@@ -10,14 +10,14 @@ class LessonFieldChangeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final scale = Theme.of(context).scale;
     final info = fieldInfo(change.field, context.l10n, colors);
     return Container(
       padding: .all(scale.space(12)),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Column(
         crossAxisAlignment: .start,
@@ -41,7 +41,7 @@ class LessonFieldChangeChip extends StatelessWidget {
               SizedBox(width: scale.space(12)),
               Text(
                 info.label,
-                style: NinjaText.subtext.copyWith(
+                style: AppText.subtext.copyWith(
                   color: colors.ink,
                   fontWeight: .w600,
                 ),
@@ -59,7 +59,7 @@ class LessonFieldChangeChip extends StatelessWidget {
     BuildContext context,
     LessonFieldChange fieldChange,
   ) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final scale = Theme.of(context).scale;
     if (fieldChange.field == .dates) {
       final addedDates = fieldChange.addedDates;
@@ -74,7 +74,7 @@ class LessonFieldChangeChip extends StatelessWidget {
               context,
               'Добавлены даты',
               addedDates,
-              colors.green,
+              colors.lecture,
               AppLineIcon.plus,
             ),
           if (hasAdded && hasRemoved) SizedBox(height: scale.space(12)),
@@ -83,7 +83,7 @@ class LessonFieldChangeChip extends StatelessWidget {
               context,
               'Удалены даты',
               removedDates,
-              colors.scarlet,
+              colors.exam,
               AppLineIcon.trash,
             ),
         ],
@@ -96,9 +96,9 @@ class LessonFieldChangeChip extends StatelessWidget {
       return Column(
         crossAxisAlignment: .start,
         children: [
-          _buildValue(context, 'Было', oldValue, colors.scarlet),
+          _buildValue(context, 'Было', oldValue, colors.exam),
           SizedBox(height: scale.space(8)),
-          _buildValue(context, 'Стало', newValue, colors.green),
+          _buildValue(context, 'Стало', newValue, colors.lecture),
         ],
       );
     }
@@ -109,7 +109,7 @@ class LessonFieldChangeChip extends StatelessWidget {
         context,
         fieldChange.newValue != null ? 'Значение' : 'Было',
         value,
-        fieldChange.newValue != null ? colors.green : colors.scarlet,
+        fieldChange.newValue != null ? colors.lecture : colors.exam,
       );
     }
     return const SizedBox.shrink();
@@ -122,7 +122,7 @@ class LessonFieldChangeChip extends StatelessWidget {
     Color color,
     AppLineIcon icon,
   ) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final scale = Theme.of(context).scale;
     return Container(
       padding: .all(scale.space(12)),
@@ -143,7 +143,7 @@ class LessonFieldChangeChip extends StatelessWidget {
               SizedBox(width: scale.space(8)),
               Text(
                 label,
-                style: NinjaText.helper.copyWith(
+                style: AppText.captionSmall.copyWith(
                   color: color,
                   fontWeight: .w600,
                 ),
@@ -170,7 +170,7 @@ class LessonFieldChangeChip extends StatelessWidget {
                         d,
                         Localizations.localeOf(context).languageCode,
                       ),
-                      style: NinjaText.helper.copyWith(
+                      style: AppText.captionSmall.copyWith(
                         color: colors.ink,
                         fontWeight: .w500,
                       ),
@@ -190,7 +190,7 @@ class LessonFieldChangeChip extends StatelessWidget {
     String value,
     Color color,
   ) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final scale = Theme.of(context).scale;
     return Row(
       crossAxisAlignment: .start,
@@ -205,7 +205,7 @@ class LessonFieldChangeChip extends StatelessWidget {
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: NinjaText.body.copyWith(color: colors.ink),
+              style: AppText.body.copyWith(color: colors.ink),
               children: [
                 TextSpan(
                   text: '$label: ',

@@ -8,7 +8,26 @@ import 'package:http/testing.dart';
 import 'package:supabase/supabase.dart';
 import 'package:test/test.dart';
 
+const _materialUserId = '00000000-0000-4000-8000-000000000010';
+
 void main() {
+  test('material subjects preserve legacy and multiple subject payloads', () {
+    final legacy = StudyMaterial.fromJson({
+      'id': 'legacy',
+      'title': 'Notes',
+      'subjectName': 'Математика',
+    });
+    final multiple = StudyMaterial.fromJson({
+      'id': 'multiple',
+      'title': 'Notes',
+      'subjectName': 'Математика',
+      'subjectNames': ['Математика', 'Программирование'],
+    });
+    expect(legacy.subjects, ['Математика']);
+    expect(multiple.subjects, ['Математика', 'Программирование']);
+    expect(multiple.toJson()['subjectNames'], multiple.subjects);
+  });
+
   group('group space mutations', () {
     test('normalizes safe links and returns the created id', () async {
       Map<String, Object?>? body;
@@ -89,6 +108,7 @@ void main() {
     var uploaded = false;
     var removed = false;
     var uploadPath = '';
+    var removedPaths = <String>[];
     final client = MockClient((request) async {
       final path = request.url.path;
       if (request.method == 'POST' && path.contains('/storage/v1/object/')) {
@@ -102,9 +122,11 @@ void main() {
       }
       if (request.method == 'DELETE' && path.endsWith('/lesson-materials')) {
         removed = true;
+        removedPaths = ((jsonDecode(request.body) as Map)['prefixes'] as List)
+            .cast<String>();
         return http.Response('[]', 200, request: request);
       }
-      if (path.endsWith('/rest/v1/rpc/create_public_material')) {
+      if (path.endsWith('/rest/v1/rpc/create_public_material_v2')) {
         return http.Response(
           jsonEncode({
             'code': 'P0001',
@@ -118,14 +140,7 @@ void main() {
       }
       return http.Response('Not found', 404, request: request);
     });
-    final repository = CampusRepository(
-      supabase: SupabaseClient(
-        'https://project.supabase.co',
-        'key',
-        httpClient: client,
-      ),
-      organizationId: 'university',
-    );
+    final repository = await _signedInRepository(client);
 
     await expectLater(
       repository.createPublicMaterial(
@@ -139,9 +154,66 @@ void main() {
 
     expect(uploaded, isTrue);
     expect(removed, isTrue);
-    expect(uploadPath, startsWith('/storage/v1/object/lesson-materials/bank/'));
-    expect(uploadPath, isNot(contains('user-')));
+    expect(
+      uploadPath,
+      startsWith('/storage/v1/object/lesson-materials/$_materialUserId/bank/'),
+    );
+    expect(removedPaths, [
+      uploadPath.substring('/storage/v1/object/lesson-materials/'.length),
+    ]);
   });
+
+  test('requires a signed-in user before uploading a valid file', () async {
+    var called = false;
+    final repository = _repository(
+      MockClient((request) async {
+        called = true;
+        return http.Response('null', 200, request: request);
+      }),
+    );
+    await expectLater(
+      repository.createPublicMaterial(
+        title: 'Notes',
+        subjectName: 'Math',
+        fileName: 'notes.pdf',
+        fileBytes: Uint8List.fromList([1]),
+      ),
+      throwsA(isA<AuthException>()),
+    );
+    expect(called, isFalse);
+  });
+
+  test(
+    'does not delete an upload after an ambiguous publication response',
+    () async {
+      var removed = false;
+      final repository = await _signedInRepository(
+        MockClient((request) async {
+          if (request.method == 'DELETE') removed = true;
+          if (request.url.path.contains('/storage/v1/object/')) {
+            return http.Response(
+              jsonEncode({'Key': request.url.path}),
+              200,
+              request: request,
+            );
+          }
+          throw http.ClientException(
+            'Connection closed after sending publication',
+          );
+        }),
+      );
+      await expectLater(
+        repository.createPublicMaterial(
+          title: 'Notes',
+          subjectName: 'Math',
+          fileName: 'notes.pdf',
+          fileBytes: Uint8List.fromList([1, 2, 3]),
+        ),
+        throwsA(isA<http.ClientException>()),
+      );
+      expect(removed, isFalse);
+    },
+  );
 
   test('rejects fileless material creation before a network request', () async {
     var called = false;
@@ -159,12 +231,94 @@ void main() {
     expect(called, isFalse);
   });
 
-  test('loads materials through the tenant-scoped v1 RPC', () async {
+  test('publishes multiple subjects with one upload and one RPC', () async {
+    var uploads = 0;
+    var creations = 0;
+    final repository = await _signedInRepository(
+      MockClient((request) async {
+        if (request.url.path.contains('/storage/v1/object/')) {
+          uploads++;
+          return http.Response('{"Key":"bank/file"}', 200, request: request);
+        }
+        expect(request.url.path, '/rest/v1/rpc/create_public_material_v2');
+        creations++;
+        final parameters = jsonDecode(request.body) as Map;
+        expect(parameters['p_subject_names'], [
+          'Математика',
+          'Программирование',
+        ]);
+        expect(parameters.containsKey('p_subject_name'), isFalse);
+        expect(parameters['p_file_size'], 3);
+        expect(
+          parameters['p_file_path'],
+          matches('^$_materialUserId/bank/[a-f0-9]{32}\$'),
+        );
+        return http.Response(
+          '"00000000-0000-4000-8000-000000000001"',
+          200,
+          request: request,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+    await repository.createPublicMaterial(
+      title: 'Notes',
+      subjectName: 'Математика',
+      subjectNames: [' Математика ', 'Программирование', 'Математика'],
+      fileName: 'notes.pdf',
+      fileBytes: Uint8List.fromList([1, 2, 3]),
+    );
+    expect(uploads, 1);
+    expect(creations, 1);
+  });
+
+  test('requires a subject before uploading a file', () async {
+    var called = false;
+    final repository = _repository(
+      MockClient((request) async {
+        called = true;
+        return http.Response('null', 200, request: request);
+      }),
+    );
+    await expectLater(
+      repository.createPublicMaterial(
+        title: 'Notes',
+        subjectName: '',
+        fileName: 'notes.pdf',
+        fileBytes: Uint8List.fromList([1]),
+      ),
+      throwsArgumentError,
+    );
+    expect(called, isFalse);
+  });
+
+  test(
+    'decodes the subject search contract without silently hiding errors',
+    () async {
+      final repository = _repository(
+        MockClient((request) async {
+          expect(request.url.path, '/rest/v1/rpc/search_material_subjects');
+          return http.Response(
+            '["Математика","Программирование"]',
+            200,
+            request: request,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+      expect(await repository.searchMaterialSubjects(' мат '), [
+        'Математика',
+        'Программирование',
+      ]);
+    },
+  );
+
+  test('loads materials through the tenant-scoped v2 RPC', () async {
     final repository = _repository(
       MockClient((request) async {
         expect(
           request.url.path,
-          '/rest/v1/rpc/list_public_materials_v1',
+          '/rest/v1/rpc/list_public_materials_v2',
         );
         expect(jsonDecode(request.body), {
           'p_organization_id': 'university',
@@ -198,7 +352,11 @@ void main() {
       if (request.url.path.endsWith('/rest/v1/rpc/access_public_material')) {
         expect(jsonDecode(request.body), {'p_id': 'material-1'});
         return http.Response(
-          jsonEncode({'filePath': 'bank/material.pdf'}),
+          jsonEncode({
+            'filePath': 'bank/material.pdf',
+            'canDownload': true,
+            'price': 0,
+          }),
           200,
           request: request,
           headers: {'content-type': 'application/json'},
@@ -241,6 +399,114 @@ void main() {
       () => repository.createPublicMaterialUrl(
         const StudyMaterial(id: 'material-1', title: 'Notes'),
       ),
+      throwsFormatException,
+    );
+  });
+
+  test('paid access never purchases or signs without an entitlement', () async {
+    final calls = <String>[];
+    final repository = _repository(
+      MockClient((request) async {
+        calls.add(request.url.pathSegments.last);
+        return http.Response(
+          jsonEncode({'canDownload': false, 'price': 40, 'filePath': null}),
+          200,
+          request: request,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+    const material = StudyMaterial(id: 'paid', title: 'Paid', hasFile: true);
+    final access = await repository.getPublicMaterialAccess(material);
+    expect(access.canDownload, isFalse);
+    expect(access.price, 40);
+    await expectLater(
+      repository.createPublicMaterialUrl(material),
+      throwsA(isA<MaterialPurchaseException>()),
+    );
+    expect(calls, ['access_public_material', 'access_public_material']);
+  });
+
+  test(
+    'purchase sends only the material and explicitly confirmed price',
+    () async {
+      final repository = _repository(
+        MockClient((request) async {
+          expect(request.url.pathSegments.last, 'purchase_public_material');
+          expect(jsonDecode(request.body), {
+            'p_id': 'paid',
+            'p_expected_price': 40,
+          });
+          return http.Response(
+            jsonEncode({'canDownload': true, 'price': 40}),
+            200,
+            request: request,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+      await repository.purchasePublicMaterial(
+        const StudyMaterial(id: 'paid', title: 'Paid'),
+        expectedPrice: 40,
+      );
+    },
+  );
+
+  for (final (message, reason) in [
+    ('MATERIAL_PRICE_CHANGED', MaterialPurchaseFailure.priceChanged),
+    (
+      'MATERIAL_INSUFFICIENT_BALANCE',
+      MaterialPurchaseFailure.insufficientBalance,
+    ),
+  ]) {
+    test('maps $message without retrying a purchase', () async {
+      var calls = 0;
+      final repository = _repository(
+        MockClient((request) async {
+          calls++;
+          return http.Response(
+            jsonEncode({'code': '22023', 'message': message}),
+            400,
+            request: request,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+      await expectLater(
+        repository.purchasePublicMaterial(
+          const StudyMaterial(id: 'paid', title: 'Paid'),
+          expectedPrice: 40,
+        ),
+        throwsA(
+          isA<MaterialPurchaseException>().having(
+            (error) => error.reason,
+            'reason',
+            reason,
+          ),
+        ),
+      );
+      expect(calls, 1);
+    });
+  }
+
+  test('rejects malformed access and unconfirmed purchase payloads', () async {
+    final repository = _repository(
+      MockClient(
+        (request) async => http.Response(
+          jsonEncode({'canDownload': 'true', 'price': -1}),
+          200,
+          request: request,
+          headers: {'content-type': 'application/json'},
+        ),
+      ),
+    );
+    const material = StudyMaterial(id: 'paid', title: 'Paid');
+    await expectLater(
+      repository.getPublicMaterialAccess(material),
+      throwsFormatException,
+    );
+    await expectLater(
+      repository.purchasePublicMaterial(material, expectedPrice: 40),
       throwsFormatException,
     );
   });
@@ -602,3 +868,21 @@ CampusRepository _repository(http.Client client) => .new(
   ),
   organizationId: 'university',
 );
+
+Future<CampusRepository> _signedInRepository(http.Client client) async {
+  final supabase = SupabaseClient(
+    'https://project.supabase.co',
+    'key',
+    httpClient: client,
+    authOptions: const AuthClientOptions(autoRefreshToken: false),
+  );
+  addTearDown(supabase.dispose);
+  await supabase.auth.setInitialSession(
+    jsonEncode({
+      'access_token': 'test-access-token',
+      'token_type': 'bearer',
+      'user': {'id': _materialUserId},
+    }),
+  );
+  return CampusRepository(supabase: supabase, organizationId: 'university');
+}

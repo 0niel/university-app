@@ -161,6 +161,7 @@ jobs:
             --release-name "${{ steps.release.outputs.tag }}"
 
       - name: Update Google Play store icon
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.update_icon_only == true }}
         env:
           SUBMIT_ICON_FOR_REVIEW: ${{ inputs.submit_icon_for_review }}
         shell: bash

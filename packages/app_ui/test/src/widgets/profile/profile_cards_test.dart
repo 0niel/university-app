@@ -45,7 +45,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+      expect(find.byType(AppLineIconWidget), findsOneWidget);
       expect(find.byType(AppProgressRing), findsNothing);
     });
   });

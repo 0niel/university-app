@@ -154,7 +154,7 @@ class StudyGroupView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Scaffold(
       backgroundColor: colors.canvas,
@@ -177,7 +177,7 @@ class StudyGroupView extends StatelessWidget {
   }
 
   Widget _body(BuildContext context, StudyGroupState state) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final group = state.group;
     if (group == null) {
       final l10n = context.l10n;
@@ -212,7 +212,7 @@ class StudyGroupView extends StatelessWidget {
     }
     return RefreshIndicator(
       key: const ValueKey('content'),
-      color: colors.brand,
+      color: colors.accent,
       backgroundColor: colors.surface,
       onRefresh: () => _cubit(context).load(),
       child: NinjaStudyGroupContent(

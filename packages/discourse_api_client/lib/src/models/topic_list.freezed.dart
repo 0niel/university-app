@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TopicList {
 
-@JsonKey(name: 'can_create_topic') bool get canCreateTopic;@JsonKey(name: 'for_period') String get forPeriod;@JsonKey(name: 'per_page') int get perPage;@JsonKey(name: 'top_tags') List<Object?> get topTags; List<Topic> get topics;
+@JsonKey(name: 'can_create_topic') bool get canCreateTopic;@JsonKey(name: 'for_period') String get forPeriod;@JsonKey(name: 'per_page') int get perPage;@JsonKey(name: 'top_tags') List<Object?> get topTags; List<Topic> get topics;@JsonKey(name: 'more_topics_url') String? get moreTopicsUrl;
 /// Create a copy of TopicList
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $TopicListCopyWith<TopicList> get copyWith => _$TopicListCopyWithImpl<TopicList>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TopicList&&(identical(other.canCreateTopic, canCreateTopic) || other.canCreateTopic == canCreateTopic)&&(identical(other.forPeriod, forPeriod) || other.forPeriod == forPeriod)&&(identical(other.perPage, perPage) || other.perPage == perPage)&&const DeepCollectionEquality().equals(other.topTags, topTags)&&const DeepCollectionEquality().equals(other.topics, topics));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TopicList&&(identical(other.canCreateTopic, canCreateTopic) || other.canCreateTopic == canCreateTopic)&&(identical(other.forPeriod, forPeriod) || other.forPeriod == forPeriod)&&(identical(other.perPage, perPage) || other.perPage == perPage)&&const DeepCollectionEquality().equals(other.topTags, topTags)&&const DeepCollectionEquality().equals(other.topics, topics)&&(identical(other.moreTopicsUrl, moreTopicsUrl) || other.moreTopicsUrl == moreTopicsUrl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,canCreateTopic,forPeriod,perPage,const DeepCollectionEquality().hash(topTags),const DeepCollectionEquality().hash(topics));
+int get hashCode => Object.hash(runtimeType,canCreateTopic,forPeriod,perPage,const DeepCollectionEquality().hash(topTags),const DeepCollectionEquality().hash(topics),moreTopicsUrl);
 
 @override
 String toString() {
-  return 'TopicList(canCreateTopic: $canCreateTopic, forPeriod: $forPeriod, perPage: $perPage, topTags: $topTags, topics: $topics)';
+  return 'TopicList(canCreateTopic: $canCreateTopic, forPeriod: $forPeriod, perPage: $perPage, topTags: $topTags, topics: $topics, moreTopicsUrl: $moreTopicsUrl)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $TopicListCopyWith<$Res>  {
   factory $TopicListCopyWith(TopicList value, $Res Function(TopicList) _then) = _$TopicListCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'can_create_topic') bool canCreateTopic,@JsonKey(name: 'for_period') String forPeriod,@JsonKey(name: 'per_page') int perPage,@JsonKey(name: 'top_tags') List<Object?> topTags, List<Topic> topics
+@JsonKey(name: 'can_create_topic') bool canCreateTopic,@JsonKey(name: 'for_period') String forPeriod,@JsonKey(name: 'per_page') int perPage,@JsonKey(name: 'top_tags') List<Object?> topTags, List<Topic> topics,@JsonKey(name: 'more_topics_url') String? moreTopicsUrl
 });
 
 
@@ -65,14 +65,15 @@ class _$TopicListCopyWithImpl<$Res>
 
 /// Create a copy of TopicList
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? canCreateTopic = null,Object? forPeriod = null,Object? perPage = null,Object? topTags = null,Object? topics = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? canCreateTopic = null,Object? forPeriod = null,Object? perPage = null,Object? topTags = null,Object? topics = null,Object? moreTopicsUrl = freezed,}) {
   return _then(_self.copyWith(
 canCreateTopic: null == canCreateTopic ? _self.canCreateTopic : canCreateTopic // ignore: cast_nullable_to_non_nullable
 as bool,forPeriod: null == forPeriod ? _self.forPeriod : forPeriod // ignore: cast_nullable_to_non_nullable
 as String,perPage: null == perPage ? _self.perPage : perPage // ignore: cast_nullable_to_non_nullable
 as int,topTags: null == topTags ? _self.topTags : topTags // ignore: cast_nullable_to_non_nullable
 as List<Object?>,topics: null == topics ? _self.topics : topics // ignore: cast_nullable_to_non_nullable
-as List<Topic>,
+as List<Topic>,moreTopicsUrl: freezed == moreTopicsUrl ? _self.moreTopicsUrl : moreTopicsUrl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -157,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'can_create_topic')  bool canCreateTopic, @JsonKey(name: 'for_period')  String forPeriod, @JsonKey(name: 'per_page')  int perPage, @JsonKey(name: 'top_tags')  List<Object?> topTags,  List<Topic> topics)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'can_create_topic')  bool canCreateTopic, @JsonKey(name: 'for_period')  String forPeriod, @JsonKey(name: 'per_page')  int perPage, @JsonKey(name: 'top_tags')  List<Object?> topTags,  List<Topic> topics, @JsonKey(name: 'more_topics_url')  String? moreTopicsUrl)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TopicList() when $default != null:
-return $default(_that.canCreateTopic,_that.forPeriod,_that.perPage,_that.topTags,_that.topics);case _:
+return $default(_that.canCreateTopic,_that.forPeriod,_that.perPage,_that.topTags,_that.topics,_that.moreTopicsUrl);case _:
   return orElse();
 
 }
@@ -178,10 +179,10 @@ return $default(_that.canCreateTopic,_that.forPeriod,_that.perPage,_that.topTags
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'can_create_topic')  bool canCreateTopic, @JsonKey(name: 'for_period')  String forPeriod, @JsonKey(name: 'per_page')  int perPage, @JsonKey(name: 'top_tags')  List<Object?> topTags,  List<Topic> topics)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'can_create_topic')  bool canCreateTopic, @JsonKey(name: 'for_period')  String forPeriod, @JsonKey(name: 'per_page')  int perPage, @JsonKey(name: 'top_tags')  List<Object?> topTags,  List<Topic> topics, @JsonKey(name: 'more_topics_url')  String? moreTopicsUrl)  $default,) {final _that = this;
 switch (_that) {
 case _TopicList():
-return $default(_that.canCreateTopic,_that.forPeriod,_that.perPage,_that.topTags,_that.topics);case _:
+return $default(_that.canCreateTopic,_that.forPeriod,_that.perPage,_that.topTags,_that.topics,_that.moreTopicsUrl);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +199,10 @@ return $default(_that.canCreateTopic,_that.forPeriod,_that.perPage,_that.topTags
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'can_create_topic')  bool canCreateTopic, @JsonKey(name: 'for_period')  String forPeriod, @JsonKey(name: 'per_page')  int perPage, @JsonKey(name: 'top_tags')  List<Object?> topTags,  List<Topic> topics)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'can_create_topic')  bool canCreateTopic, @JsonKey(name: 'for_period')  String forPeriod, @JsonKey(name: 'per_page')  int perPage, @JsonKey(name: 'top_tags')  List<Object?> topTags,  List<Topic> topics, @JsonKey(name: 'more_topics_url')  String? moreTopicsUrl)?  $default,) {final _that = this;
 switch (_that) {
 case _TopicList() when $default != null:
-return $default(_that.canCreateTopic,_that.forPeriod,_that.perPage,_that.topTags,_that.topics);case _:
+return $default(_that.canCreateTopic,_that.forPeriod,_that.perPage,_that.topTags,_that.topics,_that.moreTopicsUrl);case _:
   return null;
 
 }
@@ -213,7 +214,7 @@ return $default(_that.canCreateTopic,_that.forPeriod,_that.perPage,_that.topTags
 
 @JsonSerializable(explicitToJson: true)
 class _TopicList implements TopicList {
-  const _TopicList({@JsonKey(name: 'can_create_topic') required this.canCreateTopic, @JsonKey(name: 'for_period') required this.forPeriod, @JsonKey(name: 'per_page') required this.perPage, @JsonKey(name: 'top_tags') required final  List<Object?> topTags, required final  List<Topic> topics}): _topTags = topTags,_topics = topics;
+  const _TopicList({@JsonKey(name: 'can_create_topic') required this.canCreateTopic, @JsonKey(name: 'for_period') required this.forPeriod, @JsonKey(name: 'per_page') required this.perPage, @JsonKey(name: 'top_tags') required final  List<Object?> topTags, required final  List<Topic> topics, @JsonKey(name: 'more_topics_url') this.moreTopicsUrl}): _topTags = topTags,_topics = topics;
   factory _TopicList.fromJson(Map<String, dynamic> json) => _$TopicListFromJson(json);
 
 @override@JsonKey(name: 'can_create_topic') final  bool canCreateTopic;
@@ -233,6 +234,7 @@ class _TopicList implements TopicList {
   return EqualUnmodifiableListView(_topics);
 }
 
+@override@JsonKey(name: 'more_topics_url') final  String? moreTopicsUrl;
 
 /// Create a copy of TopicList
 /// with the given fields replaced by the non-null parameter values.
@@ -247,16 +249,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TopicList&&(identical(other.canCreateTopic, canCreateTopic) || other.canCreateTopic == canCreateTopic)&&(identical(other.forPeriod, forPeriod) || other.forPeriod == forPeriod)&&(identical(other.perPage, perPage) || other.perPage == perPage)&&const DeepCollectionEquality().equals(other._topTags, _topTags)&&const DeepCollectionEquality().equals(other._topics, _topics));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TopicList&&(identical(other.canCreateTopic, canCreateTopic) || other.canCreateTopic == canCreateTopic)&&(identical(other.forPeriod, forPeriod) || other.forPeriod == forPeriod)&&(identical(other.perPage, perPage) || other.perPage == perPage)&&const DeepCollectionEquality().equals(other._topTags, _topTags)&&const DeepCollectionEquality().equals(other._topics, _topics)&&(identical(other.moreTopicsUrl, moreTopicsUrl) || other.moreTopicsUrl == moreTopicsUrl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,canCreateTopic,forPeriod,perPage,const DeepCollectionEquality().hash(_topTags),const DeepCollectionEquality().hash(_topics));
+int get hashCode => Object.hash(runtimeType,canCreateTopic,forPeriod,perPage,const DeepCollectionEquality().hash(_topTags),const DeepCollectionEquality().hash(_topics),moreTopicsUrl);
 
 @override
 String toString() {
-  return 'TopicList(canCreateTopic: $canCreateTopic, forPeriod: $forPeriod, perPage: $perPage, topTags: $topTags, topics: $topics)';
+  return 'TopicList(canCreateTopic: $canCreateTopic, forPeriod: $forPeriod, perPage: $perPage, topTags: $topTags, topics: $topics, moreTopicsUrl: $moreTopicsUrl)';
 }
 
 
@@ -267,7 +269,7 @@ abstract mixin class _$TopicListCopyWith<$Res> implements $TopicListCopyWith<$Re
   factory _$TopicListCopyWith(_TopicList value, $Res Function(_TopicList) _then) = __$TopicListCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'can_create_topic') bool canCreateTopic,@JsonKey(name: 'for_period') String forPeriod,@JsonKey(name: 'per_page') int perPage,@JsonKey(name: 'top_tags') List<Object?> topTags, List<Topic> topics
+@JsonKey(name: 'can_create_topic') bool canCreateTopic,@JsonKey(name: 'for_period') String forPeriod,@JsonKey(name: 'per_page') int perPage,@JsonKey(name: 'top_tags') List<Object?> topTags, List<Topic> topics,@JsonKey(name: 'more_topics_url') String? moreTopicsUrl
 });
 
 
@@ -284,14 +286,15 @@ class __$TopicListCopyWithImpl<$Res>
 
 /// Create a copy of TopicList
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? canCreateTopic = null,Object? forPeriod = null,Object? perPage = null,Object? topTags = null,Object? topics = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? canCreateTopic = null,Object? forPeriod = null,Object? perPage = null,Object? topTags = null,Object? topics = null,Object? moreTopicsUrl = freezed,}) {
   return _then(_TopicList(
 canCreateTopic: null == canCreateTopic ? _self.canCreateTopic : canCreateTopic // ignore: cast_nullable_to_non_nullable
 as bool,forPeriod: null == forPeriod ? _self.forPeriod : forPeriod // ignore: cast_nullable_to_non_nullable
 as String,perPage: null == perPage ? _self.perPage : perPage // ignore: cast_nullable_to_non_nullable
 as int,topTags: null == topTags ? _self._topTags : topTags // ignore: cast_nullable_to_non_nullable
 as List<Object?>,topics: null == topics ? _self._topics : topics // ignore: cast_nullable_to_non_nullable
-as List<Topic>,
+as List<Topic>,moreTopicsUrl: freezed == moreTopicsUrl ? _self.moreTopicsUrl : moreTopicsUrl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

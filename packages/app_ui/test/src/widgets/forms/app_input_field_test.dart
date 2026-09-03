@@ -2,109 +2,163 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-String? _required(String? value) =>
-    value == null || value.isEmpty ? 'Обязательное поле' : null;
+import '../../kit_harness.dart';
 
 void main() {
-  Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
+  BoxDecoration fillOf(WidgetTester tester) => kitDecoration(
+        tester,
+        find
+            .descendant(
+              of: find.byType(AppInputField),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
-  group('AppInputField', () {
-    testWidgets('renders placeholder and forwards onChanged', (tester) async {
-      String? changed;
-      await tester.pumpWidget(
-        wrap(
-          AppInputField(
-            placeholder: 'student@mirea.ru',
-            onChanged: (v) => changed = v,
+  testWidgets('default fill is surface2 with an 18px radius and 48 height', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapKit(const AppInputField(placeholder: 'Как к вам обращаться')),
+    );
+
+    final decoration = fillOf(tester);
+    expect(decoration.color, kitColors.surface2);
+    expect(decoration.borderRadius, BorderRadius.circular(AppRadius.field));
+    expect(decoration.border, isNull);
+    expect(
+      tester
+          .widget<Container>(
+            find
+                .descendant(
+                  of: find.byType(AppInputField),
+                  matching: find.byType(Container),
+                )
+                .first,
+          )
+          .constraints
+          ?.maxHeight,
+      AppControlSize.field,
+    );
+  });
+
+  testWidgets('focus switches the fill to tint', (tester) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      wrapKit(AppInputField(focusNode: focusNode, placeholder: 'Почта')),
+    );
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(fillOf(tester).color, kitColors.tint);
+  });
+
+  testWidgets('error fill is examTint and renders the alert row', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapKit(
+        const AppInputField(
+          label: 'Группа',
+          errorText: 'Такой группы нет в этом семестре',
+        ),
+      ),
+    );
+
+    expect(fillOf(tester).color, kitColors.examTint);
+    expect(find.text('Такой группы нет в этом семестре'), findsOneWidget);
+    expect(
+      kitStyleOf(tester, 'Такой группы нет в этом семестре')?.color,
+      kitColors.danger,
+    );
+    expect(find.byType(AppLineIconWidget), findsOneWidget);
+  });
+
+  testWidgets('success fill is lectureTint with a check', (tester) async {
+    await tester.pumpWidget(wrapKit(const AppInputField(success: true)));
+
+    expect(fillOf(tester).color, kitColors.lectureTint);
+    expect(find.byType(AppLineIconWidget), findsOneWidget);
+  });
+
+  testWidgets('disabled fill is canvas and text is muted2', (tester) async {
+    final controller = TextEditingController(text: 'Недоступно');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      wrapKit(AppInputField(controller: controller, enabled: false)),
+    );
+
+    expect(fillOf(tester).color, kitColors.canvas);
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).style?.color,
+      kitColors.muted2,
+    );
+  });
+
+  testWidgets('clear button empties the controller', (tester) async {
+    final controller = TextEditingController(text: 'abc');
+    addTearDown(controller.dispose);
+    var changed = '';
+    await tester.pumpWidget(
+      wrapKit(
+        AppInputField(
+          controller: controller,
+          onChanged: (value) => changed = value,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(AppLineIconWidget));
+    await tester.pump();
+
+    expect(controller.text, isEmpty);
+    expect(changed, isEmpty);
+  });
+
+  testWidgets('password toggle flips obscureText', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        const AppInputField(obscureText: true, showPasswordToggle: true),
+      ),
+    );
+
+    expect(tester.widget<TextField>(find.byType(TextField)).obscureText, true);
+    await tester.tap(find.byType(AppLineIconWidget));
+    await tester.pump();
+    expect(tester.widget<TextField>(find.byType(TextField)).obscureText, false);
+  });
+
+  testWidgets('multiline grows to 84 and shows the counter', (tester) async {
+    final controller = TextEditingController(text: 'Заметка');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: AppInputField.multiline(
+            controller: controller,
+            maxLength: 280,
           ),
         ),
-      );
+      ),
+    );
 
-      expect(find.text('student@mirea.ru'), findsOneWidget);
-      await tester.enterText(find.byType(TextField), 'hi');
-      expect(changed, 'hi');
-    });
+    expect(find.text('7 / 280'), findsOneWidget);
+    expect(
+      tester.getSize(find.byType(AppInputField)).height,
+      greaterThanOrEqualTo(84),
+    );
+  });
 
-    testWidgets('shows an error message and helper text', (tester) async {
-      await tester.pumpWidget(
-        wrap(const AppInputField(errorText: 'Неверный пароль')),
-      );
-      expect(find.text('Неверный пароль'), findsOneWidget);
+  testWidgets('label renders above the field in muted caption', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrapKit(const AppInputField(label: 'Почта')));
 
-      await tester.pumpWidget(
-        wrap(const AppInputField(helperText: 'минимум 8 символов')),
-      );
-      expect(find.text('минимум 8 символов'), findsOneWidget);
-    });
-
-    testWidgets('renders an uppercased label above the field', (tester) async {
-      await tester.pumpWidget(
-        wrap(const AppInputField(label: 'Название')),
-      );
-      expect(find.text('НАЗВАНИЕ'), findsOneWidget);
-    });
-
-    testWidgets('multiline constructor allows several lines', (tester) async {
-      await tester.pumpWidget(
-        wrap(const AppInputField.multiline(maxLines: 5, minLines: 2)),
-      );
-      final field = tester.widget<TextField>(find.byType(TextField));
-      expect(field.maxLines, 5);
-      expect(field.minLines, 2);
-    });
-
-    testWidgets('disabled field is not editable', (tester) async {
-      await tester.pumpWidget(
-        wrap(const AppInputField(enabled: false)),
-      );
-      final field = tester.widget<TextField>(find.byType(TextField));
-      expect(field.enabled, isFalse);
-    });
-
-    testWidgets('password toggle flips obscureText', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          const AppInputField(
-            obscureText: true,
-            showPasswordToggle: true,
-          ),
-        ),
-      );
-
-      var field = tester.widget<TextField>(find.byType(TextField));
-      expect(field.obscureText, isTrue);
-
-      await tester.tap(find.byType(AppLineIconWidget));
-      await tester.pump();
-
-      field = tester.widget<TextField>(find.byType(TextField));
-      expect(field.obscureText, isFalse);
-      final toggle = find.bySemanticsLabel('Hide password');
-      expect(toggle, findsOneWidget);
-      expect(tester.getSize(toggle).width, greaterThanOrEqualTo(44));
-      expect(tester.getSize(toggle).height, greaterThanOrEqualTo(44));
-    });
-
-    testWidgets('validator participates in the enclosing Form', (tester) async {
-      final formKey = GlobalKey<FormState>();
-      await tester.pumpWidget(
-        wrap(
-          Form(
-            key: formKey,
-            child: const AppInputField(validator: _required),
-          ),
-        ),
-      );
-
-      expect(formKey.currentState!.validate(), isFalse);
-      await tester.pump();
-      expect(find.text('Обязательное поле'), findsOneWidget);
-
-      await tester.enterText(find.byType(TextField), 'Машинное обучение');
-      expect(formKey.currentState!.validate(), isTrue);
-    });
+    expect(find.text('Почта'), findsOneWidget);
+    expect(kitStyleOf(tester, 'Почта')?.color, kitColors.muted);
+    expect(kitStyleOf(tester, 'Почта')?.fontSize, 12);
   });
 }

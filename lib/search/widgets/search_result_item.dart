@@ -29,7 +29,7 @@ class SearchResultItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final tag = tagLabel;
     final subtitleText = subtitle;
     return AppPressable(
@@ -38,14 +38,14 @@ class SearchResultItem extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: colors.brandTint,
+                color: colors.tint,
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: SizedBox.square(
@@ -54,7 +54,7 @@ class SearchResultItem extends StatelessWidget {
                   child: AppLineIconWidget(
                     _icon,
                     size: 19,
-                    color: colors.brand,
+                    color: colors.accent,
                   ),
                 ),
               ),
@@ -69,7 +69,7 @@ class SearchResultItem extends StatelessWidget {
                     name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: NinjaText.body.copyWith(
+                    style: AppText.body.copyWith(
                       color: colors.ink,
                       fontWeight: FontWeight.w700,
                     ),
@@ -80,7 +80,7 @@ class SearchResultItem extends StatelessWidget {
                       subtitleText,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: NinjaText.subtext.copyWith(
+                      style: AppText.subtext.copyWith(
                         color: colors.muted,
                       ),
                     ),
@@ -90,7 +90,7 @@ class SearchResultItem extends StatelessWidget {
                       tag,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: NinjaText.subtext.copyWith(
+                      style: AppText.subtext.copyWith(
                         color: colors.muted,
                       ),
                     ),
@@ -102,7 +102,7 @@ class SearchResultItem extends StatelessWidget {
             AppLineIconWidget(
               AppLineIcon.chevronR,
               size: 16,
-              color: colors.chevron,
+              color: colors.muted2,
             ),
           ],
         ),

@@ -106,15 +106,7 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
   @override
   NfcPassState? fromJson(Map<String, dynamic> json) {
     try {
-      final statusIndex = json['status'];
-      final status = statusIndex is int
-          ? NfcPassStatus.values.elementAtOrNull(statusIndex)
-          : null;
-      if (status == null) return null;
       return NfcPassState(
-        status: status,
-        passId: json['passId'] as int?,
-        errorMessage: json['errorMessage'] as String?,
         localFilePath: json['localFilePath'] as String?,
       );
     } on Object catch (error, stackTrace) {
@@ -126,9 +118,6 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
   @override
   Map<String, dynamic> toJson(NfcPassState state) {
     return {
-      'status': state.status.index,
-      'passId': state.passId,
-      'errorMessage': state.errorMessage,
       'localFilePath': state.localFilePath,
     };
   }

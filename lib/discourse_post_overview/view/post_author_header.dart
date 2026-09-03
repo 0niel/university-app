@@ -7,24 +7,25 @@ class _PostAuthorHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.surfaceAlt,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(AppSpacing.sectionGap),
         child: Row(
           children: [
             NinjaForumAvatar(
-              size: 46,
+              name: post.username,
+              size: PostOverviewMetrics.authorAvatar,
               url: avatarUrl(
                 context.read<UniversityConfig>().communityForumUrl,
                 post.avatarTemplate,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,12 +34,12 @@ class _PostAuthorHeader extends StatelessWidget {
                     post.username,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: NinjaText.headline.copyWith(color: colors.ink),
+                    style: AppText.headline.copyWith(color: colors.ink),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     formatPostDate(post.createdAt),
-                    style: NinjaText.subtext.copyWith(color: colors.muted),
+                    style: AppText.subtext.copyWith(color: colors.muted),
                   ),
                 ],
               ),

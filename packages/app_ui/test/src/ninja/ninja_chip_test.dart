@@ -2,189 +2,133 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../kit_harness.dart';
+
 void main() {
-  final colors = NinjaColors.light();
-
-  Widget wrap(Widget child) => MaterialApp(
-        theme: NinjaTheme.light(),
-        home: Scaffold(body: Center(child: child)),
-      );
-
-  BoxDecoration chipOf(WidgetTester tester) {
-    final box = tester.widget<DecoratedBox>(
-      find
-          .descendant(
-            of: find.byType(NinjaChip),
-            matching: find.byType(DecoratedBox),
-          )
-          .first,
-    );
-    return box.decoration as BoxDecoration;
-  }
-
-  Color? labelColorOf(WidgetTester tester, String label) =>
-      tester.widget<Text>(find.text(label)).style?.color;
-
-  group('NinjaChip', () {
-    testWidgets('selected uses an accent tint and default uses a quiet fill', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(NinjaChip(label: 'Все · 14', selected: true, onTap: () {})),
-      );
-      final selected = chipOf(tester);
-      expect(selected.color, colors.brandTint);
-      expect(selected.border, isNull);
-      expect(labelColorOf(tester, 'Все · 14'), colors.brandInk);
-
-      await tester.pumpWidget(
-        wrap(NinjaChip(label: 'Электроника', onTap: () {})),
-      );
-      final unselected = chipOf(tester);
-      expect(unselected.color, colors.surfaceAlt);
-      expect(unselected.border, isNull);
-      expect(labelColorOf(tester, 'Электроника'), colors.mutedDark);
-    });
-
-    testWidgets('fires onTap', (tester) async {
-      var tapped = false;
-      await tester.pumpWidget(
-        wrap(NinjaChip(label: 'Документы', onTap: () => tapped = true)),
-      );
-
-      await tester.tap(find.byType(NinjaChip));
-      expect(tapped, isTrue);
-    });
-
-    testWidgets('the dot renders in scarlet', (tester) async {
-      await tester.pumpWidget(
-        wrap(NinjaChip(label: 'Документы', showDot: true, onTap: () {})),
-      );
-
-      final dot = tester.widget<DecoratedBox>(
+  BoxDecoration chipOf(WidgetTester tester) => kitDecoration(
+        tester,
         find
             .descendant(
-              of: find.byType(NinjaChip),
-              matching: find.byType(DecoratedBox),
+              of: find.byType(AppChip),
+              matching: find.byType(Container),
             )
-            .last,
-      );
-      expect((dot.decoration as BoxDecoration).color, colors.scarlet);
-      expect((dot.decoration as BoxDecoration).shape, BoxShape.circle);
-    });
-
-    testWidgets('prints the counter in the same quiet filter language', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(NinjaChip(label: 'Находки', count: 3, onTap: () {})),
+            .first,
       );
 
-      expect(labelColorOf(tester, '3'), colors.mutedDark);
-      expect(labelColorOf(tester, 'Находки'), colors.mutedDark);
-    });
+  testWidgets('unselected chip is surface2 with muted label', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(AppChip(label: 'Лекции', onTap: () {})),
+    );
+    await tester.pumpAndSettle();
 
-    testWidgets('keeps the kit 44px touch target', (tester) async {
-      await tester.pumpWidget(wrap(NinjaChip(label: 'Все', onTap: () {})));
-
-      expect(
-        tester.getSize(find.byType(NinjaChip)).height,
-        NinjaMetrics.minTouchTarget,
-      );
-    });
-
-    testWidgets('removable chips route the × to onRemove', (tester) async {
-      var removed = false;
-      await tester.pumpWidget(
-        wrap(
-          NinjaChip(
-            label: 'Выбран',
-            selected: true,
-            removeSemanticLabel: 'Удалить выбранное',
-            onRemove: () => removed = true,
-          ),
-        ),
-      );
-
-      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
-      expect(
-        tester.getSize(find.bySemanticsLabel('Удалить выбранное')),
-        const Size.square(NinjaMetrics.minTouchTarget),
-      );
-      await tester.tap(find.byIcon(Icons.close_rounded));
-      expect(removed, isTrue);
-    });
-
-    testWidgets('disabled uses the surface pill and blocks taps', (
-      tester,
-    ) async {
-      var tapped = false;
-      await tester.pumpWidget(
-        wrap(
-          NinjaChip(
-            label: 'Недоступен',
-            enabled: false,
-            onTap: () => tapped = true,
-          ),
-        ),
-      );
-
-      expect(chipOf(tester).color, colors.surface);
-      expect(labelColorOf(tester, 'Недоступен'), colors.disabled);
-
-      await tester.tap(find.byType(NinjaChip));
-      expect(tapped, isFalse);
-    });
+    expect(chipOf(tester).color, kitColors.surface2);
+    expect(kitStyleOf(tester, 'Лекции')?.color, kitColors.muted);
+    expect(kitStyleOf(tester, 'Лекции')?.fontSize, 13);
   });
 
-  group('NinjaChipRow', () {
-    testWidgets('lays the chips out behind its own padding', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          const SizedBox(
-            width: 300,
-            child: NinjaChipRow(
-              children: [
-                NinjaChip(label: 'Все'),
-                NinjaChip(label: 'Электроника'),
-              ],
-            ),
+  testWidgets('selected chip is tinted with accent label', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(AppChip(label: 'Все', selected: true, onTap: () {})),
+    );
+    await tester.pumpAndSettle();
+
+    expect(chipOf(tester).color, kitColors.tint);
+    expect(kitStyleOf(tester, 'Все')?.color, kitColors.accent);
+  });
+
+  testWidgets('disabled chip falls back to canvas / muted2', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(const AppChip(label: 'Disabled', enabled: false)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(chipOf(tester).color, kitColors.canvas);
+    expect(kitStyleOf(tester, 'Disabled')?.color, kitColors.muted2);
+  });
+
+  testWidgets('keeps a 44px minimum height and pill radius', (tester) async {
+    await tester.pumpWidget(wrapKit(AppChip(label: 'Лабы', onTap: () {})));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(AppChip)).height, 44);
+    expect(
+      chipOf(tester).borderRadius,
+      BorderRadius.circular(AppRadius.full),
+    );
+  });
+
+  testWidgets('count is rendered at 70% opacity', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(AppChip(label: 'Лекции', count: 12, onTap: () {})),
+    );
+
+    expect(find.text('12'), findsOneWidget);
+    final opacity = tester.widget<Opacity>(
+      find.ancestor(of: find.text('12'), matching: find.byType(Opacity)).first,
+    );
+    expect(opacity.opacity, 0.7);
+  });
+
+  testWidgets('dot and remove affordances render and fire', (tester) async {
+    var removed = 0;
+    await tester.pumpWidget(
+      wrapKit(
+        AppChip(
+          label: 'Лабы',
+          showDot: true,
+          onTap: () {},
+          onRemove: () => removed++,
+        ),
+      ),
+    );
+
+    expect(find.byType(AppLineIconWidget), findsOneWidget);
+    await tester.tap(find.byType(AppLineIconWidget));
+    expect(removed, 1);
+  });
+
+  testWidgets('filter variant uses surface / accent', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(AppChip.filter(label: 'Сегодня', onTap: () {})),
+    );
+    await tester.pumpAndSettle();
+    expect(chipOf(tester).color, kitColors.surface);
+    expect(kitStyleOf(tester, 'Сегодня')?.color, kitColors.ink);
+
+    await tester.pumpWidget(
+      wrapKit(AppChip.filter(label: 'Сегодня', selected: true, onTap: () {})),
+    );
+    await tester.pumpAndSettle();
+    expect(chipOf(tester).color, kitColors.accent);
+    expect(kitStyleOf(tester, 'Сегодня')?.color, kitColors.onAccent);
+    expect(kitStyleOf(tester, 'Сегодня')?.fontWeight, FontWeight.w700);
+  });
+
+  testWidgets('exposes button + selected semantics', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(AppChip(label: 'Практики', selected: true, onTap: () {})),
+    );
+
+    final semantics = tester.getSemantics(find.byType(AppChip));
+    expect(semantics.label, 'Практики');
+  });
+
+  testWidgets('NinjaChip delegates and NinjaChipRow scrolls', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 300,
+          child: NinjaChipRow(
+            children: [
+              NinjaChip(label: 'Все', selected: true, onTap: () {}),
+              NinjaChip(label: 'Лекции', onTap: () {}),
+            ],
           ),
         ),
-      );
+      ),
+    );
 
-      expect(find.byType(NinjaChip), findsNWidgets(2));
-      expect(
-        tester.getTopLeft(find.byType(NinjaChip).first).dx -
-            tester.getTopLeft(find.byType(NinjaChipRow)).dx,
-        NinjaMetrics.screenPadding,
-      );
-    });
-
-    testWidgets('scrolls horizontally when the chips overflow', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          const SizedBox(
-            width: 200,
-            child: NinjaChipRow(
-              children: [
-                NinjaChip(label: 'Электроника'),
-                NinjaChip(label: 'Документы'),
-                NinjaChip(label: 'Одежда'),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      final before = tester.getTopLeft(find.byType(NinjaChip).first).dx;
-      await tester.drag(find.byType(NinjaChipRow), const Offset(-80, 0));
-      await tester.pumpAndSettle();
-
-      expect(
-        tester.getTopLeft(find.byType(NinjaChip).first).dx,
-        lessThan(before),
-      );
-    });
+    expect(find.byType(AppChip), findsNWidgets(2));
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
   });
 }

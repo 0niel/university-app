@@ -1,21 +1,29 @@
 part of '../schedule_details_page.dart';
 
-class _UploadMaterialSheet extends StatefulWidget {
-  const _UploadMaterialSheet({
+class LessonMaterialUploadSheet extends StatefulWidget {
+  const LessonMaterialUploadSheet({
     required this.lesson,
     required this.selectedDate,
     required this.lessonNumber,
+    this.filePicker,
+    this.imagePicker,
+    super.key,
   });
 
   final LessonSchedulePart lesson;
   final DateTime selectedDate;
   final int lessonNumber;
+  final Future<PlatformFile?> Function()? filePicker;
+  final Future<XFile?> Function(ImageSource source)? imagePicker;
 
   @override
-  State<_UploadMaterialSheet> createState() => _UploadMaterialSheetState();
+  State<LessonMaterialUploadSheet> createState() =>
+      _LessonMaterialUploadSheetState();
 }
 
-class _UploadMaterialSheetState extends State<_UploadMaterialSheet> {
+class _LessonMaterialUploadSheetState extends State<LessonMaterialUploadSheet> {
+  static const int _maxUploadBytes = 50 * 1024 * 1024;
+
   final _imagePicker = ImagePicker();
   final _titleController = TextEditingController();
 
@@ -24,6 +32,11 @@ class _UploadMaterialSheetState extends State<_UploadMaterialSheet> {
   var _isPublic = true;
   var _anonymous = false;
   var _uploading = false;
+  var _picking = false;
+  String? _error;
+  String? _uploadError;
+
+  bool get _busy => _uploading || _picking;
 
   @override
   void dispose() {
@@ -32,47 +45,99 @@ class _UploadMaterialSheetState extends State<_UploadMaterialSheet> {
   }
 
   Future<void> _pickFile() async {
-    final file = await FilePicker.pickFile();
-    if (file == null) return;
-    final bytes = await file.readAsBytes();
-    if (!mounted) return;
-    _setPicked(_PickedMaterial(name: file.name, bytes: bytes, mimeType: null));
+    if (_busy) return;
+    setState(() {
+      _picking = true;
+      _error = null;
+      _uploadError = null;
+    });
+    try {
+      final file = await (widget.filePicker ?? FilePicker.pickFile)();
+      if (file == null || !mounted) return;
+      if (file.size > _maxUploadBytes) {
+        setState(() => _error = context.l10n.lessonDetailsFileTooLarge);
+        return;
+      }
+      final bytes = await _readBytes(file.readAsByteStream());
+      if (bytes == null || !mounted) return;
+      _setPicked(
+        _PickedMaterial(name: file.name, bytes: bytes, mimeType: null),
+      );
+    } on Exception {
+      if (mounted) setState(() => _error = context.l10n.knowledgeFileError);
+    } finally {
+      if (mounted) setState(() => _picking = false);
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final file = await _imagePicker.pickImage(source: source, imageQuality: 90);
-    if (file == null) return;
-    final bytes = await file.readAsBytes();
-    if (!mounted) return;
-    _setPicked(
-      _PickedMaterial(
-        name: file.name,
-        bytes: bytes,
-        mimeType: file.mimeType ?? 'image/jpeg',
-      ),
-    );
-    setState(() => _type = .board);
+    if (_busy) return;
+    setState(() {
+      _picking = true;
+      _error = null;
+      _uploadError = null;
+    });
+    try {
+      final file =
+          await (widget.imagePicker?.call(source) ??
+              _imagePicker.pickImage(source: source, imageQuality: 90));
+      if (file == null || !mounted) return;
+      final length = await file.length();
+      if (!mounted) return;
+      if (length > _maxUploadBytes) {
+        setState(() => _error = context.l10n.lessonDetailsFileTooLarge);
+        return;
+      }
+      final bytes = await _readBytes(file.openRead());
+      if (bytes == null || !mounted) return;
+      _setPicked(
+        _PickedMaterial(
+          name: file.name,
+          bytes: bytes,
+          mimeType: file.mimeType ?? 'image/jpeg',
+        ),
+      );
+      setState(() => _type = .board);
+    } on Exception {
+      if (mounted) setState(() => _error = context.l10n.knowledgeFileError);
+    } finally {
+      if (mounted) setState(() => _picking = false);
+    }
+  }
+
+  Future<Uint8List?> _readBytes(Stream<List<int>> stream) async {
+    final bytes = BytesBuilder(copy: false);
+    await for (final chunk in stream) {
+      if (!mounted) return null;
+      if (bytes.length + chunk.length > _maxUploadBytes) {
+        setState(() => _error = context.l10n.lessonDetailsFileTooLarge);
+        return null;
+      }
+      bytes.add(chunk);
+    }
+    if (!mounted) return null;
+    if (bytes.isEmpty) {
+      setState(() => _error = context.l10n.knowledgeFileError);
+      return null;
+    }
+    return bytes.takeBytes();
   }
 
   void _setPicked(_PickedMaterial material) {
-    if (material.bytes.length > 50 * 1024 * 1024) {
-      showNinjaToast(
-        context,
-        showCheck: false,
-        message: context.l10n.lessonDetailsFileTooLarge,
-      );
-      return;
-    }
     setState(() {
       _picked = material;
+      _error = null;
       if (_titleController.text.trim().isEmpty) {
-        _titleController.text =
-            material.name.split('.').firstOrNull ?? material.name;
+        final extension = material.name.lastIndexOf('.');
+        _titleController.text = extension > 0
+            ? material.name.substring(0, extension)
+            : material.name;
       }
     });
   }
 
   Future<void> _upload() async {
+    if (_busy) return;
     final picked = _picked;
     final title = _titleController.text.trim();
     if (picked == null) {
@@ -92,9 +157,19 @@ class _UploadMaterialSheetState extends State<_UploadMaterialSheet> {
       return;
     }
 
-    setState(() => _uploading = true);
+    final repository = context.read<ScheduleRepository>();
+    if (!repository.hasAuthenticatedUser) {
+      setState(() => _uploadError = context.l10n.lessonDetailsSignInUpload);
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _uploading = true;
+      _error = null;
+      _uploadError = null;
+    });
     try {
-      await context.read<ScheduleRepository>().uploadLessonMaterial(
+      await repository.uploadLessonMaterial(
         CreateLessonMaterialRequest(
           subjectName: widget.lesson.subject,
           lessonDate: widget.selectedDate,
@@ -110,13 +185,9 @@ class _UploadMaterialSheetState extends State<_UploadMaterialSheet> {
         ),
       );
       if (mounted) Navigator.of(context).pop(true);
-    } on Exception catch (_) {
+    } on Exception {
       if (!mounted) return;
-      showNinjaToast(
-        context,
-        showCheck: false,
-        message: context.l10n.lessonDetailsSignInUpload,
-      );
+      setState(() => _uploadError = context.l10n.knowledgeUploadError);
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
@@ -124,115 +195,139 @@ class _UploadMaterialSheetState extends State<_UploadMaterialSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: .start,
-      mainAxisSize: .min,
-      children: [
-        _DropZone(picked: _picked, onTap: () => unawaited(_pickFile())),
-        const SizedBox(height: 14),
-        Row(
-          spacing: 8,
+    return ExcludeFocus(
+      excluding: _busy,
+      child: AbsorbPointer(
+        absorbing: _busy,
+        child: Column(
+          crossAxisAlignment: .start,
+          mainAxisSize: .min,
           children: [
-            Expanded(
-              child: _SourceButton(
-                icon: AppLineIcon.camera,
-                label: context.l10n.lessonDetailsCamera,
-                onTap: () => unawaited(_pickImage(.camera)),
+            _DropZone(picked: _picked, onTap: () => unawaited(_pickFile())),
+            if (_picking)
+              const Padding(
+                padding: EdgeInsets.only(top: AppSpacing.gap),
+                child: Center(child: AppSpinner()),
               ),
-            ),
-            Expanded(
-              child: _SourceButton(
-                icon: AppLineIcon.image,
-                label: context.l10n.lessonDetailsGallery,
-                onTap: () => unawaited(_pickImage(.gallery)),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.gap),
+                child: AppBanner(message: _error!, tone: AppBannerTone.danger),
               ),
-            ),
-            Expanded(
-              child: _SourceButton(
-                icon: AppLineIcon.folder,
-                label: context.l10n.lessonDetailsFiles,
-                onTap: () => unawaited(_pickFile()),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 18),
-        Text(
-          context.l10n.lessonDetailsTypeHeader,
-          style: NinjaText.microLabel.copyWith(color: context.ninja.muted),
-        ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final type in LessonMaterialType.values)
-              _TypeChip(
-                type: type,
-                selected: _type == type,
-                onTap: () => setState(() => _type = type),
-              ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        NinjaInput(
-          controller: _titleController,
-          label: context.l10n.lessonDetailsTitleLabel,
-          placeholder: context.l10n.lessonDetailsTitleHint,
-        ),
-        const SizedBox(height: 10),
-        SettingsToggleRow(
-          label: context.l10n.lessonDetailsPublicTitle,
-          sub: context.l10n.lessonDetailsPublicSub,
-          value: _isPublic,
-          onChanged: (value) => setState(() => _isPublic = value),
-        ),
-        SettingsToggleRow(
-          label: context.l10n.lessonDetailsAnonymous,
-          value: _anonymous,
-          onChanged: (value) => setState(() => _anonymous = value),
-        ),
-        const SizedBox(height: 14),
-        Container(
-          padding: const .all(14),
-          decoration: BoxDecoration(
-            color: context.ninja.surfaceAlt,
-            borderRadius: .circular(NinjaRadius.card),
-          ),
-          child: Row(
-            spacing: 10,
-            children: [
-              AppNinjaMark(size: 16, color: context.ninja.brandInk),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: context.l10n.lessonDetailsRewardPre),
-                      TextSpan(
-                        text: context.l10n.lessonDetailsShurikensReward,
-                        style: TextStyle(color: context.ninja.brandInk),
-                      ),
-                    ],
-                  ),
-                  style: NinjaText.subtext.copyWith(
-                    color: context.ninja.mutedDark,
+            const SizedBox(height: AppSpacing.sectionGap),
+            Row(
+              spacing: AppSpacing.sm,
+              children: [
+                Expanded(
+                  child: _SourceButton(
+                    icon: AppLineIcon.camera,
+                    label: context.l10n.lessonDetailsCamera,
+                    onTap: () => unawaited(_pickImage(.camera)),
                   ),
                 ),
+                Expanded(
+                  child: _SourceButton(
+                    icon: AppLineIcon.image,
+                    label: context.l10n.lessonDetailsGallery,
+                    onTap: () => unawaited(_pickImage(.gallery)),
+                  ),
+                ),
+                Expanded(
+                  child: _SourceButton(
+                    icon: AppLineIcon.folder,
+                    label: context.l10n.lessonDetailsFiles,
+                    onTap: () => unawaited(_pickFile()),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.fieldGap),
+            Text(
+              context.l10n.lessonDetailsTypeHeader,
+              style: AppText.captionSmall.copyWith(color: context.colors.muted),
+            ),
+            const SizedBox(height: AppSpacing.gap),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                for (final type in LessonMaterialType.values)
+                  _TypeChip(
+                    type: type,
+                    selected: _type == type,
+                    onTap: () => setState(() => _type = type),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AppInputField(
+              controller: _titleController,
+              enabled: !_busy,
+              label: context.l10n.lessonDetailsTitleLabel,
+              placeholder: context.l10n.lessonDetailsTitleHint,
+            ),
+            const SizedBox(height: AppSpacing.gap),
+            SettingsToggleRow(
+              label: context.l10n.lessonDetailsPublicTitle,
+              sub: context.l10n.lessonDetailsPublicSub,
+              value: _isPublic,
+              onChanged: (value) => setState(() => _isPublic = value),
+            ),
+            SettingsToggleRow(
+              label: context.l10n.lessonDetailsAnonymous,
+              value: _anonymous,
+              onChanged: (value) => setState(() => _anonymous = value),
+            ),
+            const SizedBox(height: AppSpacing.sectionGap),
+            Container(
+              padding: const .all(AppSpacing.sectionGap),
+              decoration: BoxDecoration(
+                color: context.colors.surface2,
+                borderRadius: .circular(AppRadius.card),
               ),
+              child: Row(
+                spacing: AppSpacing.gap,
+                children: [
+                  AppNinjaMark(size: 16, color: context.colors.accent),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(text: context.l10n.lessonDetailsRewardPre),
+                          TextSpan(
+                            text: context.l10n.lessonDetailsShurikensReward,
+                            style: TextStyle(color: context.colors.accent),
+                          ),
+                        ],
+                      ),
+                      style: AppText.subtext.copyWith(
+                        color: context.colors.muted,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            if (_uploadError != null) ...[
+              AppBanner(
+                message: _uploadError!,
+                tone: AppBannerTone.danger,
+              ),
+              const SizedBox(height: AppSpacing.gap),
             ],
-          ),
+            AppButton.primary(
+              label: _uploading
+                  ? context.l10n.lessonDetailsUploading
+                  : context.l10n.lessonDetailsUploadMaterial,
+              expanded: true,
+              size: .large,
+              loading: _uploading,
+              onPressed: _busy ? null : () => unawaited(_upload()),
+            ),
+          ],
         ),
-        const SizedBox(height: 16),
-        NinjaButton.primary(
-          label: _uploading
-              ? context.l10n.lessonDetailsUploading
-              : context.l10n.lessonDetailsUploadMaterial,
-          expanded: true,
-          size: .large,
-          loading: _uploading,
-          onPressed: _uploading ? null : () => unawaited(_upload()),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -111,9 +111,9 @@ class AppScaledText {
   TextStyle get body => _style(AppText.body);
   TextStyle get bodyStrong => _style(AppText.bodyStrong);
   TextStyle get bodyRegular => _style(AppText.bodyRegular);
-  TextStyle get caption => _style(AppText.caption, color: _colors.deactive);
+  TextStyle get caption => _style(AppText.caption, color: _colors.muted);
   TextStyle get captionSmall =>
-      _style(AppText.captionSmall, color: _colors.deactive);
+      _style(AppText.captionSmall, color: _colors.muted);
   TextStyle get button => _style(AppText.button);
   TextStyle get buttonLarge => _style(AppText.buttonLarge);
   TextStyle get tab => _style(AppText.tab);
@@ -124,15 +124,15 @@ class AppScaledText {
   TextStyle get chip => _style(AppText.chip);
   TextStyle get tabular => AppText.tabular(bodyStrong);
 
-  TextStyle muted(TextStyle style) => style.copyWith(color: _colors.deactive);
+  TextStyle muted(TextStyle style) => style.copyWith(color: _colors.muted);
   TextStyle subtle(TextStyle style) =>
       style.copyWith(color: _colors.deactiveDarker);
-  TextStyle accent(TextStyle style) => style.copyWith(color: _colors.primary);
+  TextStyle accent(TextStyle style) => style.copyWith(color: _colors.accent);
   TextStyle danger(TextStyle style) => style.copyWith(color: _colors.error);
   TextStyle success(TextStyle style) => style.copyWith(color: _colors.success);
 
   TextStyle _style(TextStyle style, {Color? color}) {
-    return _scale.textStyle(style).copyWith(color: color ?? _colors.active);
+    return _scale.textStyle(style).copyWith(color: color ?? _colors.ink);
   }
 }
 

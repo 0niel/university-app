@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stac_bridge/src/actions/host_action_models.dart';
@@ -25,9 +26,7 @@ class StacCopyActionParser implements StacActionParser<HostActionModel> {
     await Clipboard.setData(ClipboardData(text: text));
     final message = stringOf(model, 'message');
     if (message.isNotEmpty && context.mounted) {
-      ScaffoldMessenger.maybeOf(
-        context,
-      )?.showSnackBar(SnackBar(content: Text(message)));
+      ToastManager.showSuccess(context, message: message);
     }
     return null;
   }

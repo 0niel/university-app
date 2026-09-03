@@ -1,6 +1,5 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/common/widgets/ninja_form_input.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class ScheduleSelectorCreateForm extends StatelessWidget {
@@ -27,14 +26,14 @@ class ScheduleSelectorCreateForm extends StatelessWidget {
         children: [
           Text(
             l10n.createNewSchedule,
-            style: NinjaText.headline.copyWith(color: context.ninja.ink),
+            style: AppText.headline.copyWith(color: context.colors.ink),
           ),
-          const SizedBox(height: 16),
-          NinjaFormInput(
+          const SizedBox(height: AppSpacing.lg),
+          AppInputField(
             controller: nameController,
             label: l10n.scheduleNameLabel,
             placeholder: l10n.scheduleNamePlaceholder,
-            onValidate: (value) {
+            validator: (value) {
               if (value == null || value.isEmpty) {
                 return l10n.enterScheduleName;
               }
@@ -44,17 +43,17 @@ class ScheduleSelectorCreateForm extends StatelessWidget {
               return null;
             },
           ),
-          const SizedBox(height: 16),
-          NinjaInput(
+          const SizedBox(height: AppSpacing.lg),
+          AppInputField(
             controller: descriptionController,
             label: l10n.descriptionOptionalLabel,
             placeholder: l10n.addScheduleDescriptionPlaceholder,
             maxLines: 3,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xlg),
           SizedBox(
             width: .infinity,
-            child: NinjaButton.primary(
+            child: AppButton.primary(
               onPressed: onSubmit,
               label: l10n.createAndAddClass,
               size: .large,

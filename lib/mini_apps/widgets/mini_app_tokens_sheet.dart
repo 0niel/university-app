@@ -20,6 +20,8 @@ class _MiniAppTokensSheetState extends State<MiniAppTokensSheet> {
   List<MiniAppDeployToken>? _tokens;
   String? _freshToken;
   bool _busy = false;
+  bool _loadFailed = false;
+  bool _loading = true;
 
   @override
   void initState() {
@@ -28,11 +30,17 @@ class _MiniAppTokensSheetState extends State<MiniAppTokensSheet> {
   }
 
   Future<void> _load() async {
+    setState(() {
+      _loadFailed = false;
+      _loading = true;
+    });
     try {
       final tokens = await widget.repository.listDeployTokens();
       if (mounted) setState(() => _tokens = tokens);
     } on Exception {
-      if (mounted) setState(() => _tokens = const []);
+      if (mounted) setState(() => _loadFailed = true);
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -51,7 +59,7 @@ class _MiniAppTokensSheetState extends State<MiniAppTokensSheet> {
         showNinjaToast(
           context,
           showCheck: false,
-          message: context.l10n.miniAppsTokensLimit,
+          message: context.l10n.miniAppsTokensFailure,
         );
       }
     } finally {
@@ -70,7 +78,7 @@ class _MiniAppTokensSheetState extends State<MiniAppTokensSheet> {
         showNinjaToast(
           context,
           showCheck: false,
-          message: context.l10n.miniAppsTokensLimit,
+          message: context.l10n.miniAppsTokensFailure,
         );
       }
     } finally {
@@ -88,7 +96,7 @@ class _MiniAppTokensSheetState extends State<MiniAppTokensSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final tokens = _tokens;
     return Column(
@@ -97,34 +105,34 @@ class _MiniAppTokensSheetState extends State<MiniAppTokensSheet> {
       children: [
         Text(
           l10n.miniAppsTokensBody,
-          style: NinjaText.subtext.copyWith(color: colors.muted, height: 1.5),
+          style: AppText.subtext.copyWith(color: colors.muted, height: 1.5),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         if (_freshToken != null) ...[
           Container(
             padding: const .all(14),
             decoration: BoxDecoration(
-              color: colors.surfaceAlt,
-              borderRadius: .circular(NinjaRadius.card),
+              color: colors.surface2,
+              borderRadius: .circular(AppRadius.card),
             ),
             child: Column(
               crossAxisAlignment: .start,
               children: [
                 Text(
                   l10n.miniAppsTokensFresh,
-                  style: NinjaText.microLabel.copyWith(
-                    color: colors.mutedDark,
+                  style: AppText.captionSmall.copyWith(
+                    color: colors.muted,
                   ),
                 ),
                 const SizedBox(height: 6),
                 SelectableText(
                   _freshToken ?? '',
-                  style: NinjaText.subtext.copyWith(
+                  style: AppText.subtext.copyWith(
                     color: colors.ink,
                     fontFamily: 'monospace',
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.gap),
                 NinjaButton.secondary(
                   label: l10n.miniAppsTokensCopy,
                   size: .small,
@@ -133,9 +141,15 @@ class _MiniAppTokensSheetState extends State<MiniAppTokensSheet> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
         ],
-        if (tokens == null)
+        if (_loadFailed)
+          NinjaErrorState(
+            title: l10n.loadingError,
+            retryLabel: l10n.retry,
+            onRetry: () => unawaited(_load()),
+          )
+        else if (tokens == null || _loading)
           const MiniAppTokensSkeleton()
         else
           for (final token in tokens)
@@ -147,17 +161,19 @@ class _MiniAppTokensSheetState extends State<MiniAppTokensSheet> {
               horizontalPadding: 0,
               showChevron: false,
               trailing: NinjaIconButton(
-                icon: const AppLineIconWidget(.close, size: 20),
+                icon: const AppLineIconWidget(.close, size: AppIconSize.md),
                 tooltip: l10n.miniAppsTokensRevoke,
                 onPressed: _busy ? null : () => unawaited(_revoke(token)),
               ),
             ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         NinjaButton.primary(
           label: l10n.miniAppsTokensCreate,
           expanded: true,
           loading: _busy,
-          onPressed: _busy ? null : () => unawaited(_create()),
+          onPressed: _busy || _loading || tokens == null || _loadFailed
+              ? null
+              : () => unawaited(_create()),
         ),
       ],
     );

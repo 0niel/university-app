@@ -1,5 +1,6 @@
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
 
@@ -9,8 +10,11 @@ class NinjaActionButton extends StatelessWidget {
     super.key,
     this.onPressed,
     this.tone = NinjaActionTone.ink,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-    this.radius = NinjaRadius.button,
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: AppSpacing.lg,
+      vertical: AppSpacing.gap,
+    ),
+    this.radius = AppRadius.full,
     this.fontSize = 12,
     this.expanded = false,
   });
@@ -24,7 +28,7 @@ class NinjaActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final Color? background;
     final Color? borderColor;
     final Color foreground;
@@ -32,23 +36,23 @@ class NinjaActionButton extends StatelessWidget {
       case NinjaActionTone.ink:
         background = colors.ink;
         borderColor = null;
-        foreground = colors.onInk;
+        foreground = colors.canvas;
       case NinjaActionTone.scarlet:
-        background = colors.scarlet;
+        background = colors.exam;
         borderColor = null;
-        foreground = colors.onScarlet;
+        foreground = colors.white;
       case NinjaActionTone.surface:
-        background = colors.surfaceAlt;
+        background = colors.surface2;
         borderColor = null;
         foreground = colors.ink;
       case NinjaActionTone.outline:
-        background = null;
-        borderColor = colors.line;
-        foreground = colors.mutedDark;
+        background = colors.surface2;
+        borderColor = null;
+        foreground = colors.muted;
     }
 
     final button = ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: NinjaMetrics.minTouchTarget),
+      constraints: const BoxConstraints(minHeight: AppControlSize.touchTarget),
       child: Container(
         width: expanded ? double.infinity : null,
         padding: padding,
@@ -61,10 +65,8 @@ class NinjaActionButton extends StatelessWidget {
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: NinjaText.family,
+          style: AppText.buttonSmall.copyWith(
             fontSize: fontSize,
-            fontWeight: FontWeight.w700,
             color: foreground,
           ),
         ),

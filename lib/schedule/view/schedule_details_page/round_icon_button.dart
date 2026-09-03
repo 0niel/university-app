@@ -13,11 +13,11 @@ class _RoundIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaIconButton(
+    return AppIconButton(
       icon: AppLineIconWidget(
         icon,
         size: size * .5,
-        color: context.ninja.ink,
+        color: context.colors.ink,
       ),
       onPressed: onTap,
     );

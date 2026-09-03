@@ -22,7 +22,7 @@ class _NinjaPathViewState extends State<NinjaPathView> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final profileState = context.watch<ProfileCubit>().state;
     final profile = profileState.gamificationProfile;
@@ -34,30 +34,18 @@ class _NinjaPathViewState extends State<NinjaPathView> {
           parent: AlwaysScrollableScrollPhysics(),
         ),
         slivers: [
-          SliverAppBar(
-            pinned: true,
-            backgroundColor: colors.canvas,
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            leadingWidth: 60,
-            leading: Center(
-              child: NinjaIconButton(
-                icon: const AppLineIconWidget(.chevronL, size: 20),
-                tooltip: l10n.back,
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-            title: Text(
-              l10n.ninjaPathTitle,
-              style: NinjaText.appBarTitle.copyWith(color: colors.ink),
+          SliverToBoxAdapter(
+            child: AppInnerHeader(
+              title: l10n.ninjaPathTitle,
+              backSemanticsLabel: l10n.back,
+              onBack: () => Navigator.of(context).pop(),
             ),
           ),
           SliverPadding(
             padding: EdgeInsets.fromLTRB(
-              NinjaMetrics.screenPadding,
-              8,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
+              24,
+              AppSpacing.screen,
               MediaQuery.paddingOf(context).bottom + 32,
             ),
             sliver: SliverList.list(
@@ -68,18 +56,27 @@ class _NinjaPathViewState extends State<NinjaPathView> {
                   streakDays: profile.streakDays,
                   shurikens: profile.shurikens,
                 ),
-                const SizedBox(height: 18),
-                NinjaTabs<int>(
+                const SizedBox(height: AppSpacing.fieldGap),
+                AppSegmentedControl<int>(
                   value: _tab,
-                  padding: EdgeInsets.zero,
-                  tabs: [
-                    NinjaTab(value: 0, label: l10n.ninjaPathTabBadges),
-                    NinjaTab(value: 1, label: l10n.ninjaPathTabQuests),
-                    NinjaTab(value: 2, label: l10n.ninjaPathTabRating),
+                  onCanvas: true,
+                  options: [
+                    AppSegmentedOption(
+                      value: 0,
+                      label: l10n.ninjaPathTabBadges,
+                    ),
+                    AppSegmentedOption(
+                      value: 1,
+                      label: l10n.ninjaPathTabQuests,
+                    ),
+                    AppSegmentedOption(
+                      value: 2,
+                      label: l10n.ninjaPathTabRating,
+                    ),
                   ],
                   onChanged: (value) => setState(() => _tab = value),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 NinjaStateSwitcher(
                   child: switch (_tab) {
                     0 => const BadgesTab(key: ValueKey('badges')),

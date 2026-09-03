@@ -7,7 +7,7 @@ class _NinjaQuestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final done = quest.isCompleted;
     final fraction = quest.target > 0
         ? (quest.progress / quest.target).clamp(0.0, 1.0)
@@ -15,10 +15,10 @@ class _NinjaQuestCard extends StatelessWidget {
     return Padding(
       padding: const .only(bottom: 8),
       child: Container(
-        padding: const .all(16),
+        padding: const .all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Column(
           crossAxisAlignment: .stretch,
@@ -31,37 +31,39 @@ class _NinjaQuestCard extends StatelessWidget {
                   height: 34,
                   alignment: .center,
                   decoration: BoxDecoration(
-                    color: done ? colors.brandTint : colors.surfaceAlt,
-                    borderRadius: .circular(11),
+                    color: done ? colors.tint : colors.surface2,
+                    borderRadius: .circular(AppRadius.badge),
                   ),
                   child: done
-                      ? NinjaCheckMark(size: 14, color: colors.brandInk)
+                      ? AppCheckMark(size: 14, color: colors.accent)
                       : Text(
                           quest.emoji,
                           style: const TextStyle(fontSize: 16),
                         ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     quest.title,
                     maxLines: 3,
                     overflow: .ellipsis,
-                    style: NinjaText.headline.copyWith(color: colors.ink),
+                    style: AppText.headline.copyWith(color: colors.ink),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpacing.gap),
                 Text(
                   '+${quest.xpReward} XP',
-                  style: NinjaText.tabular(
-                    NinjaText.microLabel.copyWith(
-                      color: done ? colors.brandInk : colors.mutedDark,
-                    ),
-                  ),
+                  style: AppText.captionSmall
+                      .copyWith(
+                        color: done ? colors.accent : colors.muted,
+                      )
+                      .copyWith(
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             ProfileProgressBar(
               value: fraction,
               label: '${quest.progress} / ${quest.target}',

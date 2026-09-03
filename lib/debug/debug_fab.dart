@@ -7,7 +7,7 @@ class _DebugFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Semantics(
       button: true,
       label: 'Debug tools',
@@ -15,13 +15,13 @@ class _DebugFab extends StatelessWidget {
         onTap: onTap,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: colors.surfaceAlt.withValues(alpha: .72),
+            color: colors.surface2.withValues(alpha: .72),
             shape: BoxShape.circle,
           ),
           child: SizedBox.square(
-            dimension: NinjaMetrics.minTouchTarget,
+            dimension: AppControlSize.touchTarget,
             child: Center(
-              child: AppNinjaMark(size: 15, color: colors.brand),
+              child: AppNinjaMark(size: 15, color: colors.accent),
             ),
           ),
         ),

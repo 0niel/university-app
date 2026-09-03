@@ -21,12 +21,16 @@ class AppDeviceTokenSync extends StatefulWidget {
 }
 
 class _AppDeviceTokenSyncState extends State<AppDeviceTokenSync> {
+  Future<void> _controllerReady = Future.value();
+  final _retiring = <DeviceTokenSyncController>[];
+  var _controllerRevision = 0;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      unawaited(_handleAuthState(context.read<AppBloc>().state));
+      unawaited(_synchronize());
     });
   }
 
@@ -34,8 +38,12 @@ class _AppDeviceTokenSyncState extends State<AppDeviceTokenSync> {
   void didUpdateWidget(covariant AppDeviceTokenSync oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (identical(oldWidget.controller, widget.controller)) return;
-    unawaited(oldWidget.controller?.pause());
-    if (context.read<AppBloc>().state.status.isLoggedIn) unawaited(_start());
+    _controllerRevision++;
+    if (oldWidget.controller case final controller?) {
+      _retiring.add(controller);
+      unawaited(controller.pause());
+    }
+    unawaited(_synchronize());
   }
 
   @override
@@ -44,32 +52,43 @@ class _AppDeviceTokenSyncState extends State<AppDeviceTokenSync> {
     super.dispose();
   }
 
-  Future<void> _start() async {
+  Future<void> _synchronize() async {
+    final controller = widget.controller;
+    final revision = _controllerRevision;
     try {
-      await widget.controller?.start();
+      await _prepareControllers();
+      if (!mounted || revision != _controllerRevision) return;
+      final state = context.read<AppBloc>().state;
+      await controller?.synchronizeUser(
+        state.status.isLoggedIn ? state.user.id : null,
+      );
     } on Exception catch (error, stackTrace) {
       log('Device token sync failed', error: error, stackTrace: stackTrace);
     }
   }
 
-  Future<void> _handleAuthState(AppState state) async {
-    if (state.status.isLoggedIn) {
-      await _start();
-      return;
-    }
-    try {
-      await widget.controller?.stopAndUnregister();
-    } on Exception catch (error, stackTrace) {
-      log('Device token cleanup failed', error: error, stackTrace: stackTrace);
-    }
+  Future<void> _prepareControllers() {
+    final result = _controllerReady.then((_) async {
+      while (_retiring.isNotEmpty) {
+        await _retiring.first.invalidate();
+        _retiring.removeAt(0);
+      }
+    });
+    _controllerReady = result.then<void>(
+      (_) => null,
+      onError: (Object _, StackTrace _) => null,
+    );
+    return result;
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<AppBloc, AppState>(
-      listenWhen: (previous, current) => previous.status != current.status,
+      listenWhen: (previous, current) =>
+          previous.status != current.status ||
+          previous.user.id != current.user.id,
       listener: (context, state) {
-        unawaited(_handleAuthState(state));
+        unawaited(_synchronize());
       },
       child: widget.child,
     );

@@ -40,7 +40,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
 
       expect(find.byType(NinjaSkeleton), findsWidgets);
-      expect(find.byType(NinjaEmptyState), findsNothing);
+      expect(find.byType(AppEmptyState), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
@@ -53,7 +53,7 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.byType(NinjaErrorState), findsOneWidget);
+      expect(find.byType(AppErrorState), findsOneWidget);
 
       await tester.tap(find.text('Повторить'));
       await tester.pump();
@@ -74,7 +74,7 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.byType(NinjaEmptyState), findsOneWidget);
+      expect(find.byType(AppEmptyState), findsOneWidget);
       expect(find.byType(NinjaSkeleton), findsNothing);
     });
   });

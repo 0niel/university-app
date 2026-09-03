@@ -1,3 +1,4 @@
+import 'package:app_ui/src/colors/colors.dart';
 import 'package:flutter/material.dart';
 
 class AppNinjaMark extends StatelessWidget {
@@ -29,7 +30,7 @@ class AppNinjaMark extends StatelessWidget {
       height: size,
       child: CustomPaint(
         painter: _NinjaMarkPainter(
-          color: color ?? const Color(0xFF2F7AFF),
+          color: color ?? AppColors.light.accent,
           cutout: cutout,
         ),
       ),

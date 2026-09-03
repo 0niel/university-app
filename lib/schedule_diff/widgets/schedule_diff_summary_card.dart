@@ -16,13 +16,13 @@ class ScheduleDiffSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final scale = Theme.of(context).scale;
     return Container(
       padding: .all(scale.space(16)),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Column(
         children: [
@@ -30,7 +30,7 @@ class ScheduleDiffSummaryCard extends StatelessWidget {
           SizedBox(height: scale.space(12)),
           Text(
             '$count',
-            style: NinjaText.title.copyWith(
+            style: AppText.title.copyWith(
               fontWeight: .bold,
               color: color,
             ),
@@ -38,7 +38,7 @@ class ScheduleDiffSummaryCard extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: NinjaText.subtext.copyWith(
+            style: AppText.subtext.copyWith(
               color: colors.muted,
               fontWeight: .w500,
             ),

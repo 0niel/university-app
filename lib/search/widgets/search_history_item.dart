@@ -18,7 +18,7 @@ class SearchHistoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return AppPressable(
       onTap: () => onPressed(query),
       semanticsLabel: query,
@@ -26,7 +26,7 @@ class SearchHistoryItem extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         padding: const .fromLTRB(
           AppSpacing.lg,
@@ -41,13 +41,13 @@ class SearchHistoryItem extends StatelessWidget {
               height: 40,
               alignment: .center,
               decoration: BoxDecoration(
-                color: colors.surfaceAlt,
+                color: colors.surface2,
                 borderRadius: .circular(AppRadius.md),
               ),
               child: AppLineIconWidget(
                 .clock,
                 size: 18,
-                color: colors.mutedDark,
+                color: colors.muted,
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -56,7 +56,7 @@ class SearchHistoryItem extends StatelessWidget {
                 query,
                 maxLines: 2,
                 overflow: .ellipsis,
-                style: NinjaText.body.copyWith(color: colors.ink),
+                style: AppText.body.copyWith(color: colors.ink),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -67,7 +67,7 @@ class SearchHistoryItem extends StatelessWidget {
                 semanticsLabel: context.l10n.delete,
                 semanticsButton: true,
                 child: const SizedBox.square(
-                  dimension: NinjaMetrics.minTouchTarget,
+                  dimension: AppControlSize.iconButton,
                   child: Center(
                     child: _ClearIcon(),
                   ),

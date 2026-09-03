@@ -13,6 +13,7 @@ import {
   validateSyncFinish,
   validateSyncStart,
 } from "./sync.ts";
+import { CommunityPayload, validateCommunityPayload } from "./community.ts";
 
 export type DatabaseIngestPayload = {
   entity: "news_items" | "schedule";
@@ -29,7 +30,8 @@ export type IngestPayload =
   | StoryMediaCleanupPayload
   | StoryMediaDeletePayload
   | SyncStartPayload
-  | SyncFinishPayload;
+  | SyncFinishPayload
+  | CommunityPayload;
 
 export function validatePayload(payload: unknown): IngestPayload {
   if (!payload || typeof payload !== "object") {
@@ -37,6 +39,12 @@ export function validatePayload(payload: unknown): IngestPayload {
   }
 
   const value = payload as Record<string, unknown>;
+  if (
+    value.entity === "community_catalog_targets" ||
+    value.entity === "community_observations"
+  ) {
+    return validateCommunityPayload(value);
+  }
   if (value.entity === "story_media_upload") {
     return validateStoryMediaUpload(value);
   }

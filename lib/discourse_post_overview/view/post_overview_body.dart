@@ -8,6 +8,7 @@ import 'package:rtu_mirea_app/discourse_post_overview/view/ninja_forum_avatar.da
 import 'package:rtu_mirea_app/discourse_post_overview/view/post_overview_comments_section.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/view/post_overview_formatting.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/view/post_overview_html.dart';
+import 'package:rtu_mirea_app/discourse_post_overview/view/post_overview_metrics.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/view/post_overview_skeleton.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
@@ -19,9 +20,14 @@ class PostOverviewBody extends StatelessWidget {
   final int postId;
 
   Future<void> _refresh(BuildContext context) async {
-    final bloc = context.read<PostOverviewBloc>()
-      ..add(PostRequested(postId: postId));
-    await bloc.stream.firstWhere((state) => state.status != .loading);
+    final bloc = context.read<PostOverviewBloc>();
+    if (bloc.isClosed) return;
+    final completed = bloc.stream
+        .where((state) => state.status != .loading)
+        .take(1)
+        .drain<void>();
+    bloc.add(PostRequested(postId: postId));
+    await completed;
   }
 
   @override
@@ -34,20 +40,39 @@ class PostOverviewBody extends StatelessWidget {
         }
         if (post != null) {
           return RefreshIndicator(
-            color: context.ninja.brand,
-            backgroundColor: context.ninja.surfaceAlt,
+            color: context.colors.accent,
+            backgroundColor: context.colors.surface2,
             onRefresh: () => _refresh(context),
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
               slivers: [
+                if (state.status == .failure)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.screen,
+                      AppSpacing.md,
+                      AppSpacing.screen,
+                      AppSpacing.zero,
+                    ),
+                    sliver: SliverToBoxAdapter(
+                      child: AppBanner(
+                        message: context.l10n.postDetailLoadError,
+                        tone: AppBannerTone.warn,
+                        actionLabel: context.l10n.retry,
+                        onAction: () => context.read<PostOverviewBloc>().add(
+                          PostRequested(postId: postId),
+                        ),
+                      ),
+                    ),
+                  ),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    NinjaMetrics.screenPadding,
-                    12,
-                    NinjaMetrics.screenPadding,
-                    0,
+                    AppSpacing.screen,
+                    AppSpacing.md,
+                    AppSpacing.screen,
+                    AppSpacing.zero,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: _PostAuthorHeader(post: post),
@@ -55,10 +80,10 @@ class PostOverviewBody extends StatelessWidget {
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    NinjaMetrics.screenPadding,
-                    22,
-                    NinjaMetrics.screenPadding,
-                    0,
+                    AppSpacing.screen,
+                    AppSpacing.xlg,
+                    AppSpacing.screen,
+                    AppSpacing.zero,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: SelectionArea(
@@ -68,14 +93,18 @@ class PostOverviewBody extends StatelessWidget {
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    NinjaMetrics.screenPadding,
-                    30,
-                    NinjaMetrics.screenPadding,
-                    40,
+                    AppSpacing.screen,
+                    AppSpacing.section,
+                    AppSpacing.screen,
+                    AppSpacing.xxlg,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: PostOverviewCommentsSection(
                       comments: state.comments,
+                      loadFailed: state.status == .commentsFailure,
+                      onRetry: () => context.read<PostOverviewBloc>().add(
+                        PostRequested(postId: postId),
+                      ),
                     ),
                   ),
                 ),
@@ -86,7 +115,7 @@ class PostOverviewBody extends StatelessWidget {
         return ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(
-            horizontal: NinjaMetrics.screenPadding,
+            horizontal: AppSpacing.screen,
           ),
           children: [
             NinjaErrorState(

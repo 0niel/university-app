@@ -26,10 +26,10 @@ class _PendingCard extends StatelessWidget {
     final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
-        10,
+        AppSpacing.screen,
+        AppSpacing.gap,
       ),
       child: Column(
         children: [

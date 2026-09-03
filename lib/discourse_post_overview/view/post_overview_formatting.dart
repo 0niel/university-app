@@ -11,34 +11,29 @@ String formatPostDate(DateTime date) =>
     DateFormat('dd.MM.yyyy HH:mm').format(date);
 
 Map<String, Style> postOverviewHtmlStyle(BuildContext context) {
-  final colors = context.ninja;
-  Style heading(TextStyle source, double size) => .new(
+  final colors = context.colors;
+  Style textStyle(TextStyle source) => .new(
     color: colors.ink,
+    fontFamily: source.fontFamily,
+    fontWeight: source.fontWeight,
     fontStyle: source.fontStyle,
-    fontSize: FontSize(size),
-    lineHeight: const LineHeight(1.5),
+    fontSize: FontSize(source.fontSize ?? AppText.body.fontSize!),
+    lineHeight: LineHeight(source.height ?? 1.5),
   );
-  final bodyStyle = Style(
-    color: colors.ink,
-    fontStyle: NinjaText.body.copyWith(color: colors.ink).fontStyle,
-    fontSize: FontSize(16),
-    lineHeight: const LineHeight(1.5),
-  );
+  final bodyStyle = textStyle(AppText.paragraph);
 
   return {
-    'h1': heading(NinjaText.display, 24),
-    'h2': heading(NinjaText.display, 20),
-    'h3': heading(NinjaText.display, 18),
-    'h4': heading(NinjaText.display, 16),
-    'h5': heading(NinjaText.title, 14),
-    'h6': heading(NinjaText.headline, 12),
-    'body': bodyStyle,
-    'p': bodyStyle,
-    'a': Style(
-      color: colors.orange,
-      fontStyle: NinjaText.body.fontStyle,
-      fontSize: FontSize(16),
-      lineHeight: const LineHeight(1.5),
+    'h1': textStyle(AppText.sectionLarge),
+    'h2': textStyle(AppText.section),
+    'h3': textStyle(AppText.sectionSmall),
+    'h4': textStyle(AppText.heading),
+    'h5': textStyle(AppText.bodyStrong),
+    'h6': textStyle(AppText.captionStrong),
+    'body': bodyStyle.copyWith(
+      margin: Margins.zero,
+      padding: HtmlPaddings.zero,
     ),
+    'p': bodyStyle,
+    'a': bodyStyle.copyWith(color: colors.accent),
   };
 }

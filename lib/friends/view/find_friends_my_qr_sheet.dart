@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:rtu_mirea_app/friends/friends_layout.dart';
 import 'package:rtu_mirea_app/friends/widgets/friends_pill_button.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/deep_links.dart';
@@ -19,33 +20,37 @@ class FindFriendsMyQrSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Column(
       mainAxisSize: .min,
       children: [
         Center(
           child: Container(
-            padding: const .all(20),
+            padding: const .all(AppSpacing.screen),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: .circular(NinjaRadius.card),
+              borderRadius: .circular(AppRadius.card),
             ),
-            child: QrImageView(
-              data: DeepLinks.shareLink(
-                '/services/people?add=$userId',
-              ).toString(),
-              size: 240,
+            child: LayoutBuilder(
+              builder: (context, constraints) => QrImageView(
+                data: DeepLinks.appLink(
+                  '/services/people?add=$userId',
+                ).toString(),
+                size: constraints.maxWidth
+                    .clamp(0, FriendsLayout.qrCode)
+                    .toDouble(),
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: AppSpacing.fieldGap),
         Text(
           l10n.friendsMyQrHint,
           textAlign: .center,
-          style: NinjaText.subtext.copyWith(color: colors.muted),
+          style: AppText.subtext.copyWith(color: colors.muted),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.screen),
         FriendsPillButton(
           label: l10n.friendsShareLink,
           icon: .share,

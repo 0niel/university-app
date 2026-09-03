@@ -28,14 +28,14 @@ class NinjaStudyGroupContent extends StatelessWidget {
       padding: const .only(top: 12, bottom: 32),
       children: [
         Padding(
-          padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+          padding: const .symmetric(horizontal: AppSpacing.screen),
           child: NinjaStudyGroupHeroCard(group: group),
         ),
         Padding(
           padding: const .fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             12,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             0,
           ),
           child: NinjaButton.primary(
@@ -48,9 +48,9 @@ class NinjaStudyGroupContent extends StatelessWidget {
         if (isOwner && state.pendingRequests.isNotEmpty) ...[
           Padding(
             padding: const .fromLTRB(
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               28,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               10,
             ),
             child: NinjaStudyGroupSectionHeader(
@@ -59,7 +59,7 @@ class NinjaStudyGroupContent extends StatelessWidget {
           ),
           Padding(
             padding: const .symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: Column(
               children: [
@@ -76,15 +76,15 @@ class NinjaStudyGroupContent extends StatelessWidget {
         ],
         Padding(
           padding: const .fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             28,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             10,
           ),
           child: NinjaStudyGroupSectionHeader(l10n.studyGroupMembersSection),
         ),
         Padding(
-          padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+          padding: const .symmetric(horizontal: AppSpacing.screen),
           child: Column(
             children: [
               for (final (index, member) in state.members.indexed)
@@ -102,9 +102,9 @@ class NinjaStudyGroupContent extends StatelessWidget {
         ),
         Padding(
           padding: const .fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             28,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             0,
           ),
           child: NinjaButton.destructiveOutline(

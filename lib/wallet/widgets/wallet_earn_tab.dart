@@ -28,13 +28,6 @@ class _WalletEarnTabState extends State<WalletEarnTab> {
     final l10n = context.l10n;
     final ways = [
       (
-        title: l10n.walletEarnAttendTitle,
-        description: l10n.walletEarnAttendDesc,
-        value: '+10',
-        per: l10n.walletEarnAttendPer,
-        live: false,
-      ),
-      (
         title: l10n.walletEarnStreakTitle,
         description: l10n.walletEarnStreakDesc,
         value: '+5→50',

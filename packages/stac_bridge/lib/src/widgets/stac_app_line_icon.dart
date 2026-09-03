@@ -45,7 +45,7 @@ class StacAppLineIconParser extends StacParser<StacAppLineIcon> {
     return AppLineIconWidget(
       icon,
       size: model.size,
-      color: parseHexColor(model.color),
+      color: parseAppColor(context, model.color),
     );
   }
 }

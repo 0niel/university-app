@@ -30,6 +30,32 @@ void main() {
   }
 
   group('ToastManager queue', () {
+    testWidgets('root overlay retains the calling navigation clearance', (
+      tester,
+    ) async {
+      late BuildContext ctx;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: AppBottomBarViewport(
+            bottomInset: 144,
+            child: Builder(
+              builder: (context) {
+                ctx = context;
+                return const Scaffold(body: SizedBox());
+              },
+            ),
+          ),
+        ),
+      );
+      ToastManager.showSuccess(ctx, message: 'Clear of navigation');
+      await tester.pumpAndSettle();
+      final toast = tester.getRect(find.byType(AppToast));
+      final height = MediaQuery.sizeOf(ctx).height;
+      expect(height - toast.bottom, greaterThanOrEqualTo(144));
+      ToastManager.debugReset();
+    });
+
     testWidgets('second toast waits for the first to finish (FIFO)', (
       tester,
     ) async {

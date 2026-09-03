@@ -1,10 +1,14 @@
 import 'dart:math' as math;
 
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_icon_tile.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
+
+enum NinjaTooltipArrow { up, down }
 
 class NinjaTooltip extends StatelessWidget {
   const NinjaTooltip({
@@ -20,11 +24,19 @@ class NinjaTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final arrowSquare = Transform.rotate(
+    final colors = context.colors;
+    final tail = Transform.rotate(
       angle: math.pi / 4,
-      child: Container(width: 10, height: 10, color: colors.ink),
+      child: Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(
+          color: colors.ink,
+          borderRadius: BorderRadius.circular(AppRadius.xxs),
+        ),
+      ),
     );
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -32,22 +44,21 @@ class NinjaTooltip extends StatelessWidget {
           start: arrowInset,
           top: arrow == NinjaTooltipArrow.up ? -5 : null,
           bottom: arrow == NinjaTooltipArrow.down ? -5 : null,
-          child: arrowSquare,
+          child: tail,
         ),
         DecoratedBox(
           decoration: BoxDecoration(
             color: colors.ink,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.iconTile),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
             child: Text(
               message,
-              style: NinjaText.subtext.copyWith(
-                fontSize: 12,
-                color: colors.onInk,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppText.subtextStrong.copyWith(color: colors.canvas),
             ),
           ),
         ),
@@ -55,8 +66,6 @@ class NinjaTooltip extends StatelessWidget {
     );
   }
 }
-
-enum NinjaTooltipArrow { up, down }
 
 class NinjaFeatureHint extends StatelessWidget {
   const NinjaFeatureHint({
@@ -74,78 +83,60 @@ class NinjaFeatureHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final action = actionLabel;
-    return DecoratedBox(
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sectionGap),
       decoration: BoxDecoration(
-        color: colors.brandTint,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        color: colors.tint,
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.brand.withValues(alpha: .12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: SizedBox.square(
-                dimension: 36,
-                child: Center(
-                  child: AppLineIconWidget(
-                    AppLineIcon.spark,
-                    size: 17,
-                    color: colors.brand,
-                  ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppIconTile(
+            icon: AppLineIcon.spark,
+            background: colors.tint2,
+            foreground: colors.accent,
+            iconSize: AppIconSize.action,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(title, style: AppText.label.copyWith(color: colors.ink)),
+                const SizedBox(height: AppSpacing.micro),
+                Text(
+                  body,
+                  style: AppText.subtext.copyWith(color: colors.muted),
                 ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: NinjaText.subtext.copyWith(
-                      color: colors.ink,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    body,
-                    style: NinjaText.helper.copyWith(color: colors.muted),
-                  ),
-                  if (action != null) ...[
-                    const SizedBox(height: 4),
-                    Semantics(
-                      button: onAction != null,
-                      child: AppPressable(
-                        onTap: onAction,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(minHeight: 44),
-                          child: Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            child: Text(
-                              action,
-                              style: NinjaText.helper.copyWith(
-                                color: colors.brandInk,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                if (action != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  AppPressable(
+                    onTap: onAction,
+                    semanticsLabel: action,
+                    semanticsButton: true,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 44),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          action,
+                          style: AppText.subtextBold.copyWith(
+                            color: colors.accent,
                           ),
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

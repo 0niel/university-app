@@ -8,38 +8,43 @@ class _SubscribeBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
-      padding: const .fromLTRB(16, 12, 16, 12),
+      padding: const .fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Row(
         children: [
           Container(
-            width: NinjaMetrics.minTouchTarget,
-            height: NinjaMetrics.minTouchTarget,
+            width: AppControlSize.touchTarget,
+            height: AppControlSize.touchTarget,
             alignment: .center,
             decoration: BoxDecoration(
-              color: colors.surfaceAlt,
+              color: colors.surface2,
               shape: .circle,
             ),
             child: AppLineIconWidget(
               .bell,
               size: 19,
-              color: colors.mutedDark,
+              color: colors.muted,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               context.l10n.changesPushBanner,
-              style: NinjaText.subtext.copyWith(color: colors.ink),
+              style: AppText.subtext.copyWith(color: colors.ink),
             ),
           ),
-          const SizedBox(width: 12),
-          NinjaSwitch(
+          const SizedBox(width: AppSpacing.md),
+          AppSwitch(
             value: enabled,
             onChanged: onChanged,
           ),

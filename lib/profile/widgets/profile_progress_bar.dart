@@ -17,10 +17,10 @@ class ProfileProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final target = value.clamp(0.0, 1.0);
     final bar = ClipRRect(
-      borderRadius: BorderRadius.circular(NinjaRadius.pill),
+      borderRadius: BorderRadius.circular(AppRadius.full),
       child: SizedBox(
         height: 8,
         child: TweenAnimationBuilder<double>(
@@ -30,12 +30,12 @@ class ProfileProgressBar extends StatelessWidget {
           builder: (context, animated, _) => Stack(
             fit: StackFit.expand,
             children: [
-              ColoredBox(color: pastel ? _kPastelTrack : colors.surfaceAlt),
+              ColoredBox(color: pastel ? _kPastelTrack : colors.surface2),
               FractionallySizedBox(
                 alignment: AlignmentDirectional.centerStart,
                 widthFactor: animated.clamp(0.0, 1.0),
                 child: ColoredBox(
-                  color: pastel ? colors.onAccentSoft : colors.brand,
+                  color: pastel ? colors.ink : colors.accent,
                 ),
               ),
             ],
@@ -50,23 +50,23 @@ class ProfileProgressBar extends StatelessWidget {
       label,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: NinjaText.tabular(
-        NinjaText.microLabel.copyWith(
-          color: pastel ? colors.onAccentSoft : colors.mutedDark,
-        ),
-      ),
+      style: AppText.captionSmall
+          .copyWith(
+            color: pastel ? colors.ink : colors.muted,
+          )
+          .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
     );
     if (MediaQuery.textScalerOf(context).scale(1) >= 1.5) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [bar, const SizedBox(height: 6), text],
+        children: [bar, const SizedBox(height: AppSpacing.xsm), text],
       );
     }
     return Row(
       children: [
         Expanded(child: bar),
-        const SizedBox(width: 10),
+        const SizedBox(width: AppSpacing.gap),
         text,
       ],
     );

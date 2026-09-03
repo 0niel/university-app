@@ -30,7 +30,7 @@ class NinjaPathSkeleton extends StatelessWidget {
       crossAxisAlignment: .stretch,
       children: [
         _badgeCategory(context),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.screen),
         _badgeCategory(context),
       ],
     );
@@ -44,11 +44,15 @@ class NinjaPathSkeleton extends StatelessWidget {
         const Row(
           children: [
             Expanded(child: NinjaSkeleton.bar(height: 19, widthFactor: 0.5)),
-            SizedBox(width: 10),
-            NinjaSkeleton(width: 42, height: 12, radius: 6),
+            SizedBox(width: AppSpacing.gap),
+            NinjaSkeleton(
+              width: 42,
+              height: 12,
+              radius: AppRadius.focusOutline,
+            ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         GridView.count(
           crossAxisCount: spec.columns,
           shrinkWrap: true,
@@ -69,19 +73,19 @@ class NinjaPathSkeleton extends StatelessWidget {
     return Container(
       padding: const .fromLTRB(10, 14, 10, 12),
       decoration: BoxDecoration(
-        color: context.ninja.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        color: context.colors.surface,
+        borderRadius: .circular(AppRadius.card),
       ),
       child: const Column(
         crossAxisAlignment: .stretch,
         children: [
           Center(child: NinjaSkeleton.avatar(size: 40)),
-          SizedBox(height: 8),
+          SizedBox(height: AppSpacing.sm),
           NinjaSkeleton.bar(height: 13, widthFactor: 0.8),
           SizedBox(height: 3),
           Flexible(child: NinjaSkeleton.bar(height: 11, widthFactor: 0.6)),
-          SizedBox(height: 8),
-          NinjaSkeleton(height: 8, radius: NinjaRadius.pill),
+          SizedBox(height: AppSpacing.sm),
+          NinjaSkeleton(height: 8, radius: AppRadius.full),
         ],
       ),
     );
@@ -94,11 +98,15 @@ class NinjaPathSkeleton extends StatelessWidget {
         const Row(
           children: [
             Expanded(child: NinjaSkeleton.bar(height: 19, widthFactor: 0.4)),
-            SizedBox(width: 10),
-            NinjaSkeleton(width: 52, height: 12, radius: 6),
+            SizedBox(width: AppSpacing.gap),
+            NinjaSkeleton(
+              width: 52,
+              height: 12,
+              radius: AppRadius.focusOutline,
+            ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         for (var index = 0; index < 4; index++) _questCard(context),
       ],
     );
@@ -108,25 +116,29 @@ class NinjaPathSkeleton extends StatelessWidget {
     return Padding(
       padding: const .only(bottom: 8),
       child: Container(
-        padding: const .all(16),
+        padding: const .all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: context.ninja.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          color: context.colors.surface,
+          borderRadius: .circular(AppRadius.card),
         ),
         child: const Column(
           crossAxisAlignment: .stretch,
           children: [
             Row(
               children: [
-                NinjaSkeleton(width: 34, height: 34, radius: 11),
-                SizedBox(width: 12),
+                NinjaSkeleton(width: 34, height: 34, radius: AppRadius.badge),
+                SizedBox(width: AppSpacing.md),
                 Expanded(child: NinjaSkeleton.bar(height: 15)),
-                SizedBox(width: 10),
-                NinjaSkeleton(width: 44, height: 12, radius: 6),
+                SizedBox(width: AppSpacing.gap),
+                NinjaSkeleton(
+                  width: 44,
+                  height: 12,
+                  radius: AppRadius.focusOutline,
+                ),
               ],
             ),
-            SizedBox(height: 12),
-            NinjaSkeleton(height: 8, radius: NinjaRadius.pill),
+            SizedBox(height: AppSpacing.md),
+            NinjaSkeleton(height: 8, radius: AppRadius.full),
           ],
         ),
       ),
@@ -136,11 +148,11 @@ class NinjaPathSkeleton extends StatelessWidget {
   Widget _buildLeaderboard(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.ninja.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        color: context.colors.surface,
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Padding(
-        padding: const .symmetric(vertical: 6),
+        padding: const .symmetric(vertical: AppSpacing.xsm),
         child: Column(
           crossAxisAlignment: .stretch,
           children: [

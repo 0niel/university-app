@@ -19,7 +19,7 @@ class MaterialRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final typeLabel = KnowledgeMaterialTypes.labelOf(
       l10n,
@@ -27,10 +27,10 @@ class MaterialRow extends StatelessWidget {
     );
     final meta = [
       typeLabel,
-      if (material.subjectName.isNotEmpty) material.subjectName,
-      material.authorName,
+      if (material.authorName.isNotEmpty) material.authorName,
+      if (material.pages > 0) l10n.knowledgePages(material.pages),
     ].join(' · ');
-    final accent = colors.brand;
+    final accent = colors.lecture;
     final compact = MediaQuery.textScalerOf(context).scale(1) > 1.5;
     final price = switch ((material.hasFile, material.requiresRepublish)) {
       (false, true) => PricePill(
@@ -45,11 +45,14 @@ class MaterialRow extends StatelessWidget {
       _ => PricePill(shurikens: material.price),
     };
     final action = loading
-        ? SizedBox.square(
-            dimension: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.4,
-              color: accent,
+        ? const NinjaSpinner(size: 24)
+        : material.hasFile && material.isFree
+        ? Tooltip(
+            message: l10n.knowledgeDownload,
+            child: AppLineIconWidget(
+              AppLineIcon.download,
+              size: 16,
+              color: colors.muted2,
             ),
           )
         : price;
@@ -72,16 +75,17 @@ class MaterialRow extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: accent.withValues(alpha: .12),
-                  borderRadius: BorderRadius.circular(NinjaRadius.button),
+                  color: colors.tintOf(accent),
+                  borderRadius: BorderRadius.circular(AppRadius.tile),
                 ),
                 child: SizedBox.square(
                   dimension: 44,
@@ -94,44 +98,49 @@ class MaterialRow extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (material.subjects.isNotEmpty) ...[
+                      Text(
+                        material.subjects.join(' · '),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.sans(11.5, FontWeight.w600).copyWith(
+                          color: colors.muted,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                    ],
                     Text(
                       material.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: NinjaText.headline.copyWith(color: colors.ink),
+                      style: AppText.sans(
+                        14.5,
+                        FontWeight.w600,
+                      ).copyWith(color: colors.ink),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 3),
                     Text(
                       meta,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: NinjaText.subtext.copyWith(color: colors.muted),
-                    ),
-                    const SizedBox(height: 9),
-                    Text(
-                      [
-                        '${material.downloads}',
-                        if (material.pages > 0)
-                          l10n.knowledgePages(material.pages),
-                      ].join(' · '),
-                      style: NinjaText.helper.copyWith(
+                      style: AppText.sans(12, FontWeight.w400).copyWith(
                         color: colors.muted,
                       ),
                     ),
                     if (compact) ...[
-                      const SizedBox(height: 10),
+                      const SizedBox(height: AppSpacing.gap),
                       Align(alignment: Alignment.centerLeft, child: action),
                     ],
                   ],
                 ),
               ),
               if (!compact) ...[
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 action,
               ],
             ],

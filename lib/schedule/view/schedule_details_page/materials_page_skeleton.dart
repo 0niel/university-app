@@ -4,7 +4,7 @@ class _MaterialsPageSkeleton extends StatelessWidget {
   const _MaterialsPageSkeleton({super.key});
   @override
   Widget build(BuildContext context) => const Column(
-    spacing: 8,
+    spacing: AppSpacing.sm,
     children: [
       _MaterialCardSkeleton(),
       _MaterialCardSkeleton(),

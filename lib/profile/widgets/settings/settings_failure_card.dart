@@ -12,16 +12,17 @@ class SettingsFailureCard extends StatelessWidget {
     final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         16,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
       ),
-      child: NinjaErrorCard(
+      child: AppErrorState(
         title: l10n.loadingError,
         message: l10n.profileSectionLoadFailed,
-        actionLabel: l10n.tryAgain,
-        onAction: onRetry,
+        footnote: null,
+        primaryLabel: l10n.tryAgain,
+        onPrimary: onRetry,
       ),
     );
   }

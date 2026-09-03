@@ -1,13 +1,17 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
+import 'package:rtu_mirea_app/free_rooms/widgets/free_room_sheet.dart';
+import 'package:rtu_mirea_app/free_rooms/widgets/free_room_view_model.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
+import 'package:rtu_mirea_app/map/services/room_key.dart';
 import 'package:rtu_mirea_app/map/widgets/widgets.dart';
 
 class MapView extends StatefulWidget {
@@ -21,204 +25,327 @@ class MapView extends StatefulWidget {
 
 class _MapViewState extends State<MapView> {
   late SvgInteractiveMapController _mapController;
-  late bool _ownsMapController;
-  final _levelController = DraggableScrollableController();
+  final _panelController = DraggableScrollableController();
+  final _panelExtent = ValueNotifier<double>(0);
+  final _query = TextEditingController();
+  Timer? _clock;
+  String? _pendingRoom;
+  double _collapsedPanelSize = .3;
+  bool _panelFramePending = false;
 
   @override
   void initState() {
     super.initState();
-    _ownsMapController = widget.mapController == null;
     _mapController = widget.mapController ?? SvgInteractiveMapController();
+    _panelController.addListener(_panelChanged);
+    _query.text = context.read<FreeRoomsCubit>().state.query;
+    _clock = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (!mounted) return;
+      setState(() {});
+      unawaited(context.read<FreeRoomsCubit>().load());
+    });
   }
 
   @override
   void didUpdateWidget(MapView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (identical(oldWidget.mapController, widget.mapController)) return;
-    if (_ownsMapController) _mapController.dispose();
-    _ownsMapController = widget.mapController == null;
+    if (oldWidget.mapController == widget.mapController) return;
+    if (oldWidget.mapController == null) _mapController.dispose();
     _mapController = widget.mapController ?? SvgInteractiveMapController();
   }
 
-  Future<void> _openRoomFinder(MapState state) async {
-    final l10n = context.l10n;
-    final room = await showAppSheet<RoomModel>(
-      context,
-      backgroundColor: context.ninja.canvas,
-      title: l10n.mapFindRoom,
-      subtitle: l10n.mapFindRoomHint,
-      contentPadding: EdgeInsets.zero,
-      child: MapRoomFinder(rooms: state.rooms),
-    );
-    if (!mounted || room == null) return;
-    final current = context.read<MapBloc>().state;
-    if (current.status != .loaded ||
-        current.selectedFloor?.id != state.selectedFloor?.id) {
-      return;
-    }
-    RoomModel? currentRoom;
-    for (final candidate in current.rooms) {
-      if (candidate.roomId == room.roomId) {
-        currentRoom = candidate;
-        break;
-      }
-    }
-    if (currentRoom == null) return;
-    _mapController.focusRoom(currentRoom);
-    unawaited(HapticFeedback.selectionClick());
+  @override
+  void dispose() {
+    _clock?.cancel();
+    if (widget.mapController == null) _mapController.dispose();
+    _panelController.dispose();
+    _panelExtent.dispose();
+    _query.dispose();
+    super.dispose();
   }
 
-  void _toggleLevelPanel(double compactExtent, double expandedExtent) {
-    if (!_levelController.isAttached) return;
-    final target = _levelController.size > compactExtent + .04
-        ? compactExtent
-        : expandedExtent;
-    final reduceMotion =
-        MediaQuery.disableAnimationsOf(context) ||
-        MediaQuery.accessibleNavigationOf(context);
-    if (reduceMotion) {
-      _levelController.jumpTo(target);
+  void _panelChanged() {
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      if (_panelFramePending) return;
+      _panelFramePending = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _panelFramePending = false;
+        if (mounted) _panelChanged();
+      });
+      return;
+    }
+    if (_panelController.isAttached) {
+      _panelExtent.value = _panelController.size;
+    }
+  }
+
+  void _queryChanged(String value) {
+    context.read<FreeRoomsCubit>().queryChanged(value);
+    if (value.trim().isNotEmpty && _panelController.isAttached) {
+      _panelController.jumpTo(.78);
+    }
+  }
+
+  void _togglePanel() {
+    if (!_panelController.isAttached) return;
+    final target = _panelController.size > _collapsedPanelSize + .08
+        ? _collapsedPanelSize
+        : .78;
+    if (MediaQuery.disableAnimationsOf(context) ||
+        MediaQuery.accessibleNavigationOf(context)) {
+      _panelController.jumpTo(target);
       return;
     }
     unawaited(
-      _levelController.animateTo(
+      _panelController.animateTo(
         target,
-        duration: const Duration(milliseconds: 280),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
       ),
     );
   }
 
-  @override
-  void dispose() {
-    if (_ownsMapController) _mapController.dispose();
-    _levelController.dispose();
-    super.dispose();
+  void _campus(CampusModel campus) {
+    _pendingRoom = null;
+    context.read<FreeRoomsCubit>().campusChanged(campus.displayName);
+    context.read<MapBloc>().add(MapEvent.campusSelected(campus));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.ninja;
-    return Scaffold(
-      backgroundColor: colors.canvas,
-      body: BlocBuilder<MapBloc, MapState>(
-        buildWhen: (previous, current) =>
-            previous.status != current.status ||
-            previous.selectedCampus?.id != current.selectedCampus?.id ||
-            previous.selectedFloor?.id != current.selectedFloor?.id ||
-            !listEquals(
-              previous.availableCampuses,
-              current.availableCampuses,
-            ) ||
-            previous.boundingRect != current.boundingRect ||
-            previous.errorMessage != current.errorMessage,
-        builder: (context, state) => NinjaStateSwitcher(
-          alignment: Alignment.center,
-          child: _body(context, state),
+  void _floor(FloorModel floor) {
+    final state = context.read<MapBloc>().state;
+    final campus = state.selectedCampus;
+    if (campus == null) return;
+    context.read<FreeRoomsCubit>().floorChanged(floor.number);
+    context.read<MapBloc>().add(
+      MapEvent.floorSelected(campus: campus, floor: floor),
+    );
+  }
+
+  void _focusRoom(FreeRoomViewModel room) {
+    final state = context.read<MapBloc>().state;
+    final campus = state.selectedCampus;
+    final floor = campus?.floors
+        .where((f) => f.number == room.floor)
+        .firstOrNull;
+    if (campus == null || floor == null) return;
+    _pendingRoom = room.name;
+    if (state.selectedFloor?.id == floor.id) {
+      _focusPending(state);
+    } else {
+      _floor(floor);
+    }
+    if (_panelController.isAttached) {
+      _panelController.jumpTo(_collapsedPanelSize);
+    }
+  }
+
+  void _focusPending(MapState state) {
+    if (state.status != MapStatus.loaded || _pendingRoom == null) return;
+    final room = state.rooms
+        .where(
+          (room) => roomKey(room.name) == roomKey(_pendingRoom!),
+        )
+        .firstOrNull;
+    if (room == null) return;
+    _pendingRoom = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _mapController.focusRoom(room);
+    });
+  }
+
+  void _openRoom(FreeRoomViewModel room) {
+    unawaited(
+      showFreeRoomSheet(
+        context,
+        room,
+        onRoute: room.floor == null ? null : () => _focusRoom(room),
+      ),
+    );
+  }
+
+  void _openMappedRoom(RoomModel room) {
+    final map = context.read<MapBloc>().state;
+    final free = context
+        .read<FreeRoomsCubit>()
+        .state
+        .copyWith(
+          campus: map.selectedCampus?.displayName ?? '',
+          floor: null,
+          query: '',
+        )
+        .filtered(map.roomFloors)
+        .where(
+          (candidate) =>
+              roomKey(candidate.room) == roomKey(room.name) &&
+              (candidate.freeUntil == null ||
+                  candidate.freeUntil!.isAfter(DateTime.now())),
+        )
+        .firstOrNull;
+    if (free != null) {
+      _openRoom(
+        FreeRoomViewModel(
+          room: free,
+          now: DateTime.now(),
+          floor: map.selectedFloor?.number,
+          locale: context.l10n.localeName,
+        ),
+      );
+      return;
+    }
+    unawaited(_showMappedRoom(room));
+  }
+
+  Future<void> _showMappedRoom(RoomModel room) async {
+    final search = await showAppSheet<bool>(
+      context,
+      child: MapRoomSheet(room: room),
+    );
+    if (search != true || !mounted) return;
+    unawaited(
+      context.push(
+        Uri(
+          path: '/search',
+          queryParameters: {
+            'query': room.name.isEmpty ? room.roomId : room.name,
+          },
+        ).toString(),
+      ),
+    );
+  }
+
+  void _friends() {
+    unawaited(
+      showAppSheet<void>(
+        context,
+        title: context.l10n.mapFriendsToggle,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppBanner(message: context.l10n.mapFriendsOutdoorHint),
+            const SizedBox(height: 16),
+            AppButton.primary(
+              label: context.l10n.mapFriendsToggle,
+              expanded: true,
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+                unawaited(context.push('/services/friends-map'));
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _body(BuildContext context, MapState state) {
-    if (state.status == .failure) {
-      return KeyedSubtree(
-        key: const ValueKey('map-failure'),
-        child: MapFailureCanvas(message: state.errorMessage),
-      );
-    }
-
-    final campus = state.selectedCampus;
-    final floor = state.selectedFloor;
-    if (campus == null || floor == null) {
-      return const KeyedSubtree(
-        key: ValueKey('map-skeleton'),
-        child: MapSkeleton(),
-      );
-    }
-
-    final layout = MapPanelLayout.from(MediaQuery.of(context));
-    final interactive = state.status == .loaded;
-    return KeyedSubtree(
-      key: const ValueKey('map-content'),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          RepaintBoundary(
-            child: SvgInteractiveMap(
-              controller: _mapController,
-              svgAssetPath: floor.svgPath,
-              viewportPadding: EdgeInsets.fromLTRB(
-                NinjaMetrics.screenPadding,
-                layout.canvasTopInset,
-                NinjaMetrics.screenPadding,
-                layout.collapsedPixels + 16,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: MapTopBar(
-              onSearch: interactive
-                  ? () => unawaited(_openRoomFinder(state))
-                  : null,
-            ).animateSectionEntrance(),
-          ),
-          MapLevelPanel(
-            controller: _levelController,
-            layout: layout,
-            campuses: state.availableCampuses,
-            selectedCampus: campus,
-            selectedFloor: floor,
-            onToggle: _toggleLevelPanel,
-          ).animateSectionEntrance(index: 2),
-          Positioned(
-            right: NinjaMetrics.screenPadding,
-            bottom: layout.collapsedPixels + 12,
-            child: AnimatedBuilder(
-              animation: _levelController,
-              builder: (context, child) {
-                final size = _levelController.isAttached
-                    ? _levelController.size
-                    : layout.collapsedExtent;
-                final range = layout.expandedExtent - layout.collapsedExtent;
-                final progress = range <= 0
-                    ? 0.0
-                    : ((size - layout.collapsedExtent) / range).clamp(0.0, 1.0);
-                final visible = progress < .12;
-                return IgnorePointer(
-                  ignoring: !visible,
-                  child: AnimatedOpacity(
-                    opacity: visible ? 1 : 0,
-                    duration: NinjaMotion.of(context, NinjaMotion.fast),
-                    curve: NinjaMotion.enter,
-                    child: child,
-                  ),
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: context.colors.canvas,
+    body: BlocConsumer<MapBloc, MapState>(
+      listener: (_, state) => _focusPending(state),
+      builder: (context, state) {
+        if (state.status == MapStatus.failure) {
+          return MapFailureCanvas(message: state.errorMessage);
+        }
+        final floor = state.selectedFloor;
+        if (floor == null) return const MapSkeleton();
+        final interactive = state.status == MapStatus.loaded;
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final bottomInset = AppBottomBar.extentOf(context);
+            final compactContentExtent =
+                MapFreeRoomsPanel.compactContentExtentOf(
+                  context,
+                  width: constraints.maxWidth,
+                  campusName: state.selectedCampus?.displayName ?? '',
+                );
+            _collapsedPanelSize =
+                ((bottomInset + compactContentExtent) / constraints.maxHeight)
+                    .clamp(.22, .42);
+            return AnimatedBuilder(
+              animation: _panelExtent,
+              builder: (context, _) {
+                final panelSize = _panelController.isAttached
+                    ? _panelController.size
+                    : _query.text.trim().isEmpty
+                    ? _collapsedPanelSize
+                    : .78;
+                final panelHeight = constraints.maxHeight * panelSize;
+                final controlsFit =
+                    constraints.maxHeight - panelHeight >=
+                    MediaQuery.paddingOf(context).top +
+                        166 +
+                        AppControlSize.touchTarget * 3 +
+                        AppSpacing.xsm * 2 +
+                        AppSpacing.md;
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    SvgInteractiveMap(
+                      controller: _mapController,
+                      svgAssetPath: floor.svgPath,
+                      onRoomTap: _openMappedRoom,
+                      viewportPadding: EdgeInsets.fromLTRB(
+                        20,
+                        MediaQuery.paddingOf(context).top + 166,
+                        20,
+                        panelHeight + 12,
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: MapTopBar(
+                        controller: _query,
+                        campuses: state.availableCampuses,
+                        selectedCampus: state.selectedCampus,
+                        onQueryChanged: _queryChanged,
+                        onCampusSelected: _campus,
+                        onFriends: _friends,
+                      ),
+                    ),
+                    if (controlsFit)
+                      Positioned(
+                        right: 20,
+                        bottom: panelHeight + 12,
+                        child: MapCanvasControls(
+                          onZoomIn: interactive ? _mapController.zoomIn : null,
+                          onZoomOut: interactive
+                              ? _mapController.zoomOut
+                              : null,
+                          onFit: interactive ? _mapController.fit : null,
+                        ),
+                      ),
+                    MapFreeRoomsPanel(
+                      controller: _panelController,
+                      collapsedSize: _collapsedPanelSize,
+                      viewportHeight: constraints.maxHeight,
+                      bottomInset: bottomInset,
+                      compactContentExtent: compactContentExtent,
+                      mapState: state,
+                      onRoomTap: _openRoom,
+                      onFloor: _floor,
+                      onToggle: _togglePanel,
+                      onMappedRoomTap: (room) {
+                        FocusScope.of(context).unfocus();
+                        _mapController.focusRoom(room);
+                        _openMappedRoom(room);
+                      },
+                    ),
+                    if (!interactive)
+                      Positioned(
+                        top: MediaQuery.paddingOf(context).top + 160,
+                        left: 20,
+                        child: const MapLoadingPill(),
+                      ),
+                  ],
                 );
               },
-              child: MapCanvasControls(
-                onZoomIn: interactive ? _mapController.zoomIn : null,
-                onZoomOut: interactive ? _mapController.zoomOut : null,
-                onFit: interactive ? _mapController.fit : null,
-              ).animateSectionEntrance(index: 1),
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.paddingOf(context).top + 76,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: NinjaStateSwitcher(
-                child: state.status == .loading
-                    ? const MapLoadingPill(key: ValueKey('map-loading-pill'))
-                    : const SizedBox.shrink(key: ValueKey('map-idle')),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+            );
+          },
+        );
+      },
+    ),
+  );
 }

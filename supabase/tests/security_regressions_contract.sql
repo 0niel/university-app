@@ -5,11 +5,17 @@ declare
   v_definition text;
 begin
   if to_regprocedure(
-    'public.increment_quest_progress(text,integer,date)'
-  ) is not null or to_regprocedure(
     'app_api_v1.increment_quest_progress(text,integer,date)'
   ) is not null then
-    raise exception 'Client-controlled quest progress RPC still exists';
+    v_definition := pg_get_functiondef(
+      'app_api_v1.increment_quest_progress(text,integer,date)'::regprocedure
+    );
+    if position('core.refresh_quest_progress(v_uid)' in v_definition) = 0
+      or position('pg_advisory_xact_lock' in v_definition) = 0
+      or position('progress+p_amount' in replace(v_definition, ' ', '')) > 0
+      or position('then p_date' in v_definition) > 0 then
+      raise exception 'Quest compatibility RPC trusts client progress';
+    end if;
   end if;
 
   if has_table_privilege('authenticated', 'core.user_quest_progress', 'INSERT')
@@ -39,13 +45,13 @@ begin
   if not (
     select prosecdef
     from pg_proc
-    where oid = 'app_api_v1.create_public_material(text,text,text,text,integer,integer,boolean,text,text,text,bigint)'::regprocedure
+    where oid = 'app_api_v1.create_public_material_v2(text,text,text[],text,integer,integer,boolean,text,text,text,bigint)'::regprocedure
   ) then
     raise exception 'Material publishing cannot apply its server reward';
   end if;
 
   v_definition := pg_get_functiondef(
-    'core.require_lesson_material_upload(uuid,text,bigint)'::regprocedure
+    'core.require_material_upload(text,text,bigint,text)'::regprocedure
   );
   if position('storage.objects' in v_definition) = 0
     or position('auth.uid()' in v_definition) = 0
@@ -54,28 +60,28 @@ begin
   end if;
 
   v_definition := pg_get_functiondef(
-    'app_api_v1.list_public_materials_v1(text,integer)'::regprocedure
+    'app_api_v1.list_public_materials_v2(text,integer)'::regprocedure
   );
   if has_function_privilege(
       'anon',
-      'app_api_v1.list_public_materials_v1(text,integer)',
+      'app_api_v1.list_public_materials_v2(text,integer)',
       'EXECUTE'
     )
     or not has_function_privilege(
       'authenticated',
-      'app_api_v1.list_public_materials_v1(text,integer)',
+      'app_api_v1.list_public_materials_v2(text,integer)',
       'EXECUTE'
     )
     or not (
       select function_row.prosecdef
       from pg_proc function_row
       where function_row.oid =
-        'app_api_v1.list_public_materials_v1(text,integer)'::regprocedure
+        'app_api_v1.list_public_materials_v2(text,integer)'::regprocedure
     )
     or position('auth.uid()' in v_definition) = 0
     or position('core.user_academic_profiles' in v_definition) = 0
     or position('profile.organization_id = p_organization_id' in v_definition) = 0
-    or position('storage.objects' in v_definition) = 0
+    or position('core.material_file_is_valid' in v_definition) = 0
     or position('requiresRepublish' in v_definition) = 0
     or position('''filePath''' in v_definition) > 0 then
     raise exception 'Material listing tenant or privacy checks are incomplete';
@@ -84,12 +90,20 @@ begin
   v_definition := pg_get_functiondef(
     'app_api_v1.access_public_material(uuid)'::regprocedure
   );
-  if position('for update' in lower(v_definition)) = 0
+  if position('core.material_entitlements' in v_definition) = 0
+    or position('apply_shuriken_delta' in v_definition) > 0
+    or position('core.material_file_is_valid' in v_definition) = 0 then
+    raise exception 'Material access is not read-only and protected';
+  end if;
+  v_definition := pg_get_functiondef(
+    'app_api_v1.purchase_public_material(uuid,integer)'::regprocedure
+  );
+  if position('for update of material' in lower(v_definition)) = 0
+    or position('for update;' in lower(v_definition)) = 0
     or position('core.material_entitlements' in v_definition) = 0
-    or position('apply_organization_shuriken_delta' in v_definition) = 0
-    or position('storage.objects' in v_definition) = 0
-    or position('split_part(v_material.file_path' in v_definition) = 0 then
-    raise exception 'Material purchase or anonymous access is not atomic';
+    or position('core.apply_shuriken_delta' in v_definition) = 0
+    or position('p_expected_price is distinct from v_price' in v_definition) = 0 then
+    raise exception 'Material purchase is not atomic';
   end if;
 
   select policy.qual
@@ -98,13 +112,17 @@ begin
   where policy.schemaname = 'storage'
     and policy.tablename = 'objects'
     and policy.policyname =
-      'authorized users can read linked lesson material files';
+      'users read accessible lesson material files';
 
   if v_definition is null
-    or position('core.user_academic_profiles' in v_definition) = 0
+    or position('can_read_lesson_material_file' in v_definition) = 0 then
+    raise exception 'Material storage policy does not enforce access';
+  end if;
+  v_definition := pg_get_functiondef('core.can_read_lesson_material_file(text)'::regprocedure);
+  if position('core.user_academic_profiles' in v_definition) = 0
     or position('material.organization_id' in v_definition) = 0
     or position('core.material_entitlements' in v_definition) = 0
-    or position('split_part(material.file_path' in v_definition) = 0 then
+    or position('core.material_file_is_valid' in v_definition) = 0 then
     raise exception 'Material storage policy is not tenant-safe';
   end if;
 
@@ -113,12 +131,12 @@ begin
       'app_api_v1.create_lesson_material(text,text,date,integer,text,text,text,text,text,text,bigint,boolean,boolean)'::regprocedure
     ),
     pg_get_functiondef(
-      'app_api_v1.create_public_material(text,text,text,text,integer,integer,boolean,text,text,text,bigint)'::regprocedure
+      'app_api_v1.create_public_material_v2(text,text,text[],text,integer,integer,boolean,text,text,text,bigint)'::regprocedure
     )
   ]
   loop
-    if position('require_lesson_material_upload' in v_definition) = 0
-      or position('apply_shuriken_delta' in v_definition) > 0 then
+    if position('core.require_material_upload' in v_definition) = 0
+      or position('core.reward_material_upload' in v_definition) = 0 then
       raise exception 'Material RPC bypasses upload verification';
     end if;
   end loop;

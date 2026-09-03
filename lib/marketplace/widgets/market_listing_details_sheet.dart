@@ -5,6 +5,7 @@ import 'package:rtu_mirea_app/common/utils/ninja_initials.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/marketplace/utils/utils.dart';
+import 'package:rtu_mirea_app/marketplace/widgets/marketplace_layout.dart';
 
 class MarketListingDetailsSheet extends StatelessWidget {
   const MarketListingDetailsSheet({
@@ -18,7 +19,7 @@ class MarketListingDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final seller = item.sellerName.isEmpty
         ? l10n.marketSellerFallback
@@ -30,18 +31,13 @@ class MarketListingDetailsSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
-            child: SizedBox(
-              height: 150,
-              child: ColoredBox(
-                color: colors.surfaceAlt,
-                child: Center(
-                  child: Text(item.emoji, style: const TextStyle(fontSize: 52)),
-                ),
-              ),
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            child: const SizedBox(
+              height: MarketplaceLayout.detailsCoverHeight,
+              child: AppStripePlaceholder(),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
               Expanded(
@@ -51,9 +47,9 @@ class MarketListingDetailsSheet extends StatelessWidget {
                     item.price,
                     UniversityConfig.current.marketplaceCurrencyCode,
                   ),
-                  style: NinjaText.tabular(
-                    NinjaText.title.copyWith(
-                      color: item.isFree ? colors.brandInk : colors.ink,
+                  style: AppText.tabular(
+                    AppText.title.copyWith(
+                      color: item.isFree ? colors.accent : colors.ink,
                     ),
                   ),
                 ),
@@ -62,32 +58,32 @@ class MarketListingDetailsSheet extends StatelessWidget {
                 NinjaBadge(l10n.marketSold, tone: NinjaBadgeTone.ink),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             item.description.isEmpty
                 ? l10n.marketDescriptionEmpty
                 : item.description,
-            style: NinjaText.body.copyWith(
+            style: AppText.body.copyWith(
               height: 1.5,
-              color: item.description.isEmpty ? colors.muted : colors.mutedDark,
+              color: colors.muted,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           DecoratedBox(
             decoration: BoxDecoration(
               color: colors.surface,
-              borderRadius: BorderRadius.circular(NinjaRadius.card),
+              borderRadius: BorderRadius.circular(AppRadius.card),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 children: [
                   NinjaAvatar(initials: ninjaInitials(seller), size: 40),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(
                       seller,
-                      style: NinjaText.headline.copyWith(color: colors.ink),
+                      style: AppText.headline.copyWith(color: colors.ink),
                     ),
                   ),
                 ],
@@ -95,7 +91,7 @@ class MarketListingDetailsSheet extends StatelessWidget {
             ),
           ),
           if (!item.isMine) ...[
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.fieldGap),
             NinjaButton.primary(
               label: canContact
                   ? l10n.marketContactSeller

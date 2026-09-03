@@ -1,7 +1,10 @@
-import 'dart:ui';
-
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_icon_tile.dart';
+import 'package:app_ui/src/widgets/app_ninja_mark.dart';
+import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:flutter/widgets.dart';
 
 class AppPushNotificationBanner extends StatelessWidget {
   const AppPushNotificationBanner({
@@ -22,88 +25,77 @@ class AppPushNotificationBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         AppPressable(
           onTap: onTap,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1C1C1E).withValues(alpha: 0.86),
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.45),
-                      blurRadius: 32,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
+          semanticsLabel: title,
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: colors.ink,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+            ),
+            child: Row(
+              children: [
+                AppIconTile(
+                  radius: AppRadius.sm,
+                  background: colors.accent,
+                  child: AppNinjaMark(size: 20, color: colors.onAccent),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: colors.primary,
-                        borderRadius: BorderRadius.circular(AppRadius.sm),
-                      ),
-                      alignment: Alignment.center,
-                      child: const AppNinjaMark(size: 20, color: Colors.white),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                title,
-                                style: AppText.caption.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                timeLabel,
-                                style: AppText.captionSmall.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.5),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            message,
-                            style: AppText.caption.copyWith(
-                              color: Colors.white.withValues(alpha: 0.85),
+                          Flexible(
+                            child: Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppText.captionStrong
+                                  .copyWith(color: colors.canvas),
                             ),
+                          ),
+                          const SizedBox(width: AppSpacing.xsm),
+                          Text(
+                            timeLabel,
+                            style: AppText.captionSmall
+                                .copyWith(color: colors.muted),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        message,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.caption.copyWith(color: colors.muted),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
         if (showStackPeek)
-          Container(
-            height: 8,
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1C1C1E).withValues(alpha: 0.5),
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(AppRadius.md),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: colors.ink.withValues(alpha: .45),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(AppRadius.tile),
+                ),
               ),
+              child:
+                  const SizedBox(height: AppSpacing.sm, width: double.infinity),
             ),
           ),
       ],

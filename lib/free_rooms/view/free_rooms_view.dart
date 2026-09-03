@@ -4,145 +4,107 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
-import 'package:rtu_mirea_app/free_rooms/widgets/widgets.dart';
+import 'package:rtu_mirea_app/free_rooms/cubit/room_booking_cubit.dart';
+import 'package:rtu_mirea_app/free_rooms/widgets/free_room_sheet.dart';
+import 'package:rtu_mirea_app/free_rooms/widgets/free_rooms_list.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-part 'building_selector.dart';
-part 'building_selector_skeleton.dart';
-part 'free_room_row_skeleton.dart';
-part 'free_rooms_list_skeleton.dart';
-part 'free_rooms_message.dart';
-
-class FreeRoomsView extends StatelessWidget {
+class FreeRoomsView extends StatefulWidget {
   const FreeRoomsView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final l10n = context.l10n;
-    final state = context.watch<FreeRoomsCubit>().state;
-    final cubit = context.read<FreeRoomsCubit>();
-    final loading = state.status == .loading && state.rooms.isEmpty;
-    final failed = state.status == .failure && state.rooms.isEmpty;
+  State<FreeRoomsView> createState() => _FreeRoomsViewState();
+}
 
+class _FreeRoomsViewState extends State<FreeRoomsView> {
+  final _query = TextEditingController();
+  Timer? _clock;
+
+  @override
+  void initState() {
+    super.initState();
+    _clock = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (!mounted) return;
+      setState(() {});
+      unawaited(context.read<FreeRoomsCubit>().load());
+    });
+  }
+
+  @override
+  void dispose() {
+    _clock?.cancel();
+    _query.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final cubit = context.read<FreeRoomsCubit>();
+    final state = context.watch<FreeRoomsCubit>().state;
+    final saved = context.watch<RoomBookingCubit>().state.activeAt(
+      DateTime.now(),
+    );
     return Scaffold(
-      backgroundColor: colors.canvas,
-      appBar: NinjaAppBar(title: l10n.classrooms),
-      body: NinjaSkeletonGroup(
-        excludeSemantics: false,
-        pulse: loading,
-        child: Column(
-          crossAxisAlignment: .stretch,
+      backgroundColor: context.colors.canvas,
+      body: RefreshIndicator(
+        color: context.colors.accent,
+        onRefresh: cubit.load,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 40),
           children: [
+            AppInnerHeader(
+              title: l10n.freeRoomsNowTitle,
+              subtitle: l10n.freeRoomsSubtitle,
+              onBack: () => Navigator.of(context).maybePop(),
+              backSemanticsLabel: l10n.back,
+            ),
             Padding(
-              padding: const .fromLTRB(
-                NinjaMetrics.screenPadding,
-                0,
-                NinjaMetrics.screenPadding,
-                18,
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 14),
+              child: AppSearchField(
+                controller: _query,
+                hintText: l10n.mapRoomSearchHint,
+                onCanvas: true,
+                onChanged: cubit.queryChanged,
+                onClear: () => cubit.queryChanged(''),
               ),
-              child: Column(
-                crossAxisAlignment: .stretch,
+            ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
                 children: [
-                  Text(
-                    l10n.freeRoomsSubtitle,
-                    style: NinjaText.body.copyWith(color: colors.muted),
+                  AppChip.filter(
+                    label: l10n.freeRoomsAllBuildings,
+                    selected: state.campus.isEmpty,
+                    onTap: () => cubit.campusChanged(''),
                   ),
-                  if (!failed) ...[
-                    const SizedBox(height: 18),
-                    FreeRoomsSummary(
-                      count: state.rooms.length,
-                      loading: loading,
+                  for (final campus in state.campuses) ...[
+                    const SizedBox(width: 6),
+                    AppChip.filter(
+                      label: campus,
+                      selected: state.campus == campus,
+                      onTap: () => cubit.campusChanged(campus),
                     ),
                   ],
                 ],
               ),
             ),
-            if (loading)
-              const _BuildingSelectorSkeleton()
-            else if (!failed && state.buildings.isNotEmpty)
-              _BuildingSelector(
-                buildings: state.buildings,
-                value: state.building,
-                onChanged: cubit.buildingChanged,
-              ),
-            Expanded(
-              child: RefreshIndicator(
-                color: colors.brand,
-                backgroundColor: colors.surface,
-                onRefresh: cubit.load,
-                child: NinjaStateSwitcher(
-                  child: _body(
-                    context,
-                    state: state,
-                    cubit: cubit,
-                    loading: loading,
-                    failed: failed,
-                  ),
-                ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+              child: FreeRoomsList(
+                state: state,
+                bookedRoom: saved?.room,
+                bookedCampus: saved?.campus,
+                onRetry: () => unawaited(cubit.load()),
+                onRoomTap: (room) =>
+                    unawaited(showFreeRoomSheet(context, room)),
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _body(
-    BuildContext context, {
-    required FreeRoomsState state,
-    required FreeRoomsCubit cubit,
-    required bool loading,
-    required bool failed,
-  }) {
-    final l10n = context.l10n;
-    if (loading) {
-      return const _FreeRoomsListSkeleton(key: ValueKey('free-rooms-loading'));
-    }
-    if (failed) {
-      return _FreeRoomsMessage(
-        key: const ValueKey('free-rooms-failure'),
-        child: NinjaErrorState(
-          title: l10n.loadingError,
-          message: l10n.tryAgain,
-          retryLabel: l10n.retry,
-          onRetry: () => unawaited(cubit.load()),
-        ),
-      );
-    }
-    final rooms = state.filteredRooms;
-    if (rooms.isEmpty) {
-      return _FreeRoomsMessage(
-        key: const ValueKey('free-rooms-empty'),
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            NinjaEmptyState.screen(
-              icon: const AppLineIconWidget(.door),
-              title: l10n.freeRoomsEmptyTitle,
-              message: l10n.freeRoomsEmptySub,
-            ),
-            NinjaChip(
-              label: l10n.freeRoomsRefresh,
-              selected: true,
-              onTap: () => unawaited(cubit.load()),
-            ),
-          ],
-        ).animateEmptyState(),
-      );
-    }
-    return ListView.separated(
-      key: const ValueKey('free-rooms-list'),
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
-        0,
-        NinjaMetrics.screenPadding,
-        40,
-      ),
-      itemCount: rooms.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, index) => FreeRoomRow(room: rooms[index]),
     );
   }
 }

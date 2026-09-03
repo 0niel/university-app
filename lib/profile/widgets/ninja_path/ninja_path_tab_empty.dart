@@ -16,8 +16,8 @@ class NinjaPathTabEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaEmptyState(
-      icon: AppLineIconWidget(icon, color: context.ninja.muted),
+    return AppEmptyState(
+      lineIcon: icon,
       title: context.l10n.ninjaPathNoData,
       actionLabel: actionLabel,
       onAction: onAction,

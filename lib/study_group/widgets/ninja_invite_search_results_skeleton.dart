@@ -11,7 +11,7 @@ class _NinjaInviteSearchResultsSkeleton extends StatelessWidget {
           for (var index = 0; index < 3; index++)
             const Padding(
               padding: .only(bottom: 10),
-              child: NinjaSkeleton(height: 76, radius: NinjaRadius.card),
+              child: NinjaSkeleton(height: 76, radius: AppRadius.card),
             ),
         ],
       ),

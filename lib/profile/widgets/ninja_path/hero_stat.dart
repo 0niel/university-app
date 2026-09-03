@@ -8,7 +8,7 @@ class _HeroStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Column(
       crossAxisAlignment: .start,
       children: [
@@ -16,16 +16,16 @@ class _HeroStat extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: .ellipsis,
-          style: NinjaText.tabular(
-            NinjaText.title.copyWith(color: colors.onAccentSoft),
-          ),
+          style: AppText.title
+              .copyWith(color: colors.ink)
+              .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AppSpacing.xxs),
         Text(
           label,
           maxLines: 2,
           overflow: .ellipsis,
-          style: NinjaText.helper.copyWith(color: colors.onAccentSoftMuted),
+          style: AppText.caption.copyWith(color: colors.muted),
         ),
       ],
     );

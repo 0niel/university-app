@@ -12,14 +12,14 @@ class _ModerationBody extends StatelessWidget {
 
   Widget _body(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     if (state.status == .loading && state.queue.isEmpty) {
       return const _ModerationSkeleton(key: ValueKey('moderation-loading'));
     }
     if (state.status == .failure) {
-      return Padding(
+      return SingleChildScrollView(
         key: const ValueKey('moderation-failure'),
-        padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+        padding: const .symmetric(horizontal: AppSpacing.screen),
         child: NinjaErrorState(
           title: l10n.loadingError,
           message: l10n.tryAgain,
@@ -30,9 +30,9 @@ class _ModerationBody extends StatelessWidget {
       );
     }
     if (state.queue.isEmpty) {
-      return Padding(
+      return SingleChildScrollView(
         key: const ValueKey('moderation-empty'),
-        padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+        padding: const .symmetric(horizontal: AppSpacing.screen),
         child: NinjaEmptyState(
           icon: const AppLineIconWidget(AppLineIcon.check),
           title: l10n.miniAppsModerationEmpty,
@@ -47,7 +47,7 @@ class _ModerationBody extends StatelessWidget {
     final queue = state.queue;
     return RefreshIndicator(
       key: const ValueKey('moderation-ready'),
-      color: colors.brand,
+      color: colors.accent,
       backgroundColor: colors.surface,
       onRefresh: () => context.read<MiniAppsModerationCubit>().load(),
       child: ListView(

@@ -26,14 +26,9 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     final base = AppColorSchemes.getDarkColors(state.colorScheme);
     final colors = state.isAmoled
         ? base.copyWith(
-            background01: Colors.black,
-            background02: const Color(0xFF101012),
-            background03: const Color(0xFF19191C),
-            surface: const Color(0xFF101012),
-            surfaceHigh: const Color(0xFF19191C),
-            surfaceLow: const Color(0xFF242428),
-            shimmerBase: const Color(0xFF17171A),
-            shimmerHighlight: const Color(0xFF252529),
+            canvas: AppColors.amoledCanvas,
+            surface: AppColors.amoledSurface,
+            surface2: AppColors.amoledSurface2,
           )
         : base;
     return AppTheme.generateTheme(colors, Brightness.dark);
@@ -44,8 +39,10 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     try {
       final version = json['accentSelectionVersion'] as int? ?? 1;
       if (version < 2) {
-        final isAmoled = json['isAmoled'] as bool? ?? false;
-        return ThemeState(isAmoled: isAmoled);
+        final restored = ThemeState.fromJson(json);
+        return restored.colorScheme == AppColorScheme.green
+            ? restored.copyWith(colorScheme: AppColorScheme.blue)
+            : restored;
       }
       return ThemeState.fromJson(json);
     } on Object catch (error, stackTrace) {

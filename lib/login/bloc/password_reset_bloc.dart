@@ -44,7 +44,7 @@ class PasswordResetBloc extends Bloc<PasswordResetEvent, PasswordResetState> {
     PasswordResetRequested event,
     Emitter<PasswordResetState> emit,
   ) async {
-    if (!state.isValid) return;
+    if (!state.isValid || state.status.isInProgress) return;
     emit(state.copyWith(status: .inProgress));
     try {
       await userRepository.sendPasswordResetEmail(email: state.email.value);

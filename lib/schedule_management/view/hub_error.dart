@@ -10,9 +10,9 @@ class _HubError extends StatelessWidget {
     final l10n = context.l10n;
     return ListView(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         24,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         24,
       ),
       children: [

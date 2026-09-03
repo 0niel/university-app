@@ -20,12 +20,12 @@ class FriendsCircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final enabled = onTap != null;
     final activeTone = (selected ?? false) ? FriendsTone.accent : tone;
     final (background, foreground) = enabled
         ? friendsToneColors(colors, activeTone)
-        : (colors.surface, colors.disabled);
+        : (colors.surface, colors.muted2);
 
     return AppPressable(
       onTap: onTap,
@@ -34,8 +34,8 @@ class FriendsCircleButton extends StatelessWidget {
       semanticsButton: true,
       semanticsSelected: selected,
       child: Container(
-        width: NinjaMetrics.minTouchTarget,
-        height: NinjaMetrics.minTouchTarget,
+        width: AppControlSize.iconButton,
+        height: AppControlSize.iconButton,
         alignment: .center,
         decoration: BoxDecoration(color: background, shape: .circle),
         child: AppLineIconWidget(icon, size: 20, color: foreground),

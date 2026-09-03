@@ -8,21 +8,21 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Row(
       children: [
         Expanded(
           child: Text(
             label,
-            style: NinjaText.body.copyWith(color: colors.muted),
+            style: AppText.body.copyWith(color: colors.muted),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         AppRowTrailing(
           child: Text(
             value,
             textAlign: TextAlign.end,
-            style: NinjaText.body.copyWith(
+            style: AppText.body.copyWith(
               color: colors.ink,
               fontWeight: FontWeight.w700,
             ),

@@ -30,13 +30,13 @@ class TeamApplicationCard extends StatelessWidget {
         teamRoleLabel(context.l10n, application.role),
       ?application.applicantGroup,
     ].join(' · ');
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -57,12 +57,12 @@ class TeamApplicationCard extends StatelessWidget {
                       children: [
                         Text(
                           application.applicantName,
-                          style: NinjaText.body.copyWith(color: colors.ink),
+                          style: AppText.body.copyWith(color: colors.ink),
                         ),
                         if (metadata.isNotEmpty)
                           Text(
                             metadata,
-                            style: NinjaText.helper.copyWith(
+                            style: AppText.captionSmall.copyWith(
                               color: colors.muted,
                             ),
                           ),
@@ -79,7 +79,7 @@ class TeamApplicationCard extends StatelessWidget {
               if (application.message.isNotEmpty)
                 Text(
                   application.message,
-                  style: NinjaText.subtext.copyWith(
+                  style: AppText.subtext.copyWith(
                     color: colors.muted,
                     height: 1.4,
                   ),

@@ -6,20 +6,20 @@ class _MaterialInlineRowSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Padding(
     padding: .symmetric(
-      horizontal: NinjaMetrics.screenPadding,
-      vertical: 12,
+      horizontal: AppSpacing.screen,
+      vertical: AppSpacing.md,
     ),
     child: Row(
       children: [
-        NinjaSkeleton.avatar(size: 40),
-        SizedBox(width: 12),
+        AppSkeleton.avatar(size: 40),
+        SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: .start,
             children: [
-              NinjaSkeleton.bar(widthFactor: 0.7),
-              SizedBox(height: 6),
-              NinjaSkeleton.bar(height: 11, widthFactor: 0.45),
+              AppSkeleton.bar(widthFactor: 0.7),
+              SizedBox(height: AppSpacing.xsm),
+              AppSkeleton.bar(height: 11, widthFactor: 0.45),
             ],
           ),
         ),

@@ -8,70 +8,71 @@ class _LessonProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final l10n = context.l10n;
     final runtime = _lessonRuntime(lesson, selectedDate);
+    if (!runtime.live && !runtime.past) return const SizedBox.shrink();
     final label = runtime.live
-        ? l10n.lessonDetailsStatusLive
-        : (runtime.past
-              ? l10n.lessonDetailsStatusPast
-              : l10n.lessonDetailsStatusSoon);
+        ? context.l10n.lessonDetailsStatusLive
+        : context.l10n.lessonDetailsStatusPast;
     final progress = runtime.progress;
-
     return Padding(
-      padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
-        10,
-        NinjaMetrics.screenPadding,
-        0,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screen,
+        AppSpacing.sm,
+        AppSpacing.screen,
+        AppSpacing.zero,
       ),
-      child: NinjaScheduleSurface(
-        child: Column(
-          crossAxisAlignment: .start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    label,
-                    style: NinjaText.body.copyWith(
-                      color: runtime.live ? colors.brandInk : colors.ink,
-                      fontWeight: FontWeight.w700,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        child: ColoredBox(
+          color: context.colors.tint,
+          child: Stack(
+            alignment: Alignment.bottomLeft,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xxs,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        label,
+                        style: AppText.sans(
+                          12,
+                          FontWeight.w700,
+                        ).copyWith(color: context.colors.accent),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      '${(progress * 100).round()}%',
+                      style: AppText.sans(
+                        11,
+                        FontWeight.w600,
+                        tabular: true,
+                      ).copyWith(color: context.colors.accent),
+                    ),
+                  ],
                 ),
-                Text(
-                  '${(progress * 100).round()}%',
-                  style: NinjaText.tabular(
-                    NinjaText.body.copyWith(color: colors.muted),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(NinjaRadius.pill),
-              child: SizedBox(
-                height: 8,
-                child: TweenAnimationBuilder<double>(
+              ),
+              if (runtime.live)
+                TweenAnimationBuilder<double>(
                   tween: Tween(end: progress.clamp(0.0, 1.0)),
                   duration: NinjaMotion.of(context, NinjaMotion.slow),
                   curve: NinjaMotion.enter,
-                  builder: (context, value, _) => Stack(
-                    fit: .expand,
-                    children: [
-                      ColoredBox(color: colors.surfaceAlt),
-                      FractionallySizedBox(
-                        alignment: .centerLeft,
-                        widthFactor: value,
-                        child: ColoredBox(color: colors.brand),
-                      ),
-                    ],
+                  builder: (context, value, _) => FractionallySizedBox(
+                    widthFactor: value,
+                    alignment: Alignment.centerLeft,
+                    child: ColoredBox(
+                      color: context.colors.accent,
+                      child: const SizedBox(height: AppSpacing.xxs),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

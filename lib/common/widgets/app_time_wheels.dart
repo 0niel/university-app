@@ -36,7 +36,7 @@ class _AppTimeWheelsState extends State<AppTimeWheels> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return SizedBox(
       height: _height,
       child: Stack(
@@ -47,7 +47,7 @@ class _AppTimeWheelsState extends State<AppTimeWheels> {
             margin: const .symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: colors.surface,
-              borderRadius: .circular(NinjaRadius.card),
+              borderRadius: .circular(AppRadius.card),
             ),
           ),
           Row(
@@ -64,8 +64,8 @@ class _AppTimeWheelsState extends State<AppTimeWheels> {
               ),
               Text(
                 ':',
-                style: NinjaText.tabular(
-                  NinjaText.title.copyWith(
+                style: AppText.tabular(
+                  AppText.title.copyWith(
                     color: colors.muted,
                     fontWeight: .w700,
                   ),
@@ -93,7 +93,7 @@ class _AppTimeWheelsState extends State<AppTimeWheels> {
     required int selected,
     required ValueChanged<int> onChanged,
   }) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return SizedBox(
       width: 56,
       child: ListWheelScrollView.useDelegate(
@@ -111,8 +111,8 @@ class _AppTimeWheelsState extends State<AppTimeWheels> {
             return Center(
               child: Text(
                 _two(index),
-                style: NinjaText.tabular(
-                  NinjaText.title.copyWith(
+                style: AppText.tabular(
+                  AppText.title.copyWith(
                     fontSize: isActive ? 22 : 20,
                     color: isActive ? colors.ink : colors.muted,
                     fontWeight: isActive ? .w700 : .w500,

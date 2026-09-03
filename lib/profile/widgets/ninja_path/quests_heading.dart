@@ -8,7 +8,7 @@ class _QuestsHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final xpLeft = quests
         .where((quest) => !quest.isCompleted)
         .fold(0, (sum, quest) => sum + quest.xpReward);
@@ -19,15 +19,15 @@ class _QuestsHeading extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: .ellipsis,
-            style: NinjaText.title.copyWith(color: colors.ink),
+            style: AppText.title.copyWith(color: colors.ink),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: AppSpacing.gap),
         Text(
           '+$xpLeft XP',
-          style: NinjaText.tabular(
-            NinjaText.microLabel.copyWith(color: colors.brandInk),
-          ),
+          style: AppText.captionSmall
+              .copyWith(color: colors.accent)
+              .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
         ),
       ],
     );

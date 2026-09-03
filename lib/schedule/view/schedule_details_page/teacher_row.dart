@@ -1,81 +1,83 @@
 part of '../schedule_details_page.dart';
 
 class _TeacherRow extends StatelessWidget {
-  const _TeacherRow({
-    required this.teacher,
-    this.profile,
-  });
-
+  const _TeacherRow({required this.teacher, this.profile});
   final Teacher teacher;
   final TeacherProfile? profile;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final l10n = context.l10n;
-    final name = teacher.name;
-    final post = teacher.post ?? l10n.lessonDetailsTeacherFallback;
     final rating = profile?.overall;
-    final trailing = rating != null
-        ? '★ ${NumberFormat('0.0', l10n.localeName).format(rating)}'
-        : l10n.lessonDetailsTeacherProfile;
-
-    return NinjaScheduleSurface(
-      onTap: () {
-        unawaited(
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => TeacherProfilePage(teacherName: name),
-            ),
-          ),
-        );
-      },
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    final formattedRating = rating == null
+        ? null
+        : NumberFormat('0.0', context.l10n.localeName).format(rating);
+    return AppCard(
+      radius: AppRadius.lg,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sectionGap,
+      ),
+      onTap: () => showTeacherProfileSheet(context, teacher: teacher),
       child: Row(
         children: [
-          NinjaAvatar(initials: _initialsOf(name)),
-          const SizedBox(width: 14),
+          if (teacher.photoUrl?.isNotEmpty ?? false)
+            AppAvatar(name: teacher.name, imageUrl: teacher.photoUrl, size: 40)
+          else
+            Container(
+              width: AppSpacing.xxlg,
+              height: AppSpacing.xxlg,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: context.colors.surface2,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                AppAvatar.initialsOf(teacher.name),
+                style: AppText.sans(
+                  13,
+                  FontWeight.w800,
+                ).copyWith(color: context.colors.muted),
+              ),
+            ),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
-              crossAxisAlignment: .start,
-              mainAxisSize: .min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
-                  maxLines: 1,
-                  overflow: .ellipsis,
-                  style: NinjaText.body.copyWith(color: colors.ink),
+                  context.l10n.lessonDetailsTeacherFallback,
+                  style: AppText.captionSmall.copyWith(
+                    color: context.colors.muted,
+                  ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  post,
-                  maxLines: 1,
-                  overflow: .ellipsis,
-                  style: NinjaText.subtext.copyWith(color: colors.muted),
+                  teacher.name,
+                  style: AppText.headlineStrong.copyWith(
+                    color: context.colors.ink,
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          Text(
-            trailing,
-            style: NinjaText.subtext.copyWith(color: colors.muted),
-          ),
-          const SizedBox(width: 6),
-          NinjaGlyphIcon(
-            NinjaGlyph.chevronRight,
-            size: 14,
-            color: colors.chevron,
-            strokeWidth: 2.5,
+          if (rating != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            AppLineIconWidget(
+              AppLineIcon.star,
+              size: 14,
+              color: context.colors.accent,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Text(formattedRating!, style: AppText.labelStrong),
+          ],
+          const SizedBox(width: AppSpacing.sm),
+          AppLineIconWidget(
+            AppLineIcon.chevronR,
+            size: 16,
+            color: context.colors.muted2,
           ),
         ],
       ),
     );
   }
-}
-
-String _initialsOf(String name) {
-  final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
-  final letters = parts.take(2).map((part) => part[0].toUpperCase());
-  return letters.isEmpty ? '?' : letters.join();
 }

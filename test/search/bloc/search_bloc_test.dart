@@ -171,6 +171,39 @@ void main() {
     });
 
     group('SearchModeChanged', () {
+      test('searches an unchanged query again after changing scope', () async {
+        final bloc = buildBloc()
+          ..add(const SearchModeChanged(searchMode: SearchMode.schedule));
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const SearchQueryChanged(searchQuery: 'A'));
+        await Future<void>.delayed(const Duration(milliseconds: 700));
+        expect(bloc.state.status, SearchStatus.populated);
+        bloc.add(const SearchModeChanged(searchMode: SearchMode.classrooms));
+        await Future<void>.delayed(const Duration(milliseconds: 700));
+        expect(bloc.state.status, SearchStatus.populated);
+        verify(() => scheduleRepository.searchClassrooms(query: 'A')).called(1);
+        await bloc.close();
+      });
+
+      test('retries the same query after an asynchronous failure', () async {
+        var attempts = 0;
+        when(() => scheduleRepository.searchGroups(query: 'A')).thenAnswer((
+          _,
+        ) async {
+          if (attempts++ == 0) throw Exception('offline');
+          return groupsResponse;
+        });
+        final bloc = buildBloc()
+          ..add(const SearchQueryChanged(searchQuery: 'A'));
+        await Future<void>.delayed(const Duration(milliseconds: 700));
+        expect(bloc.state.status, SearchStatus.failure);
+        bloc.add(const SearchQueryChanged(searchQuery: 'A'));
+        await Future<void>.delayed(const Duration(milliseconds: 700));
+        expect(bloc.state.status, SearchStatus.populated);
+        expect(attempts, 2);
+        await bloc.close();
+      });
+
       test('discards an in-flight response from the previous scope', () async {
         final groups = Completer<SearchGroupsResponse>();
         final teachers = Completer<SearchTeachersResponse>();

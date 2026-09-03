@@ -57,33 +57,32 @@ class _LessonEditorRepeatSheetState extends State<LessonEditorRepeatSheet> {
       mainAxisSize: .min,
       crossAxisAlignment: .stretch,
       children: [
-        NinjaSegmented<LessonRepeat>(
+        AppSegmented<LessonRepeat>(
           value: _repeat,
-          expanded: true,
           segments: [
-            NinjaSegment(
+            AppSegment(
               value: LessonRepeat.everyWeek,
               label: l10n.lessonEditorRepeatEveryShort,
             ),
-            NinjaSegment(
+            AppSegment(
               value: LessonRepeat.evenWeek,
               label: l10n.lessonEditorRepeatEvenShort,
             ),
-            NinjaSegment(
+            AppSegment(
               value: LessonRepeat.oddWeek,
               label: l10n.lessonEditorRepeatOddShort,
             ),
           ],
           onChanged: _select,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         Text(
           l10n.lessonEditorDatesCount(_dates.length),
           textAlign: .center,
-          style: NinjaText.subtext.copyWith(color: context.ninja.muted),
+          style: AppText.subtext.copyWith(color: context.colors.muted),
         ),
-        const SizedBox(height: 16),
-        NinjaButton.secondary(
+        const SizedBox(height: AppSpacing.lg),
+        AppButton.secondary(
           label: l10n.lessonEditorRepeatManual,
           expanded: true,
           onPressed: () => Navigator.of(context, rootNavigator: true).pop(
@@ -94,8 +93,8 @@ class _LessonEditorRepeatSheetState extends State<LessonEditorRepeatSheet> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
-        NinjaButton.primary(
+        const SizedBox(height: AppSpacing.gap),
+        AppButton.primary(
           label: l10n.done,
           expanded: true,
           onPressed: () => Navigator.of(context, rootNavigator: true).pop(

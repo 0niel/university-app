@@ -11,9 +11,9 @@ class LostFoundItemHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    final statusColor = item.status == .found ? colors.green : colors.amberInk;
+    final statusColor = item.status == .found ? colors.lecture : colors.warn;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -23,8 +23,8 @@ class LostFoundItemHeader extends StatelessWidget {
             vertical: 7,
           ),
           decoration: BoxDecoration(
-            color: colors.surfaceAlt,
-            borderRadius: BorderRadius.circular(NinjaRadius.pill),
+            color: colors.surface2,
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -42,7 +42,7 @@ class LostFoundItemHeader extends StatelessWidget {
                 item.status == .found
                     ? l10n.lostFoundTagFound
                     : l10n.lostFoundTagSearching,
-                style: NinjaText.microLabel.copyWith(color: colors.ink),
+                style: AppText.captionSmall.copyWith(color: colors.ink),
               ),
             ],
           ),
@@ -50,13 +50,13 @@ class LostFoundItemHeader extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         Text(
           item.itemName,
-          style: NinjaText.title.copyWith(color: colors.ink),
+          style: AppText.title.copyWith(color: colors.ink),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           '${item.actionLine(l10n, item.authorDisplayName(l10n))} · '
           '${relativeTime(l10n, item.createdAt)}',
-          style: NinjaText.subtext.copyWith(color: colors.mutedDark),
+          style: AppText.subtext.copyWith(color: colors.muted),
         ),
       ],
     );

@@ -15,12 +15,12 @@ class _StatsContent extends StatelessWidget {
     final stats = state.stats;
     final l10n = context.l10n;
     if (state.status == .failure && stats.isEmpty) {
-      return Padding(
+      return SingleChildScrollView(
         key: const ValueKey('stats-failure'),
         padding: const .fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           24,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           0,
         ),
         child: NinjaErrorState(
@@ -35,12 +35,12 @@ class _StatsContent extends StatelessWidget {
       return const _StatsSkeleton(key: ValueKey('stats-loading'));
     }
     if (stats.isEmpty) {
-      return Padding(
+      return SingleChildScrollView(
         key: const ValueKey('stats-empty'),
         padding: const .fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           24,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           0,
         ),
         child: NinjaEmptyState(

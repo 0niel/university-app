@@ -31,7 +31,7 @@ class PeopleCubit extends Cubit<PeopleState> {
   int _revision = 0;
 
   Future<bool> load() async {
-    if (state.isMutating) return false;
+    if (isClosed || state.isMutating) return false;
     final revision = ++_revision;
     emit(state.copyWith(status: .loading, failedSources: const {}));
     final results = await (

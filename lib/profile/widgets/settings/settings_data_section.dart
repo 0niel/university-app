@@ -22,7 +22,7 @@ class SettingsDataSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final language = context.watch<LocaleCubit>().state;
     final syncPolicy = context.watch<SyncPreferencesCubit>().state;
@@ -61,7 +61,7 @@ class SettingsDataSection extends StatelessWidget {
           title: l10n.settingsExportSchedule,
           lineIcon: AppLineIcon.share,
           value: l10n.settingsExportScheduleValue,
-          valueColor: colors.brand,
+          valueColor: colors.accent,
           onTap: () => showScheduleExportSheet(context),
         ),
       ],

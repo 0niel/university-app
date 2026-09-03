@@ -41,29 +41,32 @@ class _HubBody extends StatelessWidget {
     ];
 
     return RefreshIndicator(
-      color: context.ninja.ink,
-      backgroundColor: context.ninja.canvas,
+      color: context.colors.ink,
+      backgroundColor: context.colors.canvas,
       onRefresh: () async => _refresh(context),
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(bottom: 96),
+        padding: EdgeInsets.only(
+          top: state.selectedSchedule == null ? AppSpacing.gap : AppSpacing.xl,
+          bottom: 96,
+        ),
         children: [
           if (state.selectedSchedule case final selected?) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 0,
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 10,
               ),
               child: Text(
                 l10n.scheduleHubPrimarySection,
-                style: NinjaText.headline.copyWith(color: context.ninja.ink),
+                style: AppText.headline.copyWith(color: context.colors.ink),
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: NinjaMetrics.screenPadding,
+                horizontal: AppSpacing.screen,
               ),
               child: PrimaryScheduleCard(
                 schedule: selected,

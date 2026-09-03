@@ -8,13 +8,13 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final foreground = colors.onAccentSoft;
+    final colors = context.colors;
+    final foreground = colors.ink;
     final Widget content = target == .group
         ? Text(
             scheduleGroupBadge(name),
-            style: NinjaText.tabular(
-              NinjaText.headline.copyWith(color: foreground),
+            style: AppText.tabular(
+              AppText.headline.copyWith(color: foreground),
             ),
           )
         : AppLineIconWidget(
@@ -24,8 +24,8 @@ class _Badge extends StatelessWidget {
           );
 
     return Container(
-      width: NinjaMetrics.minTouchTarget,
-      height: NinjaMetrics.minTouchTarget,
+      width: AppControlSize.touchTarget,
+      height: AppControlSize.touchTarget,
       decoration: BoxDecoration(
         color: foreground.withValues(alpha: .12),
         shape: BoxShape.circle,

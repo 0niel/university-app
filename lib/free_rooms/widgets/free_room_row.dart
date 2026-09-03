@@ -1,85 +1,135 @@
 import 'package:app_ui/app_ui.dart';
-import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/free_rooms/widgets/free_room_view_model.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-part 'free_until_pill.dart';
-
 class FreeRoomRow extends StatelessWidget {
-  const FreeRoomRow({required this.room, super.key});
+  const FreeRoomRow({required this.room, this.onTap, super.key});
 
-  final FreeRoom room;
+  final FreeRoomViewModel room;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    final campus = room.campus ?? '';
-    final building = room.building;
-    final until = room.freeUntil;
-    final freeLabel = until == null
-        ? l10n.freeRoomsUntilEndOfDay
-        : l10n.freeRoomsFreeUntil(
-            DateFormat.Hm(
-              Localizations.localeOf(context).languageCode,
-            ).format(until.toLocal()),
-          );
-    final meta = [
-      if (building.isNotEmpty) building,
-      if (campus.isNotEmpty) l10n.freeRoomsCampus(campus),
-    ].join(' · ');
+    final tone = room.urgent ? colors.exam : colors.lecture;
+    final untilLabel = room.untilLabel(l10n);
 
-    return Semantics(
-      container: true,
-      label: '${room.room}, $meta, $freeLabel',
-      child: Container(
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
-        ),
-        padding: const .all(16),
-        child: Row(
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.brandTint,
-                borderRadius: .circular(NinjaRadius.control),
-              ),
-              child: SizedBox.square(
-                dimension: NinjaMetrics.minTouchTarget,
-                child: Center(
-                  child: AppLineIconWidget(.door, color: colors.brand),
+    return AppPressable(
+      onTap: onTap,
+      pressedScale: 1,
+      semanticsLabel: '${room.name}, ${room.subtitle(l10n)}, $untilLabel',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        child: ExcludeSemantics(
+          child: Row(
+            children: [
+              AppIconTile(
+                size: 44,
+                radius: AppRadius.tile,
+                background: colors.tintOf(tone),
+                child: Text(
+                  room.tileLabel,
+                  style: AppText.sans(
+                    13,
+                    FontWeight.w800,
+                  ).copyWith(color: tone),
                 ),
               ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: .start,
-                mainAxisSize: .min,
-                children: [
-                  Text(
-                    room.room,
-                    maxLines: 1,
-                    overflow: .ellipsis,
-                    style: NinjaText.headline.copyWith(color: colors.ink),
-                  ),
-                  if (meta.isNotEmpty) ...[
-                    const SizedBox(height: 3),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        Text(
+                          room.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.sans(
+                            15.5,
+                            FontWeight.w700,
+                          ).copyWith(color: colors.ink),
+                        ),
+                        if (room.booked) ...[
+                          _BookedBadge(label: l10n.freeRoomsYourSeat),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
                     Text(
-                      meta,
+                      room.subtitle(l10n),
                       maxLines: 1,
-                      overflow: .ellipsis,
-                      style: NinjaText.subtext.copyWith(color: colors.muted),
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.sans(
+                        12.5,
+                        FontWeight.w500,
+                      ).copyWith(color: colors.muted),
                     ),
                   ],
-                ],
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            AppRowTrailing(child: _FreeUntilPill(label: freeLabel)),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      untilLabel,
+                      style: AppText.sans(
+                        12,
+                        FontWeight.w700,
+                        tabular: true,
+                      ).copyWith(color: tone),
+                    ),
+                    if (room.leftLabel(l10n) case final left?) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        left,
+                        style: AppText.sans(
+                          11,
+                          FontWeight.w500,
+                        ).copyWith(color: colors.muted),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BookedBadge extends StatelessWidget {
+  const _BookedBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.lectureTint,
+        borderRadius: BorderRadius.circular(AppRadius.full),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        child: Text(
+          label,
+          style: AppText.sans(
+            10.5,
+            FontWeight.w800,
+          ).copyWith(color: colors.lecture),
         ),
       ),
     );

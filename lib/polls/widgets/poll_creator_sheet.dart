@@ -54,6 +54,7 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
   _Expiry _expiry = .none;
   int _correctIndex = 0;
   bool _saving = false;
+  bool _failed = false;
 
   @override
   void dispose() {
@@ -96,7 +97,11 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
     if (question.isEmpty || options.length < _minOptions) return;
     if (_type == .quiz && correctIndex == null) return;
 
-    setState(() => _saving = true);
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _saving = true;
+      _failed = false;
+    });
     final expiresAt = _expiry.duration == null
         ? null
         : DateTime.now().add(_expiry.duration ?? .zero);
@@ -113,13 +118,16 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
     if (created) {
       Navigator.of(context).pop(true);
     } else {
-      setState(() => _saving = false);
+      setState(() {
+        _saving = false;
+        _failed = true;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Column(
       mainAxisSize: .min,
@@ -127,7 +135,6 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
       children: [
         NinjaSegmented<PollType>(
           value: _type,
-          expanded: true,
           onChanged: (value) => setState(() => _type = value),
           segments: [
             NinjaSegment(value: PollType.single, label: l10n.pollsTypeSingle),
@@ -135,7 +142,7 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
             NinjaSegment(value: PollType.quiz, label: l10n.pollsTypeQuiz),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         NinjaInput.multiline(
           controller: _question,
           autofocus: true,
@@ -144,12 +151,12 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
           maxLines: 3,
           placeholder: l10n.pollsQuestionHint,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           l10n.pollsOptionsLabel,
-          style: NinjaText.headline.copyWith(color: colors.ink),
+          style: AppText.headline.copyWith(color: colors.ink),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         for (final (index, controller) in _options.indexed) ...[
           _OptionField(
             key: ValueKey(controller),
@@ -161,37 +168,37 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
             canRemove: _options.length > _minOptions,
             onRemove: () => _removeOption(index),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
         ],
         if (_options.length < _maxOptions)
           _AddOptionButton(label: l10n.pollsAddOption, onTap: _addOption),
-        const SizedBox(height: 18),
+        const SizedBox(height: AppSpacing.fieldGap),
         Text(
           l10n.pollsSettings,
-          style: NinjaText.headline.copyWith(color: colors.ink),
+          style: AppText.headline.copyWith(color: colors.ink),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         _ToggleRow(
           title: l10n.pollsAnonymous,
           subtitle: l10n.pollsAnonymousSub,
           value: _anonymous,
           onChanged: (value) => setState(() => _anonymous = value),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         _ToggleRow(
           title: l10n.pollsShowResults,
           value: _showResults,
           onChanged: (value) => setState(() => _showResults = value),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         Text(
           l10n.pollsExpiry,
-          style: NinjaText.body.copyWith(
+          style: AppText.body.copyWith(
             color: colors.muted,
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -204,11 +211,22 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
               ),
           ],
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: AppSpacing.fieldGap),
+        if (_failed) ...[
+          Semantics(
+            liveRegion: true,
+            child: AppBanner(
+              message: l10n.pollsCreateError,
+              tone: AppBannerTone.danger,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
         NinjaButton.primary(
           label: _saving ? l10n.pollsCreating : l10n.pollsCreate,
           expanded: true,
           size: NinjaButtonSize.large,
+          loading: _saving,
           onPressed: _saving ? null : () => unawaited(_save()),
         ),
       ],

@@ -13,9 +13,9 @@ class CollabNotesFailure extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       children: [
-        const SizedBox(height: 64),
+        const SizedBox(height: AppSpacing.xxxlg),
         NinjaErrorState(
           title: context.l10n.collabNotesLoadError,
           message: context.l10n.collabNotesLoadErrorSubtitle,

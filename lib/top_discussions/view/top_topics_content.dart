@@ -25,7 +25,7 @@ class TopTopicsContent extends StatelessWidget {
       return Padding(
         key: const ValueKey('topics-failure'),
         padding: const EdgeInsets.symmetric(
-          horizontal: NinjaMetrics.screenPadding,
+          horizontal: AppSpacing.screen,
         ),
         child: NinjaErrorCard(
           title: l10n.loadingError,
@@ -46,8 +46,8 @@ class TopTopicsContent extends StatelessWidget {
     final loading = state.status == .loading;
     final topics = loading
         ? const <DiscourseTopic>[]
-        : (state.topTopics?.topics.take(15).toList() ??
-              const <DiscourseTopic>[]);
+        : (state.topTopics?.topics ?? const <DiscourseTopic>[]);
+    final hasMore = !loading && (state.topTopics?.hasMore ?? false);
 
     return SizedBox(
       key: ValueKey(loading ? 'topics-loading' : 'topics-list'),
@@ -56,12 +56,29 @@ class TopTopicsContent extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(
-          horizontal: NinjaMetrics.screenPadding,
+          horizontal: AppSpacing.screen,
         ),
-        itemCount: loading ? 3 : topics.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemCount: loading ? 3 : topics.length + (hasMore ? 1 : 0),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.gap),
         itemBuilder: (context, index) {
           if (loading) return const TopicNewsCardSkeleton();
+          if (index == topics.length) {
+            return SizedBox(
+              width: 160,
+              child: Center(
+                child: state.isLoadingMore
+                    ? const NinjaSpinner()
+                    : AppButton.secondary(
+                        label: state.loadMoreFailed
+                            ? context.l10n.retry
+                            : context.l10n.more,
+                        onPressed: () => context.read<DiscourseBloc>().add(
+                          const DiscourseTopTopicsNextPageRequested(),
+                        ),
+                      ),
+              ),
+            );
+          }
           final topic = topics.elementAtOrNull(index);
           if (topic == null) return const SizedBox.shrink();
           final author = state.topTopics?.users.firstWhereOrNull(

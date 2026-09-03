@@ -70,7 +70,7 @@ class _FriendsMapViewState extends State<FriendsMapView>
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final state = context.watch<FriendsMapCubit>().state;
     final myLatitude = state.myLatitude;
     final myLongitude = state.myLongitude;
@@ -128,9 +128,9 @@ class _FriendsMapViewState extends State<FriendsMapView>
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
-                  NinjaMetrics.screenPadding,
+                  AppSpacing.screen,
                   64,
-                  NinjaMetrics.screenPadding,
+                  AppSpacing.screen,
                   0,
                 ),
                 child: NinjaBanner(

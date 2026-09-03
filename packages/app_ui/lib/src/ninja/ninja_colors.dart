@@ -46,42 +46,34 @@ class NinjaColors extends ThemeExtension<NinjaColors> {
     AppColors colors, {
     required bool isDark,
   }) {
-    final mutedDark = Color.alphaBlend(
-      colors.active.withValues(alpha: isDark ? 0.72 : 0.68),
-      colors.background01,
-    );
-    final disabled = Color.alphaBlend(
-      colors.deactiveDarker,
-      colors.background01,
-    );
     return NinjaColors(
-      canvas: colors.background01,
-      ink: colors.active,
-      onInk: colors.background01,
-      pressedInk: colors.active.withValues(alpha: 0.82),
-      indigo: colors.primary,
-      scarlet: colors.error,
-      lime: colors.primary,
-      green: colors.success,
-      orange: colors.colorful03,
-      amber: colors.warning,
-      amberInk: isDark ? colors.warning : const Color(0xFF704800),
+      canvas: colors.canvas,
+      ink: colors.ink,
+      onInk: colors.canvas,
+      pressedInk: colors.ink.withValues(alpha: 0.82),
+      indigo: colors.accent,
+      scarlet: colors.exam,
+      lime: colors.accent,
+      green: colors.lecture,
+      orange: colors.warn,
+      amber: colors.warn,
+      amberInk: colors.warn,
       surface: colors.surface,
-      surfaceAlt: colors.surfaceHigh,
-      line: colors.divider,
-      lineSoft: colors.divider.withValues(alpha: 0.55),
-      muted: colors.deactive,
-      mutedDark: mutedDark,
-      disabled: disabled,
-      disabledLine: colors.divider,
-      chevron: disabled,
-      dangerTint: colors.error.withValues(alpha: 0.1),
+      surfaceAlt: colors.surface2,
+      line: colors.line,
+      lineSoft: colors.line.withValues(alpha: colors.line.a * 0.55),
+      muted: colors.muted,
+      mutedDark: colors.muted,
+      disabled: colors.muted2,
+      disabledLine: colors.line,
+      chevron: colors.muted2,
+      dangerTint: colors.examTint,
       dangerBorder: Colors.transparent,
-      warnTint: colors.warning.withValues(alpha: 0.12),
+      warnTint: colors.warnTint,
       warnBorder: Colors.transparent,
-      successTint: colors.success.withValues(alpha: 0.12),
+      successTint: colors.lectureTint,
       successBorder: Colors.transparent,
-      infoTint: colors.primary.withValues(alpha: 0.12),
+      infoTint: colors.tint,
       infoBorder: Colors.transparent,
       isDark: isDark,
     );
@@ -119,28 +111,16 @@ class NinjaColors extends ThemeExtension<NinjaColors> {
 
   Color get brand => indigo;
 
-  Color get brandInk {
-    final tintSurface = Color.alphaBlend(brandTint, surface);
-    final selectedSurface = Color.alphaBlend(
-      brand.withValues(alpha: isDark ? 0.2 : 0.1),
-      surface,
-    );
-    for (var step = 0; step <= 20; step++) {
-      final candidate = Color.lerp(brand, ink, step / 20) ?? ink;
-      if (_contrastRatio(candidate, tintSurface) >= 4.5 &&
-          _contrastRatio(candidate, selectedSurface) >= 4.5) {
-        return candidate;
-      }
-    }
-    return ink;
-  }
+  Color get brandInk => brand;
 
   Color get onBrand => contrastForeground(brand);
   Color get brandTint => infoTint;
-  Color get accentSoft =>
-      Color.lerp(brand, Colors.white, isDark ? 0.6 : 0.78) ?? brand;
-  Color get onAccentSoft => const Color(0xFF0F1014);
-  Color get onAccentSoftMuted => const Color(0xB30F1014);
+  Color get accentSoft => Color.alphaBlend(
+        brand.withValues(alpha: isDark ? 0.34 : 0.28),
+        surface,
+      );
+  Color get onAccentSoft => ink;
+  Color get onAccentSoftMuted => muted;
   Color get onScarlet => isDark ? onInk : ink;
   Color get ninjaOnScarlet => onScarlet;
 
@@ -315,5 +295,12 @@ double _contrastRatio(Color foreground, Color background) {
 }
 
 extension NinjaColorsX on BuildContext {
-  NinjaColors get ninja => Theme.of(this).extension() ?? NinjaColors.light();
+  NinjaColors get ninja {
+    final theme = Theme.of(this);
+    return theme.extension<NinjaColors>() ??
+        NinjaColors.fromAppColors(
+          theme.colors,
+          isDark: theme.brightness == Brightness.dark,
+        );
+  }
 }

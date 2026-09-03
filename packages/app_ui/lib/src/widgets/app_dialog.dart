@@ -1,40 +1,33 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_dialog.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:flutter/widgets.dart';
 
-/// Shows a flat app-styled dialog: a `colors.surface` card with [AppRadius.xl]
-/// corners over a dimmed barrier. [builder] provides the card's content.
+typedef AppDialog = NinjaDialog;
+
 Future<T?> showAppDialog<T>(
   BuildContext context, {
   required WidgetBuilder builder,
   bool barrierDismissible = true,
-  double maxWidth = 320,
+  double maxWidth = 340,
 }) {
-  return showDialog(
-    context: context,
+  return showNinjaDialog<T>(
+    context,
     barrierDismissible: barrierDismissible,
-    barrierColor: Colors.black.withValues(alpha: .5),
+    maxWidth: maxWidth,
     builder: (dialogContext) {
-      final colors = dialogContext.colors;
-      return Dialog(
-        backgroundColor: colors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
+      final radius = BorderRadius.circular(AppRadius.dialog);
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: dialogContext.colors.canvas,
+          borderRadius: radius,
         ),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: builder(dialogContext),
-        ),
+        child: ClipRRect(borderRadius: radius, child: builder(dialogContext)),
       );
     },
   );
 }
 
-/// Design: flat confirm dialog · replaces raw [AlertDialog] + [TextButton]
-/// action pairs so confirmations look identical app-wide.
-///
-/// Resolves to `true` when [confirmLabel] is tapped, `false` otherwise
-/// (cancel tap or barrier dismiss). Set [destructive] for a danger-styled
-/// confirm action.
 Future<bool> showAppConfirmDialog(
   BuildContext context, {
   required String title,
@@ -44,73 +37,18 @@ Future<bool> showAppConfirmDialog(
   bool destructive = false,
   Widget? icon,
 }) async {
-  final confirmed = await showAppDialog<bool>(
+  final confirmed = await showNinjaDialog<bool>(
     context,
-    builder: (dialogContext) {
-      final colors = dialogContext.colors;
-      final messageText = message;
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (icon != null) ...[
-              Center(child: icon),
-              const SizedBox(height: 14),
-            ],
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: AppText.title.copyWith(
-                fontSize: 19,
-                color: colors.active,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            if (messageText != null) ...[
-              const SizedBox(height: 6),
-              Text(
-                messageText,
-                textAlign: TextAlign.center,
-                style: AppText.body.copyWith(
-                  color: colors.deactive,
-                  height: 1.4,
-                ),
-              ),
-            ],
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                Expanded(
-                  child: AppButton.secondary(
-                    label: cancelLabel,
-                    expanded: true,
-                    onPressed: () => Navigator.of(dialogContext).pop(false),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: destructive
-                      ? AppButton.danger(
-                          label: confirmLabel,
-                          expanded: true,
-                          onPressed: () =>
-                              Navigator.of(dialogContext).pop(true),
-                        )
-                      : AppButton.primary(
-                          label: confirmLabel,
-                          expanded: true,
-                          onPressed: () =>
-                              Navigator.of(dialogContext).pop(true),
-                        ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    },
+    builder: (dialogContext) => NinjaDialog(
+      title: title,
+      message: message,
+      icon: icon,
+      cancelLabel: cancelLabel,
+      onCancel: () => Navigator.of(dialogContext).pop(false),
+      confirmLabel: confirmLabel,
+      onConfirm: () => Navigator.of(dialogContext).pop(true),
+      destructive: destructive,
+    ),
   );
   return confirmed ?? false;
 }

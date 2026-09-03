@@ -1,53 +1,49 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:flutter/widgets.dart';
 
 class AppHashTag extends StatelessWidget {
   const AppHashTag({
     required this.label,
-    required this.color,
     super.key,
+    this.color,
     this.onTap,
   });
 
   final String label;
-  final Color color;
+  final Color? color;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final content = Container(
-      padding: const EdgeInsets.fromLTRB(8, 4, 10, 4),
-      decoration: BoxDecoration(
-        color: colors.surfaceHigh,
-        borderRadius: BorderRadius.circular(8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.gap,
+        vertical: AppSpacing.xsm,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 5),
-          Text(
-            '#$label',
-            style: AppText.caption.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ],
+      decoration: BoxDecoration(
+        color: colors.surface2,
+        borderRadius: BorderRadius.circular(AppRadius.full),
+      ),
+      child: Text(
+        '#$label',
+        style: AppText.captionStrong.copyWith(color: color ?? colors.muted),
       ),
     );
+
     if (onTap == null) return content;
     return AppPressable(
       onTap: onTap,
       semanticsLabel: '#$label',
       child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-        child: Center(child: content),
+        constraints: const BoxConstraints(
+          minWidth: AppControlSize.touchTarget,
+          minHeight: AppControlSize.touchTarget,
+        ),
+        child: Center(widthFactor: 1, heightFactor: 1, child: content),
       ),
     );
   }

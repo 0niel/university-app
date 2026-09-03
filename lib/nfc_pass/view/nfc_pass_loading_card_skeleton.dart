@@ -5,15 +5,19 @@ class _NfcPassLoadingCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const NinjaSkeletonGroup(
+    return NinjaSkeletonGroup(
       child: _NfcPassScrollable(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            NinjaSkeleton(height: 232, radius: NinjaRadius.card),
-            SizedBox(height: 18),
-            NinjaSkeleton(height: 52, radius: NinjaRadius.pill),
-          ],
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: NfcPassCard.maxWidth),
+            child: const AspectRatio(
+              aspectRatio: NfcPassCard.aspectRatio,
+              child: NinjaSkeleton(
+                height: double.infinity,
+                radius: AppRadius.card,
+              ),
+            ),
+          ),
         ),
       ),
     );

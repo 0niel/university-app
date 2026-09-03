@@ -15,10 +15,13 @@ class _ToggleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final subtitle = this.subtitle;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xxs,
+        vertical: AppSpacing.md,
+      ),
       child: Row(
         children: [
           Expanded(
@@ -28,22 +31,22 @@ class _ToggleRow extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: NinjaText.body.copyWith(
+                  style: AppText.body.copyWith(
                     color: colors.ink,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.xxs),
                   Text(
                     subtitle,
-                    style: NinjaText.subtext.copyWith(color: colors.muted),
+                    style: AppText.subtext.copyWith(color: colors.muted),
                   ),
                 ],
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           NinjaSwitch(value: value, onChanged: onChanged),
         ],
       ),

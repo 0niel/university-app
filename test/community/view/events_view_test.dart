@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/community/community.dart';
 import 'package:rtu_mirea_app/community/view/events_view.dart';
-import 'package:rtu_mirea_app/community/widgets/events_skeleton.dart';
+import 'package:rtu_mirea_app/community/widgets/events/events_skeleton.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 import '../../helpers/mocks/mock_events_cubit.dart';
@@ -70,7 +70,7 @@ void main() {
       verify(() => cubit.load()).called(1);
     });
 
-    testWidgets('renders events and forwards category selection', (
+    testWidgets('going filter hides events without an RSVP', (
       tester,
     ) async {
       final event = CampusEvent(
@@ -87,8 +87,9 @@ void main() {
       );
 
       expect(find.text('День карьеры'), findsOneWidget);
-      await tester.tap(find.text('Карьера'));
-      verify(() => cubit.categoryChanged(.career)).called(1);
+      await tester.tap(find.text('Иду'));
+      await tester.pumpAndSettle();
+      expect(find.text('День карьеры'), findsNothing);
     });
 
     testWidgets('empty board offers a real create action', (tester) async {
@@ -105,7 +106,7 @@ void main() {
       expect(find.text('Пока ничего нет'), findsOneWidget);
     });
 
-    testWidgets('featured event is the single pastel card of the board', (
+    testWidgets('events show a media fallback without claiming a free price', (
       tester,
     ) async {
       final event = CampusEvent(
@@ -120,18 +121,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final colors = AppTheme.darkTheme.extension<NinjaColors>()!;
-      final pastel = tester
-          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-          .map((box) => box.decoration)
-          .whereType<BoxDecoration>()
-          .where((decoration) => decoration.color == colors.accentSoft)
-          .toList();
-      expect(pastel, hasLength(1));
-      expect(
-        pastel.single.borderRadius,
-        BorderRadius.circular(NinjaRadius.card),
-      );
+      expect(find.text('День карьеры'), findsOneWidget);
+      expect(find.byType(AppStripePlaceholder), findsOneWidget);
+      expect(find.byType(Card), findsNothing);
+      expect(find.text('Бесплатно'), findsNothing);
     });
 
     testWidgets('fits a 320px viewport at 200 percent text scale', (

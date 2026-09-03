@@ -33,7 +33,6 @@ class _SourceSection extends StatelessWidget {
         ),
         NinjaSegmented<MiniAppSourceKind>(
           value: sourceKind,
-          expanded: true,
           onChanged: onKindChanged,
           segments: [
             NinjaSegment(
@@ -46,14 +45,14 @@ class _SourceSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         if (sourceKind == .remote) ...[
           NinjaInput(
             controller: originController,
             keyboardType: .url,
             placeholder: 'https://my-app.example.com',
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           NinjaInput(
             controller: entryPathController,
             placeholder: l10n.miniAppsSubmitEntryPathHint,
@@ -66,15 +65,15 @@ class _SourceSection extends StatelessWidget {
               onPreview: () => onPreview(screens[i]),
               onRemove: i == 0 ? null : () => onRemoveScreen(screens[i]),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: AppSpacing.sectionGap),
           ],
           NinjaButton.outline(
             label: l10n.miniAppsSubmitAddScreen,
             expanded: true,
             icon: AppLineIconWidget(
               .plus,
-              size: 16,
-              color: context.ninja.mutedDark,
+              size: AppIconSize.sm,
+              color: context.colors.muted,
             ),
             onPressed: onAddScreen,
           ),

@@ -14,8 +14,8 @@ class TeamApplicationsSkeleton extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 10),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: context.ninja.surface,
-                  borderRadius: BorderRadius.circular(NinjaRadius.card),
+                  color: context.colors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.card),
                 ),
                 child: const Padding(
                   padding: EdgeInsets.all(16),
@@ -25,7 +25,7 @@ class TeamApplicationsSkeleton extends StatelessWidget {
                     children: [
                       NinjaSkeletonRow(),
                       NinjaSkeleton.bar(height: 11),
-                      NinjaSkeleton(height: 48, radius: NinjaRadius.control),
+                      NinjaSkeleton(height: 48, radius: AppRadius.field),
                     ],
                   ),
                 ),

@@ -12,17 +12,36 @@ class ScheduleChangesCubit extends Cubit<ScheduleChangesState> {
       super(const ScheduleChangesState());
 
   final ScheduleRepository _repository;
+  int _loadRevision = 0;
+  (ScheduleTargetType, String)? _target;
+
+  bool matchesTarget(ScheduleTargetType type, String target) =>
+      _target == (type, target);
+
+  void clear() {
+    _loadRevision++;
+    _target = null;
+    emit(const ScheduleChangesState());
+  }
 
   Future<void> load({
     required ScheduleTargetType targetType,
     required String target,
   }) async {
-    emit(state.copyWith(status: .loading));
+    final revision = ++_loadRevision;
+    final changed = !matchesTarget(targetType, target);
+    _target = (targetType, target);
+    emit(
+      (changed ? const ScheduleChangesState() : state).copyWith(
+        status: .loading,
+      ),
+    );
     try {
       final changes = await _repository.getScheduleChanges(
         targetType: targetType,
         target: target,
       );
+      if (isClosed || revision != _loadRevision) return;
       emit(
         state.copyWith(
           changes: changes,
@@ -30,6 +49,7 @@ class ScheduleChangesCubit extends Cubit<ScheduleChangesState> {
         ),
       );
     } on Exception catch (error, stackTrace) {
+      if (isClosed || revision != _loadRevision) return;
       emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
     }

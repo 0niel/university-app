@@ -16,7 +16,7 @@ class NinjaInviteSearchResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final Widget trailing = invited
         ? NinjaBadge(l10n.studyGroupInviteSent, tone: .ink)
@@ -29,8 +29,8 @@ class NinjaInviteSearchResultCard extends StatelessWidget {
       padding: const .only(bottom: 10),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: colors.surfaceAlt,
-          borderRadius: .circular(NinjaRadius.card),
+          color: colors.surface2,
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Padding(
           padding: const .all(16),
@@ -46,14 +46,14 @@ class NinjaInviteSearchResultCard extends StatelessWidget {
                       name,
                       maxLines: 1,
                       overflow: .ellipsis,
-                      style: NinjaText.headline.copyWith(color: colors.ink),
+                      style: AppText.headline.copyWith(color: colors.ink),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
                       maxLines: 1,
                       overflow: .ellipsis,
-                      style: NinjaText.subtext.copyWith(color: colors.muted),
+                      style: AppText.subtext.copyWith(color: colors.muted),
                     ),
                   ],
                 ),

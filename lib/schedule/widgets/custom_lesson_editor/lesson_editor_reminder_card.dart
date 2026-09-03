@@ -19,27 +19,30 @@ class LessonEditorReminderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final subtitle = leadLabel;
     return Container(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       clipBehavior: .antiAlias,
       child: Padding(
-        padding: const .symmetric(horizontal: 16, vertical: 10),
+        padding: const .symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.gap,
+        ),
         child: Row(
           children: [
-            AppLineIconWidget(.bell, size: 20, color: colors.mutedDark),
-            const SizedBox(width: 12),
+            AppLineIconWidget(.bell, size: 20, color: colors.muted),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: AppPressable(
                 onTap: onTapLead,
                 semanticsLabel: [title, ?subtitle].join(', '),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(
-                    minHeight: NinjaMetrics.minTouchTarget,
+                    minHeight: AppControlSize.touchTarget,
                   ),
                   child: Align(
                     alignment: Alignment.centerLeft,
@@ -49,7 +52,7 @@ class LessonEditorReminderCard extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: NinjaText.body.copyWith(
+                          style: AppText.body.copyWith(
                             color: colors.ink,
                             fontWeight: .w600,
                           ),
@@ -57,7 +60,7 @@ class LessonEditorReminderCard extends StatelessWidget {
                         if (enabled && subtitle != null)
                           Text(
                             subtitle,
-                            style: NinjaText.helper.copyWith(
+                            style: AppText.captionSmall.copyWith(
                               color: colors.muted,
                             ),
                           ),
@@ -67,8 +70,8 @@ class LessonEditorReminderCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 10),
-            NinjaSwitch(value: enabled, onChanged: onToggle),
+            const SizedBox(width: AppSpacing.gap),
+            AppSwitch(value: enabled, onChanged: onToggle),
           ],
         ),
       ),

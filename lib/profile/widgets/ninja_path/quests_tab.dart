@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/profile/cubit/ninja_path_cubit.dart';
+import 'package:rtu_mirea_app/profile/utils/supported_quest.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/ninja_path_skeleton.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/ninja_path_tab_empty.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/ninja_path_tab_error.dart';
@@ -22,8 +23,9 @@ class QuestsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<NinjaPathCubit, NinjaPathState>(
       builder: (context, state) {
-        final daily = state.quests.where((quest) => quest.isDaily).toList();
-        final weekly = state.quests.where((quest) => quest.isWeekly).toList();
+        final supported = state.quests.where(isSupportedProfileQuest);
+        final daily = supported.where((quest) => quest.isDaily).toList();
+        final weekly = supported.where((quest) => quest.isWeekly).toList();
         return NinjaStateSwitcher(
           child: switch (state.questsStatus) {
             .initial || .loading => const NinjaPathSkeleton.quests(

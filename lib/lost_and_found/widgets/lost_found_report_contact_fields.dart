@@ -18,7 +18,7 @@ class LostFoundReportContactFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Column(
       children: [
@@ -45,19 +45,24 @@ class LostFoundReportContactFields extends StatelessWidget {
             onTap: () => onShowContactChanged(!showContact),
             child: Container(
               constraints: const BoxConstraints(
-                minHeight: NinjaMetrics.minTouchTarget,
+                minHeight: AppControlSize.iconButton,
               ),
-              padding: const EdgeInsets.fromLTRB(16, 10, 12, 10),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.gap,
+                AppSpacing.md,
+                AppSpacing.gap,
+              ),
               decoration: BoxDecoration(
-                color: colors.surfaceAlt,
-                borderRadius: BorderRadius.circular(NinjaRadius.control),
+                color: colors.surface2,
+                borderRadius: BorderRadius.circular(AppRadius.field),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       l10n.lostFoundContactConsent,
-                      style: NinjaText.body.copyWith(color: colors.ink),
+                      style: AppText.body.copyWith(color: colors.ink),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),

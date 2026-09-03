@@ -83,8 +83,8 @@ void main() {
         .toList();
     expect(glyphs, hasLength(5));
     expect(glyphs[2].icon, AppLineIcon.map);
-    expect(glyphs[2].strokeWidth, 2.5);
-    expect(glyphs.where((glyph) => glyph.strokeWidth == 2.5), hasLength(1));
+    expect(glyphs[2].strokeWidth, 2.2);
+    expect(glyphs.every((glyph) => glyph.strokeWidth == 2.2), isTrue);
 
     final fills = tester
         .widgetList<AnimatedContainer>(

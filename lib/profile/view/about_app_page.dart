@@ -16,18 +16,19 @@ class AboutAppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: colors.canvas,
       body: SafeArea(
+        top: false,
         bottom: false,
         child: Column(
           children: [
-            NinjaAppBar.inner(
+            AppInnerHeader(
               title: l10n.aboutApp,
-              backSemanticLabel: l10n.back,
+              backSemanticsLabel: l10n.back,
               onBack: () => Navigator.of(context).pop(),
             ),
             Expanded(
@@ -35,9 +36,10 @@ class AboutAppPage extends StatelessWidget {
                 slivers: [
                   SliverList(
                     delegate: SliverChildListDelegate([
+                      const SizedBox(height: AppSpacing.screen),
                       _buildHeader(context),
                       _buildContributorsSection(context),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.xlg),
                     ]),
                   ),
                 ],
@@ -50,31 +52,31 @@ class AboutAppPage extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       child: Container(
-        padding: const .all(16),
+        padding: const .all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Column(
           crossAxisAlignment: .start,
           children: [
             Text(
               'Open Source',
-              style: NinjaText.title.copyWith(color: colors.ink),
+              style: AppText.title.copyWith(color: colors.ink),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: AppSpacing.xsm),
             Text(
               context.l10n.aboutAppDescription,
-              style: NinjaText.subtext.copyWith(
+              style: AppText.subtext.copyWith(
                 height: 1.5,
-                color: colors.mutedDark,
+                color: colors.muted,
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: AppSpacing.sectionGap),
             _buildSocialIcons(context),
           ],
         ),
@@ -85,21 +87,23 @@ class AboutAppPage extends StatelessWidget {
   Widget _buildSocialIcons(BuildContext context) {
     return Row(
       children: [
-        NinjaIconButton(
-          icon: const Icon(UniconsLine.github),
-          tooltip: 'GitHub',
-          onPressed: () => unawaited(
-            launchUrlString(kGithubUrl, mode: .externalApplication),
+        AppHeaderCircleButton(
+          background: context.colors.surface2,
+          action: AppHeaderAction(
+            child: const Icon(UniconsLine.github, size: 20),
+            semanticsLabel: 'GitHub',
+            onTap: () => unawaited(_openLink(context, kGithubUrl)),
           ),
         ),
         if (context.read<UniversityConfig>().communityChatUrl
             case final url?) ...[
-          const SizedBox(width: 12),
-          NinjaIconButton(
-            icon: const Icon(UniconsLine.telegram),
-            tooltip: 'Telegram',
-            onPressed: () => unawaited(
-              launchUrlString(url, mode: .externalApplication),
+          const SizedBox(width: AppSpacing.md),
+          AppHeaderCircleButton(
+            background: context.colors.surface2,
+            action: AppHeaderAction(
+              child: const Icon(UniconsLine.telegram, size: 20),
+              semanticsLabel: 'Telegram',
+              onTap: () => unawaited(_openLink(context, url)),
             ),
           ),
         ],
@@ -107,22 +111,31 @@ class AboutAppPage extends StatelessWidget {
     );
   }
 
+  Future<void> _openLink(BuildContext context, String url) async {
+    try {
+      final launched = await launchUrlString(url, mode: .externalApplication);
+      if (!launched && context.mounted) {
+        ToastManager.showError(context, message: context.l10n.error);
+      }
+    } on Exception {
+      if (context.mounted) {
+        ToastManager.showError(context, message: context.l10n.error);
+      }
+    }
+  }
+
   Widget _buildContributorsSection(BuildContext context) {
-    final colors = context.ninja;
     return Column(
       crossAxisAlignment: .stretch,
       children: [
         Padding(
           padding: const .fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             28,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             8,
           ),
-          child: Text(
-            context.l10n.aboutAppContributors,
-            style: NinjaText.title.copyWith(color: colors.ink),
-          ),
+          child: AppSectionTitle(title: context.l10n.aboutAppContributors),
         ),
         const ContributorsView(),
       ],

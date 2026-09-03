@@ -7,13 +7,13 @@ class NinjaStudyGroupHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final description = group.description;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.accentSoft,
-        borderRadius: .circular(NinjaRadius.card),
+        color: colors.tint2,
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Padding(
         padding: const .all(16),
@@ -28,8 +28,8 @@ class NinjaStudyGroupHeroCard extends StatelessWidget {
                   height: 44,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: colors.onAccentSoft.withValues(alpha: .12),
-                    borderRadius: .circular(NinjaRadius.control),
+                    color: colors.ink.withValues(alpha: .12),
+                    borderRadius: .circular(AppRadius.field),
                   ),
                   child: Text(
                     group.emoji,
@@ -44,8 +44,8 @@ class NinjaStudyGroupHeroCard extends StatelessWidget {
                         group.name,
                         maxLines: 2,
                         overflow: .ellipsis,
-                        style: NinjaText.title.copyWith(
-                          color: colors.onAccentSoft,
+                        style: AppText.title.copyWith(
+                          color: colors.ink,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -53,8 +53,8 @@ class NinjaStudyGroupHeroCard extends StatelessWidget {
                         l10n.studyGroupMembersCount(group.memberCount),
                         maxLines: 1,
                         overflow: .ellipsis,
-                        style: NinjaText.subtext.copyWith(
-                          color: colors.onAccentSoftMuted,
+                        style: AppText.subtext.copyWith(
+                          color: colors.muted,
                         ),
                       ),
                     ],
@@ -68,8 +68,8 @@ class NinjaStudyGroupHeroCard extends StatelessWidget {
                 description,
                 maxLines: 3,
                 overflow: .ellipsis,
-                style: NinjaText.subtext.copyWith(
-                  color: colors.onAccentSoftMuted,
+                style: AppText.subtext.copyWith(
+                  color: colors.muted,
                 ),
               ),
             ],

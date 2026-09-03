@@ -7,4 +7,3 @@ export 'marketplace_card_skeleton.dart';
 export 'marketplace_category_picker.dart';
 export 'marketplace_grid.dart';
 export 'marketplace_grid_skeleton.dart';
-export 'marketplace_hero.dart';

@@ -13,24 +13,22 @@ class DiscoursePostOverviewPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.ninja.canvas,
+      backgroundColor: context.colors.canvas,
       body: BlocProvider<PostOverviewBloc>(
+        key: ValueKey(postId),
         create: (context) => PostOverviewBloc(
           communityRepository: context.read(),
         )..add(PostRequested(postId: postId)),
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              NinjaAppBar.inner(
-                title: context.l10n.postDetailTitle,
-                backSemanticLabel: context.l10n.back,
-                onBack: () => Navigator.of(context).maybePop(),
-              ),
-              Expanded(child: PostOverviewBody(postId: postId)),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppInnerHeader(
+              title: context.l10n.postDetailTitle,
+              backSemanticsLabel: context.l10n.back,
+              onBack: () => Navigator.of(context).maybePop(),
+            ),
+            Expanded(child: PostOverviewBody(postId: postId)),
+          ],
         ),
       ),
     );

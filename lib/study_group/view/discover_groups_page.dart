@@ -116,7 +116,7 @@ class _DiscoverGroupsPageState extends State<DiscoverGroupsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Scaffold(
       backgroundColor: colors.canvas,
@@ -131,7 +131,7 @@ class _DiscoverGroupsPageState extends State<DiscoverGroupsPage> {
             ),
             Padding(
               padding: const .symmetric(
-                horizontal: NinjaMetrics.screenPadding,
+                horizontal: AppSpacing.screen,
               ),
               child: NinjaInput(
                 controller: _controller,
@@ -168,7 +168,7 @@ class _DiscoverGroupsPageState extends State<DiscoverGroupsPage> {
       );
     }
     if (_results.isEmpty) {
-      final colors = context.ninja;
+      final colors = context.colors;
       return _DiscoverPlaceholder(
         key: const ValueKey('empty'),
         child: NinjaEmptyState.screen(
@@ -182,12 +182,13 @@ class _DiscoverGroupsPageState extends State<DiscoverGroupsPage> {
         ),
       );
     }
+    final results = List<StudyGroupSummary>.unmodifiable(_results);
     return ListView.builder(
       key: const ValueKey('results'),
       padding: const .only(bottom: 32),
-      itemCount: _results.length,
+      itemCount: results.length,
       itemBuilder: (context, index) {
-        final group = _results[index];
+        final group = results[index];
         return NinjaDiscoverStudyGroupCard(
           group: group,
           requested: group.hasRequested || _requested.contains(group.id),

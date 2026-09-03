@@ -26,28 +26,35 @@ class PostOverviewBloc extends Bloc<PostOverviewEvent, PostOverviewState> {
     emit(state.copyWith(status: .loading));
     try {
       final post = await _communityRepository.getPost(event.postId);
+      if (emit.isDone) return;
 
       final comments = await _loadComments(post.topicId);
+      if (emit.isDone) return;
 
       emit(
         state.copyWith(
           post: post,
-          comments: comments,
-          status: .loaded,
+          comments:
+              comments ??
+              (state.post?.topicId == post.topicId
+                  ? state.comments
+                  : const <DiscoursePostComment>[]),
+          status: comments == null ? .commentsFailure : .loaded,
         ),
       );
     } on Exception catch (error, stackTrace) {
+      if (emit.isDone) return;
       emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
     }
   }
 
-  Future<List<DiscoursePostComment>> _loadComments(int topicId) async {
+  Future<List<DiscoursePostComment>?> _loadComments(int topicId) async {
     try {
       return await _communityRepository.getPostComments(topicId: topicId);
     } on Exception catch (error, stackTrace) {
-      addError(error, stackTrace);
-      return const [];
+      if (!isClosed) addError(error, stackTrace);
+      return null;
     }
   }
 }

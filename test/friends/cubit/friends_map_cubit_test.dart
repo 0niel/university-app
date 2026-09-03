@@ -21,14 +21,13 @@ void main() {
   group('GeoSharingSettings', () {
     test('defaults to the safe options', () {
       const settings = GeoSharingSettings();
-      expect(settings.sharing, isTrue);
+      expect(settings.sharing, isFalse);
       expect(settings.visibility, GeoVisibility.all);
       expect(settings.precision, GeoPrecision.exact);
     });
 
     test('fromJson(toJson()) round-trips and preserves the wire values', () {
       const settings = GeoSharingSettings(
-        sharing: false,
         visibility: .none,
         precision: .campus,
       );
@@ -45,7 +44,7 @@ void main() {
       );
       expect(
         GeoSharingSettings.fromJson(const {'visibility': 'unknown'}).visibility,
-        GeoVisibility.all,
+        GeoVisibility.none,
       );
       expect(
         GeoSharingSettings.fromJson(const {}).precision,
@@ -115,6 +114,7 @@ void main() {
       repository = MockFriendsRepository();
       preferences = MockPreferencesRepository();
       permissions = MockPermissionClient();
+      when(() => preferences.set(any(), any())).thenAnswer((_) async {});
       when(
         () => permissions.requestNearbyWifiDevices(),
       ).thenAnswer((_) async => PermissionStatus.granted);
@@ -221,10 +221,86 @@ void main() {
               privacyForcedGhost: true,
             ),
             isGhost: true,
+            privacyBusy: true,
+            privacySyncFailed: true,
+          ),
+          FriendsMapState(
+            geoSettings: GeoSharingSettings(
+              visibility: .none,
+              privacyForcedGhost: true,
+            ),
+            isGhost: true,
             privacySyncFailed: true,
           ),
         ],
-        errors: () => [isA<Exception>()],
+        errors: () => [isA<Exception>(), isA<Exception>()],
+      );
+
+      test('does not persist after close during a pending hide', () async {
+        final pending = Completer<void>();
+        when(
+          () => repository.setGhostMode(ghost: true),
+        ).thenAnswer((_) => pending.future);
+        final cubit = buildCubit();
+        final operation = cubit.updateGeoSettings(const GeoSharingSettings());
+        await pumpEventQueue();
+        await cubit.close();
+        pending.complete();
+        await operation;
+        verifyNever(() => preferences.set(any(), any()));
+      });
+
+      test(
+        'does not reveal after close during a pending preference write',
+        () async {
+          when(
+            () => repository.setGhostMode(ghost: true),
+          ).thenAnswer((_) async {});
+          final cubit = buildCubit();
+          await cubit.updateGeoSettings(const GeoSharingSettings());
+          final pending = Completer<void>();
+          when(
+            () => preferences.set(any(), any()),
+          ).thenAnswer((_) => pending.future);
+          final operation = cubit.updateGeoSettings(
+            const GeoSharingSettings(sharing: true),
+          );
+          await pumpEventQueue();
+          await cubit.close();
+          pending.complete();
+          await operation;
+          verifyNever(() => repository.setGhostMode(ghost: false));
+        },
+      );
+
+      test(
+        'failed opt-in rolls back persisted consent and stays hidden',
+        () async {
+          when(
+            () => repository.setGhostMode(ghost: true),
+          ).thenAnswer((_) async {});
+          when(
+            () => repository.setGhostMode(ghost: false),
+          ).thenThrow(Exception('offline'));
+          final cubit = buildCubit();
+          await cubit.updateGeoSettings(const GeoSharingSettings());
+          clearInteractions(preferences);
+          await cubit.updateGeoSettings(
+            const GeoSharingSettings(sharing: true),
+          );
+          expect(cubit.state.geoSettings.sharing, isFalse);
+          expect(cubit.state.isGhost, isTrue);
+          expect(cubit.state.privacySyncFailed, isTrue);
+          expect(cubit.state.privacyBusy, isFalse);
+          final writes = verify(
+            () => preferences.set(
+              'geo_sharing',
+              captureAny(),
+            ),
+          ).captured.cast<Map<String, dynamic>>();
+          expect(writes.map((entry) => entry['sharing']), [true, false]);
+          await cubit.close();
+        },
       );
 
       blocTest<FriendsMapCubit, FriendsMapState>(
@@ -241,22 +317,25 @@ void main() {
         seed: () => const FriendsMapState(
           isGhost: true,
           geoSettings: GeoSharingSettings(
-            sharing: false,
             privacyForcedGhost: true,
           ),
         ),
-        act: (cubit) => cubit.updateGeoSettings(const GeoSharingSettings()),
+        act: (cubit) => cubit.updateGeoSettings(
+          const GeoSharingSettings(sharing: true),
+        ),
         expect: () => const [
           FriendsMapState(
             isGhost: true,
             geoSettings: GeoSharingSettings(
-              sharing: false,
               privacyForcedGhost: true,
             ),
             privacyBusy: true,
           ),
-          FriendsMapState(privacyBusy: true),
-          FriendsMapState(),
+          FriendsMapState(
+            geoSettings: GeoSharingSettings(sharing: true),
+            privacyBusy: true,
+          ),
+          FriendsMapState(geoSettings: GeoSharingSettings(sharing: true)),
         ],
       );
 
@@ -277,11 +356,18 @@ void main() {
           const GeoSharingSettings(visibility: .none),
         );
         await pumpEventQueue();
-        final show = cubit.updateGeoSettings(const GeoSharingSettings());
+        final show = cubit.updateGeoSettings(
+          const GeoSharingSettings(sharing: true),
+        );
         hidden.complete();
         await Future.wait([hide, show]);
 
-        expect(cubit.state, const FriendsMapState());
+        expect(
+          cubit.state,
+          const FriendsMapState(
+            geoSettings: GeoSharingSettings(sharing: true),
+          ),
+        );
         verifyInOrder([
           () => repository.setGhostMode(ghost: true),
           () => repository.setGhostMode(ghost: false),
@@ -296,7 +382,6 @@ void main() {
         build: buildCubit,
         seed: () => const FriendsMapState(
           isGhost: true,
-          geoSettings: GeoSharingSettings(sharing: false),
         ),
         act: (cubit) => cubit.toggleGhostMode(),
         expect: () => const <FriendsMapState>[],
@@ -313,10 +398,20 @@ void main() {
           () => repository.setGhostMode(ghost: any(named: 'ghost')),
         ).thenAnswer((_) => Future.value()),
         build: buildCubit,
+        seed: () => const FriendsMapState(
+          geoSettings: GeoSharingSettings(sharing: true),
+        ),
         act: (cubit) => cubit.toggleGhostMode(),
         expect: () => const [
-          FriendsMapState(isGhost: true, privacyBusy: true),
-          FriendsMapState(isGhost: true),
+          FriendsMapState(
+            geoSettings: GeoSharingSettings(sharing: true),
+            isGhost: true,
+            privacyBusy: true,
+          ),
+          FriendsMapState(
+            geoSettings: GeoSharingSettings(sharing: true),
+            isGhost: true,
+          ),
         ],
         verify: (_) {
           verify(() => repository.setGhostMode(ghost: true)).called(1);
@@ -329,10 +424,17 @@ void main() {
           () => repository.setGhostMode(ghost: any(named: 'ghost')),
         ).thenThrow(Exception('network')),
         build: buildCubit,
+        seed: () => const FriendsMapState(
+          geoSettings: GeoSharingSettings(sharing: true),
+        ),
         act: (cubit) => cubit.toggleGhostMode(),
         expect: () => const [
-          FriendsMapState(isGhost: true, privacyBusy: true),
-          FriendsMapState(),
+          FriendsMapState(
+            geoSettings: GeoSharingSettings(sharing: true),
+            isGhost: true,
+            privacyBusy: true,
+          ),
+          FriendsMapState(geoSettings: GeoSharingSettings(sharing: true)),
         ],
       );
 
@@ -346,6 +448,7 @@ void main() {
         ).thenAnswer((_) => Future<void>.value());
         final cubit = buildCubit();
 
+        await cubit.updateGeoSettings(const GeoSharingSettings(sharing: true));
         final first = cubit.toggleGhostMode();
         await pumpEventQueue();
         final second = cubit.toggleGhostMode().then<void>((_) => null);
@@ -504,6 +607,35 @@ void main() {
 
     group('location fusion (ingestDeviceFix)', () {
       test(
+        'does not publish or train without explicit sharing consent',
+        () async {
+          when(
+            () => repository.scanWifiAccessPoints(),
+          ).thenAnswer((_) async => const []);
+          final cubit = buildCubit()..ingestDeviceFix(devicePosition());
+          await cubit.refineViaWifi();
+          await pumpEventQueue();
+          verifyNever(
+            () => repository.submitWifiObservations(
+              latitude: any(named: 'latitude'),
+              longitude: any(named: 'longitude'),
+              accuracyM: any(named: 'accuracyM'),
+              accessPoints: any(named: 'accessPoints'),
+            ),
+          );
+          verifyNever(
+            () => repository.publishLocation(
+              latitude: any(named: 'latitude'),
+              longitude: any(named: 'longitude'),
+              accuracyM: any(named: 'accuracyM'),
+              heading: any(named: 'heading'),
+              speedMps: any(named: 'speedMps'),
+            ),
+          );
+          await cubit.close();
+        },
+      );
+      test(
         'does not publish a device fix while ghost mode is active',
         () async {
           when(
@@ -511,6 +643,9 @@ void main() {
           ).thenAnswer((_) => Future.value());
           final cubit = buildCubit();
 
+          await cubit.updateGeoSettings(
+            const GeoSharingSettings(sharing: true),
+          );
           await cubit.toggleGhostMode();
           cubit.ingestDeviceFix(devicePosition());
           await pumpEventQueue();
@@ -578,6 +713,9 @@ void main() {
           );
 
           final cubit = buildCubit();
+          await cubit.updateGeoSettings(
+            const GeoSharingSettings(sharing: true),
+          );
           await cubit.refineViaWifi();
 
           expect(cubit.state.myLatitude, closeTo(baseLat, 1e-9));
@@ -608,6 +746,7 @@ void main() {
         ).thenAnswer((_) => Future.value());
 
         final cubit = buildCubit()..ingestDeviceFix(devicePosition());
+        await cubit.updateGeoSettings(const GeoSharingSettings(sharing: true));
         await cubit.refineViaWifi();
 
         verify(
@@ -630,6 +769,7 @@ void main() {
         ).thenAnswer((_) async => aps);
 
         final cubit = buildCubit()..ingestDeviceFix(devicePosition());
+        await cubit.updateGeoSettings(const GeoSharingSettings(sharing: true));
         await cubit.toggleGhostMode();
         await cubit.refineViaWifi();
 
@@ -648,7 +788,9 @@ void main() {
           () => repository.scanWifiAccessPoints(),
         ).thenAnswer((_) async => aps.take(1).toList());
 
-        await buildCubit().refineViaWifi();
+        final cubit = buildCubit();
+        await cubit.updateGeoSettings(const GeoSharingSettings(sharing: true));
+        await cubit.refineViaWifi();
 
         verifyNever(() => repository.resolveWifiPosition(any()));
         verifyNever(
@@ -668,6 +810,7 @@ void main() {
         ).thenAnswer((_) => scan.future);
         final cubit = buildCubit();
 
+        await cubit.updateGeoSettings(const GeoSharingSettings(sharing: true));
         final first = cubit.refineViaWifi();
         await pumpEventQueue();
         await cubit.refineViaWifi();
@@ -684,6 +827,7 @@ void main() {
         ).thenThrow(const ScanWifiAccessPointsFailure('boom'));
 
         final cubit = buildCubit();
+        await cubit.updateGeoSettings(const GeoSharingSettings(sharing: true));
         await expectLater(cubit.refineViaWifi(), completes);
       });
     });

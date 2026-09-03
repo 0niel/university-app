@@ -1,3 +1,4 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 
@@ -92,7 +93,7 @@ class AppMapTiles {
     );
     return RepaintBoundary(
       child: ColoredBox(
-        color: isDark ? const Color(0xFF171A20) : const Color(0xFFF1EFEA),
+        color: isDark ? AppColors.mapCanvasDark : AppColors.mapCanvasLight,
         child: ColorFiltered(
           colorFilter: isDark ? _darkMap : _lightMap,
           child: layer,

@@ -8,6 +8,7 @@ abstract class MapState with _$MapState {
     CampusModel? selectedCampus,
     FloorModel? selectedFloor,
     @Default(<RoomModel>[]) List<RoomModel> rooms,
+    @Default(<String, int>{}) Map<String, int> roomFloors,
     Rect? boundingRect,
     String? errorMessage,
   }) = _MapState;

@@ -42,8 +42,8 @@ enum GeoPrecision { exact, campus, city }
 abstract class GeoSharingSettings with _$GeoSharingSettings {
   @JsonSerializable(checked: true)
   const factory GeoSharingSettings({
-    @Default(true) bool sharing,
-    @JsonKey(unknownEnumValue: GeoVisibility.all)
+    @Default(false) bool sharing,
+    @JsonKey(unknownEnumValue: GeoVisibility.none)
     @Default(GeoVisibility.all)
     GeoVisibility visibility,
     @JsonKey(unknownEnumValue: GeoPrecision.exact)

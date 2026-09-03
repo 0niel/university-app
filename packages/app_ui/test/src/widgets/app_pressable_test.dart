@@ -39,7 +39,7 @@ void main() {
         ),
       );
 
-      final node = tester.getSemantics(find.bySemanticsLabel('Open'));
+      final node = tester.getSemantics(find.byType(AppPressable));
       expect(
         node,
         matchesSemantics(
@@ -49,6 +49,8 @@ void main() {
           isSelected: true,
           hasEnabledState: true,
           isEnabled: true,
+          isFocusable: true,
+          hasFocusAction: true,
           hasTapAction: true,
         ),
       );
@@ -72,7 +74,7 @@ void main() {
         ),
       );
 
-      final node = tester.getSemantics(find.bySemanticsLabel('Open'));
+      final node = tester.getSemantics(find.byType(AppPressable));
       expect(
         node,
         matchesSemantics(

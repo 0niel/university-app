@@ -9,12 +9,12 @@
 
 import { pathToFileURL } from "node:url";
 
-const ACCENT = "#7C5CFF";
-const GREEN = "#1FB872";
-const BLUE = "#2F7AFF";
-const ORANGE = "#FFB020";
-const PINK = "#FF5C8A";
-const CYAN = "#22C7C7";
+const ACCENT = "accent";
+const GREEN = "lecture";
+const BLUE = "practice";
+const ORANGE = "warn";
+const PINK = "exam";
+const CYAN = "lab";
 
 // --- tiny builders ----------------------------------------------------------
 const sb = (height) => ({ type: "sizedBox", height });
@@ -31,7 +31,7 @@ const wrap = (children, spacing = 8, runSpacing = 8) => ({
   runSpacing,
   children,
 });
-const text = (data, style) => ({ type: "text", data, ...(style ? { style } : {}) });
+const text = (data) => ({ type: "appText", data });
 const card = (child, opts = {}) => ({ type: "appCard", child, ...opts });
 const section = (title, subtitle, action, onActionTap) => ({
   type: "appSectionTitle",
@@ -475,21 +475,21 @@ const inputs = scaffold([
     type: "form",
     child: col([
       {
-        type: "textFormField",
+        type: "appInputField",
         id: "name",
-        decoration: { labelText: "Имя", hintText: "Минимум 2 символа" },
-        validatorRules: [
-          { rule: "isLength", options: { min: 2 }, message: "Минимум 2 символа" },
-        ],
+        label: "Имя",
+        placeholder: "Минимум 2 символа",
+        minLength: 2,
+        validationMessage: "Минимум 2 символа",
       },
       sb(12),
       {
-        type: "textFormField",
+        type: "appInputField",
         id: "email",
-        decoration: { labelText: "Почта", hintText: "you@mirea.ru" },
-        validatorRules: [
-          { rule: "isEmail", message: "Неверный e-mail" },
-        ],
+        label: "Почта",
+        placeholder: "you@mirea.ru",
+        email: true,
+        validationMessage: "Неверный e-mail",
       },
       sb(16),
       btn("Проверить", {
@@ -574,7 +574,7 @@ const interactive = scaffold([
       ifFalse: card(
         col([
           roww([
-            lineIcon("star", 26, "#9AA0AE"),
+            lineIcon("star", 26, "muted"),
             { type: "sizedBox", width: 12 },
             text("В БД сохранено: пусто"),
             { type: "spacer" },
@@ -987,7 +987,7 @@ begin
   )
   values (
     'mirea', null, 'showcase', '${q(name)}', '${q(description)}',
-    '🎛️', '${ACCENT}', 'tools', ${tags}, ${perms},
+    '🎛️', '#1E4DFF', 'tools', ${tags}, ${perms},
     'hosted', 'published', now()
   )
   on conflict (organization_id, slug) do update set

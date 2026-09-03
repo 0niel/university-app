@@ -19,7 +19,7 @@ class AboutSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Column(
       crossAxisAlignment: .stretch,
@@ -38,11 +38,11 @@ class AboutSection extends StatelessWidget {
                 TextSpan(text: l10n.settingsAboutDescription),
                 TextSpan(
                   text: kGithubRepoLabel,
-                  style: TextStyle(color: colors.brand),
+                  style: TextStyle(color: colors.accent),
                 ),
               ],
             ),
-            style: NinjaText.helper.copyWith(height: 1.5, color: colors.muted),
+            style: AppText.caption.copyWith(height: 1.5, color: colors.muted),
           ),
         ),
       ],

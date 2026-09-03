@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/view/nfc_pass_view.dart';
+import 'package:rtu_mirea_app/nfc_pass/widgets/nfc_pass_card.dart';
 
 void main() {
   Widget buildSubject(NfcPassState state) {
@@ -14,9 +15,7 @@ void main() {
       home: Scaffold(
         body: NfcPassView(
           state: state,
-          deviceName: 'Test device',
           onConnect: () {},
-          onUnbind: () {},
           onEnterCode: () {},
           onRetry: () {},
         ),
@@ -39,7 +38,7 @@ void main() {
     );
 
     testWidgets(
-      'shows a card+button skeleton (no plain spinner) on action '
+      'shows a portrait card skeleton on action '
       'transitions',
       (tester) async {
         await tester.pumpWidget(
@@ -62,7 +61,7 @@ void main() {
       },
     );
 
-    testWidgets('loading skeleton mirrors the pass card and its pill button', (
+    testWidgets('loading skeleton mirrors the portrait pass card', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -73,9 +72,11 @@ void main() {
       final skeletons = tester
           .widgetList<NinjaSkeleton>(find.byType(NinjaSkeleton))
           .toList();
-      expect(skeletons.length, 2);
-      expect(skeletons.first.radius, NinjaRadius.card);
-      expect(skeletons.last.radius, NinjaRadius.pill);
+      expect(skeletons.length, 1);
+      expect(skeletons.single.radius, AppRadius.card);
+      final size = tester.getSize(find.byType(NinjaSkeleton));
+      expect(size.width / size.height, NfcPassCard.aspectRatio);
+      expect(size.width, NfcPassCard.maxWidth);
     });
 
     testWidgets('the unbound state offers a pill call to action', (
@@ -85,7 +86,11 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
 
       expect(find.byType(NinjaEmptyState), findsOneWidget);
-      expect(find.byType(NinjaButton), findsWidgets);
+      final button = tester.widget<NinjaPillButton>(
+        find.byType(NinjaPillButton),
+      );
+      expect(button.onPressed, isNotNull);
+      expect(button.height, greaterThanOrEqualTo(44));
     });
 
     testWidgets('fits the connect flow on a compact screen with large text', (

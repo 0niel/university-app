@@ -11,7 +11,7 @@ class GroupSpaceBirthdayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return SizedBox(
       width: 112,
       child: Column(
@@ -24,7 +24,7 @@ class GroupSpaceBirthdayCard extends StatelessWidget {
             maxLines: 2,
             textAlign: .center,
             overflow: .ellipsis,
-            style: NinjaText.helper.copyWith(
+            style: AppText.caption.copyWith(
               fontWeight: .w700,
               color: colors.ink,
             ),
@@ -33,7 +33,7 @@ class GroupSpaceBirthdayCard extends StatelessWidget {
             DateFormat.MMMd(
               Localizations.localeOf(context).languageCode,
             ).format(birthday.date),
-            style: NinjaText.helper.copyWith(color: colors.muted),
+            style: AppText.caption.copyWith(color: colors.muted),
           ),
         ],
       ),

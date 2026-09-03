@@ -2,168 +2,168 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  final colors = NinjaColors.light();
+import '../kit_harness.dart';
 
+void main() {
   const segments = [
-    NinjaSegment(value: 'day', label: 'День'),
-    NinjaSegment(value: 'week', label: 'Неделя'),
+    NinjaSegment(value: 0, label: 'День'),
+    NinjaSegment(value: 1, label: 'Неделя'),
+    NinjaSegment(value: 2, label: 'Месяц'),
   ];
 
-  Widget wrap(Widget child, {bool dark = false}) => MaterialApp(
-        theme: dark ? NinjaTheme.dark() : NinjaTheme.light(),
-        home: Scaffold(body: Center(child: child)),
+  BoxDecoration containerOf(WidgetTester tester) => kitDecoration(
+        tester,
+        find
+            .descendant(
+              of: find.byType(NinjaSegmented<int>),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
-  BoxDecoration segmentOf(WidgetTester tester, String label) {
-    final container = tester.widget<AnimatedContainer>(
+  BoxDecoration segmentOf(WidgetTester tester, String label) => kitDecoration(
+        tester,
+        find
+            .ancestor(of: find.text(label), matching: find.byType(Container))
+            .first,
+      );
+
+  testWidgets('container keeps 4px visual inset with 44px hit targets',
+      (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: NinjaSegmented<int>(
+            segments: segments,
+            value: 0,
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final decoration = containerOf(tester);
+    expect(decoration.color, kitColors.canvas);
+    expect(decoration.borderRadius, BorderRadius.circular(AppRadius.full));
+    expect(
+      tester
+          .widget<Container>(
+            find
+                .descendant(
+                  of: find.byType(NinjaSegmented<int>),
+                  matching: find.byType(Container),
+                )
+                .first,
+          )
+          .padding,
+      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+    );
+    expect(tester.getSize(find.byType(NinjaSegmented<int>)).height, 46);
+  });
+
+  testWidgets('selected segment is an accent pill 38 tall', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: NinjaSegmented<int>(
+            segments: segments,
+            value: 1,
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(segmentOf(tester, 'Неделя').color, kitColors.accent);
+    expect(segmentOf(tester, 'День').color, Colors.transparent);
+    expect(kitStyleOf(tester, 'Неделя')?.color, kitColors.onAccent);
+    expect(kitStyleOf(tester, 'День')?.color, kitColors.muted);
+    expect(kitStyleOf(tester, 'Неделя')?.fontSize, 13.5);
+    expect(kitStyleOf(tester, 'Неделя')?.fontWeight, FontWeight.w700);
+    expect(tester.getSize(find.text('Неделя').first).height, lessThan(38));
+  });
+
+  testWidgets('onCanvas swaps the container to surface', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: NinjaSegmented<int>(
+            segments: segments,
+            value: 0,
+            onCanvas: true,
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(containerOf(tester).color, kitColors.surface);
+  });
+
+  testWidgets('tapping a segment reports its value', (tester) async {
+    int? picked;
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: NinjaSegmented<int>(
+            segments: segments,
+            value: 0,
+            onChanged: (value) => picked = value,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Месяц'));
+    expect(picked, 2);
+  });
+
+  testWidgets('disabled dims the control', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        const SizedBox(
+          width: 320,
+          child: NinjaSegmented<int>(segments: segments, value: 0),
+        ),
+      ),
+    );
+
+    final opacity = tester.widget<Opacity>(
       find
-          .ancestor(
-            of: find.text(label),
-            matching: find.byType(AnimatedContainer),
+          .descendant(
+            of: find.byType(NinjaSegmented<int>),
+            matching: find.byType(Opacity),
           )
           .first,
     );
-    return container.decoration! as BoxDecoration;
-  }
+    expect(opacity.opacity, 0.5);
+  });
 
-  group('NinjaSegmented', () {
-    testWidgets('renders every label without an outer track', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          NinjaSegmented<String>(
-            segments: segments,
-            value: 'day',
+  testWidgets('AppSegmentedControl carries the same visuals', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: AppSegmentedControl<int>(
+            value: 0,
             onChanged: (_) {},
+            options: const [
+              AppSegmentedOption(value: 0, label: 'День'),
+              AppSegmentedOption(value: 1, label: 'Неделя'),
+            ],
           ),
         ),
-      );
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.text('День'), findsOneWidget);
-      expect(find.text('Неделя'), findsOneWidget);
-
-      expect(
-        find.descendant(
-          of: find.byType(NinjaSegmented<String>),
-          matching: find.byType(DecoratedBox),
-        ),
-        findsNWidgets(segments.length),
-      );
-    });
-
-    testWidgets('only the selected segment receives the brand fill', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(
-          NinjaSegmented<String>(
-            segments: segments,
-            value: 'day',
-            onChanged: (_) {},
-          ),
-        ),
-      );
-
-      final selected = segmentOf(tester, 'День');
-      expect(selected.color, colors.brand);
-      expect(selected.boxShadow, isNull);
-      final labelStyle = DefaultTextStyle.of(
-        tester.element(find.text('День')),
-      ).style;
-      expect(labelStyle.color, colors.onBrand);
-      expect(labelStyle.fontSize, 12.5);
-
-      final unselected = segmentOf(tester, 'Неделя');
-      expect(unselected.color, Colors.transparent);
-      expect(unselected.boxShadow, isNull);
-    });
-
-    testWidgets('dark mode keeps the brand fill without a shadow', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(
-          NinjaSegmented<String>(
-            segments: segments,
-            value: 'day',
-            onChanged: (_) {},
-          ),
-          dark: true,
-        ),
-      );
-
-      final selected = segmentOf(tester, 'День');
-      expect(selected.color, NinjaColors.dark().brand);
-      expect(selected.boxShadow, isNull);
-    });
-
-    testWidgets('tapping a segment reports its value', (tester) async {
-      String? changed;
-      await tester.pumpWidget(
-        wrap(
-          NinjaSegmented<String>(
-            segments: segments,
-            value: 'day',
-            onChanged: (value) => changed = value,
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Неделя'));
-      expect(changed, 'week');
-    });
-
-    testWidgets('disabled dims the control', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          const NinjaSegmented<String>(segments: segments, value: 'day'),
-        ),
-      );
-
-      expect(
-        tester
-            .widget<Opacity>(
-              find.descendant(
-                of: find.byType(NinjaSegmented<String>),
-                matching: find.byType(Opacity),
-              ),
-            )
-            .opacity,
-        0.5,
-      );
-    });
-
-    testWidgets('uses 44px targets and stacks at 200 percent text', (
-      tester,
-    ) async {
-      await tester.binding.setSurfaceSize(const Size(320, 568));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: NinjaTheme.dark(),
-          home: MediaQuery(
-            data: const MediaQueryData(
-              textScaler: TextScaler.linear(2),
-              accessibleNavigation: true,
-            ),
-            child: Scaffold(
-              body: NinjaSegmented<String>(
-                segments: segments,
-                value: 'day',
-                expanded: true,
-                onChanged: (_) {},
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(tester.takeException(), isNull);
-      for (final container in tester
-          .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))) {
-        expect(container.duration, Duration.zero);
-        expect(container.constraints?.minHeight, greaterThanOrEqualTo(44));
-      }
-    });
+    expect(segmentOf(tester, 'День').color, kitColors.accent);
   });
 }

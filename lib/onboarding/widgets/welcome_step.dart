@@ -1,90 +1,99 @@
-part of '../view/onboarding_page.dart';
+import 'package:app_ui/app_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/login/widgets/widgets.dart';
 
-class _WelcomeStep extends StatelessWidget {
-  const _WelcomeStep({
-    required this.config,
-    required this.shurikenTurns,
-    required this.onContinue,
-    required this.onGuest,
+class OnboardingWelcomeStep extends StatelessWidget {
+  const OnboardingWelcomeStep({
+    required this.totalSteps,
+    required this.onStart,
+    required this.onHaveAccount,
     super.key,
   });
 
-  final UniversityConfig config;
-  final Animation<double> shurikenTurns;
-  final VoidCallback onContinue;
-  final VoidCallback onGuest;
+  final int totalSteps;
+  final VoidCallback onStart;
+  final VoidCallback onHaveAccount;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
-    final accessible = MediaQuery.textScalerOf(context).scale(1) >= 1.6;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final markSize = accessible
-            ? 72.0
-            : (constraints.maxWidth * 0.32).clamp(96.0, 128.0);
-        final gap = constraints.maxHeight >= 720 ? 30.0 : 20.0;
-        return SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const .symmetric(
-            horizontal: NinjaMetrics.screenPadding,
+    return AuthPageLayout(
+      step: 1,
+      totalSteps: totalSteps,
+      showBack: false,
+      large: true,
+      leading: Container(
+        width: 56,
+        height: 56,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: colors.accent,
+          borderRadius: BorderRadius.circular(AppRadius.field),
+        ),
+        child: AppLineIconWidget(
+          AppLineIcon.school,
+          size: 28,
+          color: colors.onAccent,
+          strokeWidth: 2.2,
+        ),
+      ),
+      title: l10n.onboardingWelcomeTitle,
+      titleAccent: l10n.onboardingWelcomeTitleAccent,
+      subtitle: l10n.onboardingWelcomeLead,
+      actions: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppButton.primary(
+            key: const Key('onboarding_start'),
+            label: l10n.onboardingStart,
+            size: AppButtonSize.hero,
+            expanded: true,
+            onPressed: onStart,
           ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: IntrinsicHeight(
-              child: Column(
-                crossAxisAlignment: .stretch,
-                children: [
-                  Padding(
-                    padding: const .only(top: 16),
-                    child: Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: _ShurikenMark(turns: shurikenTurns),
-                    ),
-                  ),
-                  SizedBox(height: gap),
-                  const Spacer(),
-                  _WelcomeHeroCard(
-                    appName: config.appName,
-                    tagline: l10n.onboardingTagline,
-                    markSize: markSize,
-                  ),
-                  SizedBox(height: gap),
-                  const Spacer(),
-                  NinjaButton.primary(
-                    label: l10n.onboardingNext,
-                    icon: const AppLineIconWidget(AppLineIcon.arrowRight),
-                    expanded: true,
-                    size: NinjaButtonSize.large,
-                    onPressed: onContinue,
-                  ),
-                  const SizedBox(height: 10),
-                  NinjaButton.secondary(
-                    label: l10n.loginGuest,
-                    expanded: true,
-                    size: NinjaButtonSize.large,
-                    onPressed: onGuest,
-                  ),
-                  Padding(
-                    padding: .only(
-                      top: 18,
-                      bottom: bottomPadding > 0 ? 26 : 18,
-                    ),
-                    child: Text(
-                      'open-source · ${config.webAppHost}',
-                      textAlign: .center,
-                      style: NinjaText.helper.copyWith(color: colors.muted),
-                    ),
-                  ),
-                ],
-              ),
+          const SizedBox(height: 10),
+          AppButton.text(
+            key: const Key('onboarding_haveAccount'),
+            label: l10n.onboardingHaveAccount,
+            size: AppButtonSize.large,
+            expanded: true,
+            foregroundColor: colors.muted,
+            onPressed: onHaveAccount,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AuthHintCard(
+              icon: AppLineIcon.calendar,
+              color: colors.practice,
+              radius: AppRadius.none,
+              title: l10n.onboardingFeatureScheduleTitle,
+              subtitle: l10n.onboardingFeatureScheduleSub,
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 2),
+            AuthHintCard(
+              icon: AppLineIcon.door,
+              color: colors.lecture,
+              radius: AppRadius.none,
+              title: l10n.onboardingFeatureRoomsTitle,
+              subtitle: l10n.onboardingFeatureRoomsSub,
+            ),
+            const SizedBox(height: 2),
+            AuthHintCard(
+              icon: AppLineIcon.people,
+              color: colors.lab,
+              radius: AppRadius.none,
+              title: l10n.onboardingFeatureFriendsTitle,
+              subtitle: l10n.onboardingFeatureFriendsSub,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,3 +1,5 @@
+enum ScheduleView { day, week, month }
+
 final scheduleAnchorMonday = DateTime.utc(2020, 1, 6);
 
 int scheduleDayIndex(DateTime day) {
@@ -63,10 +65,11 @@ class SchedulePaging {
 }
 
 class ScheduleMonthPaging {
-  ScheduleMonthPaging({required DateTime today, this.radius = 24})
+  ScheduleMonthPaging({required DateTime today, this.radius = defaultRadius})
     : firstMonthIndex = _monthIndex(today) - radius;
 
   final int radius;
+  static const defaultRadius = 24;
   final int firstMonthIndex;
 
   int get pageCount => radius * 2 + 1;

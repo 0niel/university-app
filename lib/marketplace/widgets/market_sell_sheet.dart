@@ -69,7 +69,7 @@ class _MarketSellSheetState extends State<MarketSellSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final config = UniversityConfig.current;
     final saving = context.select<MarketplaceCubit, bool>(
@@ -88,7 +88,7 @@ class _MarketSellSheetState extends State<MarketSellSheet> {
             leadingIcon: const AppLineIconWidget(AppLineIcon.tag),
           ),
           if (_category != 'free') ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.gap),
             NinjaInput(
               controller: _price,
               enabled: !saving,
@@ -106,21 +106,21 @@ class _MarketSellSheetState extends State<MarketSellSheet> {
               },
             ),
           ],
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.gap),
           NinjaInput.multiline(
             controller: _description,
             enabled: !saving,
             maxLength: 4000,
             placeholder: l10n.marketDescriptionHint,
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.sectionGap),
           DecoratedBox(
             decoration: BoxDecoration(
               color: colors.surface,
-              borderRadius: BorderRadius.circular(NinjaRadius.card),
+              borderRadius: BorderRadius.circular(AppRadius.card),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(AppSpacing.sectionGap),
               child: MarketplaceCategoryPicker(
                 keys: config.marketplaceCategoryKeys,
                 selectedKey: _category,
@@ -133,14 +133,14 @@ class _MarketSellSheetState extends State<MarketSellSheet> {
               ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.sectionGap),
           DecoratedBox(
             decoration: BoxDecoration(
               color: colors.surface,
-              borderRadius: BorderRadius.circular(NinjaRadius.card),
+              borderRadius: BorderRadius.circular(AppRadius.card),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 children: [
                   Expanded(
@@ -150,12 +150,12 @@ class _MarketSellSheetState extends State<MarketSellSheet> {
                       children: [
                         Text(
                           l10n.marketContactConsent,
-                          style: NinjaText.headline.copyWith(color: colors.ink),
+                          style: AppText.headline.copyWith(color: colors.ink),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
                           l10n.marketContactConsentHint,
-                          style: NinjaText.subtext.copyWith(
+                          style: AppText.subtext.copyWith(
                             color: colors.muted,
                             height: 1.4,
                           ),
@@ -163,7 +163,7 @@ class _MarketSellSheetState extends State<MarketSellSheet> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.md),
                   NinjaSwitch(
                     value: _showContact,
                     onChanged: saving
@@ -174,7 +174,7 @@ class _MarketSellSheetState extends State<MarketSellSheet> {
               ),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.fieldGap),
           NinjaButton.primary(
             label: saving ? l10n.marketPublishing : l10n.marketPublish,
             icon: const AppLineIconWidget(AppLineIcon.upload),

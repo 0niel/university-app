@@ -16,7 +16,7 @@ class MiniAppScanError extends StatelessWidget {
           child: Text(
             message,
             textAlign: .center,
-            style: NinjaText.body.copyWith(color: Colors.white),
+            style: AppText.body.copyWith(color: Colors.white),
           ),
         ),
       ),

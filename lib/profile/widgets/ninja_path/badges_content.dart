@@ -21,7 +21,7 @@ class _BadgesContent extends StatelessWidget {
       children: [
         if (recentlyUnlocked != null) ...[
           _RecentlyUnlockedCard(badge: recentlyUnlocked),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.screen),
         ],
         for (final category in categories) ..._category(category, spec),
       ],
@@ -42,7 +42,7 @@ class _BadgesContent extends StatelessWidget {
         done: earned,
         total: categoryBadges.length,
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpacing.md),
       GridView.count(
         crossAxisCount: spec.columns,
         shrinkWrap: true,
@@ -54,7 +54,7 @@ class _BadgesContent extends StatelessWidget {
           for (final badge in categoryBadges) BadgeTile(badge: badge),
         ],
       ),
-      const SizedBox(height: 20),
+      const SizedBox(height: AppSpacing.screen),
     ];
   }
 

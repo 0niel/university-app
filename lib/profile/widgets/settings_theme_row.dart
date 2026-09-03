@@ -2,32 +2,78 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
-import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
 
 part 'theme_mode_icon.dart';
 
 class SettingsThemeRow extends StatelessWidget {
-  const SettingsThemeRow({super.key, this.mode, this.onChanged});
+  const SettingsThemeRow({
+    super.key,
+    this.mode,
+    this.onChanged,
+    this.compact = false,
+  });
 
   final AdaptiveThemeMode? mode;
   final ValueChanged<AdaptiveThemeMode>? onChanged;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final manager = AdaptiveTheme.maybeOf(context);
     final current = mode ?? manager?.mode ?? AdaptiveThemeMode.system;
     final onModeSelected = onChanged ?? manager?.setThemeMode;
-    return SettingsRow(
-      title: context.l10n.settingsTheme,
-      value: _themeLabel(context, current),
-      lineIcon: _themeIcon(current),
-      onTap: onModeSelected == null
-          ? null
-          : () => _showThemeSheet(
-              context,
-              current: current,
-              onSelected: onModeSelected,
-            ),
+    return Padding(
+      padding: compact ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  context.l10n.settingsTheme,
+                  style: AppText.sans(
+                    15,
+                    FontWeight.w600,
+                    height: 4 / 3,
+                  ).copyWith(color: context.colors.ink),
+                ),
+              ),
+              if (!compact)
+                AppButton.text(
+                  label: context.l10n.settingsThemeAuto,
+                  size: AppButtonSize.small,
+                  onPressed: onModeSelected == null
+                      ? null
+                      : () => _showThemeSheet(
+                          context,
+                          current: current,
+                          onSelected: onModeSelected,
+                        ),
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppSegmentedControl<AdaptiveThemeMode>(
+            value: current == AdaptiveThemeMode.system
+                ? (context.colors.isDark
+                      ? AdaptiveThemeMode.dark
+                      : AdaptiveThemeMode.light)
+                : current,
+            onChanged: onModeSelected,
+            options: [
+              for (final mode in [
+                AdaptiveThemeMode.light,
+                AdaptiveThemeMode.dark,
+              ])
+                AppSegmentedOption(
+                  value: mode,
+                  label: _themeLabel(context, mode),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

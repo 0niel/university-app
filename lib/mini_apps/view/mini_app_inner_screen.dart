@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/mini_apps/cubit/mini_app_runner_cubit.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_runner_skeleton.dart';
+import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_scaffold.dart';
 import 'package:stac_bridge/stac_bridge.dart';
 
 class MiniAppInnerScreen extends StatefulWidget {
@@ -41,15 +42,8 @@ class _MiniAppInnerScreenState extends State<MiniAppInnerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final l10n = context.l10n;
-    return Scaffold(
-      backgroundColor: colors.canvas,
-      appBar: NinjaAppBar.inner(
-        title: widget.title,
-        onBack: () => Navigator.of(context).maybePop(),
-        backSemanticLabel: l10n.back,
-      ),
+    return MiniAppScaffold(
+      title: widget.title,
       body: FutureBuilder<Map<String, dynamic>?>(
         future: _screen,
         builder: (context, snapshot) {
@@ -68,8 +62,8 @@ class _MiniAppInnerScreenState extends State<MiniAppInnerScreen> {
   Widget _error(BuildContext context, {required bool retry}) {
     final l10n = context.l10n;
     return Center(
-      child: Padding(
-        padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      child: SingleChildScrollView(
+        padding: const .symmetric(horizontal: AppSpacing.screen),
         child: NinjaErrorState(
           title: l10n.miniAppsRunnerError,
           retryLabel: retry ? l10n.retry : null,

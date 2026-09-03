@@ -44,6 +44,10 @@ jobs:
         working-directory: wear
         run: flutter pub get
 
+      - name: Install schedule fetcher dependencies
+        working-directory: tools/schedule_fetcher
+        run: dart pub get
+
       - name: Generate code
         run: dart run build_runner build
 
@@ -127,25 +131,54 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - package: discourse_api_client
-            codegen: true
-            test-command: dart test
-          - package: campus_repository
-            codegen: false
-            test-command: flutter test
-          - package: news_repository
-            codegen: true
-            test-command: dart test
-          - package: study_groups_repository
-            codegen: true
-            test-command: dart test
-          - package: news_blocks_ui
-            codegen: false
-            test-command: flutter test
-          - package: web_oauth_interceptor_client
-            codegen: false
-            test-command: flutter test
+        package:
+          - academic_calendar
+          - ads_ui
+          - analytics_repository
+          - app_ui
+          - article_repository
+          - auth_client/auth_client
+          - auth_client/supabase_authentication_client
+          - auth_client/token_storage
+          - campus_repository
+          - community_catalog_repository
+          - community_repository
+          - connectivity_client
+          - deep_link_client
+          - discourse_api_client
+          - friends_repository
+          - gamification_repository
+          - github
+          - local_auth_client
+          - local_notifications_client
+          - local_notifications_repository
+          - lost_and_found_repository
+          - mini_apps_repository
+          - network_location_client
+          - news_blocks
+          - news_blocks_ui
+          - news_repository
+          - nfc_pass_client
+          - nfc_pass_repository
+          - notifications_client/firebase_notifications_client
+          - notifications_client/notifications_client
+          - notifications_repository
+          - package_info_client
+          - permission_client
+          - preferences_repository
+          - rtu_mirea_schedule_api_client
+          - schedule
+          - schedule_exporter_repository
+          - schedule_repository
+          - service_catalog_repository
+          - share_launcher
+          - stac_bridge
+          - storage/persistent_storage
+          - storage/secure_storage
+          - storage/storage
+          - study_groups_repository
+          - user_repository
+          - web_oauth_interceptor_client
 
     steps:
       - name: Check out repository
@@ -163,14 +196,23 @@ jobs:
       - name: Install workspace dependencies
         run: flutter pub get
 
-      - name: Generate package code
-        if: matrix.codegen
+      - name: Analyze package
         working-directory: packages/${{ matrix.package }}
-        run: dart run build_runner build
+        run: dart analyze --fatal-warnings
 
       - name: Test package
         working-directory: packages/${{ matrix.package }}
-        run: ${{ matrix.test-command }}
+        shell: bash
+        run: |
+          if ! find test -type f -name '*_test.dart' -print -quit 2>/dev/null | grep -q .; then
+            exit 0
+          fi
+          runtime="$(dart "$GITHUB_WORKSPACE/tool/package_test_runtime.dart" "$PWD")"
+          if [[ "$runtime" == "flutter" ]]; then
+            flutter test --no-pub
+          else
+            dart test
+          fi
 
   edge-functions:
     name: Edge Functions
@@ -228,10 +270,13 @@ jobs:
         run: supabase db reset
 
       - name: Verify database security contracts
-        run: >-
-          psql postgresql://postgres:postgres@127.0.0.1:54322/postgres
-          --set ON_ERROR_STOP=1
-          --file supabase/tests/security_regressions_contract.sql
+        shell: bash
+        run: |
+          for contract in supabase/tests/*_contract.sql; do
+            psql postgresql://postgres:postgres@127.0.0.1:54322/postgres \
+              --set ON_ERROR_STOP=1 \
+              --file "$contract"
+          done
 
       - name: Lint database
         run: supabase db lint --local --level warning

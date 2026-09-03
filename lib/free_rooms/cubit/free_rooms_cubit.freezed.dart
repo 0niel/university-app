@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FreeRoomsState {
 
- FreeRoomsStatus get status; List<FreeRoom> get rooms; String get building;
+ FreeRoomsStatus get status; List<FreeRoom> get rooms; String get campus; int? get floor; String get query;
 /// Create a copy of FreeRoomsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $FreeRoomsStateCopyWith<FreeRoomsState> get copyWith => _$FreeRoomsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FreeRoomsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.rooms, rooms)&&(identical(other.building, building) || other.building == building));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FreeRoomsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.rooms, rooms)&&(identical(other.campus, campus) || other.campus == campus)&&(identical(other.floor, floor) || other.floor == floor)&&(identical(other.query, query) || other.query == query));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(rooms),building);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(rooms),campus,floor,query);
 
 @override
 String toString() {
-  return 'FreeRoomsState(status: $status, rooms: $rooms, building: $building)';
+  return 'FreeRoomsState(status: $status, rooms: $rooms, campus: $campus, floor: $floor, query: $query)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $FreeRoomsStateCopyWith<$Res>  {
   factory $FreeRoomsStateCopyWith(FreeRoomsState value, $Res Function(FreeRoomsState) _then) = _$FreeRoomsStateCopyWithImpl;
 @useResult
 $Res call({
- FreeRoomsStatus status, List<FreeRoom> rooms, String building
+ FreeRoomsStatus status, List<FreeRoom> rooms, String campus, int? floor, String query
 });
 
 
@@ -62,11 +62,13 @@ class _$FreeRoomsStateCopyWithImpl<$Res>
 
 /// Create a copy of FreeRoomsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? rooms = null,Object? building = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? rooms = null,Object? campus = null,Object? floor = freezed,Object? query = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FreeRoomsStatus,rooms: null == rooms ? _self.rooms : rooms // ignore: cast_nullable_to_non_nullable
-as List<FreeRoom>,building: null == building ? _self.building : building // ignore: cast_nullable_to_non_nullable
+as List<FreeRoom>,campus: null == campus ? _self.campus : campus // ignore: cast_nullable_to_non_nullable
+as String,floor: freezed == floor ? _self.floor : floor // ignore: cast_nullable_to_non_nullable
+as int?,query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -152,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FreeRoomsStatus status,  List<FreeRoom> rooms,  String building)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FreeRoomsStatus status,  List<FreeRoom> rooms,  String campus,  int? floor,  String query)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FreeRoomsState() when $default != null:
-return $default(_that.status,_that.rooms,_that.building);case _:
+return $default(_that.status,_that.rooms,_that.campus,_that.floor,_that.query);case _:
   return orElse();
 
 }
@@ -173,10 +175,10 @@ return $default(_that.status,_that.rooms,_that.building);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FreeRoomsStatus status,  List<FreeRoom> rooms,  String building)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FreeRoomsStatus status,  List<FreeRoom> rooms,  String campus,  int? floor,  String query)  $default,) {final _that = this;
 switch (_that) {
 case _FreeRoomsState():
-return $default(_that.status,_that.rooms,_that.building);case _:
+return $default(_that.status,_that.rooms,_that.campus,_that.floor,_that.query);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -193,10 +195,10 @@ return $default(_that.status,_that.rooms,_that.building);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FreeRoomsStatus status,  List<FreeRoom> rooms,  String building)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FreeRoomsStatus status,  List<FreeRoom> rooms,  String campus,  int? floor,  String query)?  $default,) {final _that = this;
 switch (_that) {
 case _FreeRoomsState() when $default != null:
-return $default(_that.status,_that.rooms,_that.building);case _:
+return $default(_that.status,_that.rooms,_that.campus,_that.floor,_that.query);case _:
   return null;
 
 }
@@ -208,7 +210,7 @@ return $default(_that.status,_that.rooms,_that.building);case _:
 
 
 class _FreeRoomsState extends FreeRoomsState {
-  const _FreeRoomsState({this.status = FreeRoomsStatus.initial, final  List<FreeRoom> rooms = const <FreeRoom>[], this.building = 'all'}): _rooms = rooms,super._();
+  const _FreeRoomsState({this.status = FreeRoomsStatus.initial, final  List<FreeRoom> rooms = const <FreeRoom>[], this.campus = '', this.floor, this.query = ''}): _rooms = rooms,super._();
 
 
 @override@JsonKey() final  FreeRoomsStatus status;
@@ -219,7 +221,9 @@ class _FreeRoomsState extends FreeRoomsState {
   return EqualUnmodifiableListView(_rooms);
 }
 
-@override@JsonKey() final  String building;
+@override@JsonKey() final  String campus;
+@override final  int? floor;
+@override@JsonKey() final  String query;
 
 /// Create a copy of FreeRoomsState
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +235,16 @@ _$FreeRoomsStateCopyWith<_FreeRoomsState> get copyWith => __$FreeRoomsStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FreeRoomsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._rooms, _rooms)&&(identical(other.building, building) || other.building == building));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FreeRoomsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._rooms, _rooms)&&(identical(other.campus, campus) || other.campus == campus)&&(identical(other.floor, floor) || other.floor == floor)&&(identical(other.query, query) || other.query == query));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_rooms),building);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_rooms),campus,floor,query);
 
 @override
 String toString() {
-  return 'FreeRoomsState(status: $status, rooms: $rooms, building: $building)';
+  return 'FreeRoomsState(status: $status, rooms: $rooms, campus: $campus, floor: $floor, query: $query)';
 }
 
 
@@ -251,7 +255,7 @@ abstract mixin class _$FreeRoomsStateCopyWith<$Res> implements $FreeRoomsStateCo
   factory _$FreeRoomsStateCopyWith(_FreeRoomsState value, $Res Function(_FreeRoomsState) _then) = __$FreeRoomsStateCopyWithImpl;
 @override @useResult
 $Res call({
- FreeRoomsStatus status, List<FreeRoom> rooms, String building
+ FreeRoomsStatus status, List<FreeRoom> rooms, String campus, int? floor, String query
 });
 
 
@@ -268,11 +272,13 @@ class __$FreeRoomsStateCopyWithImpl<$Res>
 
 /// Create a copy of FreeRoomsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? rooms = null,Object? building = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? rooms = null,Object? campus = null,Object? floor = freezed,Object? query = null,}) {
   return _then(_FreeRoomsState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FreeRoomsStatus,rooms: null == rooms ? _self._rooms : rooms // ignore: cast_nullable_to_non_nullable
-as List<FreeRoom>,building: null == building ? _self.building : building // ignore: cast_nullable_to_non_nullable
+as List<FreeRoom>,campus: null == campus ? _self.campus : campus // ignore: cast_nullable_to_non_nullable
+as String,floor: freezed == floor ? _self.floor : floor // ignore: cast_nullable_to_non_nullable
+as int?,query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

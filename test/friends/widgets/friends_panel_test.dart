@@ -44,7 +44,7 @@ void main() {
 
       expect(find.byType(NinjaSkeleton), findsWidgets);
       expect(find.byType(CircularProgressIndicator), findsNothing);
-      expect(find.byType(NinjaEmptyState), findsNothing);
+      expect(find.byType(AppEmptyState), findsNothing);
     });
 
     testWidgets('does not show skeleton once friends are loaded', (
@@ -73,7 +73,13 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           NinjaFriendsPanel(
-            friends: const [_friend],
+            friends: [
+              _friend.copyWith(
+                locationUpdatedAt: DateTime.now().subtract(
+                  const Duration(minutes: 1),
+                ),
+              ),
+            ],
             loading: false,
             myLatitude: 55.6699,
             myLongitude: 37.4803,
@@ -84,7 +90,56 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.textContaining(' м'), findsOneWidget);
+      expect(find.text('22 м'), findsOneWidget);
+    });
+
+    testWidgets('does not expose distance for private or invalid locations', (
+      tester,
+    ) async {
+      final updatedAt = DateTime.now().subtract(const Duration(minutes: 1));
+      final visible = _friend.copyWith(locationUpdatedAt: updatedAt);
+      final cases = [
+        (friend: _friend, latitude: 55.6699, longitude: 37.4803),
+        (
+          friend: visible.copyWith(isGhost: true),
+          latitude: 55.6699,
+          longitude: 37.4803,
+        ),
+        (friend: visible, latitude: 91.0, longitude: 37.4803),
+        (friend: visible, latitude: 55.6699, longitude: double.nan),
+        (
+          friend: visible.copyWith(latitude: 91),
+          latitude: 55.6699,
+          longitude: 37.4803,
+        ),
+        (
+          friend: visible.copyWith(
+            locationUpdatedAt: DateTime.now().add(const Duration(days: 1)),
+          ),
+          latitude: 55.6699,
+          longitude: 37.4803,
+        ),
+      ];
+      for (final item in cases) {
+        await tester.pumpWidget(
+          _wrap(
+            NinjaFriendsPanel(
+              friends: [item.friend],
+              loading: false,
+              myLatitude: item.latitude,
+              myLongitude: item.longitude,
+              onFriendTap: (_) {},
+              onAddFriend: () {},
+            ),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 400));
+        expect(
+          find.textContaining(RegExp(r'^\d+(?:[.,]\d+)? (?:м|км)$')),
+          findsNothing,
+        );
+        expect(tester.takeException(), isNull);
+      }
     });
 
     testWidgets('empty state offers a pill CTA that opens find friends', (
@@ -103,7 +158,7 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.byType(NinjaEmptyState), findsOneWidget);
+      expect(find.byType(AppEmptyState), findsOneWidget);
       expect(find.text('Пока никого'), findsOneWidget);
 
       final cta = tester.widget<FriendsPillButton>(
@@ -132,12 +187,12 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.byType(NinjaErrorState), findsOneWidget);
-      expect(find.byType(NinjaEmptyState), findsNothing);
+      expect(find.byType(AppErrorState), findsOneWidget);
+      expect(find.byType(AppEmptyState), findsNothing);
 
       tester
-          .widget<NinjaErrorState>(find.byType(NinjaErrorState))
-          .onRetry
+          .widget<AppErrorState>(find.byType(AppErrorState))
+          .onPrimary
           ?.call();
       await tester.pump();
       expect(retries, 1);

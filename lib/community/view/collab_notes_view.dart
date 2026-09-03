@@ -6,9 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/community/cubit/collab_notes/collab_notes.dart';
 import 'package:rtu_mirea_app/community/view/collab_note_editor_page.dart';
+import 'package:rtu_mirea_app/community/widgets/accent_header_action.dart';
 import 'package:rtu_mirea_app/community/widgets/collab_notes/collab_notes_body.dart';
 import 'package:rtu_mirea_app/community/widgets/collab_notes/create_collab_note_sheet.dart';
-import 'package:rtu_mirea_app/community/widgets/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class CollabNotesView extends StatelessWidget {
@@ -64,12 +64,19 @@ class CollabNotesView extends StatelessWidget {
           current.notes.isNotEmpty,
       listener: (context, _) => _showRefreshError(context),
       builder: (context, state) => Scaffold(
-        backgroundColor: context.ninja.canvas,
+        backgroundColor: context.colors.canvas,
         body: Column(
           children: [
-            NinjaCommunityHeader(
+            AppInnerHeader(
               title: context.l10n.collabNotesTitle,
-              subtitle: context.l10n.collabNotesSubtitle,
+              onBack: () => Navigator.of(context).maybePop(),
+              backSemanticsLabel: context.l10n.back,
+              actions: [
+                accentHeaderAction(
+                  semanticsLabel: context.l10n.collabNotesCreateTitle,
+                  onTap: state.isCreating ? null : () => _create(context),
+                ),
+              ],
             ),
             Expanded(
               child: CollabNotesBody(
@@ -78,11 +85,6 @@ class CollabNotesView extends StatelessWidget {
               ),
             ),
           ],
-        ),
-        floatingActionButton: NinjaCommunityFab(
-          label: context.l10n.collabNotesCreateTitle,
-          icon: .pencil,
-          onPressed: state.isCreating ? null : () => _create(context),
         ),
       ),
     );

@@ -46,12 +46,11 @@ void main() {
 
       expect(find.text('Не удалось загрузить барахолку'), findsOneWidget);
       expect(find.text('Пока пусто'), findsNothing);
-      expect(find.byType(MarketplaceHero), findsNothing);
       await tester.tap(find.text('Повторить'));
       verify(() => cubit.load()).called(1);
     });
 
-    testWidgets('the pastel hero is the only accent surface on the screen', (
+    testWidgets('grid uses honest missing-photo placeholders', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -65,37 +64,23 @@ void main() {
         ),
       );
 
-      final accent = NinjaColors.dark().accentSoft;
-      final accentSurfaces = tester
-          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-          .where(
-            (widget) =>
-                widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).color == accent,
-          );
-      expect(accentSurfaces, hasLength(1));
-      expect(find.byType(MarketplaceHero), findsOneWidget);
+      expect(find.byType(GridView), findsOneWidget);
+      expect(find.byType(AppStripePlaceholder), findsOneWidget);
     });
 
-    testWidgets('the hero keeps a plain surface while the grid loads', (
+    testWidgets('loading keeps the same grid geometry as the loaded state', (
       tester,
     ) async {
       await tester.pumpWidget(
         buildSubject(const MarketplaceState(status: .loading)),
       );
 
-      final hero = tester.widget<DecoratedBox>(
-        find
-            .descendant(
-              of: find.byType(MarketplaceHero),
-              matching: find.byType(DecoratedBox),
-            )
-            .first,
-      );
-      expect(
-        (hero.decoration as BoxDecoration).color,
-        NinjaColors.dark().surface,
-      );
+      expect(find.byType(MarketplaceGridSkeleton), findsOneWidget);
+      final grid = tester.widget<GridView>(find.byType(GridView));
+      final delegate =
+          grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+      expect(delegate.crossAxisCount, 2);
+      expect(delegate.mainAxisExtent, 263);
     });
 
     testWidgets('the empty state offers a real sell action', (tester) async {
@@ -125,7 +110,11 @@ void main() {
         ),
       );
 
+      await tester.ensureVisible(find.text('Поиск'));
+      await tester.tap(find.text('Поиск'));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField).first, 'зззз');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
 
       expect(find.text('Ничего не нашлось'), findsOneWidget);
@@ -140,24 +129,24 @@ void main() {
       expect(find.text('Учебник физики'), findsOneWidget);
     });
 
-    testWidgets('the page header keeps a 44px circular refresh action', (
+    testWidgets('the page header keeps a 44px circular back action', (
       tester,
     ) async {
       when(() => cubit.load()).thenAnswer((_) async => true);
       await tester.pumpWidget(buildSubject(const MarketplaceState()));
 
-      final button = find.byKey(const ValueKey('marketplace-refresh-button'));
+      final button = find.bySemanticsLabel('Назад');
       expect(button, findsOneWidget);
       expect(
         tester.getSize(button),
         const Size(
-          NinjaMetrics.minTouchTarget,
-          NinjaMetrics.minTouchTarget,
+          AppControlSize.touchTarget,
+          AppControlSize.touchTarget,
         ),
       );
 
-      final title = tester.widget<Text>(find.text('Барахолка'));
-      expect(title.style?.fontSize, NinjaText.display.fontSize);
+      final title = tester.widget<Text>(find.text('Маркет'));
+      expect(title.style?.fontSize, AppText.displaySmall.fontSize);
     });
 
     testWidgets('includes every configured category including other', (
@@ -166,7 +155,7 @@ void main() {
       when(() => cubit.filterChanged(any())).thenReturn(null);
       await tester.pumpWidget(buildSubject(const MarketplaceState()));
 
-      await tester.drag(find.byType(NinjaChipRow), const Offset(-500, 0));
+      await tester.drag(find.byType(AppChipRow<String>), const Offset(-500, 0));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Разное'), findsOneWidget);
@@ -191,8 +180,12 @@ void main() {
         ),
       );
 
+      await tester.ensureVisible(find.text('Поиск'));
+      await tester.tap(find.text('Поиск'));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField).first, 'мышь');
-      await tester.pump();
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
 
       expect(find.text('Беспроводная мышь'), findsOneWidget);
       expect(find.text('Учебник физики'), findsNothing);
@@ -211,8 +204,6 @@ void main() {
         buildSubject(const MarketplaceState(status: .ready, items: [item])),
       );
 
-      // The persistent owner-actions pill was replaced by a long-press /
-      // discoverability-chip sheet.
       expect(find.byTooltip('Удалить объявление'), findsNothing);
       await tester.tap(
         find.byWidgetPredicate(

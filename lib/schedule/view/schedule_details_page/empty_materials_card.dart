@@ -9,38 +9,38 @@ class _EmptyMaterialsCard extends StatelessWidget {
     semanticsLabel: context.l10n.lessonDetailsEmptyMaterialsTitle,
     child: Container(
       constraints: const BoxConstraints(minHeight: 88),
-      padding: const .all(16),
+      padding: const .all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.ninja.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        color: context.colors.surface,
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Column(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: AppControlSize.touchTarget,
+            height: AppControlSize.touchTarget,
             alignment: .center,
             decoration: BoxDecoration(
-              color: context.ninja.brandTint,
+              color: context.colors.tint,
               shape: .circle,
             ),
             child: AppLineIconWidget(
               AppLineIcon.upload,
-              color: context.ninja.brandInk,
+              color: context.colors.accent,
               size: 20,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.gap),
           Text(
             context.l10n.lessonDetailsEmptyMaterialsTitle,
             textAlign: .center,
-            style: NinjaText.body.copyWith(color: context.ninja.ink),
+            style: AppText.body.copyWith(color: context.colors.ink),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             context.l10n.lessonDetailsEmptyMaterialsSub,
             textAlign: .center,
-            style: NinjaText.subtext.copyWith(color: context.ninja.muted),
+            style: AppText.subtext.copyWith(color: context.colors.muted),
           ),
         ],
       ),

@@ -18,8 +18,7 @@ class StacAppChipParser extends StacParser<StacAppChip> {
     return AppFilterChip(
       label: model.label,
       isSelected: model.selected,
-      small: model.small,
-      color: parseHexColor(model.color),
+      color: parseAppColor(context, model.color),
       onTap: actionCallback(context, model.actionJson),
     );
   }

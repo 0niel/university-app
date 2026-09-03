@@ -1,5 +1,8 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/gamification/ninja_rank.dart';
+import 'package:flutter/widgets.dart';
 
 class AppRankNode extends StatelessWidget {
   const AppRankNode({
@@ -41,34 +44,38 @@ class AppRankNode extends StatelessWidget {
     final colors = context.colors;
     final isLocked = !isActive && !isDone;
     final background = isActive
-        ? colors.primary
+        ? colors.accent
         : isDone
-            ? colors.primary.withValues(alpha: 0.14)
-            : colors.surfaceHigh;
-    Widget emoji = Text(rank.emoji, style: const TextStyle(fontSize: 20));
+            ? colors.tint
+            : colors.surface2;
+
+    Widget emoji = Text(
+      rank.emoji,
+      style: const TextStyle(fontSize: 20, height: 1),
+    );
     if (isLocked) {
       emoji = Opacity(
-        opacity: 0.5,
+        opacity: .5,
         child: ColorFiltered(colorFilter: _greyscale, child: emoji),
       );
     }
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 44,
-          height: 44,
+          width: AppControlSize.iconButton,
+          height: AppControlSize.iconButton,
           alignment: Alignment.center,
           decoration: BoxDecoration(color: background, shape: BoxShape.circle),
           child: emoji,
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: AppSpacing.fine),
         Text(
           rank.name,
-          style: AppText.captionSmall.copyWith(
-            color: isActive ? colors.primary : colors.deactiveDarker,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-          ),
+          style: isActive
+              ? AppText.captionSmall.copyWith(color: colors.accent)
+              : AppText.caption.copyWith(color: colors.muted2),
         ),
       ],
     );

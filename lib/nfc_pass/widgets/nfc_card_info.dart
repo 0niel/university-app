@@ -5,9 +5,10 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 part 'info_row.dart';
 
 class NfcCardInfo extends StatelessWidget {
-  const NfcCardInfo({required this.passId, super.key});
+  const NfcCardInfo({required this.passId, this.deviceName, super.key});
 
   final String? passId;
+  final String? deviceName;
 
   @override
   Widget build(BuildContext context) {
@@ -15,27 +16,31 @@ class NfcCardInfo extends StatelessWidget {
     if (id == null) return const SizedBox.shrink();
 
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.nfcPassInfoTitle,
-          style: NinjaText.title.copyWith(color: colors.ink),
+          style: AppText.title.copyWith(color: colors.ink),
         ),
         const SizedBox(height: 6),
         DecoratedBox(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
+            borderRadius: BorderRadius.circular(AppRadius.card),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               children: [
                 _InfoRow(label: l10n.nfcPassIdField, value: _obfuscate(id)),
-                const SizedBox(height: 14),
+                if (deviceName case final device?) ...[
+                  const SizedBox(height: AppSpacing.sectionGap),
+                  _InfoRow(label: l10n.nfcPassDeviceLabel, value: device),
+                ],
+                const SizedBox(height: AppSpacing.sectionGap),
                 _InfoRow(
                   label: l10n.nfcPassStatusField,
                   value: l10n.nfcPassActiveStatus,

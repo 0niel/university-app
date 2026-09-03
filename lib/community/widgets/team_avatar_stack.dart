@@ -18,7 +18,7 @@ class TeamAvatarStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return SizedBox(
       height: size + 4,
       child: Stack(
@@ -41,7 +41,7 @@ class TeamAvatarStack extends StatelessWidget {
                   height: size,
                   decoration: BoxDecoration(
                     shape: .circle,
-                    color: colors.surfaceAlt,
+                    color: colors.surface2,
                   ),
                   child: Center(
                     child: AppLineIconWidget(

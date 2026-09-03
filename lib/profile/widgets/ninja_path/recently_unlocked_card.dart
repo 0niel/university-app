@@ -7,13 +7,13 @@ class _RecentlyUnlockedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Container(
-      padding: const .all(16),
+      padding: const .all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Row(
         children: [
@@ -22,12 +22,12 @@ class _RecentlyUnlockedCard extends StatelessWidget {
             height: 44,
             alignment: .center,
             decoration: BoxDecoration(
-              color: colors.brandTint,
-              borderRadius: .circular(14),
+              color: colors.tint,
+              borderRadius: .circular(AppRadius.tile),
             ),
             child: Text(badge.emoji, style: const TextStyle(fontSize: 21)),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: AppSpacing.sectionGap),
           Expanded(
             child: Column(
               crossAxisAlignment: .start,
@@ -36,23 +36,25 @@ class _RecentlyUnlockedCard extends StatelessWidget {
                   l10n.profileBadgeUnlocked,
                   maxLines: 1,
                   overflow: .ellipsis,
-                  style: NinjaText.microLabel.copyWith(color: colors.brandInk),
+                  style: AppText.captionSmall.copyWith(color: colors.accent),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   badge.name,
                   maxLines: 2,
                   overflow: .ellipsis,
-                  style: NinjaText.headline.copyWith(color: colors.ink),
+                  style: AppText.headline.copyWith(color: colors.ink),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   '+${badge.shurikenReward} ${l10n.ninjaRankShurikens}',
                   maxLines: 1,
                   overflow: .ellipsis,
-                  style: NinjaText.tabular(
-                    NinjaText.helper.copyWith(color: colors.mutedDark),
-                  ),
+                  style: AppText.caption
+                      .copyWith(color: colors.muted)
+                      .copyWith(
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                 ),
               ],
             ),

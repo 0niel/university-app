@@ -4,3 +4,4 @@ export 'app_tour_script.dart';
 export 'model/app_tour_step.dart';
 export 'model/app_tour_target.dart';
 export 'view/app_tour_overlay.dart';
+export 'view/tour_coach_card.dart';

@@ -8,127 +8,145 @@ class _SubjectHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    final runtime = _lessonRuntime(lesson, selectedDate);
-    final teacher = _teacherLine(lesson);
-    final live = runtime.live;
-    final foreground = live ? colors.onAccentSoft : colors.ink;
-    final muted = live ? colors.onAccentSoftMuted : colors.muted;
-
+    final locale = Localizations.localeOf(context).toString();
+    final room = lesson.classrooms.firstOrNull;
+    final campus = room?.campus?.shortName ?? room?.campus?.name;
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: NinjaMetrics.screenPadding,
-      ),
-      child: NinjaScheduleSurface(
-        color: live ? colors.accentSoft : colors.surface,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (live) ...[
-                  ExcludeSemantics(
-                    child: Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: foreground,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 7),
-                ],
-                Flexible(
-                  child: Text(
-                    live
-                        ? l10n.lessonDetailsLiveNow
-                        : _lessonTypeName(l10n, lesson),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: NinjaText.microLabel.copyWith(
-                      color: live
-                          ? foreground
-                          : colors.subjectColor(
-                              lesson.subject,
-                            ),
-                    ),
-                  ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              AppBadge(
+                key: const ValueKey('lesson-type-badge'),
+                label: _lessonTypeName(l10n, lesson),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xsm,
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              lesson.subject,
-              style: NinjaText.title.copyWith(color: foreground),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  _timeRange(lesson),
-                  style: NinjaText.tabular(
-                    NinjaText.body.copyWith(color: foreground),
-                  ),
+                textStyle: AppText.sans(12, FontWeight.w700),
+                tone: switch (lesson.lessonType) {
+                  LessonType.lecture => AppBadgeTone.lecture,
+                  LessonType.practice => AppBadgeTone.practice,
+                  LessonType.laboratoryWork => AppBadgeTone.lab,
+                  LessonType.exam || LessonType.credit => AppBadgeTone.exam,
+                  _ => AppBadgeTone.accent,
+                },
+              ),
+              Text(
+                capitalizeFirst(
+                  DateFormat('EEEE, d MMMM', locale).format(selectedDate),
                 ),
-                if (runtime.past)
-                  Text(
-                    l10n.lessonDetailsEnded,
-                    style: NinjaText.subtext.copyWith(color: muted),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final itemWidth = constraints.maxWidth >= 540
-                    ? (constraints.maxWidth - 24) / 3
-                    : constraints.maxWidth;
-                return Wrap(
-                  spacing: 12,
-                  runSpacing: 8,
-                  children: [
-                    SizedBox(
-                      width: itemWidth,
-                      child: NinjaScheduleFact(
-                        label: l10n.classroom,
-                        value: _classroomLine(l10n, lesson),
-                        icon: AppLineIcon.pin,
-                        foreground: foreground,
-                        muted: muted,
-                      ),
-                    ),
-                    SizedBox(
-                      width: itemWidth,
-                      child: NinjaScheduleFact(
-                        label: l10n.lessonDetailsTeacherFallback,
-                        value: teacher.isEmpty ? '—' : teacher,
-                        icon: AppLineIcon.user,
-                        foreground: foreground,
-                        muted: muted,
-                      ),
-                    ),
-                    SizedBox(
-                      width: itemWidth,
-                      child: NinjaScheduleFact(
-                        label: l10n.classLabel,
-                        value: '${lesson.lessonBells.number ?? '—'}',
-                        icon: AppLineIcon.clock,
-                        foreground: foreground,
-                        muted: muted,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+                style: AppText.sans(
+                  13,
+                  FontWeight.w500,
+                ).copyWith(color: colors.muted),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sectionGap),
+          AppBalancedText(
+            lesson.subject,
+            style: AppText.serif(
+              32,
+              height: 1.1,
+              letterSpacingEm: -.02,
+            ).copyWith(color: colors.ink),
+          ),
+          const SizedBox(height: AppSpacing.contentGap),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final stacked =
+                  constraints.maxWidth < 320 ||
+                  MediaQuery.textScalerOf(context).scale(1) > 1.5;
+              final cards = [
+                _LessonInfoCard(
+                  label: l10n.scheduleDiffFieldTime,
+                  value: _timeRange(lesson),
+                  caption: [
+                    if (lessonNumberOf(lesson) case final number?)
+                      l10n.lessonPairOrdinal(number),
+                    if (campus != null && campus.isNotEmpty) campus,
+                  ].join(' · '),
+                ),
+                _LessonInfoCard(
+                  label: l10n.classroom,
+                  value: _classroomLine(l10n, lesson),
+                  caption: [
+                    if (campus != null && campus.isNotEmpty) campus,
+                    l10n.lessonOnMap,
+                  ].join(' · '),
+                  onTap: () => const MapRoute().push<void>(context),
+                ),
+              ];
+              return stacked
+                  ? Column(spacing: AppSpacing.sm, children: cards)
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: cards.first),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(child: cards.last),
+                      ],
+                    );
+            },
+          ),
+        ],
       ),
     );
   }
+}
+
+class _LessonInfoCard extends StatelessWidget {
+  const _LessonInfoCard({
+    required this.label,
+    required this.value,
+    required this.caption,
+    this.onTap,
+  });
+  final String label;
+  final String value;
+  final String caption;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => AppCard(
+    radius: AppRadius.lg,
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.lg,
+      vertical: AppSpacing.sectionGap,
+    ),
+    onTap: onTap,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          label,
+          style: AppText.captionSmall.copyWith(color: context.colors.muted),
+        ),
+        const SizedBox(height: AppSpacing.xsm),
+        Text(
+          value,
+          style: AppText.sans(
+            17,
+            FontWeight.w700,
+            tabular: true,
+          ).copyWith(color: context.colors.ink),
+        ),
+        const SizedBox(height: AppSpacing.xxs),
+        Text(
+          caption,
+          style: AppText.caption.copyWith(
+            color: onTap == null ? context.colors.muted : context.colors.accent,
+          ),
+        ),
+      ],
+    ),
+  );
 }

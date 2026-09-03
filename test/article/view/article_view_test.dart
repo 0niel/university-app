@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/article/article.dart';
-import 'package:rtu_mirea_app/article/view/article_view.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
@@ -15,7 +14,15 @@ class _MockArticleBloc extends MockBloc<ArticleEvent, ArticleState>
 class _MockCategoriesBloc extends MockBloc<CategoriesEvent, CategoriesState>
     implements CategoriesBloc {}
 
+class _Saved extends MockCubit<List<String>> implements SavedArticlesCubit {}
+
 void main() {
+  late SavedArticlesCubit saved;
+  setUp(() {
+    saved = _Saved();
+    when(() => saved.state).thenReturn([]);
+    when(() => saved.isSaved(any())).thenReturn(false);
+  });
   testWidgets('article chrome is flat, responsive, and uses line actions', (
     tester,
   ) async {
@@ -25,6 +32,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     final articleBloc = _MockArticleBloc();
+    when(() => articleBloc.id).thenReturn('article-1');
     final categoriesBloc = _MockCategoriesBloc();
     final uri = Uri.parse('https://example.com/article');
     when(() => articleBloc.state).thenReturn(ArticleState(uri: uri));
@@ -44,6 +52,7 @@ void main() {
         home: MultiBlocProvider(
           providers: [
             BlocProvider<ArticleBloc>.value(value: articleBloc),
+            BlocProvider<SavedArticlesCubit>.value(value: saved),
             BlocProvider<CategoriesBloc>.value(value: categoriesBloc),
           ],
           child: const ArticleView(isVideoArticle: false),
@@ -53,7 +62,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byType(AppBar), findsNothing);
-    expect(find.byType(AppLineIconWidget), findsNWidgets(2));
+    expect(find.byType(AppLineIconWidget), findsNWidgets(3));
     expect(
       tester.getSize(find.byKey(const Key('articlePage_shareButton'))),
       const Size(44, 44),
@@ -69,6 +78,7 @@ void main() {
     tester,
   ) async {
     final articleBloc = _MockArticleBloc();
+    when(() => articleBloc.id).thenReturn('article-1');
     final categoriesBloc = _MockCategoriesBloc();
     when(() => articleBloc.state).thenReturn(
       const ArticleState(status: ArticleStatus.failure),
@@ -84,6 +94,7 @@ void main() {
         home: MultiBlocProvider(
           providers: [
             BlocProvider<ArticleBloc>.value(value: articleBloc),
+            BlocProvider<SavedArticlesCubit>.value(value: saved),
             BlocProvider<CategoriesBloc>.value(value: categoriesBloc),
           ],
           child: const ArticleView(isVideoArticle: false),

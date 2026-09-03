@@ -10,11 +10,12 @@ class NinjaPathTabError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return NinjaErrorState(
+    return AppErrorState(
       title: l10n.ninjaPathLoadError,
       message: l10n.profileSectionLoadFailed,
-      retryLabel: l10n.tryAgain,
-      onRetry: onRetry,
+      footnote: null,
+      primaryLabel: l10n.tryAgain,
+      onPrimary: onRetry,
     );
   }
 }

@@ -1878,6 +1878,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get legendLessons => 'Пары';
 
   @override
+  String get legendHoliday => 'Праздник';
+
+  @override
   String get legendRetake => 'Пересдача';
 
   @override
@@ -4446,10 +4449,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get loginSubtitle => 'Войди, используя свой аккаунт (НЕ ЛКС МИРЭА)';
 
   @override
-  String get loginEmailPlaceholder => 'student@university.example';
+  String get loginEmailPlaceholder => 'name@example.com';
 
   @override
-  String get loginEmailError => 'Используйте разрешённый университетский email';
+  String get loginEmailError => 'Введите корректный email';
 
   @override
   String loginPasswordError(int count) {
@@ -5451,7 +5454,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get marketTitle => 'Барахолка';
+  String get marketTitle => 'Маркет';
 
   @override
   String marketSubtitle(int count) {
@@ -7178,7 +7181,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsTitle => 'Настройки';
 
   @override
-  String get settingsAppearance => 'Внешний вид';
+  String get settingsAppearance => 'Оформление';
 
   @override
   String get settingsTheme => 'Тема';
@@ -8448,4 +8451,2603 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get mapInteractiveHint =>
       'Перемещайте карту, масштабируйте щипком или двойным касанием';
+
+  @override
+  String get onboardingWelcomeTitle => 'Университет\nв одном касании';
+
+  @override
+  String get onboardingWelcomeTitleAccent => 'касании';
+
+  @override
+  String get onboardingWelcomeLead =>
+      'Пары, дедлайны, свободные аудитории и пропуск — без лишних вкладок.';
+
+  @override
+  String get onboardingFeatureScheduleTitle => 'Расписание с изменениями';
+
+  @override
+  String get onboardingFeatureScheduleSub =>
+      'Переносы и замены — сразу в ленте';
+
+  @override
+  String get onboardingFeatureRoomsTitle => 'Свободные аудитории рядом';
+
+  @override
+  String get onboardingFeatureRoomsSub => 'Где позаниматься в перерыве';
+
+  @override
+  String get onboardingFeatureFriendsTitle => 'Друзья на кампусе';
+
+  @override
+  String get onboardingFeatureFriendsSub => 'Общие окна и кто где сейчас';
+
+  @override
+  String get onboardingStart => 'Начать';
+
+  @override
+  String get onboardingHaveAccount => 'У меня есть аккаунт';
+
+  @override
+  String get onboardingGroupLead =>
+      'Расписание подтянется автоматически. Изменить можно в настройках.';
+
+  @override
+  String get onboardingGroupPlaceholder => 'ИКБО-01-24';
+
+  @override
+  String get onboardingGroupNotFound =>
+      'Группа не найдена. Проверьте написание или ';
+
+  @override
+  String get onboardingGroupNotFoundAction => 'создайте своё расписание';
+
+  @override
+  String get onboardingGroupNotFoundSuffix => '.';
+
+  @override
+  String get onboardingContinue => 'Продолжить';
+
+  @override
+  String get onboardingSettingsTitle => 'Пара настроек';
+
+  @override
+  String get onboardingSettingsLead => 'Всё можно поменять позже.';
+
+  @override
+  String get onboardingPushSub => 'Пары, дедлайны, изменения';
+
+  @override
+  String get onboardingGeoTitle => 'Геолокация на кампусе';
+
+  @override
+  String get onboardingGeoSub => 'Для карты и свободных аудиторий';
+
+  @override
+  String get onboardingFriendsTitle => 'Показывать меня друзьям';
+
+  @override
+  String get onboardingFriendsSub => 'Только когда вы на кампусе';
+
+  @override
+  String get onboardingPushDenied =>
+      'Разрешите уведомления в настройках системы';
+
+  @override
+  String get onboardingGeoDenied => 'Разрешите геолокацию в настройках системы';
+
+  @override
+  String get onboardingSettingsSaveError =>
+      'Не удалось сохранить настройку. Попробуйте ещё раз.';
+
+  @override
+  String onboardingWelcomeToast(String group) {
+    return 'Добро пожаловать, $group';
+  }
+
+  @override
+  String onboardingStepSemantics(int step, int total) {
+    return 'Шаг $step из $total';
+  }
+
+  @override
+  String newsTimeMinutes(int count) {
+    return '$count мин';
+  }
+
+  @override
+  String newsTimeHours(int count) {
+    return '$count ч';
+  }
+
+  @override
+  String get newsTimeYesterday => 'вчера';
+
+  @override
+  String newsTimeDays(int count) {
+    return '$count дн';
+  }
+
+  @override
+  String get newsTimeNow => 'сейчас';
+
+  @override
+  String get newsSourcesSemantics => 'Источники новостей';
+
+  @override
+  String articleTimeAgo(String time) {
+    return '$time назад';
+  }
+
+  @override
+  String get articleUnsaved => 'Убрано из сохранённого';
+
+  @override
+  String get articleRemoveFromSaved => 'Убрать из сохранённого';
+
+  @override
+  String get articleSourceOfficial => 'Официальный канал';
+
+  @override
+  String get articleSourceTelegram => 'Telegram-канал';
+
+  @override
+  String get articleSourceRss => 'RSS-лента';
+
+  @override
+  String articleSourceSubscribers(String count) {
+    return '$count подписчиков';
+  }
+
+  @override
+  String get articleSourceSubscribed => 'Подписан';
+
+  @override
+  String get articleSourceSubscribe => 'Подписаться';
+
+  @override
+  String articleSourceFollowedToast(String name) {
+    return 'Вы подписаны на $name';
+  }
+
+  @override
+  String get articleSourceUnfollowedToast => 'Подписка отменена';
+
+  @override
+  String get storyRead => 'Читать';
+
+  @override
+  String get storyClose => 'Закрыть';
+
+  @override
+  String get storyPrevious => 'Предыдущая история';
+
+  @override
+  String get storyNext => 'Следующая история';
+
+  @override
+  String get storyEmpty => 'У этого источника пока нет историй';
+
+  @override
+  String get communitiesMine => 'Мои';
+
+  @override
+  String get communitiesRecommended => 'Рекомендуем';
+
+  @override
+  String get communitiesMember => 'Вы участник';
+
+  @override
+  String communitiesJoinedToast(String name) {
+    return 'Добро пожаловать в $name';
+  }
+
+  @override
+  String get communitiesLeftToast => 'Вы покинули сообщество';
+
+  @override
+  String get communitiesMineEmpty => 'Вступи в сообщество — оно появится здесь';
+
+  @override
+  String get communitiesEmptyCategory => 'В этой категории пока нет сообществ';
+
+  @override
+  String get communitiesSuggest => 'Предложить сообщество';
+
+  @override
+  String get communityFeed => 'Лента';
+
+  @override
+  String get communityWrite => 'написать';
+
+  @override
+  String get communityFeedEmpty => 'Публикации в сообществе';
+
+  @override
+  String get communityFeedEmptySub =>
+      'Организаторы пишут в чате — открой его, чтобы написать';
+
+  @override
+  String get communityStatMembers => 'участников';
+
+  @override
+  String get communityStatPlatform => 'площадка';
+
+  @override
+  String get communityStatCategory => 'категория';
+
+  @override
+  String get communityOpenChat => 'Открыть чат';
+
+  @override
+  String get communityPlatformWeb => 'Сайт';
+
+  @override
+  String scheduleWeekOverline(int week, String parity) {
+    return '$week-я нед · $parity';
+  }
+
+  @override
+  String scheduleChangesThisWeek(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count изменения на этой неделе',
+      many: '$count изменений на этой неделе',
+      few: '$count изменения на этой неделе',
+      one: '$count изменение на этой неделе',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scheduleShow => 'Показать';
+
+  @override
+  String scheduleCompareWith(String name) {
+    return 'Сравнение с $name';
+  }
+
+  @override
+  String get scheduleCommonWindows => 'общие окна:';
+
+  @override
+  String get scheduleNoCommonWindows => 'общих окон нет';
+
+  @override
+  String get scheduleCompareOff => 'Выкл';
+
+  @override
+  String get scheduleViewDay => 'День';
+
+  @override
+  String get schedulePrevWeek => '← нед';
+
+  @override
+  String get scheduleNextWeek => 'нед →';
+
+  @override
+  String scheduleDayLessons(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count пар',
+      many: '$count пар',
+      few: '$count пары',
+      one: '$count пара',
+      zero: 'пар нет',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scheduleBreakMinutes(int minutes) {
+    return 'перерыв $minutes мин';
+  }
+
+  @override
+  String get scheduleFreeDayTitle => 'Свободный день';
+
+  @override
+  String get scheduleFreeDaySubtitle => 'Пар нет. Можно добавить своё событие.';
+
+  @override
+  String get scheduleCompareFriend => 'Сравнить с другом';
+
+  @override
+  String get scheduleLegendLab => 'Лаба';
+
+  @override
+  String get scheduleLegendCancel => 'Отмена';
+
+  @override
+  String get scheduleLegendAddOwn => 'тап — добавить своё';
+
+  @override
+  String scheduleMonthMeta(int year, int semester) {
+    return '$year · $semester-й семестр';
+  }
+
+  @override
+  String get scheduleMonthStatsTitle => 'В ЭТОМ МЕСЯЦЕ';
+
+  @override
+  String get scheduleStudyDays => 'Учебных дней';
+
+  @override
+  String get scheduleLessonsLabel => 'Пар';
+
+  @override
+  String get scheduleExamsLabel => 'Контрольных';
+
+  @override
+  String scheduleLecturesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count лекции',
+      many: '$count лекций',
+      few: '$count лекции',
+      one: '$count лекция',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schedulePracticesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count практики',
+      many: '$count практик',
+      few: '$count практики',
+      one: '$count практика',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scheduleLabsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count лабы',
+      many: '$count лаб',
+      few: '$count лабы',
+      one: '$count лаба',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lessonShortLecture => 'ЛЕК';
+
+  @override
+  String get lessonShortPractice => 'ПРАК';
+
+  @override
+  String get lessonShortLab => 'ЛАБ';
+
+  @override
+  String get lessonShortPe => 'ФИЗ';
+
+  @override
+  String get lessonShortConsult => 'КОНС';
+
+  @override
+  String get lessonShortExam => 'ЭКЗ';
+
+  @override
+  String get lessonShortCredit => 'ЗАЧ';
+
+  @override
+  String get lessonShortCourse => 'КУРС';
+
+  @override
+  String get lessonShortIndividual => 'СР';
+
+  @override
+  String get lessonShortOwn => 'СВОЁ';
+
+  @override
+  String get lessonTagCancelled => '· отменена';
+
+  @override
+  String lessonTagLive(int minutes) {
+    return '· идёт, ещё $minutes мин';
+  }
+
+  @override
+  String get lessonTagNext => '· следующая';
+
+  @override
+  String get lessonTagMoved => '· перенос аудитории';
+
+  @override
+  String get lessonTagNew => '· новая';
+
+  @override
+  String get lessonMetaCancelled => 'Отменена';
+
+  @override
+  String lessonMetaMoved(String type, String room, String oldRoom) {
+    return '$type · $room вместо $oldRoom';
+  }
+
+  @override
+  String get lessonMetaPast => 'прошла';
+
+  @override
+  String get scheduleActionOpen => 'Открыть пару';
+
+  @override
+  String get scheduleActionReport => 'Сообщить об ошибке';
+
+  @override
+  String get scheduleLessonHidden => 'Пара скрыта';
+
+  @override
+  String scheduleChangesSubtitle(String time) {
+    return 'На этой неделе · обновлено $time';
+  }
+
+  @override
+  String get scheduleChangesSubtitleWeek => 'На этой неделе';
+
+  @override
+  String get scheduleChangeTagMoved => 'Перенос';
+
+  @override
+  String get scheduleChangeTagCancelled => 'Отмена';
+
+  @override
+  String get scheduleChangeTagNew => 'Новая';
+
+  @override
+  String get scheduleChangeTagTeacher => 'Замена';
+
+  @override
+  String get scheduleChangeTagRoom => 'Аудитория';
+
+  @override
+  String get scheduleChangeAdded => 'добавлена';
+
+  @override
+  String get scheduleChangesAck => 'Понятно';
+
+  @override
+  String get scheduleAddTitle => 'Своя пара';
+
+  @override
+  String get scheduleAddSubtitle =>
+      'Секция, консультация, встреча — появится в расписании';
+
+  @override
+  String get scheduleAddName => 'Название';
+
+  @override
+  String get scheduleAddPlace => 'Место (необязательно)';
+
+  @override
+  String get scheduleAddType => 'Тип';
+
+  @override
+  String get scheduleAddDay => 'День';
+
+  @override
+  String get scheduleAddSlot => 'Пара';
+
+  @override
+  String get scheduleAddDone => 'Пара добавлена в расписание';
+
+  @override
+  String get activityTypeOwn => 'Своё';
+
+  @override
+  String get activityTypeEvent => 'Событие';
+
+  @override
+  String get activityTypeRetake => 'Пересдача';
+
+  @override
+  String get activityTypeExtra => 'Доп. занятие';
+
+  @override
+  String get scheduleCompareTitle => 'Сравнить расписание';
+
+  @override
+  String get scheduleCompareSubtitle =>
+      'Покажем занятые слоты друга и общие окна';
+
+  @override
+  String scheduleCompareStarted(String name) {
+    return 'Сравнение с $name включено';
+  }
+
+  @override
+  String get scheduleCompareNoFriends => 'Пока нет друзей с группой';
+
+  @override
+  String get scheduleCompareNoFriendsHint =>
+      'Добавь друзей — их группы появятся здесь';
+
+  @override
+  String get scheduleCompareNoGroup => 'группа не указана';
+
+  @override
+  String get scheduleNoteSubtitle =>
+      'Видна только вам · можно поделиться с группой';
+
+  @override
+  String get scheduleNotePlaceholder => 'Что важно помнить…';
+
+  @override
+  String get scheduleNoteAddFile => '+ файл';
+
+  @override
+  String get scheduleNoteAddBoard => '+ фото доски';
+
+  @override
+  String get scheduleNoteTag => '#тег';
+
+  @override
+  String get scheduleNoteSaved => 'Заметка сохранена';
+
+  @override
+  String scheduleRemindIn(int minutes) {
+    return 'За $minutes мин';
+  }
+
+  @override
+  String get scheduleRemindHour => 'За час';
+
+  @override
+  String scheduleRemindSet(int minutes) {
+    return 'Напомню за $minutes мин';
+  }
+
+  @override
+  String get scheduleShareLink => 'Ссылка';
+
+  @override
+  String get scheduleShareCalendar => 'В календарь';
+
+  @override
+  String get scheduleShareImage => 'Картинкой';
+
+  @override
+  String get scheduleLinkCopied => 'Ссылка скопирована';
+
+  @override
+  String get scheduleFilterTitle => 'Показывать';
+
+  @override
+  String get scheduleFilterPastSub => 'Показывать серым';
+
+  @override
+  String get scheduleFilterCancelled => 'Отменённые';
+
+  @override
+  String get scheduleFilterCancelledSub => 'Зачёркнутыми';
+
+  @override
+  String get lessonCancelledBanner => 'Пара отменена';
+
+  @override
+  String lessonMovedBanner(String from, String to) {
+    return 'Аудитория изменена: $from → $to';
+  }
+
+  @override
+  String get lessonTimeLabel => 'Время';
+
+  @override
+  String lessonNumberMeta(int number) {
+    return '$number-я пара';
+  }
+
+  @override
+  String get lessonOnMap => 'на карте';
+
+  @override
+  String get lessonFiles => 'Файлы';
+
+  @override
+  String get lessonMaterialsAdd => 'добавить';
+
+  @override
+  String get lessonHowWasIt => 'Как прошло?';
+
+  @override
+  String get lessonGroupNote => 'Заметка группы';
+
+  @override
+  String get lessonGroupNoteEmpty => 'Пока пусто — расскажи, что было важным';
+
+  @override
+  String get scheduleTeacherRating => 'рейтинг';
+
+  @override
+  String get scheduleTeacherReviews => 'отзывов';
+
+  @override
+  String get scheduleTeacherSubjects => 'предметов';
+
+  @override
+  String get scheduleTeacherWrite => 'Написать';
+
+  @override
+  String get scheduleTeacherReview => 'Оставить отзыв';
+
+  @override
+  String get scheduleTeacherNoContacts => 'Контактов преподавателя пока нет';
+
+  @override
+  String get scheduleWeekExport => 'Экспорт недели';
+
+  @override
+  String get scheduleFilterSemantics => 'Фильтры';
+
+  @override
+  String get scheduleAddLessonSemantics => 'Добавить свою пару';
+
+  @override
+  String get scheduleMoreSemantics => 'Действия с парой';
+
+  @override
+  String get riskBadge => 'РИСК';
+
+  @override
+  String get gradesTitle => 'Оценки';
+
+  @override
+  String get gradesRefresh => 'Обновить';
+
+  @override
+  String get gradesErrorTitle => 'Не удалось загрузить';
+
+  @override
+  String gradesErrorSaved(String date) {
+    return 'Последние оценки сохранены от $date.';
+  }
+
+  @override
+  String get gradesErrorNoData => 'Сохранённых оценок пока нет.';
+
+  @override
+  String get gradesGpaLabel => 'Личный GPA';
+
+  @override
+  String gradesGpaDelta(String delta) {
+    return '$delta за месяц';
+  }
+
+  @override
+  String get gradesScholarshipLabel => 'До повышенной стипендии';
+
+  @override
+  String gradesScholarshipHint(String subject) {
+    return 'закрой $subject на 4+';
+  }
+
+  @override
+  String get gradesScholarshipReached => 'порог уже пройден';
+
+  @override
+  String get gradesTermCurrent => 'Текущий';
+
+  @override
+  String gradesTermSemester(int n) {
+    return '$n-й сем';
+  }
+
+  @override
+  String get gradesNoSubjectsTitle => 'Пока нет предметов';
+
+  @override
+  String get gradesNoSubjectsSubtitle =>
+      'Выбери расписание группы — предметы появятся здесь';
+
+  @override
+  String get gradesTermEmpty => 'Оценок за этот семестр нет';
+
+  @override
+  String get gradesTeacherUnknown => 'Преподаватель не указан';
+
+  @override
+  String get gradesAddMarkSubtitle => 'Добавить оценку';
+
+  @override
+  String gradesMarkAdded(int mark) {
+    return 'Оценка $mark добавлена';
+  }
+
+  @override
+  String get gradesRemoveLast => 'Убрать последнюю';
+
+  @override
+  String gradesMarkSemantics(int mark) {
+    return 'Оценка $mark';
+  }
+
+  @override
+  String get attendanceTitle => 'Посещаемость';
+
+  @override
+  String get attendanceAddAbsence => 'Отметить пропуск';
+
+  @override
+  String get attendanceStatSemester => 'личные записи';
+
+  @override
+  String get attendanceStatMissed => 'пропусков';
+
+  @override
+  String attendanceStatRisk(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'предметов в риске',
+      few: 'предмета в риске',
+      one: 'предмет в риске',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get attendanceWeeksTitle => 'По неделям';
+
+  @override
+  String attendanceWeeksRange(String month) {
+    return '$month → сейчас';
+  }
+
+  @override
+  String attendanceRiskBanner(String subject, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count пропуска без причины',
+      many: '$count пропусков без причины',
+      few: '$count пропуска без причины',
+      one: '$count пропуск без причины',
+    );
+    return '$subject: $_temp0. Расчётная посещаемость ниже 70%; уточните требования у преподавателя.';
+  }
+
+  @override
+  String get attendanceBySubjects => 'По предметам';
+
+  @override
+  String attendanceMissRow(String reason) {
+    return 'Пропуск · $reason';
+  }
+
+  @override
+  String get attendanceReasonSick => 'болел (личная отметка)';
+
+  @override
+  String get attendanceReasonNone => 'без причины';
+
+  @override
+  String get attendanceCertificate => 'Болел';
+
+  @override
+  String get attendanceRemoveAbsence => 'Убрать';
+
+  @override
+  String get attendanceRiskNote =>
+      'Это личный расчёт по доступному расписанию. Условия допуска и отработки уточните у преподавателя.';
+
+  @override
+  String get attendanceNoLessonsTitle => 'Пока нет занятий';
+
+  @override
+  String get attendanceNoLessonsSubtitle =>
+      'Выбери расписание группы — статистика появится после первых пар';
+
+  @override
+  String get attendanceSheetSubject => 'Предмет';
+
+  @override
+  String get attendanceSheetDate => 'Дата';
+
+  @override
+  String get attendanceSheetReason => 'Причина';
+
+  @override
+  String get attendanceSheetSubmit => 'Отметить';
+
+  @override
+  String get attendanceAbsenceAdded => 'Пропуск отмечен';
+
+  @override
+  String attendanceExpandSemantics(String subject) {
+    return 'Показать пропуски по предмету $subject';
+  }
+
+  @override
+  String get coworkTitle => 'Коворкинг';
+
+  @override
+  String get coworkVenue => 'Личный план на этом устройстве';
+
+  @override
+  String coworkFree(int count) {
+    return '$count свободно';
+  }
+
+  @override
+  String get coworkZoneQuiet => 'Тихая';
+
+  @override
+  String get coworkZoneCommon => 'Общая';
+
+  @override
+  String get coworkZoneMeeting => 'Переговорки';
+
+  @override
+  String get coworkWindows => 'УСЛОВНАЯ СХЕМА';
+
+  @override
+  String get coworkLegendFree => 'не проверено';
+
+  @override
+  String get coworkLegendTaken => 'занято';
+
+  @override
+  String get coworkLegendMine => 'выбрано';
+
+  @override
+  String get coworkTimeLabel => 'Время';
+
+  @override
+  String coworkTimeValue(String from, String until, int hours) {
+    return '$from → $until · $hours ч';
+  }
+
+  @override
+  String get coworkExtendLabel => 'Продление';
+
+  @override
+  String get coworkExtendAvailable => 'для личного плана';
+
+  @override
+  String coworkExtendAction(String until) {
+    return 'продлить до $until';
+  }
+
+  @override
+  String get coworkExtendMax => 'до закрытия';
+
+  @override
+  String get coworkFriendsLabel => 'Друзья рядом';
+
+  @override
+  String get coworkFriendsNone => 'нет свежих геопозиций';
+
+  @override
+  String get coworkPickSeat => 'Выберите место';
+
+  @override
+  String coworkBook(String seat, String until) {
+    return 'Сохранить $seat · до $until';
+  }
+
+  @override
+  String get coworkCancelBooking => 'Удалить сохранённое место';
+
+  @override
+  String coworkBooked(String seat, String until) {
+    return 'Место $seat сохранено до $until';
+  }
+
+  @override
+  String get coworkBookingCancelled => 'Сохранённое место удалено';
+
+  @override
+  String coworkSeatSemantics(String seat) {
+    return 'Место $seat';
+  }
+
+  @override
+  String get mapSearchPlaceholder => 'Аудитория, кафедра, столовая';
+
+  @override
+  String get mapFriendsToggle => 'Друзья на карте';
+
+  @override
+  String get mapCampusFilter => 'Корпус';
+
+  @override
+  String get mapExpandSheet => 'Развернуть список';
+
+  @override
+  String get mapCollapseSheet => 'Свернуть список';
+
+  @override
+  String get freeRoomsNowTitle => 'Свободно сейчас';
+
+  @override
+  String freeRoomsMeta(String campus, String time, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count аудитории',
+      many: '$count аудиторий',
+      few: '$count аудитории',
+      one: '$count аудитория',
+    );
+    return '$campus · до следующей пары в $time · $_temp0';
+  }
+
+  @override
+  String freeRoomsMetaEndOfDay(String campus, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count аудитории',
+      many: '$count аудиторий',
+      few: '$count аудитории',
+      one: '$count аудитория',
+    );
+    return '$campus · пар сегодня больше нет · $_temp0';
+  }
+
+  @override
+  String get freeRoomsYourSeat => 'сохранено';
+
+  @override
+  String get freeRoomsKind => 'Аудитория';
+
+  @override
+  String freeRoomsLeftHours(int hours) {
+    return '$hours ч';
+  }
+
+  @override
+  String freeRoomsLeftHoursMinutes(int hours, int minutes) {
+    return '$hours ч $minutes мин';
+  }
+
+  @override
+  String freeRoomsLeftMinutes(int minutes) {
+    return '$minutes мин';
+  }
+
+  @override
+  String freeRoomsNothingFound(String campus) {
+    return 'Ничего не нашлось в $campus. Попробуйте другой корпус.';
+  }
+
+  @override
+  String get freeRoomsNothingFoundAll =>
+      'Ничего не нашлось. Попробуйте другой запрос.';
+
+  @override
+  String get roomPhotoPlaceholder => 'фото аудитории';
+
+  @override
+  String roomFreeUntilBadge(String time) {
+    return 'свободна до $time';
+  }
+
+  @override
+  String get roomFreeEndOfDayBadge => 'свободна до конца дня';
+
+  @override
+  String roomMetaFloor(String kind, String campus, int floor) {
+    return '$kind · $campus, $floor этаж';
+  }
+
+  @override
+  String roomMetaNoFloor(String kind, String campus) {
+    return '$kind · $campus';
+  }
+
+  @override
+  String get roomStatFreeFor => 'Свободна ещё';
+
+  @override
+  String get roomStatFloor => 'Этаж';
+
+  @override
+  String get roomStatBuilding => 'Корпус';
+
+  @override
+  String get roomBook => 'Сохранить место';
+
+  @override
+  String roomBooked(String time) {
+    return 'Сохранено до $time';
+  }
+
+  @override
+  String roomBookedToast(String name, String time) {
+    return '$name · сохранено до $time';
+  }
+
+  @override
+  String get roomReleasedToast => 'Сохранённое место удалено';
+
+  @override
+  String get roomRoute => 'Показать на плане';
+
+  @override
+  String roomNotOnPlan(String name) {
+    return '$name нет на плане корпуса';
+  }
+
+  @override
+  String get roomTakenBadge => 'занята';
+
+  @override
+  String get homeOfflineBanner => 'Офлайн · показаны сохранённые данные';
+
+  @override
+  String get homeGreetingMorning => 'Доброе утро, ';
+
+  @override
+  String get homeGreetingDay => 'Добрый день, ';
+
+  @override
+  String get homeGreetingEvening => 'Добрый вечер, ';
+
+  @override
+  String get homeStatusNoLessons => 'пар нет';
+
+  @override
+  String homeStatusOngoing(int index, int count) {
+    return 'идёт $index-я из $count';
+  }
+
+  @override
+  String homeStatusNext(String time) {
+    return 'следующая в $time';
+  }
+
+  @override
+  String homeStatusFirst(String time) {
+    return 'первая в $time';
+  }
+
+  @override
+  String homeStatusStart(String time) {
+    return 'начало $time';
+  }
+
+  @override
+  String get homeStatusDone => 'на сегодня всё';
+
+  @override
+  String homeHeroFirstIn(int minutes) {
+    return 'Первая пара через $minutes мин';
+  }
+
+  @override
+  String get homeHeroNow => 'Сейчас идёт';
+
+  @override
+  String homeHeroBreak(int minutes) {
+    return 'Перерыв · $minutes мин';
+  }
+
+  @override
+  String get homeHeroDoneTitle => 'На сегодня всё.';
+
+  @override
+  String homeHeroDoneLessons(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count пар позади',
+      few: '$count пары позади',
+      one: '$count пара позади',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeHeroTomorrow(String lessons, String time) {
+    return 'Завтра $lessons, первая в $time';
+  }
+
+  @override
+  String get homeHeroTomorrowFree => 'Завтра пар нет';
+
+  @override
+  String homeHeroDeadlineChip(String left) {
+    return 'Дедлайн · $left';
+  }
+
+  @override
+  String get homeHeroDeadlineNone => 'Дедлайнов нет';
+
+  @override
+  String get homeHeroTomorrowPlan => 'План на завтра';
+
+  @override
+  String get homeHeroFirstLesson => 'ПЕРВАЯ ПАРА';
+
+  @override
+  String get homeHeroFreeTitle => 'Пар нет.';
+
+  @override
+  String get homeHeroFreeBody =>
+      'Можно закрыть дедлайн, сходить в коворкинг или заглянуть в афишу.';
+
+  @override
+  String homeWhoGoesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count идут',
+      one: '$count идёт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeWhoGoesEmpty => 'Кто идёт';
+
+  @override
+  String get homeWhoGoesTitle => 'Кто идёт на пару';
+
+  @override
+  String homeWhoGoesSubtitle(int count, int total) {
+    return '$count из $total';
+  }
+
+  @override
+  String get homeWhoGoesMe => 'Я тоже иду';
+
+  @override
+  String get homeWhoGoesMeDone => 'Вы идёте';
+
+  @override
+  String get homeWhoGoesGoing => 'идёт';
+
+  @override
+  String get homeWhoGoesNoClassmates =>
+      'Одногруппники появятся здесь, когда выберут вашу группу';
+
+  @override
+  String get homeGoingToast => 'Вы идёте на пару';
+
+  @override
+  String homeFreeRoomTitle(String room) {
+    return 'Свободна $room';
+  }
+
+  @override
+  String homeFreeRoomUntil(String time) {
+    return 'до $time';
+  }
+
+  @override
+  String get homeFreeRoomsSub => 'найти место на перерыв';
+
+  @override
+  String homeStreakDays(int count) {
+    return '$count дн. подряд';
+  }
+
+  @override
+  String homeXp(String xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String homeDeadlinesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дедлайнов',
+      few: '$count дедлайна',
+      one: '$count дедлайн',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeExamIn(int days) {
+    return 'КР через $days дн';
+  }
+
+  @override
+  String get homeExamToday => 'КР сегодня';
+
+  @override
+  String get homeAllServices => 'все сервисы';
+
+  @override
+  String get homeAddDeadline => '+ добавить';
+
+  @override
+  String get homeDeadlinesAllDone => 'Всё закрыто. Так держать.';
+
+  @override
+  String get homeAllLower => 'все';
+
+  @override
+  String homeRepliesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ответов',
+      few: '$count ответа',
+      one: '$count ответ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeLessonMoved(String type, String room, String old) {
+    return '$type · $room вместо $old';
+  }
+
+  @override
+  String get homeDeadlineDone => 'готово';
+
+  @override
+  String homeNoteChars(int count, int max) {
+    return '$count / $max';
+  }
+
+  @override
+  String get homeSearchLabel => 'Поиск';
+
+  @override
+  String homeWeekParity(String parity) {
+    return '· $parity';
+  }
+
+  @override
+  String get notificationsReadAll => 'Прочитать все';
+
+  @override
+  String get notificationsEmptyTitle => 'Уведомлений пока нет';
+
+  @override
+  String get notificationsEmptySubtitle =>
+      'Изменения расписания и пуши появятся здесь';
+
+  @override
+  String get notifTimeNow => 'сейчас';
+
+  @override
+  String notifTimeMinutes(int count) {
+    return '$count мин';
+  }
+
+  @override
+  String notifTimeHours(int count) {
+    return '$count ч';
+  }
+
+  @override
+  String get notifTimeYesterday => 'вчера';
+
+  @override
+  String notifChangeMoved(String subject) {
+    return 'Перенос · $subject';
+  }
+
+  @override
+  String notifChangeCancelled(String subject) {
+    return 'Отмена · $subject';
+  }
+
+  @override
+  String notifChangeAdded(String subject) {
+    return 'Новая пара · $subject';
+  }
+
+  @override
+  String notifChangeRoom(String subject) {
+    return 'Другая аудитория · $subject';
+  }
+
+  @override
+  String notifChangeTeacher(String subject) {
+    return 'Другой преподаватель · $subject';
+  }
+
+  @override
+  String notifChangeInsteadOf(String value) {
+    return 'вместо $value';
+  }
+
+  @override
+  String get notifPushDefaultTitle => 'Уведомление';
+
+  @override
+  String get offlineBannerCached => 'Офлайн · показаны сохранённые данные';
+
+  @override
+  String profileRankXp(String rank, String xp) {
+    return '$rank · $xp XP';
+  }
+
+  @override
+  String profileGroupPlace(int rank) {
+    return '#$rank в группе';
+  }
+
+  @override
+  String get profileGroupPlaceUnknown => 'пока без места';
+
+  @override
+  String profileXpToLevelStreak(String xp, int level, int days) {
+    return '$xp XP до $level уровня · стрик $days дн.';
+  }
+
+  @override
+  String get profileRankShinobi => 'Шиноби';
+
+  @override
+  String get profileRankChunin => 'Чунин';
+
+  @override
+  String get profileRankJonin => 'Джонин';
+
+  @override
+  String get profileRankKage => 'Каге';
+
+  @override
+  String get profileMetricGpa => 'GPA';
+
+  @override
+  String get profileMetricAttendance => 'посещаемость';
+
+  @override
+  String get profileMetricExam => 'до КР';
+
+  @override
+  String profileDaysShort(int days) {
+    return '$days дн';
+  }
+
+  @override
+  String get profileWeekQuests => 'Квесты недели';
+
+  @override
+  String get profileUntilSunday => 'до воскресенья';
+
+  @override
+  String profileQuestXp(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String profileQuestProgress(int done, int total) {
+    return '$done/$total';
+  }
+
+  @override
+  String get profileQuestsEmpty => 'Пока нет доступных квестов';
+
+  @override
+  String profileAllBadges(int count) {
+    return 'все $count';
+  }
+
+  @override
+  String profileBadgeSoon(int percent) {
+    return 'Скоро · $percent%';
+  }
+
+  @override
+  String get profileBadgesEmpty => 'Первое достижение уже близко';
+
+  @override
+  String profileFriendsMeta(int count, int campus) {
+    return '$count · $campus на карте';
+  }
+
+  @override
+  String get profileStudentCard => 'NFC Pass';
+
+  @override
+  String profileCardNumber(String number) {
+    return '№ $number';
+  }
+
+  @override
+  String get profileEditAbout => 'О себе';
+
+  @override
+  String get profileEditAboutHint => 'Личная заметка о себе';
+
+  @override
+  String get profileEditTelegram => 'Телеграм';
+
+  @override
+  String get profileEditTelegramHint => '@username';
+
+  @override
+  String get profileEditName => 'Имя';
+
+  @override
+  String get profileUpdatedToast => 'Профиль обновлён';
+
+  @override
+  String get profileChangePhoto => 'Сменить фото';
+
+  @override
+  String get profilePhotoSoon => 'Загрузка фото скоро появится';
+
+  @override
+  String get leaderboardScopeInstitute => 'Институт';
+
+  @override
+  String get leaderboardScopeUniversity => 'Университет';
+
+  @override
+  String leaderboardXp(String xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String leaderboardHintGap(int place, String xp) {
+    return 'До $place-го места — $xp XP. Выполни квесты недели.';
+  }
+
+  @override
+  String get leaderboardHintTop => 'Ты в тройке лидеров. Держи темп!';
+
+  @override
+  String get leaderboardEmpty => 'Рейтинг пока пуст';
+
+  @override
+  String get leaderboardError => 'Не удалось загрузить рейтинг';
+
+  @override
+  String get settingsAppearanceSection => 'Оформление';
+
+  @override
+  String get settingsAccentLabel => 'Акцент';
+
+  @override
+  String get settingsLockWidget => 'Виджет на экране блокировки';
+
+  @override
+  String settingsWidgetNext(String time) {
+    return 'СЛЕДУЮЩАЯ · $time';
+  }
+
+  @override
+  String get settingsWidgetPreview => 'превью';
+
+  @override
+  String get settingsWidgetNoLesson => 'Пар нет';
+
+  @override
+  String get settingsGroup => 'Группа';
+
+  @override
+  String get settingsShowPast => 'Показывать прошедшие пары';
+
+  @override
+  String get settingsShowPastSub => 'Серым, ниже текущей';
+
+  @override
+  String get settingsShowCancelled => 'Показывать отменённые';
+
+  @override
+  String get settingsShowCancelledSub => 'Зачёркнутыми';
+
+  @override
+  String get settingsOnlySubgroup => 'Только моя подгруппа';
+
+  @override
+  String get settingsOnlySubgroupSub => 'Скрывать пары другой подгруппы';
+
+  @override
+  String get settingsExportCalendar => 'Экспорт в календарь';
+
+  @override
+  String get settingsExportSync => 'Синхронизировать';
+
+  @override
+  String get settingsExportDone => 'Расписание добавлено в календарь';
+
+  @override
+  String get settingsExportNoSchedule => 'Сначала выберите расписание';
+
+  @override
+  String get settingsNotifyLessonsSub => 'За 15 минут до начала';
+
+  @override
+  String get settingsNotifyDeadlines => 'Дедлайны';
+
+  @override
+  String get settingsNotifyDeadlinesSub => 'За день и за час';
+
+  @override
+  String get settingsNotifyNewsSub => 'Только важные';
+
+  @override
+  String get settingsShowToFriends => 'Показывать меня друзьям';
+
+  @override
+  String get settingsShowToFriendsSub => 'Только на кампусе';
+
+  @override
+  String get settingsGeo => 'Геолокация';
+
+  @override
+  String get settingsGeoSub => 'Карта и аудитории';
+
+  @override
+  String get settingsSignOutFull => 'Выйти из аккаунта';
+
+  @override
+  String settingsVersionBuild(String version, String build) {
+    return 'Версия $version · сборка $build';
+  }
+
+  @override
+  String get settingsAllNotifications => 'Все уведомления';
+
+  @override
+  String get friendsCommonWindowsToday => 'Общие окна сегодня';
+
+  @override
+  String get friendsCompareHeroTitle => 'Окна с друзьями';
+
+  @override
+  String get friendsCompareHeroSub => 'По расписанию группы друга';
+
+  @override
+  String get friendsCompare => 'Сравнить';
+
+  @override
+  String get friendsFilterAll => 'Все';
+
+  @override
+  String get friendsFilterCampus => 'На карте';
+
+  @override
+  String get friendsPrivacyTitle => 'Геопозиция — только с вашего согласия';
+
+  @override
+  String get friendsPrivacySub =>
+      'Друзья видят последнюю отправленную геопозицию. Управляйте доступом в настройках карты; определение кампуса и этажа недоступно.';
+
+  @override
+  String get friendsCampusEmpty => 'Сейчас никто не делится геопозицией';
+
+  @override
+  String friendsNoTelegram(String name) {
+    return 'У $name не указан Telegram';
+  }
+
+  @override
+  String get friendsLoadError => 'Не удалось загрузить друзей';
+
+  @override
+  String friendsMessage(String name) {
+    return 'Написать $name';
+  }
+
+  @override
+  String get newsSourceAllAbbr => 'ВСЕ';
+
+  @override
+  String get articleSaved => 'Сохранено';
+
+  @override
+  String get communitiesJoin => 'Вступить';
+
+  @override
+  String get servicesSearchPlaceholder => 'Найти сервис, аудиторию, человека';
+
+  @override
+  String get servicesEditBanner => 'Отмечайте звёздочкой сервисы для Главной';
+
+  @override
+  String get servicesFavoriteAdd => 'Добавить на Главную';
+
+  @override
+  String get servicesFavoriteRemove => 'Убрать с Главной';
+
+  @override
+  String get servicesNfcOpenTitle => 'Открыть турникет';
+
+  @override
+  String get servicesNfcActiveTitle => 'Поднесите к турникету';
+
+  @override
+  String get servicesNfcActiveSub =>
+      'Активен 30 секунд · нажмите, чтобы отменить';
+
+  @override
+  String servicesNfcPassSub(String id) {
+    return 'Пропуск № $id';
+  }
+
+  @override
+  String get servicesNfcConnectSub =>
+      'Пропуск не подключён · нажмите, чтобы подключить';
+
+  @override
+  String get servicesNfcUnavailableSub => 'NFC недоступен на этом устройстве';
+
+  @override
+  String get servicesSectionCampus => 'Кампус';
+
+  @override
+  String get servicesSectionStudy => 'Учёба';
+
+  @override
+  String get serviceNfcTitle => 'Пропуск';
+
+  @override
+  String get serviceExamsTitle => 'Экзамены';
+
+  @override
+  String get serviceMarketTitle => 'Маркет';
+
+  @override
+  String get serviceMapSub => 'Аудитории и маршруты';
+
+  @override
+  String get serviceRoomsSub => 'Свободные прямо сейчас';
+
+  @override
+  String get serviceCoworkSub => 'Места и бронирование';
+
+  @override
+  String get serviceNfcSub => 'NFC-пропуск в кампус';
+
+  @override
+  String get serviceDeadlinesSub => 'Задачи и сроки';
+
+  @override
+  String get serviceExamsSub => 'Контрольные и экзамены';
+
+  @override
+  String serviceExamsInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Контроль через $count дней',
+      few: 'Контроль через $count дня',
+      one: 'Контроль через $count день',
+      zero: 'Контроль сегодня',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get serviceGradesSub => 'GPA и оценки за семестр';
+
+  @override
+  String get serviceAttendanceSub => 'Пропуски и статистика';
+
+  @override
+  String get serviceNotesSub => 'Конспекты группы';
+
+  @override
+  String get serviceKbSub => 'Билеты, решения, шпоры';
+
+  @override
+  String get serviceToolsSub => 'Стипендия и зачётка';
+
+  @override
+  String get serviceNewsSub => 'Каналы университета';
+
+  @override
+  String get serviceCommunitiesSub => 'Клубы и секции';
+
+  @override
+  String get serviceFriendsSub => 'Кто на кампусе';
+
+  @override
+  String get servicePollsSub => 'Голосования группы';
+
+  @override
+  String get serviceEventsSub => 'События на неделе';
+
+  @override
+  String get serviceMarketSub => 'Объявления студентов';
+
+  @override
+  String get serviceLostSub => 'Находки и потери';
+
+  @override
+  String get serviceWalletSub => 'Баланс и стипендия';
+
+  @override
+  String get serviceAppsSub => 'Мини-приложения';
+
+  @override
+  String get serviceVirtualTourSub => 'Прогулка по кампусу';
+
+  @override
+  String get servicePeopleSub => 'Одногруппники и группа';
+
+  @override
+  String get serviceFriendsMapSub => 'Друзья на карте';
+
+  @override
+  String get serviceTeamFinderSub => 'Собери команду';
+
+  @override
+  String get serviceMentorshipSub => 'Наставники и советы';
+
+  @override
+  String get serviceExternalSub => 'Откроется в браузере';
+
+  @override
+  String get searchSheetPlaceholder => 'Аудитория, предмет, человек, сервис';
+
+  @override
+  String get searchSheetNoResults =>
+      'Ничего не нашли. Попробуйте «А-318» или «матан».';
+
+  @override
+  String get searchTagSubject => 'Предмет';
+
+  @override
+  String get searchTagService => 'Сервис';
+
+  @override
+  String get searchSubjectInSchedule => 'в расписании';
+
+  @override
+  String get deadlinesClosedSemester => 'Закрыто дедлайнов';
+
+  @override
+  String deadlinesOfTotal(int total) {
+    return 'из $total';
+  }
+
+  @override
+  String get deadlinesGroupToday => 'Сегодня';
+
+  @override
+  String get deadlineLeftDone => 'готово';
+
+  @override
+  String get deadlinesSharedTitle => 'Общие дедлайны группы';
+
+  @override
+  String deadlinesSharedBody(int shared, int total) {
+    return 'Староста добавляет — у всех появляется. $shared из $total — общие.';
+  }
+
+  @override
+  String get deadlineDoneToast => 'Дедлайн закрыт';
+
+  @override
+  String get undo => 'Отменить';
+
+  @override
+  String get deadlinesAddSemantics => 'Добавить дедлайн';
+
+  @override
+  String get addDeadlineTitle => 'Новый дедлайн';
+
+  @override
+  String get addDeadlineWhatHint => 'Что сдать';
+
+  @override
+  String get addDeadlineSubject => 'Предмет';
+
+  @override
+  String get addDeadlineDue => 'Срок';
+
+  @override
+  String get addDeadlinePickDate => 'Выбрать дату';
+
+  @override
+  String get addDeadlineSharedTitle => 'Общий для группы';
+
+  @override
+  String addDeadlineSharedSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Увидят все $count человек',
+      few: 'Увидят все $count человека',
+      one: 'Увидит $count человек',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addDeadlineSharedSubGeneric => 'Увидят все одногруппники';
+
+  @override
+  String get addDeadlineToast => 'Дедлайн добавлен · напомню за день';
+
+  @override
+  String get examsTitle => 'Контроль';
+
+  @override
+  String examsSessionIn(int count) {
+    return 'сессия через $count дн';
+  }
+
+  @override
+  String examsNearestIn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ближайшая · через $count дней',
+      few: 'Ближайшая · через $count дня',
+      one: 'Ближайшая · через $count день',
+      zero: 'Ближайшая · сегодня',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get examsReadiness => 'Готовность';
+
+  @override
+  String get examsTopicsTitle => 'Темы к КР';
+
+  @override
+  String get examsTopicsHint => 'отмечайте пройденное';
+
+  @override
+  String get examsTopicsEmpty => 'Добавьте темы — готовность посчитается сама';
+
+  @override
+  String get examsAddTopic => 'Добавить тему';
+
+  @override
+  String get examsTopicHint => 'Тема';
+
+  @override
+  String get examsRemoveTopic => 'Удалить тему';
+
+  @override
+  String get examsPlanTitle => 'План подготовки';
+
+  @override
+  String get examsPlanRebuild => 'пересобрать';
+
+  @override
+  String get examsPlanEmpty => 'Все темы закрыты — можно отдыхать';
+
+  @override
+  String examsPlanMinutes(int count) {
+    return '$count мин';
+  }
+
+  @override
+  String get examsAllTitle => 'Все контрольные';
+
+  @override
+  String get examsDaysShort => 'ДН';
+
+  @override
+  String examsSelectSemantics(String subject) {
+    return 'Показать $subject';
+  }
+
+  @override
+  String get toolsPageTitle => 'Инструменты';
+
+  @override
+  String get toolsTabGpa => 'GPA';
+
+  @override
+  String get toolsTabGrant => 'Стипендия';
+
+  @override
+  String get toolsTabEcts => 'Зачётные ед.';
+
+  @override
+  String get toolsTabCommunity => 'Сообщество';
+
+  @override
+  String get toolsGpaForecast => 'Прогноз GPA за сессию';
+
+  @override
+  String get toolsGpaHintAllFives => 'Повышенная стипендия · 100%';
+
+  @override
+  String get toolsGpaHintHalfFives => 'Повышенная возможна, если ≥ 50% пятёрок';
+
+  @override
+  String get toolsGpaHintThree => 'Есть тройка — только базовая стипендия';
+
+  @override
+  String get toolsMarksHint => 'Тапайте по оценке, чтобы поменять';
+
+  @override
+  String get toolsMarksEmpty =>
+      'Добавьте расписание группы — предметы появятся здесь';
+
+  @override
+  String toolsMarkSemantics(String subject, int mark) {
+    return '$subject: оценка $mark';
+  }
+
+  @override
+  String get toolsGrantBase => 'Базовая';
+
+  @override
+  String get toolsGrantStudy => 'Повышенная · учёба';
+
+  @override
+  String get toolsGrantScience => 'Повышенная · наука';
+
+  @override
+  String get toolsGrantSocial => 'Социальная';
+
+  @override
+  String get toolsGrantNoApplication => 'нет заявки';
+
+  @override
+  String get toolsGrantNotEligible => 'не положена';
+
+  @override
+  String get toolsGrantEvent => 'Участие в мероприятии';
+
+  @override
+  String get toolsGrantEventSub => 'Нужно 1 за семестр';
+
+  @override
+  String toolsRubles(String amount) {
+    return '$amount ₽';
+  }
+
+  @override
+  String toolsRublesPlus(String amount) {
+    return '+$amount ₽';
+  }
+
+  @override
+  String toolsGrantNote(int done, String rest) {
+    return 'Для повышенной нужно: сессия без троек, ≥ 50% пятёрок и участие в 1 мероприятии. Сейчас — $done из 3: $rest.';
+  }
+
+  @override
+  String get toolsGrantNoteDone =>
+      'Для повышенной нужно: сессия без троек, ≥ 50% пятёрок и участие в 1 мероприятии. Все условия выполнены — подавайте заявку.';
+
+  @override
+  String toolsGrantRestThrees(String subject) {
+    return 'осталось закрыть $subject';
+  }
+
+  @override
+  String get toolsGrantRestFives => 'нужно больше пятёрок';
+
+  @override
+  String get toolsGrantRestEvent => 'осталось сходить на мероприятие';
+
+  @override
+  String get toolsEctsEarned => 'Набрано за курс';
+
+  @override
+  String toolsEctsValue(int earned, int total) {
+    return '$earned / $total з.е.';
+  }
+
+  @override
+  String toolsEctsLegend(int credits, String subject) {
+    return '$credits $subject';
+  }
+
+  @override
+  String pollsOpenCount(int count) {
+    return '$count без ответа';
+  }
+
+  @override
+  String get pollsAuthorYou => 'Ваш опрос';
+
+  @override
+  String get pollsAuthorCommunity => 'Опрос сообщества';
+
+  @override
+  String get pollsStatusClosed => 'закрыт';
+
+  @override
+  String get pollsStatusOpen => 'открыт';
+
+  @override
+  String pollsStatusUntil(String date) {
+    return 'до $date';
+  }
+
+  @override
+  String get pollsYouAnswered => 'вы ответили';
+
+  @override
+  String get pollsVoteCounted => 'Голос учтён';
+
+  @override
+  String get eventsFilterToday => 'Сегодня';
+
+  @override
+  String get eventsFilterFree => 'Бесплатно';
+
+  @override
+  String get eventsFilterGoing => 'Иду';
+
+  @override
+  String get eventsFreeLabel => 'бесплатно';
+
+  @override
+  String eventsGoingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count идут',
+      one: '$count идёт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get eventsGoingChecked => 'Иду ✓';
+
+  @override
+  String get eventsEmptyGoingTitle => 'Пока никуда не идёте';
+
+  @override
+  String get eventsEmptyGoingSub =>
+      'Нажмите «Пойду» у события — оно появится здесь.';
+
+  @override
+  String get eventsEmptyTodayTitle => 'Сегодня событий нет';
+
+  @override
+  String get eventsToastGoing => 'Добавлено в планы';
+
+  @override
+  String get eventsToastRemoved => 'Убрано из планов';
+
+  @override
+  String get lostFoundTabAll => 'Все';
+
+  @override
+  String get lostFoundTabFoundShort => 'Нашли';
+
+  @override
+  String get lostFoundTabLostShort => 'Ищут';
+
+  @override
+  String get lostFoundSecurityTitle => 'Помощь охраны';
+
+  @override
+  String get lostFoundSecuritySub =>
+      'Передай найденные документы или ценные вещи сотруднику охраны';
+
+  @override
+  String get lostFoundEmptyAll => 'Объявлений пока нет';
+
+  @override
+  String lostFoundContactAuthor(String name) {
+    return 'Связаться с $name';
+  }
+
+  @override
+  String get walletBalanceTitle => 'Баланс сюрикенов';
+
+  @override
+  String get walletTopUp => 'Пополнить';
+
+  @override
+  String get walletTopUpSubtitle => 'как заработать сюрикены';
+
+  @override
+  String get walletIncomeMonth => 'Доход за месяц';
+
+  @override
+  String get walletSpendMonth => 'Траты за месяц';
+
+  @override
+  String walletForMonth(String month) {
+    return 'за $month';
+  }
+
+  @override
+  String get walletNoIncome => 'пока без начислений';
+
+  @override
+  String get walletOperations => 'Операции';
+
+  @override
+  String get walletPassActive => 'Пропуск активен';
+
+  @override
+  String get walletPassExpired => 'Срок пропуска истёк';
+
+  @override
+  String get walletPassMissing => 'Пропуск не привязан';
+
+  @override
+  String walletPassValidUntil(String date) {
+    return 'Студенческий · до $date';
+  }
+
+  @override
+  String get walletPassMissingSub => 'Укажите номер студенческого в профиле';
+
+  @override
+  String walletCardNumber(String number) {
+    return '№ $number';
+  }
+
+  @override
+  String get collabNotesFilterAll => 'Все';
+
+  @override
+  String get collabNotesFilterNew => 'Новые';
+
+  @override
+  String get collabNotesFilterMine => 'Мои';
+
+  @override
+  String get collabNotesFilterGroup => 'Группа';
+
+  @override
+  String get collabNotesFilterPersonal => 'Личные';
+
+  @override
+  String get collabNotesKindLecture => 'ЛЕК';
+
+  @override
+  String get collabNotesKindPractice => 'ПРАК';
+
+  @override
+  String get collabNotesKindLab => 'ЛАБ';
+
+  @override
+  String get collabNotesKindDoc => 'ДОК';
+
+  @override
+  String get collabNotesPersonalLabel => 'Личный конспект';
+
+  @override
+  String get collabNotesGroupLabel => 'Конспект группы';
+
+  @override
+  String collabNotesStatsTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Вы ведёте $count конспектов',
+      few: 'Вы ведёте $count конспекта',
+      one: 'Вы ведёте $count конспект',
+      zero: 'У вас пока нет конспектов',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collabNotesStatsSub => 'Общие конспекты видит вся группа';
+
+  @override
+  String collabNotesStatsNew(int count) {
+    return '$count новых';
+  }
+
+  @override
+  String get knowledgeSearchHint => 'Предмет, билеты, преподаватель';
+
+  @override
+  String knowledgeDownloads(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count скачиваний',
+      few: '$count скачивания',
+      one: '$count скачивание',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String knowledgeLikes(int count) {
+    return '♥ $count';
+  }
+
+  @override
+  String knowledgePriceShurikens(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count сюрикенов',
+      few: '$count сюрикена',
+      one: '$count сюрикен',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get knowledgeEmptySearchText =>
+      'Ничего не нашлось. Попросите группу — ';
+
+  @override
+  String get knowledgeCreateRequest => 'создать запрос';
+
+  @override
+  String knowledgeRequestShareText(String query) {
+    return 'Ищу материалы: $query. Есть у кого-нибудь?';
+  }
+
+  @override
+  String get knowledgeDownload => 'Скачать';
+
+  @override
+  String get marketWrite => 'Написать';
+
+  @override
+  String get marketManage => 'Управлять';
+
+  @override
+  String get marketFavoriteAdd => 'В избранное';
+
+  @override
+  String get marketFavoriteRemove => 'Убрать из избранного';
+
+  @override
+  String get loginWelcomeBackAccent => 'возвращением';
+
+  @override
+  String get authEmailHeaderTitleAccent => 'продолжить';
+
+  @override
+  String get authCheckEmailTitleAccent => 'почту';
+
+  @override
+  String get authSignUpTitleAccent => 'аккаунт';
+
+  @override
+  String get authPasswordResetTitleAccent => 'пароля';
+
+  @override
+  String get authEmailHeaderSubtitle => 'Отправим 6-значный код на вашу почту.';
+
+  @override
+  String get lessonAttendanceTitle => 'Посещаемость группы';
+
+  @override
+  String get lessonAttendanceMeta => 'последние 5';
+
+  @override
+  String get scheduleActionHide => 'Скрыть из расписания';
+
+  @override
+  String get scheduleTeacherRoom => 'кабинет';
+
+  @override
+  String get roomLocalPlanHint =>
+      'Личная заметка на этом устройстве. Она не бронирует аудиторию и не гарантирует свободное место.';
+
+  @override
+  String get roomAvailabilityUnknown => 'Нет актуальных данных о занятости';
+
+  @override
+  String get roomRemoveSaved => 'Удалить сохранённое место';
+
+  @override
+  String get mapFriendsOutdoorHint =>
+      'Геопозиции друзей доступны на карте кампуса. Позиции внутри здания и этажи неизвестны.';
+
+  @override
+  String get coworkLocalPlanHint =>
+      'Личный план, не бронь. Схема условная; наличие мест и очередь не проверяются.';
+
+  @override
+  String get coworkLocalPlan => 'Личный план';
+
+  @override
+  String get coworkSaveError => 'Не удалось сохранить. Попробуйте ещё раз.';
+
+  @override
+  String get coworkClosed => 'Выберите место с 08:00 до 22:00';
+
+  @override
+  String get communitiesSave => 'В мои';
+
+  @override
+  String get communitiesSaved => 'В моих';
+
+  @override
+  String get communitiesSavedEmpty => 'Сохрани сообщество — оно появится здесь';
+
+  @override
+  String get homeTrendingEmpty => 'Пока нет обсуждений';
+
+  @override
+  String get homeFavoritesEmpty => 'Выберите быстрые действия в сервисах';
+
+  @override
+  String get onboardingFriendsSharingSub => 'Делиться геопозицией с друзьями';
+
+  @override
+  String get onboardingGeoSystemSettings =>
+      'Геолокацию можно отключить в настройках системы';
+
+  @override
+  String get toolsLocalEstimate =>
+      'Личный расчёт хранится на этом устройстве. Размеры и условия стипендии уточняйте в университете.';
+
+  @override
+  String get toolsNoValue => 'не указано';
+
+  @override
+  String get toolsGpaPersonal => 'Ваш прогноз, не официальная ведомость';
+
+  @override
+  String get toolsEctsTarget => 'План зачётных единиц';
+
+  @override
+  String get personalRecordsNotice =>
+      'Личный учёт на этом устройстве. Не официальные данные университета.';
+
+  @override
+  String get attendanceEstimateNotice =>
+      'Посещаемость рассчитана по расписанию и вашим отметкам пропусков. Это оценка, а не подтверждение присутствия.';
+
+  @override
+  String get gradesScholarshipDisclaimer =>
+      'Ориентир GPA: 4,75. Не подтверждает право на стипендию.';
+
+  @override
+  String get profileLocalFieldsNote =>
+      'Поля «О себе» и «Телеграм» сохраняются только на этом устройстве и не видны другим пользователям.';
+
+  @override
+  String get articleSourceChannel => 'Источник новостей';
+
+  @override
+  String get deadlineSaved => 'Дедлайн добавлен';
+
+  @override
+  String get scheduleLinkUnavailable =>
+      'Ссылка на это расписание пока недоступна. Отправьте текст, изображение или календарь.';
+
+  @override
+  String get scheduleReminderLocked =>
+      'Напоминание уже запланировано. Изменить или отменить его пока нельзя.';
+
+  @override
+  String get settingsAdvanced => 'Дополнительные настройки';
+
+  @override
+  String get settingsLessonReactionsSub => 'Эмоции рядом с занятиями';
+
+  @override
+  String get settingsWidgetRefreshRequested => 'Запрос на обновление отправлен';
+
+  @override
+  String get identityHandleCheckError =>
+      'Не удалось проверить никнейм. Попробуйте ещё раз';
+
+  @override
+  String get authPasswordLabel => 'Пароль';
+
+  @override
+  String get authConfirmPasswordLabel => 'Повторите пароль';
+
+  @override
+  String get settingsWidgetUnsupported =>
+      'Виджет расписания доступен на Android';
+
+  @override
+  String get miniAppsReportFailure =>
+      'Не удалось отправить жалобу. Попробуйте снова.';
+
+  @override
+  String get miniAppsRevRestoreFailure =>
+      'Не удалось восстановить версию. Попробуйте снова.';
+
+  @override
+  String get miniAppsTokensFailure =>
+      'Не удалось обновить токены публикации. Попробуйте снова.';
+
+  @override
+  String get nfcPassMediaUnavailable => 'Фон недоступен. Выберите другой файл.';
+
+  @override
+  String lessonPairOrdinal(int number) {
+    return '$number-я пара';
+  }
+
+  @override
+  String lessonFileKilobytes(String size) {
+    return '$size КБ';
+  }
+
+  @override
+  String lessonFileMegabytes(String size) {
+    return '$size МБ';
+  }
+
+  @override
+  String get scheduleShortCancelled => 'ОТМ';
+
+  @override
+  String get pollsCreateError =>
+      'Не удалось создать опрос. Попробуйте ещё раз.';
+
+  @override
+  String get knowledgeUploadError =>
+      'Не удалось загрузить материал. Попробуйте ещё раз.';
+
+  @override
+  String get knowledgeFileError =>
+      'Не удалось прочитать файл. Выберите файл размером до 50 МБ.';
+
+  @override
+  String get postDetailCommentsLoadError => 'Не удалось загрузить комментарии';
+
+  @override
+  String get scheduleNoteChecklist => 'Чеклист';
+
+  @override
+  String get servicesSectionFirstParty => 'Наши сервисы';
+
+  @override
+  String get knowledgeSubjectsTitle => 'Предметы';
+
+  @override
+  String get knowledgeSubjectsHint => 'Можно выбрать до 10 предметов';
+
+  @override
+  String get knowledgeSubjectsSearch => 'Поиск по предметам';
+
+  @override
+  String get knowledgeSubjectsLoadError => 'Не удалось загрузить предметы';
+
+  @override
+  String get knowledgeSubjectsEmpty => 'Предметы не найдены';
+
+  @override
+  String get knowledgeSubjectsApply => 'Готово';
+
+  @override
+  String get knowledgeSubjectsFilter => 'Выбрать предметы';
+
+  @override
+  String get knowledgeUploadSuccess => 'Материал опубликован';
+
+  @override
+  String get exportSelectedDay => 'День';
+
+  @override
+  String get exportImagePreview => 'Предпросмотр картинки';
+
+  @override
+  String exportImagePages(int count) {
+    return '$count стр. · PNG';
+  }
+
+  @override
+  String get exportImageHint =>
+      'Расписание целиком, с датами, преподавателями и аудиториями. Длинные периоды разбиваются на страницы.';
+
+  @override
+  String get exportCalendarSafeHint =>
+      'Добавим пары в отдельный календарь. Личные события останутся нетронутыми, повторный экспорт обновит наши записи.';
+
+  @override
+  String get exportCalendarMobileOnly =>
+      'Системный календарь доступен на телефоне. На этом устройстве используйте файл .ics.';
+
+  @override
+  String get reminderTimeInvalid => 'Выберите время в будущем, до начала пары.';
+
+  @override
+  String get compareDayView => 'По дням';
+
+  @override
+  String get compareWeekView => 'Обзор недели';
+
+  @override
+  String get compareWindowsTitle => 'Время для встречи';
+
+  @override
+  String get compareNoWindows => 'Общих окон от 30 минут между занятиями нет';
+
+  @override
+  String get compareWindowsHint =>
+      'Учитываем занятия и события. Окна показываются только между ними.';
+
+  @override
+  String get compareChangeSchedule => 'Изменить';
+
+  @override
+  String get authGuestUpgradeTitle => 'Сохранить гостевой аккаунт';
+
+  @override
+  String get authGuestUpgradeSubtitle =>
+      'Привяжите email: расписание, настройки и прогресс останутся с вами.';
+
+  @override
+  String get authGuestUpgradeSendCode => 'Получить код';
+
+  @override
+  String get authGuestUpgradeVerify => 'Подтвердить email';
+
+  @override
+  String get authGuestUpgradePassword => 'Задать пароль';
+
+  @override
+  String get authGuestUpgradeDone => 'Аккаунт сохранён';
+
+  @override
+  String get authGuestUpgradeError =>
+      'Не удалось сохранить аккаунт. Проверьте данные и повторите.';
+
+  @override
+  String get authGuestExitWarning =>
+      'Если выйти, гостевой аккаунт и его данные нельзя будет восстановить. Сначала привяжите email, чтобы сохранить их.';
+
+  @override
+  String get settingsColorCustom => 'Свой цвет';
+
+  @override
+  String get settingsColorHex => 'HEX';
+
+  @override
+  String get settingsColorHue => 'Оттенок';
+
+  @override
+  String get settingsColorSaturation => 'Насыщенность';
+
+  @override
+  String get settingsColorBrightness => 'Яркость';
+
+  @override
+  String friendsInviteMessage(String link) {
+    return 'Присоединяйся ко мне в University Ninja! Установи приложение, чтобы открыть приглашение и добавить меня в друзья:\n$link';
+  }
+
+  @override
+  String scheduleSimultaneousLessons(int count) {
+    return '$count пары одновременно';
+  }
+
+  @override
+  String get authAnyEmailHint => 'Подойдёт любой ваш email.';
+
+  @override
+  String get exportCalendarIncomplete =>
+      'У части событий не указано время окончания. Чтобы ничего не потерять, выберите PNG, текст или .ics.';
+
+  @override
+  String get exportUnscheduledEventsHint =>
+      'События без указанного времени остаются в картинке и тексте. В календарь попадут только события с датой и временем либо пометкой «весь день».';
+
+  @override
+  String get exportAllDay => 'Весь день';
+
+  @override
+  String exportEntriesCount(int count) {
+    return 'Событий: $count';
+  }
+
+  @override
+  String get knowledgePurchaseTitle => 'Открыть материал?';
+
+  @override
+  String knowledgePurchaseBody(String title, String price) {
+    return '«$title» будет доступен за $price. Сюрикены спишутся один раз; повторное открытие бесплатно.';
+  }
+
+  @override
+  String get knowledgePurchaseConfirm => 'Купить и открыть';
+
+  @override
+  String get knowledgePurchaseFailed =>
+      'Не удалось купить материал. Проверь баланс и попробуй ещё раз.';
+
+  @override
+  String get knowledgePurchasePriceChanged =>
+      'Цена изменилась. Открой материал ещё раз, чтобы подтвердить новую цену.';
+
+  @override
+  String get knowledgePurchaseInsufficient => 'Недостаточно сюрикенов';
 }

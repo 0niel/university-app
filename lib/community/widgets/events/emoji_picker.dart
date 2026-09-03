@@ -13,7 +13,7 @@ class _EmojiPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -30,8 +30,8 @@ class _EmojiPicker extends StatelessWidget {
                 height: 44,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: selected == emoji ? colors.brandTint : colors.surface,
-                  borderRadius: BorderRadius.circular(NinjaRadius.control),
+                  color: selected == emoji ? colors.tint : colors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.field),
                 ),
                 child: Text(emoji, style: const TextStyle(fontSize: 20)),
               ),

@@ -15,12 +15,12 @@ class CommunityFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return NinjaFab(
       icon: AppLineIconWidget(
         icon,
         size: 24,
-        color: onPressed == null ? colors.disabled : colors.onInk,
+        color: onPressed == null ? colors.muted2 : colors.canvas,
       ),
       tooltip: label,
       onPressed: onPressed,

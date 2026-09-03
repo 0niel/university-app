@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:local_notifications_repository/local_notifications_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
@@ -12,6 +13,8 @@ import '../../helpers/pump_app.dart';
 class _MockCustomScheduleCubit extends Mock implements CustomScheduleCubit {}
 
 class _FakeLessonSchedulePart extends Fake implements LessonSchedulePart {}
+
+class _Notifications extends Mock implements LocalNotificationsRepository {}
 
 void main() {
   late CustomScheduleCubit schedules;
@@ -58,14 +61,17 @@ void main() {
   });
 
   testWidgets('does not close or mutate when validation fails', (tester) async {
-    await tester.pumpApp(buildSubject());
-
-    await tester.tap(find.byTooltip('Сохранить'));
-    await tester.pump();
-
-    expect(find.text('Новая пара'), findsOneWidget);
-    verifyNever(() => schedules.addLesson(any(), any()));
-    await tester.pump(const Duration(seconds: 4));
+    final semantics = tester.ensureSemantics();
+    try {
+      await tester.pumpApp(buildSubject());
+      await tester.tap(find.bySemanticsLabel('Сохранить'));
+      await tester.pump();
+      expect(find.text('Новая пара'), findsOneWidget);
+      verifyNever(() => schedules.addLesson(any(), any()));
+      await tester.pump(const Duration(seconds: 4));
+    } finally {
+      semantics.dispose();
+    }
   });
 
   testWidgets('does not close when persistence target is missing', (
@@ -74,14 +80,44 @@ void main() {
     when(
       () => schedules.addLesson(any(), any()),
     ).thenReturn(.scheduleNotFound);
-    await tester.pumpApp(buildSubject());
-    await tester.enterText(find.byType(TextField), 'Math');
+    final semantics = tester.ensureSemantics();
+    try {
+      await tester.pumpApp(buildSubject());
+      await tester.enterText(find.byType(TextField), 'Math');
+      await tester.tap(find.bySemanticsLabel('Сохранить'));
+      await tester.pump();
+      expect(find.text('Новая пара'), findsOneWidget);
+      verify(() => schedules.addLesson('schedule-id', any())).called(1);
+      await tester.pump(const Duration(seconds: 4));
+    } finally {
+      semantics.dispose();
+    }
+  });
 
-    await tester.tap(find.byTooltip('Сохранить'));
-    await tester.pump();
-
-    expect(find.text('Новая пара'), findsOneWidget);
-    verify(() => schedules.addLesson('schedule-id', any())).called(1);
-    await tester.pump(const Duration(seconds: 4));
+  testWidgets('denied reminder permission preserves the form without saving', (
+    tester,
+  ) async {
+    final notifications = _Notifications();
+    when(notifications.ensurePermission).thenAnswer((_) async => false);
+    editor
+      ..subjectChanged('Math')
+      ..reminderEnabledChanged(enabled: true);
+    final semantics = tester.ensureSemantics();
+    try {
+      await tester.pumpApp(
+        RepositoryProvider<LocalNotificationsRepository>.value(
+          value: notifications,
+          child: buildSubject(),
+        ),
+      );
+      await tester.tap(find.bySemanticsLabel('Сохранить'));
+      await tester.pumpAndSettle();
+      expect(find.text('Новая пара'), findsOneWidget);
+      expect(editor.state.reminderMinutes, isNotNull);
+      verifyNever(() => schedules.addLesson(any(), any()));
+      await tester.pump(const Duration(seconds: 4));
+    } finally {
+      semantics.dispose();
+    }
   });
 }

@@ -2,96 +2,104 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  final colors = NinjaColors.light();
+import '../kit_harness.dart';
 
-  Widget wrap(Widget child) => MaterialApp(
-        theme: NinjaTheme.light(),
-        home: Scaffold(body: Center(child: child)),
+void main() {
+  BoxDecoration boxOf(WidgetTester tester) => kitDecoration(
+        tester,
+        find
+            .descendant(
+              of: find.byType(AppCheckbox),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
-  BoxDecoration boxOf(WidgetTester tester) {
-    final box = tester.widget<DecoratedBox>(
+  testWidgets('off state is a 24px transparent box with a muted2 border', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapKit(AppCheckbox(value: false, onChanged: (_) {})),
+    );
+    await tester.pumpAndSettle();
+
+    final decoration = boxOf(tester);
+    expect(decoration.color, Colors.transparent);
+    expect(decoration.border, Border.all(color: kitColors.muted2, width: 2));
+    expect(decoration.borderRadius, BorderRadius.circular(8));
+  });
+
+  testWidgets('on state fills with accent and draws a check', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(AppCheckbox(value: true, onChanged: (_) {})),
+    );
+    await tester.pumpAndSettle();
+
+    expect(boxOf(tester).color, kitColors.accent);
+    expect(find.byType(AppCheckMark), findsOneWidget);
+  });
+
+  testWidgets('indeterminate draws the 10x2.5 bar', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        AppCheckbox(value: false, indeterminate: true, onChanged: (_) {}),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(boxOf(tester).color, kitColors.accent);
+    expect(find.byType(AppCheckMark), findsNothing);
+    final bar = tester.widget<SizedBox>(
       find
           .descendant(
-            of: find.byType(NinjaCheckbox),
-            matching: find.byType(DecoratedBox),
+            of: find.byType(AppCheckbox),
+            matching: find.byType(SizedBox),
           )
-          .first,
+          .last,
     );
-    return box.decoration as BoxDecoration;
-  }
+    expect(bar.width, 10);
+    expect(bar.height, 2.5);
+  });
 
-  group('NinjaCheckbox', () {
-    testWidgets('checked is the ink block with a check', (tester) async {
-      await tester.pumpWidget(
-        wrap(NinjaCheckbox(value: true, onChanged: (_) {})),
-      );
+  testWidgets('disabled uses the surface2 border and muted2 label', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapKit(const AppCheckbox(value: false, label: 'Disabled')),
+    );
+    await tester.pumpAndSettle();
 
-      expect(boxOf(tester).color, colors.ink);
-      expect(boxOf(tester).border, isNull);
-      expect(find.byType(NinjaCheckMark), findsOneWidget);
-      expect(tester.getSize(find.byType(NinjaCheckbox)), const Size.square(24));
-    });
+    final border = boxOf(tester).border;
+    expect(border, Border.all(color: kitColors.surface2, width: 2));
+    expect(kitStyleOf(tester, 'Disabled')?.color, kitColors.muted2);
+  });
 
-    testWidgets('empty is the 1.5 disabledLine outline', (tester) async {
-      await tester.pumpWidget(
-        wrap(NinjaCheckbox(value: false, onChanged: (_) {})),
-      );
+  testWidgets('tap reports the flipped value', (tester) async {
+    bool? received;
+    await tester.pumpWidget(
+      wrapKit(
+        AppCheckbox(value: false, onChanged: (value) => received = value),
+      ),
+    );
 
-      final decoration = boxOf(tester);
-      expect(decoration.color, Colors.transparent);
-      expect(decoration.border?.top.color, colors.disabledLine);
-      expect(decoration.border?.top.width, NinjaMetrics.lineWidth);
-      expect(find.byType(NinjaCheckMark), findsNothing);
-    });
+    await tester.tap(find.byType(AppCheckbox));
+    expect(received, isTrue);
+  });
 
-    testWidgets('indeterminate swaps the check for the bar', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          NinjaCheckbox(value: false, indeterminate: true, onChanged: (_) {}),
-        ),
-      );
+  testWidgets('label sits 10px away in 13/600', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(AppCheckbox(value: true, label: 'Выбран', onChanged: (_) {})),
+    );
 
-      expect(boxOf(tester).color, colors.ink);
-      expect(find.byType(NinjaCheckMark), findsNothing);
-      expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is SizedBox && widget.width == 11 && widget.height == 3,
-        ),
-        findsOneWidget,
-      );
-    });
+    expect(kitStyleOf(tester, 'Выбран')?.fontSize, 13);
+    expect(kitStyleOf(tester, 'Выбран')?.fontWeight, FontWeight.w600);
+  });
 
-    testWidgets('tapping reports the flipped value', (tester) async {
-      bool? changed;
-      await tester.pumpWidget(
-        wrap(
-          NinjaCheckbox(value: false, onChanged: (value) => changed = value),
-        ),
-      );
+  testWidgets('NinjaCheckbox delegates to AppCheckbox', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(NinjaCheckbox(value: true, onChanged: (_) {})),
+    );
 
-      await tester.tap(find.byType(NinjaCheckbox));
-      expect(changed, isTrue);
-    });
-
-    testWidgets('disabled dims the box and blocks taps', (tester) async {
-      await tester.pumpWidget(wrap(const NinjaCheckbox(value: true)));
-
-      expect(
-        tester
-            .widget<Opacity>(
-              find.descendant(
-                of: find.byType(NinjaCheckbox),
-                matching: find.byType(Opacity),
-              ),
-            )
-            .opacity,
-        0.5,
-      );
-
-      await tester.tap(find.byType(NinjaCheckbox));
-    });
+    expect(find.byType(AppCheckbox), findsOneWidget);
   });
 }

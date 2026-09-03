@@ -13,17 +13,17 @@ class _SettingsRowIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final lineIcon = this.lineIcon;
-    final tint = danger ? colors.dangerTint : colors.surfaceAlt;
-    final ink = danger ? colors.scarlet : colors.mutedDark;
+    final tint = danger ? colors.dangerTint : colors.surface2;
+    final ink = danger ? colors.danger : colors.muted;
     return Container(
       width: 34,
       height: 34,
       alignment: .center,
       decoration: BoxDecoration(
         color: tint,
-        borderRadius: .circular(11),
+        borderRadius: .circular(AppRadius.badge),
       ),
       child: lineIcon != null
           ? AppLineIconWidget(lineIcon, size: 18, color: ink)

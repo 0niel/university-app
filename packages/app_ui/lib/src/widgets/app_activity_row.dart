@@ -1,9 +1,11 @@
-import 'dart:math' as math;
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_dashed_border.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:flutter/widgets.dart';
 
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
-
-/// Non-class calendar activities the student is involved in.
 enum AppActivityType { event, retake, extra, personal, consult }
 
 extension AppActivityTypeX on AppActivityType {
@@ -16,11 +18,11 @@ extension AppActivityTypeX on AppActivityType {
       };
 
   Color color(AppColors colors) => switch (this) {
-        AppActivityType.event => colors.secondary,
-        AppActivityType.retake => colors.colorful07,
-        AppActivityType.extra => colors.success,
-        AppActivityType.personal => colors.warning,
-        AppActivityType.consult => colors.colorful01,
+        AppActivityType.event => colors.accent,
+        AppActivityType.retake => colors.exam,
+        AppActivityType.extra => colors.lecture,
+        AppActivityType.personal => colors.warn,
+        AppActivityType.consult => colors.lab,
       };
 
   AppLineIcon get icon => switch (this) {
@@ -32,8 +34,6 @@ extension AppActivityTypeX on AppActivityType {
       };
 }
 
-/// Dashed-border, colour-spined card for a non-class activity (event, retake,
-/// extra class, consultation, personal). Mirrors the design's `ActivityRow`.
 class AppActivityRow extends StatelessWidget {
   const AppActivityRow({
     required this.type,
@@ -56,34 +56,41 @@ class AppActivityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colors;
-    final color = type.color(colors);
+    final colors = context.colors;
+    final tone = type.color(colors);
+    final endText = endTime;
     final meta = [
       place,
       subtitle,
-    ].where((s) => s != null && s.isNotEmpty).join(' · ');
+    ].where((value) => value != null && value.isNotEmpty).join(' · ');
 
     return AppPressable(
       onTap: onTap,
-      child: CustomPaint(
-        foregroundPainter: _DashedRRectPainter(
-          color: color.withValues(alpha: 0.4),
-          radius: 18,
-        ),
+      semanticsLabel: '${type.label}, $time, $title',
+      child: AppDashedBorder(
+        color: colors.line,
+        radius: AppRadius.field,
+        strokeWidth: 1,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppRadius.field),
           child: ColoredBox(
             color: colors.surface,
             child: IntrinsicHeight(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(width: 4, color: color),
+                  SizedBox(width: 4, child: ColoredBox(color: tone)),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 13, 16, 13),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.actionInset,
+                        AppSpacing.lg,
+                        AppSpacing.actionInset,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(
                             children: [
@@ -91,43 +98,32 @@ class AppActivityRow extends StatelessWidget {
                                 TextSpan(
                                   text: time,
                                   children: [
-                                    if (endTime != null)
+                                    if (endText != null)
                                       TextSpan(
-                                        text: '–$endTime',
-                                        style: TextStyle(
-                                          color: colors.deactiveDarker,
-                                          fontWeight: FontWeight.w500,
+                                        text: '–$endText',
+                                        style: AppText.timeEnd.copyWith(
+                                          color: colors.muted2,
                                         ),
                                       ),
                                   ],
                                 ),
-                                style: AppText.tabular(
-                                  AppText.bodyStrong.copyWith(
-                                    color: colors.active,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
+                                style: AppText.time.copyWith(color: colors.ink),
                               ),
-                              const SizedBox(width: 8),
-                              _TypePill(type: type, color: color),
+                              const SizedBox(width: AppSpacing.sm),
+                              _TypePill(type: type, tone: tone),
                             ],
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: AppSpacing.xs),
                           Text(
                             title,
-                            style: AppText.bodyLarge.copyWith(
-                              color: colors.active,
-                              fontWeight: FontWeight.w600,
-                              height: 1.25,
-                            ),
+                            style: AppText.headline.copyWith(color: colors.ink),
                           ),
                           if (meta.isNotEmpty) ...[
-                            const SizedBox(height: 4),
+                            const SizedBox(height: AppSpacing.xs),
                             Text(
                               meta,
                               style: AppText.caption.copyWith(
-                                color: colors.deactiveDarker,
+                                color: colors.muted,
                               ),
                             ),
                           ],
@@ -146,72 +142,32 @@ class AppActivityRow extends StatelessWidget {
 }
 
 class _TypePill extends StatelessWidget {
-  const _TypePill({required this.type, required this.color});
+  const _TypePill({required this.type, required this.tone});
 
   final AppActivityType type;
-  final Color color;
+  final Color tone;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.micro,
+      ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.13),
+        color: colors.tintOf(tone),
         borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AppLineIconWidget(type.icon, size: 11, color: color),
-          const SizedBox(width: 4),
-          Text(
-            type.label,
-            style: AppText.captionSmall.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          AppLineIconWidget(type.icon, size: AppIconSize.micro, color: tone),
+          const SizedBox(width: AppSpacing.xs),
+          Text(type.label, style: AppText.micro.copyWith(color: tone)),
         ],
       ),
     );
-  }
-}
-
-/// Paints a dashed rounded-rect outline (Flutter has no dashed border builtin).
-class _DashedRRectPainter extends CustomPainter {
-  const _DashedRRectPainter({required this.color, required this.radius});
-
-  final Color color;
-  final double radius;
-
-  static const double _dash = 5;
-  static const double _gap = 4;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
-    final rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(radius),
-    );
-    final path = Path()..addRRect(rrect);
-
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final next = math.min(distance + _dash, metric.length);
-        canvas.drawPath(metric.extractPath(distance, next), paint);
-        distance = next + _gap;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DashedRRectPainter oldDelegate) {
-    return oldDelegate.color != color || oldDelegate.radius != radius;
   }
 }

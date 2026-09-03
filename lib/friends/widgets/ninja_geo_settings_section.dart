@@ -13,7 +13,7 @@ class _NinjaGeoSettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final helperText = helper;
     return Padding(
       padding: const .symmetric(horizontal: AppSpacing.xl),
@@ -22,21 +22,15 @@ class _NinjaGeoSettingsSection extends StatelessWidget {
         children: [
           Text(
             title.toUpperCase(),
-            style: NinjaText.microLabel.copyWith(color: colors.muted),
+            style: AppText.captionSmall.copyWith(color: colors.muted),
           ),
           const SizedBox(height: 9),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: colors.surfaceAlt,
-              borderRadius: .circular(NinjaRadius.button),
-            ),
-            child: Padding(padding: const .all(4), child: child),
-          ),
+          child,
           if (helperText != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               helperText,
-              style: NinjaText.helper.copyWith(color: colors.muted),
+              style: AppText.caption.copyWith(color: colors.muted),
             ),
           ],
         ],
@@ -58,7 +52,7 @@ class _NinjaGeoSettingsDivider extends StatelessWidget {
       child: Divider(
         height: 1,
         thickness: 1,
-        color: context.ninja.lineSoft,
+        color: context.colors.line,
       ),
     );
   }

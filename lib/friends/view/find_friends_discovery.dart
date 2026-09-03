@@ -34,36 +34,46 @@ class FindFriendsDiscovery extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final loading = state.status == FindFriendsStatus.loading;
+    final people = _people(l10n);
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: .stretch,
       children: [
         Padding(
-          padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
-          child: Row(
-            spacing: 10,
-            children: [
-              Expanded(
-                child: NinjaFindFriendsDiscoveryAction(
-                  icon: AppLineIcon.qr,
-                  title: l10n.friendsMyQr,
-                  subtitle: l10n.friendsMyQrSub,
-                  accented: !loading,
-                  onTap: onShowQr,
+          padding: const .symmetric(horizontal: AppSpacing.screen),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 10,
+              children: [
+                Expanded(
+                  child: NinjaFindFriendsDiscoveryAction(
+                    icon: AppLineIcon.qr,
+                    title: l10n.friendsMyQr,
+                    subtitle: l10n.friendsMyQrSub,
+                    accented: !loading,
+                    onTap: onShowQr,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: NinjaFindFriendsDiscoveryAction(
-                  icon: AppLineIcon.camera,
-                  title: l10n.friendsScan,
-                  subtitle: l10n.friendsScanSub,
-                  onTap: onScan,
+                Expanded(
+                  child: NinjaFindFriendsDiscoveryAction(
+                    icon: AppLineIcon.camera,
+                    title: l10n.friendsScan,
+                    subtitle: l10n.friendsScanSub,
+                    onTap: onScan,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ).animateSectionEntrance(),
-        NinjaStateSwitcher(child: _people(l10n)),
-        const SizedBox(height: 26),
+        NinjaStateSwitcher(
+          child: SizedBox(
+            key: people.key,
+            width: double.infinity,
+            child: people,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.section),
         NinjaFindFriendsInviteCard(
           onTap: onInvite,
         ).animateSectionEntrance(index: 1),
@@ -85,16 +95,17 @@ class FindFriendsDiscovery extends StatelessWidget {
       return Padding(
         key: const ValueKey('failure'),
         padding: const .fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           26,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           0,
         ),
-        child: NinjaErrorCard(
+        child: AppErrorState(
           title: l10n.loadingError,
           message: l10n.tryAgain,
-          actionLabel: l10n.retry,
-          onAction: onRetry,
+          footnote: null,
+          primaryLabel: l10n.retry,
+          onPrimary: onRetry,
         ),
       );
     }
@@ -105,15 +116,15 @@ class FindFriendsDiscovery extends StatelessWidget {
       return Padding(
         key: const ValueKey('empty'),
         padding: const .fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           26,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           0,
         ),
-        child: NinjaEmptyState(
-          icon: const AppLineIconWidget(AppLineIcon.people),
+        child: AppEmptyState(
+          lineIcon: AppLineIcon.people,
           title: l10n.friendsEmptyTitle,
-          message: l10n.friendsEmptySub,
+          subtitle: l10n.friendsEmptySub,
         ).animateEmptyState(),
       );
     }
@@ -137,11 +148,17 @@ class FindFriendsDiscovery extends StatelessWidget {
               ].join(' · '),
               trailing: FindFriendsAddAction(
                 sent: state.isSent(member.userId, member.friendshipStatus),
+                loading: state.sendingTo.contains(member.userId),
                 onAdd: () => onSendRequest(member.userId),
               ),
             ).animateListItem(index: index),
           NinjaFindFriendsGroupAction(
-            count: state.roster.members.length,
+            count: groupmates
+                .where(
+                  (member) =>
+                      !state.isSent(member.userId, member.friendshipStatus),
+                )
+                .length,
             loading: state.isAddingGroup,
             onTap: onAddWholeGroup,
           ),
@@ -156,6 +173,7 @@ class FindFriendsDiscovery extends StatelessWidget {
                   : (suggestion.group ?? ''),
               trailing: FindFriendsAddAction(
                 sent: state.sentTo.contains(suggestion.userId),
+                loading: state.sendingTo.contains(suggestion.userId),
                 subtle: true,
                 onAdd: () => onSendRequest(suggestion.userId),
               ),

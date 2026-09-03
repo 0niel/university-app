@@ -11,28 +11,28 @@ class _HubSkeleton extends StatelessWidget {
     return NinjaSkeletonGroup(
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: 24),
         children: [
           const Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: NinjaSkeleton(width: 90, height: 11),
           ),
           const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: NinjaSkeleton(
               height: textScale >= 1.5 ? 172 : 140,
-              radius: NinjaRadius.card,
+              radius: AppRadius.card,
             ),
           ),
           const SizedBox(height: 18),
           const Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: NinjaSkeleton(width: 110, height: 11),
           ),

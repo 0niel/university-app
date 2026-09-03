@@ -14,13 +14,13 @@ class NinjaStudyGroupMemberRow extends StatelessWidget {
   final bool pending;
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final handle = member.handle;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Padding(
         padding: const .all(16),
@@ -36,7 +36,7 @@ class NinjaStudyGroupMemberRow extends StatelessWidget {
                     member.fullName,
                     maxLines: 1,
                     overflow: .ellipsis,
-                    style: NinjaText.headline.copyWith(color: colors.ink),
+                    style: AppText.headline.copyWith(color: colors.ink),
                   ),
                   if (handle != null) ...[
                     const SizedBox(height: 3),
@@ -44,7 +44,7 @@ class NinjaStudyGroupMemberRow extends StatelessWidget {
                       '@$handle',
                       maxLines: 1,
                       overflow: .ellipsis,
-                      style: NinjaText.subtext.copyWith(color: colors.muted),
+                      style: AppText.subtext.copyWith(color: colors.muted),
                     ),
                   ],
                 ],
@@ -62,7 +62,7 @@ class NinjaStudyGroupMemberRow extends StatelessWidget {
                   icon: AppLineIconWidget(
                     .close,
                     size: 18,
-                    color: colors.scarlet,
+                    color: colors.exam,
                   ),
                   tooltip: l10n.studyGroupRemove,
                   onPressed: pending ? null : onRemove,

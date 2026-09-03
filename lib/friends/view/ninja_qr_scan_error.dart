@@ -18,11 +18,14 @@ class NinjaQrScanError extends StatelessWidget {
       child: Center(
         child: Padding(
           padding: const .symmetric(
-            horizontal: NinjaMetrics.screenPadding,
+            horizontal: AppSpacing.screen,
           ),
-          child: NinjaErrorState(
+          child: AppErrorState(
             title: title,
             message: message,
+            footnote: null,
+            primaryLabel: MaterialLocalizations.of(context).closeButtonLabel,
+            onPrimary: () => Navigator.of(context).maybePop(),
           ).animateEmptyState(),
         ),
       ),

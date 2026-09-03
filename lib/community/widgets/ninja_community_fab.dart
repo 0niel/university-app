@@ -15,13 +15,13 @@ class NinjaCommunityFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final maxWidth =
-        (MediaQuery.widthOf(context) - NinjaMetrics.screenPadding * 2).clamp(
+    final colors = context.colors;
+    final maxWidth = (MediaQuery.widthOf(context) - AppSpacing.screen * 2)
+        .clamp(
           0.0,
           double.infinity,
         );
-    final foreground = colors.onBrand;
+    final foreground = colors.onAccent;
     return SafeArea(
       child: Semantics(
         button: true,
@@ -32,8 +32,8 @@ class NinjaCommunityFab extends StatelessWidget {
           onTap: onPressed,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: onPressed == null ? colors.surface : colors.brand,
-              borderRadius: BorderRadius.circular(NinjaRadius.pill),
+              color: onPressed == null ? colors.surface : colors.accent,
+              borderRadius: BorderRadius.circular(AppRadius.full),
             ),
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: 52, maxWidth: maxWidth),
@@ -45,7 +45,7 @@ class NinjaCommunityFab extends StatelessWidget {
                     AppLineIconWidget(
                       icon,
                       size: 20,
-                      color: onPressed == null ? colors.disabled : foreground,
+                      color: onPressed == null ? colors.muted2 : foreground,
                     ),
                     const SizedBox(width: 9),
                     Flexible(
@@ -53,10 +53,8 @@ class NinjaCommunityFab extends StatelessWidget {
                         label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: NinjaText.button.copyWith(
-                          color: onPressed == null
-                              ? colors.disabled
-                              : foreground,
+                        style: AppText.button.copyWith(
+                          color: onPressed == null ? colors.muted2 : foreground,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

@@ -26,6 +26,8 @@ class _MiniAppSecretSheetState extends State<MiniAppSecretSheet> {
   MiniAppSigningSecretInfo? _info;
   String? _freshSecret;
   bool _busy = false;
+  bool _loadFailed = false;
+  bool _loading = true;
 
   @override
   void initState() {
@@ -34,11 +36,17 @@ class _MiniAppSecretSheetState extends State<MiniAppSecretSheet> {
   }
 
   Future<void> _load() async {
+    setState(() {
+      _loadFailed = false;
+      _loading = true;
+    });
     try {
       final info = await widget.repository.getSigningSecretInfo(widget.appId);
       if (mounted) setState(() => _info = info);
     } on Exception {
-      if (mounted) setState(() => _info = const MiniAppSigningSecretInfo());
+      if (mounted) setState(() => _loadFailed = true);
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -93,7 +101,7 @@ class _MiniAppSecretSheetState extends State<MiniAppSecretSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final info = _info;
     final hasSecret = info?.hasSecret ?? false;
@@ -103,34 +111,34 @@ class _MiniAppSecretSheetState extends State<MiniAppSecretSheet> {
       children: [
         Text(
           l10n.miniAppsSecretBody,
-          style: NinjaText.subtext.copyWith(color: colors.muted, height: 1.5),
+          style: AppText.subtext.copyWith(color: colors.muted, height: 1.5),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         if (_freshSecret != null) ...[
           Container(
             padding: const .all(14),
             decoration: BoxDecoration(
-              color: colors.surfaceAlt,
-              borderRadius: .circular(NinjaRadius.card),
+              color: colors.surface2,
+              borderRadius: .circular(AppRadius.card),
             ),
             child: Column(
               crossAxisAlignment: .start,
               children: [
                 Text(
                   l10n.miniAppsSecretFresh,
-                  style: NinjaText.microLabel.copyWith(
-                    color: colors.mutedDark,
+                  style: AppText.captionSmall.copyWith(
+                    color: colors.muted,
                   ),
                 ),
                 const SizedBox(height: 6),
                 SelectableText(
                   _freshSecret ?? '',
-                  style: NinjaText.subtext.copyWith(
+                  style: AppText.subtext.copyWith(
                     color: colors.ink,
                     fontFamily: 'monospace',
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.gap),
                 NinjaButton.secondary(
                   label: l10n.miniAppsSecretCopy,
                   size: .small,
@@ -139,9 +147,15 @@ class _MiniAppSecretSheetState extends State<MiniAppSecretSheet> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
         ],
-        if (info == null)
+        if (_loadFailed)
+          NinjaErrorState(
+            title: l10n.loadingError,
+            retryLabel: l10n.retry,
+            onRetry: () => unawaited(_load()),
+          )
+        else if (info == null || _loading)
           const MiniAppSecretSkeleton()
         else
           NinjaListCell(
@@ -154,26 +168,33 @@ class _MiniAppSecretSheetState extends State<MiniAppSecretSheet> {
             horizontalPadding: 0,
             showChevron: false,
           ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           l10n.miniAppsSecretRotateHint,
-          style: NinjaText.helper.copyWith(color: colors.muted, height: 1.4),
+          style: AppText.captionSmall.copyWith(
+            color: colors.muted,
+            height: 1.4,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         NinjaButton.primary(
           label: hasSecret
               ? l10n.miniAppsSecretRotate
               : l10n.miniAppsSecretGenerate,
           expanded: true,
           loading: _busy,
-          onPressed: _busy ? null : () => unawaited(_rotate()),
+          onPressed: _busy || _loading || info == null || _loadFailed
+              ? null
+              : () => unawaited(_rotate()),
         ),
         if (hasSecret) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.gap),
           NinjaButton.destructiveOutline(
             label: l10n.miniAppsSecretDisable,
             expanded: true,
-            onPressed: _busy ? null : () => unawaited(_disable()),
+            onPressed: _busy || _loading || _loadFailed
+                ? null
+                : () => unawaited(_disable()),
           ),
         ],
       ],

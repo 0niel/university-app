@@ -22,7 +22,7 @@ class _OptionField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Row(
       children: [
@@ -34,21 +34,21 @@ class _OptionField extends StatelessWidget {
             child: AppPressable(
               onTap: onMarkCorrect,
               child: SizedBox.square(
-                dimension: NinjaMetrics.minTouchTarget,
+                dimension: AppControlSize.iconButton,
                 child: Center(
                   child: Container(
                     width: 24,
                     height: 24,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: isCorrect ? colors.brand : colors.surfaceAlt,
+                      color: isCorrect ? colors.accent : colors.surface2,
                       shape: BoxShape.circle,
                     ),
                     child: isCorrect
                         ? AppLineIconWidget(
                             AppLineIcon.check,
                             size: 13,
-                            color: colors.onBrand,
+                            color: colors.onAccent,
                             strokeWidth: 3,
                           )
                         : null,
@@ -57,7 +57,7 @@ class _OptionField extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppSpacing.gap),
         ],
         Expanded(
           child: NinjaInput(
@@ -68,13 +68,13 @@ class _OptionField extends StatelessWidget {
         ),
         if (canRemove)
           Padding(
-            padding: const EdgeInsets.only(left: 8),
+            padding: const EdgeInsets.only(left: AppSpacing.sm),
             child: Tooltip(
               message: l10n.pollsRemoveOption,
               child: AppPressable(
                 onTap: onRemove,
                 child: SizedBox.square(
-                  dimension: NinjaMetrics.minTouchTarget,
+                  dimension: AppControlSize.iconButton,
                   child: Center(
                     child: AppLineIconWidget(
                       .close,

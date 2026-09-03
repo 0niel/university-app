@@ -14,13 +14,13 @@ class _QuestsContent extends StatelessWidget {
       children: [
         if (daily.isNotEmpty) ...[
           _QuestsHeading(title: l10n.ninjaPathToday, quests: daily),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           for (final quest in daily) _NinjaQuestCard(quest: quest),
-          if (weekly.isNotEmpty) const SizedBox(height: 20),
+          if (weekly.isNotEmpty) const SizedBox(height: AppSpacing.screen),
         ],
         if (weekly.isNotEmpty) ...[
           _QuestsHeading(title: l10n.ninjaPathThisWeek, quests: weekly),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           for (final quest in weekly) _NinjaQuestCard(quest: quest),
         ],
       ],

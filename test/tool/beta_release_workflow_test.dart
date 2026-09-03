@@ -26,6 +26,8 @@ void main() {
     expect(workflow, contains('actions/attest-build-provenance@'));
     expect(workflow, contains(r'gh release create "$TAG"'));
     expect(workflow, contains('--prerelease'));
+    expect(workflow, contains("--notes ''"));
+    expect(workflow, isNot(contains('--generate-notes')));
     expect(workflow, contains('if-no-files-found: error'));
     expect(
       workflow,
@@ -36,7 +38,7 @@ void main() {
     expect(workflow, isNot(contains('shorebirdtech/shorebird-release@')));
   });
 
-  test('updates the Google Play store icon after internal release', () {
+  test('updates the Google Play store icon only on explicit dispatch', () {
     final workflow = File(
       '.github/workflows/google-play-release.yml',
     ).readAsStringSync();
@@ -60,6 +62,13 @@ void main() {
     expect(workflow, contains('update_icon_only:'));
     expect(workflow, contains('submit_icon_for_review:'));
     expect(
+      workflow.substring(iconIndex, cleanupIndex),
+      contains(
+        r"if: ${{ github.event_name == 'workflow_dispatch' && "
+        'inputs.update_icon_only == true }}',
+      ),
+    );
+    expect(
       workflow,
       contains('A release tag is required for a manual bundle upload'),
     );
@@ -69,7 +78,7 @@ void main() {
       workflow,
       contains('github.event.workflow_run.head_sha || github.sha'),
     );
-    expect(workflow, contains("inputs.update_icon_only != true"));
+    expect(workflow, contains('inputs.update_icon_only != true'));
     expect(workflow, contains('arguments+=(--submit-for-review)'));
     expect(
       workflow,

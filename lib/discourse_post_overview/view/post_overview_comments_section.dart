@@ -7,35 +7,48 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 class PostOverviewCommentsSection extends StatelessWidget {
   const PostOverviewCommentsSection({
     required this.comments,
+    this.loadFailed = false,
+    this.onRetry,
     super.key,
   });
 
   final List<DiscoursePostComment> comments;
+  final bool loadFailed;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
 
     return Column(
       crossAxisAlignment: .start,
-      spacing: 16,
+      spacing: AppSpacing.lg,
       children: [
         Text(
-          context.l10n.postDetailComments(comments.length),
-          style: NinjaText.title.copyWith(color: colors.ink),
+          loadFailed && comments.isEmpty
+              ? context.l10n.comments
+              : context.l10n.postDetailComments(comments.length),
+          style: AppText.section.copyWith(color: colors.ink),
         ),
-        if (comments.isEmpty)
+        if (loadFailed)
+          AppBanner(
+            message: context.l10n.postDetailCommentsLoadError,
+            tone: AppBannerTone.warn,
+            actionLabel: context.l10n.retry,
+            onAction: onRetry,
+          ),
+        if (comments.isEmpty && !loadFailed)
           Text(
             context.l10n.postDetailNoComments,
-            style: NinjaText.body.copyWith(color: colors.muted),
-          )
-        else
+            style: AppText.body.copyWith(color: colors.muted),
+          ),
+        if (comments.isNotEmpty)
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,
             itemCount: comments.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
             itemBuilder: (context, index) =>
                 PostOverviewCommentTile(comment: comments[index]),
           ),

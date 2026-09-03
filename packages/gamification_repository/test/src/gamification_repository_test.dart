@@ -7,6 +7,37 @@ import 'package:supabase/supabase.dart';
 import 'package:test/test.dart';
 
 void main() {
+  for (final group in <String?>[null, 'GROUP-01']) {
+    test(
+      'academic bootstrap sends only organization and optional group $group',
+      () async {
+        final requests = <http.Request>[];
+        final repository = GamificationRepository(
+          supabase: SupabaseClient(
+            'https://project.supabase.co',
+            'key',
+            httpClient: MockClient((request) async {
+              requests.add(request);
+              return http.Response('', 204, request: request);
+            }),
+          ),
+        );
+        await repository.ensureAcademicProfile(
+          'university',
+          academicGroup: group,
+        );
+        expect(
+          requests.single.url.path,
+          '/rest/v1/rpc/ensure_academic_profile',
+        );
+        expect(jsonDecode(requests.single.body), {
+          'p_organization_id': 'university',
+          'p_group': ?group,
+        });
+      },
+    );
+  }
+
   GamificationRepository repositoryReturning(Object body, {int status = 200}) {
     return GamificationRepository(
       supabase: SupabaseClient(
@@ -30,6 +61,17 @@ void main() {
     expect(
       repository.getProfile,
       throwsA(isA<GamificationResponseException>()),
+    );
+  });
+
+  test('academic bootstrap exposes authorization failure for recovery', () {
+    final repository = repositoryReturning(
+      {'code': '42501', 'message': 'Organization access denied'},
+      status: 403,
+    );
+    expect(
+      () => repository.ensureAcademicProfile('other'),
+      throwsA(isA<PostgrestException>()),
     );
   });
 

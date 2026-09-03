@@ -47,14 +47,18 @@ class StacAppIconButtonParser extends StacParser<StacAppIconButton> {
     return AppIconButton(
       icon: AppLineIconWidget(icon),
       tooltip: model.tooltip,
-      variant: AppButtonVariant.values.firstWhere(
-        (variant) => variant.name == model.variant,
-        orElse: () => AppButtonVariant.ghost,
-      ),
-      size: AppButtonSize.values.firstWhere(
-        (size) => size.name == model.size,
-        orElse: () => AppButtonSize.medium,
-      ),
+      tone: switch (model.variant) {
+        'primary' => AppIconButtonTone.primary,
+        'tonal' => AppIconButtonTone.tonal,
+        'danger' || 'destructive' => AppIconButtonTone.danger,
+        'secondary' || 'outline' => AppIconButtonTone.secondary,
+        _ => AppIconButtonTone.plain,
+      },
+      size: switch (model.size) {
+        'small' => AppIconButtonSize.small,
+        'compact' => AppIconButtonSize.compact,
+        _ => AppIconButtonSize.regular,
+      },
       onPressed: actionCallback(context, model.actionJson),
     );
   }

@@ -7,7 +7,7 @@ class _FeatureTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
       padding: const .symmetric(horizontal: 16, vertical: 10),
       child: Row(
@@ -15,13 +15,13 @@ class _FeatureTile extends StatelessWidget {
         children: [
           AppLineIconWidget(
             feature.icon,
-            color: feature.enabled ? colors.brand : colors.muted,
+            color: feature.enabled ? colors.accent : colors.muted,
             size: 20,
           ),
           Expanded(
             child: Text(
               feature.label,
-              style: NinjaText.body.copyWith(color: colors.ink),
+              style: AppText.body.copyWith(color: colors.ink),
             ),
           ),
           NinjaSwitch(

@@ -10,7 +10,7 @@ class MiniAppCardMeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Column(
       crossAxisAlignment: .end,
@@ -21,11 +21,11 @@ class MiniAppCardMeta extends StatelessWidget {
             mainAxisSize: .min,
             spacing: 3,
             children: [
-              AppLineIconWidget(.star, size: 13, color: colors.brand),
+              AppLineIconWidget(.star, size: 13, color: colors.accent),
               Text(
                 app.ratingAvg.toStringAsFixed(1),
-                style: NinjaText.tabular(
-                  NinjaText.subtext.copyWith(
+                style: AppText.tabular(
+                  AppText.subtext.copyWith(
                     color: colors.ink,
                     fontWeight: .w700,
                   ),
@@ -35,7 +35,7 @@ class MiniAppCardMeta extends StatelessWidget {
           ),
         Text(
           l10n.miniAppsLaunches(app.launchCount),
-          style: NinjaText.helper.copyWith(color: colors.muted),
+          style: AppText.captionSmall.copyWith(color: colors.muted),
         ),
       ],
     );

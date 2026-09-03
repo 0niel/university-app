@@ -22,8 +22,11 @@ class DiscourseApiClient {
   final String _baseUrl;
   final http.Client _httpClient;
 
-  Future<Top> getTop() async {
-    final uri = Uri.parse('$_baseUrl/top.json?period=monthly');
+  Future<Top> getTop({int page = 0}) async {
+    if (page < 0) throw ArgumentError.value(page, 'page');
+    final uri = Uri.parse('$_baseUrl/top.json').replace(
+      queryParameters: {'period': 'yearly', 'page': '$page'},
+    );
     final response = await _httpClient.get(
       uri,
       headers: _requestHeaders,

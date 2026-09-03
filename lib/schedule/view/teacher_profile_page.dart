@@ -6,63 +6,87 @@ import 'package:campus_repository/campus_repository.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rtu_mirea_app/community/community.dart';
+import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
-import 'package:rtu_mirea_app/schedule/widgets/ninja_schedule_section_header.dart';
-import 'package:rtu_mirea_app/schedule/widgets/ninja_schedule_surface.dart';
+import 'package:schedule_repository/schedule_repository.dart' show Teacher;
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-part 'rating_card.dart';
 part 'review_card.dart';
 part 'review_card_skeleton.dart';
 part 'review_sheet.dart';
 part 'reviews_skeleton.dart';
 part 'stars_row.dart';
 
-class TeacherProfilePage extends StatefulWidget {
-  const TeacherProfilePage({required this.teacherName, super.key});
+Future<void> showTeacherProfileSheet(
+  BuildContext context, {
+  required Teacher teacher,
+}) => showAppSheet<void>(
+  context,
+  child: RepositoryProvider.value(
+    value: context.read<CampusRepository>(),
+    child: TeacherProfilePage(
+      teacherName: teacher.name,
+      teacher: teacher,
+      inSheet: true,
+    ),
+  ),
+);
 
+class TeacherProfilePage extends StatefulWidget {
+  const TeacherProfilePage({
+    required this.teacherName,
+    this.teacher,
+    this.inSheet = false,
+    super.key,
+  });
   final String teacherName;
+  final Teacher? teacher;
+  final bool inSheet;
 
   @override
   State<TeacherProfilePage> createState() => _TeacherProfilePageState();
 }
 
 class _TeacherProfilePageState extends State<TeacherProfilePage> {
-  TeacherProfile _profile = .empty;
+  TeacherProfile _profile = TeacherProfile.empty;
   bool _loading = true;
   bool _error = false;
-
+  int _loadRevision = 0;
   CampusRepository get _repository => context.read();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_load());
+    });
   }
 
   Future<void> _load() async {
+    if (!mounted) return;
+    final revision = ++_loadRevision;
     setState(() {
       _loading = true;
       _error = false;
     });
     try {
       final profile = await _repository.getTeacherProfile(widget.teacherName);
-      if (mounted) {
+      if (mounted && revision == _loadRevision) {
         setState(() {
           _profile = profile;
           _loading = false;
         });
       }
-    } on Exception catch (e, st) {
+    } on Exception catch (error, stackTrace) {
       log(
         'Failed to load teacher profile',
-        error: e,
-        stackTrace: st,
+        error: error,
+        stackTrace: stackTrace,
         name: 'TeacherProfilePage',
       );
-      if (mounted) {
+      if (mounted && revision == _loadRevision) {
         setState(() {
           _loading = false;
           _error = true;
@@ -72,7 +96,6 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
   }
 
   Future<void> _review() async {
-    final mine = _profile.reviews.where((r) => r.isMine).firstOrNull;
     final saved = await showAppSheet<bool>(
       context,
       title: context.l10n.teacherProfileReviewTitle,
@@ -80,209 +103,296 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
       child: _ReviewSheet(
         repository: _repository,
         teacherName: widget.teacherName,
-        current: mine,
+        current: _profile.reviews.where((r) => r.isMine).firstOrNull,
       ),
     );
-    if (saved == true) await _load();
+    if (saved == true && mounted) await _load();
   }
 
   void _share() {
-    final overall = _profile.overall;
     unawaited(
       SharePlus.instance.share(
         ShareParams(
           text:
               '${widget.teacherName} · '
-              '${context.read<UniversityConfig>().appName}'
-              '${overall != null ? ' · ★ ${overall.toStringAsFixed(1)}' : ''}',
+              '${context.read<UniversityConfig>().appName}',
         ),
       ),
     );
   }
 
-  Widget _buildReviews(BuildContext context, TeacherProfile profile) {
+  Future<void> _write() async {
+    final email = widget.teacher?.email;
+    final phone = widget.teacher?.phone;
+    final uri = email != null && email.trim().isNotEmpty
+        ? Uri(scheme: 'mailto', path: email)
+        : phone != null && phone.trim().isNotEmpty
+        ? Uri(scheme: 'tel', path: phone)
+        : null;
+    if (uri == null || !await launchUrl(uri)) {
+      if (mounted) {
+        ToastManager.showInfo(
+          context,
+          message: context.l10n.scheduleTeacherNoContacts,
+        );
+      }
+    }
+  }
+
+  Widget _buildReviews(BuildContext context) {
     final l10n = context.l10n;
     if (_loading) {
       return const _ReviewsSkeleton(key: ValueKey('teacher_reviews_skeleton'));
     }
     if (_error) {
-      return NinjaErrorState(
+      return AppErrorState(
         title: l10n.loadingError,
         message: l10n.tryAgain,
-        retryLabel: l10n.retry,
-        onRetry: () => unawaited(_load()),
-      ).animateEmptyState(key: const ValueKey('teacher_reviews_error'));
+        primaryLabel: l10n.retry,
+        footnote: null,
+        onPrimary: _load,
+      );
     }
-    if (profile.reviews.isEmpty) {
-      return NinjaEmptyState(
+    if (_profile.reviews.isEmpty) {
+      return AppEmptyState(
         title: l10n.teacherProfileEmptyTitle,
-        message: l10n.teacherProfileEmptySub,
-        icon: AppLineIconWidget(
-          AppLineIcon.message,
-          size: 20,
-          color: context.ninja.muted,
-        ),
+        subtitle: l10n.teacherProfileEmptySub,
         actionLabel: l10n.teacherProfileLeaveReview,
-        onAction: () => unawaited(_review()),
-      ).animateEmptyState(key: const ValueKey('teacher_reviews_empty'));
+        onAction: _review,
+      );
+    }
+    if (widget.inSheet) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        child: ColoredBox(
+          color: context.colors.surface,
+          child: Column(
+            children: [
+              for (final (index, review) in _profile.reviews.indexed) ...[
+                if (index > 0)
+                  Divider(height: AppSpacing.xxxs, color: context.colors.line),
+                _ReviewCard(review: review, compact: true),
+              ],
+            ],
+          ),
+        ),
+      );
     }
     return Column(
-      key: const ValueKey('teacher_reviews'),
-      crossAxisAlignment: .stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: AppSpacing.gap,
       children: [
-        for (final (index, review) in profile.reviews.indexed) ...[
-          _ReviewCard(review: review).animateListItem(index: index),
-          const SizedBox(height: 10),
+        for (final review in _profile.reviews) _ReviewCard(review: review),
+      ],
+    );
+  }
+
+  Widget _content(BuildContext context) {
+    final colors = context.colors;
+    final l10n = context.l10n;
+    final profile = _profile;
+    final unavailable = _loading || _error;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            AppAvatar(
+              name: widget.teacherName,
+              imageUrl: widget.teacher?.photoUrl,
+              size: 64,
+              backgroundColor: colors.surface2,
+              textStyle: AppText.sans(20, FontWeight.w700),
+              color: colors.muted,
+            ),
+            const SizedBox(width: AppSpacing.sectionGap),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.teacherName,
+                    style: AppText.serif(
+                      24,
+                      height: 1.1,
+                    ).copyWith(color: colors.ink),
+                  ),
+                  if (widget.teacher?.department case final department?) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      department,
+                      style: AppText.sans(
+                        13,
+                        FontWeight.w400,
+                      ).copyWith(color: colors.muted),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final wide =
+                constraints.maxWidth >= 340 &&
+                MediaQuery.textScalerOf(context).scale(1) <= 1.5;
+            final stats = [
+              (
+                l10n.scheduleTeacherRating,
+                unavailable || profile.overall == null
+                    ? '—'
+                    : NumberFormat(
+                        '0.0',
+                        Localizations.localeOf(context).toString(),
+                      ).format(profile.overall),
+              ),
+              (
+                l10n.scheduleTeacherReviews,
+                unavailable ? '—' : '${profile.reviewsCount}',
+              ),
+              (
+                l10n.scheduleTeacherSubjects,
+                unavailable ? '—' : '${profile.subjects.length}',
+              ),
+            ];
+            return Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                for (final stat in stats)
+                  SizedBox(
+                    width: wide
+                        ? (constraints.maxWidth - 16) / 3
+                        : constraints.maxWidth,
+                    child: AppCard(
+                      key: ValueKey('teacher-stat-${stat.$1}'),
+                      radius: AppRadius.field,
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            stat.$2,
+                            style: AppText.sans(
+                              20,
+                              FontWeight.w800,
+                            ).copyWith(color: colors.ink),
+                          ),
+                          const SizedBox(height: AppSpacing.xxs),
+                          Text(
+                            stat.$1,
+                            style: AppText.sans(11.5, FontWeight.w400).copyWith(
+                              color: colors.muted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+        if (profile.subjects.isNotEmpty) ...[
+          if (widget.inSheet)
+            const SizedBox(height: AppSpacing.md)
+          else
+            AppOverline(l10n.teacherProfileSubjects),
+          Wrap(
+            spacing: AppSpacing.xsm,
+            runSpacing: AppSpacing.xsm,
+            children: [
+              for (final (index, subject) in profile.subjects.indexed)
+                AppCard(
+                  key: ValueKey('teacher-subject-$index'),
+                  radius: AppRadius.full,
+                  color: colors.surface,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  child: Text(
+                    subject,
+                    style: AppText.sans(
+                      12.5,
+                      FontWeight.w600,
+                    ).copyWith(color: colors.ink),
+                  ),
+                ),
+            ],
+          ),
         ],
+        if (widget.inSheet)
+          const SizedBox(height: AppSpacing.sectionGap)
+        else
+          AppOverline(l10n.teacherProfileReviews),
+        AppStateSwitcher(child: _buildReviews(context)),
+        const SizedBox(height: AppSpacing.sectionGap),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final buttons = [
+              AppButton.secondary(
+                label: l10n.scheduleTeacherWrite,
+                expanded: true,
+                backgroundColor: colors.surface,
+                onPressed: _write,
+              ),
+              AppButton.primary(
+                label: l10n.scheduleTeacherReview,
+                expanded: true,
+                onPressed: _review,
+              ),
+            ];
+            return constraints.maxWidth < 320 ||
+                    MediaQuery.textScalerOf(context).scale(1) > 1.4
+                ? Column(spacing: AppSpacing.sm, children: buttons)
+                : Row(
+                    children: [
+                      Expanded(child: buttons.first),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(child: buttons.last),
+                    ],
+                  );
+          },
+        ),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final profile = _profile;
-    final overall = profile.overall;
-    final reviewsCountLabel = context.l10n.teacherProfileReviewsCount(
-      profile.reviewsCount,
-    );
+    if (widget.inSheet) return _content(context);
     return Scaffold(
-      backgroundColor: colors.canvas,
+      backgroundColor: context.colors.canvas,
       body: RefreshIndicator(
-        color: colors.ink,
         onRefresh: _load,
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          slivers: [
-            SliverAppBar(
-              pinned: true,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              backgroundColor: colors.canvas,
-              surfaceTintColor: Colors.transparent,
-              leading: NinjaIconButton(
-                icon: const AppLineIconWidget(.chevronL, size: 20),
-                tooltip: context.l10n.back,
-                onPressed: () => Navigator.of(context).maybePop(),
-              ),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            AppInnerHeader(
+              title: context.l10n.lessonDetailsTeacherFallback,
               actions: [
-                NinjaIconButton(
-                  icon: const AppLineIconWidget(.share, size: 20),
-                  tooltip: context.l10n.teacherProfileShare,
-                  onPressed: _share,
+                AppHeaderAction(
+                  icon: AppLineIcon.share,
+                  semanticsLabel: context.l10n.teacherProfileShare,
+                  onTap: _share,
                 ),
-                const SizedBox(width: 8),
               ],
             ),
-            SliverSafeArea(
-              top: false,
-              sliver: SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  NinjaMetrics.screenPadding,
-                  8,
-                  NinjaMetrics.screenPadding,
-                  100,
-                ),
-                sliver: SliverList.list(
-                  children: [
-                    NinjaScheduleSurface(
-                      child: Row(
-                        spacing: 14,
-                        children: [
-                          NinjaAvatar(
-                            initials: _teacherInitials(widget.teacherName),
-                            size: 64,
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: .start,
-                              spacing: 4,
-                              children: [
-                                Text(
-                                  widget.teacherName,
-                                  style: NinjaText.title.copyWith(
-                                    color: colors.ink,
-                                  ),
-                                ),
-                                Text(
-                                  overall != null
-                                      ? '★ ${overall.toStringAsFixed(1)}'
-                                            ' · $reviewsCountLabel'
-                                      : context
-                                            .l10n
-                                            .teacherProfileNoReviewsInline,
-                                  style: NinjaText.subtext.copyWith(
-                                    color: colors.muted,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        _RatingCard(
-                          value: profile.clarity,
-                          label: context.l10n.teacherProfileClarity,
-                        ),
-                        _RatingCard(
-                          value: profile.loyalty,
-                          label: context.l10n.teacherProfileLoyalty,
-                        ),
-                        _RatingCard(
-                          value: profile.usefulness,
-                          label: context.l10n.teacherProfileUsefulness,
-                        ),
-                      ],
-                    ),
-                    if (profile.subjects.isNotEmpty) ...[
-                      const SizedBox(height: 28),
-                      NinjaScheduleSectionHeader(
-                        title: context.l10n.teacherProfileSubjects,
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          for (final subject in profile.subjects.take(8))
-                            NinjaChip(label: subject),
-                        ],
-                      ),
-                    ],
-                    const SizedBox(height: 28),
-                    NinjaScheduleSectionHeader(
-                      title: context.l10n.teacherProfileReviews,
-                    ),
-                    const SizedBox(height: 10),
-                    NinjaStateSwitcher(child: _buildReviews(context, profile)),
-                  ],
-                ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                AppSpacing.screen,
+                AppSpacing.screen,
+                AppSpacing.xxlg,
               ),
+              child: _content(context),
             ),
           ],
         ),
       ),
-      floatingActionButton: CommunityFab(
-        label: context.l10n.teacherProfileLeaveReview,
-        icon: .pencil,
-        onPressed: () => unawaited(_review()),
-      ),
     );
   }
 }
-
-String _teacherInitials(String name) => name
-    .trim()
-    .split(RegExp(r'\s+'))
-    .where((part) => part.isNotEmpty)
-    .take(2)
-    .map((part) => part.characters.firstOrNull?.toUpperCase() ?? '')
-    .join();

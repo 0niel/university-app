@@ -2,7 +2,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-part 'app_slot_chip.dart';
 part 'app_time_picker_sheet.dart';
 part 'app_time_wheel_group.dart';
 part 'app_time_wheels.dart';

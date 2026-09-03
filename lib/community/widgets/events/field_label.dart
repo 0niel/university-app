@@ -8,6 +8,6 @@ class _FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     label,
-    style: NinjaText.microLabel.copyWith(color: context.ninja.muted),
+    style: AppText.overline.copyWith(color: context.colors.muted),
   );
 }

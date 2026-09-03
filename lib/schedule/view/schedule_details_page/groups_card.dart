@@ -32,22 +32,22 @@ class _GroupsCardState extends State<_GroupsCard> {
         ),
         Padding(
           padding: const .fromLTRB(
-            NinjaMetrics.screenPadding,
-            0,
-            NinjaMetrics.screenPadding,
-            16,
+            AppSpacing.screen,
+            AppSpacing.zero,
+            AppSpacing.screen,
+            AppSpacing.lg,
           ),
           child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               for (final name in shown)
-                NinjaChip(
+                AppChip(
                   label: name,
                   onTap: () => openGlobalSearch(context, query: name),
                 ),
               if (hidden > 0)
-                NinjaChip(
+                AppChip(
                   label: context.l10n.lessonDetailsGroupsMore(hidden),
                   onTap: () => setState(() => _expanded = true),
                 ),

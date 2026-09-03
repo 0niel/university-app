@@ -16,16 +16,16 @@ class _EditRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final status = ScheduleLiveStatus.of(entry.schedule);
 
     return Padding(
       key: ValueKey('${entry.id}_row'),
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: Container(
@@ -33,7 +33,7 @@ class _EditRow extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Row(
           children: [
@@ -42,7 +42,7 @@ class _EditRow extends StatelessWidget {
               onTap: onRemove,
               semanticsLabel: '${l10n.delete}: ${entry.name}',
               child: SizedBox.square(
-                dimension: NinjaMetrics.minTouchTarget,
+                dimension: AppControlSize.touchTarget,
                 child: Center(
                   child: Container(
                     width: 32,
@@ -55,7 +55,7 @@ class _EditRow extends StatelessWidget {
                     child: AppLineIconWidget(
                       AppLineIcon.minus,
                       size: 17,
-                      color: colors.scarlet,
+                      color: colors.exam,
                     ),
                   ),
                 ),
@@ -73,12 +73,12 @@ class _EditRow extends StatelessWidget {
                     entry.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: NinjaText.headline.copyWith(color: colors.ink),
+                    style: AppText.headline.copyWith(color: colors.ink),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     l10n.scheduleHubLessonsToday(status.todayCount),
-                    style: NinjaText.subtext.copyWith(color: colors.muted),
+                    style: AppText.subtext.copyWith(color: colors.muted),
                   ),
                 ],
               ),
@@ -87,11 +87,11 @@ class _EditRow extends StatelessWidget {
             ReorderableDragStartListener(
               index: index,
               child: SizedBox.square(
-                dimension: NinjaMetrics.minTouchTarget,
+                dimension: AppControlSize.touchTarget,
                 child: Center(
                   child: AppLineIconWidget(
                     AppLineIcon.more,
-                    color: colors.chevron,
+                    color: colors.muted2,
                   ),
                 ),
               ),

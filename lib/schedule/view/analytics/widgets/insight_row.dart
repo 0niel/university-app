@@ -7,40 +7,40 @@ class _InsightRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    return NinjaScheduleSurface(
+    final colors = context.colors;
+    return AppCard(
       child: Row(
-        spacing: 12,
+        spacing: AppSpacing.md,
         children: [
           Container(
-            width: NinjaMetrics.minTouchTarget,
-            height: NinjaMetrics.minTouchTarget,
+            width: AppControlSize.touchTarget,
+            height: AppControlSize.touchTarget,
             alignment: .center,
             decoration: BoxDecoration(
-              color: colors.surfaceAlt,
+              color: colors.surface2,
               shape: .circle,
             ),
             child: AppLineIconWidget(
               insight.icon,
               size: 19,
-              color: colors.mutedDark,
+              color: colors.muted,
             ),
           ),
           Expanded(
             child: Column(
               crossAxisAlignment: .start,
-              spacing: 2,
+              spacing: AppSpacing.xxs,
               children: [
                 Text(
                   insight.title,
-                  style: NinjaText.body.copyWith(
+                  style: AppText.body.copyWith(
                     color: colors.ink,
                     fontWeight: .w600,
                   ),
                 ),
                 Text(
                   insight.sub,
-                  style: NinjaText.subtext.copyWith(color: colors.muted),
+                  style: AppText.subtext.copyWith(color: colors.muted),
                 ),
               ],
             ),

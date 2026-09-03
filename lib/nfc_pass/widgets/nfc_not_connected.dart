@@ -11,7 +11,7 @@ class NfcNotConnected extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -21,7 +21,7 @@ class NfcNotConnected extends StatelessWidget {
           message: l10n.nfcPassNotConnectedDescription,
           icon: AppLineIconWidget(
             AppLineIcon.contactless,
-            color: colors.brandInk,
+            color: colors.accent,
           ),
           actionLabel: l10n.nfcPassConnectButton,
           onAction: onConnect,

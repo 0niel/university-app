@@ -25,6 +25,7 @@ class _CreateCollabNoteSheetState extends State<CreateCollabNoteSheet> {
   }
 
   Future<void> _save() async {
+    if (context.read<CollabNotesCubit>().state.isCreating) return;
     final title = _controller.text.trim();
     if (title.isEmpty) return;
     final note = await context.read<CollabNotesCubit>().create(
@@ -54,15 +55,16 @@ class _CreateCollabNoteSheetState extends State<CreateCollabNoteSheet> {
       children: [
         Text(
           context.l10n.collabNotesVisibilityLabel,
-          style: NinjaText.microLabel.copyWith(
-            color: context.ninja.muted,
+          style: AppText.captionSmall.copyWith(
+            color: context.colors.muted,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         NinjaSegmented<CollabNoteVisibility>(
           value: _visibility,
-          onChanged: (value) => setState(() => _visibility = value),
-          expanded: true,
+          onChanged: saving
+              ? null
+              : (value) => setState(() => _visibility = value),
           segments: [
             NinjaSegment(
               value: CollabNoteVisibility.group,
@@ -74,21 +76,24 @@ class _CreateCollabNoteSheetState extends State<CreateCollabNoteSheet> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         NinjaInput(
           controller: _controller,
+          enabled: !saving,
           autofocus: true,
           maxLength: 200,
           textInputAction: .done,
           onSubmitted: (_) => unawaited(_save()),
           placeholder: context.l10n.collabNotesTitleExampleHint,
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: AppSpacing.fieldGap),
         NinjaButton.primary(
           label: saving
               ? context.l10n.collabNotesCreating
               : context.l10n.collabNotesCreate,
           expanded: true,
+          size: NinjaButtonSize.large,
+          loading: saving,
           onPressed: saving ? null : () => unawaited(_save()),
         ),
       ],

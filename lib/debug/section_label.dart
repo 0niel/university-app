@@ -11,7 +11,7 @@ class _SectionLabel extends StatelessWidget {
       padding: const .fromLTRB(16, 14, 16, 8),
       child: Text(
         text.toUpperCase(),
-        style: NinjaText.microLabel.copyWith(color: context.ninja.muted),
+        style: AppText.captionSmall.copyWith(color: context.colors.muted),
       ),
     );
   }

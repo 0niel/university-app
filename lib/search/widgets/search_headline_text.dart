@@ -10,7 +10,7 @@ class SearchHeadlineText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       headerText,
-      style: NinjaText.title.copyWith(color: context.ninja.ink),
+      style: AppText.title.copyWith(color: context.colors.ink),
     );
   }
 }

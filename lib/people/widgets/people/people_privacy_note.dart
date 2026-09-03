@@ -7,12 +7,12 @@ class PeoplePrivacyNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
       padding: const .symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Row(
         spacing: 10,
@@ -26,7 +26,7 @@ class PeoplePrivacyNote extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: NinjaText.helper.copyWith(
+              style: AppText.caption.copyWith(
                 color: colors.muted,
                 height: 1.45,
               ),

@@ -11,17 +11,7 @@ class LostFoundThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final placeholder = ColoredBox(
-      color: colors.surfaceAlt,
-      child: Center(
-        child: AppLineIconWidget(
-          _iconFor(item.category),
-          size: 42,
-          color: colors.muted,
-        ),
-      ),
-    );
+    const placeholder = AppStripePlaceholder();
     final image = item.images.firstOrNull;
     if (image == null) return placeholder;
     return CachedNetworkImage(
@@ -37,12 +27,4 @@ class LostFoundThumbnail extends StatelessWidget {
       errorWidget: (_, _, _) => placeholder,
     );
   }
-
-  AppLineIcon _iconFor(String category) => switch (category) {
-    'tech' || 'electronics' => AppLineIcon.device,
-    'docs' || 'documents' => AppLineIcon.clipboard,
-    'keys' => AppLineIcon.key,
-    'cloth' || 'clothes' => AppLineIcon.shirt,
-    _ => AppLineIcon.box,
-  };
 }

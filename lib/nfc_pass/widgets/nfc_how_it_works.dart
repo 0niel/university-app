@@ -9,7 +9,7 @@ class NfcHowItWorks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     final steps = [l10n.nfcPassStep1, l10n.nfcPassStep2, l10n.nfcPassStep3];
 
     return Column(
@@ -17,9 +17,9 @@ class NfcHowItWorks extends StatelessWidget {
       children: [
         Text(
           l10n.nfcPassHowItWorksTitle,
-          style: NinjaText.title.copyWith(color: colors.ink),
+          style: AppText.title.copyWith(color: colors.ink),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: AppSpacing.gap),
         for (var i = 0; i < steps.length; i++)
           Padding(
             padding: const .only(bottom: 10),

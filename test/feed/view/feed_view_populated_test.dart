@@ -2,145 +2,98 @@ import 'package:app_ui/app_ui.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:news_repository/news_repository.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/feed/feed.dart';
-import 'package:rtu_mirea_app/l10n/generated/app_localizations.dart';
 
-class _MockCategoriesBloc extends MockBloc<CategoriesEvent, CategoriesState>
+import '../../helpers/pump_app.dart';
+
+class _Categories extends MockBloc<CategoriesEvent, CategoriesState>
     implements CategoriesBloc {}
 
-class _MockFeedBloc extends MockBloc<FeedEvent, FeedState>
-    implements FeedBloc {}
-
-Widget _wrapFeed({
-  required CategoriesBloc categoriesBloc,
-  required FeedBloc feedBloc,
-  required Widget child,
-}) {
-  return MultiBlocProvider(
-    providers: [
-      BlocProvider<CategoriesBloc>.value(value: categoriesBloc),
-      BlocProvider<FeedBloc>.value(value: feedBloc),
-    ],
-    child: MaterialApp(
-      theme: NinjaTheme.light(),
-      locale: const Locale('ru'),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: child),
-    ),
-  );
-}
+class _Feed extends MockBloc<FeedEvent, FeedState> implements FeedBloc {}
 
 void main() {
-  testWidgets('category tabs switch content without a full-page pager', (
-    tester,
-  ) async {
-    const all = Category(id: 'all', name: 'Все');
-    const science = Category(id: 'science', name: 'Наука');
-    final categoriesBloc = _MockCategoriesBloc();
-    final feedBloc = _MockFeedBloc();
-    when(() => categoriesBloc.state).thenReturn(
+  late CategoriesBloc categories;
+  late FeedBloc feed;
+  const all = Category(id: 'all', name: 'Все');
+  const science = Category(id: 'source:telegram:science', name: 'Наука');
+
+  setUp(() {
+    categories = _Categories();
+    feed = _Feed();
+    when(() => categories.state).thenReturn(
       const CategoriesState(
-        status: CategoriesStatus.populated,
+        status: .populated,
         categories: [all, science],
         selectedCategory: all,
+        sources: [
+          NewsSourceItem(
+            sourceType: 'telegram',
+            sourceId: 'science',
+            sourceName: 'Наука',
+          ),
+        ],
       ),
     );
-    when(() => feedBloc.state).thenReturn(
+    when(() => feed.state).thenReturn(
       const FeedState(
-        status: FeedStatus.populated,
-        hasMoreNews: {'all': false, 'science': false},
+        status: .populated,
+        feed: {'all': [], 'source:telegram:science': []},
+        hasMoreNews: {'all': false, 'source:telegram:science': false},
       ),
     );
+  });
 
-    await tester.pumpWidget(
-      _wrapFeed(
-        categoriesBloc: categoriesBloc,
-        feedBloc: feedBloc,
-        child: const FeedViewPopulated(categories: [all, science]),
-      ),
-    );
+  Widget subject() => MultiBlocProvider(
+    providers: [
+      BlocProvider<CategoriesBloc>.value(value: categories),
+      BlocProvider<FeedBloc>.value(value: feed),
+    ],
+    child: const Scaffold(body: NewsFeedView()),
+  );
 
-    expect(find.byType(TabBarView), findsNothing);
-    expect(find.byType(IndexedStack), findsOneWidget);
+  testWidgets('source selection switches through the real categories event', (
+    tester,
+  ) async {
+    await tester.pumpApp(subject());
     await tester.tap(find.text('Наука'));
-    await tester.pump();
-
     verify(
-      () => categoriesBloc.add(const CategorySelected(category: science)),
+      () => categories.add(const CategorySelected(category: science)),
     ).called(1);
+    expect(find.byType(TabBarView), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
   for (final status in [CategoriesStatus.loading, CategoriesStatus.failure]) {
-    testWidgets('keeps cached feed visible while categories are $status', (
+    testWidgets('cached feed stays visible while categories are $status', (
       tester,
     ) async {
-      const all = Category(id: 'all', name: 'Все');
-      final categoriesBloc = _MockCategoriesBloc();
-      final feedBloc = _MockFeedBloc();
-      when(() => categoriesBloc.state).thenReturn(
+      when(() => categories.state).thenReturn(
         CategoriesState(
           status: status,
           categories: const [all],
           selectedCategory: all,
         ),
       );
-      when(() => feedBloc.state).thenReturn(
-        const FeedState(
-          status: FeedStatus.populated,
-          hasMoreNews: {'all': false},
-        ),
-      );
-
-      await tester.pumpWidget(
-        _wrapFeed(
-          categoriesBloc: categoriesBloc,
-          feedBloc: feedBloc,
-          child: const FeedView(),
-        ),
-      );
-
-      expect(find.byType(FeedViewPopulated), findsOneWidget);
-      expect(find.byKey(const Key('feedView_failure')), findsNothing);
-      expect(find.byType(CategoryFeedLoaderItem), findsNothing);
+      await tester.pumpApp(subject());
+      expect(find.byType(NewsFeedView), findsOneWidget);
+      expect(find.byType(FeedLoaderItem), findsNothing);
+      expect(find.byKey(const Key('newsFeed_empty')), findsOneWidget);
     });
   }
 
-  testWidgets('cold feed loading uses one scene and one live region', (
+  testWidgets('cold feed loads once and announces a single skeleton scene', (
     tester,
   ) async {
-    final semantics = tester.ensureSemantics();
-    final categoriesBloc = _MockCategoriesBloc();
-    final feedBloc = _MockFeedBloc();
-    when(() => categoriesBloc.state).thenReturn(
-      const CategoriesState(status: CategoriesStatus.loading),
-    );
-    when(() => feedBloc.state).thenReturn(const FeedState());
-
-    await tester.pumpWidget(
-      _wrapFeed(
-        categoriesBloc: categoriesBloc,
-        feedBloc: feedBloc,
-        child: const FeedView(),
-      ),
-    );
-
-    final loading = find.bySemanticsLabel('Загрузка');
-    expect(find.byType(CategoryFeedLoaderItem), findsOneWidget);
-    expect(loading, findsOneWidget);
-    expect(tester.getSemantics(loading).flagsCollection.isLiveRegion, isTrue);
-    expect(tester.binding.transientCallbackCount, 1);
-    semantics.dispose();
+    when(() => feed.state).thenReturn(const FeedState());
+    await tester.pumpApp(subject());
+    expect(find.byType(FeedLoaderItem), findsOneWidget);
+    expect(find.byType(NinjaSkeletonGroup), findsOneWidget);
+    verify(() => feed.add(const FeedRequested(category: all))).called(1);
+    await tester.pump(const Duration(milliseconds: 100));
+    verifyNever(() => feed.add(const FeedRequested(category: all)));
   });
 }

@@ -36,7 +36,8 @@ class NinjaStateSwitcher extends StatelessWidget {
       layoutBuilder: (currentChild, previousChildren) => Stack(
         alignment: alignment,
         children: [
-          ...previousChildren,
+          for (final previous in previousChildren)
+            ExcludeSemantics(child: IgnorePointer(child: previous)),
           if (currentChild != null) currentChild,
         ],
       ),
@@ -44,3 +45,5 @@ class NinjaStateSwitcher extends StatelessWidget {
     );
   }
 }
+
+typedef AppStateSwitcher = NinjaStateSwitcher;

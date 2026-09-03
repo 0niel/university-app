@@ -19,8 +19,8 @@ class RevisionsSkeleton extends StatelessWidget {
               margin: const .only(bottom: 8),
               padding: const .all(14),
               decoration: BoxDecoration(
-                color: context.ninja.surface,
-                borderRadius: BorderRadius.circular(NinjaRadius.card),
+                color: context.colors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.card),
               ),
               child: Row(
                 children: [
@@ -35,7 +35,11 @@ class RevisionsSkeleton extends StatelessWidget {
                     ),
                   ),
                   if (canRestore && index != 0)
-                    const NinjaSkeleton(width: 64, height: 36, radius: 9),
+                    const NinjaSkeleton(
+                      width: 64,
+                      height: 36,
+                      radius: AppRadius.skeleton,
+                    ),
                 ],
               ),
             ),

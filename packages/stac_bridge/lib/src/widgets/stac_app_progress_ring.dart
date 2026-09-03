@@ -46,7 +46,7 @@ class StacAppProgressRingParser extends StacParser<StacAppProgressRing> {
       value: model.value,
       size: model.size,
       strokeWidth: model.strokeWidth,
-      color: parseHexColor(model.color),
+      color: parseAppColor(context, model.color),
       label: model.label,
       sublabel: model.sublabel,
     );

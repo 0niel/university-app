@@ -38,7 +38,7 @@ class MapFloorCanvas extends StatelessWidget {
               painter: RoomsHighlightPainter(
                 rooms,
                 selectedRoomId: selectedRoomId,
-                highlightColor: context.ninja.brand,
+                highlightColor: context.colors.accent,
               ),
             ),
           ),

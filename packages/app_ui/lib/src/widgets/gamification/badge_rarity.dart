@@ -1,5 +1,5 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:flutter/widgets.dart';
 
 enum BadgeRarity { common, rare, epic, legendary }
 
@@ -11,11 +11,11 @@ extension BadgeRarityX on BadgeRarity {
         BadgeRarity.legendary => 'легендарная',
       };
 
-  Color color(NinjaColors colors) => switch (this) {
+  Color color(AppColors colors) => switch (this) {
         BadgeRarity.common => colors.muted,
-        BadgeRarity.rare => colors.indigo,
-        BadgeRarity.epic => colors.orange,
-        BadgeRarity.legendary => colors.amber,
+        BadgeRarity.rare => colors.accent,
+        BadgeRarity.epic => colors.lab,
+        BadgeRarity.legendary => colors.warn,
       };
 
   static BadgeRarity fromString(String value) => switch (value) {

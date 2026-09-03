@@ -57,6 +57,7 @@ abstract class TopTopicsResponse with _$TopTopicsResponse {
   const factory TopTopicsResponse({
     required List<DiscourseTopic> topics,
     required List<DiscourseUser> users,
+    @Default(false) bool hasMore,
   }) = _TopTopicsResponse;
 }
 

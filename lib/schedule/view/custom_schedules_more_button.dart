@@ -8,12 +8,12 @@ class _CustomSchedulesMoreButton extends StatelessWidget {
     onTap: onTap,
     semanticsLabel: context.l10n.more,
     child: SizedBox.square(
-      dimension: NinjaMetrics.minTouchTarget,
+      dimension: AppControlSize.touchTarget,
       child: Center(
         child: AppLineIconWidget(
           .more,
           size: 20,
-          color: context.ninja.mutedDark,
+          color: context.colors.muted,
         ),
       ),
     ),

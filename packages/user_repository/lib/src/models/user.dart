@@ -11,6 +11,7 @@ abstract class User with _$User {
     String? name,
     String? photo,
     @Default(true) bool isNewUser,
+    @Default(false) bool isGuest,
   }) = _User;
 
   const User._();
@@ -23,6 +24,7 @@ abstract class User with _$User {
     name: authenticationUser.name,
     photo: authenticationUser.photo,
     isNewUser: authenticationUser.isNewUser,
+    isGuest: authenticationUser.isGuest,
   );
 
   bool get isAnonymous => this == anonymous;

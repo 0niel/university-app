@@ -4,7 +4,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
-import 'package:rtu_mirea_app/common/utils/ninja_initials.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/profile/cubit/ninja_path_cubit.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/ninja_path_skeleton.dart';
@@ -26,7 +25,7 @@ class LeaderboardTab extends StatelessWidget {
           crossAxisAlignment: .stretch,
           children: [
             _ScopeChips(scope: state.leaderboardScope),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.screen),
             NinjaStateSwitcher(
               child: switch (state.leaderboardStatus) {
                 .initial || .loading => const NinjaPathSkeleton.leaderboard(

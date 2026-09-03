@@ -39,7 +39,7 @@ const kStarterScreenJson = '''
           {"type": "appCard", "child": {
             "type": "column",
             "children": [
-              {"type": "text", "data": "Привет, ниндзя! 🥷"},
+              {"type": "appText", "data": "Привет, ниндзя! 🥷"},
               {"type": "sizedBox", "height": 12},
               {"type": "appButton", "label": "Открыть расписание",
                "expanded": true,
@@ -88,7 +88,7 @@ final miniAppTemplates = [
   "body": {"type": "padding",
     "padding": {"left": 16, "right": 16, "top": 16},
     "child": {"type": "column", "crossAxisAlignment": "stretch", "children": [
-      {"type": "appCard", "child": {"type": "text", "data": "Детали пункта"}},
+      {"type": "appCard", "child": {"type": "appText", "data": "Детали пункта"}},
       {"type": "sizedBox", "height": 12},
       {"type": "appButton", "label": "Назад", "variant": "secondary",
        "expanded": true, "onPressed": {"actionType": "pop"}}
@@ -113,7 +113,7 @@ final miniAppTemplates = [
        "subtitle": "сохраняется между запусками"},
       {"type": "appCard", "child": {"type": "column",
         "crossAxisAlignment": "stretch", "children": [
-        {"type": "text", "data": "Сделано: {{storage.done}}"},
+        {"type": "appText", "data": "Сделано: {{storage.done}}"},
         {"type": "sizedBox", "height": 12},
         {"type": "appButton", "label": "Отметить выполненным",
          "expanded": true,

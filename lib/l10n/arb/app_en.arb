@@ -2194,6 +2194,8 @@
   "@nextWeek": {},
   "legendLessons": "Classes",
   "@legendLessons": {},
+  "legendHoliday": "Public holiday",
+  "@legendHoliday": {},
   "legendRetake": "Retake",
   "@legendRetake": {},
   "legendEvent": "Event",
@@ -4222,9 +4224,9 @@
   "@loginWelcomeBack": {},
   "loginSubtitle": "Sign in with your account",
   "@loginSubtitle": {},
-  "loginEmailPlaceholder": "student@university.example",
+  "loginEmailPlaceholder": "name@example.com",
   "@loginEmailPlaceholder": {},
-  "loginEmailError": "Use an approved university email address",
+  "loginEmailError": "Enter a valid email address",
   "@loginEmailError": {},
   "loginPasswordError": "{count, plural, one{At least {count} character} other{At least {count} characters}}",
   "@loginPasswordError": {
@@ -5105,7 +5107,7 @@
       }
     }
   },
-  "marketTitle": "Marketplace",
+  "marketTitle": "Market",
   "@marketTitle": {
     "description": "Marketplace screen title"
   },
@@ -7667,5 +7669,3344 @@
   "mapInteractiveHint": "Pan the map, pinch or double tap to zoom",
   "@mapInteractiveHint": {
     "description": "Semantic hint of the interactive floor plan canvas"
-  }
+  },
+  "onboardingWelcomeTitle": "University\nin one tap",
+  "@onboardingWelcomeTitle": {
+    "description": "Onboarding welcome headline; the accent word is onboardingWelcomeTitleAccent"
+  },
+  "onboardingWelcomeTitleAccent": "tap",
+  "@onboardingWelcomeTitleAccent": {
+    "description": "Accent (italic) word inside onboardingWelcomeTitle"
+  },
+  "onboardingWelcomeLead": "Classes, deadlines, free rooms and your pass — no extra tabs.",
+  "@onboardingWelcomeLead": {
+    "description": "Onboarding welcome lead paragraph"
+  },
+  "onboardingFeatureScheduleTitle": "Schedule with changes",
+  "@onboardingFeatureScheduleTitle": {
+    "description": "Welcome feature row title"
+  },
+  "onboardingFeatureScheduleSub": "Reschedules and swaps — right in your feed",
+  "@onboardingFeatureScheduleSub": {
+    "description": "Welcome feature row subtitle"
+  },
+  "onboardingFeatureRoomsTitle": "Free rooms nearby",
+  "@onboardingFeatureRoomsTitle": {
+    "description": "Welcome feature row title"
+  },
+  "onboardingFeatureRoomsSub": "Where to study during a break",
+  "@onboardingFeatureRoomsSub": {
+    "description": "Welcome feature row subtitle"
+  },
+  "onboardingFeatureFriendsTitle": "Friends on campus",
+  "@onboardingFeatureFriendsTitle": {
+    "description": "Welcome feature row title"
+  },
+  "onboardingFeatureFriendsSub": "Shared gaps and who is where right now",
+  "@onboardingFeatureFriendsSub": {
+    "description": "Welcome feature row subtitle"
+  },
+  "onboardingStart": "Get started",
+  "@onboardingStart": {
+    "description": "Welcome primary button"
+  },
+  "onboardingHaveAccount": "I already have an account",
+  "@onboardingHaveAccount": {
+    "description": "Welcome secondary button"
+  },
+  "onboardingGroupLead": "Your schedule will load automatically. You can change it in Settings.",
+  "@onboardingGroupLead": {
+    "description": "Group picker lead paragraph"
+  },
+  "onboardingGroupPlaceholder": "ИКБО-01-24",
+  "@onboardingGroupPlaceholder": {
+    "description": "Group search field placeholder (example group code)"
+  },
+  "onboardingGroupNotFound": "Group not found. Check the spelling or ",
+  "@onboardingGroupNotFound": {
+    "description": "Group picker empty state, text before the accent action"
+  },
+  "onboardingGroupNotFoundAction": "create your own schedule",
+  "@onboardingGroupNotFoundAction": {
+    "description": "Group picker empty state, accent part"
+  },
+  "onboardingGroupNotFoundSuffix": ".",
+  "@onboardingGroupNotFoundSuffix": {
+    "description": "Group picker empty state, trailing punctuation"
+  },
+  "onboardingContinue": "Continue",
+  "@onboardingContinue": {
+    "description": "Onboarding continue button"
+  },
+  "onboardingSettingsTitle": "A couple of settings",
+  "@onboardingSettingsTitle": {
+    "description": "Onboarding settings step title"
+  },
+  "onboardingSettingsLead": "You can change everything later.",
+  "@onboardingSettingsLead": {
+    "description": "Onboarding settings step lead"
+  },
+  "onboardingPushSub": "Classes, deadlines, changes",
+  "@onboardingPushSub": {
+    "description": "Notifications toggle subtitle"
+  },
+  "onboardingGeoTitle": "Location on campus",
+  "@onboardingGeoTitle": {
+    "description": "Location toggle title"
+  },
+  "onboardingGeoSub": "For the map and free rooms",
+  "@onboardingGeoSub": {
+    "description": "Location toggle subtitle"
+  },
+  "onboardingFriendsTitle": "Show me to friends",
+  "@onboardingFriendsTitle": {
+    "description": "Profile visibility toggle title"
+  },
+  "onboardingFriendsSub": "Only while you are on campus",
+  "@onboardingFriendsSub": {
+    "description": "Profile visibility toggle subtitle"
+  },
+  "onboardingPushDenied": "Allow notifications in the system settings",
+  "@onboardingPushDenied": {
+    "description": "Toast when the OS notification permission is denied"
+  },
+  "onboardingGeoDenied": "Allow location access in the system settings",
+  "@onboardingGeoDenied": {
+    "description": "Toast when the OS location permission is denied"
+  },
+  "onboardingSettingsSaveError": "Couldn't save the setting. Try again.",
+  "@onboardingSettingsSaveError": {
+    "description": "Toast when a settings update fails"
+  },
+  "onboardingWelcomeToast": "Welcome, {group}",
+  "@onboardingWelcomeToast": {
+    "description": "Toast after finishing onboarding",
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingStepSemantics": "Step {step} of {total}",
+  "@onboardingStepSemantics": {
+    "description": "Progress bar semantics",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "newsTimeMinutes": "{count} min",
+  "@newsTimeMinutes": {
+    "description": "Compact relative time in minutes on news cards",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newsTimeHours": "{count} h",
+  "@newsTimeHours": {
+    "description": "Compact relative time in hours on news cards",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newsTimeYesterday": "yesterday",
+  "@newsTimeYesterday": {
+    "description": "Compact relative time for the previous day"
+  },
+  "newsTimeDays": "{count} d",
+  "@newsTimeDays": {
+    "description": "Compact relative time in days on news cards",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newsTimeNow": "now",
+  "@newsTimeNow": {
+    "description": "Compact relative time for a just published item"
+  },
+  "newsSourcesSemantics": "News sources",
+  "@newsSourcesSemantics": {
+    "description": "Semantics label of the source rail on the news page"
+  },
+  "articleTimeAgo": "{time} ago",
+  "@articleTimeAgo": {
+    "description": "Relative publish time suffix on the article page",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "articleUnsaved": "Removed from saved",
+  "@articleUnsaved": {
+    "description": "Toast after removing an article from saved"
+  },
+  "articleRemoveFromSaved": "Remove from saved",
+  "@articleRemoveFromSaved": {
+    "description": "Semantics label of the save button when the article is saved"
+  },
+  "articleSourceOfficial": "Official channel",
+  "@articleSourceOfficial": {
+    "description": "Source kind label on the article source card"
+  },
+  "articleSourceTelegram": "Telegram channel",
+  "@articleSourceTelegram": {
+    "description": "Source kind label for Telegram sources"
+  },
+  "articleSourceRss": "RSS feed",
+  "@articleSourceRss": {
+    "description": "Source kind label for RSS sources"
+  },
+  "articleSourceSubscribers": "{count} subscribers",
+  "@articleSourceSubscribers": {
+    "description": "Subscriber count on the article source card",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "articleSourceSubscribed": "Following",
+  "@articleSourceSubscribed": {
+    "description": "Source card pill when the source is followed"
+  },
+  "articleSourceSubscribe": "Follow",
+  "@articleSourceSubscribe": {
+    "description": "Source card pill when the source is not followed"
+  },
+  "articleSourceFollowedToast": "You follow {name}",
+  "@articleSourceFollowedToast": {
+    "description": "Toast after following a news source",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "articleSourceUnfollowedToast": "Unfollowed",
+  "@articleSourceUnfollowedToast": {
+    "description": "Toast after unfollowing a news source"
+  },
+  "storyRead": "Read",
+  "@storyRead": {
+    "description": "Story viewer button that opens the article"
+  },
+  "storyClose": "Close",
+  "@storyClose": {
+    "description": "Semantics label of the story viewer close button"
+  },
+  "storyPrevious": "Previous story",
+  "@storyPrevious": {
+    "description": "Semantics label of the story viewer left tap zone"
+  },
+  "storyNext": "Next story",
+  "@storyNext": {
+    "description": "Semantics label of the story viewer right tap zone"
+  },
+  "storyEmpty": "No stories from this source yet",
+  "@storyEmpty": {
+    "description": "Story viewer empty state"
+  },
+  "communitiesMine": "Mine",
+  "@communitiesMine": {
+    "description": "Overline above the joined communities group"
+  },
+  "communitiesRecommended": "Recommended",
+  "@communitiesRecommended": {
+    "description": "Overline above the community cards when no category is selected"
+  },
+  "communitiesMember": "You are a member",
+  "@communitiesMember": {
+    "description": "Join button label when the user joined the community"
+  },
+  "communitiesJoinedToast": "Welcome to {name}",
+  "@communitiesJoinedToast": {
+    "description": "Toast after joining a community",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "communitiesLeftToast": "You left the community",
+  "@communitiesLeftToast": {
+    "description": "Toast after leaving a community"
+  },
+  "communitiesMineEmpty": "Join a community and it will appear here",
+  "@communitiesMineEmpty": {
+    "description": "Empty state of the joined communities group"
+  },
+  "communitiesEmptyCategory": "No communities in this category yet",
+  "@communitiesEmptyCategory": {
+    "description": "Empty state of the community cards list"
+  },
+  "communitiesSuggest": "Suggest a community",
+  "@communitiesSuggest": {
+    "description": "Semantics label of the accent plus button on the communities page"
+  },
+  "communityFeed": "Feed",
+  "@communityFeed": {
+    "description": "Community page feed section title"
+  },
+  "communityWrite": "write",
+  "@communityWrite": {
+    "description": "Community page feed section action that opens the chat"
+  },
+  "communityFeedEmpty": "Community posts",
+  "@communityFeedEmpty": {
+    "description": "Community feed empty state title"
+  },
+  "communityFeedEmptySub": "Organizers post in the chat — open it to write",
+  "@communityFeedEmptySub": {
+    "description": "Community feed empty state subtitle"
+  },
+  "communityStatMembers": "members",
+  "@communityStatMembers": {
+    "description": "Community stat card label"
+  },
+  "communityStatPlatform": "platform",
+  "@communityStatPlatform": {
+    "description": "Community stat card label for the chat platform"
+  },
+  "communityStatCategory": "category",
+  "@communityStatCategory": {
+    "description": "Community stat card label for the catalog category"
+  },
+  "communityOpenChat": "Open chat",
+  "@communityOpenChat": {
+    "description": "Semantics label of the community link"
+  },
+  "communityPlatformWeb": "Website",
+  "@communityPlatformWeb": {
+    "description": "Platform name for web links"
+  },
+  "scheduleWeekOverline": "Week {week} · {parity}",
+  "@scheduleWeekOverline": {
+    "description": "Schedule header overline",
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "parity": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleChangesThisWeek": "{count, plural, =1{{count} change this week} other{{count} changes this week}}",
+  "@scheduleChangesThisWeek": {
+    "description": "Changes banner",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleShow": "Show",
+  "@scheduleShow": {
+    "description": "Banner action"
+  },
+  "scheduleCompareWith": "Comparing with {name}",
+  "@scheduleCompareWith": {
+    "description": "Compare banner",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleCommonWindows": "common windows:",
+  "@scheduleCommonWindows": {
+    "description": "Compare banner"
+  },
+  "scheduleNoCommonWindows": "no common windows today",
+  "@scheduleNoCommonWindows": {
+    "description": "Compare banner"
+  },
+  "scheduleCompareOff": "Off",
+  "@scheduleCompareOff": {
+    "description": "Compare banner action"
+  },
+  "scheduleViewDay": "Day",
+  "@scheduleViewDay": {
+    "description": "Schedule view segment"
+  },
+  "schedulePrevWeek": "← week",
+  "@schedulePrevWeek": {
+    "description": "Day view link"
+  },
+  "scheduleNextWeek": "week →",
+  "@scheduleNextWeek": {
+    "description": "Day view link"
+  },
+  "scheduleDayLessons": "{count, plural, =0{no classes} =1{{count} class} other{{count} classes}}",
+  "@scheduleDayLessons": {
+    "description": "Day lesson count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleBreakMinutes": "break {minutes} min",
+  "@scheduleBreakMinutes": {
+    "description": "Gap row",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleFreeDayTitle": "Free day",
+  "@scheduleFreeDayTitle": {
+    "description": "Empty day card"
+  },
+  "scheduleFreeDaySubtitle": "No classes. You can add your own event.",
+  "@scheduleFreeDaySubtitle": {
+    "description": "Empty day card"
+  },
+  "scheduleCompareFriend": "Compare with a friend",
+  "@scheduleCompareFriend": {
+    "description": "Week view pill"
+  },
+  "scheduleLegendLab": "Lab",
+  "@scheduleLegendLab": {
+    "description": "Week legend"
+  },
+  "scheduleLegendCancel": "Cancelled",
+  "@scheduleLegendCancel": {
+    "description": "Week legend"
+  },
+  "scheduleLegendAddOwn": "tap — add your own",
+  "@scheduleLegendAddOwn": {
+    "description": "Week legend"
+  },
+  "scheduleMonthMeta": "{year} · semester {semester}",
+  "@scheduleMonthMeta": {
+    "description": "Month card meta",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "semester": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleMonthStatsTitle": "THIS MONTH",
+  "@scheduleMonthStatsTitle": {
+    "description": "Month stats overline"
+  },
+  "scheduleStudyDays": "Study days",
+  "@scheduleStudyDays": {
+    "description": "Month stats"
+  },
+  "scheduleLessonsLabel": "Classes",
+  "@scheduleLessonsLabel": {
+    "description": "Month stats"
+  },
+  "scheduleExamsLabel": "Tests",
+  "@scheduleExamsLabel": {
+    "description": "Month stats"
+  },
+  "scheduleLecturesCount": "{count, plural, =1{{count} lecture} other{{count} lectures}}",
+  "@scheduleLecturesCount": {
+    "description": "Month legend",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "schedulePracticesCount": "{count, plural, =1{{count} practice} other{{count} practices}}",
+  "@schedulePracticesCount": {
+    "description": "Month legend",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleLabsCount": "{count, plural, =1{{count} lab} other{{count} labs}}",
+  "@scheduleLabsCount": {
+    "description": "Month legend",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonShortLecture": "LEC",
+  "@lessonShortLecture": {
+    "description": "Lesson type short"
+  },
+  "lessonShortPractice": "PRAC",
+  "@lessonShortPractice": {
+    "description": "Lesson type short"
+  },
+  "lessonShortLab": "LAB",
+  "@lessonShortLab": {
+    "description": "Lesson type short"
+  },
+  "lessonShortPe": "PE",
+  "@lessonShortPe": {
+    "description": "Lesson type short"
+  },
+  "lessonShortConsult": "CONS",
+  "@lessonShortConsult": {
+    "description": "Lesson type short"
+  },
+  "lessonShortExam": "EXAM",
+  "@lessonShortExam": {
+    "description": "Lesson type short"
+  },
+  "lessonShortCredit": "CRED",
+  "@lessonShortCredit": {
+    "description": "Lesson type short"
+  },
+  "lessonShortCourse": "CRS",
+  "@lessonShortCourse": {
+    "description": "Lesson type short"
+  },
+  "lessonShortIndividual": "IND",
+  "@lessonShortIndividual": {
+    "description": "Lesson type short"
+  },
+  "lessonShortOwn": "OWN",
+  "@lessonShortOwn": {
+    "description": "Lesson type short"
+  },
+  "lessonTagCancelled": "· cancelled",
+  "@lessonTagCancelled": {
+    "description": "Lesson row tag"
+  },
+  "lessonTagLive": "· in progress, {minutes} min left",
+  "@lessonTagLive": {
+    "description": "Lesson row tag",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTagNext": "· next",
+  "@lessonTagNext": {
+    "description": "Lesson row tag"
+  },
+  "lessonTagMoved": "· room changed",
+  "@lessonTagMoved": {
+    "description": "Lesson row tag"
+  },
+  "lessonTagNew": "· new",
+  "@lessonTagNew": {
+    "description": "Lesson row tag"
+  },
+  "lessonMetaCancelled": "Cancelled",
+  "@lessonMetaCancelled": {
+    "description": "Lesson row meta"
+  },
+  "lessonMetaMoved": "{type} · {room} instead of {oldRoom}",
+  "@lessonMetaMoved": {
+    "description": "Lesson row meta",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "room": {
+        "type": "String"
+      },
+      "oldRoom": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonMetaPast": "finished",
+  "@lessonMetaPast": {
+    "description": "Lesson row meta suffix"
+  },
+  "scheduleActionOpen": "Open class",
+  "@scheduleActionOpen": {
+    "description": "Lesson actions sheet"
+  },
+  "scheduleActionReport": "Report a mistake",
+  "@scheduleActionReport": {
+    "description": "Lesson actions sheet"
+  },
+  "scheduleLessonHidden": "Class hidden",
+  "@scheduleLessonHidden": {
+    "description": "Toast"
+  },
+  "scheduleChangesSubtitle": "This week · updated {time}",
+  "@scheduleChangesSubtitle": {
+    "description": "Changes sheet subtitle",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleChangesSubtitleWeek": "This week",
+  "@scheduleChangesSubtitleWeek": {
+    "description": "Changes sheet subtitle"
+  },
+  "scheduleChangeTagMoved": "Moved",
+  "@scheduleChangeTagMoved": {
+    "description": "Change tag"
+  },
+  "scheduleChangeTagCancelled": "Cancelled",
+  "@scheduleChangeTagCancelled": {
+    "description": "Change tag"
+  },
+  "scheduleChangeTagNew": "New",
+  "@scheduleChangeTagNew": {
+    "description": "Change tag"
+  },
+  "scheduleChangeTagTeacher": "Teacher",
+  "@scheduleChangeTagTeacher": {
+    "description": "Change tag"
+  },
+  "scheduleChangeTagRoom": "Room",
+  "@scheduleChangeTagRoom": {
+    "description": "Change tag"
+  },
+  "scheduleChangeAdded": "added",
+  "@scheduleChangeAdded": {
+    "description": "Change sub"
+  },
+  "scheduleChangesAck": "Got it",
+  "@scheduleChangesAck": {
+    "description": "Changes sheet CTA"
+  },
+  "scheduleAddTitle": "Own class",
+  "@scheduleAddTitle": {
+    "description": "Add lesson sheet"
+  },
+  "scheduleAddSubtitle": "Club, consultation, meeting — it will appear in the schedule",
+  "@scheduleAddSubtitle": {
+    "description": "Add lesson sheet"
+  },
+  "scheduleAddName": "Title",
+  "@scheduleAddName": {
+    "description": "Add lesson sheet"
+  },
+  "scheduleAddPlace": "Place (optional)",
+  "@scheduleAddPlace": {
+    "description": "Add lesson sheet"
+  },
+  "scheduleAddType": "Type",
+  "@scheduleAddType": {
+    "description": "Add lesson sheet"
+  },
+  "scheduleAddDay": "Day",
+  "@scheduleAddDay": {
+    "description": "Add lesson sheet"
+  },
+  "scheduleAddSlot": "Class",
+  "@scheduleAddSlot": {
+    "description": "Add lesson sheet"
+  },
+  "scheduleAddDone": "Class added to the schedule",
+  "@scheduleAddDone": {
+    "description": "Toast"
+  },
+  "activityTypeOwn": "Own",
+  "@activityTypeOwn": {
+    "description": "Activity type"
+  },
+  "activityTypeEvent": "Event",
+  "@activityTypeEvent": {
+    "description": "Activity type"
+  },
+  "activityTypeRetake": "Retake",
+  "@activityTypeRetake": {
+    "description": "Activity type"
+  },
+  "activityTypeExtra": "Extra class",
+  "@activityTypeExtra": {
+    "description": "Activity type"
+  },
+  "scheduleCompareTitle": "Compare schedules",
+  "@scheduleCompareTitle": {
+    "description": "Compare sheet"
+  },
+  "scheduleCompareSubtitle": "We will show your friend's busy slots and common windows",
+  "@scheduleCompareSubtitle": {
+    "description": "Compare sheet"
+  },
+  "scheduleCompareStarted": "Comparing with {name}",
+  "@scheduleCompareStarted": {
+    "description": "Toast",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleCompareNoFriends": "No friends with a group yet",
+  "@scheduleCompareNoFriends": {
+    "description": "Compare sheet empty"
+  },
+  "scheduleCompareNoFriendsHint": "Add friends — their groups will appear here",
+  "@scheduleCompareNoFriendsHint": {
+    "description": "Compare sheet empty"
+  },
+  "scheduleCompareNoGroup": "group not set",
+  "@scheduleCompareNoGroup": {
+    "description": "Compare sheet row"
+  },
+  "scheduleNoteSubtitle": "Only you can see it · can be shared with the group",
+  "@scheduleNoteSubtitle": {
+    "description": "Note sheet"
+  },
+  "scheduleNotePlaceholder": "What to remember…",
+  "@scheduleNotePlaceholder": {
+    "description": "Note sheet"
+  },
+  "scheduleNoteAddFile": "+ file",
+  "@scheduleNoteAddFile": {
+    "description": "Note sheet"
+  },
+  "scheduleNoteAddBoard": "+ board photo",
+  "@scheduleNoteAddBoard": {
+    "description": "Note sheet"
+  },
+  "scheduleNoteTag": "#tag",
+  "@scheduleNoteTag": {
+    "description": "Note sheet"
+  },
+  "scheduleNoteSaved": "Note saved",
+  "@scheduleNoteSaved": {
+    "description": "Toast"
+  },
+  "scheduleRemindIn": "{minutes} min before",
+  "@scheduleRemindIn": {
+    "description": "Remind option",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleRemindHour": "1 hour before",
+  "@scheduleRemindHour": {
+    "description": "Remind option"
+  },
+  "scheduleRemindSet": "Will remind {minutes} min before",
+  "@scheduleRemindSet": {
+    "description": "Toast",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleShareLink": "Link",
+  "@scheduleShareLink": {
+    "description": "Share option"
+  },
+  "scheduleShareCalendar": "To calendar",
+  "@scheduleShareCalendar": {
+    "description": "Share option"
+  },
+  "scheduleShareImage": "As image",
+  "@scheduleShareImage": {
+    "description": "Share option"
+  },
+  "scheduleLinkCopied": "Link copied",
+  "@scheduleLinkCopied": {
+    "description": "Toast"
+  },
+  "scheduleFilterTitle": "Show",
+  "@scheduleFilterTitle": {
+    "description": "Filter sheet"
+  },
+  "scheduleFilterPastSub": "Shown in grey",
+  "@scheduleFilterPastSub": {
+    "description": "Filter sheet"
+  },
+  "scheduleFilterCancelled": "Cancelled",
+  "@scheduleFilterCancelled": {
+    "description": "Filter sheet"
+  },
+  "scheduleFilterCancelledSub": "Struck through",
+  "@scheduleFilterCancelledSub": {
+    "description": "Filter sheet"
+  },
+  "lessonCancelledBanner": "Class cancelled",
+  "@lessonCancelledBanner": {
+    "description": "Lesson page banner"
+  },
+  "lessonMovedBanner": "Room changed: {from} → {to}",
+  "@lessonMovedBanner": {
+    "description": "Lesson page banner",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonTimeLabel": "Time",
+  "@lessonTimeLabel": {
+    "description": "Lesson page card"
+  },
+  "lessonNumberMeta": "class {number}",
+  "@lessonNumberMeta": {
+    "description": "Lesson page card",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonOnMap": "on the map",
+  "@lessonOnMap": {
+    "description": "Lesson page card"
+  },
+  "lessonFiles": "Files",
+  "@lessonFiles": {
+    "description": "Lesson page action"
+  },
+  "lessonMaterialsAdd": "add",
+  "@lessonMaterialsAdd": {
+    "description": "Lesson page section action"
+  },
+  "lessonHowWasIt": "How was it?",
+  "@lessonHowWasIt": {
+    "description": "Lesson page section"
+  },
+  "lessonGroupNote": "Group note",
+  "@lessonGroupNote": {
+    "description": "Lesson page card"
+  },
+  "lessonGroupNoteEmpty": "Nothing yet — share what was important",
+  "@lessonGroupNoteEmpty": {
+    "description": "Lesson page card"
+  },
+  "scheduleTeacherRating": "rating",
+  "@scheduleTeacherRating": {
+    "description": "Teacher sheet stat"
+  },
+  "scheduleTeacherReviews": "reviews",
+  "@scheduleTeacherReviews": {
+    "description": "Teacher sheet stat"
+  },
+  "scheduleTeacherSubjects": "subjects",
+  "@scheduleTeacherSubjects": {
+    "description": "Teacher sheet stat"
+  },
+  "scheduleTeacherWrite": "Write",
+  "@scheduleTeacherWrite": {
+    "description": "Teacher sheet action"
+  },
+  "scheduleTeacherReview": "Leave a review",
+  "@scheduleTeacherReview": {
+    "description": "Teacher sheet action"
+  },
+  "scheduleTeacherNoContacts": "No contacts for this teacher yet",
+  "@scheduleTeacherNoContacts": {
+    "description": "Toast"
+  },
+  "scheduleWeekExport": "Export week",
+  "@scheduleWeekExport": {
+    "description": "Semantics"
+  },
+  "scheduleFilterSemantics": "Filters",
+  "@scheduleFilterSemantics": {
+    "description": "Semantics"
+  },
+  "scheduleAddLessonSemantics": "Add own class",
+  "@scheduleAddLessonSemantics": {
+    "description": "Semantics"
+  },
+  "scheduleMoreSemantics": "Class actions",
+  "@scheduleMoreSemantics": {
+    "description": "Semantics"
+  },
+  "riskBadge": "RISK",
+  "@riskBadge": {
+    "description": "Risk badge on grades/attendance cards"
+  },
+  "gradesTitle": "Grades",
+  "@gradesTitle": {
+    "description": "Grades page title"
+  },
+  "gradesRefresh": "Refresh",
+  "@gradesRefresh": {
+    "description": "Grades header refresh button semantics"
+  },
+  "gradesErrorTitle": "Could not load",
+  "@gradesErrorTitle": {
+    "description": "Grades error state title"
+  },
+  "gradesErrorSaved": "Last grades were saved on {date}.",
+  "@gradesErrorSaved": {
+    "description": "Grades error message with the last save date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesErrorNoData": "No saved grades yet.",
+  "@gradesErrorNoData": {
+    "description": "Grades error message without a save date"
+  },
+  "gradesGpaLabel": "Personal GPA",
+  "@gradesGpaLabel": {
+    "description": "GPA card label"
+  },
+  "gradesGpaDelta": "{delta} this month",
+  "@gradesGpaDelta": {
+    "description": "GPA delta over the last month",
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesScholarshipLabel": "To the raised scholarship",
+  "@gradesScholarshipLabel": {
+    "description": "GPA card right label"
+  },
+  "gradesScholarshipHint": "get {subject} to 4+",
+  "@gradesScholarshipHint": {
+    "description": "Hint naming the weakest subject",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "gradesScholarshipReached": "threshold reached",
+  "@gradesScholarshipReached": {
+    "description": "Hint when GPA is above the scholarship threshold"
+  },
+  "gradesTermCurrent": "Current",
+  "@gradesTermCurrent": {
+    "description": "Current term segment"
+  },
+  "gradesTermSemester": "Sem {n}",
+  "@gradesTermSemester": {
+    "description": "Previous term segment",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "gradesNoSubjectsTitle": "No subjects yet",
+  "@gradesNoSubjectsTitle": {
+    "description": "Grades empty state title"
+  },
+  "gradesNoSubjectsSubtitle": "Pick your group schedule and subjects will appear here",
+  "@gradesNoSubjectsSubtitle": {
+    "description": "Grades empty state subtitle"
+  },
+  "gradesTermEmpty": "No grades for this term",
+  "@gradesTermEmpty": {
+    "description": "Grades empty state for a past term"
+  },
+  "gradesTeacherUnknown": "Teacher not set",
+  "@gradesTeacherUnknown": {
+    "description": "Fallback teacher line"
+  },
+  "gradesAddMarkSubtitle": "Add a grade",
+  "@gradesAddMarkSubtitle": {
+    "description": "Add-mark sheet subtitle"
+  },
+  "gradesMarkAdded": "Grade {mark} added",
+  "@gradesMarkAdded": {
+    "description": "Toast after adding a mark",
+    "placeholders": {
+      "mark": {
+        "type": "int"
+      }
+    }
+  },
+  "gradesRemoveLast": "Remove last",
+  "@gradesRemoveLast": {
+    "description": "Remove last mark action"
+  },
+  "gradesMarkSemantics": "Grade {mark}",
+  "@gradesMarkSemantics": {
+    "description": "Mark pill semantics",
+    "placeholders": {
+      "mark": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceTitle": "Attendance",
+  "@attendanceTitle": {
+    "description": "Attendance page title"
+  },
+  "attendanceAddAbsence": "Log an absence",
+  "@attendanceAddAbsence": {
+    "description": "Add absence button / sheet title"
+  },
+  "attendanceStatSemester": "personal log",
+  "@attendanceStatSemester": {
+    "description": "Attendance stat caption"
+  },
+  "attendanceStatMissed": "absences",
+  "@attendanceStatMissed": {
+    "description": "Attendance stat caption"
+  },
+  "attendanceStatRisk": "{count, plural, =1{subject at risk} other{subjects at risk}}",
+  "@attendanceStatRisk": {
+    "description": "Attendance stat caption",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceWeeksTitle": "By week",
+  "@attendanceWeeksTitle": {
+    "description": "Weekly bars card title"
+  },
+  "attendanceWeeksRange": "{month} → now",
+  "@attendanceWeeksRange": {
+    "description": "Weekly bars range",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "attendanceRiskBanner": "{subject}: {count, plural, =1{{count} unexcused absence} other{{count} unexcused absences}}. Estimated attendance is below 70%; check the course requirements with your teacher.",
+  "@attendanceRiskBanner": {
+    "description": "Risk banner text",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceBySubjects": "By subject",
+  "@attendanceBySubjects": {
+    "description": "Attendance section overline"
+  },
+  "attendanceMissRow": "Absence · {reason}",
+  "@attendanceMissRow": {
+    "description": "Absence row text",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "attendanceReasonSick": "sick (personal record)",
+  "@attendanceReasonSick": {
+    "description": "Absence reason"
+  },
+  "attendanceReasonNone": "no reason",
+  "@attendanceReasonNone": {
+    "description": "Absence reason"
+  },
+  "attendanceCertificate": "Sick",
+  "@attendanceCertificate": {
+    "description": "Attach certificate action"
+  },
+  "attendanceRemoveAbsence": "Remove",
+  "@attendanceRemoveAbsence": {
+    "description": "Remove absence action"
+  },
+  "attendanceRiskNote": "This is a personal estimate from the available schedule. Ask your teacher about assessment and make-up requirements.",
+  "@attendanceRiskNote": {
+    "description": "Note under a risky subject"
+  },
+  "attendanceNoLessonsTitle": "No classes yet",
+  "@attendanceNoLessonsTitle": {
+    "description": "Attendance empty state title"
+  },
+  "attendanceNoLessonsSubtitle": "Pick your group schedule — stats appear after the first classes",
+  "@attendanceNoLessonsSubtitle": {
+    "description": "Attendance empty state subtitle"
+  },
+  "attendanceSheetSubject": "Subject",
+  "@attendanceSheetSubject": {
+    "description": "Absence sheet field label"
+  },
+  "attendanceSheetDate": "Date",
+  "@attendanceSheetDate": {
+    "description": "Absence sheet field label"
+  },
+  "attendanceSheetReason": "Reason",
+  "@attendanceSheetReason": {
+    "description": "Absence sheet field label"
+  },
+  "attendanceSheetSubmit": "Log",
+  "@attendanceSheetSubmit": {
+    "description": "Absence sheet CTA"
+  },
+  "attendanceAbsenceAdded": "Absence logged",
+  "@attendanceAbsenceAdded": {
+    "description": "Toast after logging an absence"
+  },
+  "attendanceExpandSemantics": "Show absences for {subject}",
+  "@attendanceExpandSemantics": {
+    "description": "Expand row semantics",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "coworkTitle": "Coworking",
+  "@coworkTitle": {
+    "description": "Cowork page title"
+  },
+  "coworkVenue": "Personal plan on this device",
+  "@coworkVenue": {
+    "description": "Cowork venue line"
+  },
+  "coworkFree": "{count} free",
+  "@coworkFree": {
+    "description": "Free seats pill",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "coworkZoneQuiet": "Quiet",
+  "@coworkZoneQuiet": {
+    "description": "Cowork zone"
+  },
+  "coworkZoneCommon": "Common",
+  "@coworkZoneCommon": {
+    "description": "Cowork zone"
+  },
+  "coworkZoneMeeting": "Meeting rooms",
+  "@coworkZoneMeeting": {
+    "description": "Cowork zone"
+  },
+  "coworkWindows": "SCHEMATIC LAYOUT",
+  "@coworkWindows": {
+    "description": "Seat map windows strip"
+  },
+  "coworkLegendFree": "not verified",
+  "@coworkLegendFree": {
+    "description": "Legend"
+  },
+  "coworkLegendTaken": "taken",
+  "@coworkLegendTaken": {
+    "description": "Legend"
+  },
+  "coworkLegendMine": "selected",
+  "@coworkLegendMine": {
+    "description": "Legend"
+  },
+  "coworkTimeLabel": "Time",
+  "@coworkTimeLabel": {
+    "description": "Details row label"
+  },
+  "coworkTimeValue": "{from} → {until} · {hours} h",
+  "@coworkTimeValue": {
+    "description": "Details time value",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "until": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "coworkExtendLabel": "Extension",
+  "@coworkExtendLabel": {
+    "description": "Details row label"
+  },
+  "coworkExtendAvailable": "for your personal plan",
+  "@coworkExtendAvailable": {
+    "description": "Extension value before booking"
+  },
+  "coworkExtendAction": "extend until {until}",
+  "@coworkExtendAction": {
+    "description": "Extension action",
+    "placeholders": {
+      "until": {
+        "type": "String"
+      }
+    }
+  },
+  "coworkExtendMax": "until closing",
+  "@coworkExtendMax": {
+    "description": "Extension exhausted"
+  },
+  "coworkFriendsLabel": "Friends nearby",
+  "@coworkFriendsLabel": {
+    "description": "Details row label"
+  },
+  "coworkFriendsNone": "no recent locations",
+  "@coworkFriendsNone": {
+    "description": "No friends nearby"
+  },
+  "coworkPickSeat": "Pick a seat",
+  "@coworkPickSeat": {
+    "description": "Disabled CTA"
+  },
+  "coworkBook": "Save {seat} · until {until}",
+  "@coworkBook": {
+    "description": "Book CTA",
+    "placeholders": {
+      "seat": {
+        "type": "String"
+      },
+      "until": {
+        "type": "String"
+      }
+    }
+  },
+  "coworkCancelBooking": "Remove saved seat",
+  "@coworkCancelBooking": {
+    "description": "Cancel CTA"
+  },
+  "coworkBooked": "Seat {seat} saved until {until}",
+  "@coworkBooked": {
+    "description": "Toast after booking",
+    "placeholders": {
+      "seat": {
+        "type": "String"
+      },
+      "until": {
+        "type": "String"
+      }
+    }
+  },
+  "coworkBookingCancelled": "Saved seat removed",
+  "@coworkBookingCancelled": {
+    "description": "Toast after cancelling"
+  },
+  "coworkSeatSemantics": "Seat {seat}",
+  "@coworkSeatSemantics": {
+    "description": "Seat cell semantics",
+    "placeholders": {
+      "seat": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSearchPlaceholder": "Room, department, canteen",
+  "@mapSearchPlaceholder": {
+    "description": "Map search pill placeholder"
+  },
+  "mapFriendsToggle": "Friends on the map",
+  "@mapFriendsToggle": {
+    "description": "Semantics label of the friends-on-map toggle"
+  },
+  "mapCampusFilter": "Campus",
+  "@mapCampusFilter": {
+    "description": "Semantics label of the campus chips row"
+  },
+  "mapExpandSheet": "Expand list",
+  "@mapExpandSheet": {
+    "description": "Semantics of the sheet chevron when collapsed"
+  },
+  "mapCollapseSheet": "Collapse list",
+  "@mapCollapseSheet": {
+    "description": "Semantics of the sheet chevron when expanded"
+  },
+  "freeRoomsNowTitle": "Free now",
+  "@freeRoomsNowTitle": {
+    "description": "Title of the free rooms sheet"
+  },
+  "freeRoomsMeta": "{campus} · until the next class at {time} · {count, plural, =1{{count} room} other{{count} rooms}}",
+  "@freeRoomsMeta": {
+    "description": "Meta line under the free rooms title",
+    "placeholders": {
+      "campus": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "freeRoomsMetaEndOfDay": "{campus} · no more classes today · {count, plural, =1{{count} room} other{{count} rooms}}",
+  "@freeRoomsMetaEndOfDay": {
+    "description": "Meta line when no next class today",
+    "placeholders": {
+      "campus": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "freeRoomsYourSeat": "saved",
+  "@freeRoomsYourSeat": {
+    "description": "Badge on the booked room row"
+  },
+  "freeRoomsKind": "Room",
+  "@freeRoomsKind": {
+    "description": "Generic room kind label"
+  },
+  "freeRoomsLeftHours": "{hours} h",
+  "@freeRoomsLeftHours": {
+    "description": "Time left, whole hours",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "freeRoomsLeftHoursMinutes": "{hours} h {minutes} min",
+  "@freeRoomsLeftHoursMinutes": {
+    "description": "Time left, hours and minutes",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "freeRoomsLeftMinutes": "{minutes} min",
+  "@freeRoomsLeftMinutes": {
+    "description": "Time left, minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "freeRoomsNothingFound": "Nothing found in {campus}. Try another campus.",
+  "@freeRoomsNothingFound": {
+    "description": "Empty state of the free rooms list",
+    "placeholders": {
+      "campus": {
+        "type": "String"
+      }
+    }
+  },
+  "freeRoomsNothingFoundAll": "Nothing found. Try another query.",
+  "@freeRoomsNothingFoundAll": {
+    "description": "Empty state without campus filter"
+  },
+  "roomPhotoPlaceholder": "room photo",
+  "@roomPhotoPlaceholder": {
+    "description": "Placeholder label on the room sheet photo"
+  },
+  "roomFreeUntilBadge": "free until {time}",
+  "@roomFreeUntilBadge": {
+    "description": "Room sheet badge",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "roomFreeEndOfDayBadge": "free until the end of the day",
+  "@roomFreeEndOfDayBadge": {
+    "description": "Room sheet badge when no upcoming class"
+  },
+  "roomMetaFloor": "{kind} · {campus}, floor {floor}",
+  "@roomMetaFloor": {
+    "description": "Room sheet meta line with floor",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "campus": {
+        "type": "String"
+      },
+      "floor": {
+        "type": "int"
+      }
+    }
+  },
+  "roomMetaNoFloor": "{kind} · {campus}",
+  "@roomMetaNoFloor": {
+    "description": "Room sheet meta line without floor",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "campus": {
+        "type": "String"
+      }
+    }
+  },
+  "roomStatFreeFor": "Free for",
+  "@roomStatFreeFor": {
+    "description": "Room sheet stat label"
+  },
+  "roomStatFloor": "Floor",
+  "@roomStatFloor": {
+    "description": "Room sheet stat label"
+  },
+  "roomStatBuilding": "Building",
+  "@roomStatBuilding": {
+    "description": "Room sheet stat label"
+  },
+  "roomBook": "Save place",
+  "@roomBook": {
+    "description": "Room sheet CTA"
+  },
+  "roomBooked": "Saved until {time}",
+  "@roomBooked": {
+    "description": "Room sheet CTA when booked",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "roomBookedToast": "{name} · saved until {time}",
+  "@roomBookedToast": {
+    "description": "Toast after booking",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "roomReleasedToast": "Saved place removed",
+  "@roomReleasedToast": {
+    "description": "Toast after releasing a booking"
+  },
+  "roomRoute": "Show on the floor plan",
+  "@roomRoute": {
+    "description": "Semantics of the route circle button"
+  },
+  "roomNotOnPlan": "{name} is not on the campus floor plans",
+  "@roomNotOnPlan": {
+    "description": "Toast when a room cannot be located",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "roomTakenBadge": "busy",
+  "@roomTakenBadge": {
+    "description": "Badge for a room that is not free now"
+  },
+  "homeOfflineBanner": "Offline · showing saved data",
+  "@homeOfflineBanner": {
+    "description": "Home offline banner"
+  },
+  "homeGreetingMorning": "Good morning, ",
+  "@homeGreetingMorning": {
+    "description": "Home greeting before noon; the name follows in accent italic"
+  },
+  "homeGreetingDay": "Good afternoon, ",
+  "@homeGreetingDay": {
+    "description": "Home greeting before 18:00"
+  },
+  "homeGreetingEvening": "Good evening, ",
+  "@homeGreetingEvening": {
+    "description": "Home greeting after 18:00"
+  },
+  "homeStatusNoLessons": "no classes",
+  "@homeStatusNoLessons": {
+    "description": "Home status line when the day has no lessons"
+  },
+  "homeStatusOngoing": "class {index} of {count} in progress",
+  "@homeStatusOngoing": {
+    "description": "Home status line during a lesson",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeStatusNext": "next at {time}",
+  "@homeStatusNext": {
+    "description": "Home status line: next lesson time",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeStatusFirst": "first at {time}",
+  "@homeStatusFirst": {
+    "description": "Home status line: first lesson time today",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeStatusStart": "starts at {time}",
+  "@homeStatusStart": {
+    "description": "Home status line for another day",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeStatusDone": "done for today",
+  "@homeStatusDone": {
+    "description": "Home status line when all lessons are over"
+  },
+  "homeHeroFirstIn": "First class in {minutes} min",
+  "@homeHeroFirstIn": {
+    "description": "Home hero pill before the first lesson",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "homeHeroNow": "In progress",
+  "@homeHeroNow": {
+    "description": "Home hero pill during a lesson"
+  },
+  "homeHeroBreak": "Break · {minutes} min",
+  "@homeHeroBreak": {
+    "description": "Home hero pill during a break",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "homeHeroDoneTitle": "Done for today.",
+  "@homeHeroDoneTitle": {
+    "description": "Home hero title when lessons are over"
+  },
+  "homeHeroDoneLessons": "{count, plural, =1{{count} class behind} other{{count} classes behind}}",
+  "@homeHeroDoneLessons": {
+    "description": "Home hero accent line after the last lesson",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeHeroTomorrow": "Tomorrow {lessons}, first at {time}",
+  "@homeHeroTomorrow": {
+    "description": "Home hero tomorrow summary",
+    "placeholders": {
+      "lessons": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroTomorrowFree": "No classes tomorrow",
+  "@homeHeroTomorrowFree": {
+    "description": "Home hero tomorrow summary when tomorrow is free"
+  },
+  "homeHeroDeadlineChip": "Deadline · {left}",
+  "@homeHeroDeadlineChip": {
+    "description": "Home hero nearest deadline chip",
+    "placeholders": {
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroDeadlineNone": "No deadlines",
+  "@homeHeroDeadlineNone": {
+    "description": "Home hero deadline chip when nothing is due"
+  },
+  "homeHeroTomorrowPlan": "Plan for tomorrow",
+  "@homeHeroTomorrowPlan": {
+    "description": "Home hero button that selects tomorrow"
+  },
+  "homeHeroFirstLesson": "FIRST CLASS",
+  "@homeHeroFirstLesson": {
+    "description": "Home hero overline for another day"
+  },
+  "homeHeroFreeTitle": "No classes.",
+  "@homeHeroFreeTitle": {
+    "description": "Home hero free-day title"
+  },
+  "homeHeroFreeBody": "Close a deadline, visit the cowork or check the events board.",
+  "@homeHeroFreeBody": {
+    "description": "Home hero free-day body"
+  },
+  "homeWhoGoesCount": "{count, plural, =1{{count} going} other{{count} going}}",
+  "@homeWhoGoesCount": {
+    "description": "Home who-goes chip label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeWhoGoesEmpty": "Who is going",
+  "@homeWhoGoesEmpty": {
+    "description": "Home who-goes chip label without classmates"
+  },
+  "homeWhoGoesTitle": "Who is going to class",
+  "@homeWhoGoesTitle": {
+    "description": "Who-goes sheet title"
+  },
+  "homeWhoGoesSubtitle": "{count} of {total}",
+  "@homeWhoGoesSubtitle": {
+    "description": "Who-goes sheet subtitle",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeWhoGoesMe": "I am going too",
+  "@homeWhoGoesMe": {
+    "description": "Who-goes sheet CTA"
+  },
+  "homeWhoGoesMeDone": "You are going",
+  "@homeWhoGoesMeDone": {
+    "description": "Who-goes sheet CTA after confirming"
+  },
+  "homeWhoGoesGoing": "going",
+  "@homeWhoGoesGoing": {
+    "description": "Who-goes row status"
+  },
+  "homeWhoGoesNoClassmates": "Classmates will appear here once they pick your group",
+  "@homeWhoGoesNoClassmates": {
+    "description": "Who-goes sheet empty text"
+  },
+  "homeGoingToast": "You are going to class",
+  "@homeGoingToast": {
+    "description": "Toast after confirming attendance intent"
+  },
+  "homeFreeRoomTitle": "{room} is free",
+  "@homeFreeRoomTitle": {
+    "description": "Home break hero free room row",
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFreeRoomUntil": "until {time}",
+  "@homeFreeRoomUntil": {
+    "description": "Home break hero free room subtitle",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFreeRoomsSub": "find a place for the break",
+  "@homeFreeRoomsSub": {
+    "description": "Home break hero free rooms fallback subtitle"
+  },
+  "homeStreakDays": "{count} days in a row",
+  "@homeStreakDays": {
+    "description": "Home status strip streak pill",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeXp": "{xp} XP",
+  "@homeXp": {
+    "description": "Home status strip xp label",
+    "placeholders": {
+      "xp": {
+        "type": "String"
+      }
+    }
+  },
+  "homeDeadlinesCount": "{count, plural, =1{{count} deadline} other{{count} deadlines}}",
+  "@homeDeadlinesCount": {
+    "description": "Home status strip deadlines pill",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeExamIn": "Test in {days} d",
+  "@homeExamIn": {
+    "description": "Home status strip exam pill",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "homeExamToday": "Test today",
+  "@homeExamToday": {
+    "description": "Home status strip exam pill on the day"
+  },
+  "homeAllServices": "all services",
+  "@homeAllServices": {
+    "description": "Home quick actions section action"
+  },
+  "homeAddDeadline": "+ add",
+  "@homeAddDeadline": {
+    "description": "Home deadlines section action"
+  },
+  "homeDeadlinesAllDone": "All done. Keep it up.",
+  "@homeDeadlinesAllDone": {
+    "description": "Home deadlines empty text"
+  },
+  "homeAllLower": "all",
+  "@homeAllLower": {
+    "description": "Home trending section action"
+  },
+  "homeRepliesCount": "{count, plural, =1{{count} reply} other{{count} replies}}",
+  "@homeRepliesCount": {
+    "description": "Home trending row meta",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeLessonMoved": "{type} · {room} instead of {old}",
+  "@homeLessonMoved": {
+    "description": "Home lesson row meta for a moved lesson",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "room": {
+        "type": "String"
+      },
+      "old": {
+        "type": "String"
+      }
+    }
+  },
+  "homeDeadlineDone": "done",
+  "@homeDeadlineDone": {
+    "description": "Home deadline row right label when done"
+  },
+  "homeNoteChars": "{count} / {max}",
+  "@homeNoteChars": {
+    "description": "Note sheet character counter",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSearchLabel": "Search",
+  "@homeSearchLabel": {
+    "description": "Home header search button semantics"
+  },
+  "homeWeekParity": "· {parity}",
+  "@homeWeekParity": {
+    "description": "Home clock pill week parity suffix",
+    "placeholders": {
+      "parity": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsReadAll": "Mark all read",
+  "@notificationsReadAll": {
+    "description": "Notifications sheet header action"
+  },
+  "notificationsEmptyTitle": "No notifications yet",
+  "@notificationsEmptyTitle": {
+    "description": "Notifications sheet empty state title"
+  },
+  "notificationsEmptySubtitle": "Schedule changes and pushes will show up here",
+  "@notificationsEmptySubtitle": {
+    "description": "Notifications sheet empty state subtitle"
+  },
+  "notifTimeNow": "now",
+  "@notifTimeNow": {
+    "description": "Notification age: just now"
+  },
+  "notifTimeMinutes": "{count} min",
+  "@notifTimeMinutes": {
+    "description": "Notification age in minutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifTimeHours": "{count} h",
+  "@notifTimeHours": {
+    "description": "Notification age in hours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifTimeYesterday": "yesterday",
+  "@notifTimeYesterday": {
+    "description": "Notification age: yesterday"
+  },
+  "notifChangeMoved": "Moved · {subject}",
+  "@notifChangeMoved": {
+    "description": "Schedule change notification title",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "notifChangeCancelled": "Cancelled · {subject}",
+  "@notifChangeCancelled": {
+    "description": "Schedule change notification title",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "notifChangeAdded": "New class · {subject}",
+  "@notifChangeAdded": {
+    "description": "Schedule change notification title",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "notifChangeRoom": "New room · {subject}",
+  "@notifChangeRoom": {
+    "description": "Schedule change notification title",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "notifChangeTeacher": "New teacher · {subject}",
+  "@notifChangeTeacher": {
+    "description": "Schedule change notification title",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "notifChangeInsteadOf": "instead of {value}",
+  "@notifChangeInsteadOf": {
+    "description": "Schedule change notification detail",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "notifPushDefaultTitle": "Notification",
+  "@notifPushDefaultTitle": {
+    "description": "Fallback title for a push without a title"
+  },
+  "offlineBannerCached": "Offline · showing saved data",
+  "@offlineBannerCached": {
+    "description": "Offline banner text"
+  },
+  "profileRankXp": "{rank} · {xp} XP",
+  "@profileRankXp": {
+    "description": "Profile level card: rank name and XP",
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      },
+      "xp": {
+        "type": "String"
+      }
+    }
+  },
+  "profileGroupPlace": "#{rank} in group",
+  "@profileGroupPlace": {
+    "description": "Profile level card: place in group",
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "profileGroupPlaceUnknown": "no place yet",
+  "@profileGroupPlaceUnknown": {
+    "description": "Profile level card when group rank is unknown"
+  },
+  "profileXpToLevelStreak": "{xp} XP to level {level} · streak {days} d.",
+  "@profileXpToLevelStreak": {
+    "description": "Profile level card footer",
+    "placeholders": {
+      "xp": {
+        "type": "String"
+      },
+      "level": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "profileRankShinobi": "Shinobi",
+  "@profileRankShinobi": {
+    "description": "Rank label for level 1-9"
+  },
+  "profileRankChunin": "Chunin",
+  "@profileRankChunin": {
+    "description": "Rank label for level 10-19"
+  },
+  "profileRankJonin": "Jonin",
+  "@profileRankJonin": {
+    "description": "Rank label for level 20-29"
+  },
+  "profileRankKage": "Kage",
+  "@profileRankKage": {
+    "description": "Rank label for level 30+"
+  },
+  "profileMetricGpa": "GPA",
+  "@profileMetricGpa": {
+    "description": "Profile metric card label"
+  },
+  "profileMetricAttendance": "attendance",
+  "@profileMetricAttendance": {
+    "description": "Profile metric card label"
+  },
+  "profileMetricExam": "to exam",
+  "@profileMetricExam": {
+    "description": "Profile metric card label: days until next test"
+  },
+  "profileDaysShort": "{days} d",
+  "@profileDaysShort": {
+    "description": "Short day count",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "profileWeekQuests": "Weekly quests",
+  "@profileWeekQuests": {
+    "description": "Profile quests section title"
+  },
+  "profileUntilSunday": "until Sunday",
+  "@profileUntilSunday": {
+    "description": "Profile quests section meta"
+  },
+  "profileQuestXp": "+{xp} XP",
+  "@profileQuestXp": {
+    "description": "Quest reward",
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "profileQuestProgress": "{done}/{total}",
+  "@profileQuestProgress": {
+    "description": "Quest progress label",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "profileQuestsEmpty": "No quests are available yet",
+  "@profileQuestsEmpty": {
+    "description": "Profile quests empty state"
+  },
+  "profileAllBadges": "all {count}",
+  "@profileAllBadges": {
+    "description": "Profile achievements action",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileBadgeSoon": "Soon · {percent}%",
+  "@profileBadgeSoon": {
+    "description": "Locked badge card subtitle",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "profileBadgesEmpty": "Your first achievement is close",
+  "@profileBadgesEmpty": {
+    "description": "Profile achievements empty state"
+  },
+  "profileFriendsMeta": "{count} · {campus} on the map",
+  "@profileFriendsMeta": {
+    "description": "Profile friends row meta",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "campus": {
+        "type": "int"
+      }
+    }
+  },
+  "profileStudentCard": "NFC Pass",
+  "@profileStudentCard": {
+    "description": "Profile row to the pass"
+  },
+  "profileCardNumber": "No. {number}",
+  "@profileCardNumber": {
+    "description": "Student card number",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "profileEditAbout": "About",
+  "@profileEditAbout": {
+    "description": "Edit profile sheet field label"
+  },
+  "profileEditAboutHint": "A personal note about yourself",
+  "@profileEditAboutHint": {
+    "description": "Edit profile sheet about placeholder"
+  },
+  "profileEditTelegram": "Telegram",
+  "@profileEditTelegram": {
+    "description": "Edit profile sheet field label"
+  },
+  "profileEditTelegramHint": "@username",
+  "@profileEditTelegramHint": {
+    "description": "Edit profile sheet telegram placeholder"
+  },
+  "profileEditName": "Name",
+  "@profileEditName": {
+    "description": "Edit profile sheet name label"
+  },
+  "profileUpdatedToast": "Profile updated",
+  "@profileUpdatedToast": {
+    "description": "Toast after saving the profile"
+  },
+  "profileChangePhoto": "Change photo",
+  "@profileChangePhoto": {
+    "description": "Semantics of the camera badge on the edit-profile avatar"
+  },
+  "profilePhotoSoon": "Photo upload is coming soon",
+  "@profilePhotoSoon": {
+    "description": "Toast when tapping the camera badge"
+  },
+  "leaderboardScopeInstitute": "Institute",
+  "@leaderboardScopeInstitute": {
+    "description": "Leaderboard scope segment"
+  },
+  "leaderboardScopeUniversity": "University",
+  "@leaderboardScopeUniversity": {
+    "description": "Leaderboard scope segment"
+  },
+  "leaderboardXp": "{xp} XP",
+  "@leaderboardXp": {
+    "description": "Leaderboard row XP",
+    "placeholders": {
+      "xp": {
+        "type": "String"
+      }
+    }
+  },
+  "leaderboardHintGap": "{xp} XP to place {place}. Finish the weekly quests.",
+  "@leaderboardHintGap": {
+    "description": "Leaderboard footer hint",
+    "placeholders": {
+      "place": {
+        "type": "int"
+      },
+      "xp": {
+        "type": "String"
+      }
+    }
+  },
+  "leaderboardHintTop": "You are in the top three. Keep the pace!",
+  "@leaderboardHintTop": {
+    "description": "Leaderboard footer hint for top-3"
+  },
+  "leaderboardEmpty": "The rating is empty for now",
+  "@leaderboardEmpty": {
+    "description": "Leaderboard empty state"
+  },
+  "leaderboardError": "Could not load the rating",
+  "@leaderboardError": {
+    "description": "Leaderboard error state"
+  },
+  "settingsAppearanceSection": "Appearance",
+  "@settingsAppearanceSection": {
+    "description": "Settings section overline"
+  },
+  "settingsAccentLabel": "Accent",
+  "@settingsAccentLabel": {
+    "description": "Settings accent colour picker label"
+  },
+  "settingsLockWidget": "Lock screen widget",
+  "@settingsLockWidget": {
+    "description": "Settings widget preview row title"
+  },
+  "settingsWidgetNext": "NEXT · {time}",
+  "@settingsWidgetNext": {
+    "description": "Widget preview overline",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsWidgetPreview": "preview",
+  "@settingsWidgetPreview": {
+    "description": "Widget preview tag"
+  },
+  "settingsWidgetNoLesson": "No classes",
+  "@settingsWidgetNoLesson": {
+    "description": "Widget preview when there is no upcoming lesson"
+  },
+  "settingsGroup": "Group",
+  "@settingsGroup": {
+    "description": "Settings schedule group row"
+  },
+  "settingsShowPast": "Show past classes",
+  "@settingsShowPast": {
+    "description": "Settings toggle"
+  },
+  "settingsShowPastSub": "Greyed out, below the current one",
+  "@settingsShowPastSub": {
+    "description": "Settings toggle subtitle"
+  },
+  "settingsShowCancelled": "Show cancelled",
+  "@settingsShowCancelled": {
+    "description": "Settings toggle"
+  },
+  "settingsShowCancelledSub": "Struck through",
+  "@settingsShowCancelledSub": {
+    "description": "Settings toggle subtitle"
+  },
+  "settingsOnlySubgroup": "Only my subgroup",
+  "@settingsOnlySubgroup": {
+    "description": "Settings toggle"
+  },
+  "settingsOnlySubgroupSub": "Hides the other subgroup's classes",
+  "@settingsOnlySubgroupSub": {
+    "description": "Settings toggle subtitle"
+  },
+  "settingsExportCalendar": "Export to calendar",
+  "@settingsExportCalendar": {
+    "description": "Settings row"
+  },
+  "settingsExportSync": "Sync",
+  "@settingsExportSync": {
+    "description": "Settings export action"
+  },
+  "settingsExportDone": "Schedule added to the calendar",
+  "@settingsExportDone": {
+    "description": "Toast after calendar export"
+  },
+  "settingsExportNoSchedule": "Pick a schedule first",
+  "@settingsExportNoSchedule": {
+    "description": "Toast when there is nothing to export"
+  },
+  "settingsNotifyLessonsSub": "15 minutes before start",
+  "@settingsNotifyLessonsSub": {
+    "description": "Settings toggle subtitle"
+  },
+  "settingsNotifyDeadlines": "Deadlines",
+  "@settingsNotifyDeadlines": {
+    "description": "Settings toggle"
+  },
+  "settingsNotifyDeadlinesSub": "A day and an hour before",
+  "@settingsNotifyDeadlinesSub": {
+    "description": "Settings toggle subtitle"
+  },
+  "settingsNotifyNewsSub": "Important only",
+  "@settingsNotifyNewsSub": {
+    "description": "Settings toggle subtitle"
+  },
+  "settingsShowToFriends": "Show me to friends",
+  "@settingsShowToFriends": {
+    "description": "Settings privacy toggle"
+  },
+  "settingsShowToFriendsSub": "Only on campus",
+  "@settingsShowToFriendsSub": {
+    "description": "Settings privacy toggle subtitle"
+  },
+  "settingsGeo": "Location",
+  "@settingsGeo": {
+    "description": "Settings privacy toggle"
+  },
+  "settingsGeoSub": "Map and rooms",
+  "@settingsGeoSub": {
+    "description": "Settings privacy toggle subtitle"
+  },
+  "settingsSignOutFull": "Sign out",
+  "@settingsSignOutFull": {
+    "description": "Settings sign-out row"
+  },
+  "settingsVersionBuild": "Version {version} · build {build}",
+  "@settingsVersionBuild": {
+    "description": "Settings footer",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAllNotifications": "All notifications",
+  "@settingsAllNotifications": {
+    "description": "Settings row to the full notifications page"
+  },
+  "friendsCommonWindowsToday": "Shared gaps today",
+  "@friendsCommonWindowsToday": {
+    "description": "Friends hero overline"
+  },
+  "friendsCompareHeroTitle": "Free time with friends",
+  "@friendsCompareHeroTitle": {
+    "description": "Friends hero title"
+  },
+  "friendsCompareHeroSub": "From your friend’s group schedule",
+  "@friendsCompareHeroSub": {
+    "description": "Friends hero subtitle"
+  },
+  "friendsCompare": "Compare",
+  "@friendsCompare": {
+    "description": "Friends hero action"
+  },
+  "friendsFilterAll": "All",
+  "@friendsFilterAll": {
+    "description": "Friends filter chip"
+  },
+  "friendsFilterCampus": "On the map",
+  "@friendsFilterCampus": {
+    "description": "Friends filter chip"
+  },
+  "friendsPrivacyTitle": "Location sharing is your choice",
+  "@friendsPrivacyTitle": {
+    "description": "Friends privacy card title"
+  },
+  "friendsPrivacySub": "Friends see your last shared location. Manage access in map settings; campus and floor detection are unavailable.",
+  "@friendsPrivacySub": {
+    "description": "Friends privacy card subtitle"
+  },
+  "friendsCampusEmpty": "No one is sharing a recent location",
+  "@friendsCampusEmpty": {
+    "description": "Friends on-campus filter empty state"
+  },
+  "friendsNoTelegram": "{name} has no Telegram handle",
+  "@friendsNoTelegram": {
+    "description": "Toast when a friend cannot be messaged",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendsLoadError": "Could not load friends",
+  "@friendsLoadError": {
+    "description": "Friends page error state"
+  },
+  "friendsMessage": "Message {name}",
+  "@friendsMessage": {
+    "description": "Semantics of the send button",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "newsSourceAllAbbr": "ALL",
+  "@newsSourceAllAbbr": {
+    "description": "Abbreviation inside the 'all sources' circle on the news source rail"
+  },
+  "articleSaved": "Saved",
+  "@articleSaved": {
+    "description": "Toast after saving an article"
+  },
+  "communitiesJoin": "Join",
+  "@communitiesJoin": {
+    "description": "Join community button"
+  },
+  "servicesSearchPlaceholder": "Find a service, room, person",
+  "@servicesSearchPlaceholder": {
+    "description": "Services search pill placeholder"
+  },
+  "servicesEditBanner": "Star the services you want on Home",
+  "@servicesEditBanner": {
+    "description": "Services edit-mode banner"
+  },
+  "servicesFavoriteAdd": "Add to Home",
+  "@servicesFavoriteAdd": {
+    "description": "Semantics of the star toggle when off"
+  },
+  "servicesFavoriteRemove": "Remove from Home",
+  "@servicesFavoriteRemove": {
+    "description": "Semantics of the star toggle when on"
+  },
+  "servicesNfcOpenTitle": "Open the turnstile",
+  "@servicesNfcOpenTitle": {
+    "description": "NFC card title when idle"
+  },
+  "servicesNfcActiveTitle": "Hold near the turnstile",
+  "@servicesNfcActiveTitle": {
+    "description": "NFC card title when active"
+  },
+  "servicesNfcActiveSub": "Active for 30 seconds · tap to cancel",
+  "@servicesNfcActiveSub": {
+    "description": "NFC card subtitle when active"
+  },
+  "servicesNfcPassSub": "Pass no. {id}",
+  "@servicesNfcPassSub": {
+    "description": "NFC card subtitle with the bound pass id",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "servicesNfcConnectSub": "Pass not connected · tap to connect",
+  "@servicesNfcConnectSub": {
+    "description": "NFC card subtitle when no pass is bound"
+  },
+  "servicesNfcUnavailableSub": "NFC is unavailable on this device",
+  "@servicesNfcUnavailableSub": {
+    "description": "NFC card subtitle when the device has no NFC"
+  },
+  "servicesSectionCampus": "Campus",
+  "@servicesSectionCampus": {
+    "description": "Services section title"
+  },
+  "servicesSectionStudy": "Studies",
+  "@servicesSectionStudy": {
+    "description": "Services section title"
+  },
+  "serviceNfcTitle": "Pass",
+  "@serviceNfcTitle": {
+    "description": "Services row title for the NFC pass"
+  },
+  "serviceExamsTitle": "Exams",
+  "@serviceExamsTitle": {
+    "description": "Services row title for the session page"
+  },
+  "serviceMarketTitle": "Market",
+  "@serviceMarketTitle": {
+    "description": "Services row title for the marketplace"
+  },
+  "serviceMapSub": "Rooms and routes",
+  "@serviceMapSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceRoomsSub": "Free right now",
+  "@serviceRoomsSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceCoworkSub": "Seats and booking",
+  "@serviceCoworkSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceNfcSub": "NFC campus pass",
+  "@serviceNfcSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceDeadlinesSub": "Tasks and due dates",
+  "@serviceDeadlinesSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceExamsSub": "Tests and exams",
+  "@serviceExamsSub": {
+    "description": "Services row subtitle when no exam is scheduled"
+  },
+  "serviceExamsInDays": "{count, plural, =0{Test today} =1{Test in {count} day} other{Test in {count} days}}",
+  "@serviceExamsInDays": {
+    "description": "Services row subtitle with days to the nearest exam",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "serviceGradesSub": "GPA and semester marks",
+  "@serviceGradesSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceAttendanceSub": "Absences and stats",
+  "@serviceAttendanceSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceNotesSub": "Group notes",
+  "@serviceNotesSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceKbSub": "Tickets, solutions, cheat sheets",
+  "@serviceKbSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceToolsSub": "Grant and credits",
+  "@serviceToolsSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceNewsSub": "University channels",
+  "@serviceNewsSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceCommunitiesSub": "Clubs and sections",
+  "@serviceCommunitiesSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceFriendsSub": "Who is on campus",
+  "@serviceFriendsSub": {
+    "description": "Services row subtitle"
+  },
+  "servicePollsSub": "Group votes",
+  "@servicePollsSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceEventsSub": "Events this week",
+  "@serviceEventsSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceMarketSub": "Student listings",
+  "@serviceMarketSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceLostSub": "Found and lost items",
+  "@serviceLostSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceWalletSub": "Balance and grant",
+  "@serviceWalletSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceAppsSub": "Mini apps",
+  "@serviceAppsSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceVirtualTourSub": "Walk around the campus",
+  "@serviceVirtualTourSub": {
+    "description": "Services row subtitle"
+  },
+  "servicePeopleSub": "Classmates and group",
+  "@servicePeopleSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceFriendsMapSub": "Friends on the map",
+  "@serviceFriendsMapSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceTeamFinderSub": "Build a team",
+  "@serviceTeamFinderSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceMentorshipSub": "Mentors and advice",
+  "@serviceMentorshipSub": {
+    "description": "Services row subtitle"
+  },
+  "serviceExternalSub": "Opens in the browser",
+  "@serviceExternalSub": {
+    "description": "Services row subtitle for external links"
+  },
+  "searchSheetPlaceholder": "Room, subject, person, service",
+  "@searchSheetPlaceholder": {
+    "description": "Search sheet field placeholder"
+  },
+  "searchSheetNoResults": "Nothing found. Try “A-318” or “calculus”.",
+  "@searchSheetNoResults": {
+    "description": "Search sheet empty state"
+  },
+  "searchTagSubject": "Subject",
+  "@searchTagSubject": {
+    "description": "Search result kind"
+  },
+  "searchTagService": "Service",
+  "@searchTagService": {
+    "description": "Search result kind"
+  },
+  "searchSubjectInSchedule": "in the schedule",
+  "@searchSubjectInSchedule": {
+    "description": "Search result subtitle for subjects"
+  },
+  "deadlinesClosedSemester": "Completed deadlines",
+  "@deadlinesClosedSemester": {
+    "description": "Deadlines hero label"
+  },
+  "deadlinesOfTotal": "of {total}",
+  "@deadlinesOfTotal": {
+    "description": "Deadlines hero total",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "deadlinesGroupToday": "Today",
+  "@deadlinesGroupToday": {
+    "description": "Deadlines group title"
+  },
+  "deadlineLeftDone": "done",
+  "@deadlineLeftDone": {
+    "description": "Deadline row right label when done"
+  },
+  "deadlinesSharedTitle": "Shared group deadlines",
+  "@deadlinesSharedTitle": {
+    "description": "Deadlines info card title"
+  },
+  "deadlinesSharedBody": "The monitor adds one — everyone sees it. {shared} of {total} are shared.",
+  "@deadlinesSharedBody": {
+    "description": "Deadlines info card body",
+    "placeholders": {
+      "shared": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "deadlineDoneToast": "Deadline closed",
+  "@deadlineDoneToast": {
+    "description": "Toast after completing a deadline"
+  },
+  "undo": "Undo",
+  "@undo": {
+    "description": "Undo action"
+  },
+  "deadlinesAddSemantics": "Add deadline",
+  "@deadlinesAddSemantics": {
+    "description": "Semantics of the + header button"
+  },
+  "addDeadlineTitle": "New deadline",
+  "@addDeadlineTitle": {
+    "description": "Add deadline sheet title"
+  },
+  "addDeadlineWhatHint": "What to hand in",
+  "@addDeadlineWhatHint": {
+    "description": "Add deadline title field placeholder"
+  },
+  "addDeadlineSubject": "Subject",
+  "@addDeadlineSubject": {
+    "description": "Add deadline subject label"
+  },
+  "addDeadlineDue": "Due",
+  "@addDeadlineDue": {
+    "description": "Add deadline due label"
+  },
+  "addDeadlinePickDate": "Pick a date",
+  "@addDeadlinePickDate": {
+    "description": "Add deadline due pill"
+  },
+  "addDeadlineSharedTitle": "Shared with the group",
+  "@addDeadlineSharedTitle": {
+    "description": "Add deadline toggle title"
+  },
+  "addDeadlineSharedSub": "{count, plural, =1{Visible to {count} person} other{Visible to all {count} people}}",
+  "@addDeadlineSharedSub": {
+    "description": "Add deadline toggle subtitle with classmates count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addDeadlineSharedSubGeneric": "Everyone in the group will see it",
+  "@addDeadlineSharedSubGeneric": {
+    "description": "Add deadline toggle subtitle without a count"
+  },
+  "addDeadlineToast": "Deadline added · I'll remind you a day before",
+  "@addDeadlineToast": {
+    "description": "Toast after creating a deadline"
+  },
+  "examsTitle": "Assessment",
+  "@examsTitle": {
+    "description": "Exams page title"
+  },
+  "examsSessionIn": "session in {count} d",
+  "@examsSessionIn": {
+    "description": "Exams page header meta",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "examsNearestIn": "{count, plural, =0{Nearest · today} =1{Nearest · in {count} day} other{Nearest · in {count} days}}",
+  "@examsNearestIn": {
+    "description": "Exams hero badge",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "examsReadiness": "Readiness",
+  "@examsReadiness": {
+    "description": "Exams readiness label"
+  },
+  "examsTopicsTitle": "Topics for the test",
+  "@examsTopicsTitle": {
+    "description": "Exams topics section title"
+  },
+  "examsTopicsHint": "tick what you've covered",
+  "@examsTopicsHint": {
+    "description": "Exams topics section hint"
+  },
+  "examsTopicsEmpty": "Add topics — readiness is calculated automatically",
+  "@examsTopicsEmpty": {
+    "description": "Exams topics empty row"
+  },
+  "examsAddTopic": "Add topic",
+  "@examsAddTopic": {
+    "description": "Exams add-topic row and sheet title"
+  },
+  "examsTopicHint": "Topic",
+  "@examsTopicHint": {
+    "description": "Exams add-topic field placeholder"
+  },
+  "examsRemoveTopic": "Remove topic",
+  "@examsRemoveTopic": {
+    "description": "Semantics of the swipe-to-delete on a topic"
+  },
+  "examsPlanTitle": "Study plan",
+  "@examsPlanTitle": {
+    "description": "Exams plan section title"
+  },
+  "examsPlanRebuild": "rebuild",
+  "@examsPlanRebuild": {
+    "description": "Exams plan rebuild action"
+  },
+  "examsPlanEmpty": "All topics covered — time to rest",
+  "@examsPlanEmpty": {
+    "description": "Exams plan empty row"
+  },
+  "examsPlanMinutes": "{count} min",
+  "@examsPlanMinutes": {
+    "description": "Exams plan row minutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "examsAllTitle": "All assessments",
+  "@examsAllTitle": {
+    "description": "Exams list overline"
+  },
+  "examsDaysShort": "D",
+  "@examsDaysShort": {
+    "description": "Exams day tile unit"
+  },
+  "examsSelectSemantics": "Show {subject}",
+  "@examsSelectSemantics": {
+    "description": "Semantics of an exam card",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "toolsPageTitle": "Tools",
+  "@toolsPageTitle": {
+    "description": "Tools page title"
+  },
+  "toolsTabGpa": "GPA",
+  "@toolsTabGpa": {
+    "description": "Tools tab"
+  },
+  "toolsTabGrant": "Grant",
+  "@toolsTabGrant": {
+    "description": "Tools tab"
+  },
+  "toolsTabEcts": "Credits",
+  "@toolsTabEcts": {
+    "description": "Tools tab"
+  },
+  "toolsTabCommunity": "Community",
+  "@toolsTabCommunity": {
+    "description": "Tools tab"
+  },
+  "toolsGpaForecast": "GPA forecast for the session",
+  "@toolsGpaForecast": {
+    "description": "Tools GPA hero label"
+  },
+  "toolsGpaHintAllFives": "Increased grant · 100%",
+  "@toolsGpaHintAllFives": {
+    "description": "Tools GPA hint"
+  },
+  "toolsGpaHintHalfFives": "Increased grant possible with ≥ 50% fives",
+  "@toolsGpaHintHalfFives": {
+    "description": "Tools GPA hint"
+  },
+  "toolsGpaHintThree": "There is a three — base grant only",
+  "@toolsGpaHintThree": {
+    "description": "Tools GPA hint"
+  },
+  "toolsMarksHint": "Tap a mark to change it",
+  "@toolsMarksHint": {
+    "description": "Tools marks card hint"
+  },
+  "toolsMarksEmpty": "Add your group's schedule — subjects will appear here",
+  "@toolsMarksEmpty": {
+    "description": "Tools marks empty state"
+  },
+  "toolsMarkSemantics": "{subject}: mark {mark}",
+  "@toolsMarkSemantics": {
+    "description": "Semantics of a mark tile",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "mark": {
+        "type": "int"
+      }
+    }
+  },
+  "toolsGrantBase": "Base",
+  "@toolsGrantBase": {
+    "description": "Grant row"
+  },
+  "toolsGrantStudy": "Increased · studies",
+  "@toolsGrantStudy": {
+    "description": "Grant row"
+  },
+  "toolsGrantScience": "Increased · science",
+  "@toolsGrantScience": {
+    "description": "Grant row"
+  },
+  "toolsGrantSocial": "Social",
+  "@toolsGrantSocial": {
+    "description": "Grant row"
+  },
+  "toolsGrantNoApplication": "no application",
+  "@toolsGrantNoApplication": {
+    "description": "Grant row value"
+  },
+  "toolsGrantNotEligible": "not eligible",
+  "@toolsGrantNotEligible": {
+    "description": "Grant row value"
+  },
+  "toolsGrantEvent": "Event participation",
+  "@toolsGrantEvent": {
+    "description": "Grant toggle row"
+  },
+  "toolsGrantEventSub": "1 per semester is required",
+  "@toolsGrantEventSub": {
+    "description": "Grant toggle row subtitle"
+  },
+  "toolsRubles": "{amount} ₽",
+  "@toolsRubles": {
+    "description": "Money value",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "toolsRublesPlus": "+{amount} ₽",
+  "@toolsRublesPlus": {
+    "description": "Positive money value",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "toolsGrantNote": "The increased grant needs: no threes, ≥ 50% fives and 1 event. Now — {done} of 3: {rest}.",
+  "@toolsGrantNote": {
+    "description": "Grant note",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "rest": {
+        "type": "String"
+      }
+    }
+  },
+  "toolsGrantNoteDone": "The increased grant needs: no threes, ≥ 50% fives and 1 event. All conditions are met — apply.",
+  "@toolsGrantNoteDone": {
+    "description": "Grant note when everything is done"
+  },
+  "toolsGrantRestThrees": "fix {subject}",
+  "@toolsGrantRestThrees": {
+    "description": "Grant note remainder",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "toolsGrantRestFives": "more fives needed",
+  "@toolsGrantRestFives": {
+    "description": "Grant note remainder"
+  },
+  "toolsGrantRestEvent": "attend an event",
+  "@toolsGrantRestEvent": {
+    "description": "Grant note remainder"
+  },
+  "toolsEctsEarned": "Earned this year",
+  "@toolsEctsEarned": {
+    "description": "ECTS card label"
+  },
+  "toolsEctsValue": "{earned} / {total} cr.",
+  "@toolsEctsValue": {
+    "description": "ECTS card value",
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "toolsEctsLegend": "{credits} {subject}",
+  "@toolsEctsLegend": {
+    "description": "ECTS legend item",
+    "placeholders": {
+      "credits": {
+        "type": "int"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "pollsOpenCount": "{count} unanswered",
+  "@pollsOpenCount": {
+    "description": "Polls header meta",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pollsAuthorYou": "Your poll",
+  "@pollsAuthorYou": {
+    "description": "Poll card author line for own polls"
+  },
+  "pollsAuthorCommunity": "Community poll",
+  "@pollsAuthorCommunity": {
+    "description": "Poll card author line"
+  },
+  "pollsStatusClosed": "closed",
+  "@pollsStatusClosed": {
+    "description": "Poll status"
+  },
+  "pollsStatusOpen": "open",
+  "@pollsStatusOpen": {
+    "description": "Poll status"
+  },
+  "pollsStatusUntil": "until {date}",
+  "@pollsStatusUntil": {
+    "description": "Poll status with deadline",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pollsYouAnswered": "you answered",
+  "@pollsYouAnswered": {
+    "description": "Poll footer suffix"
+  },
+  "pollsVoteCounted": "Vote counted",
+  "@pollsVoteCounted": {
+    "description": "Toast after voting"
+  },
+  "eventsFilterToday": "Today",
+  "@eventsFilterToday": {
+    "description": "Events filter chip"
+  },
+  "eventsFilterFree": "Free",
+  "@eventsFilterFree": {
+    "description": "Events filter chip"
+  },
+  "eventsFilterGoing": "Going",
+  "@eventsFilterGoing": {
+    "description": "Events filter chip"
+  },
+  "eventsFreeLabel": "free",
+  "@eventsFreeLabel": {
+    "description": "Event price pill"
+  },
+  "eventsGoingCount": "{count, plural, =1{{count} going} other{{count} going}}",
+  "@eventsGoingCount": {
+    "description": "Event attendees count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventsGoingChecked": "Going ✓",
+  "@eventsGoingChecked": {
+    "description": "RSVP pill when going"
+  },
+  "eventsEmptyGoingTitle": "You are not going anywhere yet",
+  "@eventsEmptyGoingTitle": {
+    "description": "Empty card for the Going filter"
+  },
+  "eventsEmptyGoingSub": "Tap “Going” on an event and it will show up here.",
+  "@eventsEmptyGoingSub": {
+    "description": "Empty card subtitle for the Going filter"
+  },
+  "eventsEmptyTodayTitle": "No events today",
+  "@eventsEmptyTodayTitle": {
+    "description": "Empty card for the Today filter"
+  },
+  "eventsToastGoing": "Added to your plans",
+  "@eventsToastGoing": {
+    "description": "Toast after RSVP"
+  },
+  "eventsToastRemoved": "Removed from your plans",
+  "@eventsToastRemoved": {
+    "description": "Toast after RSVP removal"
+  },
+  "lostFoundTabAll": "All",
+  "@lostFoundTabAll": {
+    "description": "Lost and found segment"
+  },
+  "lostFoundTabFoundShort": "Found",
+  "@lostFoundTabFoundShort": {
+    "description": "Lost and found segment and tag"
+  },
+  "lostFoundTabLostShort": "Looking",
+  "@lostFoundTabLostShort": {
+    "description": "Lost and found segment and tag"
+  },
+  "lostFoundSecurityTitle": "Security desk",
+  "@lostFoundSecurityTitle": {
+    "description": "Security desk info card title"
+  },
+  "lostFoundSecuritySub": "Give found documents or valuables to a security staff member",
+  "@lostFoundSecuritySub": {
+    "description": "Security desk info card subtitle"
+  },
+  "lostFoundEmptyAll": "No listings yet",
+  "@lostFoundEmptyAll": {
+    "description": "Empty list for the All segment"
+  },
+  "lostFoundContactAuthor": "Contact {name}",
+  "@lostFoundContactAuthor": {
+    "description": "Send button semantics",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "walletBalanceTitle": "Shuriken balance",
+  "@walletBalanceTitle": {
+    "description": "Wallet balance card overline"
+  },
+  "walletTopUp": "Top up",
+  "@walletTopUp": {
+    "description": "Wallet balance card action"
+  },
+  "walletTopUpSubtitle": "how to earn shurikens",
+  "@walletTopUpSubtitle": {
+    "description": "Top-up sheet subtitle"
+  },
+  "walletIncomeMonth": "Income this month",
+  "@walletIncomeMonth": {
+    "description": "Wallet summary card"
+  },
+  "walletSpendMonth": "Spent this month",
+  "@walletSpendMonth": {
+    "description": "Wallet summary card"
+  },
+  "walletForMonth": "in {month}",
+  "@walletForMonth": {
+    "description": "Wallet summary card subline",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "walletNoIncome": "nothing earned yet",
+  "@walletNoIncome": {
+    "description": "Wallet summary card subline"
+  },
+  "walletOperations": "Operations",
+  "@walletOperations": {
+    "description": "Wallet history overline"
+  },
+  "walletPassActive": "Pass is active",
+  "@walletPassActive": {
+    "description": "Student card row title"
+  },
+  "walletPassExpired": "Pass has expired",
+  "@walletPassExpired": {
+    "description": "Student card row title"
+  },
+  "walletPassMissing": "No pass linked",
+  "@walletPassMissing": {
+    "description": "Student card row title"
+  },
+  "walletPassValidUntil": "Student card · until {date}",
+  "@walletPassValidUntil": {
+    "description": "Student card row subtitle",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "walletPassMissingSub": "Add your student card number in the profile",
+  "@walletPassMissingSub": {
+    "description": "Student card row subtitle"
+  },
+  "walletCardNumber": "No. {number}",
+  "@walletCardNumber": {
+    "description": "Balance card number line",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "collabNotesFilterAll": "All",
+  "@collabNotesFilterAll": {
+    "description": "Notes filter chip"
+  },
+  "collabNotesFilterNew": "New",
+  "@collabNotesFilterNew": {
+    "description": "Notes filter chip"
+  },
+  "collabNotesFilterMine": "Mine",
+  "@collabNotesFilterMine": {
+    "description": "Notes filter chip"
+  },
+  "collabNotesFilterGroup": "Group",
+  "@collabNotesFilterGroup": {
+    "description": "Notes filter chip"
+  },
+  "collabNotesFilterPersonal": "Personal",
+  "@collabNotesFilterPersonal": {
+    "description": "Notes filter chip"
+  },
+  "collabNotesKindLecture": "LEC",
+  "@collabNotesKindLecture": {
+    "description": "Note kind tile"
+  },
+  "collabNotesKindPractice": "PRAC",
+  "@collabNotesKindPractice": {
+    "description": "Note kind tile"
+  },
+  "collabNotesKindLab": "LAB",
+  "@collabNotesKindLab": {
+    "description": "Note kind tile"
+  },
+  "collabNotesKindDoc": "DOC",
+  "@collabNotesKindDoc": {
+    "description": "Note kind tile"
+  },
+  "collabNotesPersonalLabel": "Personal note",
+  "@collabNotesPersonalLabel": {
+    "description": "Note row subject line"
+  },
+  "collabNotesGroupLabel": "Group note",
+  "@collabNotesGroupLabel": {
+    "description": "Note row subject line"
+  },
+  "collabNotesStatsTitle": "{count, plural, =0{You have no notes yet} =1{You maintain {count} note} other{You maintain {count} notes}}",
+  "@collabNotesStatsTitle": {
+    "description": "Notes stats card title",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "collabNotesStatsSub": "Shared notes are visible to the whole group",
+  "@collabNotesStatsSub": {
+    "description": "Notes stats card subtitle"
+  },
+  "collabNotesStatsNew": "{count} new",
+  "@collabNotesStatsNew": {
+    "description": "Notes stats card trailing",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeSearchHint": "Subject, tickets, teacher",
+  "@knowledgeSearchHint": {
+    "description": "Knowledge bank search placeholder"
+  },
+  "knowledgeDownloads": "{count, plural, =1{{count} download} other{{count} downloads}}",
+  "@knowledgeDownloads": {
+    "description": "Material downloads count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeLikes": "♥ {count}",
+  "@knowledgeLikes": {
+    "description": "Material likes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgePriceShurikens": "{count, plural, =1{{count} shuriken} other{{count} shurikens}}",
+  "@knowledgePriceShurikens": {
+    "description": "Material price",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeEmptySearchText": "Nothing found. Ask your group — ",
+  "@knowledgeEmptySearchText": {
+    "description": "Knowledge bank empty search text before the link"
+  },
+  "knowledgeCreateRequest": "create a request",
+  "@knowledgeCreateRequest": {
+    "description": "Knowledge bank empty search link"
+  },
+  "knowledgeRequestShareText": "Looking for materials: {query}. Does anyone have them?",
+  "@knowledgeRequestShareText": {
+    "description": "Shared request text",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "knowledgeDownload": "Download",
+  "@knowledgeDownload": {
+    "description": "Download icon semantics"
+  },
+  "marketWrite": "Message",
+  "@marketWrite": {
+    "description": "Market card action"
+  },
+  "marketManage": "Manage",
+  "@marketManage": {
+    "description": "Market card action for own listings"
+  },
+  "marketFavoriteAdd": "Add to favourites",
+  "@marketFavoriteAdd": {
+    "description": "Heart button semantics"
+  },
+  "marketFavoriteRemove": "Remove from favourites",
+  "@marketFavoriteRemove": {
+    "description": "Heart button semantics"
+  },
+  "loginWelcomeBackAccent": "back",
+  "@loginWelcomeBackAccent": {
+    "description": "Accent word inside the login welcome title"
+  },
+  "authEmailHeaderTitleAccent": "continue",
+  "@authEmailHeaderTitleAccent": {
+    "description": "Accent word inside the email sign-in title"
+  },
+  "authCheckEmailTitleAccent": "email",
+  "@authCheckEmailTitleAccent": {
+    "description": "Accent word inside the check-email title"
+  },
+  "authSignUpTitleAccent": "account",
+  "@authSignUpTitleAccent": {
+    "description": "Accent word inside the sign-up title"
+  },
+  "authPasswordResetTitleAccent": "reset",
+  "@authPasswordResetTitleAccent": {
+    "description": "Accent word inside the password reset title"
+  },
+  "authEmailHeaderSubtitle": "We will send a 6-digit code to your email.",
+  "@authEmailHeaderSubtitle": {
+    "description": "Subtitle of the email sign-in step"
+  },
+  "lessonAttendanceTitle": "Group attendance",
+  "@lessonAttendanceTitle": {
+    "description": "Attendance chart section title on the lesson page"
+  },
+  "lessonAttendanceMeta": "last 5",
+  "@lessonAttendanceMeta": {
+    "description": "Meta label for the attendance chart on the lesson page"
+  },
+  "scheduleActionHide": "Hide from schedule",
+  "@scheduleActionHide": {
+    "description": "Lesson actions sheet row that hides the lesson"
+  },
+  "scheduleTeacherRoom": "office",
+  "@scheduleTeacherRoom": {
+    "description": "Teacher sheet stat label for the office room"
+  },
+  "roomLocalPlanHint": "A personal note on this device. It does not reserve the room or guarantee a free seat.",
+  "roomAvailabilityUnknown": "Current availability is unknown",
+  "roomRemoveSaved": "Remove saved place",
+  "mapFriendsOutdoorHint": "Friends are shown on the campus map. Indoor positions and floors are unknown.",
+  "coworkLocalPlanHint": "A personal plan, not a reservation. The layout is schematic; seat availability and queues are not checked.",
+  "coworkLocalPlan": "Personal plan",
+  "coworkSaveError": "Could not save. Please try again.",
+  "coworkClosed": "Choose a seat between 08:00 and 22:00",
+  "communitiesSave": "Save",
+  "communitiesSaved": "Saved",
+  "communitiesSavedEmpty": "Save a community to see it here",
+  "homeTrendingEmpty": "No discussions yet",
+  "homeFavoritesEmpty": "Choose quick actions in Services",
+  "onboardingFriendsSharingSub": "Share your location with friends",
+  "onboardingGeoSystemSettings": "Location access can be turned off in system settings",
+  "toolsLocalEstimate": "Personal estimate saved on this device. Check scholarship amounts and eligibility with your university.",
+  "toolsNoValue": "not entered",
+  "toolsGpaPersonal": "Your forecast, not an official grade record",
+  "toolsEctsTarget": "Credit target",
+  "personalRecordsNotice": "Personal records on this device. Not official university data.",
+  "attendanceEstimateNotice": "Attendance is estimated from the schedule and your logged absences, not verified presence.",
+  "gradesScholarshipDisclaimer": "GPA reference: 4.75. This does not establish scholarship eligibility.",
+  "profileLocalFieldsNote": "About and Telegram are saved only on this device and are not visible to other users.",
+  "articleSourceChannel": "News source",
+  "deadlineSaved": "Deadline added",
+  "scheduleLinkUnavailable": "A link to this schedule is not available yet. Share text, an image or a calendar instead.",
+  "scheduleReminderLocked": "This reminder is already scheduled. Changing or cancelling it is not available yet.",
+  "settingsAdvanced": "Advanced settings",
+  "settingsLessonReactionsSub": "Reactions next to classes",
+  "settingsWidgetRefreshRequested": "Refresh requested",
+  "identityHandleCheckError": "Could not check the username. Try again",
+  "authPasswordLabel": "Password",
+  "authConfirmPasswordLabel": "Confirm password",
+  "settingsWidgetUnsupported": "The schedule widget is available on Android",
+  "miniAppsReportFailure": "Could not send the report. Try again.",
+  "miniAppsRevRestoreFailure": "Could not restore this version. Try again.",
+  "miniAppsTokensFailure": "Could not update deployment tokens. Try again.",
+  "nfcPassMediaUnavailable": "Background unavailable. Select another file.",
+  "lessonPairOrdinal": "Period {number}",
+  "@lessonPairOrdinal": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonFileKilobytes": "{size} KB",
+  "@lessonFileKilobytes": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonFileMegabytes": "{size} MB",
+  "@lessonFileMegabytes": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleShortCancelled": "CANC",
+  "pollsCreateError": "Could not create the poll. Try again.",
+  "knowledgeUploadError": "Could not upload the material. Try again.",
+  "knowledgeFileError": "Could not read this file. Choose a file up to 50 MB.",
+  "postDetailCommentsLoadError": "Couldn't load comments",
+  "scheduleNoteChecklist": "Checklist",
+  "servicesSectionFirstParty": "Built for campus",
+  "knowledgeSubjectsTitle": "Subjects",
+  "knowledgeSubjectsHint": "Select up to 10 subjects",
+  "knowledgeSubjectsSearch": "Search subjects",
+  "knowledgeSubjectsLoadError": "Could not load subjects",
+  "knowledgeSubjectsEmpty": "No subjects found",
+  "knowledgeSubjectsApply": "Done",
+  "knowledgeSubjectsFilter": "Select subjects",
+  "knowledgeUploadSuccess": "Material published",
+  "exportSelectedDay": "Day",
+  "exportImagePreview": "Image preview",
+  "exportImagePages": "{count} pages · PNG",
+  "@exportImagePages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportImageHint": "The full schedule with dates, teachers and rooms. Longer periods are split into pages.",
+  "exportCalendarSafeHint": "Classes go into a separate calendar. Personal events stay untouched; exporting again updates our entries.",
+  "exportCalendarMobileOnly": "The system calendar is available on mobile. Use an .ics file on this device.",
+  "reminderTimeInvalid": "Choose a future time before the class starts.",
+  "compareDayView": "By day",
+  "compareWeekView": "Week overview",
+  "compareWindowsTitle": "Time to meet",
+  "compareNoWindows": "No shared gaps of at least 30 minutes between classes",
+  "compareWindowsHint": "Includes classes and events. Gaps are shown only between them.",
+  "compareChangeSchedule": "Change",
+  "authGuestUpgradeTitle": "Save your guest account",
+  "authGuestUpgradeSubtitle": "Link an email to keep your schedule, settings and progress.",
+  "authGuestUpgradeSendCode": "Send code",
+  "authGuestUpgradeVerify": "Verify email",
+  "authGuestUpgradePassword": "Set password",
+  "authGuestUpgradeDone": "Account saved",
+  "authGuestUpgradeError": "Could not save the account. Check your details and try again.",
+  "authGuestExitWarning": "Signing out permanently loses access to this guest account. Link an email first to keep your data.",
+  "settingsColorCustom": "Custom color",
+  "settingsColorHex": "HEX",
+  "settingsColorHue": "Hue",
+  "settingsColorSaturation": "Saturation",
+  "settingsColorBrightness": "Brightness",
+  "friendsInviteMessage": "Join me on University Ninja! Install the app to open this invitation and add me as a friend:\n{link}",
+  "@friendsInviteMessage": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleSimultaneousLessons": "{count} simultaneous classes",
+  "@scheduleSimultaneousLessons": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "authAnyEmailHint": "Use any email address you own.",
+  "exportCalendarIncomplete": "Some events have no end time. Choose PNG, text or .ics to keep everything.",
+  "exportUnscheduledEventsHint": "Events without a time remain in images and text. Calendars include only timed or explicitly all-day events.",
+  "exportAllDay": "All day",
+  "exportEntriesCount": "Events: {count}",
+  "@exportEntriesCount": {"placeholders": {"count": {"type": "int"}}},
+  "knowledgePurchaseTitle": "Unlock material?",
+  "knowledgePurchaseBody": "Unlock “{title}” for {price}. Shurikens are charged once; reopening is free.",
+  "@knowledgePurchaseBody": {"placeholders": {"title": {"type": "String"}, "price": {"type": "String"}}},
+  "knowledgePurchaseConfirm": "Unlock and open",
+  "knowledgePurchaseFailed": "Could not unlock the material. Check your balance and try again.",
+  "knowledgePurchasePriceChanged": "The price changed. Open the material again to confirm the new price.",
+  "knowledgePurchaseInsufficient": "Not enough shurikens"
 }

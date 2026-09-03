@@ -25,10 +25,10 @@ class WalletHistoryTab extends StatelessWidget {
       final l10n = context.l10n;
       return Padding(
         padding: const EdgeInsets.fromLTRB(
-          0,
-          32,
-          0,
-          0,
+          AppSpacing.zero,
+          AppSpacing.xxl,
+          AppSpacing.zero,
+          AppSpacing.zero,
         ),
         child: NinjaEmptyState(
           icon: const AppLineIconWidget(AppLineIcon.clock),

@@ -30,7 +30,7 @@ class NinjaQrScanTopBar extends StatelessWidget {
               maxLines: 1,
               overflow: .ellipsis,
               textAlign: .center,
-              style: NinjaText.headline.copyWith(color: Colors.white),
+              style: AppText.headline.copyWith(color: Colors.white),
             ),
           ),
           ValueListenableBuilder<MobileScannerState>(

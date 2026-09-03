@@ -1,5 +1,7 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:flutter/widgets.dart';
 
 enum AppTagTone {
   accent,
@@ -22,30 +24,31 @@ class AppTag extends StatelessWidget {
 
   final String label;
   final AppTagTone tone;
-
   final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colors;
-    final (:bg, :fg) = _resolve(colors);
+    final (:bg, :fg) = _resolve(context.colors);
     final leading = this.leading;
 
     return Container(
-      height: 24,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.badgeInset,
+        vertical: AppSpacing.fine,
+      ),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (leading != null) ...[leading, const SizedBox(width: 4)],
-          Text(
-            label,
-            style: AppText.chip
-                .copyWith(color: fg, fontSize: 12, fontWeight: FontWeight.w600),
+          if (leading != null) ...[
+            leading,
+            const SizedBox(width: AppSpacing.xsm),
+          ],
+          Flexible(
+            child: Text(label, style: AppText.badge.copyWith(color: fg)),
           ),
         ],
       ),
@@ -53,43 +56,31 @@ class AppTag extends StatelessWidget {
   }
 
   ({Color bg, Color fg}) _resolve(AppColors c) => switch (tone) {
-        AppTagTone.accent => (
-            bg: c.primary.withValues(alpha: 0.14),
-            fg: c.primary
-          ),
-        AppTagTone.live => (
-            bg: c.success.withValues(alpha: 0.16),
-            fg: c.success
-          ),
-        AppTagTone.warn => (
-            bg: c.warning.withValues(alpha: 0.16),
-            fg: c.warning
-          ),
-        AppTagTone.danger => (bg: c.error.withValues(alpha: 0.16), fg: c.error),
-        AppTagTone.info => (bg: c.info.withValues(alpha: 0.16), fg: c.info),
-        AppTagTone.pink => (
-            bg: c.secondary.withValues(alpha: 0.16),
-            fg: c.secondary
-          ),
-        AppTagTone.mute => (bg: c.surfaceHigh, fg: c.deactive),
-        AppTagTone.solid => (bg: c.primary, fg: c.onAccent),
+        AppTagTone.accent => (bg: c.tint, fg: c.accent),
+        AppTagTone.live => (bg: c.lectureTint, fg: c.lecture),
+        AppTagTone.warn => (bg: c.warnTint, fg: c.warn),
+        AppTagTone.danger => (bg: c.examTint, fg: c.exam),
+        AppTagTone.info => (bg: c.practiceTint, fg: c.practice),
+        AppTagTone.pink => (bg: c.labTint, fg: c.lab),
+        AppTagTone.mute => (bg: c.surface2, fg: c.muted),
+        AppTagTone.solid => (bg: c.accent, fg: c.onAccent),
       };
 }
 
 class AppLiveDot extends StatelessWidget {
-  const AppLiveDot({super.key, this.size = 6});
+  const AppLiveDot({super.key, this.size = 6, this.color});
 
   final double size;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: Theme.of(context).colors.success,
+        color: color ?? context.colors.lecture,
         shape: BoxShape.circle,
       ),
+      child: SizedBox.square(dimension: size),
     );
   }
 }

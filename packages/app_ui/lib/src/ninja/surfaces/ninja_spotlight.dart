@@ -1,9 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:app_ui/src/animations/ninja_motion.dart';
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
+import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/ninja/widgets/ninja_button.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
 import 'package:flutter/widgets.dart';
 
 enum NinjaSpotlightShape { rounded, circle }
@@ -15,7 +16,7 @@ class NinjaSpotlight extends StatelessWidget {
     required this.hole,
     required this.pulse,
     this.shape = NinjaSpotlightShape.rounded,
-    this.radius = 22,
+    this.radius = AppRadius.row,
     this.animateHole = true,
     super.key,
   });
@@ -29,13 +30,12 @@ class NinjaSpotlight extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final media = MediaQuery.maybeOf(context);
     final reduceMotion = (media?.disableAnimations ?? false) ||
         (media?.accessibleNavigation ?? false);
-    final scrim = colors.isDark
-        ? colors.canvas.withValues(alpha: 0.84)
-        : colors.ink.withValues(alpha: 0.66);
+    final scrim =
+        colors.isDark ? colors.canvas.withValues(alpha: 0.9) : colors.scrim;
 
     Widget paint(Rect? rect) => AnimatedBuilder(
           animation: pulse,
@@ -46,7 +46,7 @@ class NinjaSpotlight extends StatelessWidget {
               shape: shape,
               radius: radius,
               scrim: scrim,
-              ring: colors.brand,
+              ring: colors.accent,
               pulse: reduceMotion ? 0 : pulse.value,
             ),
           ),
@@ -179,7 +179,7 @@ class NinjaCoachCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final progress = this.progress;
     final skipLabel = this.skipLabel;
     final backLabel = this.backLabel;
@@ -187,24 +187,29 @@ class NinjaCoachCard extends StatelessWidget {
     final card = DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.fieldGap,
+          AppSpacing.xl,
+          AppSpacing.fieldGap,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (progress != null || (skipLabel != null && onSkip != null))
               Padding(
-                padding: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: AppSpacing.gap),
                 child: Row(
                   children: [
                     if (progress != null)
                       Text(
                         progress,
-                        style: NinjaText.microLabel.copyWith(
-                          color: colors.brandInk,
+                        style: AppText.overline.copyWith(
+                          color: colors.accent,
                         ),
                       ),
                     const Spacer(),
@@ -219,14 +224,14 @@ class NinjaCoachCard extends StatelessWidget {
               ),
             Text(
               title,
-              style: NinjaText.headline.copyWith(color: colors.ink),
+              style: AppText.headline.copyWith(color: colors.ink),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: AppSpacing.xsm),
             Text(
               body,
-              style: NinjaText.body.copyWith(color: colors.mutedDark),
+              style: AppText.subtext.copyWith(color: colors.muted),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Row(
               children: [
                 if (backLabel != null && onBack != null) ...[
@@ -235,7 +240,7 @@ class NinjaCoachCard extends StatelessWidget {
                     size: NinjaButtonSize.small,
                     onPressed: onBack,
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.gap),
                 ],
                 Expanded(
                   child: NinjaButton.primary(

@@ -8,7 +8,7 @@ class _EditBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     final activeId = scheduleSelectedId(state.selectedSchedule);
     final groups = [
       for (final entry in state.groupsSchedule)
@@ -24,36 +24,36 @@ class _EditBody extends StatelessWidget {
     ];
 
     return ListView(
-      padding: const EdgeInsets.only(top: 8, bottom: 32),
+      padding: const EdgeInsets.only(bottom: 32),
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             0,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             16,
           ),
           child: Text(
             l10n.editSchedulesHint,
-            style: NinjaText.subtext.copyWith(color: colors.muted),
+            style: AppText.subtext.copyWith(color: colors.muted),
           ),
         ),
         if (state.selectedSchedule case final selected?) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               0,
-              NinjaMetrics.screenPadding,
+              AppSpacing.screen,
               10,
             ),
             child: Text(
               l10n.scheduleHubPrimarySection,
-              style: NinjaText.headline.copyWith(color: colors.ink),
+              style: AppText.headline.copyWith(color: colors.ink),
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: PrimaryScheduleCard(
               schedule: selected,

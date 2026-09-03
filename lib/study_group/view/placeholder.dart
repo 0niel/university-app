@@ -10,9 +10,9 @@ class _Placeholder extends StatelessWidget {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         24,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         32,
       ),
       child: child.animateEmptyState(),

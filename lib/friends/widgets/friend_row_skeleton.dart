@@ -7,22 +7,22 @@ class _FriendRowSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: context.ninja.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          color: context.colors.surface,
+          borderRadius: .circular(AppRadius.card),
         ),
         child: const Padding(
           padding: .all(16),
           child: Row(
             children: [
               NinjaSkeleton.avatar(),
-              SizedBox(width: 14),
+              SizedBox(width: AppSpacing.sectionGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: .start,
@@ -33,7 +33,7 @@ class _FriendRowSkeleton extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 10),
+              SizedBox(width: AppSpacing.gap),
               Column(
                 crossAxisAlignment: .end,
                 spacing: 5,
@@ -41,9 +41,13 @@ class _FriendRowSkeleton extends StatelessWidget {
                   NinjaSkeleton(
                     width: 54,
                     height: 24,
-                    radius: NinjaRadius.pill,
+                    radius: AppRadius.full,
                   ),
-                  NinjaSkeleton(width: 34, height: 11, radius: 5),
+                  NinjaSkeleton(
+                    width: 34,
+                    height: 11,
+                    radius: AppRadius.skeletonThin,
+                  ),
                 ],
               ),
             ],

@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/widgets/app_icon_tile.dart';
+import 'package:flutter/widgets.dart';
 
 class AppSettingsIcon extends StatelessWidget {
   const AppSettingsIcon({
     required this.icon,
     required this.color,
     super.key,
-    this.size = 32,
+    this.size = 36,
   });
 
   final IconData icon;
@@ -14,14 +16,11 @@ class AppSettingsIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(size * 0.3),
-      ),
-      child: Icon(icon, size: size * 0.55, color: color),
+    return AppIconTile(
+      size: size,
+      radius: size / 3,
+      background: context.colors.tintOf(color),
+      child: Icon(icon, size: size * .5, color: color),
     );
   }
 }

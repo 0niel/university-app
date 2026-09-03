@@ -1,4 +1,6 @@
-import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/widgets/app_filter_chip.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:flutter/material.dart';
 
 class AppChipRow<T> extends StatelessWidget {
@@ -8,32 +10,42 @@ class AppChipRow<T> extends StatelessWidget {
     super.key,
     this.onChanged,
     this.padding = EdgeInsets.zero,
+    this.spacing = AppSpacing.xsm,
+    this.controller,
   });
 
   final List<AppChipRowItem<T>> items;
   final T value;
   final ValueChanged<T>? onChanged;
   final EdgeInsetsGeometry padding;
+  final double spacing;
+  final ScrollController? controller;
 
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        padding: padding,
-        child: Row(
-          children: [
-            for (final (index, item) in items.indexed) ...[
-              _buildChipRowButton(
-                context: context,
-                item: item,
-                selected: item.value == value,
-                onTap: () => onChanged?.call(item.value),
-              ),
-              if (index < items.length - 1) const SizedBox(width: 6),
-            ],
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
+      padding: padding,
+      controller: controller,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final (index, item) in items.indexed) ...[
+            if (index > 0) SizedBox(width: spacing),
+            AppChip.filter(
+              label: item.label,
+              leadingIcon: item.icon,
+              count: item.count,
+              selected: item.value == value,
+              onTap:
+                  onChanged == null ? null : () => onChanged?.call(item.value),
+            ),
           ],
-        ),
-      );
+        ],
+      ),
+    );
+  }
 }
 
 class AppChipRowItem<T> {
@@ -41,48 +53,11 @@ class AppChipRowItem<T> {
     required this.value,
     required this.label,
     this.icon,
+    this.count,
   });
 
   final T value;
   final String label;
-  final IconData? icon;
-}
-
-Widget _buildChipRowButton<T>({
-  required BuildContext context,
-  required AppChipRowItem<T> item,
-  required bool selected,
-  required VoidCallback onTap,
-}) {
-  final colors = context.colors;
-  return Material(
-    color: selected ? colors.primary : colors.surface,
-    borderRadius: BorderRadius.circular(AppRadius.full),
-    clipBehavior: Clip.antiAlias,
-    child: AppPressable(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (item.icon != null) ...[
-              Icon(
-                item.icon,
-                size: AppIconSize.xs,
-                color: selected ? colors.onAccent : colors.deactive,
-              ),
-              const SizedBox(width: 6),
-            ],
-            Text(
-              item.label,
-              style: AppText.button.copyWith(
-                color: selected ? colors.onAccent : colors.deactive,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
+  final AppLineIcon? icon;
+  final int? count;
 }

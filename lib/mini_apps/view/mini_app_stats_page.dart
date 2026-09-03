@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mini_apps_repository/mini_apps_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/mini_apps/cubit/mini_app_stats_cubit.dart';
+import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_scaffold.dart';
 
 part 'mini_app_stats_view.dart';
 part 'range_selector.dart';

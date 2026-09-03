@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
@@ -13,24 +14,27 @@ import 'package:friends_repository/friends_repository.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart'
     show SettingsToggleRow;
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_details_page/material_badge.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/sheets.dart';
 import 'package:rtu_mirea_app/schedule/view/teacher_profile_page.dart';
 import 'package:rtu_mirea_app/schedule/widgets/custom_schedule_selector.dart';
+import 'package:rtu_mirea_app/schedule/widgets/schedule_metrics.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:rtu_mirea_app/search/widgets/global_search_button.dart';
 import 'package:schedule_repository/schedule_repository.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 part 'schedule_details_page/helpers.dart';
 part 'schedule_details_page/lesson_details_body.dart';
 part 'schedule_details_page/lesson_details_loader.dart';
-part 'schedule_details_page/lesson_note_actions.dart';
 part 'schedule_details_page/lesson_reaction_queue.dart';
 part 'schedule_details_page/lesson_runtime.dart';
 part 'schedule_details_page/lesson_share_actions.dart';
@@ -52,9 +56,6 @@ part 'schedule_details_page/reactions_section.dart';
 part 'schedule_details_page/reactions_skeleton.dart';
 part 'schedule_details_page/review_preview.dart';
 part 'schedule_details_page/empty_review_prompt.dart';
-part 'schedule_details_page/lesson_note_editor_sheet.dart';
-part 'schedule_details_page/hashtag_text_controller.dart';
-part 'schedule_details_page/note_tool_button.dart';
 part 'schedule_details_page/round_icon_button.dart';
 part 'schedule_details_page/section_title.dart';
 part 'schedule_details_page/subject_top_bar.dart';
@@ -63,6 +64,7 @@ part 'schedule_details_page/lesson_progress_card.dart';
 part 'schedule_details_page/lesson_action_grid.dart';
 part 'schedule_details_page/teacher_card.dart';
 part 'schedule_details_page/teacher_row.dart';
+part 'schedule_details_page/group_note_card.dart';
 part 'schedule_details_page/groups_card.dart';
 part 'schedule_details_page/peers_card.dart';
 part 'schedule_details_page/upload_material_sheet.dart';
@@ -85,11 +87,7 @@ class ScheduleDetailsPage extends StatefulWidget {
 }
 
 class _ScheduleDetailsPageState extends State<ScheduleDetailsPage>
-    with
-        _LessonDetailsLoader,
-        _LessonReactionQueue,
-        _LessonNoteActions,
-        _LessonShareActions {
+    with _LessonDetailsLoader, _LessonReactionQueue, _LessonShareActions {
   @override
   void initState() {
     super.initState();
@@ -132,10 +130,27 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage>
     if (saved == true && mounted) await _loadDetails();
   }
 
+  Future<void> _uploadMaterial() async {
+    final uploaded = await showAppSheet<bool>(
+      context,
+      title: context.l10n.lessonDetailsMaterialToClass,
+      subtitle: widget.lesson.subject,
+      child: RepositoryProvider<ScheduleRepository>.value(
+        value: context.read(),
+        child: LessonMaterialUploadSheet(
+          lesson: widget.lesson,
+          selectedDate: widget.selectedDate,
+          lessonNumber: _lessonNumber,
+        ),
+      ),
+    );
+    if (uploaded == true && mounted) await _loadDetails();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.ninja.canvas,
+      backgroundColor: context.colors.canvas,
       body: _LessonDetailsBody(
         lesson: widget.lesson,
         selectedDate: widget.selectedDate,
@@ -147,14 +162,28 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage>
         teacherProfile: _teacherProfile,
         showGroups: _streamGroupNames.isNotEmpty,
         onBack: () => Navigator.of(context).maybePop(),
-        onShare: _shareLesson,
+        onShare: () => showScheduleShareSheet(
+          context,
+          lesson: widget.lesson,
+          day: widget.selectedDate,
+        ),
         onMore: _showAddToCustomScheduleModal,
-        onNote: _openNoteSheet,
+        onNote: () => showLessonNoteSheet(
+          context,
+          lesson: widget.lesson,
+          day: widget.selectedDate,
+        ),
         onRoute: _openRoute,
         onReactionTap: _toggleReaction,
         onReviewTap: () => unawaited(_showReviewSheet()),
         onRetryDetails: () => unawaited(_loadDetails()),
         onOpenMaterials: () => unawaited(_openMaterials()),
+        onUploadMaterial: () => unawaited(_uploadMaterial()),
+        onRemind: () => showLessonRemindSheet(
+          context,
+          lesson: widget.lesson,
+          day: widget.selectedDate,
+        ),
       ).animatePageEntrance(),
     );
   }

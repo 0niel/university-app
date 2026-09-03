@@ -9,15 +9,15 @@ class NinjaGroupEmptyHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const .fromLTRB(
-      NinjaMetrics.screenPadding,
+      AppSpacing.screen,
       12,
-      NinjaMetrics.screenPadding,
+      AppSpacing.screen,
       12,
     ),
     child: Text(
       text,
-      style: NinjaText.helper.copyWith(
-        color: context.ninja.muted,
+      style: AppText.caption.copyWith(
+        color: context.colors.muted,
         height: 1.45,
       ),
     ),

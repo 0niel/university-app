@@ -14,7 +14,7 @@ class InviteCircleAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return NinjaIconButton(
       icon: AppLineIconWidget(
         icon,

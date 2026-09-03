@@ -2,142 +2,153 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../kit_harness.dart';
+
 void main() {
-  final colors = NinjaColors.light();
-
-  Widget wrap(Widget child) => MaterialApp(
-        theme: NinjaTheme.light(),
-        home: Scaffold(body: Center(child: child)),
-      );
-
   group('NinjaAvatar', () {
-    testWidgets('scales the initials with the three design sizes', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(
-          const Column(
-            children: [
-              NinjaAvatar(initials: 'АС', size: 64, tone: NinjaAvatarTone.ink),
-              NinjaAvatar(initials: 'КП'),
-              NinjaAvatar(
-                initials: 'ЕС',
-                size: 32,
-                tone: NinjaAvatarTone.indigo,
-              ),
-            ],
-          ),
-        ),
-      );
-
-      expect(tester.widget<Text>(find.text('АС')).style?.fontSize, 20);
-      expect(tester.widget<Text>(find.text('КП')).style?.fontSize, 14);
-      expect(tester.widget<Text>(find.text('ЕС')).style?.fontSize, 11);
-      expect(tester.widget<Text>(find.text('АС')).style?.color, colors.onInk);
-      expect(
-        tester.widget<Text>(find.text('КП')).style?.color,
-        colors.ink,
-      );
-      expect(tester.widget<Text>(find.text('ЕС')).style?.color, colors.onBrand);
-      expect(tester.getSize(find.text('АС').first).height, isNonZero);
+    test('font size scales with diameter', () {
+      expect(NinjaAvatar.fontSizeFor(24), 9);
+      expect(NinjaAvatar.fontSizeFor(32), 11);
+      expect(NinjaAvatar.fontSizeFor(40), 13);
+      expect(NinjaAvatar.fontSizeFor(56), 18);
+      expect(NinjaAvatar.fontSizeFor(72), 22);
+      expect(NinjaAvatar.fontSizeFor(88), 28);
+      expect(NinjaAvatar.weightFor(32), FontWeight.w800);
+      expect(NinjaAvatar.weightFor(40), FontWeight.w700);
     });
 
-    testWidgets("6a's 48px header avatar prints 700 15 initials", (
-      tester,
-    ) async {
+    testWidgets('default tone is tint on accent', (tester) async {
       await tester.pumpWidget(
-        wrap(
+        wrapKit(const NinjaAvatar(initials: 'ОК', size: 40)),
+      );
+
+      final circle = kitDecorationOf(tester, NinjaAvatar);
+      expect(circle.color, kitColors.tint);
+      expect(circle.shape, BoxShape.circle);
+      final style = kitStyleOf(tester, 'ОК');
+      expect(style?.fontSize, 13);
+      expect(style?.fontWeight, FontWeight.w700);
+      expect(style?.color, kitColors.accent);
+    });
+
+    testWidgets('lesson tones map to their tints', (tester) async {
+      await tester.pumpWidget(
+        wrapKit(
           const NinjaAvatar(
-            initials: 'АС',
-            size: 48,
-            tone: NinjaAvatarTone.ink,
+            initials: 'АК',
+            size: 32,
+            tone: NinjaAvatarTone.lab,
           ),
         ),
       );
 
-      final text = tester.widget<Text>(find.text('АС'));
-      expect(text.style?.fontSize, 15);
-      expect(text.style?.fontWeight, FontWeight.w700);
-      expect(text.style?.color, colors.onInk);
+      expect(kitDecorationOf(tester, NinjaAvatar).color, kitColors.labTint);
+      expect(kitStyleOf(tester, 'АК')?.color, kitColors.lab);
     });
 
-    testWidgets('fills follow the tone', (tester) async {
-      await tester.pumpWidget(
-        wrap(const NinjaAvatar(initials: 'ЕС', tone: NinjaAvatarTone.indigo)),
-      );
-
-      final container = tester.widget<Container>(
-        find
-            .descendant(
-              of: find.byType(NinjaAvatar),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
-      final decoration = container.decoration! as BoxDecoration;
-      expect(decoration.color, colors.brand);
-      expect(decoration.shape, BoxShape.circle);
-    });
-
-    testWidgets('surface tone uses a deterministic soft accent', (
-      tester,
-    ) async {
-      await tester.pumpWidget(wrap(const NinjaAvatar(initials: 'КП')));
-
-      final container = tester.widget<Container>(
-        find
-            .descendant(
-              of: find.byType(NinjaAvatar),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
-      final decoration = container.decoration! as BoxDecoration;
-      final accent = colors.subjectColor('КП');
-      expect(decoration.color, accent.withValues(alpha: 0.14));
-      expect(tester.widget<Text>(find.text('КП')).style?.color, colors.ink);
-    });
-
-    testWidgets('presence dot is 12px green inside a canvas ring', (
+    testWidgets('level badge is a 20px accent circle ringed by surface', (
       tester,
     ) async {
       await tester.pumpWidget(
-        wrap(const NinjaAvatar(initials: 'ТБ', online: true)),
+        wrapKit(const NinjaAvatar(initials: 'ОК', size: 56, level: '7')),
       );
 
-      final dots = tester.widgetList<Container>(find.byType(Container)).where(
-            (container) =>
-                (container.decoration as BoxDecoration?)?.color == colors.green,
-          );
-      expect(dots, hasLength(1));
-      expect(dots.first.constraints?.maxWidth, 12);
+      final badge = tester.widget<Container>(
+        find.ancestor(of: find.text('7'), matching: find.byType(Container)),
+      );
+      expect(badge.constraints?.maxWidth, 20);
+      final decoration = badge.decoration! as BoxDecoration;
+      expect(decoration.color, kitColors.accent);
+      expect(decoration.border, Border.all(color: kitColors.surface, width: 2));
+      expect(kitStyleOf(tester, '7')?.fontSize, 10);
+    });
+
+    testWidgets('online dot is a 12px lecture circle', (tester) async {
+      await tester.pumpWidget(
+        wrapKit(const NinjaAvatar(initials: 'МР', online: true)),
+      );
+
+      final dot = tester.widget<Container>(
+        find.byWidgetPredicate(
+          (widget) => widget is Container && widget.constraints?.maxWidth == 12,
+        ),
+      );
+      expect((dot.decoration! as BoxDecoration).color, kitColors.lecture);
     });
   });
 
   group('NinjaAvatarGroup', () {
-    testWidgets('overlaps members and appends the +N chip', (tester) async {
+    testWidgets('overlaps 32px avatars by 10 and ends with +N', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        wrap(
+        wrapKit(
           const NinjaAvatarGroup(
+            overflowCount: 5,
             items: [
-              NinjaAvatarGroupItem('АС'),
-              NinjaAvatarGroupItem('КП', tone: NinjaAvatarTone.indigo),
+              NinjaAvatarGroupItem('АК', tone: NinjaAvatarTone.lab),
+              NinjaAvatarGroupItem('МР', tone: NinjaAvatarTone.lecture),
+              NinjaAvatarGroupItem('ДС', tone: NinjaAvatarTone.exam),
             ],
-            overflowCount: 3,
           ),
         ),
       );
 
-      expect(find.text('АС'), findsOneWidget);
-      expect(find.text('КП'), findsOneWidget);
-      expect(find.text('+3'), findsOneWidget);
+      expect(find.text('+5'), findsOneWidget);
+      expect(kitStyleOf(tester, '+5')?.color, kitColors.muted);
+      expect(tester.getSize(find.byType(NinjaAvatarGroup)).width, 114);
+      expect(tester.getSize(find.byType(NinjaAvatarGroup)).height, 36);
+    });
+  });
 
-      expect(tester.getSize(find.byType(NinjaAvatarGroup)).width, 103);
+  group('AppAvatar', () {
+    test('derives initials from the name', () {
+      expect(AppAvatar.initialsOf('Олег Кузнецов'), 'ОК');
+      expect(AppAvatar.initialsOf('  '), '?');
+      expect(AppAvatar.initialsStyle(24).fontSize, 9);
+      expect(AppAvatar.initialsStyle(88).fontSize, 28);
     });
 
-    testWidgets('renders nothing when empty', (tester) async {
-      await tester.pumpWidget(wrap(const NinjaAvatarGroup(items: [])));
-      expect(find.byType(NinjaAvatar), findsNothing);
+    testWidgets('renders initials on a tinted circle with badges', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapKit(
+          AppAvatar(
+            name: 'Олег Кузнецов',
+            size: 56,
+            color: kitColors.accent,
+            levelBadge: 7,
+            online: true,
+          ),
+        ),
+      );
+
+      expect(find.text('ОК'), findsOneWidget);
+      expect(kitDecorationOf(tester, AppAvatar).color, kitColors.tint);
+      expect(find.text('7'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) => widget is Container && widget.constraints?.maxWidth == 12,
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('stack overlaps and appends the extra count', (tester) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const AppAvatarStack(
+            names: ['Анна К', 'Мария Р', 'Денис С'],
+            size: 32,
+            extra: 5,
+          ),
+        ),
+      );
+
+      expect(find.text('+5'), findsOneWidget);
+      expect(tester.getSize(find.byType(AppAvatarStack)).width, 102);
+      expect(find.byType(AppAvatar), findsNWidgets(3));
     });
   });
 }

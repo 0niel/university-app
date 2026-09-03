@@ -17,17 +17,17 @@ class AppCommunityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final iconTile = Container(
       width: 44,
       height: 44,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: colors.brandTint,
-        borderRadius: .circular(NinjaRadius.button),
+        color: colors.tint,
+        borderRadius: .circular(AppRadius.tile),
       ),
       child: IconTheme.merge(
-        data: IconThemeData(color: colors.brand, size: 20),
+        data: IconThemeData(color: colors.accent, size: AppIconSize.md),
         child: icon,
       ),
     );
@@ -40,7 +40,7 @@ class AppCommunityCard extends StatelessWidget {
           title,
           maxLines: 1,
           overflow: .ellipsis,
-          style: NinjaText.headline.copyWith(
+          style: AppText.headline.copyWith(
             color: colors.ink,
             fontWeight: .w600,
           ),
@@ -49,7 +49,7 @@ class AppCommunityCard extends StatelessWidget {
           subtitle,
           maxLines: 2,
           overflow: .ellipsis,
-          style: NinjaText.subtext.copyWith(color: colors.muted),
+          style: AppText.subtext.copyWith(color: colors.muted),
         ),
       ],
     );
@@ -61,7 +61,7 @@ class AppCommunityCard extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: .circular(NinjaRadius.card),
+            borderRadius: .circular(AppRadius.card),
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 72),
@@ -70,13 +70,13 @@ class AppCommunityCard extends StatelessWidget {
               child: Row(
                 children: [
                   iconTile,
-                  const SizedBox(width: 14),
+                  const SizedBox(width: AppSpacing.sectionGap),
                   Expanded(child: labels),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.gap),
                   AppLineIconWidget(
                     .chevronR,
-                    size: 16,
-                    color: colors.chevron,
+                    size: AppIconSize.sm,
+                    color: colors.muted2,
                   ),
                 ],
               ),

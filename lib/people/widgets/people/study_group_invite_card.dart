@@ -16,13 +16,13 @@ class StudyGroupInviteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Container(
       padding: const .all(14),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -35,8 +35,8 @@ class StudyGroupInviteCard extends StatelessWidget {
                 height: 44,
                 alignment: .center,
                 decoration: BoxDecoration(
-                  color: colors.surfaceAlt,
-                  borderRadius: .circular(14),
+                  color: colors.surface2,
+                  borderRadius: .circular(AppRadius.tile),
                 ),
                 child: Text(
                   invite.groupEmoji,
@@ -50,7 +50,7 @@ class StudyGroupInviteCard extends StatelessWidget {
                     Text(
                       invite.groupName,
                       overflow: .ellipsis,
-                      style: NinjaText.body.copyWith(color: colors.ink),
+                      style: AppText.body.copyWith(color: colors.ink),
                     ),
                     Text(
                       [
@@ -59,7 +59,7 @@ class StudyGroupInviteCard extends StatelessWidget {
                         l10n.studyGroupMembersCount(invite.memberCount),
                       ].join(' · '),
                       overflow: .ellipsis,
-                      style: NinjaText.helper.copyWith(
+                      style: AppText.caption.copyWith(
                         color: colors.muted,
                       ),
                     ),

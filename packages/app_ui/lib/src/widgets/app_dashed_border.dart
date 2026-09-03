@@ -1,33 +1,19 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-/// {@template app_dashed_border}
-/// Paints a dashed rounded-rectangle border around [child].
-///
-/// Used for "dropzone"-style affordances (file pickers, both-free slots) where
-/// the dashed outline signals an empty / actionable area, per the design.
-/// {@endtemplate}
 class AppDashedBorder extends StatelessWidget {
-  /// {@macro app_dashed_border}
   const AppDashedBorder({
     required this.color,
     required this.radius,
     required this.child,
-    this.strokeWidth = 2,
     super.key,
+    this.strokeWidth = 2,
   });
 
-  /// Colour of the dashes.
   final Color color;
-
-  /// Corner radius of the border (and the clip applied to [child]).
   final double radius;
-
-  /// Thickness of the dashes.
   final double strokeWidth;
-
-  /// Content drawn inside the border.
   final Widget child;
 
   @override

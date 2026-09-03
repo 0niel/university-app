@@ -29,6 +29,8 @@ const _config = UniversityConfig(
 );
 
 void main() {
+  setUp(ToastManager.debugReset);
+  tearDown(ToastManager.debugReset);
   late _MockUserRepository userRepository;
 
   setUp(() {
@@ -65,7 +67,7 @@ void main() {
         of: find.byKey(const Key('loginPage_emailInput')),
         matching: find.byType(EditableText),
       ),
-      'student@mirea.ru',
+      'student@gmail.com',
     );
     await tester.enterText(
       find.descendant(
@@ -96,6 +98,7 @@ void main() {
 
     expect(find.text('Неверный email или пароль.'), findsOneWidget);
     expect(find.text('Invalid login credentials'), findsNothing);
+    await tester.pump(const Duration(seconds: 4));
   });
 
   testWidgets('transport failures use the localized generic message', (
@@ -108,5 +111,6 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('backend transport details'), findsNothing);
+    await tester.pump(const Duration(seconds: 4));
   });
 }

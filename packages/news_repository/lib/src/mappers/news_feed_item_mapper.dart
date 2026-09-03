@@ -4,11 +4,6 @@ import 'package:news_repository/src/models/news_feed_item.dart';
 
 nb.NewsBlock mapNewsFeedItem(NewsFeedItem item, int position) {
   final blocks = item.newsBlocks;
-  if (_isVideoOnly(blocks)) {
-    final url = _extractUrl(blocks, const ['videoUrl', 'video_url']);
-    if (url != null) return nb.VideoBlock(videoUrl: url);
-  }
-
   final imageUrl = _extractUrl(blocks, const [
     'imageUrl',
     'image_url',
@@ -67,25 +62,22 @@ nb.NewsBlock _buildPost(NewsFeedItem item, int position, String? imageUrl) {
   };
 }
 
-bool _isVideoOnly(List<Map<String, dynamic>> blocks) {
-  final types = blocks.map((block) => block['type']);
-  final hasVideo = types.any(
-    (type) => type == '__video__' || type == '__video_introduction__',
-  );
-  final hasText = types.any(
-    (type) =>
-        type == '__text_paragraph__' ||
-        type == '__text_lead_paragraph__' ||
-        type == '__html__',
-  );
-  return hasVideo && !hasText;
-}
-
 String? _extractUrl(List<Map<String, dynamic>> blocks, List<String> keys) {
   for (final block in blocks) {
     for (final key in keys) {
       final value = block[key];
-      if (value is String && value.trim().isNotEmpty) return value;
+      if (value is! String) continue;
+      final uri = Uri.tryParse(value.trim());
+      if (uri != null &&
+          uri.scheme == 'https' &&
+          uri.host.isNotEmpty &&
+          uri.userInfo.isEmpty &&
+          !RegExp(
+            r'\.(mp4|webm|mov)$',
+            caseSensitive: false,
+          ).hasMatch(uri.path)) {
+        return uri.toString();
+      }
     }
   }
   return null;

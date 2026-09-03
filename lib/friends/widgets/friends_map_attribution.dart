@@ -17,14 +17,14 @@ class FriendsMapAttribution extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return ValueListenableBuilder<double>(
       valueListenable: panelExtent,
       builder: (context, extent, child) {
         final height = MediaQuery.heightOf(context);
         final bottom = (height * extent + 10).clamp(110.0, double.infinity);
         return Positioned(
-          left: NinjaMetrics.screenPadding,
+          left: AppSpacing.screen,
           bottom: bottom,
           child: child!,
         );
@@ -37,19 +37,19 @@ class FriendsMapAttribution extends StatelessWidget {
         pressedScale: 0.98,
         child: ConstrainedBox(
           constraints: const BoxConstraints(
-            minHeight: NinjaMetrics.minTouchTarget,
+            minHeight: AppControlSize.iconButton,
           ),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: colors.surface.withValues(alpha: 0.92),
-              borderRadius: .circular(NinjaRadius.pill),
+              borderRadius: .circular(AppRadius.full),
             ),
             child: Padding(
-              padding: const .symmetric(horizontal: 12, vertical: 7),
+              padding: const .symmetric(horizontal: AppSpacing.md, vertical: 7),
               child: Center(
                 child: Text(
                   AppMapTiles.attribution,
-                  style: NinjaText.helper.copyWith(color: colors.mutedDark),
+                  style: AppText.caption.copyWith(color: colors.muted),
                 ),
               ),
             ),

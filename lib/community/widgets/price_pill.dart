@@ -18,7 +18,7 @@ class PricePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final freeBackground = Color.alphaBlend(
       colors.successTint,
       colors.canvas,
@@ -27,15 +27,15 @@ class PricePill extends StatelessWidget {
       (true, _) => (colors.surface, colors.muted),
       (_, true) => (
         freeBackground,
-        colors.contrastForeground(freeBackground),
+        colors.ink,
       ),
-      _ => (colors.surfaceAlt, colors.ink),
+      _ => (colors.surface2, colors.ink),
     };
     return Container(
       padding: const .symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: .circular(NinjaRadius.pill),
+        borderRadius: .circular(AppRadius.full),
       ),
       child: Wrap(
         spacing: 4,
@@ -52,8 +52,8 @@ class PricePill extends StatelessWidget {
                 : (text ?? shurikens?.toString() ?? '—'),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: NinjaText.tabular(
-              NinjaText.badge.copyWith(color: fg),
+            style: AppText.tabular(
+              AppText.badge.copyWith(color: fg),
             ),
           ),
         ],

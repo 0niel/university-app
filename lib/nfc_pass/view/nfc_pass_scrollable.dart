@@ -9,10 +9,10 @@ class _NfcPassScrollable extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
-        NinjaMetrics.screenPadding,
-        NinjaMetrics.screenPadding,
-        NinjaMetrics.screenPadding + MediaQuery.paddingOf(context).bottom,
+        AppSpacing.screen,
+        AppSpacing.screen,
+        AppSpacing.screen,
+        AppSpacing.screen + MediaQuery.paddingOf(context).bottom,
       ),
       child: child,
     );

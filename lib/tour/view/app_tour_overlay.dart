@@ -9,6 +9,7 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/tour/app_tour_anchors.dart';
 import 'package:rtu_mirea_app/tour/app_tour_controller.dart';
 import 'package:rtu_mirea_app/tour/model/app_tour_step.dart';
+import 'package:rtu_mirea_app/tour/view/tour_coach_card.dart';
 
 class AppTourOverlay extends StatefulWidget {
   const AppTourOverlay({
@@ -277,7 +278,7 @@ class _AppTourLayerState extends State<_AppTourLayer>
 
     final card = Listener(
       behavior: HitTestBehavior.opaque,
-      child: NinjaCoachCard(
+      child: TourCoachCard(
         title: widget.step.title,
         body: widget.step.body,
         progress: l10n.tourProgress(widget.index + 1, widget.total),
@@ -288,8 +289,8 @@ class _AppTourLayerState extends State<_AppTourLayer>
         skipLabel: widget.isLast ? null : l10n.tourSkip,
         onSkip: widget.isLast ? null : widget.onSkip,
         arrow: floating
-            ? NinjaCoachArrow.none
-            : (below ? NinjaCoachArrow.up : NinjaCoachArrow.down),
+            ? TourCoachArrow.none
+            : (below ? TourCoachArrow.up : TourCoachArrow.down),
         arrowOffset: rect == null
             ? 0
             : clampDouble(rect.center.dx - left, 24, width - 24),

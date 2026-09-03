@@ -17,14 +17,14 @@ class NinjaGroupTelegramCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final onDelete = this.onDelete;
     return Padding(
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Row(
           children: [
@@ -34,7 +34,7 @@ class NinjaGroupTelegramCard extends StatelessWidget {
                 subtitle: link.safeUri?.path ?? link.url,
                 showDivider: false,
                 trailingLabel: context.l10n.groupSpaceOpen,
-                trailingColor: colors.brandInk,
+                trailingColor: colors.accent,
                 showChevron: false,
                 onTap: onOpen,
               ),

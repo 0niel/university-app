@@ -1,3 +1,4 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:news_blocks/news_blocks.dart';
@@ -57,7 +58,7 @@ void main() {
 
       await tester.pumpApp(widget);
 
-      await tester.tap(find.byType(IconButton));
+      await tester.tap(find.byType(AppIconButton));
 
       expect(actions, equals([action]));
     });

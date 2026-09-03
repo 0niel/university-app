@@ -4,27 +4,27 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lost_and_found_repository/lost_and_found_repository.dart';
-import 'package:rtu_mirea_app/config/university_config.dart';
+import 'package:rtu_mirea_app/community/widgets/accent_header_action.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
-import 'package:rtu_mirea_app/lost_and_found/config/lost_found_categories.dart';
 import 'package:rtu_mirea_app/lost_and_found/cubit/lost_found_cubit.dart';
+import 'package:rtu_mirea_app/lost_and_found/models/models.dart';
+import 'package:rtu_mirea_app/lost_and_found/utils/utils.dart';
 import 'package:rtu_mirea_app/lost_and_found/widgets/widgets.dart';
 
 class LostFoundView extends StatefulWidget {
-  const LostFoundView({super.key});
+  const LostFoundView({
+    super.key,
+    this.contactLauncher = const UrlLostFoundContactLauncher(),
+  });
+
+  final LostFoundContactLauncher contactLauncher;
 
   @override
   State<LostFoundView> createState() => _LostFoundViewState();
 }
 
 class _LostFoundViewState extends State<LostFoundView> {
-  final _searchController = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
+  LostFoundTab _tab = LostFoundTab.all;
 
   Future<void> _report() {
     final cubit = context.read<LostFoundCubit>();
@@ -45,22 +45,42 @@ class _LostFoundViewState extends State<LostFoundView> {
       context,
       child: BlocProvider.value(
         value: cubit,
-        child: LostFoundItemSheet(item: item),
+        child: LostFoundItemSheet(
+          item: item,
+          contactLauncher: widget.contactLauncher,
+        ),
       ),
     );
+  }
+
+  Future<void> _contact(LostFoundItem item) async {
+    final telegram = item.telegramContactInfo ?? '';
+    final phone = item.phoneNumberContactInfo ?? '';
+    if (item.isMine || (telegram.isEmpty && phone.isEmpty)) {
+      return _openItem(item);
+    }
+    final opened = telegram.isNotEmpty
+        ? await widget.contactLauncher.openTelegram(telegram)
+        : await widget.contactLauncher(phone);
+    if (!opened && mounted) {
+      showNinjaToast(
+        context,
+        showCheck: false,
+        message: context.l10n.lostFoundContactOpenError,
+      );
+    }
   }
 
   void _onStateChanged(BuildContext context, LostFoundState state) {
     final message = state.status == .failure
         ? context.l10n.lostFoundLoadError
         : context.l10n.lostFoundCleanupWarning;
-    NinjaToastHost.maybeOf(
-      context,
-    )?.show(NinjaToastData(message: message, showCheck: false));
+    showNinjaToast(context, showCheck: false, message: message);
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final l10n = context.l10n;
     return BlocConsumer<LostFoundCubit, LostFoundState>(
       listenWhen: (previous, current) =>
@@ -69,132 +89,81 @@ class _LostFoundViewState extends State<LostFoundView> {
               current.items.isNotEmpty) ||
           previous.cleanupWarningRevision != current.cleanupWarningRevision,
       listener: _onStateChanged,
-      builder: (context, state) => Scaffold(
-        backgroundColor: context.ninja.canvas,
-        body: SafeArea(
-          bottom: false,
-          child: LostFoundBody(
-            state: state,
-            onItemTap: (item) => unawaited(_openItem(item)),
-            onReport: () => unawaited(_report()),
-            header: _header(context, state),
-            categoryFilter: LostFoundCategoryPicker(
-              keys: [
-                'all',
-                ...UniversityConfig.current.lostFoundCategoryKeys,
-              ],
-              value: state.category,
-              labelBuilder: (key) => key == 'all'
-                  ? l10n.communitiesAll
-                  : LostFoundCategories.label(l10n, key),
-              onChanged: context.read<LostFoundCubit>().categoryChanged,
-            ),
-          ),
-        ).animatePageEntrance(),
-      ),
-    );
-  }
-
-  Widget _header(BuildContext context, LostFoundState state) {
-    final colors = context.ninja;
-    final l10n = context.l10n;
-    final coldLoading = state.status == .loading && state.items.isEmpty;
-    final coldFailure = state.status == .failure && state.items.isEmpty;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
-        AppSpacing.md,
-        NinjaMetrics.screenPadding,
-        AppSpacing.lg,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.lostFoundTitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: NinjaText.display.copyWith(color: colors.ink),
-                    ),
-                    const SizedBox(height: 5),
-                    if (coldLoading)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 3, bottom: 3),
-                        child: NinjaSkeleton(
-                          width: 120,
-                          height: 11,
-                          radius: 5,
-                        ),
-                      )
-                    else
-                      Text(
-                        l10n.lostFoundItemsCount(state.items.length),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: NinjaText.subtext.copyWith(
-                          color: colors.mutedDark,
-                        ),
+      builder: (context, state) {
+        final cubit = context.read<LostFoundCubit>();
+        return Scaffold(
+          backgroundColor: colors.canvas,
+          body: RefreshIndicator(
+            color: colors.accent,
+            backgroundColor: colors.surface,
+            onRefresh: cubit.load,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: AppInnerHeader(
+                    title: l10n.lostFoundTitle,
+                    onBack: () => Navigator.of(context).maybePop(),
+                    backSemanticsLabel: l10n.back,
+                    actions: [
+                      accentHeaderAction(
+                        onTap: state.isCreating
+                            ? null
+                            : () => unawaited(_report()),
+                        semanticsLabel: l10n.lostFoundReport,
                       ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              NinjaIconButton(
-                icon: AppLineIconWidget(
-                  AppLineIcon.refresh,
-                  size: 20,
-                  color: colors.ink,
-                ),
-                tooltip: l10n.retry,
-                onPressed: state.status == .loading
-                    ? null
-                    : () => unawaited(context.read<LostFoundCubit>().load()),
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          NinjaInput(
-            controller: _searchController,
-            leadingIcon: AppLineIconWidget(
-              AppLineIcon.search,
-              size: 17,
-              color: colors.muted,
-            ),
-            placeholder: l10n.lostFoundSearchHint,
-            textInputAction: TextInputAction.search,
-            onChanged: context.read<LostFoundCubit>().queryChanged,
-          ),
-          if (!coldFailure) ...[
-            const SizedBox(height: AppSpacing.md),
-            NinjaSegmented<LostFoundItemStatus>(
-              expanded: true,
-              value: state.tab,
-              segments: [
-                NinjaSegment(
-                  value: .found,
-                  label: l10n.lostFoundTabFound(state.countFor(.found)),
-                ),
-                NinjaSegment(
-                  value: .lost,
-                  label: l10n.lostFoundTabLost(state.countFor(.lost)),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.screen,
+                    AppSpacing.screen,
+                    AppSpacing.screen,
+                    AppSpacing.xxlg,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AppSegmentedControl<LostFoundTab>(
+                          value: _tab,
+                          onCanvas: true,
+                          onChanged: (value) => setState(() => _tab = value),
+                          options: [
+                            AppSegmentedOption(
+                              value: LostFoundTab.all,
+                              label: l10n.lostFoundTabAll,
+                            ),
+                            AppSegmentedOption(
+                              value: LostFoundTab.found,
+                              label: l10n.lostFoundTabFoundShort,
+                            ),
+                            AppSegmentedOption(
+                              value: LostFoundTab.lost,
+                              label: l10n.lostFoundTabLostShort,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.sectionGap),
+                        LostFoundBody(
+                          state: state,
+                          tab: _tab,
+                          onItemTap: (item) => unawaited(_openItem(item)),
+                          onContact: (item) => unawaited(_contact(item)),
+                          onRetry: () => unawaited(cubit.load()),
+                        ),
+                        const SizedBox(height: AppSpacing.sectionGap),
+                        const LostFoundSecurityCard(),
+                      ],
+                    ),
+                  ),
                 ),
               ],
-              onChanged: context.read<LostFoundCubit>().tabChanged,
             ),
-            const SizedBox(height: AppSpacing.md),
-            LostFoundReportCta(
-              accented: !coldLoading,
-              onTap: state.isCreating ? null : () => unawaited(_report()),
-            ),
-          ],
-        ],
-      ),
+          ),
+        );
+      },
     );
   }
 }

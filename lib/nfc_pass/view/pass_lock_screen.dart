@@ -13,53 +13,53 @@ class _PassLockScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final icon = switch (kind) {
       .face => AppLineIcon.face,
       .fingerprint || .iris || .none => AppLineIcon.fingerprint,
     };
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(NinjaMetrics.screenPadding),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.screen),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
+            borderRadius: BorderRadius.circular(AppRadius.card),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.screen),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
                   child: Container(
-                    width: NinjaMetrics.minTouchTarget,
-                    height: NinjaMetrics.minTouchTarget,
+                    width: AppControlSize.iconButton,
+                    height: AppControlSize.iconButton,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: colors.brandTint,
+                      color: colors.tint,
                       shape: BoxShape.circle,
                     ),
                     child: AppLineIconWidget(
                       icon,
                       size: 21,
-                      color: colors.brandInk,
+                      color: colors.accent,
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 Text(
                   l10n.passLockTitle,
                   textAlign: TextAlign.center,
-                  style: NinjaText.headline.copyWith(color: colors.ink),
+                  style: AppText.headline.copyWith(color: colors.ink),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.passLockSubtitle,
                   textAlign: TextAlign.center,
-                  style: NinjaText.subtext.copyWith(
+                  style: AppText.subtext.copyWith(
                     height: 1.5,
                     color: colors.muted,
                   ),

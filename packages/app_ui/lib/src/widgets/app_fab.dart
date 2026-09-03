@@ -1,4 +1,9 @@
-import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/widgets/app_press_state.dart';
+import 'package:app_ui/src/widgets/app_tooltip.dart';
 import 'package:flutter/material.dart';
 
 class AppFab extends StatelessWidget {
@@ -7,6 +12,8 @@ class AppFab extends StatelessWidget {
     required this.onPressed,
     super.key,
     this.tooltip,
+    this.backgroundColor,
+    this.foregroundColor,
   }) : label = null;
 
   const AppFab.extended({
@@ -15,50 +22,72 @@ class AppFab extends StatelessWidget {
     required this.onPressed,
     super.key,
     this.tooltip,
+    this.backgroundColor,
+    this.foregroundColor,
   });
 
   final AppLineIcon icon;
   final String? label;
   final VoidCallback? onPressed;
   final String? tooltip;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final enabled = onPressed != null;
+    final background =
+        backgroundColor ?? (enabled ? colors.accent : colors.canvas);
+    final foreground =
+        foregroundColor ?? (enabled ? colors.onAccent : colors.muted2);
     final labelText = label;
-    if (labelText == null) {
-      return AppPressable(
-        pressedScale: 0.95,
-        onTap: onPressed,
-        child: FloatingActionButton(
-          heroTag: null,
-          onPressed: onPressed,
-          tooltip: tooltip,
-          backgroundColor: colors.primary,
-          foregroundColor: colors.onAccent,
-          elevation: 0,
-          highlightElevation: 0,
-          child: AppLineIconWidget(icon, color: colors.onAccent),
-        ),
-      );
-    }
-    return AppPressable(
-      pressedScale: 0.95,
+    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+        MediaQuery.accessibleNavigationOf(context);
+
+    Widget fab = AppPressState(
       onTap: onPressed,
-      child: FloatingActionButton.extended(
-        heroTag: null,
-        onPressed: onPressed,
-        tooltip: tooltip,
-        backgroundColor: colors.primary,
-        foregroundColor: colors.onAccent,
-        elevation: 0,
-        highlightElevation: 0,
-        icon: AppLineIconWidget(icon, size: 20, color: colors.onAccent),
-        label: Text(
-          labelText,
-          style: AppText.button.copyWith(color: colors.onAccent),
+      pressedScale: 0.95,
+      semanticsLabel: tooltip ?? labelText,
+      semanticsButton: true,
+      builder: (context, {required pressed}) => AnimatedContainer(
+        duration:
+            reduceMotion ? Duration.zero : const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        height: AppControlSize.fab,
+        width: labelText == null ? AppControlSize.fab : null,
+        padding: labelText == null
+            ? null
+            : const EdgeInsets.symmetric(horizontal: AppSpacing.contentGap),
+        decoration: BoxDecoration(
+          color: pressed ? background.withValues(alpha: .82) : background,
+          borderRadius: BorderRadius.circular(AppRadius.full),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AppLineIconWidget(
+              icon,
+              size: labelText == null ? 24 : 20,
+              color: foreground,
+              strokeWidth: 2.4,
+            ),
+            if (labelText != null) ...[
+              const SizedBox(width: AppSpacing.gap),
+              Text(
+                labelText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.buttonLarge.copyWith(color: foreground),
+              ),
+            ],
+          ],
         ),
       ),
     );
+
+    if (tooltip != null) fab = AppTooltipAnchor(message: tooltip!, child: fab);
+    return fab;
   }
 }

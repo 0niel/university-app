@@ -18,13 +18,13 @@ class NinjaFindFriendsGroupAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       child: FriendsPillButton(
         label: context.l10n.friendsAddWholeGroup(count),
         tone: .neutral,
         expanded: true,
         loading: loading,
-        onTap: onTap,
+        onTap: count == 0 || loading ? null : onTap,
       ),
     );
   }

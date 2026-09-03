@@ -1,5 +1,9 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_divider.dart';
+import 'package:app_ui/src/widgets/app_toggle.dart';
+import 'package:flutter/widgets.dart';
 
 class AppSettingsToggleRow extends StatelessWidget {
   const AppSettingsToggleRow({
@@ -24,16 +28,14 @@ class AppSettingsToggleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final subtitleText = subtitle;
+    final leadingWidget = leading;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (!isFirst)
-          Divider(
-            height: 0.5,
-            thickness: 0.5,
-            indent: leading != null ? 56 : 16,
-            color: colors.divider,
-          ),
+          AppDivider(indent: leadingWidget != null ? 64 : AppSpacing.lg),
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
@@ -41,37 +43,34 @@ class AppSettingsToggleRow extends StatelessWidget {
           ),
           child: Row(
             children: [
-              if (leading != null) ...[
-                leading!,
-                const SizedBox(width: 12),
+              if (leadingWidget != null) ...[
+                leadingWidget,
+                const SizedBox(width: AppSpacing.md),
               ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       title,
-                      style: AppText.body.copyWith(color: colors.active),
+                      style: AppText.body.copyWith(color: colors.ink),
                     ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
+                    if (subtitleText != null) ...[
+                      const SizedBox(height: AppSpacing.xxs),
                       Text(
-                        subtitle!,
-                        style: AppText.captionSmall.copyWith(
-                          color: colors.deactive,
-                        ),
+                        subtitleText,
+                        style: AppText.caption.copyWith(color: colors.muted),
                       ),
                     ],
                   ],
                 ),
               ),
-              Switch(
+              const SizedBox(width: AppSpacing.md),
+              AppSwitch(
                 value: value,
                 onChanged: onChanged,
-                activeThumbColor: Colors.white,
-                activeTrackColor: colors.primary,
-                inactiveTrackColor: colors.surfaceLow,
-                inactiveThumbColor: Colors.white,
+                semanticsLabel: title,
               ),
             ],
           ),

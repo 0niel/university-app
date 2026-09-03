@@ -14,12 +14,12 @@ class LostFoundReportCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final enabled = onTap != null;
     final pastel = accented && enabled;
-    final title = pastel ? colors.onAccentSoft : colors.ink;
-    final support = pastel ? colors.onAccentSoftMuted : colors.muted;
+    final title = pastel ? colors.ink : colors.ink;
+    final support = pastel ? colors.muted : colors.muted;
     return AppPressable(
       onTap: onTap,
       enabled: enabled,
@@ -28,25 +28,25 @@ class LostFoundReportCta extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: pastel ? colors.accentSoft : colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          color: pastel ? colors.tint : colors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Row(
           children: [
             Container(
-              width: NinjaMetrics.minTouchTarget,
-              height: NinjaMetrics.minTouchTarget,
+              width: AppControlSize.iconButton,
+              height: AppControlSize.iconButton,
               decoration: BoxDecoration(
                 color: pastel
-                    ? colors.onAccentSoft.withValues(alpha: .12)
-                    : colors.surfaceAlt,
-                borderRadius: BorderRadius.circular(NinjaRadius.control),
+                    ? colors.ink.withValues(alpha: .12)
+                    : colors.surface2,
+                borderRadius: BorderRadius.circular(AppRadius.field),
               ),
               alignment: Alignment.center,
               child: AppLineIconWidget(
                 AppLineIcon.plus,
                 size: 20,
-                color: pastel ? colors.onAccentSoft : colors.muted,
+                color: pastel ? colors.ink : colors.muted,
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -58,14 +58,14 @@ class LostFoundReportCta extends StatelessWidget {
                     l10n.lostFoundReportTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: NinjaText.headline.copyWith(color: title),
+                    style: AppText.headline.copyWith(color: title),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     l10n.lostFoundReportSub,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: NinjaText.helper.copyWith(color: support),
+                    style: AppText.captionSmall.copyWith(color: support),
                   ),
                 ],
               ),
@@ -74,7 +74,7 @@ class LostFoundReportCta extends StatelessWidget {
             AppLineIconWidget(
               AppLineIcon.chevronR,
               size: 16,
-              color: pastel ? colors.onAccentSoftMuted : colors.chevron,
+              color: pastel ? colors.muted : colors.muted2,
             ),
           ],
         ),

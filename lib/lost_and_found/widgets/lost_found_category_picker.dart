@@ -10,7 +10,7 @@ class LostFoundCategoryPicker extends StatelessWidget {
     required this.onChanged,
     this.labelBuilder,
     this.padding = const EdgeInsets.symmetric(
-      horizontal: NinjaMetrics.screenPadding,
+      horizontal: AppSpacing.screen,
     ),
     super.key,
   });

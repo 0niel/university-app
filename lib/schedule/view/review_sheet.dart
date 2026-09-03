@@ -57,7 +57,7 @@ class _ReviewSheetState extends State<_ReviewSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Column(
       mainAxisSize: .min,
       crossAxisAlignment: .start,
@@ -77,36 +77,39 @@ class _ReviewSheetState extends State<_ReviewSheet> {
           value: _usefulness,
           onChanged: (v) => setState(() => _usefulness = v),
         ),
-        const SizedBox(height: 12),
-        NinjaInput.multiline(
+        const SizedBox(height: AppSpacing.md),
+        AppInputField.multiline(
           controller: _body,
           minLines: 2,
           maxLines: 4,
           placeholder: context.l10n.teacherProfileReviewHint,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: AppSpacing.gap),
         AppPressable(
           onTap: () => setState(() => _anonymous = !_anonymous),
           semanticsLabel: context.l10n.teacherProfileAnonymous,
           semanticsToggled: _anonymous,
           child: Container(
             constraints: const BoxConstraints(
-              minHeight: NinjaMetrics.minTouchTarget,
+              minHeight: AppControlSize.touchTarget,
             ),
-            padding: const .symmetric(horizontal: 14, vertical: 6),
+            padding: const .symmetric(
+              horizontal: AppSpacing.sectionGap,
+              vertical: AppSpacing.xsm,
+            ),
             decoration: BoxDecoration(
-              color: colors.surfaceAlt,
-              borderRadius: .circular(NinjaRadius.card),
+              color: colors.surface2,
+              borderRadius: .circular(AppRadius.card),
             ),
             child: Row(
               children: [
                 Expanded(
                   child: Text(
                     context.l10n.teacherProfileAnonymous,
-                    style: NinjaText.body.copyWith(color: colors.ink),
+                    style: AppText.body.copyWith(color: colors.ink),
                   ),
                 ),
-                NinjaSwitch(
+                AppSwitch(
                   value: _anonymous,
                   onChanged: (value) => setState(() => _anonymous = value),
                 ),
@@ -114,8 +117,8 @@ class _ReviewSheetState extends State<_ReviewSheet> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        NinjaButton.primary(
+        const SizedBox(height: AppSpacing.lg),
+        AppButton.primary(
           label: _saving
               ? context.l10n.teacherProfileSaving
               : context.l10n.teacherProfilePublish,

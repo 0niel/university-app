@@ -12,7 +12,12 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 LatLng? friendPoint(Friend friend) {
   final lat = friend.latitude;
   final lng = friend.longitude;
-  if (lat == null || lng == null || !lat.isFinite || !lng.isFinite) {
+  if (lat == null ||
+      lng == null ||
+      !lat.isFinite ||
+      !lng.isFinite ||
+      lat.abs() > 90 ||
+      lng.abs() > 180) {
     return null;
   }
   return LatLng(lat, lng);

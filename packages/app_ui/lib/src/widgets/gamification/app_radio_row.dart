@@ -1,5 +1,9 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:flutter/widgets.dart';
 
 class AppRadioRow extends StatelessWidget {
   const AppRadioRow({
@@ -10,6 +14,7 @@ class AppRadioRow extends StatelessWidget {
     this.emoji,
     this.leading,
     this.isFirst = false,
+    this.borderRadius = const BorderRadius.all(Radius.circular(AppRadius.card)),
     this.onTap,
   });
 
@@ -19,24 +24,27 @@ class AppRadioRow extends StatelessWidget {
   final String? emoji;
   final Widget? leading;
   final bool isFirst;
+  final BorderRadiusGeometry borderRadius;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final subtitle = this.subtitle;
-    final leading = this.leading;
-    final emoji = this.emoji;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
-        MediaQuery.accessibleNavigationOf(context);
+    final colors = context.colors;
+    final subtitleText = subtitle;
+    final leadingWidget = leading;
+    final emojiText = emoji;
+    final reduceMotion =
+        (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
+            (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
     final duration =
         reduceMotion ? Duration.zero : const Duration(milliseconds: 180);
+
     return Semantics(
       button: true,
       inMutuallyExclusiveGroup: true,
       selected: selected,
       enabled: onTap != null,
-      label: subtitle == null ? title : '$title, $subtitle',
+      label: subtitleText == null ? title : '$title, $subtitleText',
       excludeSemantics: true,
       onTap: onTap,
       child: AppPressable(
@@ -46,27 +54,30 @@ class AppRadioRow extends StatelessWidget {
           duration: duration,
           curve: Curves.easeOutCubic,
           constraints: const BoxConstraints(minHeight: 58),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
           decoration: BoxDecoration(
-            color: selected ? colors.brandTint : Colors.transparent,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
+            color: selected ? colors.tint : colors.surface,
+            borderRadius: borderRadius,
           ),
           child: Row(
             children: [
-              if (leading != null) ...[
-                leading,
-                const SizedBox(width: 14),
-              ] else if (emoji != null) ...[
+              if (leadingWidget != null) ...[
+                leadingWidget,
+                const SizedBox(width: AppSpacing.sectionGap),
+              ] else if (emojiText != null) ...[
                 SizedBox.square(
                   dimension: 38,
                   child: Center(
                     child: Text(
-                      emoji,
+                      emojiText,
                       style: const TextStyle(fontSize: 20, height: 1),
                     ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: AppSpacing.sectionGap),
               ],
               Expanded(
                 child: Column(
@@ -75,23 +86,21 @@ class AppRadioRow extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: NinjaText.body.copyWith(
-                        color: colors.ink,
-                        fontWeight:
-                            selected ? FontWeight.w800 : FontWeight.w600,
-                      ),
+                      style: selected
+                          ? AppText.bodyBold.copyWith(color: colors.ink)
+                          : AppText.bodyStrong.copyWith(color: colors.ink),
                     ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
+                    if (subtitleText != null) ...[
+                      const SizedBox(height: AppSpacing.xxs),
                       Text(
-                        subtitle,
-                        style: NinjaText.helper.copyWith(color: colors.muted),
+                        subtitleText,
+                        style: AppText.subtext.copyWith(color: colors.muted),
                       ),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               AnimatedContainer(
                 duration: duration,
                 curve: Curves.easeOutCubic,
@@ -99,11 +108,16 @@ class AppRadioRow extends StatelessWidget {
                 height: 24,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: selected ? colors.brand : colors.surfaceAlt,
+                  color: selected ? colors.accent : colors.surface2,
                   shape: BoxShape.circle,
                 ),
                 child: selected
-                    ? NinjaCheckMark(size: 13, color: colors.onBrand)
+                    ? AppLineIconWidget(
+                        AppLineIcon.check,
+                        size: AppIconSize.badge,
+                        color: colors.onAccent,
+                        strokeWidth: 2.6,
+                      )
                     : null,
               ),
             ],

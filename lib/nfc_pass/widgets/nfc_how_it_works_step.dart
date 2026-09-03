@@ -13,20 +13,20 @@ class NfcHowItWorksStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: colors.brandTint,
+                color: colors.tint,
                 shape: BoxShape.circle,
               ),
               child: SizedBox.square(
@@ -34,23 +34,23 @@ class NfcHowItWorksStep extends StatelessWidget {
                 child: Center(
                   child: Text(
                     '$index',
-                    style: NinjaText.tabular(
-                      NinjaText.body.copyWith(
+                    style: AppText.tabular(
+                      AppText.body.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: colors.brandInk,
+                        color: colors.accent,
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
                 text,
-                style: NinjaText.body.copyWith(
+                style: AppText.body.copyWith(
                   height: 1.45,
-                  color: colors.mutedDark,
+                  color: colors.muted,
                 ),
               ),
             ),

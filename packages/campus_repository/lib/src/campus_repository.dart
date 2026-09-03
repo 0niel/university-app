@@ -456,7 +456,7 @@ class CampusRepository {
 
   Future<List<StudyMaterial>> getPublicMaterials({int limit = 50}) async {
     final res = await _supabase.rpc<Object?>(
-      'list_public_materials_v1',
+      'list_public_materials_v2',
       params: {'p_organization_id': _organizationId, 'p_limit': limit},
     );
     return _mapRows(res, StudyMaterial.fromJson);
@@ -470,9 +470,25 @@ class CampusRepository {
     return _mapRows(res, MaterialAuthor.fromJson);
   }
 
+  Future<List<String>> searchMaterialSubjects(String query) async {
+    final response = await _supabase.rpc<Object?>(
+      'search_material_subjects',
+      params: {
+        'p_organization_id': _organizationId,
+        'p_query': query.trim(),
+        'p_limit': 40,
+      },
+    );
+    if (response is! List || response.any((value) => value is! String)) {
+      throw const FormatException('Material subjects must be a JSON array');
+    }
+    return response.cast<String>();
+  }
+
   Future<void> createPublicMaterial({
     required String title,
     required String subjectName,
+    List<String> subjectNames = const [],
     String materialType = 'note',
     int price = 0,
     int pages = 0,
@@ -481,12 +497,34 @@ class CampusRepository {
     Uint8List? fileBytes,
     String? mimeType,
   }) async {
+    final trimmedTitle = title.trim();
+    final subjects = <String>[
+      ...{
+        for (final value in subjectNames.isEmpty ? [subjectName] : subjectNames)
+          if (value.trim().isNotEmpty) value.trim(),
+      },
+    ];
+    if (trimmedTitle.isEmpty || trimmedTitle.length > 200) {
+      throw ArgumentError(
+        'A material title of up to 200 characters is required',
+      );
+    }
+    if (subjects.isEmpty ||
+        subjects.length > 10 ||
+        subjects.any((value) => value.length > 300)) {
+      throw ArgumentError('Choose up to 10 valid subjects');
+    }
     if (fileBytes == null ||
         fileBytes.isEmpty ||
+        fileBytes.length > 50 * 1024 * 1024 ||
         fileName?.trim().isEmpty != false) {
       throw ArgumentError('A material file is required');
     }
-    final filePath = 'bank/${_randomMaterialObjectKey()}';
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null || userId.isEmpty) {
+      throw const AuthException('Sign in before uploading a material');
+    }
+    final filePath = '$userId/bank/${_randomMaterialObjectKey()}';
     await _supabase.storage
         .from('lesson-materials')
         .uploadBinary(
@@ -497,12 +535,12 @@ class CampusRepository {
           ),
         );
     try {
-      await _supabase.rpc<Object?>(
-        'create_public_material',
+      final response = await _supabase.rpc<Object?>(
+        'create_public_material_v2',
         params: {
           'p_organization_id': _organizationId,
-          'p_title': title,
-          'p_subject_name': subjectName,
+          'p_title': trimmedTitle,
+          'p_subject_names': subjects,
           'p_material_type': materialType,
           'p_price': price,
           'p_pages': pages,
@@ -513,8 +551,9 @@ class CampusRepository {
           'p_file_size': fileBytes.length,
         },
       );
-    } on Exception catch (error, stackTrace) {
-      if (filePath.isNotEmpty) await _removeMaterialFile(filePath);
+      _parseUuid(response, 'create_public_material_v2');
+    } on Object catch (error, stackTrace) {
+      if (error is PostgrestException) await _removeMaterialFile(filePath);
       Error.throwWithStackTrace(error, stackTrace);
     }
   }
@@ -522,7 +561,7 @@ class CampusRepository {
   Future<void> _removeMaterialFile(String filePath) async {
     try {
       await _supabase.storage.from('lesson-materials').remove([filePath]);
-    } on Exception catch (error, stackTrace) {
+    } on Object catch (error, stackTrace) {
       log(
         'Failed to remove an orphaned material file',
         error: error,
@@ -549,6 +588,9 @@ class CampusRepository {
     if (access is! Map) {
       throw const FormatException('Material access returned an invalid result');
     }
+    if (!MaterialAccess.fromJson(access.cast()).canDownload) {
+      throw const MaterialPurchaseException(.unavailable);
+    }
     final filePath = access['filePath'];
     if (filePath is! String || filePath.isEmpty) {
       throw const FormatException('Material access returned an invalid path');
@@ -556,6 +598,42 @@ class CampusRepository {
     return _supabase.storage
         .from('lesson-materials')
         .createSignedUrl(filePath, 60 * 10);
+  }
+
+  Future<MaterialAccess> getPublicMaterialAccess(StudyMaterial material) async {
+    final response = await _supabase.rpc<Object?>(
+      'access_public_material',
+      params: {'p_id': material.id},
+    );
+    if (response is! Map) {
+      throw const FormatException('Invalid material access response');
+    }
+    return MaterialAccess.fromJson(response.cast());
+  }
+
+  Future<void> purchasePublicMaterial(
+    StudyMaterial material, {
+    required int expectedPrice,
+  }) async {
+    if (expectedPrice <= 0 || expectedPrice > 1000000) {
+      throw ArgumentError.value(expectedPrice, 'expectedPrice');
+    }
+    try {
+      final response = await _supabase.rpc<Object?>(
+        'purchase_public_material',
+        params: {'p_id': material.id, 'p_expected_price': expectedPrice},
+      );
+      if (response is! Map ||
+          !MaterialAccess.fromJson(response.cast()).canDownload) {
+        throw const FormatException('Material purchase was not confirmed');
+      }
+    } on PostgrestException catch (error) {
+      throw MaterialPurchaseException(switch (error.message) {
+        'MATERIAL_INSUFFICIENT_BALANCE' => .insufficientBalance,
+        'MATERIAL_PRICE_CHANGED' => .priceChanged,
+        _ => .unavailable,
+      });
+    }
   }
 
   // ── Teacher profile ────────────────────────────────────────────────────────

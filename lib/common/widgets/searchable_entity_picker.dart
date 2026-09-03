@@ -107,7 +107,7 @@ class _SearchableEntityPickerState<T> extends State<SearchableEntityPicker<T>> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
 
     return Column(
       mainAxisSize: .min,
@@ -143,9 +143,9 @@ class _SearchableEntityPickerState<T> extends State<SearchableEntityPicker<T>> {
                         !_showManual)
                       NinjaEmptyState.screen(
                         title: l10n.pickerNothingFound,
-                        icon: NinjaGlyphIcon(
-                          NinjaGlyph.search,
-                          color: colors.brandInk,
+                        icon: AppLineIconWidget(
+                          AppLineIcon.search,
+                          color: colors.accent,
                         ),
                       ).animateEmptyState(),
                   ],

@@ -2,142 +2,170 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../kit_harness.dart';
+
 void main() {
-  final colors = NinjaColors.light();
-
-  Widget wrap(Widget child) => MaterialApp(
-        theme: NinjaTheme.light(),
-        home: Scaffold(body: Center(child: child)),
+  BoxDecoration decorationOf(WidgetTester tester, Type type) => kitDecoration(
+        tester,
+        find
+            .descendant(
+              of: find.byType(type),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
       );
-
-  BoxDecoration decorationOf(WidgetTester tester, Type type) {
-    final decorated = tester.widget<DecoratedBox>(
-      find
-          .descendant(
-            of: find.byType(type),
-            matching: find.byType(DecoratedBox),
-          )
-          .first,
-    );
-    return decorated.decoration as BoxDecoration;
-  }
 
   group('NinjaBadge', () {
-    testWidgets('default tone uses the readable selected accent', (
+    testWidgets('lime tone is accent on onAccent with 11.5/600 text', (
       tester,
     ) async {
-      await tester.pumpWidget(wrap(const NinjaBadge('СЕГОДНЯ')));
+      await tester.pumpWidget(wrapKit(const NinjaBadge('Следующая')));
 
       final decoration = decorationOf(tester, NinjaBadge);
-      expect(decoration.color, colors.brand);
-      final style = tester.widget<Text>(find.text('СЕГОДНЯ')).style;
+      expect(decoration.color, kitColors.accent);
+      expect(decoration.borderRadius, BorderRadius.circular(AppRadius.full));
+
+      final style = kitStyleOf(tester, 'Следующая');
       expect(style?.fontSize, 11.5);
       expect(style?.fontWeight, FontWeight.w600);
-      expect(style?.color, colors.onBrand);
+      expect(style?.color, kitColors.onAccent);
     });
 
-    testWidgets('ink tone inverts the text', (tester) async {
-      await tester.pumpWidget(
-        wrap(const NinjaBadge('СОБЫТИЕ', tone: NinjaBadgeTone.ink)),
-      );
-
-      expect(decorationOf(tester, NinjaBadge).color, colors.ink);
-      expect(
-        tester.widget<Text>(find.text('СОБЫТИЕ')).style?.color,
-        colors.onInk,
-      );
-    });
-
-    testWidgets('danger tone uses a soft fill and accent dot without a border',
-        (
+    testWidgets('tinted tones carry a 6px dot in the tone colour', (
       tester,
     ) async {
       await tester.pumpWidget(
-        wrap(const NinjaBadge('ДЕДЛАЙН', tone: NinjaBadgeTone.dangerOutline)),
-      );
-
-      final decoration = decorationOf(tester, NinjaBadge);
-      expect(decoration.color, colors.dangerTint);
-      expect(decoration.border, isNull);
-      expect(
-        tester.widget<Text>(find.text('ДЕДЛАЙН')).style?.color,
-        colors.ink,
-      );
-      expect(
-        find.descendant(
-          of: find.byType(NinjaBadge),
-          matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is DecoratedBox &&
-                (widget.decoration as BoxDecoration).color == colors.scarlet,
-          ),
+        wrapKit(
+          const NinjaBadge('Отменена', tone: NinjaBadgeTone.dangerOutline),
         ),
-        findsOneWidget,
+      );
+
+      expect(decorationOf(tester, NinjaBadge).color, kitColors.examTint);
+      final dot = tester.widget<SizedBox>(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SizedBox && widget.width == 6 && widget.height == 6,
+        ),
+      );
+      expect(dot.height, 6);
+      final dots = tester.widgetList<DecoratedBox>(find.byType(DecoratedBox));
+      expect(
+        dots.any(
+          (box) => (box.decoration as BoxDecoration).color == kitColors.danger,
+        ),
+        isTrue,
       );
     });
 
-    testWidgets('tint tones pair tint fills with readable text', (
-      tester,
-    ) async {
+    testWidgets('neutral tone is surface2 on muted', (tester) async {
       await tester.pumpWidget(
-        wrap(
-          const Column(
+        wrapKit(const NinjaBadge('Тег', tone: NinjaBadgeTone.neutral)),
+      );
+
+      expect(decorationOf(tester, NinjaBadge).color, kitColors.surface2);
+      expect(kitStyleOf(tester, 'Тег')?.color, kitColors.muted);
+    });
+  });
+
+  group('NinjaCountBadge', () {
+    testWidgets('renders a 22px danger pill and caps at 99+', (tester) async {
+      await tester.pumpWidget(wrapKit(const NinjaCountBadge(3)));
+      final pill = kitDecorationOf(tester, NinjaCountBadge);
+      expect(pill.color, kitColors.danger);
+      expect(find.text('3'), findsOneWidget);
+
+      await tester.pumpWidget(wrapKit(const NinjaCountBadge(120)));
+      expect(find.text('99+'), findsOneWidget);
+    });
+
+    testWidgets('dot variant is a 10px danger circle', (tester) async {
+      await tester.pumpWidget(wrapKit(const NinjaCountBadge.dot()));
+      final dot = tester.widget<SizedBox>(
+        find.descendant(
+          of: find.byType(NinjaCountBadge),
+          matching: find.byType(SizedBox),
+        ),
+      );
+      expect(dot.width, 10);
+      expect(decorationOf(tester, NinjaCountBadge).shape, BoxShape.circle);
+    });
+  });
+
+  group('AppBadge', () {
+    testWidgets('accent and ink tones paint solid fills', (tester) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              NinjaBadge('ПЕРЕНОС', tone: NinjaBadgeTone.warnTint),
-              NinjaBadge('ГОТОВО', tone: NinjaBadgeTone.successTint),
+              AppBadge(label: 'Следующая', tone: AppBadgeTone.accent),
+              AppBadge(label: 'Новое', tone: AppBadgeTone.ink),
             ],
           ),
         ),
       );
 
-      expect(
-        tester.widget<Text>(find.text('ПЕРЕНОС')).style?.color,
-        colors.ink,
+      final fills = tester
+          .widgetList<Container>(
+            find.descendant(
+              of: find.byType(AppBadge),
+              matching: find.byType(Container),
+            ),
+          )
+          .map((container) => (container.decoration! as BoxDecoration).color)
+          .toList();
+      expect(fills, [kitColors.accent, kitColors.ink]);
+      expect(kitStyleOf(tester, 'Новое')?.color, kitColors.canvas);
+    });
+
+    testWidgets('tinted dot badges use tint fill, ink text and tone dot', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const AppBadge(label: 'Перенос', tone: AppBadgeTone.warn, dot: true),
+        ),
       );
-      expect(
-        tester.widget<Text>(find.text('ГОТОВО')).style?.color,
-        colors.ink,
-      );
+
+      expect(kitDecorationOf(tester, AppBadge).color, kitColors.warnTint);
+      expect(kitStyleOf(tester, 'Перенос')?.color, kitColors.ink);
+      final dot = tester.widget<AppDot>(find.byType(AppDot));
+      expect(dot.size, 6);
+      expect(dot.color, kitColors.warn);
     });
   });
 
-  group('NinjaCountBadge', () {
-    testWidgets('renders the count in a scarlet pill', (tester) async {
-      await tester.pumpWidget(wrap(const NinjaCountBadge(4)));
+  group('AppCountBadge / AppDot / AppTypeTag', () {
+    testWidgets('count badge caps at max with a danger fill', (tester) async {
+      await tester.pumpWidget(wrapKit(const AppCountBadge(120)));
+      expect(find.text('99+'), findsOneWidget);
+      expect(kitDecorationOf(tester, AppCountBadge).color, kitColors.danger);
+    });
 
-      expect(find.text('4'), findsOneWidget);
-      final decoration = decorationOf(tester, NinjaCountBadge);
-      expect(decoration.color, colors.scarlet);
-      final container = tester.widget<Container>(
+    testWidgets('dot defaults to 10px danger', (tester) async {
+      await tester.pumpWidget(wrapKit(const AppDot()));
+      final box = tester.widget<SizedBox>(
         find.descendant(
-          of: find.byType(NinjaCountBadge),
-          matching: find.byType(Container),
+          of: find.byType(AppDot),
+          matching: find.byType(SizedBox),
         ),
       );
-      expect(container.constraints?.minWidth, 22);
-      expect(
-        tester.widget<Text>(find.text('4')).style?.color,
-        colors.onScarlet,
+      expect(box.width, 10);
+      expect(decorationOf(tester, AppDot).color, kitColors.danger);
+    });
+
+    testWidgets('type tag is 11/800 on the tone tint with r8', (tester) async {
+      await tester.pumpWidget(
+        wrapKit(AppTypeTag('ЛАБ', color: kitColors.lab)),
       );
-    });
 
-    testWidgets('clamps above 99', (tester) async {
-      await tester.pumpWidget(wrap(const NinjaCountBadge(128)));
-      expect(find.text('99+'), findsOneWidget);
-    });
-
-    testWidgets('dot variant is a bare 10px circle', (tester) async {
-      await tester.pumpWidget(wrap(const NinjaCountBadge.dot()));
-
-      expect(find.byType(Text), findsNothing);
-      final size = tester.getSize(find.byType(NinjaCountBadge));
-      expect(size, const Size(10, 10));
-    });
-
-    testWidgets('count exposes one concise semantics label', (tester) async {
-      await tester.pumpWidget(wrap(const NinjaCountBadge(12)));
-
-      expect(find.bySemanticsLabel('12'), findsOneWidget);
+      final tag = kitDecorationOf(tester, AppTypeTag);
+      expect(tag.color, kitColors.tintOf(kitColors.lab));
+      expect(tag.borderRadius, BorderRadius.circular(8));
+      final style = kitStyleOf(tester, 'ЛАБ');
+      expect(style?.fontSize, 11);
+      expect(style?.fontWeight, FontWeight.w800);
+      expect(style?.color, kitColors.lab);
     });
   });
 }

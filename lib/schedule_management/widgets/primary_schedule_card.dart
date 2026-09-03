@@ -25,7 +25,7 @@ class PrimaryScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final target = _targetOf(schedule);
     final status = ScheduleLiveStatus.of(schedule.schedule);
@@ -36,8 +36,8 @@ class PrimaryScheduleCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: colors.accentSoft,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          color: colors.tint2,
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,8 +57,8 @@ class PrimaryScheduleCard extends StatelessWidget {
                         schedule.name,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: NinjaText.dialogTitle.copyWith(
-                          color: colors.onAccentSoft,
+                        style: AppText.heading.copyWith(
+                          color: colors.ink,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -69,8 +69,8 @@ class PrimaryScheduleCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         l10n.scheduleHubLessonsToday(status.todayCount),
-                        style: NinjaText.subtext.copyWith(
-                          color: colors.onAccentSoftMuted,
+                        style: AppText.subtext.copyWith(
+                          color: colors.muted,
                         ),
                       ),
                     ],

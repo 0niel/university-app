@@ -23,9 +23,8 @@ class AdaptiveThemeWrapper extends StatelessWidget {
           light: lightTheme,
           dark: darkTheme,
           initial: .dark,
-          builder: (theme, activeDarkTheme) => AppThemeBuilder(
+          builder: (theme, _) => AppThemeBuilder(
             theme: theme,
-            darkTheme: activeDarkTheme,
             themeState: themeState,
             themeCubit: themeCubit,
             router: router,

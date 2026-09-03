@@ -14,13 +14,14 @@ class _ScopeChips extends StatelessWidget {
       (LeaderboardScope.faculty, l10n.ninjaPathScopeFaculty),
       (LeaderboardScope.all, l10n.ninjaPathScopeAll),
     ];
-    return NinjaChipRow(
-      padding: .zero,
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
       children: [
         for (final (value, label) in scopes)
-          NinjaChip(
+          AppFilterChip(
             label: label,
-            selected: scope == value,
+            isSelected: scope == value,
             onTap: () => unawaited(
               context.read<NinjaPathCubit>().loadLeaderboard(value),
             ),

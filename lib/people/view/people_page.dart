@@ -37,8 +37,11 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 
   Future<void> _initialize() async {
+    if (!mounted) return;
     await _cubit.load();
+    if (!mounted) return;
     await _handleAddDeepLink();
+    if (!mounted) return;
     await _handleJoinGroupDeepLink();
     if (mounted && GoRouterState.of(context).uri.hasQuery) {
       context.go('/services/people');
@@ -52,6 +55,7 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 
   Future<void> _handleJoinGroupDeepLink() async {
+    if (!mounted) return;
     final code = GoRouterState.of(context).uri.queryParameters['joinGroup'];
     if (code == null || code.isEmpty) return;
     final joined = await _cubit.joinGroupByCode(code);
@@ -72,6 +76,7 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 
   Future<void> _handleAddDeepLink() async {
+    if (!mounted) return;
     final addUserId = GoRouterState.of(context).uri.queryParameters['add'];
     if (addUserId == null || addUserId.isEmpty) return;
     if (addUserId == context.read<AppBloc>().state.user.id) return;

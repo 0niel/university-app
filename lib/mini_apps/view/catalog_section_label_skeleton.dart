@@ -9,12 +9,16 @@ class _CatalogSectionLabelSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         28,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
-      child: NinjaSkeleton(width: width, height: 19, radius: 9),
+      child: NinjaSkeleton(
+        width: width,
+        height: 19,
+        radius: AppRadius.skeleton,
+      ),
     );
   }
 }

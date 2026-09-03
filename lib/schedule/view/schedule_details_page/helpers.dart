@@ -1,12 +1,10 @@
 part of '../schedule_details_page.dart';
 
+String _initialsOf(String name) => AppAvatar.initialsOf(name);
+
 final List<String> _reactionOrder = [
   for (final type in ReactionType.values) type.name,
 ];
-
-final Map<String, String> _reactionEmoji = {
-  for (final type in ReactionType.values) type.name: type.emoji,
-};
 
 bool _sameDate(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month && a.day == b.day;
@@ -37,11 +35,7 @@ String _lessonTypeName(AppLocalizations l10n, LessonSchedulePart lesson) {
 }
 
 String _timeRange(LessonSchedulePart lesson) {
-  return '${lesson.lessonBells.startTime} → ${lesson.lessonBells.endTime}';
-}
-
-String _teacherLine(LessonSchedulePart lesson) {
-  return lesson.teachers.map((teacher) => teacher.name).join(', ');
+  return '${lesson.lessonBells.startTime}–${lesson.lessonBells.endTime}';
 }
 
 String _classroomLine(AppLocalizations l10n, LessonSchedulePart lesson) {
@@ -60,8 +54,14 @@ String _materialTypeLabel(AppLocalizations l10n, LessonMaterialType type) {
 
 String _formatFileSize(AppLocalizations l10n, int bytes) {
   if (bytes <= 0) return l10n.lessonDetailsFile;
-  if (bytes < 1024 * 1024) return '${(bytes / 1024).round()} KB';
-  return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  if (bytes < 1024 * 1024) {
+    return l10n.lessonFileKilobytes(
+      NumberFormat('0', l10n.localeName).format(bytes / 1024),
+    );
+  }
+  return l10n.lessonFileMegabytes(
+    NumberFormat('0.0', l10n.localeName).format(bytes / (1024 * 1024)),
+  );
 }
 
 String _relativeWhen(AppLocalizations l10n, DateTime date) {
@@ -70,5 +70,6 @@ String _relativeWhen(AppLocalizations l10n, DateTime date) {
   if (delta.inHours < 1) return l10n.lessonDetailsMinutesShort(delta.inMinutes);
   if (delta.inHours < 24) return l10n.lessonDetailsHoursShort(delta.inHours);
   if (delta.inDays == 1) return l10n.lessonDetailsYesterday;
+  if (delta.inDays < 7) return l10n.daysAgo(delta.inDays);
   return DateFormat('dd.MM').format(date);
 }

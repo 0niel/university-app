@@ -22,7 +22,7 @@ class PeopleFriendRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final lastSeen = _lastSeen(context.l10n);
     final group = friend.group;
     return Row(
@@ -39,7 +39,7 @@ class PeopleFriendRow extends StatelessWidget {
                     child: Text(
                       friend.fullName,
                       overflow: .ellipsis,
-                      style: NinjaText.body.copyWith(color: colors.ink),
+                      style: AppText.body.copyWith(color: colors.ink),
                     ),
                   ),
                   if (friend.mood.isNotEmpty) ...[
@@ -55,7 +55,7 @@ class PeopleFriendRow extends StatelessWidget {
                   ?group,
                 ].join(' · '),
                 overflow: .ellipsis,
-                style: NinjaText.helper.copyWith(
+                style: AppText.caption.copyWith(
                   color: colors.muted,
                 ),
               ),
@@ -65,9 +65,9 @@ class PeopleFriendRow extends StatelessWidget {
         if (lastSeen != null)
           Text(
             lastSeen.$2,
-            style: NinjaText.helper.copyWith(
+            style: AppText.caption.copyWith(
               fontWeight: .w600,
-              color: lastSeen.$1 ? colors.brandInk : colors.muted,
+              color: lastSeen.$1 ? colors.accent : colors.muted,
             ),
           )
         else if (friend.isGhost)

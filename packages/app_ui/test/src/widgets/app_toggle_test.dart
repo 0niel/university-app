@@ -2,89 +2,110 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../kit_harness.dart';
+
 void main() {
-  Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
+  BoxDecoration trackOf(WidgetTester tester) => kitDecoration(
+        tester,
+        find
+            .descendant(
+              of: find.byType(AppSwitch),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
-  AnimatedContainer track(WidgetTester tester) =>
-      tester.widget<AnimatedContainer>(
-        find.descendant(
-          of: find.byType(AppToggle),
-          matching: find.byType(AnimatedContainer),
-        ),
-      );
+  testWidgets('track is 48x28 and toggles the accent fill', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(AppSwitch(value: false, onChanged: (_) {})),
+    );
+    await tester.pumpAndSettle();
 
-  group('AppToggle', () {
-    testWidgets('fires onChanged with the flipped value on tap',
-        (tester) async {
-      bool? changed;
-      await tester.pumpWidget(
-        wrap(AppToggle(value: false, onChanged: (v) => changed = v)),
-      );
+    expect(trackOf(tester).color, kitColors.surface2);
 
-      await tester.tap(find.byType(AppToggle));
-      expect(changed, isTrue);
-    });
+    await tester.pumpWidget(
+      wrapKit(AppSwitch(value: true, onChanged: (_) {})),
+    );
+    await tester.pumpAndSettle();
 
-    testWidgets('on uses the accent track, off uses surface-low',
-        (tester) async {
-      await tester.pumpWidget(
-        wrap(AppToggle(value: true, onChanged: (_) {})),
-      );
-      final colors = tester.element(find.byType(AppToggle)).ninja;
-      expect(
-        (track(tester).decoration! as BoxDecoration).color,
-        colors.brand,
-      );
-
-      await tester.pumpWidget(
-        wrap(AppToggle(value: false, onChanged: (_) {})),
-      );
-      expect(
-        (track(tester).decoration! as BoxDecoration).color,
-        colors.line,
-      );
-    });
-
-    testWidgets('keeps a 44px target and disables motion for accessibility', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const MediaQuery(
-            data: MediaQueryData(accessibleNavigation: true),
-            child: Scaffold(body: Center(child: AppToggle(value: true))),
-          ),
-        ),
-      );
-
-      expect(tester.getSize(find.byType(AppToggle)).height, 44);
-      expect(track(tester).duration, Duration.zero);
-    });
+    expect(trackOf(tester).color, kitColors.accent);
+    final constraints = tester
+        .widget<Container>(
+          find
+              .descendant(
+                of: find.byType(AppSwitch),
+                matching: find.byType(Container),
+              )
+              .first,
+        )
+        .constraints;
+    expect(constraints?.maxWidth, 48);
+    expect(constraints?.maxHeight, 28);
   });
 
-  group('AppLangToggle', () {
-    testWidgets('renders both options and fires onChanged', (tester) async {
-      String? picked;
-      await tester.pumpWidget(
-        wrap(
-          AppLangToggle(
-            value: 'RU',
-            options: const ['RU', 'EN'],
-            onChanged: (v) => picked = v,
-          ),
+  testWidgets('tapping reports the flipped value', (tester) async {
+    bool? received;
+    await tester.pumpWidget(
+      wrapKit(AppSwitch(value: false, onChanged: (value) => received = value)),
+    );
+
+    await tester.tap(find.byType(AppSwitch));
+    expect(received, isTrue);
+  });
+
+  testWidgets('disabled dims to 45%', (tester) async {
+    await tester.pumpWidget(wrapKit(const AppSwitch(value: true)));
+
+    final opacity = tester.widget<Opacity>(
+      find.descendant(
+        of: find.byType(AppSwitch),
+        matching: find.byType(Opacity),
+      ),
+    );
+    expect(opacity.opacity, 0.45);
+  });
+
+  testWidgets('optional label renders in muted 12', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(AppSwitch(value: true, label: 'on', onChanged: (_) {})),
+    );
+
+    expect(find.text('on'), findsOneWidget);
+    expect(kitStyleOf(tester, 'on')?.color, kitColors.muted);
+    expect(kitStyleOf(tester, 'on')?.fontSize, 12);
+  });
+
+  testWidgets('AppToggle and NinjaSwitch delegate to AppSwitch', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapKit(
+        Column(
+          children: [
+            AppToggle(value: true, onChanged: (_) {}),
+            NinjaSwitch(value: false, onChanged: (_) {}),
+          ],
         ),
-      );
+      ),
+    );
 
-      expect(find.text('RU'), findsOneWidget);
-      expect(find.text('EN'), findsOneWidget);
+    expect(find.byType(AppSwitch), findsNWidgets(2));
+  });
 
-      await tester.tap(find.text('EN'));
-      expect(picked, 'EN');
-      expect(tester.getSize(find.byType(AppLangToggle)).height, 44);
-    });
+  testWidgets('AppLangToggle renders a segmented control', (tester) async {
+    var picked = '';
+    await tester.pumpWidget(
+      wrapKit(
+        AppLangToggle(
+          value: 'RU',
+          options: const ['RU', 'EN'],
+          onChanged: (value) => picked = value,
+        ),
+      ),
+    );
+
+    expect(find.byType(AppSegmentedControl<String>), findsOneWidget);
+    await tester.tap(find.text('EN'));
+    expect(picked, 'EN');
   });
 }

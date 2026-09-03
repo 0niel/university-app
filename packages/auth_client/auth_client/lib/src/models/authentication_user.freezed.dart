@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuthenticationUser {
 
- String get id; String? get email; String? get name; String? get photo; bool get isNewUser;
+ String get id; String? get email; String? get name; String? get photo; bool get isNewUser; bool get isGuest;
 /// Create a copy of AuthenticationUser
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $AuthenticationUserCopyWith<AuthenticationUser> get copyWith => _$Authentication
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthenticationUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.photo, photo) || other.photo == photo)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthenticationUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.photo, photo) || other.photo == photo)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.isGuest, isGuest) || other.isGuest == isGuest));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,email,name,photo,isNewUser);
+int get hashCode => Object.hash(runtimeType,id,email,name,photo,isNewUser,isGuest);
 
 @override
 String toString() {
-  return 'AuthenticationUser(id: $id, email: $email, name: $name, photo: $photo, isNewUser: $isNewUser)';
+  return 'AuthenticationUser(id: $id, email: $email, name: $name, photo: $photo, isNewUser: $isNewUser, isGuest: $isGuest)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $AuthenticationUserCopyWith<$Res>  {
   factory $AuthenticationUserCopyWith(AuthenticationUser value, $Res Function(AuthenticationUser) _then) = _$AuthenticationUserCopyWithImpl;
 @useResult
 $Res call({
- String id, String? email, String? name, String? photo, bool isNewUser
+ String id, String? email, String? name, String? photo, bool isNewUser, bool isGuest
 });
 
 
@@ -62,13 +62,14 @@ class _$AuthenticationUserCopyWithImpl<$Res>
 
 /// Create a copy of AuthenticationUser
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = freezed,Object? name = freezed,Object? photo = freezed,Object? isNewUser = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = freezed,Object? name = freezed,Object? photo = freezed,Object? isNewUser = null,Object? isGuest = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String?,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String?,photo: freezed == photo ? _self.photo : photo // ignore: cast_nullable_to_non_nullable
 as String?,isNewUser: null == isNewUser ? _self.isNewUser : isNewUser // ignore: cast_nullable_to_non_nullable
+as bool,isGuest: null == isGuest ? _self.isGuest : isGuest // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -154,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? email,  String? name,  String? photo,  bool isNewUser)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? email,  String? name,  String? photo,  bool isNewUser,  bool isGuest)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthenticationUser() when $default != null:
-return $default(_that.id,_that.email,_that.name,_that.photo,_that.isNewUser);case _:
+return $default(_that.id,_that.email,_that.name,_that.photo,_that.isNewUser,_that.isGuest);case _:
   return orElse();
 
 }
@@ -175,10 +176,10 @@ return $default(_that.id,_that.email,_that.name,_that.photo,_that.isNewUser);cas
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? email,  String? name,  String? photo,  bool isNewUser)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? email,  String? name,  String? photo,  bool isNewUser,  bool isGuest)  $default,) {final _that = this;
 switch (_that) {
 case _AuthenticationUser():
-return $default(_that.id,_that.email,_that.name,_that.photo,_that.isNewUser);case _:
+return $default(_that.id,_that.email,_that.name,_that.photo,_that.isNewUser,_that.isGuest);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +196,10 @@ return $default(_that.id,_that.email,_that.name,_that.photo,_that.isNewUser);cas
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? email,  String? name,  String? photo,  bool isNewUser)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? email,  String? name,  String? photo,  bool isNewUser,  bool isGuest)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthenticationUser() when $default != null:
-return $default(_that.id,_that.email,_that.name,_that.photo,_that.isNewUser);case _:
+return $default(_that.id,_that.email,_that.name,_that.photo,_that.isNewUser,_that.isGuest);case _:
   return null;
 
 }
@@ -210,7 +211,7 @@ return $default(_that.id,_that.email,_that.name,_that.photo,_that.isNewUser);cas
 
 
 class _AuthenticationUser extends AuthenticationUser {
-  const _AuthenticationUser({required this.id, this.email, this.name, this.photo, this.isNewUser = true}): super._();
+  const _AuthenticationUser({required this.id, this.email, this.name, this.photo, this.isNewUser = true, this.isGuest = false}): super._();
 
 
 @override final  String id;
@@ -218,6 +219,7 @@ class _AuthenticationUser extends AuthenticationUser {
 @override final  String? name;
 @override final  String? photo;
 @override@JsonKey() final  bool isNewUser;
+@override@JsonKey() final  bool isGuest;
 
 /// Create a copy of AuthenticationUser
 /// with the given fields replaced by the non-null parameter values.
@@ -229,16 +231,16 @@ _$AuthenticationUserCopyWith<_AuthenticationUser> get copyWith => __$Authenticat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthenticationUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.photo, photo) || other.photo == photo)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthenticationUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.photo, photo) || other.photo == photo)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.isGuest, isGuest) || other.isGuest == isGuest));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,email,name,photo,isNewUser);
+int get hashCode => Object.hash(runtimeType,id,email,name,photo,isNewUser,isGuest);
 
 @override
 String toString() {
-  return 'AuthenticationUser(id: $id, email: $email, name: $name, photo: $photo, isNewUser: $isNewUser)';
+  return 'AuthenticationUser(id: $id, email: $email, name: $name, photo: $photo, isNewUser: $isNewUser, isGuest: $isGuest)';
 }
 
 
@@ -249,7 +251,7 @@ abstract mixin class _$AuthenticationUserCopyWith<$Res> implements $Authenticati
   factory _$AuthenticationUserCopyWith(_AuthenticationUser value, $Res Function(_AuthenticationUser) _then) = __$AuthenticationUserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? email, String? name, String? photo, bool isNewUser
+ String id, String? email, String? name, String? photo, bool isNewUser, bool isGuest
 });
 
 
@@ -266,13 +268,14 @@ class __$AuthenticationUserCopyWithImpl<$Res>
 
 /// Create a copy of AuthenticationUser
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = freezed,Object? name = freezed,Object? photo = freezed,Object? isNewUser = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = freezed,Object? name = freezed,Object? photo = freezed,Object? isNewUser = null,Object? isGuest = null,}) {
   return _then(_AuthenticationUser(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String?,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String?,photo: freezed == photo ? _self.photo : photo // ignore: cast_nullable_to_non_nullable
 as String?,isNewUser: null == isNewUser ? _self.isNewUser : isNewUser // ignore: cast_nullable_to_non_nullable
+as bool,isGuest: null == isGuest ? _self.isGuest : isGuest // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

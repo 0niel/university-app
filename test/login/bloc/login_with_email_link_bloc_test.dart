@@ -58,6 +58,19 @@ void main() {
 
     group('LoginWithEmailLinkSubmitted', () {
       blocTest<LoginWithEmailLinkBloc, LoginWithEmailLinkState>(
+        'rejects a missing continueUrl without an uncaught null error',
+        build: buildBloc,
+        act: (bloc) => bloc.add(
+          LoginWithEmailLinkSubmitted(
+            Uri.parse('https://mirea.ninja/login?code=abc123'),
+          ),
+        ),
+        expect: () => const [
+          LoginWithEmailLinkState(status: LoginWithEmailLinkStatus.loading),
+          LoginWithEmailLinkState(status: LoginWithEmailLinkStatus.failure),
+        ],
+      );
+      blocTest<LoginWithEmailLinkBloc, LoginWithEmailLinkState>(
         'emits [loading, success] when logInWithEmailLink succeeds',
         build: buildBloc,
         act: (bloc) => bloc.add(LoginWithEmailLinkSubmitted(validEmailLink)),
@@ -168,6 +181,36 @@ void main() {
     });
 
     group('LoginWithEmailCodeSubmitted', () {
+      blocTest<LoginWithEmailLinkBloc, LoginWithEmailLinkState>(
+        'does not resubmit while a code is being checked',
+        build: buildBloc,
+        seed: () => const LoginWithEmailLinkState(
+          status: LoginWithEmailLinkStatus.loading,
+        ),
+        act: (bloc) => bloc.add(
+          const LoginWithEmailCodeSubmitted(
+            email: 'student@mirea.ru',
+            code: '123456',
+          ),
+        ),
+        expect: () => const <LoginWithEmailLinkState>[],
+        verify: (_) => verifyNever(
+          () => userRepository.logInWithEmailCode(
+            email: any(named: 'email'),
+            code: any(named: 'code'),
+          ),
+        ),
+      );
+
+      blocTest<LoginWithEmailLinkBloc, LoginWithEmailLinkState>(
+        'retry clears a rejected-code state',
+        build: buildBloc,
+        seed: () => const LoginWithEmailLinkState(
+          status: LoginWithEmailLinkStatus.failure,
+        ),
+        act: (bloc) => bloc.add(const LoginWithEmailCodeResetRequested()),
+        expect: () => const [LoginWithEmailLinkState()],
+      );
       blocTest<LoginWithEmailLinkBloc, LoginWithEmailLinkState>(
         'emits [loading, success] when logInWithEmailCode succeeds',
         build: buildBloc,

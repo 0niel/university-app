@@ -10,27 +10,27 @@ class ScheduleDiffSummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final cards = <Widget>[
       if (diff.added.isNotEmpty)
         ScheduleDiffSummaryCard(
           count: diff.added.length,
           label: context.l10n.scheduleDiffNewLabel,
-          color: colors.green,
+          color: colors.lecture,
           icon: AppLineIcon.plus,
         ),
       if (diff.modified.isNotEmpty)
         ScheduleDiffSummaryCard(
           count: diff.modified.length,
           label: context.l10n.scheduleDiffModifiedLabel,
-          color: colors.amber,
+          color: colors.warn,
           icon: AppLineIcon.pencil,
         ),
       if (diff.removed.isNotEmpty)
         ScheduleDiffSummaryCard(
           count: diff.removed.length,
           label: context.l10n.scheduleDiffRemovedLabel,
-          color: colors.scarlet,
+          color: colors.exam,
           icon: AppLineIcon.trash,
         ),
     ];

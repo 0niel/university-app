@@ -9,7 +9,7 @@ class _PeersCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final shown = peers.take(_maxAvatars).toList();
     final friendsCount = peers.where((peer) => peer.isFriend).length;
 
@@ -22,28 +22,28 @@ class _PeersCard extends StatelessWidget {
         ),
         Padding(
           padding: const .fromLTRB(
-            NinjaMetrics.screenPadding,
-            0,
-            NinjaMetrics.screenPadding,
-            18,
+            AppSpacing.screen,
+            AppSpacing.zero,
+            AppSpacing.screen,
+            AppSpacing.fieldGap,
           ),
           child: Row(
             children: [
-              NinjaAvatarGroup(
+              AppAvatarGroup(
                 overflowCount: peers.length - shown.length,
                 items: [
                   for (final peer in shown)
-                    NinjaAvatarGroupItem(_initialsOf(peer.fullName)),
+                    AppAvatarGroupItem(_initialsOf(peer.fullName)),
                 ],
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   context.l10n.lessonDetailsPeersFriends(friendsCount),
                   maxLines: 2,
                   overflow: .ellipsis,
-                  style: NinjaText.subtext.copyWith(
-                    color: friendsCount > 0 ? colors.brandInk : colors.muted,
+                  style: AppText.subtext.copyWith(
+                    color: friendsCount > 0 ? colors.accent : colors.muted,
                   ),
                 ),
               ),

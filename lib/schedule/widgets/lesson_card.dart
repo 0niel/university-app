@@ -4,8 +4,6 @@ import 'package:rtu_mirea_app/app/theme/lesson_type_palette.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-final _lessonPalette = NinjaColors.dark();
-
 abstract final class LessonCard {
   static Color colorOf(
     LessonSchedulePart lesson, {
@@ -17,22 +15,21 @@ abstract final class LessonCard {
         : getColorByType(lesson.lessonType, overrides: overrides);
   }
 
+  static Color colorOfFor(
+    BuildContext context,
+    LessonSchedulePart lesson,
+  ) => colorOf(lesson, overrides: LessonTypePalette.of(context));
+
   static Color getColorByType(
     LessonType lessonType, {
     Map<String, int> overrides = const {},
   }) {
     final override = overrides[lessonType.name];
     if (override != null) return Color(override);
-    return switch (lessonType) {
-      .lecture ||
-      .physicalEducation ||
-      .consultation ||
-      .unknown => _lessonPalette.indigo,
-      .laboratoryWork || .individualWork || .credit => _lessonPalette.scarlet,
-      .practice => _lessonPalette.orange,
-      .exam => _lessonPalette.amber,
-      .courseWork || .courseProject => _lessonPalette.green,
-    };
+    return Color(
+      kDefaultLessonTypeColors[lessonType.name] ??
+          kDefaultLessonTypeColors['unknown']!,
+    );
   }
 
   static AppLineIcon getIconByType(LessonType lessonType) {

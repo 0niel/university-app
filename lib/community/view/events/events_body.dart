@@ -1,106 +1,87 @@
-part of '../events_view.dart';
+import 'package:app_ui/app_ui.dart';
+import 'package:campus_repository/campus_repository.dart';
+import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/community/cubit/events/events_cubit.dart';
+import 'package:rtu_mirea_app/community/models/models.dart';
+import 'package:rtu_mirea_app/community/widgets/events/event_card.dart';
+import 'package:rtu_mirea_app/community/widgets/events/events_empty_card.dart';
+import 'package:rtu_mirea_app/community/widgets/events/events_skeleton.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-class _EventsBody extends StatelessWidget {
-  const _EventsBody({required this.state});
+class EventsBody extends StatelessWidget {
+  const EventsBody({
+    required this.state,
+    required this.filter,
+    required this.onRetry,
+    required this.onCreate,
+    required this.onToggleRsvp,
+    super.key,
+  });
 
   final EventsState state;
+  final EventsFilter filter;
+  final VoidCallback onRetry;
+  final VoidCallback onCreate;
+  final ValueChanged<CampusEvent> onToggleRsvp;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
-    final pinFilters = textScale <= 1.3;
-    return RefreshIndicator(
-      backgroundColor: colors.canvas,
-      color: colors.ink,
-      onRefresh: context.read<EventsCubit>().load,
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          SliverToBoxAdapter(
-            child: NinjaCommunityHeader(
-              title: context.l10n.eventsTitle,
-              subtitle: context.l10n.eventsSubtitle,
-            ),
-          ),
-          if (pinFilters)
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _NinjaEventsFilterDelegate(
-                color: colors.canvas,
-                child: _CategoryFilters(selected: state.category),
-              ),
-            )
-          else
-            SliverToBoxAdapter(
-              child: ColoredBox(
-                color: colors.canvas,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 9),
-                  child: _CategoryFilters(selected: state.category),
-                ),
-              ),
-            ),
-          SliverToBoxAdapter(
-            child: NinjaStateSwitcher(child: _content(context)),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
-      ),
-    );
+    return NinjaStateSwitcher(child: _content(context));
   }
 
   Widget _content(BuildContext context) {
-    if (state.status == .loading) {
+    final l10n = context.l10n;
+    if (state.status == .loading && state.events.isEmpty) {
       return const EventsSkeleton(key: ValueKey('events-loading'));
     }
     if (state.status == .failure && state.events.isEmpty) {
-      return _LoadFailure(
+      return NinjaErrorState(
         key: const ValueKey('events-failure'),
-        onRetry: context.read<EventsCubit>().load,
+        title: l10n.eventsLoadError,
+        message: l10n.eventsLoadErrorSub,
+        retryLabel: l10n.retry,
+        onRetry: onRetry,
       );
     }
-    if (state.filteredEvents.isEmpty) {
-      return const _EmptyEvents(key: ValueKey('events-empty'));
+    final now = DateTime.now();
+    final events = state.events
+        .where((event) => filter.matches(event, now))
+        .toList(growable: false);
+    if (events.isEmpty) {
+      return switch (filter) {
+        .going => EventsEmptyCard(
+          key: const ValueKey('events-empty-going'),
+          title: l10n.eventsEmptyGoingTitle,
+          subtitle: l10n.eventsEmptyGoingSub,
+        ),
+        .today => EventsEmptyCard(
+          key: const ValueKey('events-empty-today'),
+          title: l10n.eventsEmptyTodayTitle,
+          subtitle: l10n.eventsEmptySubtitle,
+        ),
+        .all => NinjaEmptyState(
+          key: const ValueKey('events-empty'),
+          icon: const AppLineIconWidget(AppLineIcon.calendar, size: 24),
+          title: l10n.eventsEmptyTitle,
+          message: l10n.eventsEmptySubtitle,
+          actionLabel: l10n.eventsCreateCta,
+          onAction: onCreate,
+        ),
+      };
     }
-    return _EventsList(
-      key: ValueKey('events-list-${state.category.wireName}'),
-      state: state,
+    return Column(
+      key: ValueKey('events-list-${filter.name}'),
+      children: [
+        for (final (index, event) in events.indexed) ...[
+          if (index > 0) const SizedBox(height: AppSpacing.cardGap),
+          EventCard(
+            key: ValueKey(event.id),
+            event: event,
+            isPending: state.pendingRsvps.contains(event.id),
+            onToggleRsvp: () => onToggleRsvp(event),
+          ).animateListItem(index: index),
+        ],
+      ],
     );
   }
-}
-
-class _NinjaEventsFilterDelegate extends SliverPersistentHeaderDelegate {
-  const _NinjaEventsFilterDelegate({
-    required this.color,
-    required this.child,
-  });
-
-  final Color color;
-  final Widget child;
-
-  @override
-  double get minExtent => 62;
-
-  @override
-  double get maxExtent => 62;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return ColoredBox(
-      color: color,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 9),
-        child: child,
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(_NinjaEventsFilterDelegate oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.child != child;
 }

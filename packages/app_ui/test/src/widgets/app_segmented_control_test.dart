@@ -2,73 +2,101 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../kit_harness.dart';
+
 void main() {
-  testWidgets('keeps every normal-scale segment at least 44px tall', (
+  const options = [
+    AppSegmentedOption(value: 0, label: 'Сегодня'),
+    AppSegmentedOption(value: 1, label: 'Неделя'),
+  ];
+
+  testWidgets('segments are 38px pills inside a 4px padded track', (
     tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(
-          body: AppSegmentedControl<int>(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: AppSegmentedControl<int>(
             value: 1,
             onChanged: (_) {},
-            options: const [
-              AppSegmentedOption(value: 0, label: 'Сегодня'),
-              AppSegmentedOption(value: 1, label: 'Неделя'),
-            ],
+            options: options,
           ),
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
-    for (final semantics in find.byType(Semantics).evaluate()) {
-      final widget = semantics.widget as Semantics;
-      if (widget.properties.button == true) {
-        expect(
-          tester.getSize(find.byWidget(widget)).height,
-          greaterThanOrEqualTo(44),
-        );
-      }
-    }
+    expect(tester.getSize(find.byType(AppSegmentedControl<int>)).height, 46);
   });
 
-  testWidgets('stacks options without overflow at 200% text scale', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(320, 600));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
+  testWidgets('wraps and stays tappable at large text scales', (tester) async {
+    var picked = -1;
     await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.darkTheme,
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: const TextScaler.linear(2)),
-          child: child!,
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: AppSegmentedControl<int>(
+            value: 0,
+            onChanged: (value) => picked = value,
+            options: options,
+          ),
         ),
-        home: const Scaffold(
-          body: AppSegmentedControl<int>(
-            value: 1,
-            options: [
-              AppSegmentedOption(value: 0, label: '🟢 Низкий'),
-              AppSegmentedOption(value: 1, label: '🟡 Средний'),
-              AppSegmentedOption(value: 2, label: '🔴 Срочно'),
-            ],
+        textScale: 2,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Неделя'));
+    expect(picked, 1);
+  });
+
+  testWidgets('exposes selected semantics', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: AppSegmentedControl<int>(
+            value: 0,
+            onChanged: (_) {},
+            options: options,
           ),
         ),
       ),
     );
 
-    expect(tester.takeException(), isNull);
-    expect(find.text('🟡 Средний'), findsOneWidget);
-    final selected = tester.widget<Semantics>(
-      find.byWidgetPredicate(
-        (widget) => widget is Semantics && widget.properties.selected == true,
-      ),
-    );
-    expect(selected.properties.selected, isTrue);
-    expect(selected.properties.enabled, isFalse);
+    final semantics = tester.getSemantics(find.text('Сегодня'));
+    expect(semantics.label, 'Сегодня');
+  });
+
+  testWidgets('equal-width segments preserve more room for labels', (
+    tester,
+  ) async {
+    for (final expanded in [true, false]) {
+      await tester.pumpWidget(
+        wrapKit(
+          SizedBox(
+            width: 350,
+            child: AppSegmentedControl<int>(
+              value: 0,
+              expanded: expanded,
+              onChanged: (_) {},
+              options: options,
+            ),
+          ),
+        ),
+      );
+      final segment = tester.widget<AnimatedContainer>(
+        find.ancestor(
+          of: find.text('Сегодня'),
+          matching: find.byType(AnimatedContainer),
+        ).first,
+      );
+      expect(
+        segment.padding,
+        EdgeInsets.symmetric(horizontal: expanded ? 6 : 14, vertical: 6),
+      );
+      expect(tester.takeException(), isNull);
+    }
   });
 }

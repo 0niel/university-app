@@ -14,7 +14,7 @@ class WalletEarnMoreToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return AppPressable(
       onTap: onTap,
@@ -23,10 +23,13 @@ class WalletEarnMoreToggle extends StatelessWidget {
           : '${l10n.loginComingSoon} · $count',
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-          minHeight: NinjaMetrics.minTouchTarget,
+          minHeight: AppControlSize.iconButton,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xs,
+            vertical: AppSpacing.sectionGap,
+          ),
           child: Row(
             children: [
               Expanded(
@@ -34,7 +37,7 @@ class WalletEarnMoreToggle extends StatelessWidget {
                   expanded
                       ? l10n.hideLessonAction
                       : '${l10n.loginComingSoon} · $count',
-                  style: NinjaText.body.copyWith(color: colors.muted),
+                  style: AppText.body.copyWith(color: colors.muted),
                 ),
               ),
               AnimatedRotation(

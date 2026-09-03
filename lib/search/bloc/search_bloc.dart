@@ -190,7 +190,7 @@ class SearchBloc extends HydratedBloc<SearchEvent, SearchState> {
           status: .populated,
         ),
       );
-    } on Exception catch (error, stackTrace) {
+    } on Object catch (error, stackTrace) {
       if (emit.isDone || revision != _searchRevision) return;
       emit(state.copyWith(status: .failure));
       addError(error, stackTrace);

@@ -4,11 +4,13 @@ class AppNavigationRail extends StatelessWidget {
   const AppNavigationRail({
     required this.currentIndex,
     required this.onSelected,
+    this.scheduleBadge = false,
     super.key,
   });
 
   final int currentIndex;
   final ValueChanged<int> onSelected;
+  final bool scheduleBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -21,15 +23,7 @@ class AppNavigationRail extends StatelessWidget {
           destinationIndex: index,
           onSelected: onSelected,
         ),
-        items: _navigationDestinations(context)
-            .map(
-              (item) => NinjaBottomBarItem(
-                icon: NavGlyphIcon(item.glyph),
-                activeIcon: NavGlyphIcon(item.glyph, filled: true),
-                label: item.label,
-              ),
-            )
-            .toList(),
+        items: navigationBarItems(context, scheduleBadge: scheduleBadge),
       ),
     );
   }

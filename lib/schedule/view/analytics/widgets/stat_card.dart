@@ -8,23 +8,23 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 132, minHeight: 96),
-      child: NinjaScheduleSurface(
+      child: AppCard(
         child: Column(
-          spacing: 4,
+          spacing: AppSpacing.xs,
           children: [
             Text(
               value,
-              style: NinjaText.tabular(
-                NinjaText.title.copyWith(color: colors.ink),
+              style: AppText.tabular(
+                AppText.title.copyWith(color: colors.ink),
               ),
             ),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: NinjaText.helper.copyWith(color: colors.muted),
+              style: AppText.captionSmall.copyWith(color: colors.muted),
             ),
           ],
         ),

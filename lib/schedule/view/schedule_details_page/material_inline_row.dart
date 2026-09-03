@@ -11,23 +11,27 @@ class _MaterialInlineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    return NinjaScheduleSurface(
+    final colors = context.colors;
+    return AppPressable(
       onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        children: [
-          _FileBadge(material: material, size: 40),
-          const SizedBox(width: 12),
-          Expanded(child: _MaterialText(material: material, compact: true)),
-          const SizedBox(width: 8),
-          NinjaGlyphIcon(
-            NinjaGlyph.chevronRight,
-            size: 14,
-            color: colors.chevron,
-            strokeWidth: 2.5,
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            _FileBadge(material: material, size: 40),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: _MaterialText(material: material, compact: true)),
+            const SizedBox(width: AppSpacing.sm),
+            AppLineIconWidget(
+              AppLineIcon.download,
+              size: 16,
+              color: colors.muted2,
+            ),
+          ],
+        ),
       ),
     );
   }

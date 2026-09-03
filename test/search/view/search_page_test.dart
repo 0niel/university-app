@@ -111,6 +111,14 @@ void main() {
       await tester.pump();
 
       expect(tester.takeException(), isNull);
+      final input = find.byKey(const Key('searchPage_searchTextField'));
+      final cancel = find.byType(AppButton);
+      expect(tester.getSize(input).width, 280);
+      expect(
+        tester.getTopLeft(cancel).dy,
+        greaterThan(tester.getBottomLeft(input).dy),
+      );
+      expect(tester.getSize(cancel).height, greaterThanOrEqualTo(44));
       expect(
         tester.getSize(find.byType(SearchScopeChip).first).height,
         greaterThanOrEqualTo(NinjaMetrics.minTouchTarget),
@@ -119,6 +127,15 @@ void main() {
         tester.getSize(find.byType(BestMatchSkeletonCard)).height,
         greaterThanOrEqualTo(220),
       );
+      final clear = find.bySemanticsLabel(RegExp('Clear field|Очистить поле'));
+      expect(tester.getSize(clear), const Size(44, 44));
+      await tester.tap(clear);
+      await tester.pump();
+      expect(
+        tester.widget<EditableText>(find.byType(EditableText)).controller.text,
+        isEmpty,
+      );
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('empty results offer a pill action that clears the query', (
@@ -246,7 +263,7 @@ void main() {
       expect(selected.boxShadow, isNull);
       expect(
         tester.widget<Text>(find.text('Расписание')).style?.color,
-        colors.onBrand,
+        AppColors.light.onAccent,
       );
     });
 

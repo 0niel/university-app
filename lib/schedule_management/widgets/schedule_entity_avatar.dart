@@ -39,18 +39,18 @@ class ScheduleEntityAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final accent = switch (target) {
-      .group => colors.brand,
-      .teacher => colors.orange,
-      .classroom => colors.green,
+      .group => colors.accent,
+      .teacher => colors.warn,
+      .classroom => colors.lecture,
     };
 
     final Widget content = target == .group
         ? Text(
             scheduleGroupBadge(name),
-            style: NinjaText.tabular(
-              NinjaText.headline.copyWith(
+            style: AppText.tabular(
+              AppText.headline.copyWith(
                 fontSize: size * 0.34,
                 color: accent,
               ),

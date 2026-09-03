@@ -14,6 +14,7 @@ _TopicList _$TopicListFromJson(Map<String, dynamic> json) => _TopicList(
   topics: (json['topics'] as List<dynamic>)
       .map((e) => Topic.fromJson(e as Map<String, dynamic>))
       .toList(),
+  moreTopicsUrl: json['more_topics_url'] as String?,
 );
 
 Map<String, dynamic> _$TopicListToJson(_TopicList instance) =>
@@ -23,4 +24,5 @@ Map<String, dynamic> _$TopicListToJson(_TopicList instance) =>
       'per_page': instance.perPage,
       'top_tags': instance.topTags,
       'topics': instance.topics.map((e) => e.toJson()).toList(),
+      'more_topics_url': instance.moreTopicsUrl,
     };

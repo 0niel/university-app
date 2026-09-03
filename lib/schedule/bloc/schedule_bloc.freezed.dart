@@ -15,14 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ScheduleState implements DiagnosticableTreeMixin {
 
-@JsonKey(includeFromJson: false, includeToJson: false) ScheduleStatus get status;@JsonKey(fromJson: _classroomSchedulesFromJson, toJson: _classroomSchedulesToJson) List<(UID, Classroom, List<SchedulePart>)> get classroomsSchedule;@JsonKey(fromJson: _teacherSchedulesFromJson, toJson: _teacherSchedulesToJson) List<(UID, Teacher, List<SchedulePart>)> get teachersSchedule;@JsonKey(fromJson: _groupSchedulesFromJson, toJson: _groupSchedulesToJson) List<(UID, Group, List<SchedulePart>)> get groupsSchedule;@SelectedScheduleConverter() SelectedSchedule? get selectedSchedule;/// When the active schedule was last successfully synced from the server.
-/// Persisted so the offline banner can show a truthful "updated at" time.
- DateTime? get lastSyncedAt;/// Last successful fetch time of every saved schedule, keyed by its
-/// identifier (`uid ?? name`). Lets the hub show a truthful "обновлено …"
-/// line for each saved schedule, not just the active one.
- Map<UID, DateTime> get scheduleSyncedAt;/// Whether the schedule on screen is stale cached data shown because the
-/// last refresh failed (no network). Transient — never persisted.
-@JsonKey(includeFromJson: false, includeToJson: false) bool get isOffline;
+@JsonKey(includeFromJson: false, includeToJson: false) ScheduleStatus get status;@JsonKey(fromJson: _classroomSchedulesFromJson, toJson: _classroomSchedulesToJson) List<(UID, Classroom, List<SchedulePart>)> get classroomsSchedule;@JsonKey(fromJson: _teacherSchedulesFromJson, toJson: _teacherSchedulesToJson) List<(UID, Teacher, List<SchedulePart>)> get teachersSchedule;@JsonKey(fromJson: _groupSchedulesFromJson, toJson: _groupSchedulesToJson) List<(UID, Group, List<SchedulePart>)> get groupsSchedule;@SelectedScheduleConverter() SelectedSchedule? get selectedSchedule; DateTime? get lastSyncedAt; Map<UID, DateTime> get scheduleSyncedAt;@JsonKey(includeFromJson: false, includeToJson: false) bool get isOffline;
 /// Create a copy of ScheduleState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -267,24 +260,14 @@ class _ScheduleState extends ScheduleState with DiagnosticableTreeMixin {
 }
 
 @override@SelectedScheduleConverter() final  SelectedSchedule? selectedSchedule;
-/// When the active schedule was last successfully synced from the server.
-/// Persisted so the offline banner can show a truthful "updated at" time.
 @override final  DateTime? lastSyncedAt;
-/// Last successful fetch time of every saved schedule, keyed by its
-/// identifier (`uid ?? name`). Lets the hub show a truthful "обновлено …"
-/// line for each saved schedule, not just the active one.
  final  Map<UID, DateTime> _scheduleSyncedAt;
-/// Last successful fetch time of every saved schedule, keyed by its
-/// identifier (`uid ?? name`). Lets the hub show a truthful "обновлено …"
-/// line for each saved schedule, not just the active one.
 @override@JsonKey() Map<UID, DateTime> get scheduleSyncedAt {
   if (_scheduleSyncedAt is EqualUnmodifiableMapView) return _scheduleSyncedAt;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_scheduleSyncedAt);
 }
 
-/// Whether the schedule on screen is stale cached data shown because the
-/// last refresh failed (no network). Transient — never persisted.
 @override@JsonKey(includeFromJson: false, includeToJson: false) final  bool isOffline;
 
 /// Create a copy of ScheduleState

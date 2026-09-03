@@ -8,8 +8,8 @@ class _GroupPostDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     body.isEmpty ? '—' : body,
-    style: NinjaText.body.copyWith(
-      color: context.ninja.mutedDark,
+    style: AppText.body.copyWith(
+      color: context.colors.muted,
       height: 1.5,
     ),
   );

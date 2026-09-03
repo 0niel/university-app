@@ -37,59 +37,41 @@ class _AppMultiDatePickerSheetState extends State<AppMultiDatePickerSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     return Column(
-      spacing: 16,
       mainAxisSize: .min,
       crossAxisAlignment: .stretch,
       children: [
-        Column(
-          spacing: 8,
-          crossAxisAlignment: .stretch,
+        Row(
           children: [
-            Row(
-              children: [
-                Text(
-                  l10n.pickerSelectedCount(_selected.length),
-                  style: NinjaText.subtext.copyWith(
-                    color: colors.muted,
-                  ),
-                ),
-                const Spacer(),
-                if (_selected.isNotEmpty)
-                  AppPressable(
-                    onTap: () => setState(_selected.clear),
-                    semanticsLabel: l10n.pickerClear,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 44),
-                      child: Center(
-                        child: Text(
-                          l10n.pickerClear,
-                          style: NinjaText.subtext.copyWith(
-                            color: colors.scarlet,
-                            fontWeight: .w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+            Text(
+              l10n.pickerSelectedCount(_selected.length),
+              style: AppText.subtext.copyWith(color: colors.muted),
             ),
-            AppFlatCalendar(
-              firstDay: widget.firstDate,
-              lastDay: widget.lastDate,
-              initialFocus: _selected.elementAtOrNull(0) ?? DateTime.now(),
-              dateSelectedBuilder: (day) =>
-                  _selected.any((date) => _sameDay(date, day)),
-              dateEnabledBuilder: widget.dateEnabledBuilder,
-              onDateSelected: _toggle,
-            ),
+            const Spacer(),
+            if (_selected.isNotEmpty)
+              AppButton.text(
+                label: l10n.pickerClear,
+                size: AppButtonSize.small,
+                foregroundColor: colors.danger,
+                onPressed: () => setState(_selected.clear),
+              ),
           ],
         ),
-        NinjaButton.primary(
+        const SizedBox(height: 8),
+        AppFlatCalendar(
+          firstDay: widget.firstDate,
+          lastDay: widget.lastDate,
+          initialFocus: _selected.elementAtOrNull(0) ?? DateTime.now(),
+          dateSelectedBuilder: (day) =>
+              _selected.any((date) => _sameDay(date, day)),
+          dateEnabledBuilder: widget.dateEnabledBuilder,
+          onDateSelected: _toggle,
+        ),
+        const SizedBox(height: 14),
+        AppSheetAction(
           label: l10n.done,
-          expanded: true,
-          onPressed: () =>
+          onTap: () =>
               Navigator.of(context, rootNavigator: true).pop(_selected),
         ),
       ],

@@ -25,7 +25,7 @@ class MiniAppScanTopBar extends StatelessWidget {
           const Spacer(),
           Text(
             context.l10n.miniAppsScanTitle,
-            style: NinjaText.body.copyWith(color: Colors.white),
+            style: AppText.body.copyWith(color: Colors.white),
           ),
           const Spacer(),
           ValueListenableBuilder<MobileScannerState>(

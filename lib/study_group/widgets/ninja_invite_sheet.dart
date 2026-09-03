@@ -137,7 +137,7 @@ class _NinjaInviteSheetState extends State<NinjaInviteSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final hasQuery = _controller.text.trim().length >= 2;
     return Column(
@@ -147,8 +147,8 @@ class _NinjaInviteSheetState extends State<NinjaInviteSheet> {
         Container(
           padding: const .all(16),
           decoration: BoxDecoration(
-            color: colors.surfaceAlt,
-            borderRadius: .circular(NinjaRadius.card),
+            color: colors.surface2,
+            borderRadius: .circular(AppRadius.card),
           ),
           child: Row(
             spacing: 12,
@@ -166,12 +166,14 @@ class _NinjaInviteSheetState extends State<NinjaInviteSheet> {
                     children: [
                       Text(
                         l10n.studyGroupShareCode,
-                        style: NinjaText.helper.copyWith(color: colors.muted),
+                        style: AppText.captionSmall.copyWith(
+                          color: colors.muted,
+                        ),
                       ),
                       Text(
                         widget.joinCode,
-                        style: NinjaText.tabular(
-                          NinjaText.title.copyWith(color: colors.ink),
+                        style: AppText.tabular(
+                          AppText.title.copyWith(color: colors.ink),
                         ),
                       ),
                     ],
@@ -189,7 +191,7 @@ class _NinjaInviteSheetState extends State<NinjaInviteSheet> {
         const SizedBox(height: 10),
         Text(
           l10n.studyGroupInviteByLink,
-          style: NinjaText.helper.copyWith(color: colors.muted),
+          style: AppText.captionSmall.copyWith(color: colors.muted),
         ),
         const SizedBox(height: 28),
         NinjaInput(
@@ -216,7 +218,7 @@ class _NinjaInviteSheetState extends State<NinjaInviteSheet> {
     }
     if (!hasQuery) return const SizedBox.shrink(key: ValueKey('idle'));
     if (_results.isEmpty) {
-      final colors = context.ninja;
+      final colors = context.colors;
       final l10n = context.l10n;
       return NinjaEmptyState(
         icon: AppLineIconWidget(

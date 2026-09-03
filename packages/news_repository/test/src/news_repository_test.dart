@@ -4,6 +4,59 @@ import 'package:test/test.dart';
 
 void main() {
   group('NewsRepository.getFeed', () {
+    test('video-only items preserve article identity in the feed', () async {
+      final repository = NewsRepository(
+        dataSource: _FakeNewsRemoteDataSource(
+          feed: [
+            {
+              ..._feedItem(),
+              'newsBlocks': [
+                {
+                  'type': '__video__',
+                  'video_url': 'https://cdn.example/story.mp4',
+                },
+              ],
+            },
+          ],
+        ),
+        organizationId: 'university',
+      );
+      final response = await repository.getFeed();
+      final post = response.feed.single as PostBlock;
+      expect(post.id, 'article-id');
+      expect(
+        post.action,
+        const NavigateToArticleAction(articleId: 'article-id'),
+      );
+    });
+
+    test(
+      'raw Telegram IDs and videos are not rendered as image URLs',
+      () async {
+        for (final invalid in [
+          'story:42',
+          '123456789',
+          'https://cdn.example/story.mp4',
+        ]) {
+          final repository = NewsRepository(
+            dataSource: _FakeNewsRemoteDataSource(
+              feed: [
+                {
+                  ..._feedItem(),
+                  'newsBlocks': [
+                    {'type': '__article_introduction__', 'image_url': invalid},
+                  ],
+                },
+              ],
+            ),
+            organizationId: 'university',
+          );
+          final response = await repository.getFeed();
+          expect((response.feed.single as PostBlock).imageUrl, isNull);
+        }
+      },
+    );
+
     test('uses the total count returned by the RPC', () async {
       final dataSource = _FakeNewsRemoteDataSource(
         feed: [_feedItem(totalCount: 42)],

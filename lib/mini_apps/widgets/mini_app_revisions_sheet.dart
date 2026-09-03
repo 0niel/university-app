@@ -28,6 +28,8 @@ class MiniAppRevisionsSheet extends StatefulWidget {
 class _MiniAppRevisionsSheetState extends State<MiniAppRevisionsSheet> {
   List<MiniAppRevision>? _revisions;
   bool _busy = false;
+  bool _loadFailed = false;
+  bool _restoreFailed = false;
 
   @override
   void initState() {
@@ -36,17 +38,24 @@ class _MiniAppRevisionsSheetState extends State<MiniAppRevisionsSheet> {
   }
 
   Future<void> _load() async {
+    setState(() {
+      _loadFailed = false;
+      _revisions = null;
+    });
     try {
       final revisions = await widget.repository.getRevisions(widget.app.id);
       if (mounted) setState(() => _revisions = revisions);
     } on Exception {
-      if (mounted) setState(() => _revisions = const []);
+      if (mounted) setState(() => _loadFailed = true);
     }
   }
 
   Future<void> _restore(MiniAppRevision revision) async {
     if (_busy) return;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _restoreFailed = false;
+    });
     try {
       await widget.repository.restoreRevision(
         appId: widget.app.id,
@@ -54,7 +63,12 @@ class _MiniAppRevisionsSheetState extends State<MiniAppRevisionsSheet> {
       );
       if (mounted) Navigator.of(context).pop(true);
     } on Exception {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _restoreFailed = true;
+        });
+      }
     }
   }
 
@@ -90,6 +104,13 @@ class _MiniAppRevisionsSheetState extends State<MiniAppRevisionsSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final revisions = _revisions;
+    if (_loadFailed) {
+      return NinjaErrorState(
+        title: l10n.loadingError,
+        retryLabel: l10n.retry,
+        onRetry: () => unawaited(_load()),
+      );
+    }
     if (revisions == null) {
       return RevisionsSkeleton(canRestore: widget.canRestore);
     }
@@ -97,15 +118,23 @@ class _MiniAppRevisionsSheetState extends State<MiniAppRevisionsSheet> {
       return NinjaEmptyState(
         icon: AppLineIconWidget(
           AppLineIcon.clock,
-          size: 20,
-          color: context.ninja.muted,
+          size: AppIconSize.md,
+          color: context.colors.muted,
         ),
         title: l10n.miniAppsRevEmpty,
       );
     }
     return Column(
       mainAxisSize: .min,
+      crossAxisAlignment: .stretch,
       children: [
+        if (_restoreFailed) ...[
+          NinjaBanner(
+            title: l10n.miniAppsRevRestoreFailure,
+            tone: .danger,
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
         for (final (index, revision) in revisions.indexed)
           NinjaListCell(
             title:

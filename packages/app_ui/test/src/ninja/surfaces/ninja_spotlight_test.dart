@@ -2,168 +2,144 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../kit_harness.dart';
+
 void main() {
-  Widget wrap(Widget child, {bool reduceMotion = false}) => MaterialApp(
-        theme: NinjaTheme.light(),
-        builder: (context, inner) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            disableAnimations: reduceMotion,
-          ),
-          child: inner!,
+  const pulse = AlwaysStoppedAnimation<double>(0);
+  Finder coachTail() => find.descendant(
+        of: find.byType(NinjaCoachCard),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is CustomPaint &&
+              widget.painter != null &&
+              widget.child == null,
         ),
-        home: Scaffold(body: child),
       );
 
   group('NinjaSpotlight', () {
-    testWidgets('punches the scrim and rings the hole', (tester) async {
-      final pulse = AnimationController(
-        vsync: const TestVSync(),
-        duration: const Duration(seconds: 1),
-      )..value = 0.5;
-      addTearDown(pulse.dispose);
-
+    testWidgets('paints a full scrim without a hole', (tester) async {
       await tester.pumpWidget(
-        wrap(
-          NinjaSpotlight(
-            hole: const Rect.fromLTWH(40, 80, 120, 48),
-            pulse: pulse,
+        wrapKit(
+          const SizedBox(
+            width: 300,
+            height: 300,
+            child: NinjaSpotlight(hole: null, pulse: pulse),
           ),
         ),
       );
-      await tester.pumpAndSettle();
 
+      expect(find.byType(IgnorePointer), findsWidgets);
       expect(
-        find.byType(CustomPaint).first,
-        paintsExactlyCountTimes(#drawPath, 3),
+        find.descendant(
+          of: find.byType(NinjaSpotlight),
+          matching: find.byType(CustomPaint),
+        ),
+        findsOneWidget,
       );
+      expect(find.byType(TweenAnimationBuilder<Rect?>), findsNothing);
     });
 
-    testWidgets('drops the pulsing ring with reduced motion', (tester) async {
-      final pulse = AnimationController(
-        vsync: const TestVSync(),
-        duration: const Duration(seconds: 1),
-      )..value = 0.5;
-      addTearDown(pulse.dispose);
-
+    testWidgets('animates the hole into place', (tester) async {
       await tester.pumpWidget(
-        wrap(
-          NinjaSpotlight(
-            hole: const Rect.fromLTWH(40, 80, 120, 48),
-            pulse: pulse,
+        wrapKit(
+          const SizedBox(
+            width: 300,
+            height: 300,
+            child: NinjaSpotlight(
+              hole: Rect.fromLTWH(20, 20, 120, 48),
+              pulse: pulse,
+              shape: NinjaSpotlightShape.circle,
+            ),
           ),
-          reduceMotion: true,
         ),
       );
+
+      expect(find.byType(TweenAnimationBuilder<Rect?>), findsOneWidget);
       await tester.pumpAndSettle();
-
-      expect(
-        find.byType(CustomPaint).first,
-        paintsExactlyCountTimes(#drawPath, 2),
-      );
-    });
-
-    testWidgets('covers the screen while the target is unknown', (
-      tester,
-    ) async {
-      final pulse = AnimationController(
-        vsync: const TestVSync(),
-        duration: const Duration(seconds: 1),
-      );
-      addTearDown(pulse.dispose);
-
-      await tester.pumpWidget(wrap(NinjaSpotlight(hole: null, pulse: pulse)));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byType(CustomPaint).first,
-        paintsExactlyCountTimes(#drawPath, 1),
-      );
+      expect(tester.takeException(), isNull);
     });
   });
 
   group('NinjaCoachCard', () {
-    testWidgets('shows the step copy and drives the tour', (tester) async {
+    testWidgets('renders copy and drives next, back and skip', (
+      tester,
+    ) async {
       var next = 0;
       var back = 0;
       var skip = 0;
-
       await tester.pumpWidget(
-        wrap(
-          NinjaCoachCard(
-            title: 'Поиск по всему кампусу',
-            body: 'Пары, преподаватели и аудитории.',
-            progress: '2 из 9',
-            nextLabel: 'Далее',
-            onNext: () => next++,
-            backLabel: 'Назад',
-            onBack: () => back++,
-            skipLabel: 'Пропустить',
-            onSkip: () => skip++,
+        wrapKit(
+          SizedBox(
+            width: 340,
+            child: NinjaCoachCard(
+              title: 'Отмечайтесь на парах',
+              body: 'Тап по паре открывает действия',
+              progress: '1 / 3',
+              nextLabel: 'Далее',
+              onNext: () => next++,
+              backLabel: 'Назад',
+              onBack: () => back++,
+              skipLabel: 'Пропустить',
+              onSkip: () => skip++,
+              arrow: NinjaCoachArrow.up,
+            ),
           ),
         ),
       );
 
-      expect(find.text('Поиск по всему кампусу'), findsOneWidget);
-      expect(find.text('Пары, преподаватели и аудитории.'), findsOneWidget);
-      expect(find.text('2 из 9'), findsOneWidget);
+      expect(find.text('Отмечайтесь на парах'), findsOneWidget);
+      expect(find.text('1 / 3'), findsOneWidget);
+      expect(kitStyleOf(tester, '1 / 3')?.color, kitColors.accent);
+      final card = kitDecoration(
+        tester,
+        find
+            .descendant(
+              of: find.byType(NinjaCoachCard),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      expect(card.color, kitColors.surface);
+      expect(coachTail(), findsOneWidget);
+      expect(tester.getSize(coachTail()), const Size(20, 9));
+      expect(
+        tester.getBottomLeft(coachTail()).dy,
+        tester
+            .getTopLeft(
+              find
+                  .descendant(
+                    of: find.byType(NinjaCoachCard),
+                    matching: find.byType(DecoratedBox),
+                  )
+                  .first,
+            )
+            .dy,
+      );
 
       await tester.tap(find.text('Далее'));
       await tester.tap(find.text('Назад'));
       await tester.tap(find.text('Пропустить'));
-      await tester.pump();
-
       expect(next, 1);
       expect(back, 1);
       expect(skip, 1);
     });
 
-    testWidgets('hides back and skip on the closing step', (tester) async {
+    testWidgets('omits the tail without an arrow', (tester) async {
       await tester.pumpWidget(
-        wrap(
-          NinjaCoachCard(
-            title: 'Вот и всё',
-            body: 'Обучение можно пройти заново.',
-            nextLabel: 'Готово',
-            onNext: () {},
+        wrapKit(
+          SizedBox(
+            width: 340,
+            child: NinjaCoachCard(
+              title: 'Готово',
+              body: 'Пользуйтесь',
+              nextLabel: 'Понятно',
+              onNext: () {},
+            ),
           ),
         ),
       );
 
-      expect(find.text('Готово'), findsOneWidget);
-      expect(find.text('Назад'), findsNothing);
-      expect(find.text('Пропустить'), findsNothing);
-    });
-
-    testWidgets('grows a tail that points at the highlight', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          NinjaCoachCard(
-            title: 'Пять разделов',
-            body: 'Главная, расписание, карта, сервисы и профиль.',
-            nextLabel: 'Далее',
-            onNext: () {},
-            arrow: NinjaCoachArrow.up,
-            arrowOffset: 60,
-          ),
-        ),
-      );
-
-      final column = tester.widget<Column>(
-        find
-            .descendant(
-              of: find.byType(NinjaCoachCard),
-              matching: find.byType(Column),
-            )
-            .first,
-      );
-      expect(column.children.first, isA<Padding>());
-      expect(
-        find.descendant(
-          of: find.byType(NinjaCoachCard),
-          matching: find.byType(CustomPaint),
-        ),
-        findsWidgets,
-      );
+      expect(coachTail(), findsNothing);
     });
   });
 }

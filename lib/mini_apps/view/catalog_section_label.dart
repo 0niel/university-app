@@ -9,14 +9,14 @@ class _CatalogSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const .fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         28,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: Text(
         title,
-        style: NinjaText.title.copyWith(color: context.ninja.ink),
+        style: AppText.title.copyWith(color: context.colors.ink),
       ),
     );
   }

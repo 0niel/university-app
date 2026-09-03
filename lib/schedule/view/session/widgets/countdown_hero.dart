@@ -1,77 +1,143 @@
-part of '../session_page.dart';
+import 'package:app_ui/app_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/schedule/view/session/session_exam.dart';
 
-class _CountdownHero extends StatelessWidget {
-  const _CountdownHero({required this.exams});
+class CountdownHero extends StatelessWidget {
+  const CountdownHero({
+    required this.exam,
+    required this.readiness,
+    super.key,
+    this.onReadiness,
+  });
 
-  final List<_Exam> exams;
+  final SessionExam exam;
+  final double readiness;
+  final VoidCallback? onReadiness;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    final first = exams.firstOrNull;
-    final last = exams.lastOrNull;
-    final locale = Localizations.localeOf(context).toString();
-    final examCount = exams.where((exam) => exam.lessonType == .exam).length;
-    final creditCount = exams
-        .where((exam) => exam.lessonType == .credit)
-        .length;
-    final avgReadiness = exams.isEmpty
-        ? 0
-        : (exams.fold<double>(0, (sum, exam) => sum + exam.readiness) /
-                  exams.length *
-                  100)
-              .round();
-
-    return NinjaScheduleSurface(
-      padding: const EdgeInsets.all(20),
+    return AppCard(
+      radius: AppRadius.hero,
+      color: colors.examTint,
+      padding: const EdgeInsets.all(AppSpacing.fieldGap),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.sessionUntilFirstExam,
-            textAlign: .center,
-            style: NinjaText.microLabel.copyWith(color: colors.muted),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            first == null ? '—' : '${first.days}',
-            style: NinjaText.tabular(
-              NinjaText.display.copyWith(color: colors.ink),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            first == null
-                ? l10n.sessionNoPlannedExams
-                : l10n.sessionHeroSubtitle(
-                    first.subject,
-                    DateFormat('d MMMM', locale).format(first.date),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xsm,
                   ),
-            textAlign: .center,
-            style: NinjaText.subtext.copyWith(color: colors.mutedDark),
+                  child: Text(
+                    l10n.examsNearestIn(exam.days),
+                    style: AppText.sans(
+                      12,
+                      FontWeight.w700,
+                    ).copyWith(color: colors.danger),
+                  ),
+                ),
+              ),
+              Text(
+                DateFormat(
+                  'd MMM · HH:mm',
+                  Localizations.localeOf(context).toString(),
+                ).format(exam.date),
+                style: AppText.label.copyWith(color: colors.muted),
+              ),
+            ],
           ),
-          if (last != null) ...[
-            const SizedBox(height: 18),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                _HeroStat(
-                  value: '$examCount+$creditCount',
-                  label: l10n.sessionExamsCredits,
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            '${exam.typeName} · ${exam.subject}',
+            style: AppText.section.copyWith(color: colors.ink),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = MediaQuery.textScalerOf(context).scale(1) < 1.5;
+              final readinessControl = AppPressable(
+                onTap: onReadiness,
+                semanticsButton: onReadiness != null,
+                semanticsLabel: l10n.examsReadiness,
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.examsReadiness,
+                            style: AppText.captionBold.copyWith(
+                              color: colors.ink,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${(readiness * 100).round()}%',
+                          style: AppText.captionBold.copyWith(
+                            color: colors.danger,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.xsm),
+                    AppProgressBar(
+                      value: readiness,
+                      color: colors.danger,
+                      trackColor: colors.surface,
+                    ),
+                  ],
                 ),
-                _HeroStat(
-                  value: '$avgReadiness%',
-                  label: l10n.sessionReadinessLabel,
-                ),
-                _HeroStat(
-                  value: '${last.days}',
-                  label: l10n.sessionDaysTotal,
-                ),
-              ],
-            ),
-          ],
+              );
+              final metadata = Text(
+                [
+                  if (exam.room.isNotEmpty) exam.room,
+                  if (exam.teacher.isNotEmpty) exam.teacher,
+                ].join(' · '),
+                style: AppText.captionStrong.copyWith(color: colors.muted),
+              );
+              return compact
+                  ? Row(
+                      children: [
+                        Expanded(child: readinessControl),
+                        if (exam.room.isNotEmpty ||
+                            exam.teacher.isNotEmpty) ...[
+                          const SizedBox(width: AppSpacing.sectionGap),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: constraints.maxWidth * .42,
+                            ),
+                            child: metadata,
+                          ),
+                        ],
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        readinessControl,
+                        if (exam.room.isNotEmpty ||
+                            exam.teacher.isNotEmpty) ...[
+                          const SizedBox(height: AppSpacing.sm),
+                          metadata,
+                        ],
+                      ],
+                    );
+            },
+          ),
         ],
       ),
     );

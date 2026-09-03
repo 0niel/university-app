@@ -60,10 +60,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Тема'), findsOneWidget);
-    await tester.tap(find.text('Тема'));
+    await tester.tap(find.text('Авто'));
     await tester.pumpAndSettle();
-    expect(find.text('Светлая'), findsOneWidget);
-    expect(find.text('Тёмная'), findsOneWidget);
+    expect(find.text('Светлая'), findsWidgets);
+    expect(find.text('Тёмная'), findsWidgets);
     expect(find.text('Авто'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
@@ -110,7 +110,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final colors = NinjaColors.fromAppColors(AppColors.dark, isDark: true);
+    final colors = tester.element(find.byType(SettingsCard)).colors;
     final card = tester.widget<DecoratedBox>(
       find
           .descendant(
@@ -126,7 +126,7 @@ void main() {
     expect(decoration.gradient, isNull);
     expect(
       decoration.borderRadius,
-      BorderRadius.circular(NinjaRadius.card),
+      BorderRadius.circular(AppRadius.card),
     );
     expect(tester.takeException(), isNull);
   });
@@ -159,7 +159,12 @@ void main() {
             child: Scaffold(
               body: SafeArea(
                 child: SingleChildScrollView(
-                  child: SettingsAppearance(),
+                  child: Column(
+                    children: [
+                      SettingsAppearance(),
+                      SettingsAdvancedAppearance(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -169,11 +174,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Акцент института'), findsOneWidget);
+    expect(find.text('Акцент'), findsOneWidget);
     expect(find.text('Цвета типов занятий'), findsOneWidget);
     expect(find.text('🎨'), findsNothing);
-    await tester.ensureVisible(find.text('Акцент института'));
-    await tester.tap(find.text('Акцент института'));
+    await tester.ensureVisible(find.text('Акцент'));
+    await tester.tap(find.text('Акцент'));
     await tester.pumpAndSettle();
 
     expect(find.text('Голубой'), findsOneWidget);

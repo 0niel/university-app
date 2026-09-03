@@ -15,10 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SchedulePreferencesState {
 
- bool get isMiniature; bool get showEmptyLessons; bool get isListModeEnabled; bool get showCommentsIndicators;// Filters sheet: which lesson types are visible.
- bool get showLectures; bool get showSeminars; bool get showLabs; bool get showExams;// Filters sheet: display options.
- bool get showGaps; bool get collapsePast;// Subjects hidden via the hide-lesson confirm dialog.
- List<String> get hiddenSubjects;
+ bool get isMiniature; bool get showEmptyLessons; bool get isListModeEnabled; bool get showCommentsIndicators; bool get showLectures; bool get showSeminars; bool get showLabs; bool get showExams; bool get showGaps; bool get collapsePast; List<String> get hiddenSubjects;
 /// Create a copy of SchedulePreferencesState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -229,17 +226,13 @@ class _SchedulePreferencesState implements SchedulePreferencesState {
 @override@JsonKey() final  bool showEmptyLessons;
 @override@JsonKey() final  bool isListModeEnabled;
 @override@JsonKey() final  bool showCommentsIndicators;
-// Filters sheet: which lesson types are visible.
 @override@JsonKey() final  bool showLectures;
 @override@JsonKey() final  bool showSeminars;
 @override@JsonKey() final  bool showLabs;
 @override@JsonKey() final  bool showExams;
-// Filters sheet: display options.
 @override@JsonKey() final  bool showGaps;
 @override@JsonKey() final  bool collapsePast;
-// Subjects hidden via the hide-lesson confirm dialog.
  final  List<String> _hiddenSubjects;
-// Subjects hidden via the hide-lesson confirm dialog.
 @override@JsonKey() List<String> get hiddenSubjects {
   if (_hiddenSubjects is EqualUnmodifiableListView) return _hiddenSubjects;
   // ignore: implicit_dynamic_type

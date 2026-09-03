@@ -5,22 +5,30 @@ abstract class FreeRoomsState with _$FreeRoomsState {
   const factory FreeRoomsState({
     @Default(FreeRoomsStatus.initial) FreeRoomsStatus status,
     @Default(<FreeRoom>[]) List<FreeRoom> rooms,
-    @Default('all') String building,
+    @Default('') String campus,
+    int? floor,
+    @Default('') String query,
   }) = _FreeRoomsState;
 
   const FreeRoomsState._();
 
-  List<FreeRoom> get filteredRooms => [
-    for (final room in rooms)
-      if (building == 'all' || room.building == building) room,
-  ];
+  List<FreeRoom> campusRooms(Map<String, int> roomFloors) =>
+      filterFreeRooms(rooms, campus: campus, roomFloors: roomFloors);
 
-  List<String> get buildings {
+  List<FreeRoom> filtered(Map<String, int> roomFloors) => filterFreeRooms(
+    rooms,
+    campus: campus,
+    floor: floor,
+    query: query,
+    roomFloors: roomFloors,
+  );
+
+  List<String> get campuses {
     final set = <String>{};
     for (final room in rooms) {
-      if (room.building.isNotEmpty) set.add(room.building);
+      final campus = room.campus;
+      if (campus != null && campus.isNotEmpty) set.add(campus);
     }
-    final list = set.toList()..sort();
-    return list.take(7).toList();
+    return set.toList()..sort();
   }
 }

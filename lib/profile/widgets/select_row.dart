@@ -20,7 +20,7 @@ class _SelectRow<T> extends StatelessWidget {
       showChevron: false,
       horizontalPadding: AppSpacing.xl,
       onTap: onTap,
-      trailing: NinjaRadio<T>(
+      trailing: AppRadio<T>(
         value: value,
         groupValue: groupValue,
         onChanged: (_) => onTap(),

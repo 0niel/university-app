@@ -12,15 +12,15 @@ class MentorshipSkeleton extends StatelessWidget {
           for (var index = 0; index < 3; index++)
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 0,
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 10,
               ),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: context.ninja.surface,
-                  borderRadius: BorderRadius.circular(NinjaRadius.card),
+                  color: context.colors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.card),
                 ),
                 child: const Padding(
                   padding: EdgeInsets.all(16),
@@ -31,7 +31,7 @@ class MentorshipSkeleton extends StatelessWidget {
                       NinjaSkeletonRow(),
                       NinjaSkeleton.bar(height: 11),
                       NinjaSkeleton.bar(height: 11, widthFactor: 0.7),
-                      NinjaSkeleton(height: 48, radius: NinjaRadius.pill),
+                      NinjaSkeleton(height: 48, radius: AppRadius.full),
                     ],
                   ),
                 ),

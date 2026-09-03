@@ -7,7 +7,7 @@ class MapLoadingPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final label = context.l10n.mapOpeningFloor;
     return Semantics(
       liveRegion: true,
@@ -15,7 +15,7 @@ class MapLoadingPill extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.pill),
+          borderRadius: .circular(AppRadius.full),
         ),
         child: Padding(
           padding: const .symmetric(horizontal: 16, vertical: 11),
@@ -24,9 +24,11 @@ class MapLoadingPill extends StatelessWidget {
             children: [
               NinjaSpinner(size: 16, strokeWidth: 2, color: colors.ink),
               const SizedBox(width: 9),
-              Text(
-                label,
-                style: NinjaText.microLabel.copyWith(color: colors.ink),
+              Flexible(
+                child: Text(
+                  label,
+                  style: AppText.captionSmall.copyWith(color: colors.ink),
+                ),
               ),
             ],
           ),

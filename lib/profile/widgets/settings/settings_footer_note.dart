@@ -7,18 +7,18 @@ class SettingsFooterNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         20,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         MediaQuery.paddingOf(context).bottom + 24,
       ),
       child: Text(
         context.l10n.settingsFooter,
         textAlign: TextAlign.center,
-        style: NinjaText.helper.copyWith(color: colors.chevron),
+        style: AppText.caption.copyWith(color: colors.muted2),
       ),
     );
   }

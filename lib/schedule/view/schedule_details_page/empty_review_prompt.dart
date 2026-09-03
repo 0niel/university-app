@@ -5,26 +5,26 @@ class _EmptyReviewPrompt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Container(
-      padding: const .all(16),
+      padding: const .all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Row(
         children: [
           Expanded(
             child: Text(
               context.l10n.lessonDetailsLeaveReview,
-              style: NinjaText.body.copyWith(color: colors.ink),
+              style: AppText.body.copyWith(color: colors.ink),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           AppLineIconWidget(
             AppLineIcon.chevronR,
             size: 16,
-            color: colors.chevron,
+            color: colors.muted2,
           ),
         ],
       ),

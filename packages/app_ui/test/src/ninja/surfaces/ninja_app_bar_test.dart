@@ -2,136 +2,239 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../kit_harness.dart';
+
 void main() {
-  final colors = NinjaColors.light();
+  Widget host(Widget child) => wrapKit(SizedBox(width: 390, child: child));
 
-  Widget wrap(NinjaAppBar appBar) => MaterialApp(
-        theme: NinjaTheme.light(),
-        home: Scaffold(appBar: appBar, body: const SizedBox()),
-      );
-
-  group('NinjaAppBar (root)', () {
-    testWidgets('renders the display title and outline actions', (
+  group('AppScreenHeader', () {
+    testWidgets('renders display title, overline, subtitle and 42px circles', (
       tester,
     ) async {
-      var searched = 0;
+      var taps = 0;
       await tester.pumpWidget(
-        wrap(
-          NinjaAppBar(
-            title: 'Расписание',
+        host(
+          AppScreenHeader(
+            title: 'Главная',
+            overline: 'среда',
+            subtitle: '4 пары',
             actions: [
-              NinjaAppBarAction(
-                icon: const Icon(Icons.search),
-                onPressed: () => searched++,
-                semanticLabel: 'Поиск',
-              ),
-              const NinjaAppBarAction(
-                icon: Icon(Icons.notifications_none),
-                hasBadge: true,
+              AppHeaderAction(
+                icon: AppLineIcon.bell,
+                badge: true,
+                onTap: () => taps++,
               ),
             ],
           ),
         ),
       );
 
-      final title = tester.widget<Text>(find.text('Расписание')).style;
-      expect(title?.fontSize, 20);
-      expect(title?.fontWeight, FontWeight.w700);
-      expect(title?.letterSpacing, -0.3);
+      final title = kitStyleOf(tester, 'Главная');
+      expect(title?.fontSize, 34);
+      expect(title?.fontFamily, AppText.serifFamily);
+      expect(find.text('СРЕДА'), findsOneWidget);
+      expect(kitStyleOf(tester, '4 пары')?.color, kitColors.muted);
 
-      final iconTheme = IconTheme.of(tester.element(find.byIcon(Icons.search)));
-      expect(iconTheme.size, 18);
-      expect(iconTheme.color, colors.ink);
+      final top = tester.widget<Padding>(
+        find
+            .descendant(
+              of: find.byType(AppScreenHeader),
+              matching: find.byType(Padding),
+            )
+            .first,
+      );
+      expect(top.padding.resolve(TextDirection.ltr).top, AppSpacing.screenTop);
 
-      final badges = tester.widgetList<Container>(find.byType(Container)).where(
-            (container) =>
-                (container.decoration as BoxDecoration?)?.color ==
-                colors.scarlet,
-          );
-      expect(badges, hasLength(1));
-
-      await tester.tap(find.byIcon(Icons.search));
-      expect(searched, 1);
+      final circle = kitDecorationOf(tester, AppHeaderCircleButton);
+      expect(circle.color, kitColors.surface);
+      expect(circle.shape, BoxShape.circle);
+      expect(
+        tester.getSize(find.byType(AppHeaderCircleButton)).width,
+        AppControlSize.touchTarget,
+      );
       expect(
         tester.getSize(
           find
-              .ancestor(
-                of: find.byIcon(Icons.search),
-                matching: find.byType(SizedBox),
+              .descendant(
+                of: find.byType(AppHeaderCircleButton),
+                matching: find.byType(Container),
               )
               .first,
         ),
-        const Size(44, 44),
+        const Size.square(AppControlSize.iconButtonCompact),
+      );
+      await tester.tap(find.byType(AppHeaderCircleButton));
+      expect(taps, 1);
+    });
+
+    testWidgets('pill button shows label with a chevron', (tester) async {
+      await tester.pumpWidget(
+        host(AppHeaderPillButton(label: 'Неделя 3', onTap: () {})),
+      );
+
+      expect(
+        kitDecorationOf(tester, AppHeaderPillButton).color,
+        kitColors.surface,
+      );
+      expect(kitStyleOf(tester, 'Неделя 3')?.fontWeight, FontWeight.w700);
+      expect(
+        tester.widget<AppLineIconWidget>(find.byType(AppLineIconWidget)).icon,
+        AppLineIcon.chevronD,
       );
     });
 
-    testWidgets('reserves 72px of height', (tester) async {
-      const bar = NinjaAppBar(title: 'Расписание');
-      expect(bar.preferredSize.height, 72);
-    });
-  });
-
-  group('NinjaAppBar.inner', () {
-    testWidgets('renders back arrow, title and brand action', (tester) async {
-      var back = 0;
-      var help = 0;
+    testWidgets('text action keeps reference layout with a 44px touch target', (
+      tester,
+    ) async {
+      var taps = 0;
+      const actionKey = ValueKey('header-text-action');
       await tester.pumpWidget(
-        wrap(
-          NinjaAppBar.inner(
-            title: 'Отчёт по лабе №3',
-            onBack: () => back++,
-            backSemanticLabel: 'Назад',
-            actionLabel: 'помощь',
-            onAction: () => help++,
+        host(
+          AppScreenHeader(
+            title: 'Сервисы',
+            textAction: AppHeaderTextAction(
+              key: actionKey,
+              label: 'Настроить',
+              onTap: () => taps++,
+            ),
           ),
         ),
       );
 
-      expect(find.byType(NinjaGlyphIcon), findsOneWidget);
-      final title = tester.widget<Text>(find.text('Отчёт по лабе №3')).style;
-      expect(title?.fontSize, 15);
-      expect(title?.fontWeight, FontWeight.w600);
-
-      final action = tester.widget<Text>(find.text('помощь')).style;
-      expect(action?.fontSize, 12.5);
-      expect(action?.fontWeight, FontWeight.w700);
-      expect(action?.color, colors.brandInk);
-
-      await tester.tap(find.byType(NinjaGlyphIcon));
-      expect(back, 1);
-      await tester.tap(find.text('помощь'));
-      expect(help, 1);
-      expect(
-        tester.getSize(
-          find
-              .ancestor(
-                of: find.byType(NinjaGlyphIcon),
-                matching: find.byType(SizedBox),
-              )
-              .first,
-        ),
-        const Size(44, 44),
-      );
-      expect(
-        tester
-            .getSize(
-              find
-                  .ancestor(
-                    of: find.text('помощь'),
-                    matching: find.byType(ConstrainedBox),
-                  )
-                  .first,
-            )
-            .height,
-        greaterThanOrEqualTo(44),
-      );
+      final header = tester.getRect(find.byType(AppScreenHeader));
+      final title = tester.getRect(find.text('Сервисы'));
+      final action = tester.getRect(find.byKey(actionKey));
+      final label = tester.getRect(find.text('Настроить'));
+      expect(title.left - header.left, AppSpacing.screen);
+      expect(title.top - header.top, AppSpacing.screenTop);
+      expect(header.bottom, title.bottom);
+      expect(action.height, AppControlSize.touchTarget);
+      expect(action.width, greaterThanOrEqualTo(AppControlSize.touchTarget));
+      expect(label.right, header.right - AppSpacing.screen);
+      expect(label.bottom, header.bottom - AppSpacing.sm);
+      expect(kitStyleOf(tester, 'Настроить')?.color, kitColors.accent);
+      await tester.tapAt(action.topCenter + const Offset(0, 1));
+      expect(taps, 1);
     });
 
-    testWidgets('hides the arrow without a handler', (tester) async {
-      await tester.pumpWidget(wrap(const NinjaAppBar.inner(title: 'Заявка')));
-      expect(find.byType(NinjaGlyphIcon), findsNothing);
-      const bar = NinjaAppBar.inner(title: 'Заявка');
-      expect(bar.preferredSize.height, 56);
+    testWidgets('text action remains bounded at 200 percent and in RTL', (
+      tester,
+    ) async {
+      for (final direction in TextDirection.values) {
+        await tester.pumpWidget(
+          wrapKit(
+            Directionality(
+              textDirection: direction,
+              child: SizedBox(
+                width: 320,
+                child: AppScreenHeader(
+                  title: 'Сервисы',
+                  textAction: AppHeaderTextAction(
+                    key: const ValueKey('header-text-action'),
+                    label: 'Настроить',
+                    onTap: () {},
+                  ),
+                ),
+              ),
+            ),
+            textScale: 2,
+          ),
+        );
+
+        final header = tester.getRect(find.byType(AppScreenHeader));
+        final action = tester.getRect(
+          find.byKey(const ValueKey('header-text-action')),
+        );
+        expect(action.height, greaterThanOrEqualTo(AppControlSize.touchTarget));
+        expect(action.width, greaterThanOrEqualTo(AppControlSize.touchTarget));
+        expect(header.contains(action.topLeft), isTrue);
+        expect(
+          header.contains(action.bottomRight - const Offset(1, 1)),
+          isTrue,
+        );
+        expect(tester.takeException(), isNull);
+      }
+    });
+  });
+
+  group('AppInnerHeader', () {
+    testWidgets('renders a 44px back circle, 28px title and muted trailing', (
+      tester,
+    ) async {
+      var backs = 0;
+      await tester.pumpWidget(
+        host(
+          AppInnerHeader(
+            title: 'Дедлайны',
+            subtitle: '3 активных',
+            onBack: () => backs++,
+            trailingLabel: 'Изменить',
+          ),
+        ),
+      );
+
+      final title = kitStyleOf(tester, 'Дедлайны');
+      expect(title?.fontSize, 28);
+      expect(title?.fontFamily, AppText.serifFamily);
+      final back = tester.widget<Container>(
+        find
+            .ancestor(
+              of: find.byType(AppLineIconWidget),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      expect(back.constraints?.maxWidth, AppControlSize.iconButton);
+      final trailing = kitStyleOf(tester, 'Изменить');
+      expect(trailing?.fontSize, 13);
+      expect(trailing?.color, kitColors.muted);
+
+      await tester.tap(find.byType(AppLineIconWidget));
+      expect(backs, 1);
+    });
+  });
+
+  group('AppSectionTitle / AppOverline', () {
+    testWidgets('section title pairs serif 22 with an accent action', (
+      tester,
+    ) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        host(
+          AppSectionTitle(
+            title: 'Дедлайны',
+            action: 'все',
+            onActionTap: () => taps++,
+          ),
+        ),
+      );
+
+      expect(kitStyleOf(tester, 'Дедлайны')?.fontSize, 22);
+      final action = kitStyleOf(tester, 'все');
+      expect(action?.fontSize, 13);
+      expect(action?.fontWeight, FontWeight.w600);
+      expect(action?.color, kitColors.accent);
+      await tester.tap(find.text('все'));
+      expect(taps, 1);
+    });
+
+    testWidgets('meta variant is 13/500 muted', (tester) async {
+      await tester.pumpWidget(
+        host(const AppSectionTitle(title: 'Сегодня', meta: '4 пары')),
+      );
+
+      final meta = kitStyleOf(tester, '4 пары');
+      expect(meta?.fontWeight, FontWeight.w500);
+      expect(meta?.color, kitColors.muted);
+    });
+
+    testWidgets('overline is uppercase 11.5/700 muted', (tester) async {
+      await tester.pumpWidget(host(const AppOverline('сегодня')));
+
+      final style = kitStyleOf(tester, 'СЕГОДНЯ');
+      expect(style?.fontSize, 11.5);
+      expect(style?.fontWeight, FontWeight.w700);
+      expect(style?.color, kitColors.muted);
     });
   });
 }

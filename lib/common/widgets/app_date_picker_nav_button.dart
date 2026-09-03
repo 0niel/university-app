@@ -4,36 +4,25 @@ class AppDatePickerNavButton extends StatelessWidget {
   const AppDatePickerNavButton({
     required this.icon,
     required this.onTap,
+    required this.semanticsLabel,
     super.key,
   });
 
   final AppLineIcon icon;
   final VoidCallback onTap;
+  final String semanticsLabel;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    return Semantics(
-      button: true,
-      child: AppPressable(
-        onTap: onTap,
-        child: SizedBox.square(
-          dimension: 44,
-          child: Center(
-            child: Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: colors.surface,
-                shape: .circle,
-              ),
-              child: Center(
-                child: AppLineIconWidget(icon, size: 18, color: colors.ink),
-              ),
-            ),
-          ),
-        ),
-      ),
+    return AppIconButton(
+      icon: AppLineIconWidget(icon),
+      onPressed: onTap,
+      tooltip: semanticsLabel,
+      tone: AppIconButtonTone.surface,
+      shape: AppIconButtonShape.circle,
+      size: AppIconButtonSize.small,
+      iconSize: 18,
+      strokeWidth: 2.4,
     );
   }
 }

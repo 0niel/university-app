@@ -13,29 +13,32 @@ class _SheetPickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return AppPressable(
       onTap: onTap,
       child: Container(
         constraints: const BoxConstraints(
-          minHeight: NinjaMetrics.minTouchTarget,
+          minHeight: AppControlSize.iconButton,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: 13,
+        ),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.button),
+          borderRadius: BorderRadius.circular(AppRadius.full),
         ),
         child: Row(
           children: [
             AppLineIconWidget(icon, size: 17, color: colors.muted),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.gap),
             Expanded(
               child: Text(
                 value,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: NinjaText.tabular(
-                  NinjaText.body.copyWith(color: colors.ink),
+                style: AppText.tabular(
+                  AppText.body.copyWith(color: colors.ink),
                 ),
               ),
             ),

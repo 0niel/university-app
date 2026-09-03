@@ -78,7 +78,7 @@ async def _prepare_story(
             max_byte_size=settings.MAX_FILE_SIZE_MB * 1024 * 1024,
         )
         if media is None:
-            return prepared
+            raise ValueError("Telegram story media is unavailable")
         digest = hashlib.sha256(media.data).hexdigest()
         story_id = int(str(raw["id"]).removeprefix("story-"))
         ticket = await ingest.create_story_media_upload(
@@ -200,6 +200,9 @@ async def _drain_message_source(
                 raw_items=raw_items,
                 checkpoint=checkpoint,
                 metadata={"mode": "bootstrap" if bootstrap else "incremental"},
+                source_info=await fetcher.get_source_info(channel)
+                if not raw_items
+                else None,
             )
         except Exception as error:
             await _record_sync_failure(
@@ -266,6 +269,9 @@ async def _reconcile_messages(
             raw_items=raw_items,
             checkpoint=run.checkpoint,
             metadata={"mode": "reconcile"},
+            source_info=await fetcher.get_source_info(channel)
+            if not raw_items
+            else None,
         )
     except Exception as error:
         await _record_sync_failure(
@@ -321,6 +327,7 @@ async def _sync_story_snapshot(
                 "last_story_id": last_story_id,
             },
             metadata={"mode": "snapshot"},
+            source_info=await fetcher.get_source_info(channel),
         )
     except Exception as error:
         await _record_sync_failure(
@@ -344,11 +351,12 @@ async def _ingest_observed_batch(
     raw_items: list[dict[str, Any]],
     checkpoint: dict[str, Any],
     metadata: dict[str, Any],
+    source_info: dict[str, Any] | None = None,
 ) -> None:
     try:
         await ingest.ingest_news(
             settings.APP_ORGANIZATION_ID,
-            _source(channel, source_type),
+            _source(channel, source_type, raw_items, source_info),
             [
                 _item(item, source_name=channel, source_type=source_type)
                 for item in raw_items
@@ -413,13 +421,39 @@ async def _rollback_story_media(
         logger.exception("Telegram story media rollback failed for @{}", channel)
 
 
-def _source(channel: str, source_type: str) -> IngestSource:
+def _source(
+    channel: str,
+    source_type: str,
+    raw_items: list[dict[str, Any]] | None = None,
+    source_info: dict[str, Any] | None = None,
+) -> IngestSource:
+    info = source_info or {}
+    chat = next(
+        (
+            item["chat"]
+            for item in raw_items or []
+            if isinstance(item.get("chat"), dict)
+        ),
+        {
+            "title": info.get("name"),
+            "photo_url": info.get("photo_url"),
+            "participants_count": info.get("subscribers_count"),
+        },
+    )
+    metadata = {}
+    if isinstance(chat.get("photo_url"), str) and chat["photo_url"].startswith(
+        "https://"
+    ):
+        metadata["avatar_url"] = chat["photo_url"]
+    if isinstance(chat.get("participants_count"), int):
+        metadata["subscribers"] = str(chat["participants_count"])
     return IngestSource(
         source_type=source_type,
         source_external_id=channel,
-        source_name=f"@{channel}",
+        source_name=chat.get("title") or f"@{channel}",
         source_url=f"https://t.me/{channel}",
         category="telegram",
+        metadata=metadata,
     )
 
 

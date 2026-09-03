@@ -56,4 +56,65 @@ void main() {
       isTrue,
     );
   });
+
+  testWidgets('standalone rows retain their rounded selection', (tester) async {
+    await tester.pumpWidget(
+      wrap(const AppRadioRow(title: 'Standalone', selected: true)),
+    );
+    final container = tester.widget<AnimatedContainer>(
+      find.byType(AnimatedContainer).first,
+    );
+    expect(
+      (container.decoration! as BoxDecoration).borderRadius,
+      BorderRadius.circular(AppRadius.card),
+    );
+  });
+
+  for (final dark in [false, true]) {
+    testWidgets('grouped middle selection is flat in dark=$dark',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: dark ? AppTheme.darkTheme : AppTheme.lightTheme,
+          home: const Scaffold(
+            body: AppListGroup(
+              children: [
+                AppRadioRow(
+                  title: 'First',
+                  selected: false,
+                  borderRadius: BorderRadius.zero,
+                ),
+                AppRadioRow(
+                  title: 'Middle',
+                  selected: true,
+                  borderRadius: BorderRadius.zero,
+                ),
+                AppRadioRow(
+                  title: 'Last',
+                  selected: false,
+                  borderRadius: BorderRadius.zero,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      final middle = find
+          .ancestor(
+            of: find.text('Middle'),
+            matching: find.byType(AnimatedContainer),
+          )
+          .first;
+      final decoration =
+          tester.widget<AnimatedContainer>(middle).decoration! as BoxDecoration;
+      expect(decoration.borderRadius, BorderRadius.zero);
+      expect(
+        decoration.color,
+        dark ? AppColors.dark.tint : AppColors.light.tint,
+      );
+      final clip = tester.widget<ClipRRect>(find.byType(ClipRRect));
+      expect(clip.borderRadius, BorderRadius.circular(AppRadius.card));
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

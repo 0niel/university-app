@@ -7,17 +7,17 @@ class WalletComingLaterNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Text(
           text,
-          style: NinjaText.subtext.copyWith(color: colors.muted),
+          style: AppText.subtext.copyWith(color: colors.muted),
         ),
       ),
     );

@@ -15,9 +15,10 @@ class MockStorage extends Mock implements Storage {}
 void main() {
   late NfcPassRepository repository;
   late ImagePicker imagePicker;
+  late Storage storage;
 
   setUp(() {
-    final storage = MockStorage();
+    storage = MockStorage();
     when(() => storage.read(any())).thenReturn(null);
     when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
     when(() => storage.delete(any())).thenAnswer((_) async {});
@@ -224,14 +225,62 @@ void main() {
     });
 
     group('hydration', () {
-      test('can be (de)serialized', () {
+      test('persists only the selected background media', () {
         final cubit = buildCubit();
+        addTearDown(cubit.close);
         const state = NfcPassState(
           status: NfcPassStatus.bound,
           passId: 42,
+          errorMessage: 'Previous binding error',
           localFilePath: 'clip.mp4',
         );
-        expect(cubit.fromJson(cubit.toJson(state)), state);
+        expect(cubit.toJson(state), {'localFilePath': 'clip.mp4'});
+        expect(
+          cubit.fromJson(cubit.toJson(state)),
+          const NfcPassState(localFilePath: 'clip.mp4'),
+        );
+      });
+
+      test('ignores legacy cached binding and errors', () {
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        expect(
+          cubit.fromJson({
+            'status': NfcPassStatus.bound.index,
+            'passId': 42,
+            'errorMessage': 'Previous binding error',
+            'localFilePath': 'background.png',
+          }),
+          const NfcPassState(localFilePath: 'background.png'),
+        );
+        expect(cubit.fromJson({}), const NfcPassState());
+      });
+
+      test('reloads the real binding from the secure repository', () async {
+        when(() => storage.read('NfcPassCubit')).thenReturn({
+          'status': NfcPassStatus.bound.index,
+          'passId': 42,
+          'errorMessage': 'Previous binding error',
+          'localFilePath': 'clip.mp4',
+        });
+        when(repository.isPassBound).thenAnswer((_) async => true);
+        when(repository.getPassId).thenAnswer((_) async => 12345);
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        expect(cubit.state, const NfcPassState(localFilePath: 'clip.mp4'));
+
+        await cubit.checkBound();
+
+        expect(
+          cubit.state,
+          const NfcPassState(
+            status: NfcPassStatus.bound,
+            passId: 12345,
+            localFilePath: 'clip.mp4',
+          ),
+        );
+        verify(repository.isPassBound).called(1);
+        verify(repository.getPassId).called(1);
       });
     });
   });

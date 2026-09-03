@@ -88,7 +88,6 @@ class _CreateTeamSheetState extends State<CreateTeamSheet> {
         children: [
           NinjaSegmented<String>(
             value: _kind,
-            expanded: true,
             onChanged: saving ? null : (value) => setState(() => _kind = value),
             segments: [
               for (final kind in config.teamKindKeys)
@@ -116,8 +115,8 @@ class _CreateTeamSheetState extends State<CreateTeamSheet> {
           ),
           Text(
             context.l10n.teamFinderCreateRolesLabel,
-            style: NinjaText.microLabel.copyWith(
-              color: context.ninja.muted,
+            style: AppText.captionSmall.copyWith(
+              color: context.colors.muted,
             ),
           ),
           Wrap(
@@ -165,8 +164,8 @@ class _CreateTeamSheetState extends State<CreateTeamSheet> {
     return Container(
       padding: const .symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: context.ninja.surface,
-        borderRadius: .circular(NinjaRadius.button),
+        color: context.colors.surface,
+        borderRadius: .circular(AppRadius.full),
       ),
       child: Row(
         spacing: 4,
@@ -196,7 +195,7 @@ class _CreateTeamSheetState extends State<CreateTeamSheet> {
   }
 
   Widget _deadlineControl(BuildContext context, {required bool saving}) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final deadline = _deadline;
     final label = deadline == null
         ? context.l10n.teamFinderCreateDeadlineEmpty
@@ -211,7 +210,7 @@ class _CreateTeamSheetState extends State<CreateTeamSheet> {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.control),
+          borderRadius: .circular(AppRadius.field),
         ),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 56),
@@ -223,7 +222,7 @@ class _CreateTeamSheetState extends State<CreateTeamSheet> {
                 Expanded(
                   child: Text(
                     label,
-                    style: NinjaText.body.copyWith(color: colors.ink),
+                    style: AppText.body.copyWith(color: colors.ink),
                   ),
                 ),
                 AppLineIconWidget(.calendar, size: 17, color: colors.muted),

@@ -25,9 +25,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     final previousMode = _modeFor;
     setState(() => _target = target);
     if (_modeFor != previousMode) {
-      context.read<SearchBloc>()
-        ..add(SearchModeChanged(searchMode: _modeFor))
-        ..add(SearchQueryChanged(searchQuery: _controller.text));
+      context.read<SearchBloc>().add(SearchModeChanged(searchMode: _modeFor));
     }
   }
 
@@ -48,61 +46,70 @@ class _AddScheduleViewState extends State<AddScheduleView> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
-            4,
-            NinjaMetrics.screenPadding,
-            14,
-          ),
-          child: NinjaTabs<ScheduleTarget>(
-            value: _target,
-            onChanged: _onTargetChanged,
-            padding: EdgeInsets.zero,
-            spacing: 16,
-            tabs: [
-              NinjaTab(
-                value: ScheduleTarget.group,
-                label: l10n.addScheduleTabGroup,
-              ),
-              NinjaTab(
-                value: ScheduleTarget.teacher,
-                label: l10n.addScheduleTabTeacher,
-              ),
-              NinjaTab(
-                value: ScheduleTarget.classroom,
-                label: l10n.addScheduleTabClassroom,
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
-            0,
-            NinjaMetrics.screenPadding,
-            14,
-          ),
-          child: NinjaInput(
-            controller: _controller,
-            autofocus: true,
-            leadingIcon: AppLineIconWidget(
-              AppLineIcon.search,
-              color: context.ninja.muted,
-              size: 18,
+    return NestedScrollView(
+      headerSliverBuilder: (context, innerBoxIsScrolled) => [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+            child: AppInnerHeader(
+              title: l10n.addScheduleTitle,
+              onBack: () => Navigator.of(context).maybePop(),
             ),
-            placeholder: _hint,
-            onChanged: _onQueryChanged,
           ),
         ),
-        Expanded(
-          child: _query.trim().isNotEmpty
-              ? _AddScheduleResults(target: _target)
-              : _ScheduleZeroState(onCreate: () => _openCreate(context)),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screen,
+              0,
+              AppSpacing.screen,
+              14,
+            ),
+            child: AppSegmentedControl<ScheduleTarget>(
+              value: _target,
+              onChanged: _onTargetChanged,
+              onCanvas: true,
+              options: [
+                AppSegmentedOption(
+                  value: ScheduleTarget.group,
+                  label: l10n.addScheduleTabGroup,
+                ),
+                AppSegmentedOption(
+                  value: ScheduleTarget.teacher,
+                  label: l10n.addScheduleTabTeacher,
+                ),
+                AppSegmentedOption(
+                  value: ScheduleTarget.classroom,
+                  label: l10n.addScheduleTabClassroom,
+                ),
+              ],
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screen,
+              0,
+              AppSpacing.screen,
+              14,
+            ),
+            child: AppSearchField(
+              controller: _controller,
+              autofocus: true,
+              onCanvas: true,
+              hintText: _hint,
+              onChanged: _onQueryChanged,
+            ),
+          ),
         ),
       ],
+      body: _query.trim().isNotEmpty
+          ? _AddScheduleResults(
+              target: _target,
+              onRetry: () => _onQueryChanged(_controller.text),
+            )
+          : _ScheduleZeroState(onCreate: () => _openCreate(context)),
     );
   }
 

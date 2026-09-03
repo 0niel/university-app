@@ -21,10 +21,12 @@ import 'package:stac_bridge/src/widgets/app_control_parsers.dart';
 import 'package:stac_bridge/src/widgets/app_data_parsers.dart';
 import 'package:stac_bridge/src/widgets/app_empty_state_parser.dart';
 import 'package:stac_bridge/src/widgets/app_icon_parsers.dart';
+import 'package:stac_bridge/src/widgets/app_input_field_parser.dart';
 import 'package:stac_bridge/src/widgets/app_list_row_parser.dart';
 import 'package:stac_bridge/src/widgets/app_meta_pill_parser.dart';
 import 'package:stac_bridge/src/widgets/app_section_title_parser.dart';
 import 'package:stac_bridge/src/widgets/app_state_parsers.dart';
+import 'package:stac_bridge/src/widgets/app_text_parser.dart';
 
 export 'stac_bridge_config.dart';
 
@@ -49,6 +51,7 @@ abstract final class StacBridge {
     StacAppEmptyStateParser(),
     StacAppErrorStateParser(),
     StacAppIconButtonParser(),
+    StacAppInputFieldParser(),
     StacAppLineIconParser(),
     StacAppListRowParser(),
     StacAppLiveBadgeParser(),
@@ -60,6 +63,7 @@ abstract final class StacBridge {
     StacAppStateScopeParser(),
     StacAppSmartChipParser(),
     StacAppTagParser(),
+    StacAppTextParser(),
     StacAppToggleParser(),
   ];
 

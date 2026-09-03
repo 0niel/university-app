@@ -17,7 +17,7 @@ class WalletSpendTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final boost = (
       title: l10n.walletSpendBoostTitle,
@@ -33,10 +33,10 @@ class WalletSpendTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.only(bottom: AppSpacing.gap),
           child: Text(
             l10n.walletSpendSectionTitle,
-            style: NinjaText.headline.copyWith(color: colors.ink),
+            style: AppText.headline.copyWith(color: colors.ink),
           ),
         ),
         WalletSpendRow(
@@ -45,7 +45,7 @@ class WalletSpendTab extends StatelessWidget {
         ).animateListItem(),
         WalletSpendRow(item: teaser).animateListItem(index: 1),
         Padding(
-          padding: const EdgeInsets.only(top: 10),
+          padding: const EdgeInsets.only(top: AppSpacing.gap),
           child: WalletComingLaterNote(text: l10n.walletSpendPartnersLater),
         ),
       ],

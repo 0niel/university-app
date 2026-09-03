@@ -1,7 +1,6 @@
 import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/community/widgets/deadlines/deadline_row.dart';
-import 'package:rtu_mirea_app/community/widgets/ninja_section_title.dart';
+import 'package:flutter/widgets.dart';
+import 'package:rtu_mirea_app/community/view/deadlines/deadline_labels.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 class DeadlineGroup extends StatelessWidget {
@@ -12,6 +11,7 @@ class DeadlineGroup extends StatelessWidget {
     required this.onToggle,
     super.key,
     this.dimmed = false,
+    this.now,
   });
 
   final String title;
@@ -19,39 +19,36 @@ class DeadlineGroup extends StatelessWidget {
   final Set<String> pendingDeadlineIds;
   final ValueChanged<String> onToggle;
   final bool dimmed;
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
     return SliverMainAxisGroup(
       slivers: [
         SliverToBoxAdapter(
-          child: NinjaSectionTitle(
-            title: title,
-            count: deadlines.length,
-            topPadding: 8,
-          ),
+          child: AppOverline(title, topPadding: 24, bottomPadding: 12),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
-            6,
-            NinjaMetrics.screenPadding,
-            0,
-          ),
-          sliver: SliverList.builder(
-            itemCount: deadlines.length,
-            itemBuilder: (context, index) {
-              final deadline = deadlines[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: DeadlineRow(
-                  deadline: deadline,
-                  pending: pendingDeadlineIds.contains(deadline.id),
-                  dimmed: dimmed,
-                  onToggle: () => onToggle(deadline.id),
-                ),
-              ).animateListItem(key: ValueKey(deadline.id), index: index);
-            },
+        SliverToBoxAdapter(
+          child: Opacity(
+            opacity: dimmed ? 0.75 : 1,
+            child: AppListGroup(
+              children: [
+                for (final deadline in deadlines)
+                  AppDeadlineRow(
+                    key: ValueKey('deadline-${deadline.id}'),
+                    title: deadline.title,
+                    meta: deadlineMetaLabel(context, deadline, now: now),
+                    left: deadlineLeftLabel(context, deadline, now: now),
+                    urgent: deadline.isUrgentAt(now ?? DateTime.now()),
+                    done: deadline.isDone,
+                    onToggle:
+                        deadline.isMine &&
+                            !pendingDeadlineIds.contains(deadline.id)
+                        ? () => onToggle(deadline.id)
+                        : null,
+                  ),
+              ],
+            ),
           ),
         ),
       ],

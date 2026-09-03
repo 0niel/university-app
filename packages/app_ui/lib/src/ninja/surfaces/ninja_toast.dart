@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
-import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:app_ui/src/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 
 class NinjaToast extends StatelessWidget {
@@ -12,133 +10,32 @@ class NinjaToast extends StatelessWidget {
     required this.message,
     super.key,
     this.showCheck = true,
+    this.icon,
     this.actionLabel,
     this.onAction,
   });
 
   final String message;
   final bool showCheck;
+  final AppLineIcon? icon;
   final String? actionLabel;
   final VoidCallback? onAction;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final action = actionLabel;
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final stacked = textScale >= 1.5;
-
-    final messageWidget = Semantics(
-      label: message,
-      liveRegion: true,
-      container: true,
-      excludeSemantics: true,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (showCheck) ...[
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.brand,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: SizedBox.square(
-                dimension: 32,
-                child: Center(
-                  child: AppLineIconWidget(
-                    AppLineIcon.check,
-                    size: 17,
-                    strokeWidth: 2.5,
-                    color: colors.onBrand,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Text(
-                message,
-                style: NinjaText.body.copyWith(
-                  color: colors.onInk,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    final actionWidget = action == null
-        ? null
-        : Semantics(
-            button: true,
-            enabled: onAction != null,
-            child: AppPressable(
-              onTap: onAction,
-              enabled: onAction != null,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minWidth: NinjaMetrics.minTouchTarget,
-                  minHeight: NinjaMetrics.minTouchTarget,
-                ),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colors.brand,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Center(
-                      widthFactor: 1,
-                      child: Text(
-                        action,
-                        textAlign: TextAlign.center,
-                        style: NinjaText.button.copyWith(color: colors.onBrand),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colors.ink,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: stacked && actionWidget != null
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                messageWidget,
-                const SizedBox(height: 8),
-                actionWidget,
-              ],
-            )
-          : Row(
-              children: [
-                Expanded(child: messageWidget),
-                if (actionWidget != null) ...[
-                  const SizedBox(width: 10),
-                  actionWidget,
-                ],
-              ],
-            ),
-    );
-  }
+  Widget build(BuildContext context) => AppToast(
+        message: message,
+        showIcon: showCheck,
+        icon: icon,
+        actionLabel: actionLabel,
+        onAction: onAction,
+      );
 }
 
 class NinjaToastData {
   const NinjaToastData({
     required this.message,
     this.showCheck = true,
+    this.icon,
     this.actionLabel,
     this.onAction,
     this.duration = const Duration(seconds: 3),
@@ -146,6 +43,7 @@ class NinjaToastData {
 
   final String message;
   final bool showCheck;
+  final AppLineIcon? icon;
   final String? actionLabel;
   final VoidCallback? onAction;
   final Duration duration;
@@ -195,7 +93,7 @@ class NinjaToastHostState extends State<NinjaToastHost>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 180),
+      duration: const Duration(milliseconds: 250),
     );
   }
 
@@ -264,17 +162,15 @@ class NinjaToastHostState extends State<NinjaToastHost>
               opacity: _controller,
               child: SlideTransition(
                 position: Tween(
-                  begin: const Offset(0, 0.18),
+                  begin: const Offset(0, 0.22),
                   end: Offset.zero,
                 ).animate(
-                  CurvedAnimation(
-                    parent: _controller,
-                    curve: Curves.easeOut,
-                  ),
+                  CurvedAnimation(parent: _controller, curve: Curves.easeOut),
                 ),
                 child: NinjaToast(
                   message: toast.message,
                   showCheck: toast.showCheck,
+                  icon: toast.icon,
                   actionLabel: toast.actionLabel,
                   onAction: toast.onAction == null
                       ? null
@@ -295,6 +191,7 @@ void showNinjaToast(
   BuildContext context, {
   required String message,
   bool showCheck = true,
+  AppLineIcon? icon,
   String? actionLabel,
   VoidCallback? onAction,
   Duration duration = const Duration(seconds: 3),
@@ -303,6 +200,7 @@ void showNinjaToast(
     NinjaToastData(
       message: message,
       showCheck: showCheck,
+      icon: icon,
       actionLabel: actionLabel,
       onAction: onAction,
       duration: duration,

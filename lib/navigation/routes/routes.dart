@@ -14,6 +14,7 @@ import 'package:rtu_mirea_app/article/view/interstitial_ad_behavior.dart';
 import 'package:rtu_mirea_app/communities/communities.dart';
 import 'package:rtu_mirea_app/community/community.dart';
 import 'package:rtu_mirea_app/config/config.dart';
+import 'package:rtu_mirea_app/cowork/cowork.dart';
 import 'package:rtu_mirea_app/discourse_post_overview/discourse_post_overview.dart';
 import 'package:rtu_mirea_app/feed/feed.dart';
 import 'package:rtu_mirea_app/feed/view/news_feed_page.dart';
@@ -158,6 +159,7 @@ class GlobalSearchRoute extends GoRouteData with $GlobalSearchRoute {
             TypedGoRoute<ScheduleAnalyticsRoute>(path: 'analytics'),
             TypedGoRoute<ScheduleCreateRoute>(path: 'create'),
             TypedGoRoute<ScheduleEditRoute>(path: 'edit/:scheduleId'),
+            TypedGoRoute<ScheduleSessionRoute>(path: 'session'),
           ],
         ),
       ],
@@ -196,6 +198,8 @@ class GlobalSearchRoute extends GoRouteData with $GlobalSearchRoute {
             TypedGoRoute<ToolsRoute>(path: 'tools'),
             TypedGoRoute<CommunitiesRoute>(path: 'communities'),
             TypedGoRoute<FriendsMapRoute>(path: 'friends-map'),
+            TypedGoRoute<FriendsRoute>(path: 'friends'),
+            TypedGoRoute<CoworkRoute>(path: 'cowork'),
             TypedGoRoute<PeopleRoute>(
               path: 'people',
               routes: [
@@ -327,23 +331,26 @@ class SlideshowRoute extends GoRouteData with $SlideshowRoute {
     final extra = (state.extra as Map<String, dynamic>?) ?? $extra ?? const {};
     final slideshow = extra['slideshow'] as SlideshowBlock?;
     if (slideshow == null) {
-      final colors = context.ninja;
+      final colors = context.colors;
       return Scaffold(
         backgroundColor: colors.canvas,
-        appBar: NinjaAppBar.inner(
-          title: context.l10n.slideshow,
-          backSemanticLabel: context.l10n.back,
-          onBack: () => Navigator.of(context).maybePop(),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(NinjaMetrics.screenPadding),
-            child: NinjaEmptyState(
-              icon: const AppLineIconWidget(AppLineIcon.image),
-              title: context.l10n.loadingError,
-              message: context.l10n.tryAgain,
+        body: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            AppInnerHeader(
+              title: context.l10n.slideshow,
+              backSemanticsLabel: context.l10n.back,
+              onBack: () => Navigator.of(context).maybePop(),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.screen),
+              child: AppEmptyState(
+                lineIcon: AppLineIcon.image,
+                title: context.l10n.loadingError,
+                subtitle: context.l10n.tryAgain,
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -703,6 +710,36 @@ class GroupSpaceRoute extends GoRouteData with $GroupSpaceRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const GroupSpacePage();
+  }
+}
+
+@immutable
+class ScheduleSessionRoute extends GoRouteData with $ScheduleSessionRoute {
+  const ScheduleSessionRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SessionPage();
+  }
+}
+
+@immutable
+class FriendsRoute extends GoRouteData with $FriendsRoute {
+  const FriendsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const FriendsPage();
+  }
+}
+
+@immutable
+class CoworkRoute extends GoRouteData with $CoworkRoute {
+  const CoworkRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const CoworkPage();
   }
 }
 

@@ -9,13 +9,13 @@ class WalletSpendRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final row = Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.gap),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Row(
         children: [
@@ -26,34 +26,34 @@ class WalletSpendRow extends StatelessWidget {
               children: [
                 Text(
                   item.title,
-                  style: NinjaText.headline.copyWith(color: colors.ink),
+                  style: AppText.headline.copyWith(color: colors.ink),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   item.description,
-                  style: NinjaText.subtext.copyWith(color: colors.muted),
+                  style: AppText.subtext.copyWith(color: colors.muted),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          AppNinjaMark(size: 14, color: colors.brandInk),
+          const SizedBox(width: AppSpacing.md),
+          AppNinjaMark(size: 14, color: colors.accent),
           const SizedBox(width: 5),
           Text(
             item.cost,
-            style: NinjaText.tabular(
-              NinjaText.body.copyWith(
+            style: AppText.tabular(
+              AppText.body.copyWith(
                 color: colors.ink,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
           if (onTap != null) ...[
-            const SizedBox(width: 6),
+            const SizedBox(width: AppSpacing.xsm),
             AppLineIconWidget(
               AppLineIcon.chevronR,
               size: 16,
-              color: colors.chevron,
+              color: colors.muted2,
             ),
           ],
         ],

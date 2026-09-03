@@ -1,5 +1,6 @@
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -18,27 +19,29 @@ class NinjaTextBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+
     return ColoredBox(
       color: colors.canvas,
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          12,
-          6,
-          12,
+          AppSpacing.md,
+          AppSpacing.xsm,
+          AppSpacing.md,
           bottomInset == 0 ? 8 : bottomInset + 4,
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(5),
+            padding: const EdgeInsets.all(AppSpacing.xs),
             child: Row(
               children: [
-                for (var index = 0; index < labels.length; index++)
+                for (var index = 0; index < labels.length; index++) ...[
+                  if (index != 0) const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: _NinjaTextBottomBarTab(
                       label: labels[index],
@@ -46,6 +49,7 @@ class NinjaTextBottomBar extends StatelessWidget {
                       onTap: () => onSelected(index),
                     ),
                   ),
+                ],
               ],
             ),
           ),
@@ -75,15 +79,16 @@ class _NinjaTextBottomBarTabState extends State<_NinjaTextBottomBarTab> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     final selected = widget.selected;
     final background = selected
-        ? colors.brand.withValues(alpha: colors.isDark ? .2 : .1)
+        ? colors.accent
         : _focused
-            ? colors.brand.withValues(alpha: .07)
+            ? colors.surface2
             : const Color(0x00000000);
+
     return Semantics(
       button: true,
       selected: selected,
@@ -112,21 +117,20 @@ class _NinjaTextBottomBarTabState extends State<_NinjaTextBottomBarTab> {
             child: AnimatedContainer(
               duration: reduceMotion
                   ? Duration.zero
-                  : const Duration(milliseconds: 220),
+                  : const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
-              constraints: const BoxConstraints(minHeight: 48),
+              constraints: const BoxConstraints(minHeight: 44),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: background,
-                borderRadius: BorderRadius.circular(17),
+                borderRadius: BorderRadius.circular(AppRadius.full),
               ),
               child: Text(
                 widget.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: NinjaText.body.copyWith(
-                  color: selected ? colors.brandInk : colors.mutedDark,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                style: AppText.segment.copyWith(
+                  color: selected ? colors.onAccent : colors.muted,
                 ),
               ),
             ),

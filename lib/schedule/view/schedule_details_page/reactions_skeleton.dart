@@ -10,12 +10,16 @@ class _ReactionsSkeleton extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       child: Row(
         children: [
           for (final (index, width) in _pillWidths.indexed) ...[
-            if (index > 0) const SizedBox(width: 8),
-            NinjaSkeleton(width: width, height: 42, radius: NinjaRadius.pill),
+            if (index > 0) const SizedBox(width: AppSpacing.sm),
+            AppSkeleton(
+              width: width,
+              height: AppControlSize.iconButtonCompact,
+              radius: AppRadius.full,
+            ),
           ],
         ],
       ),

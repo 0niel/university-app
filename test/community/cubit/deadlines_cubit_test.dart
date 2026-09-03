@@ -4,7 +4,8 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:rtu_mirea_app/community/community.dart';
+import 'package:rtu_mirea_app/community/cubit/deadlines/deadlines.dart';
+import 'package:rtu_mirea_app/community/models/deadline_draft.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 import '../../helpers/mocks/mock_schedule_repository.dart';

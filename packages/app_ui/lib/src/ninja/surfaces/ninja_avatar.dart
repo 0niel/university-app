@@ -1,6 +1,8 @@
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/typography/typography.dart';
 import 'package:flutter/widgets.dart';
+
+enum NinjaAvatarTone { ink, surface, indigo, lecture, lab, exam }
 
 class NinjaAvatar extends StatelessWidget {
   const NinjaAvatar({
@@ -9,91 +11,131 @@ class NinjaAvatar extends StatelessWidget {
     this.size = 44,
     this.tone = NinjaAvatarTone.surface,
     this.online = false,
+    this.level,
+    this.borderColor,
   });
 
   final String initials;
   final double size;
   final NinjaAvatarTone tone;
   final bool online;
+  final String? level;
+  final Color? borderColor;
 
   static double fontSizeFor(double diameter) {
-    if (diameter >= 64) return 20;
-    if (diameter >= 48) return 15;
-    if (diameter >= 44) return 14;
-    if (diameter >= 36) return 11.5;
-    return 11;
+    if (diameter >= 88) return 28;
+    if (diameter >= 72) return 22;
+    if (diameter >= 56) return 18;
+    if (diameter >= 40) return 13;
+    if (diameter >= 32) return 11;
+    if (diameter >= 28) return 10;
+    return 9;
   }
+
+  static FontWeight weightFor(double diameter) =>
+      diameter >= 40 ? FontWeight.w700 : FontWeight.w800;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final accent = colors.subjectColor(initials);
+    final colors = context.colors;
     final (background, foreground) = switch (tone) {
-      NinjaAvatarTone.ink => (colors.ink, colors.onInk),
-      NinjaAvatarTone.surface => (
-          accent.withValues(alpha: colors.isDark ? 0.24 : 0.14),
-          colors.ink,
-        ),
-      NinjaAvatarTone.indigo => (colors.brand, colors.onBrand),
+      NinjaAvatarTone.ink => (colors.ink, colors.canvas),
+      NinjaAvatarTone.surface => (colors.tint, colors.accent),
+      NinjaAvatarTone.indigo => (colors.accent, colors.onAccent),
+      NinjaAvatarTone.lecture => (colors.lectureTint, colors.lecture),
+      NinjaAvatarTone.lab => (colors.labTint, colors.lab),
+      NinjaAvatarTone.exam => (colors.examTint, colors.exam),
     };
+
     final avatar = Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: background, shape: BoxShape.circle),
       alignment: Alignment.center,
+      decoration: BoxDecoration(color: background, shape: BoxShape.circle),
       child: Text(
         initials,
-        style: TextStyle(
-          fontFamily: NinjaText.family,
-          fontSize: fontSizeFor(size),
-          fontWeight: FontWeight.w700,
-          color: foreground,
-        ),
+        style: AppText.sans(fontSizeFor(size), weightFor(size))
+            .copyWith(color: foreground),
       ),
     );
-    if (!online) return avatar;
+
+    if (!online && level == null) return avatar;
 
     return SizedBox(
       width: size,
       height: size,
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
           avatar,
-          PositionedDirectional(
-            end: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(2.5),
-              decoration: BoxDecoration(
-                color: colors.canvas,
-                shape: BoxShape.circle,
+          if (level != null)
+            PositionedDirectional(
+              end: -2,
+              bottom: -2,
+              child: Container(
+                width: 20,
+                height: 20,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.accent,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: borderColor ?? colors.surface,
+                    width: 2,
+                  ),
+                ),
+                child: Text(
+                  level!,
+                  style: AppText.countBadge.copyWith(color: colors.onAccent),
+                ),
               ),
+            )
+          else if (online)
+            PositionedDirectional(
+              end: 0,
+              bottom: 0,
               child: Container(
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: colors.green,
+                  color: colors.lecture,
                   shape: BoxShape.circle,
+                  border: Border.all(
+                    color: borderColor ?? colors.surface,
+                    width: 2,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
   }
 }
 
-enum NinjaAvatarTone { ink, surface, indigo }
+typedef AppAvatarGroupItem = NinjaAvatarGroupItem;
+
+typedef AppAvatarGroup = NinjaAvatarGroup;
+
+class NinjaAvatarGroupItem {
+  const NinjaAvatarGroupItem(
+    this.initials, {
+    this.tone = NinjaAvatarTone.surface,
+  });
+
+  final String initials;
+  final NinjaAvatarTone tone;
+}
 
 class NinjaAvatarGroup extends StatelessWidget {
   const NinjaAvatarGroup({
     required this.items,
     super.key,
     this.overflowCount = 0,
-    this.size = 36,
-    this.ringWidth = 2.5,
+    this.size = 32,
+    this.ringWidth = 2,
     this.overlap = 10,
+    this.ringColor,
   });
 
   final List<NinjaAvatarGroupItem> items;
@@ -101,36 +143,34 @@ class NinjaAvatarGroup extends StatelessWidget {
   final double size;
   final double ringWidth;
   final double overlap;
+  final Color? ringColor;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
+    final ring = ringColor ?? colors.surface;
     final ringed = size + ringWidth * 2;
-    final step = ringed - overlap;
+    final effectiveOverlap = size <= 28 ? 8.0 : overlap;
+    final step = ringed - effectiveOverlap;
+
     final entries = <Widget>[
       for (final item in items)
-        NinjaAvatar(
-          initials: item.initials,
-          size: size,
-          tone: item.tone,
-        ),
+        NinjaAvatar(initials: item.initials, size: size, tone: item.tone),
       if (overflowCount > 0)
         Container(
           width: size,
           height: size,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: colors.surfaceAlt,
+            color: colors.surface2,
             shape: BoxShape.circle,
           ),
-          alignment: Alignment.center,
           child: Text(
             '+$overflowCount',
-            style: TextStyle(
-              fontFamily: NinjaText.family,
-              fontSize: NinjaAvatar.fontSizeFor(size),
-              fontWeight: FontWeight.w700,
-              color: colors.ink,
-            ),
+            style: AppText.sans(
+              NinjaAvatar.fontSizeFor(size),
+              NinjaAvatar.weightFor(size),
+            ).copyWith(color: colors.muted),
           ),
         ),
     ];
@@ -146,10 +186,7 @@ class NinjaAvatarGroup extends StatelessWidget {
               start: step * index,
               child: Container(
                 padding: EdgeInsets.all(ringWidth),
-                decoration: BoxDecoration(
-                  color: colors.canvas,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: ring, shape: BoxShape.circle),
                 child: entries[index],
               ),
             ),
@@ -157,14 +194,4 @@ class NinjaAvatarGroup extends StatelessWidget {
       ),
     );
   }
-}
-
-class NinjaAvatarGroupItem {
-  const NinjaAvatarGroupItem(
-    this.initials, {
-    this.tone = NinjaAvatarTone.surface,
-  });
-
-  final String initials;
-  final NinjaAvatarTone tone;
 }

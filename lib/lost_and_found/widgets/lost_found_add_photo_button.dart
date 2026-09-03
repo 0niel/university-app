@@ -14,7 +14,7 @@ class LostFoundAddPhotoButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return AppPressable(
       pressedScale: 0.95,
       onTap: onPressed,
@@ -25,10 +25,10 @@ class LostFoundAddPhotoButton extends StatelessWidget {
         height: 72,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: colors.surfaceAlt,
-          borderRadius: BorderRadius.circular(NinjaRadius.control),
+          color: colors.surface2,
+          borderRadius: BorderRadius.circular(AppRadius.field),
         ),
-        child: AppLineIconWidget(icon, size: 20, color: colors.brandInk),
+        child: AppLineIconWidget(icon, size: 20, color: colors.accent),
       ),
     );
   }

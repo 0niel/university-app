@@ -13,13 +13,13 @@ class _TeacherCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: .stretch,
       children: [
-        _SectionTitle(title: context.l10n.lessonDetailsTeacherFallback),
+        const SizedBox(height: AppSpacing.sm),
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: NinjaMetrics.screenPadding,
+            horizontal: AppSpacing.screen,
           ),
           child: Column(
-            spacing: 10,
+            spacing: AppSpacing.gap,
             children: [
               for (var i = 0; i < teachers.length; i++)
                 _TeacherRow(

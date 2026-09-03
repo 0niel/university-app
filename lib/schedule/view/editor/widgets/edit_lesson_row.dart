@@ -15,8 +15,8 @@ class _EditLessonRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final color = LessonCard.colorOf(lesson);
+    final colors = context.colors;
+    final color = LessonCard.colorOfFor(context, lesson);
     final classroomName = lesson.classrooms.firstOrNull?.name;
     final classroomSuffix = classroomName == null || classroomName.isEmpty
         ? ''
@@ -37,22 +37,22 @@ class _EditLessonRow extends StatelessWidget {
         padding: const .only(right: 20),
         decoration: BoxDecoration(
           color: colors.dangerTint,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: AppLineIconWidget(
           .trash,
           size: 20,
-          color: colors.scarlet,
+          color: colors.exam,
         ),
       ),
       child: Container(
         padding: const .symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Row(
-          spacing: 12,
+          spacing: AppSpacing.md,
           children: [
             ReorderableDragStartListener(
               index: index,
@@ -66,23 +66,23 @@ class _EditLessonRow extends StatelessWidget {
               ),
             ),
             Container(
-              width: NinjaMetrics.subjectBarWidthCompact,
+              width: 4,
               height: 36,
               decoration: BoxDecoration(
                 color: color,
-                borderRadius: .circular(NinjaRadius.pill),
+                borderRadius: .circular(AppRadius.full),
               ),
             ),
             Expanded(
               child: Column(
                 crossAxisAlignment: .start,
-                spacing: 2,
+                spacing: AppSpacing.xxs,
                 children: [
                   Text(
                     lesson.subject,
                     maxLines: 1,
                     overflow: .ellipsis,
-                    style: NinjaText.body.copyWith(
+                    style: AppText.body.copyWith(
                       color: colors.ink,
                       fontWeight: .w600,
                     ),
@@ -90,8 +90,8 @@ class _EditLessonRow extends StatelessWidget {
                   Text(
                     '${lesson.lessonBells.startTime}–'
                     '${lesson.lessonBells.endTime}$classroomSuffix',
-                    style: NinjaText.tabular(
-                      NinjaText.subtext.copyWith(color: colors.muted),
+                    style: AppText.tabular(
+                      AppText.subtext.copyWith(color: colors.muted),
                     ),
                   ),
                 ],
@@ -101,17 +101,17 @@ class _EditLessonRow extends StatelessWidget {
               onTap: onEdit,
               semanticsLabel: context.l10n.edit,
               child: Container(
-                width: NinjaMetrics.minTouchTarget,
-                height: NinjaMetrics.minTouchTarget,
+                width: AppControlSize.touchTarget,
+                height: AppControlSize.touchTarget,
                 decoration: BoxDecoration(
-                  color: colors.surfaceAlt,
+                  color: colors.surface2,
                   shape: .circle,
                 ),
                 child: Center(
                   child: AppLineIconWidget(
                     .pencil,
                     size: 17,
-                    color: colors.mutedDark,
+                    color: colors.muted,
                   ),
                 ),
               ),

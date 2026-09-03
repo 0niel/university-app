@@ -1,29 +1,37 @@
-part of 'polls_view.dart';
+import 'package:app_ui/app_ui.dart';
+import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-class _PollsSkeleton extends StatelessWidget {
-  const _PollsSkeleton({super.key});
+class PollsSkeleton extends StatelessWidget {
+  const PollsSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      liveRegion: true,
-      label: context.l10n.loadingContent,
-      child: ExcludeSemantics(
-        child: NinjaSkeletonGroup(
-          child: ListView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 110),
-            itemCount: 4,
-            itemBuilder: (_, index) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _PollSkeletonCard(
-                questionLines: index.isEven ? 2 : 1,
-                optionCount: index.isEven ? 3 : 2,
+    return NinjaSkeletonGroup(
+      semanticsLabel: context.l10n.loadingContent,
+      child: Column(
+        children: [
+          for (var index = 0; index < 3; index++) ...[
+            if (index > 0) const SizedBox(height: AppSpacing.cardGap),
+            const AppCard(
+              radius: AppRadius.row,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  NinjaSkeleton.bar(widthFactor: .4, height: 10),
+                  SizedBox(height: AppSpacing.sectionGap),
+                  NinjaSkeleton.bar(widthFactor: .85, height: 16),
+                  SizedBox(height: AppSpacing.sectionGap),
+                  NinjaSkeleton(height: 44, radius: AppRadius.tile),
+                  SizedBox(height: AppSpacing.xsm),
+                  NinjaSkeleton(height: 44, radius: AppRadius.tile),
+                  SizedBox(height: AppSpacing.xsm),
+                  NinjaSkeleton(height: 44, radius: AppRadius.tile),
+                ],
               ),
             ),
-          ),
-        ),
+          ],
+        ],
       ),
     );
   }

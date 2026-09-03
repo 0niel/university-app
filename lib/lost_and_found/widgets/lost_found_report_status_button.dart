@@ -17,7 +17,7 @@ class LostFoundReportStatusButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final reduceMotion =
         MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
@@ -31,19 +31,19 @@ class LostFoundReportStatusButton extends StatelessWidget {
             ? Duration.zero
             : const Duration(milliseconds: 180),
         constraints: const BoxConstraints(
-          minHeight: NinjaMetrics.minTouchTarget,
+          minHeight: AppControlSize.iconButton,
         ),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: selected ? colors.brand : colors.surfaceAlt,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          color: selected ? colors.accent : colors.surface2,
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Column(
           children: [
             AppLineIconWidget(
               icon,
               size: 20,
-              color: selected ? colors.onBrand : colors.muted,
+              color: selected ? colors.onAccent : colors.muted,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
@@ -51,8 +51,8 @@ class LostFoundReportStatusButton extends StatelessWidget {
               maxLines: 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
-              style: NinjaText.button.copyWith(
-                color: selected ? colors.onBrand : colors.ink,
+              style: AppText.button.copyWith(
+                color: selected ? colors.onAccent : colors.ink,
               ),
             ),
           ],

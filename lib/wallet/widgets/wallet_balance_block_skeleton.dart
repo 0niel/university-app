@@ -10,17 +10,17 @@ class _WalletBalanceBlockSkeleton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           NinjaSkeleton.bar(height: 11, widthFactor: 0.34),
-          SizedBox(height: 14),
+          SizedBox(height: AppSpacing.sectionGap),
           NinjaSkeleton(
             height: 46,
             widthFactor: 0.5,
-            radius: NinjaRadius.control,
+            radius: AppRadius.field,
           ),
-          SizedBox(height: 18),
+          SizedBox(height: AppSpacing.fieldGap),
           Row(
             children: [
               _WalletStatBlockSkeleton(),
-              SizedBox(width: 10),
+              SizedBox(width: AppSpacing.gap),
               _WalletStatBlockSkeleton(),
             ],
           ),

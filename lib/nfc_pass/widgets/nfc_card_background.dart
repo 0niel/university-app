@@ -13,6 +13,7 @@ class _NfcCardBackground extends StatefulWidget {
 class _NfcCardBackgroundState extends State<_NfcCardBackground> {
   VideoPlayerController? _controller;
   Future<void>? _initFuture;
+  bool _reduceMotion = true;
 
   @override
   void initState() {
@@ -32,6 +33,18 @@ class _NfcCardBackgroundState extends State<_NfcCardBackground> {
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
+        MediaQuery.accessibleNavigationOf(context);
+    final controller = _controller;
+    if (controller != null && controller.value.isInitialized) {
+      unawaited(_reduceMotion ? controller.pause() : controller.play());
+    }
+  }
+
   void _setUpVideo() {
     if (!widget.isVideo) return;
     final controller = VideoPlayerController.file(
@@ -48,7 +61,7 @@ class _NfcCardBackgroundState extends State<_NfcCardBackground> {
     await controller.setVolume(0);
     await controller.setLooping(true);
     if (!mounted || !identical(_controller, controller)) return;
-    await controller.play();
+    if (!_reduceMotion) await controller.play();
   }
 
   @override
@@ -59,22 +72,18 @@ class _NfcCardBackgroundState extends State<_NfcCardBackground> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        _buildMedia(),
-        ColoredBox(color: context.ninja.accentSoft.withValues(alpha: 0.84)),
-      ],
-    );
+    return _buildMedia();
   }
 
   Widget _buildMedia() {
     if (!widget.isVideo) {
-      return Image.file(
+      final image = Image.file(
         io.File(widget.filePath),
         fit: .cover,
         semanticLabel: context.l10n.nfcPassPreviewImageHint,
-      ).animate().fadeIn(duration: 400.ms);
+        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+      );
+      return _reduceMotion ? image : image.animate().fadeIn(duration: 400.ms);
     }
 
     final controller = _controller;
@@ -83,8 +92,13 @@ class _NfcCardBackgroundState extends State<_NfcCardBackground> {
     return FutureBuilder<void>(
       future: _initFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState != .done) return const SizedBox.shrink();
-        return FittedBox(
+        if (snapshot.connectionState != .done ||
+            snapshot.hasError ||
+            !controller.value.isInitialized ||
+            controller.value.size.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        final video = FittedBox(
           fit: .cover,
           clipBehavior: .hardEdge,
           child: SizedBox(
@@ -92,7 +106,8 @@ class _NfcCardBackgroundState extends State<_NfcCardBackground> {
             height: controller.value.size.height,
             child: VideoPlayer(controller),
           ),
-        ).animate().fadeIn(duration: 400.ms);
+        );
+        return _reduceMotion ? video : video.animate().fadeIn(duration: 400.ms);
       },
     );
   }

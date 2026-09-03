@@ -1,18 +1,20 @@
 import 'dart:math' as math;
 
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:flutter/widgets.dart';
 
 class AppProgressRing extends StatelessWidget {
   const AppProgressRing({
     required this.value,
     super.key,
-    this.size = 56,
-    this.strokeWidth = 5,
+    this.size = 64,
+    this.strokeWidth = 6,
     this.color,
     this.trackColor,
     this.label,
     this.sublabel,
+    this.labelStyle,
   });
 
   final double value;
@@ -22,20 +24,20 @@ class AppProgressRing extends StatelessWidget {
   final Color? trackColor;
   final String? label;
   final String? sublabel;
+  final TextStyle? labelStyle;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colors;
-    final arc = colors.primary;
-    final track = colors.surfaceHigh;
+    final colors = context.colors;
+    final label = this.label;
+    final sublabel = this.sublabel;
 
     return Semantics(
       label: sublabel,
       value: label ?? '${(value.clamp(0, 1) * 100).round()}%',
       child: ExcludeSemantics(
-        child: SizedBox(
-          width: size,
-          height: size,
+        child: SizedBox.square(
+          dimension: size,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -43,8 +45,8 @@ class AppProgressRing extends StatelessWidget {
                 size: Size.square(size),
                 painter: _RingPainter(
                   value: value.clamp(0.0, 1.0),
-                  arcColor: color ?? arc,
-                  trackColor: trackColor ?? track,
+                  arcColor: color ?? colors.accent,
+                  trackColor: trackColor ?? colors.surface2,
                   strokeWidth: strokeWidth,
                 ),
               ),
@@ -54,22 +56,22 @@ class AppProgressRing extends StatelessWidget {
                   children: [
                     if (label != null)
                       Text(
-                        label!,
-                        style: AppText.tabular(
-                          TextStyle(
-                            fontSize: size * 0.24,
-                            fontWeight: FontWeight.w700,
-                            color: colors.active,
-                            height: 1,
-                          ),
-                        ),
+                        label,
+                        style: (labelStyle ??
+                                AppText.sans(
+                                  size * 14 / 64,
+                                  FontWeight.w800,
+                                  height: 1,
+                                  tabular: true,
+                                ))
+                            .copyWith(color: colors.ink),
                       ),
                     if (sublabel != null)
                       Text(
-                        sublabel!,
+                        sublabel,
                         style: AppText.overline.copyWith(
-                          color: colors.deactive,
-                          fontSize: 8,
+                          fontSize: size * .13,
+                          color: colors.muted,
                         ),
                       ),
                   ],
@@ -98,30 +100,32 @@ class _RingPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - strokeWidth) / 2;
+    final radius = math.max<double>(
+      0,
+      (size.shortestSide - strokeWidth) / 2 - size.shortestSide / 32,
+    );
     final rect = Rect.fromCircle(center: center, radius: radius);
 
-    canvas
-      ..drawCircle(
-        center,
-        radius,
-        Paint()
-          ..color = trackColor
-          ..strokeWidth = strokeWidth
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round,
-      )
-      ..drawArc(
-        rect,
-        -math.pi / 2,
-        2 * math.pi * value,
-        false,
-        Paint()
-          ..color = arcColor
-          ..strokeWidth = strokeWidth
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round,
-      );
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..color = trackColor
+        ..strokeWidth = strokeWidth
+        ..style = PaintingStyle.stroke,
+    );
+    if (value <= 0) return;
+    canvas.drawArc(
+      rect,
+      -math.pi / 2,
+      2 * math.pi * value,
+      false,
+      Paint()
+        ..color = arcColor
+        ..strokeWidth = strokeWidth
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round,
+    );
   }
 
   @override

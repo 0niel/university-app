@@ -46,7 +46,7 @@ class StacAppListRowParser extends StacParser<StacAppListRow> {
           : AppIconAvatar(
               emoji: model.emoji,
               color:
-                  parseHexColor(model.emojiColor) ??
+                  parseAppColor(context, model.emojiColor) ??
                   Theme.of(context).colors.primary,
             ),
       trailing: childWidget(context, model.trailing),

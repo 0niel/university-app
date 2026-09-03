@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_meta.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 void main() {
@@ -94,5 +95,16 @@ void main() {
         isNull,
       );
     });
+  });
+
+  test('derives a missing pair number from the standard bell slot', () {
+    final lesson = lessonWithGroups(null).copyWith(
+      lessonBells: LessonBells(
+        startTime: const TimeOfDay(hour: 9, minute: 0),
+        endTime: const TimeOfDay(hour: 10, minute: 30),
+      ),
+    );
+
+    expect(lessonNumberOf(lesson), 1);
   });
 }

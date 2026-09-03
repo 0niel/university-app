@@ -9,13 +9,13 @@ class NinjaGroupAnnouncementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Padding(
           padding: const .all(16),
@@ -24,13 +24,13 @@ class NinjaGroupAnnouncementCard extends StatelessWidget {
             children: [
               Text(
                 announcement.title,
-                style: NinjaText.headline.copyWith(color: colors.ink),
+                style: AppText.headline.copyWith(color: colors.ink),
               ),
               if (announcement.body.isNotEmpty) ...[
                 const SizedBox(height: 6),
                 Text(
                   announcement.body,
-                  style: NinjaText.subtext.copyWith(
+                  style: AppText.subtext.copyWith(
                     color: colors.muted,
                     height: 1.45,
                   ),

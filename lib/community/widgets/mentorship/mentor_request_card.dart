@@ -21,22 +21,22 @@ class MentorRequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final metadata = [
       if (request.topic.isNotEmpty) request.topic,
       mentorWhenShortLabel(context.l10n, request.whenSlot.wireValue),
     ].join(' · ');
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         0,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         10,
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -54,11 +54,13 @@ class MentorRequestCard extends StatelessWidget {
                       children: [
                         Text(
                           request.counterpartName,
-                          style: NinjaText.body.copyWith(color: colors.ink),
+                          style: AppText.body.copyWith(color: colors.ink),
                         ),
                         Text(
                           metadata,
-                          style: NinjaText.helper.copyWith(color: colors.muted),
+                          style: AppText.captionSmall.copyWith(
+                            color: colors.muted,
+                          ),
                         ),
                       ],
                     ),
@@ -68,7 +70,7 @@ class MentorRequestCard extends StatelessWidget {
               if (request.message.isNotEmpty)
                 Text(
                   request.message,
-                  style: NinjaText.subtext.copyWith(
+                  style: AppText.subtext.copyWith(
                     color: colors.muted,
                     height: 1.4,
                   ),

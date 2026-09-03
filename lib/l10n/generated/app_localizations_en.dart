@@ -1846,6 +1846,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get legendLessons => 'Classes';
 
   @override
+  String get legendHoliday => 'Public holiday';
+
+  @override
   String get legendRetake => 'Retake';
 
   @override
@@ -4355,10 +4358,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginSubtitle => 'Sign in with your account';
 
   @override
-  String get loginEmailPlaceholder => 'student@university.example';
+  String get loginEmailPlaceholder => 'name@example.com';
 
   @override
-  String get loginEmailError => 'Use an approved university email address';
+  String get loginEmailError => 'Enter a valid email address';
 
   @override
   String loginPasswordError(int count) {
@@ -5345,7 +5348,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get marketTitle => 'Marketplace';
+  String get marketTitle => 'Market';
 
   @override
   String marketSubtitle(int count) {
@@ -8301,4 +8304,2583 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapInteractiveHint => 'Pan the map, pinch or double tap to zoom';
+
+  @override
+  String get onboardingWelcomeTitle => 'University\nin one tap';
+
+  @override
+  String get onboardingWelcomeTitleAccent => 'tap';
+
+  @override
+  String get onboardingWelcomeLead =>
+      'Classes, deadlines, free rooms and your pass — no extra tabs.';
+
+  @override
+  String get onboardingFeatureScheduleTitle => 'Schedule with changes';
+
+  @override
+  String get onboardingFeatureScheduleSub =>
+      'Reschedules and swaps — right in your feed';
+
+  @override
+  String get onboardingFeatureRoomsTitle => 'Free rooms nearby';
+
+  @override
+  String get onboardingFeatureRoomsSub => 'Where to study during a break';
+
+  @override
+  String get onboardingFeatureFriendsTitle => 'Friends on campus';
+
+  @override
+  String get onboardingFeatureFriendsSub =>
+      'Shared gaps and who is where right now';
+
+  @override
+  String get onboardingStart => 'Get started';
+
+  @override
+  String get onboardingHaveAccount => 'I already have an account';
+
+  @override
+  String get onboardingGroupLead =>
+      'Your schedule will load automatically. You can change it in Settings.';
+
+  @override
+  String get onboardingGroupPlaceholder => 'ИКБО-01-24';
+
+  @override
+  String get onboardingGroupNotFound =>
+      'Group not found. Check the spelling or ';
+
+  @override
+  String get onboardingGroupNotFoundAction => 'create your own schedule';
+
+  @override
+  String get onboardingGroupNotFoundSuffix => '.';
+
+  @override
+  String get onboardingContinue => 'Continue';
+
+  @override
+  String get onboardingSettingsTitle => 'A couple of settings';
+
+  @override
+  String get onboardingSettingsLead => 'You can change everything later.';
+
+  @override
+  String get onboardingPushSub => 'Classes, deadlines, changes';
+
+  @override
+  String get onboardingGeoTitle => 'Location on campus';
+
+  @override
+  String get onboardingGeoSub => 'For the map and free rooms';
+
+  @override
+  String get onboardingFriendsTitle => 'Show me to friends';
+
+  @override
+  String get onboardingFriendsSub => 'Only while you are on campus';
+
+  @override
+  String get onboardingPushDenied =>
+      'Allow notifications in the system settings';
+
+  @override
+  String get onboardingGeoDenied =>
+      'Allow location access in the system settings';
+
+  @override
+  String get onboardingSettingsSaveError =>
+      'Couldn\'t save the setting. Try again.';
+
+  @override
+  String onboardingWelcomeToast(String group) {
+    return 'Welcome, $group';
+  }
+
+  @override
+  String onboardingStepSemantics(int step, int total) {
+    return 'Step $step of $total';
+  }
+
+  @override
+  String newsTimeMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String newsTimeHours(int count) {
+    return '$count h';
+  }
+
+  @override
+  String get newsTimeYesterday => 'yesterday';
+
+  @override
+  String newsTimeDays(int count) {
+    return '$count d';
+  }
+
+  @override
+  String get newsTimeNow => 'now';
+
+  @override
+  String get newsSourcesSemantics => 'News sources';
+
+  @override
+  String articleTimeAgo(String time) {
+    return '$time ago';
+  }
+
+  @override
+  String get articleUnsaved => 'Removed from saved';
+
+  @override
+  String get articleRemoveFromSaved => 'Remove from saved';
+
+  @override
+  String get articleSourceOfficial => 'Official channel';
+
+  @override
+  String get articleSourceTelegram => 'Telegram channel';
+
+  @override
+  String get articleSourceRss => 'RSS feed';
+
+  @override
+  String articleSourceSubscribers(String count) {
+    return '$count subscribers';
+  }
+
+  @override
+  String get articleSourceSubscribed => 'Following';
+
+  @override
+  String get articleSourceSubscribe => 'Follow';
+
+  @override
+  String articleSourceFollowedToast(String name) {
+    return 'You follow $name';
+  }
+
+  @override
+  String get articleSourceUnfollowedToast => 'Unfollowed';
+
+  @override
+  String get storyRead => 'Read';
+
+  @override
+  String get storyClose => 'Close';
+
+  @override
+  String get storyPrevious => 'Previous story';
+
+  @override
+  String get storyNext => 'Next story';
+
+  @override
+  String get storyEmpty => 'No stories from this source yet';
+
+  @override
+  String get communitiesMine => 'Mine';
+
+  @override
+  String get communitiesRecommended => 'Recommended';
+
+  @override
+  String get communitiesMember => 'You are a member';
+
+  @override
+  String communitiesJoinedToast(String name) {
+    return 'Welcome to $name';
+  }
+
+  @override
+  String get communitiesLeftToast => 'You left the community';
+
+  @override
+  String get communitiesMineEmpty => 'Join a community and it will appear here';
+
+  @override
+  String get communitiesEmptyCategory => 'No communities in this category yet';
+
+  @override
+  String get communitiesSuggest => 'Suggest a community';
+
+  @override
+  String get communityFeed => 'Feed';
+
+  @override
+  String get communityWrite => 'write';
+
+  @override
+  String get communityFeedEmpty => 'Community posts';
+
+  @override
+  String get communityFeedEmptySub =>
+      'Organizers post in the chat — open it to write';
+
+  @override
+  String get communityStatMembers => 'members';
+
+  @override
+  String get communityStatPlatform => 'platform';
+
+  @override
+  String get communityStatCategory => 'category';
+
+  @override
+  String get communityOpenChat => 'Open chat';
+
+  @override
+  String get communityPlatformWeb => 'Website';
+
+  @override
+  String scheduleWeekOverline(int week, String parity) {
+    return 'Week $week · $parity';
+  }
+
+  @override
+  String scheduleChangesThisWeek(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes this week',
+      one: '$count change this week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scheduleShow => 'Show';
+
+  @override
+  String scheduleCompareWith(String name) {
+    return 'Comparing with $name';
+  }
+
+  @override
+  String get scheduleCommonWindows => 'common windows:';
+
+  @override
+  String get scheduleNoCommonWindows => 'no common windows today';
+
+  @override
+  String get scheduleCompareOff => 'Off';
+
+  @override
+  String get scheduleViewDay => 'Day';
+
+  @override
+  String get schedulePrevWeek => '← week';
+
+  @override
+  String get scheduleNextWeek => 'week →';
+
+  @override
+  String scheduleDayLessons(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes',
+      one: '$count class',
+      zero: 'no classes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scheduleBreakMinutes(int minutes) {
+    return 'break $minutes min';
+  }
+
+  @override
+  String get scheduleFreeDayTitle => 'Free day';
+
+  @override
+  String get scheduleFreeDaySubtitle =>
+      'No classes. You can add your own event.';
+
+  @override
+  String get scheduleCompareFriend => 'Compare with a friend';
+
+  @override
+  String get scheduleLegendLab => 'Lab';
+
+  @override
+  String get scheduleLegendCancel => 'Cancelled';
+
+  @override
+  String get scheduleLegendAddOwn => 'tap — add your own';
+
+  @override
+  String scheduleMonthMeta(int year, int semester) {
+    return '$year · semester $semester';
+  }
+
+  @override
+  String get scheduleMonthStatsTitle => 'THIS MONTH';
+
+  @override
+  String get scheduleStudyDays => 'Study days';
+
+  @override
+  String get scheduleLessonsLabel => 'Classes';
+
+  @override
+  String get scheduleExamsLabel => 'Tests';
+
+  @override
+  String scheduleLecturesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lectures',
+      one: '$count lecture',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schedulePracticesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count practices',
+      one: '$count practice',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scheduleLabsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count labs',
+      one: '$count lab',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lessonShortLecture => 'LEC';
+
+  @override
+  String get lessonShortPractice => 'PRAC';
+
+  @override
+  String get lessonShortLab => 'LAB';
+
+  @override
+  String get lessonShortPe => 'PE';
+
+  @override
+  String get lessonShortConsult => 'CONS';
+
+  @override
+  String get lessonShortExam => 'EXAM';
+
+  @override
+  String get lessonShortCredit => 'CRED';
+
+  @override
+  String get lessonShortCourse => 'CRS';
+
+  @override
+  String get lessonShortIndividual => 'IND';
+
+  @override
+  String get lessonShortOwn => 'OWN';
+
+  @override
+  String get lessonTagCancelled => '· cancelled';
+
+  @override
+  String lessonTagLive(int minutes) {
+    return '· in progress, $minutes min left';
+  }
+
+  @override
+  String get lessonTagNext => '· next';
+
+  @override
+  String get lessonTagMoved => '· room changed';
+
+  @override
+  String get lessonTagNew => '· new';
+
+  @override
+  String get lessonMetaCancelled => 'Cancelled';
+
+  @override
+  String lessonMetaMoved(String type, String room, String oldRoom) {
+    return '$type · $room instead of $oldRoom';
+  }
+
+  @override
+  String get lessonMetaPast => 'finished';
+
+  @override
+  String get scheduleActionOpen => 'Open class';
+
+  @override
+  String get scheduleActionReport => 'Report a mistake';
+
+  @override
+  String get scheduleLessonHidden => 'Class hidden';
+
+  @override
+  String scheduleChangesSubtitle(String time) {
+    return 'This week · updated $time';
+  }
+
+  @override
+  String get scheduleChangesSubtitleWeek => 'This week';
+
+  @override
+  String get scheduleChangeTagMoved => 'Moved';
+
+  @override
+  String get scheduleChangeTagCancelled => 'Cancelled';
+
+  @override
+  String get scheduleChangeTagNew => 'New';
+
+  @override
+  String get scheduleChangeTagTeacher => 'Teacher';
+
+  @override
+  String get scheduleChangeTagRoom => 'Room';
+
+  @override
+  String get scheduleChangeAdded => 'added';
+
+  @override
+  String get scheduleChangesAck => 'Got it';
+
+  @override
+  String get scheduleAddTitle => 'Own class';
+
+  @override
+  String get scheduleAddSubtitle =>
+      'Club, consultation, meeting — it will appear in the schedule';
+
+  @override
+  String get scheduleAddName => 'Title';
+
+  @override
+  String get scheduleAddPlace => 'Place (optional)';
+
+  @override
+  String get scheduleAddType => 'Type';
+
+  @override
+  String get scheduleAddDay => 'Day';
+
+  @override
+  String get scheduleAddSlot => 'Class';
+
+  @override
+  String get scheduleAddDone => 'Class added to the schedule';
+
+  @override
+  String get activityTypeOwn => 'Own';
+
+  @override
+  String get activityTypeEvent => 'Event';
+
+  @override
+  String get activityTypeRetake => 'Retake';
+
+  @override
+  String get activityTypeExtra => 'Extra class';
+
+  @override
+  String get scheduleCompareTitle => 'Compare schedules';
+
+  @override
+  String get scheduleCompareSubtitle =>
+      'We will show your friend\'s busy slots and common windows';
+
+  @override
+  String scheduleCompareStarted(String name) {
+    return 'Comparing with $name';
+  }
+
+  @override
+  String get scheduleCompareNoFriends => 'No friends with a group yet';
+
+  @override
+  String get scheduleCompareNoFriendsHint =>
+      'Add friends — their groups will appear here';
+
+  @override
+  String get scheduleCompareNoGroup => 'group not set';
+
+  @override
+  String get scheduleNoteSubtitle =>
+      'Only you can see it · can be shared with the group';
+
+  @override
+  String get scheduleNotePlaceholder => 'What to remember…';
+
+  @override
+  String get scheduleNoteAddFile => '+ file';
+
+  @override
+  String get scheduleNoteAddBoard => '+ board photo';
+
+  @override
+  String get scheduleNoteTag => '#tag';
+
+  @override
+  String get scheduleNoteSaved => 'Note saved';
+
+  @override
+  String scheduleRemindIn(int minutes) {
+    return '$minutes min before';
+  }
+
+  @override
+  String get scheduleRemindHour => '1 hour before';
+
+  @override
+  String scheduleRemindSet(int minutes) {
+    return 'Will remind $minutes min before';
+  }
+
+  @override
+  String get scheduleShareLink => 'Link';
+
+  @override
+  String get scheduleShareCalendar => 'To calendar';
+
+  @override
+  String get scheduleShareImage => 'As image';
+
+  @override
+  String get scheduleLinkCopied => 'Link copied';
+
+  @override
+  String get scheduleFilterTitle => 'Show';
+
+  @override
+  String get scheduleFilterPastSub => 'Shown in grey';
+
+  @override
+  String get scheduleFilterCancelled => 'Cancelled';
+
+  @override
+  String get scheduleFilterCancelledSub => 'Struck through';
+
+  @override
+  String get lessonCancelledBanner => 'Class cancelled';
+
+  @override
+  String lessonMovedBanner(String from, String to) {
+    return 'Room changed: $from → $to';
+  }
+
+  @override
+  String get lessonTimeLabel => 'Time';
+
+  @override
+  String lessonNumberMeta(int number) {
+    return 'class $number';
+  }
+
+  @override
+  String get lessonOnMap => 'on the map';
+
+  @override
+  String get lessonFiles => 'Files';
+
+  @override
+  String get lessonMaterialsAdd => 'add';
+
+  @override
+  String get lessonHowWasIt => 'How was it?';
+
+  @override
+  String get lessonGroupNote => 'Group note';
+
+  @override
+  String get lessonGroupNoteEmpty => 'Nothing yet — share what was important';
+
+  @override
+  String get scheduleTeacherRating => 'rating';
+
+  @override
+  String get scheduleTeacherReviews => 'reviews';
+
+  @override
+  String get scheduleTeacherSubjects => 'subjects';
+
+  @override
+  String get scheduleTeacherWrite => 'Write';
+
+  @override
+  String get scheduleTeacherReview => 'Leave a review';
+
+  @override
+  String get scheduleTeacherNoContacts => 'No contacts for this teacher yet';
+
+  @override
+  String get scheduleWeekExport => 'Export week';
+
+  @override
+  String get scheduleFilterSemantics => 'Filters';
+
+  @override
+  String get scheduleAddLessonSemantics => 'Add own class';
+
+  @override
+  String get scheduleMoreSemantics => 'Class actions';
+
+  @override
+  String get riskBadge => 'RISK';
+
+  @override
+  String get gradesTitle => 'Grades';
+
+  @override
+  String get gradesRefresh => 'Refresh';
+
+  @override
+  String get gradesErrorTitle => 'Could not load';
+
+  @override
+  String gradesErrorSaved(String date) {
+    return 'Last grades were saved on $date.';
+  }
+
+  @override
+  String get gradesErrorNoData => 'No saved grades yet.';
+
+  @override
+  String get gradesGpaLabel => 'Personal GPA';
+
+  @override
+  String gradesGpaDelta(String delta) {
+    return '$delta this month';
+  }
+
+  @override
+  String get gradesScholarshipLabel => 'To the raised scholarship';
+
+  @override
+  String gradesScholarshipHint(String subject) {
+    return 'get $subject to 4+';
+  }
+
+  @override
+  String get gradesScholarshipReached => 'threshold reached';
+
+  @override
+  String get gradesTermCurrent => 'Current';
+
+  @override
+  String gradesTermSemester(int n) {
+    return 'Sem $n';
+  }
+
+  @override
+  String get gradesNoSubjectsTitle => 'No subjects yet';
+
+  @override
+  String get gradesNoSubjectsSubtitle =>
+      'Pick your group schedule and subjects will appear here';
+
+  @override
+  String get gradesTermEmpty => 'No grades for this term';
+
+  @override
+  String get gradesTeacherUnknown => 'Teacher not set';
+
+  @override
+  String get gradesAddMarkSubtitle => 'Add a grade';
+
+  @override
+  String gradesMarkAdded(int mark) {
+    return 'Grade $mark added';
+  }
+
+  @override
+  String get gradesRemoveLast => 'Remove last';
+
+  @override
+  String gradesMarkSemantics(int mark) {
+    return 'Grade $mark';
+  }
+
+  @override
+  String get attendanceTitle => 'Attendance';
+
+  @override
+  String get attendanceAddAbsence => 'Log an absence';
+
+  @override
+  String get attendanceStatSemester => 'personal log';
+
+  @override
+  String get attendanceStatMissed => 'absences';
+
+  @override
+  String attendanceStatRisk(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'subjects at risk',
+      one: 'subject at risk',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get attendanceWeeksTitle => 'By week';
+
+  @override
+  String attendanceWeeksRange(String month) {
+    return '$month → now';
+  }
+
+  @override
+  String attendanceRiskBanner(String subject, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unexcused absences',
+      one: '$count unexcused absence',
+    );
+    return '$subject: $_temp0. Estimated attendance is below 70%; check the course requirements with your teacher.';
+  }
+
+  @override
+  String get attendanceBySubjects => 'By subject';
+
+  @override
+  String attendanceMissRow(String reason) {
+    return 'Absence · $reason';
+  }
+
+  @override
+  String get attendanceReasonSick => 'sick (personal record)';
+
+  @override
+  String get attendanceReasonNone => 'no reason';
+
+  @override
+  String get attendanceCertificate => 'Sick';
+
+  @override
+  String get attendanceRemoveAbsence => 'Remove';
+
+  @override
+  String get attendanceRiskNote =>
+      'This is a personal estimate from the available schedule. Ask your teacher about assessment and make-up requirements.';
+
+  @override
+  String get attendanceNoLessonsTitle => 'No classes yet';
+
+  @override
+  String get attendanceNoLessonsSubtitle =>
+      'Pick your group schedule — stats appear after the first classes';
+
+  @override
+  String get attendanceSheetSubject => 'Subject';
+
+  @override
+  String get attendanceSheetDate => 'Date';
+
+  @override
+  String get attendanceSheetReason => 'Reason';
+
+  @override
+  String get attendanceSheetSubmit => 'Log';
+
+  @override
+  String get attendanceAbsenceAdded => 'Absence logged';
+
+  @override
+  String attendanceExpandSemantics(String subject) {
+    return 'Show absences for $subject';
+  }
+
+  @override
+  String get coworkTitle => 'Coworking';
+
+  @override
+  String get coworkVenue => 'Personal plan on this device';
+
+  @override
+  String coworkFree(int count) {
+    return '$count free';
+  }
+
+  @override
+  String get coworkZoneQuiet => 'Quiet';
+
+  @override
+  String get coworkZoneCommon => 'Common';
+
+  @override
+  String get coworkZoneMeeting => 'Meeting rooms';
+
+  @override
+  String get coworkWindows => 'SCHEMATIC LAYOUT';
+
+  @override
+  String get coworkLegendFree => 'not verified';
+
+  @override
+  String get coworkLegendTaken => 'taken';
+
+  @override
+  String get coworkLegendMine => 'selected';
+
+  @override
+  String get coworkTimeLabel => 'Time';
+
+  @override
+  String coworkTimeValue(String from, String until, int hours) {
+    return '$from → $until · $hours h';
+  }
+
+  @override
+  String get coworkExtendLabel => 'Extension';
+
+  @override
+  String get coworkExtendAvailable => 'for your personal plan';
+
+  @override
+  String coworkExtendAction(String until) {
+    return 'extend until $until';
+  }
+
+  @override
+  String get coworkExtendMax => 'until closing';
+
+  @override
+  String get coworkFriendsLabel => 'Friends nearby';
+
+  @override
+  String get coworkFriendsNone => 'no recent locations';
+
+  @override
+  String get coworkPickSeat => 'Pick a seat';
+
+  @override
+  String coworkBook(String seat, String until) {
+    return 'Save $seat · until $until';
+  }
+
+  @override
+  String get coworkCancelBooking => 'Remove saved seat';
+
+  @override
+  String coworkBooked(String seat, String until) {
+    return 'Seat $seat saved until $until';
+  }
+
+  @override
+  String get coworkBookingCancelled => 'Saved seat removed';
+
+  @override
+  String coworkSeatSemantics(String seat) {
+    return 'Seat $seat';
+  }
+
+  @override
+  String get mapSearchPlaceholder => 'Room, department, canteen';
+
+  @override
+  String get mapFriendsToggle => 'Friends on the map';
+
+  @override
+  String get mapCampusFilter => 'Campus';
+
+  @override
+  String get mapExpandSheet => 'Expand list';
+
+  @override
+  String get mapCollapseSheet => 'Collapse list';
+
+  @override
+  String get freeRoomsNowTitle => 'Free now';
+
+  @override
+  String freeRoomsMeta(String campus, String time, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rooms',
+      one: '$count room',
+    );
+    return '$campus · until the next class at $time · $_temp0';
+  }
+
+  @override
+  String freeRoomsMetaEndOfDay(String campus, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rooms',
+      one: '$count room',
+    );
+    return '$campus · no more classes today · $_temp0';
+  }
+
+  @override
+  String get freeRoomsYourSeat => 'saved';
+
+  @override
+  String get freeRoomsKind => 'Room';
+
+  @override
+  String freeRoomsLeftHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String freeRoomsLeftHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String freeRoomsLeftMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String freeRoomsNothingFound(String campus) {
+    return 'Nothing found in $campus. Try another campus.';
+  }
+
+  @override
+  String get freeRoomsNothingFoundAll => 'Nothing found. Try another query.';
+
+  @override
+  String get roomPhotoPlaceholder => 'room photo';
+
+  @override
+  String roomFreeUntilBadge(String time) {
+    return 'free until $time';
+  }
+
+  @override
+  String get roomFreeEndOfDayBadge => 'free until the end of the day';
+
+  @override
+  String roomMetaFloor(String kind, String campus, int floor) {
+    return '$kind · $campus, floor $floor';
+  }
+
+  @override
+  String roomMetaNoFloor(String kind, String campus) {
+    return '$kind · $campus';
+  }
+
+  @override
+  String get roomStatFreeFor => 'Free for';
+
+  @override
+  String get roomStatFloor => 'Floor';
+
+  @override
+  String get roomStatBuilding => 'Building';
+
+  @override
+  String get roomBook => 'Save place';
+
+  @override
+  String roomBooked(String time) {
+    return 'Saved until $time';
+  }
+
+  @override
+  String roomBookedToast(String name, String time) {
+    return '$name · saved until $time';
+  }
+
+  @override
+  String get roomReleasedToast => 'Saved place removed';
+
+  @override
+  String get roomRoute => 'Show on the floor plan';
+
+  @override
+  String roomNotOnPlan(String name) {
+    return '$name is not on the campus floor plans';
+  }
+
+  @override
+  String get roomTakenBadge => 'busy';
+
+  @override
+  String get homeOfflineBanner => 'Offline · showing saved data';
+
+  @override
+  String get homeGreetingMorning => 'Good morning, ';
+
+  @override
+  String get homeGreetingDay => 'Good afternoon, ';
+
+  @override
+  String get homeGreetingEvening => 'Good evening, ';
+
+  @override
+  String get homeStatusNoLessons => 'no classes';
+
+  @override
+  String homeStatusOngoing(int index, int count) {
+    return 'class $index of $count in progress';
+  }
+
+  @override
+  String homeStatusNext(String time) {
+    return 'next at $time';
+  }
+
+  @override
+  String homeStatusFirst(String time) {
+    return 'first at $time';
+  }
+
+  @override
+  String homeStatusStart(String time) {
+    return 'starts at $time';
+  }
+
+  @override
+  String get homeStatusDone => 'done for today';
+
+  @override
+  String homeHeroFirstIn(int minutes) {
+    return 'First class in $minutes min';
+  }
+
+  @override
+  String get homeHeroNow => 'In progress';
+
+  @override
+  String homeHeroBreak(int minutes) {
+    return 'Break · $minutes min';
+  }
+
+  @override
+  String get homeHeroDoneTitle => 'Done for today.';
+
+  @override
+  String homeHeroDoneLessons(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes behind',
+      one: '$count class behind',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeHeroTomorrow(String lessons, String time) {
+    return 'Tomorrow $lessons, first at $time';
+  }
+
+  @override
+  String get homeHeroTomorrowFree => 'No classes tomorrow';
+
+  @override
+  String homeHeroDeadlineChip(String left) {
+    return 'Deadline · $left';
+  }
+
+  @override
+  String get homeHeroDeadlineNone => 'No deadlines';
+
+  @override
+  String get homeHeroTomorrowPlan => 'Plan for tomorrow';
+
+  @override
+  String get homeHeroFirstLesson => 'FIRST CLASS';
+
+  @override
+  String get homeHeroFreeTitle => 'No classes.';
+
+  @override
+  String get homeHeroFreeBody =>
+      'Close a deadline, visit the cowork or check the events board.';
+
+  @override
+  String homeWhoGoesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count going',
+      one: '$count going',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeWhoGoesEmpty => 'Who is going';
+
+  @override
+  String get homeWhoGoesTitle => 'Who is going to class';
+
+  @override
+  String homeWhoGoesSubtitle(int count, int total) {
+    return '$count of $total';
+  }
+
+  @override
+  String get homeWhoGoesMe => 'I am going too';
+
+  @override
+  String get homeWhoGoesMeDone => 'You are going';
+
+  @override
+  String get homeWhoGoesGoing => 'going';
+
+  @override
+  String get homeWhoGoesNoClassmates =>
+      'Classmates will appear here once they pick your group';
+
+  @override
+  String get homeGoingToast => 'You are going to class';
+
+  @override
+  String homeFreeRoomTitle(String room) {
+    return '$room is free';
+  }
+
+  @override
+  String homeFreeRoomUntil(String time) {
+    return 'until $time';
+  }
+
+  @override
+  String get homeFreeRoomsSub => 'find a place for the break';
+
+  @override
+  String homeStreakDays(int count) {
+    return '$count days in a row';
+  }
+
+  @override
+  String homeXp(String xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String homeDeadlinesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count deadlines',
+      one: '$count deadline',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeExamIn(int days) {
+    return 'Test in $days d';
+  }
+
+  @override
+  String get homeExamToday => 'Test today';
+
+  @override
+  String get homeAllServices => 'all services';
+
+  @override
+  String get homeAddDeadline => '+ add';
+
+  @override
+  String get homeDeadlinesAllDone => 'All done. Keep it up.';
+
+  @override
+  String get homeAllLower => 'all';
+
+  @override
+  String homeRepliesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count replies',
+      one: '$count reply',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeLessonMoved(String type, String room, String old) {
+    return '$type · $room instead of $old';
+  }
+
+  @override
+  String get homeDeadlineDone => 'done';
+
+  @override
+  String homeNoteChars(int count, int max) {
+    return '$count / $max';
+  }
+
+  @override
+  String get homeSearchLabel => 'Search';
+
+  @override
+  String homeWeekParity(String parity) {
+    return '· $parity';
+  }
+
+  @override
+  String get notificationsReadAll => 'Mark all read';
+
+  @override
+  String get notificationsEmptyTitle => 'No notifications yet';
+
+  @override
+  String get notificationsEmptySubtitle =>
+      'Schedule changes and pushes will show up here';
+
+  @override
+  String get notifTimeNow => 'now';
+
+  @override
+  String notifTimeMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String notifTimeHours(int count) {
+    return '$count h';
+  }
+
+  @override
+  String get notifTimeYesterday => 'yesterday';
+
+  @override
+  String notifChangeMoved(String subject) {
+    return 'Moved · $subject';
+  }
+
+  @override
+  String notifChangeCancelled(String subject) {
+    return 'Cancelled · $subject';
+  }
+
+  @override
+  String notifChangeAdded(String subject) {
+    return 'New class · $subject';
+  }
+
+  @override
+  String notifChangeRoom(String subject) {
+    return 'New room · $subject';
+  }
+
+  @override
+  String notifChangeTeacher(String subject) {
+    return 'New teacher · $subject';
+  }
+
+  @override
+  String notifChangeInsteadOf(String value) {
+    return 'instead of $value';
+  }
+
+  @override
+  String get notifPushDefaultTitle => 'Notification';
+
+  @override
+  String get offlineBannerCached => 'Offline · showing saved data';
+
+  @override
+  String profileRankXp(String rank, String xp) {
+    return '$rank · $xp XP';
+  }
+
+  @override
+  String profileGroupPlace(int rank) {
+    return '#$rank in group';
+  }
+
+  @override
+  String get profileGroupPlaceUnknown => 'no place yet';
+
+  @override
+  String profileXpToLevelStreak(String xp, int level, int days) {
+    return '$xp XP to level $level · streak $days d.';
+  }
+
+  @override
+  String get profileRankShinobi => 'Shinobi';
+
+  @override
+  String get profileRankChunin => 'Chunin';
+
+  @override
+  String get profileRankJonin => 'Jonin';
+
+  @override
+  String get profileRankKage => 'Kage';
+
+  @override
+  String get profileMetricGpa => 'GPA';
+
+  @override
+  String get profileMetricAttendance => 'attendance';
+
+  @override
+  String get profileMetricExam => 'to exam';
+
+  @override
+  String profileDaysShort(int days) {
+    return '$days d';
+  }
+
+  @override
+  String get profileWeekQuests => 'Weekly quests';
+
+  @override
+  String get profileUntilSunday => 'until Sunday';
+
+  @override
+  String profileQuestXp(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String profileQuestProgress(int done, int total) {
+    return '$done/$total';
+  }
+
+  @override
+  String get profileQuestsEmpty => 'No quests are available yet';
+
+  @override
+  String profileAllBadges(int count) {
+    return 'all $count';
+  }
+
+  @override
+  String profileBadgeSoon(int percent) {
+    return 'Soon · $percent%';
+  }
+
+  @override
+  String get profileBadgesEmpty => 'Your first achievement is close';
+
+  @override
+  String profileFriendsMeta(int count, int campus) {
+    return '$count · $campus on the map';
+  }
+
+  @override
+  String get profileStudentCard => 'NFC Pass';
+
+  @override
+  String profileCardNumber(String number) {
+    return 'No. $number';
+  }
+
+  @override
+  String get profileEditAbout => 'About';
+
+  @override
+  String get profileEditAboutHint => 'A personal note about yourself';
+
+  @override
+  String get profileEditTelegram => 'Telegram';
+
+  @override
+  String get profileEditTelegramHint => '@username';
+
+  @override
+  String get profileEditName => 'Name';
+
+  @override
+  String get profileUpdatedToast => 'Profile updated';
+
+  @override
+  String get profileChangePhoto => 'Change photo';
+
+  @override
+  String get profilePhotoSoon => 'Photo upload is coming soon';
+
+  @override
+  String get leaderboardScopeInstitute => 'Institute';
+
+  @override
+  String get leaderboardScopeUniversity => 'University';
+
+  @override
+  String leaderboardXp(String xp) {
+    return '$xp XP';
+  }
+
+  @override
+  String leaderboardHintGap(int place, String xp) {
+    return '$xp XP to place $place. Finish the weekly quests.';
+  }
+
+  @override
+  String get leaderboardHintTop => 'You are in the top three. Keep the pace!';
+
+  @override
+  String get leaderboardEmpty => 'The rating is empty for now';
+
+  @override
+  String get leaderboardError => 'Could not load the rating';
+
+  @override
+  String get settingsAppearanceSection => 'Appearance';
+
+  @override
+  String get settingsAccentLabel => 'Accent';
+
+  @override
+  String get settingsLockWidget => 'Lock screen widget';
+
+  @override
+  String settingsWidgetNext(String time) {
+    return 'NEXT · $time';
+  }
+
+  @override
+  String get settingsWidgetPreview => 'preview';
+
+  @override
+  String get settingsWidgetNoLesson => 'No classes';
+
+  @override
+  String get settingsGroup => 'Group';
+
+  @override
+  String get settingsShowPast => 'Show past classes';
+
+  @override
+  String get settingsShowPastSub => 'Greyed out, below the current one';
+
+  @override
+  String get settingsShowCancelled => 'Show cancelled';
+
+  @override
+  String get settingsShowCancelledSub => 'Struck through';
+
+  @override
+  String get settingsOnlySubgroup => 'Only my subgroup';
+
+  @override
+  String get settingsOnlySubgroupSub => 'Hides the other subgroup\'s classes';
+
+  @override
+  String get settingsExportCalendar => 'Export to calendar';
+
+  @override
+  String get settingsExportSync => 'Sync';
+
+  @override
+  String get settingsExportDone => 'Schedule added to the calendar';
+
+  @override
+  String get settingsExportNoSchedule => 'Pick a schedule first';
+
+  @override
+  String get settingsNotifyLessonsSub => '15 minutes before start';
+
+  @override
+  String get settingsNotifyDeadlines => 'Deadlines';
+
+  @override
+  String get settingsNotifyDeadlinesSub => 'A day and an hour before';
+
+  @override
+  String get settingsNotifyNewsSub => 'Important only';
+
+  @override
+  String get settingsShowToFriends => 'Show me to friends';
+
+  @override
+  String get settingsShowToFriendsSub => 'Only on campus';
+
+  @override
+  String get settingsGeo => 'Location';
+
+  @override
+  String get settingsGeoSub => 'Map and rooms';
+
+  @override
+  String get settingsSignOutFull => 'Sign out';
+
+  @override
+  String settingsVersionBuild(String version, String build) {
+    return 'Version $version · build $build';
+  }
+
+  @override
+  String get settingsAllNotifications => 'All notifications';
+
+  @override
+  String get friendsCommonWindowsToday => 'Shared gaps today';
+
+  @override
+  String get friendsCompareHeroTitle => 'Free time with friends';
+
+  @override
+  String get friendsCompareHeroSub => 'From your friend’s group schedule';
+
+  @override
+  String get friendsCompare => 'Compare';
+
+  @override
+  String get friendsFilterAll => 'All';
+
+  @override
+  String get friendsFilterCampus => 'On the map';
+
+  @override
+  String get friendsPrivacyTitle => 'Location sharing is your choice';
+
+  @override
+  String get friendsPrivacySub =>
+      'Friends see your last shared location. Manage access in map settings; campus and floor detection are unavailable.';
+
+  @override
+  String get friendsCampusEmpty => 'No one is sharing a recent location';
+
+  @override
+  String friendsNoTelegram(String name) {
+    return '$name has no Telegram handle';
+  }
+
+  @override
+  String get friendsLoadError => 'Could not load friends';
+
+  @override
+  String friendsMessage(String name) {
+    return 'Message $name';
+  }
+
+  @override
+  String get newsSourceAllAbbr => 'ALL';
+
+  @override
+  String get articleSaved => 'Saved';
+
+  @override
+  String get communitiesJoin => 'Join';
+
+  @override
+  String get servicesSearchPlaceholder => 'Find a service, room, person';
+
+  @override
+  String get servicesEditBanner => 'Star the services you want on Home';
+
+  @override
+  String get servicesFavoriteAdd => 'Add to Home';
+
+  @override
+  String get servicesFavoriteRemove => 'Remove from Home';
+
+  @override
+  String get servicesNfcOpenTitle => 'Open the turnstile';
+
+  @override
+  String get servicesNfcActiveTitle => 'Hold near the turnstile';
+
+  @override
+  String get servicesNfcActiveSub => 'Active for 30 seconds · tap to cancel';
+
+  @override
+  String servicesNfcPassSub(String id) {
+    return 'Pass no. $id';
+  }
+
+  @override
+  String get servicesNfcConnectSub => 'Pass not connected · tap to connect';
+
+  @override
+  String get servicesNfcUnavailableSub => 'NFC is unavailable on this device';
+
+  @override
+  String get servicesSectionCampus => 'Campus';
+
+  @override
+  String get servicesSectionStudy => 'Studies';
+
+  @override
+  String get serviceNfcTitle => 'Pass';
+
+  @override
+  String get serviceExamsTitle => 'Exams';
+
+  @override
+  String get serviceMarketTitle => 'Market';
+
+  @override
+  String get serviceMapSub => 'Rooms and routes';
+
+  @override
+  String get serviceRoomsSub => 'Free right now';
+
+  @override
+  String get serviceCoworkSub => 'Seats and booking';
+
+  @override
+  String get serviceNfcSub => 'NFC campus pass';
+
+  @override
+  String get serviceDeadlinesSub => 'Tasks and due dates';
+
+  @override
+  String get serviceExamsSub => 'Tests and exams';
+
+  @override
+  String serviceExamsInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Test in $count days',
+      one: 'Test in $count day',
+      zero: 'Test today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get serviceGradesSub => 'GPA and semester marks';
+
+  @override
+  String get serviceAttendanceSub => 'Absences and stats';
+
+  @override
+  String get serviceNotesSub => 'Group notes';
+
+  @override
+  String get serviceKbSub => 'Tickets, solutions, cheat sheets';
+
+  @override
+  String get serviceToolsSub => 'Grant and credits';
+
+  @override
+  String get serviceNewsSub => 'University channels';
+
+  @override
+  String get serviceCommunitiesSub => 'Clubs and sections';
+
+  @override
+  String get serviceFriendsSub => 'Who is on campus';
+
+  @override
+  String get servicePollsSub => 'Group votes';
+
+  @override
+  String get serviceEventsSub => 'Events this week';
+
+  @override
+  String get serviceMarketSub => 'Student listings';
+
+  @override
+  String get serviceLostSub => 'Found and lost items';
+
+  @override
+  String get serviceWalletSub => 'Balance and grant';
+
+  @override
+  String get serviceAppsSub => 'Mini apps';
+
+  @override
+  String get serviceVirtualTourSub => 'Walk around the campus';
+
+  @override
+  String get servicePeopleSub => 'Classmates and group';
+
+  @override
+  String get serviceFriendsMapSub => 'Friends on the map';
+
+  @override
+  String get serviceTeamFinderSub => 'Build a team';
+
+  @override
+  String get serviceMentorshipSub => 'Mentors and advice';
+
+  @override
+  String get serviceExternalSub => 'Opens in the browser';
+
+  @override
+  String get searchSheetPlaceholder => 'Room, subject, person, service';
+
+  @override
+  String get searchSheetNoResults =>
+      'Nothing found. Try “A-318” or “calculus”.';
+
+  @override
+  String get searchTagSubject => 'Subject';
+
+  @override
+  String get searchTagService => 'Service';
+
+  @override
+  String get searchSubjectInSchedule => 'in the schedule';
+
+  @override
+  String get deadlinesClosedSemester => 'Completed deadlines';
+
+  @override
+  String deadlinesOfTotal(int total) {
+    return 'of $total';
+  }
+
+  @override
+  String get deadlinesGroupToday => 'Today';
+
+  @override
+  String get deadlineLeftDone => 'done';
+
+  @override
+  String get deadlinesSharedTitle => 'Shared group deadlines';
+
+  @override
+  String deadlinesSharedBody(int shared, int total) {
+    return 'The monitor adds one — everyone sees it. $shared of $total are shared.';
+  }
+
+  @override
+  String get deadlineDoneToast => 'Deadline closed';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get deadlinesAddSemantics => 'Add deadline';
+
+  @override
+  String get addDeadlineTitle => 'New deadline';
+
+  @override
+  String get addDeadlineWhatHint => 'What to hand in';
+
+  @override
+  String get addDeadlineSubject => 'Subject';
+
+  @override
+  String get addDeadlineDue => 'Due';
+
+  @override
+  String get addDeadlinePickDate => 'Pick a date';
+
+  @override
+  String get addDeadlineSharedTitle => 'Shared with the group';
+
+  @override
+  String addDeadlineSharedSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Visible to all $count people',
+      one: 'Visible to $count person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addDeadlineSharedSubGeneric => 'Everyone in the group will see it';
+
+  @override
+  String get addDeadlineToast =>
+      'Deadline added · I\'ll remind you a day before';
+
+  @override
+  String get examsTitle => 'Assessment';
+
+  @override
+  String examsSessionIn(int count) {
+    return 'session in $count d';
+  }
+
+  @override
+  String examsNearestIn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nearest · in $count days',
+      one: 'Nearest · in $count day',
+      zero: 'Nearest · today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get examsReadiness => 'Readiness';
+
+  @override
+  String get examsTopicsTitle => 'Topics for the test';
+
+  @override
+  String get examsTopicsHint => 'tick what you\'ve covered';
+
+  @override
+  String get examsTopicsEmpty =>
+      'Add topics — readiness is calculated automatically';
+
+  @override
+  String get examsAddTopic => 'Add topic';
+
+  @override
+  String get examsTopicHint => 'Topic';
+
+  @override
+  String get examsRemoveTopic => 'Remove topic';
+
+  @override
+  String get examsPlanTitle => 'Study plan';
+
+  @override
+  String get examsPlanRebuild => 'rebuild';
+
+  @override
+  String get examsPlanEmpty => 'All topics covered — time to rest';
+
+  @override
+  String examsPlanMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String get examsAllTitle => 'All assessments';
+
+  @override
+  String get examsDaysShort => 'D';
+
+  @override
+  String examsSelectSemantics(String subject) {
+    return 'Show $subject';
+  }
+
+  @override
+  String get toolsPageTitle => 'Tools';
+
+  @override
+  String get toolsTabGpa => 'GPA';
+
+  @override
+  String get toolsTabGrant => 'Grant';
+
+  @override
+  String get toolsTabEcts => 'Credits';
+
+  @override
+  String get toolsTabCommunity => 'Community';
+
+  @override
+  String get toolsGpaForecast => 'GPA forecast for the session';
+
+  @override
+  String get toolsGpaHintAllFives => 'Increased grant · 100%';
+
+  @override
+  String get toolsGpaHintHalfFives =>
+      'Increased grant possible with ≥ 50% fives';
+
+  @override
+  String get toolsGpaHintThree => 'There is a three — base grant only';
+
+  @override
+  String get toolsMarksHint => 'Tap a mark to change it';
+
+  @override
+  String get toolsMarksEmpty =>
+      'Add your group\'s schedule — subjects will appear here';
+
+  @override
+  String toolsMarkSemantics(String subject, int mark) {
+    return '$subject: mark $mark';
+  }
+
+  @override
+  String get toolsGrantBase => 'Base';
+
+  @override
+  String get toolsGrantStudy => 'Increased · studies';
+
+  @override
+  String get toolsGrantScience => 'Increased · science';
+
+  @override
+  String get toolsGrantSocial => 'Social';
+
+  @override
+  String get toolsGrantNoApplication => 'no application';
+
+  @override
+  String get toolsGrantNotEligible => 'not eligible';
+
+  @override
+  String get toolsGrantEvent => 'Event participation';
+
+  @override
+  String get toolsGrantEventSub => '1 per semester is required';
+
+  @override
+  String toolsRubles(String amount) {
+    return '$amount ₽';
+  }
+
+  @override
+  String toolsRublesPlus(String amount) {
+    return '+$amount ₽';
+  }
+
+  @override
+  String toolsGrantNote(int done, String rest) {
+    return 'The increased grant needs: no threes, ≥ 50% fives and 1 event. Now — $done of 3: $rest.';
+  }
+
+  @override
+  String get toolsGrantNoteDone =>
+      'The increased grant needs: no threes, ≥ 50% fives and 1 event. All conditions are met — apply.';
+
+  @override
+  String toolsGrantRestThrees(String subject) {
+    return 'fix $subject';
+  }
+
+  @override
+  String get toolsGrantRestFives => 'more fives needed';
+
+  @override
+  String get toolsGrantRestEvent => 'attend an event';
+
+  @override
+  String get toolsEctsEarned => 'Earned this year';
+
+  @override
+  String toolsEctsValue(int earned, int total) {
+    return '$earned / $total cr.';
+  }
+
+  @override
+  String toolsEctsLegend(int credits, String subject) {
+    return '$credits $subject';
+  }
+
+  @override
+  String pollsOpenCount(int count) {
+    return '$count unanswered';
+  }
+
+  @override
+  String get pollsAuthorYou => 'Your poll';
+
+  @override
+  String get pollsAuthorCommunity => 'Community poll';
+
+  @override
+  String get pollsStatusClosed => 'closed';
+
+  @override
+  String get pollsStatusOpen => 'open';
+
+  @override
+  String pollsStatusUntil(String date) {
+    return 'until $date';
+  }
+
+  @override
+  String get pollsYouAnswered => 'you answered';
+
+  @override
+  String get pollsVoteCounted => 'Vote counted';
+
+  @override
+  String get eventsFilterToday => 'Today';
+
+  @override
+  String get eventsFilterFree => 'Free';
+
+  @override
+  String get eventsFilterGoing => 'Going';
+
+  @override
+  String get eventsFreeLabel => 'free';
+
+  @override
+  String eventsGoingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count going',
+      one: '$count going',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get eventsGoingChecked => 'Going ✓';
+
+  @override
+  String get eventsEmptyGoingTitle => 'You are not going anywhere yet';
+
+  @override
+  String get eventsEmptyGoingSub =>
+      'Tap “Going” on an event and it will show up here.';
+
+  @override
+  String get eventsEmptyTodayTitle => 'No events today';
+
+  @override
+  String get eventsToastGoing => 'Added to your plans';
+
+  @override
+  String get eventsToastRemoved => 'Removed from your plans';
+
+  @override
+  String get lostFoundTabAll => 'All';
+
+  @override
+  String get lostFoundTabFoundShort => 'Found';
+
+  @override
+  String get lostFoundTabLostShort => 'Looking';
+
+  @override
+  String get lostFoundSecurityTitle => 'Security desk';
+
+  @override
+  String get lostFoundSecuritySub =>
+      'Give found documents or valuables to a security staff member';
+
+  @override
+  String get lostFoundEmptyAll => 'No listings yet';
+
+  @override
+  String lostFoundContactAuthor(String name) {
+    return 'Contact $name';
+  }
+
+  @override
+  String get walletBalanceTitle => 'Shuriken balance';
+
+  @override
+  String get walletTopUp => 'Top up';
+
+  @override
+  String get walletTopUpSubtitle => 'how to earn shurikens';
+
+  @override
+  String get walletIncomeMonth => 'Income this month';
+
+  @override
+  String get walletSpendMonth => 'Spent this month';
+
+  @override
+  String walletForMonth(String month) {
+    return 'in $month';
+  }
+
+  @override
+  String get walletNoIncome => 'nothing earned yet';
+
+  @override
+  String get walletOperations => 'Operations';
+
+  @override
+  String get walletPassActive => 'Pass is active';
+
+  @override
+  String get walletPassExpired => 'Pass has expired';
+
+  @override
+  String get walletPassMissing => 'No pass linked';
+
+  @override
+  String walletPassValidUntil(String date) {
+    return 'Student card · until $date';
+  }
+
+  @override
+  String get walletPassMissingSub =>
+      'Add your student card number in the profile';
+
+  @override
+  String walletCardNumber(String number) {
+    return 'No. $number';
+  }
+
+  @override
+  String get collabNotesFilterAll => 'All';
+
+  @override
+  String get collabNotesFilterNew => 'New';
+
+  @override
+  String get collabNotesFilterMine => 'Mine';
+
+  @override
+  String get collabNotesFilterGroup => 'Group';
+
+  @override
+  String get collabNotesFilterPersonal => 'Personal';
+
+  @override
+  String get collabNotesKindLecture => 'LEC';
+
+  @override
+  String get collabNotesKindPractice => 'PRAC';
+
+  @override
+  String get collabNotesKindLab => 'LAB';
+
+  @override
+  String get collabNotesKindDoc => 'DOC';
+
+  @override
+  String get collabNotesPersonalLabel => 'Personal note';
+
+  @override
+  String get collabNotesGroupLabel => 'Group note';
+
+  @override
+  String collabNotesStatsTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You maintain $count notes',
+      one: 'You maintain $count note',
+      zero: 'You have no notes yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get collabNotesStatsSub =>
+      'Shared notes are visible to the whole group';
+
+  @override
+  String collabNotesStatsNew(int count) {
+    return '$count new';
+  }
+
+  @override
+  String get knowledgeSearchHint => 'Subject, tickets, teacher';
+
+  @override
+  String knowledgeDownloads(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count downloads',
+      one: '$count download',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String knowledgeLikes(int count) {
+    return '♥ $count';
+  }
+
+  @override
+  String knowledgePriceShurikens(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count shurikens',
+      one: '$count shuriken',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get knowledgeEmptySearchText => 'Nothing found. Ask your group — ';
+
+  @override
+  String get knowledgeCreateRequest => 'create a request';
+
+  @override
+  String knowledgeRequestShareText(String query) {
+    return 'Looking for materials: $query. Does anyone have them?';
+  }
+
+  @override
+  String get knowledgeDownload => 'Download';
+
+  @override
+  String get marketWrite => 'Message';
+
+  @override
+  String get marketManage => 'Manage';
+
+  @override
+  String get marketFavoriteAdd => 'Add to favourites';
+
+  @override
+  String get marketFavoriteRemove => 'Remove from favourites';
+
+  @override
+  String get loginWelcomeBackAccent => 'back';
+
+  @override
+  String get authEmailHeaderTitleAccent => 'continue';
+
+  @override
+  String get authCheckEmailTitleAccent => 'email';
+
+  @override
+  String get authSignUpTitleAccent => 'account';
+
+  @override
+  String get authPasswordResetTitleAccent => 'reset';
+
+  @override
+  String get authEmailHeaderSubtitle =>
+      'We will send a 6-digit code to your email.';
+
+  @override
+  String get lessonAttendanceTitle => 'Group attendance';
+
+  @override
+  String get lessonAttendanceMeta => 'last 5';
+
+  @override
+  String get scheduleActionHide => 'Hide from schedule';
+
+  @override
+  String get scheduleTeacherRoom => 'office';
+
+  @override
+  String get roomLocalPlanHint =>
+      'A personal note on this device. It does not reserve the room or guarantee a free seat.';
+
+  @override
+  String get roomAvailabilityUnknown => 'Current availability is unknown';
+
+  @override
+  String get roomRemoveSaved => 'Remove saved place';
+
+  @override
+  String get mapFriendsOutdoorHint =>
+      'Friends are shown on the campus map. Indoor positions and floors are unknown.';
+
+  @override
+  String get coworkLocalPlanHint =>
+      'A personal plan, not a reservation. The layout is schematic; seat availability and queues are not checked.';
+
+  @override
+  String get coworkLocalPlan => 'Personal plan';
+
+  @override
+  String get coworkSaveError => 'Could not save. Please try again.';
+
+  @override
+  String get coworkClosed => 'Choose a seat between 08:00 and 22:00';
+
+  @override
+  String get communitiesSave => 'Save';
+
+  @override
+  String get communitiesSaved => 'Saved';
+
+  @override
+  String get communitiesSavedEmpty => 'Save a community to see it here';
+
+  @override
+  String get homeTrendingEmpty => 'No discussions yet';
+
+  @override
+  String get homeFavoritesEmpty => 'Choose quick actions in Services';
+
+  @override
+  String get onboardingFriendsSharingSub => 'Share your location with friends';
+
+  @override
+  String get onboardingGeoSystemSettings =>
+      'Location access can be turned off in system settings';
+
+  @override
+  String get toolsLocalEstimate =>
+      'Personal estimate saved on this device. Check scholarship amounts and eligibility with your university.';
+
+  @override
+  String get toolsNoValue => 'not entered';
+
+  @override
+  String get toolsGpaPersonal => 'Your forecast, not an official grade record';
+
+  @override
+  String get toolsEctsTarget => 'Credit target';
+
+  @override
+  String get personalRecordsNotice =>
+      'Personal records on this device. Not official university data.';
+
+  @override
+  String get attendanceEstimateNotice =>
+      'Attendance is estimated from the schedule and your logged absences, not verified presence.';
+
+  @override
+  String get gradesScholarshipDisclaimer =>
+      'GPA reference: 4.75. This does not establish scholarship eligibility.';
+
+  @override
+  String get profileLocalFieldsNote =>
+      'About and Telegram are saved only on this device and are not visible to other users.';
+
+  @override
+  String get articleSourceChannel => 'News source';
+
+  @override
+  String get deadlineSaved => 'Deadline added';
+
+  @override
+  String get scheduleLinkUnavailable =>
+      'A link to this schedule is not available yet. Share text, an image or a calendar instead.';
+
+  @override
+  String get scheduleReminderLocked =>
+      'This reminder is already scheduled. Changing or cancelling it is not available yet.';
+
+  @override
+  String get settingsAdvanced => 'Advanced settings';
+
+  @override
+  String get settingsLessonReactionsSub => 'Reactions next to classes';
+
+  @override
+  String get settingsWidgetRefreshRequested => 'Refresh requested';
+
+  @override
+  String get identityHandleCheckError =>
+      'Could not check the username. Try again';
+
+  @override
+  String get authPasswordLabel => 'Password';
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get settingsWidgetUnsupported =>
+      'The schedule widget is available on Android';
+
+  @override
+  String get miniAppsReportFailure => 'Could not send the report. Try again.';
+
+  @override
+  String get miniAppsRevRestoreFailure =>
+      'Could not restore this version. Try again.';
+
+  @override
+  String get miniAppsTokensFailure =>
+      'Could not update deployment tokens. Try again.';
+
+  @override
+  String get nfcPassMediaUnavailable =>
+      'Background unavailable. Select another file.';
+
+  @override
+  String lessonPairOrdinal(int number) {
+    return 'Period $number';
+  }
+
+  @override
+  String lessonFileKilobytes(String size) {
+    return '$size KB';
+  }
+
+  @override
+  String lessonFileMegabytes(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String get scheduleShortCancelled => 'CANC';
+
+  @override
+  String get pollsCreateError => 'Could not create the poll. Try again.';
+
+  @override
+  String get knowledgeUploadError =>
+      'Could not upload the material. Try again.';
+
+  @override
+  String get knowledgeFileError =>
+      'Could not read this file. Choose a file up to 50 MB.';
+
+  @override
+  String get postDetailCommentsLoadError => 'Couldn\'t load comments';
+
+  @override
+  String get scheduleNoteChecklist => 'Checklist';
+
+  @override
+  String get servicesSectionFirstParty => 'Built for campus';
+
+  @override
+  String get knowledgeSubjectsTitle => 'Subjects';
+
+  @override
+  String get knowledgeSubjectsHint => 'Select up to 10 subjects';
+
+  @override
+  String get knowledgeSubjectsSearch => 'Search subjects';
+
+  @override
+  String get knowledgeSubjectsLoadError => 'Could not load subjects';
+
+  @override
+  String get knowledgeSubjectsEmpty => 'No subjects found';
+
+  @override
+  String get knowledgeSubjectsApply => 'Done';
+
+  @override
+  String get knowledgeSubjectsFilter => 'Select subjects';
+
+  @override
+  String get knowledgeUploadSuccess => 'Material published';
+
+  @override
+  String get exportSelectedDay => 'Day';
+
+  @override
+  String get exportImagePreview => 'Image preview';
+
+  @override
+  String exportImagePages(int count) {
+    return '$count pages · PNG';
+  }
+
+  @override
+  String get exportImageHint =>
+      'The full schedule with dates, teachers and rooms. Longer periods are split into pages.';
+
+  @override
+  String get exportCalendarSafeHint =>
+      'Classes go into a separate calendar. Personal events stay untouched; exporting again updates our entries.';
+
+  @override
+  String get exportCalendarMobileOnly =>
+      'The system calendar is available on mobile. Use an .ics file on this device.';
+
+  @override
+  String get reminderTimeInvalid =>
+      'Choose a future time before the class starts.';
+
+  @override
+  String get compareDayView => 'By day';
+
+  @override
+  String get compareWeekView => 'Week overview';
+
+  @override
+  String get compareWindowsTitle => 'Time to meet';
+
+  @override
+  String get compareNoWindows =>
+      'No shared gaps of at least 30 minutes between classes';
+
+  @override
+  String get compareWindowsHint =>
+      'Includes classes and events. Gaps are shown only between them.';
+
+  @override
+  String get compareChangeSchedule => 'Change';
+
+  @override
+  String get authGuestUpgradeTitle => 'Save your guest account';
+
+  @override
+  String get authGuestUpgradeSubtitle =>
+      'Link an email to keep your schedule, settings and progress.';
+
+  @override
+  String get authGuestUpgradeSendCode => 'Send code';
+
+  @override
+  String get authGuestUpgradeVerify => 'Verify email';
+
+  @override
+  String get authGuestUpgradePassword => 'Set password';
+
+  @override
+  String get authGuestUpgradeDone => 'Account saved';
+
+  @override
+  String get authGuestUpgradeError =>
+      'Could not save the account. Check your details and try again.';
+
+  @override
+  String get authGuestExitWarning =>
+      'Signing out permanently loses access to this guest account. Link an email first to keep your data.';
+
+  @override
+  String get settingsColorCustom => 'Custom color';
+
+  @override
+  String get settingsColorHex => 'HEX';
+
+  @override
+  String get settingsColorHue => 'Hue';
+
+  @override
+  String get settingsColorSaturation => 'Saturation';
+
+  @override
+  String get settingsColorBrightness => 'Brightness';
+
+  @override
+  String friendsInviteMessage(String link) {
+    return 'Join me on University Ninja! Install the app to open this invitation and add me as a friend:\n$link';
+  }
+
+  @override
+  String scheduleSimultaneousLessons(int count) {
+    return '$count simultaneous classes';
+  }
+
+  @override
+  String get authAnyEmailHint => 'Use any email address you own.';
+
+  @override
+  String get exportCalendarIncomplete =>
+      'Some events have no end time. Choose PNG, text or .ics to keep everything.';
+
+  @override
+  String get exportUnscheduledEventsHint =>
+      'Events without a time remain in images and text. Calendars include only timed or explicitly all-day events.';
+
+  @override
+  String get exportAllDay => 'All day';
+
+  @override
+  String exportEntriesCount(int count) {
+    return 'Events: $count';
+  }
+
+  @override
+  String get knowledgePurchaseTitle => 'Unlock material?';
+
+  @override
+  String knowledgePurchaseBody(String title, String price) {
+    return 'Unlock “$title” for $price. Shurikens are charged once; reopening is free.';
+  }
+
+  @override
+  String get knowledgePurchaseConfirm => 'Unlock and open';
+
+  @override
+  String get knowledgePurchaseFailed =>
+      'Could not unlock the material. Check your balance and try again.';
+
+  @override
+  String get knowledgePurchasePriceChanged =>
+      'The price changed. Open the material again to confirm the new price.';
+
+  @override
+  String get knowledgePurchaseInsufficient => 'Not enough shurikens';
 }

@@ -25,7 +25,7 @@ class ScheduleSelectorOptionList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return BlocBuilder<CustomScheduleCubit, CustomScheduleState>(
-      builder: (context, state) => NinjaStateSwitcher(
+      builder: (context, state) => AppStateSwitcher(
         child: _buildState(context, l10n, state.customSchedules),
       ),
     );
@@ -48,9 +48,9 @@ class ScheduleSelectorOptionList extends StatelessWidget {
       children: [
         Text(
           l10n.selectSchedule,
-          style: NinjaText.headline.copyWith(color: context.ninja.ink),
+          style: AppText.headline.copyWith(color: context.colors.ink),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         for (final (index, schedule) in schedules.indexed)
           ScheduleSelectorOptionRow(
             schedule: schedule,
@@ -58,10 +58,10 @@ class ScheduleSelectorOptionList extends StatelessWidget {
             onSelected: onSelected,
           ).animateListItem(index: index),
         if (selectedId != null) ...[
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.fieldGap),
           SizedBox(
             width: .infinity,
-            child: NinjaButton.primary(
+            child: AppButton.primary(
               onPressed: onSubmit,
               label: l10n.addToSelectedSchedule,
               size: .large,

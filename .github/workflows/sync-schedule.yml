@@ -46,8 +46,21 @@ jobs:
           SCHEDULE_INGEST_KEY: ${{ secrets.SCHEDULE_INGEST_KEY }}
           SCHEDULE_SOURCE_AUTHORIZATION: ${{ secrets.SCHEDULE_SOURCE_AUTHORIZATION }}
           SCHEDULE_SOURCE_BASE_URL: ${{ vars.SCHEDULE_SOURCE_BASE_URL }}
-        run: >-
-          dart run bin/sync_mirea_schedule.dart
-          --schedule-base-url "$env:SCHEDULE_SOURCE_BASE_URL"
-          --fetch-concurrency 16
-          --batch-size 8
+        shell: pwsh
+        run: |
+          $arguments = @(
+            'run',
+            'bin/sync_mirea_schedule.dart',
+            '--schedule-base-url',
+            $env:SCHEDULE_SOURCE_BASE_URL,
+            '--fetch-concurrency',
+            '16',
+            '--batch-size',
+            '8'
+          )
+          & dart @arguments
+          if ($LASTEXITCODE -ne 0) {
+            Start-Sleep -Seconds 20
+            & dart @arguments
+          }
+          exit $LASTEXITCODE

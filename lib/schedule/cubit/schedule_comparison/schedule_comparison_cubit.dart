@@ -9,4 +9,20 @@ class ScheduleComparisonCubit extends Cubit<ScheduleComparisonState> {
   ScheduleComparisonCubit() : super(const ScheduleComparisonState());
 
   static const maxSchedules = 3;
+
+  String? _friendName;
+
+  SelectedSchedule? get friend => state.schedules.firstOrNull;
+
+  String get friendName => _friendName ?? friend?.name ?? '';
+
+  void start(SelectedSchedule schedule, {String? friendName}) {
+    _friendName = friendName;
+    emit(state.copyWith(schedules: {schedule}, isEnabled: true));
+  }
+
+  void stop() {
+    _friendName = null;
+    emit(const ScheduleComparisonState());
+  }
 }

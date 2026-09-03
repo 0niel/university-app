@@ -8,18 +8,20 @@ class _FileBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
+    final label = fileTypeBadge(material.fileName, material.mimeType);
+    final color = label == 'PDF' ? colors.exam : colors.lecture;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: colors.brandTint,
-        shape: .circle,
+        color: colors.tintOf(color),
+        borderRadius: BorderRadius.circular(AppRadius.iconTile),
       ),
       alignment: Alignment.center,
       child: Text(
-        fileTypeBadge(material.fileName, material.mimeType),
-        style: NinjaText.badge.copyWith(color: colors.brandInk),
+        label,
+        style: AppText.sans(10, FontWeight.w800).copyWith(color: color),
       ),
     );
   }

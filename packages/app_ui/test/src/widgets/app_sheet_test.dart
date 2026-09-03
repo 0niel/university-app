@@ -90,8 +90,8 @@ void main() {
             (container) => container.constraints?.maxWidth == 40,
           );
       final decoration = grabber.decoration! as BoxDecoration;
-      expect(decoration.color, colors.divider);
-      expect(decoration.borderRadius, BorderRadius.circular(AppRadius.full));
+      expect(decoration.color, colors.muted2);
+      expect(decoration.borderRadius, BorderRadius.circular(2));
     });
 
     testWidgets('close button pops the sheet', (tester) async {

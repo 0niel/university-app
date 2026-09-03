@@ -18,13 +18,13 @@ class FriendRequestRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final group = request.group;
     return Container(
       padding: const .all(12),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Row(
         children: [
@@ -37,12 +37,12 @@ class FriendRequestRow extends StatelessWidget {
                 Text(
                   request.fullName,
                   overflow: .ellipsis,
-                  style: NinjaText.body.copyWith(color: colors.ink),
+                  style: AppText.body.copyWith(color: colors.ink),
                 ),
                 if (group != null)
                   Text(
                     group,
-                    style: NinjaText.helper.copyWith(
+                    style: AppText.caption.copyWith(
                       color: colors.muted,
                     ),
                   ),

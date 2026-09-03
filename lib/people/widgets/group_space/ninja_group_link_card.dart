@@ -19,21 +19,21 @@ class NinjaGroupLinkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final row = AnimatedOpacity(
       opacity: pending ? 0.5 : 1,
       duration: const Duration(milliseconds: 160),
       child: Padding(
         padding: const .fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           0,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           8,
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: .circular(NinjaRadius.card),
+            borderRadius: .circular(AppRadius.card),
           ),
           child: NinjaListCell(
             title: link.title,
@@ -50,17 +50,17 @@ class NinjaGroupLinkCard extends StatelessWidget {
       key: ValueKey(link.id),
       direction: .endToStart,
       background: ColoredBox(
-        color: colors.scarlet,
+        color: colors.danger,
         child: Align(
           alignment: .centerRight,
           child: Padding(
             padding: const .symmetric(
-              horizontal: NinjaMetrics.screenPadding,
+              horizontal: AppSpacing.screen,
             ),
             child: NinjaGlyphIcon(
               NinjaGlyph.trash,
               size: 18,
-              color: colors.ninjaOnScarlet,
+              color: colors.onAccent,
             ),
           ),
         ),

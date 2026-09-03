@@ -24,7 +24,7 @@ void main() {
         expect(state.isSectionEnabled(section), isTrue);
       }
       expect(state.showLessonReactions, isTrue);
-      expect(state.lessonTypeColor('lecture'), 0xFF087F5B);
+      expect(state.lessonTypeColor('lecture'), 0xFF0E8A63);
     });
 
     blocTest<UiPreferencesCubit, UiPreferencesState>(
@@ -67,7 +67,7 @@ void main() {
         isA<UiPreferencesState>().having(
           (state) => state.lessonTypeColor('lecture'),
           'reset lecture color',
-          0xFF087F5B,
+          0xFF0E8A63,
         ),
       ],
     );

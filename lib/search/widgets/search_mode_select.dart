@@ -25,7 +25,7 @@ class SearchModeSelect extends StatelessWidget {
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(
-            horizontal: NinjaMetrics.screenPadding,
+            horizontal: AppSpacing.screen,
           ),
           child: Row(
             spacing: AppSpacing.sm,

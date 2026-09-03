@@ -19,7 +19,7 @@ class NfcMediaSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     final onRemove = onRemoveMedia;
 
     return Column(
@@ -27,17 +27,17 @@ class NfcMediaSelector extends StatelessWidget {
       children: [
         Text(
           l10n.nfcPassMediaTitle,
-          style: NinjaText.title.copyWith(color: colors.ink),
+          style: AppText.title.copyWith(color: colors.ink),
         ),
         const SizedBox(height: 6),
         Text(
           l10n.nfcPassMediaDescription,
-          style: NinjaText.subtext.copyWith(
+          style: AppText.subtext.copyWith(
             height: 1.45,
-            color: colors.mutedDark,
+            color: colors.muted,
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         Row(
           children: [
             Expanded(
@@ -54,7 +54,7 @@ class NfcMediaSelector extends StatelessWidget {
               ),
             ),
             if (hasMedia && onRemove != null) ...[
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.gap),
               Expanded(
                 child: NinjaButton.destructiveOutline(
                   label: l10n.nfcPassMediaRemove,

@@ -5,15 +5,6 @@ class FriendCardSheet extends StatelessWidget {
 
   final Friend friend;
 
-  Future<void> _openTelegram(String handle) async {
-    final clean = handle.replaceFirst('@', '').trim();
-    if (clean.isEmpty) return;
-    await launchUrl(
-      Uri.parse('https://t.me/$clean'),
-      mode: .externalApplication,
-    );
-  }
-
   String? get _subtitle {
     final handle = friend.handle;
     final group = friend.group;
@@ -27,40 +18,31 @@ class FriendCardSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    final handle = friend.handle;
-    final hasTelegram = handle != null && handle.isNotEmpty;
     final subtitle = _subtitle;
     return Column(
       mainAxisSize: .min,
       children: [
-        NinjaAvatar(initials: ninjaInitials(friend.fullName), size: 64),
-        const SizedBox(height: 12),
+        AppAvatar(name: friend.fullName, size: FriendsLayout.detailAvatar),
+        const SizedBox(height: AppSpacing.md),
         Text(
           friend.fullName,
           textAlign: .center,
-          style: NinjaText.title.copyWith(color: colors.ink),
+          style: AppText.title.copyWith(color: colors.ink),
         ),
         if (subtitle != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             subtitle,
             textAlign: .center,
-            style: NinjaText.subtext.copyWith(color: colors.muted),
+            style: AppText.subtext.copyWith(color: colors.muted),
           ),
         ],
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.screen),
         Column(
           spacing: 10,
           children: [
-            if (hasTelegram)
-              FriendsPillButton(
-                label: l10n.friendsWriteTelegram,
-                icon: .message,
-                expanded: true,
-                onTap: () => _openTelegram(handle),
-              ),
             FriendsPillButton(
               label: l10n.friendsRemove,
               tone: .danger,

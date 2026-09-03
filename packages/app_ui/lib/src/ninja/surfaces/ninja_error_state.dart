@@ -1,7 +1,8 @@
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
-import 'package:app_ui/src/ninja/surfaces/ninja_action_button.dart';
-import 'package:app_ui/src/ninja/surfaces/ninja_glyph.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_pill_button.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:flutter/widgets.dart';
 
 class NinjaErrorState extends StatelessWidget {
@@ -16,6 +17,7 @@ class NinjaErrorState extends StatelessWidget {
     this.secondaryLabel,
     this.onSecondary,
   });
+
   final String title;
   final String? message;
   final NinjaErrorTone tone;
@@ -27,76 +29,76 @@ class NinjaErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final messageText = message;
     final retry = retryLabel;
     final secondary = secondaryLabel;
     final accent = tone.accentOf(colors);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.fieldGap,
+        vertical: AppSpacing.xlg,
+      ),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 52,
-            height: 52,
+            width: 56,
+            height: 56,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               color: tone.tintOf(colors),
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
-            alignment: Alignment.center,
             child: IconTheme(
-              data: IconThemeData(size: 24, color: accent),
-              child:
-                  icon ?? NinjaGlyphIcon(tone.glyph, size: 24, color: accent),
+              data: IconThemeData(size: AppIconSize.lg, color: accent),
+              child: icon ??
+                  AppLineIconWidget(
+                    tone.icon,
+                    size: AppIconSize.lg,
+                    color: accent,
+                  ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.gap),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: NinjaText.headline.copyWith(color: colors.ink),
+            style: AppText.sectionSmall.copyWith(color: colors.ink),
           ),
           if (messageText != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.gap),
             Text(
               messageText,
               textAlign: TextAlign.center,
-              style: NinjaText.subtext.copyWith(color: colors.muted),
+              style: AppText.subtext.copyWith(
+                color: colors.muted,
+                height: 1.4,
+              ),
             ),
           ],
           if (retry != null || secondary != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.gap),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
               alignment: WrapAlignment.center,
               children: [
                 if (retry != null)
-                  NinjaActionButton(
+                  NinjaPillButton(
                     label: retry,
                     onPressed: onRetry,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    fontSize: 13,
+                    tone: NinjaPillTone.secondary,
                   ),
                 if (secondary != null)
-                  NinjaActionButton(
+                  NinjaPillButton(
                     label: secondary,
                     onPressed: onSecondary,
-                    tone: NinjaActionTone.surface,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    fontSize: 13,
                   ),
               ],
             ),
@@ -112,18 +114,21 @@ enum NinjaErrorTone {
   warn,
   info;
 
-  Color accentOf(NinjaColors colors) => switch (this) {
-        NinjaErrorTone.danger => colors.scarlet,
-        NinjaErrorTone.warn => colors.amberInk,
-        NinjaErrorTone.info => colors.brandInk,
+  Color accentOf(AppColors colors) => switch (this) {
+        NinjaErrorTone.danger => colors.danger,
+        NinjaErrorTone.warn => colors.warn,
+        NinjaErrorTone.info => colors.accent,
       };
-  Color tintOf(NinjaColors colors) => switch (this) {
-        NinjaErrorTone.danger => colors.dangerTint,
+
+  Color tintOf(AppColors colors) => switch (this) {
+        NinjaErrorTone.danger => colors.examTint,
         NinjaErrorTone.warn => colors.warnTint,
-        NinjaErrorTone.info => colors.infoTint,
+        NinjaErrorTone.info => colors.tint,
       };
-  NinjaGlyph get glyph => switch (this) {
-        NinjaErrorTone.danger => NinjaGlyph.warning,
-        NinjaErrorTone.warn || NinjaErrorTone.info => NinjaGlyph.info,
+
+  AppLineIcon get icon => switch (this) {
+        NinjaErrorTone.danger => AppLineIcon.cloudOff,
+        NinjaErrorTone.warn => AppLineIcon.alert,
+        NinjaErrorTone.info => AppLineIcon.info,
       };
 }

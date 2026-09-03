@@ -6,47 +6,50 @@ class _DropZone extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final picked = this.picked;
     return AppPressable(
       onTap: onTap,
       semanticsLabel: context.l10n.lessonDetailsPickFileOrPhoto,
       child: Container(
         width: .infinity,
-        padding: const .symmetric(horizontal: 16, vertical: 24),
+        padding: const .symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.xlg,
+        ),
         decoration: BoxDecoration(
-          color: colors.surfaceAlt,
-          borderRadius: .circular(NinjaRadius.card),
+          color: colors.surface2,
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Column(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: AppControlSize.touchTarget,
+              height: AppControlSize.touchTarget,
               alignment: .center,
               decoration: BoxDecoration(
-                color: colors.brandTint,
+                color: colors.tint,
                 shape: .circle,
               ),
               child: AppLineIconWidget(
                 .clipboard,
                 size: 20,
-                color: colors.brandInk,
+                color: colors.accent,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.gap),
             Text(
               picked?.name ?? context.l10n.lessonDetailsPickFileOrPhoto,
               maxLines: 1,
               overflow: .ellipsis,
-              style: NinjaText.body.copyWith(color: colors.ink),
+              style: AppText.body.copyWith(color: colors.ink),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               picked == null
                   ? context.l10n.lessonDetailsDropHint
                   : _formatFileSize(context.l10n, picked.bytes.length),
-              style: NinjaText.subtext.copyWith(color: colors.muted),
+              style: AppText.subtext.copyWith(color: colors.muted),
             ),
           ],
         ),

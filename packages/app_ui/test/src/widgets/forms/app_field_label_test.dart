@@ -2,16 +2,24 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+import '../../kit_harness.dart';
 
-  group('AppFieldLabel', () {
-    testWidgets('uppercases the text', (tester) async {
-      await tester.pumpWidget(wrap(const AppFieldLabel('Название')));
-      expect(find.text('НАЗВАНИЕ'), findsOneWidget);
-    });
+void main() {
+  testWidgets('renders muted 12px caption text', (tester) async {
+    await tester.pumpWidget(wrapKit(const AppFieldLabel('Почта')));
+
+    expect(find.text('Почта'), findsOneWidget);
+    final style = kitStyleOf(tester, 'Почта');
+    expect(style?.color, kitColors.muted);
+    expect(style?.fontSize, 12);
+    expect(style?.fontWeight, FontWeight.w500);
+  });
+
+  testWidgets('hint is appended in muted2', (tester) async {
+    await tester.pumpWidget(
+      wrapKit(const AppFieldLabel('Почта', hint: 'focused')),
+    );
+
+    expect(find.textContaining('focused', findRichText: true), findsOneWidget);
   });
 }

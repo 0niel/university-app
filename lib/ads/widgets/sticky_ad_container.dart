@@ -9,7 +9,7 @@ class StickyAdContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(color: context.ninja.canvas),
+    decoration: BoxDecoration(color: context.colors.canvas),
     child: child,
   );
 }

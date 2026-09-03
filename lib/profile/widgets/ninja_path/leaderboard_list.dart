@@ -9,11 +9,11 @@ class _LeaderboardList extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.ninja.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        color: context.colors.surface,
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Padding(
-        padding: const .symmetric(vertical: 6),
+        padding: const .symmetric(vertical: AppSpacing.xsm),
         child: Column(
           crossAxisAlignment: .stretch,
           children: [

@@ -206,3 +206,5 @@ config/firebase.local.json
 /ios/Runner/GoogleService-Info.plist
 /lib/firebase_options.dart
 /android/private/
+/.playwright-cli/
+/output/playwright/

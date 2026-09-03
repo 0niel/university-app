@@ -115,14 +115,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    Finder reaction(String emoji) => find.byWidgetPredicate(
-      (widget) => widget is NinjaChip && widget.label.startsWith(emoji),
-    );
-    expect(reaction('😍'), findsOneWidget);
-    expect(reaction('🧠'), findsOneWidget);
-    tester.widget<NinjaChip>(reaction('😍')).onTap?.call();
-    tester.widget<NinjaChip>(reaction('😍')).onTap?.call();
-    tester.widget<NinjaChip>(reaction('🧠')).onTap?.call();
+    Finder reaction(String type) =>
+        find.byKey(ValueKey('lesson-reaction-$type'));
+    expect(reaction('love'), findsOneWidget);
+    expect(reaction('brain'), findsOneWidget);
+    tester.widget<AppChip>(reaction('love')).onTap?.call();
+    tester.widget<AppChip>(reaction('love')).onTap?.call();
+    tester.widget<AppChip>(reaction('brain')).onTap?.call();
     await tester.pumpAndSettle();
 
     expect(events, [

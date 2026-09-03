@@ -1,8 +1,11 @@
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
-import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_banner.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
+
+enum NinjaBannerTone { danger, warn, success, info }
 
 class NinjaBanner extends StatelessWidget {
   const NinjaBanner({
@@ -24,133 +27,112 @@ class NinjaBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final palette = _palette(colors);
+    final colors = context.colors;
+    final accent = tone.accentOf(colors);
     final bodyText = body;
     final action = actionLabel;
+    if (bodyText == null && icon == null) {
+      return AppBanner(
+        message: title,
+        tone: switch (tone) {
+          NinjaBannerTone.info => AppBannerTone.accent,
+          NinjaBannerTone.warn => AppBannerTone.warn,
+          NinjaBannerTone.danger => AppBannerTone.danger,
+          NinjaBannerTone.success => AppBannerTone.success,
+        },
+        actionLabel: actionLabel,
+        onAction: onAction,
+      );
+    }
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sectionGap,
+        vertical: AppSpacing.md,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: palette.accent.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(13),
+      decoration: BoxDecoration(
+        color: tone.tintOf(colors),
+        borderRadius: BorderRadius.circular(AppRadius.banner),
+      ),
+      child: Row(
+        crossAxisAlignment: bodyText == null
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
+        children: [
+          if (icon != null)
+            IconTheme(
+              data: IconThemeData(size: AppIconSize.compact, color: accent),
+              child: icon!,
+            )
+          else
+            Padding(
+              padding: EdgeInsets.only(
+                top: bodyText == null ? AppSpacing.zero : AppSpacing.xs,
               ),
-              child: icon ??
-                  AppLineIconWidget(
-                    palette.icon,
-                    size: 20,
-                    color: palette.accent,
-                  ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: accent,
+                  shape: BoxShape.circle,
+                ),
+                child: const SizedBox.square(dimension: 8),
+              ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppText.label.copyWith(color: colors.ink)),
+                if (bodyText != null) ...[
+                  const SizedBox(height: AppSpacing.micro),
                   Text(
-                    title,
-                    style: NinjaText.headline.copyWith(color: colors.ink),
+                    bodyText,
+                    style: AppText.subtext.copyWith(color: colors.muted),
                   ),
-                  if (bodyText != null) ...[
-                    const SizedBox(height: 3),
-                    Text(
-                      bodyText,
-                      style:
-                          NinjaText.subtext.copyWith(color: colors.mutedDark),
-                    ),
-                  ],
-                  if (action != null) ...[
-                    const SizedBox(height: 7),
-                    _NinjaBannerAction(
-                      label: action,
-                      accent: palette.accent,
-                      onPressed: onAction,
-                    ),
-                  ],
                 ],
+              ],
+            ),
+          ),
+          if (action != null) ...[
+            const SizedBox(width: AppSpacing.md),
+            AppPressable(
+              onTap: onAction,
+              semanticsLabel: action,
+              semanticsButton: true,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 44),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+                  child: Center(
+                    child: Text(
+                      action,
+                      style: AppText.subtextBold.copyWith(color: accent),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
-        ),
+        ],
       ),
     );
   }
+}
 
-  _NinjaBannerPalette _palette(NinjaColors colors) => switch (tone) {
-        NinjaBannerTone.danger => _NinjaBannerPalette(
-            accent: colors.scarlet,
-            icon: AppLineIcon.alert,
-          ),
-        NinjaBannerTone.warn => _NinjaBannerPalette(
-            accent: colors.amberInk,
-            icon: AppLineIcon.alert,
-          ),
-        NinjaBannerTone.success => _NinjaBannerPalette(
-            accent: colors.green,
-            icon: AppLineIcon.check,
-          ),
-        NinjaBannerTone.info => _NinjaBannerPalette(
-            accent: colors.brandInk,
-            icon: AppLineIcon.info,
-          ),
+extension NinjaBannerToneX on NinjaBannerTone {
+  Color accentOf(AppColors colors) => switch (this) {
+        NinjaBannerTone.danger => colors.danger,
+        NinjaBannerTone.warn => colors.warn,
+        NinjaBannerTone.success => colors.lecture,
+        NinjaBannerTone.info => colors.accent,
       };
-}
 
-enum NinjaBannerTone { danger, warn, success, info }
-
-class _NinjaBannerAction extends StatelessWidget {
-  const _NinjaBannerAction({
-    required this.label,
-    required this.accent,
-    required this.onPressed,
-  });
-
-  final String label;
-  final Color accent;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final content = Container(
-      constraints: const BoxConstraints(minHeight: NinjaMetrics.minTouchTarget),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      alignment: AlignmentDirectional.centerStart,
-      decoration: BoxDecoration(
-        color: colors.surfaceAlt,
-        borderRadius: BorderRadius.circular(NinjaRadius.pill),
-      ),
-      child: Text(
-        label,
-        style: NinjaText.button.copyWith(color: accent),
-      ),
-    );
-    final onPressed = this.onPressed;
-    if (onPressed == null) return content;
-    return AppPressable(
-      onTap: onPressed,
-      semanticsLabel: label,
-      child: content,
-    );
-  }
-}
-
-class _NinjaBannerPalette {
-  const _NinjaBannerPalette({required this.accent, required this.icon});
-
-  final Color accent;
-  final AppLineIcon icon;
+  Color tintOf(AppColors colors) => switch (this) {
+        NinjaBannerTone.danger => colors.examTint,
+        NinjaBannerTone.warn => colors.warnTint,
+        NinjaBannerTone.success => colors.lectureTint,
+        NinjaBannerTone.info => colors.tint,
+      };
 }

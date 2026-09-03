@@ -12,6 +12,12 @@ _StudyMaterial _$StudyMaterialFromJson(Map<String, dynamic> json) =>
         id: $checkedConvert('id', (v) => v as String? ?? ''),
         title: $checkedConvert('title', (v) => v as String? ?? ''),
         subjectName: $checkedConvert('subjectName', (v) => v as String? ?? ''),
+        subjectNames: $checkedConvert(
+          'subjectNames',
+          (v) =>
+              (v as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const <String>[],
+        ),
         materialType: $checkedConvert(
           'materialType',
           (v) => v as String? ?? 'note',
@@ -43,6 +49,7 @@ Map<String, dynamic> _$StudyMaterialToJson(_StudyMaterial instance) =>
       'id': instance.id,
       'title': instance.title,
       'subjectName': instance.subjectName,
+      'subjectNames': instance.subjectNames,
       'materialType': instance.materialType,
       'downloads': instance.downloads,
       'likes': instance.likes,

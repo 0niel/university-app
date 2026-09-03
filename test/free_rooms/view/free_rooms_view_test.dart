@@ -11,12 +11,20 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 class MockFreeRoomsCubit extends MockCubit<FreeRoomsState>
     implements FreeRoomsCubit {}
 
+class MockRoomBookingCubit extends MockCubit<RoomBookingState>
+    implements RoomBookingCubit {}
+
 void main() {
   group('FreeRoomsView', () {
     late FreeRoomsCubit cubit;
+    late RoomBookingCubit saved;
 
     setUp(() {
       cubit = MockFreeRoomsCubit();
+      saved = MockRoomBookingCubit();
+      when(() => saved.state).thenReturn(const RoomBookingState());
+      addTearDown(cubit.close);
+      addTearDown(saved.close);
     });
 
     Widget buildSubject({double textScale = 1, bool reduceMotion = false}) {
@@ -33,8 +41,11 @@ void main() {
           ),
           child: child!,
         ),
-        home: BlocProvider<FreeRoomsCubit>.value(
-          value: cubit,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<FreeRoomsCubit>.value(value: cubit),
+            BlocProvider<RoomBookingCubit>.value(value: saved),
+          ],
           child: const FreeRoomsView(),
         ),
       );
@@ -67,7 +78,7 @@ void main() {
       },
     );
 
-    testWidgets('renders the summary as the only accentSoft card', (
+    testWidgets('renders the free room group and campus filters', (
       tester,
     ) async {
       when(() => cubit.state).thenReturn(
@@ -80,15 +91,9 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      final colors = tester.element(find.byType(FreeRoomsView)).ninja;
-      final accented = tester
-          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-          .map((widget) => widget.decoration)
-          .whereType<BoxDecoration>()
-          .where((decoration) => decoration.color == colors.accentSoft);
-      expect(accented, hasLength(1));
-      expect(find.byType(FreeRoomsSummary), findsOneWidget);
-      expect(find.byType(NinjaChip), findsWidgets);
+      expect(find.byType(AppListGroup), findsOneWidget);
+      expect(find.text('Свободно сейчас'), findsOneWidget);
+      expect(find.byType(AppChip), findsWidgets);
     });
 
     testWidgets(
@@ -124,7 +129,7 @@ void main() {
         );
         expect(find.text('Ошибка загрузки'), findsOneWidget);
         expect(find.text('Свободных нет'), findsNothing);
-        expect(find.byType(FreeRoomsSummary), findsNothing);
+        expect(find.byType(FreeRoomRow), findsNothing);
         await tester.tap(find.text('Повторить'));
         verify(() => cubit.load()).called(1);
       },
@@ -143,7 +148,7 @@ void main() {
       expect(find.byKey(const ValueKey('free-rooms-empty')), findsOneWidget);
       expect(find.text('Свободных нет'), findsOneWidget);
 
-      await tester.tap(find.widgetWithText(NinjaChip, 'Обновить'));
+      await tester.tap(find.text('Обновить'));
       verify(() => cubit.load()).called(1);
     });
 

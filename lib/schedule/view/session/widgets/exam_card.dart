@@ -1,117 +1,88 @@
-part of '../session_page.dart';
+import 'package:app_ui/app_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/schedule/view/session/session_exam.dart';
 
-class _ExamCard extends StatelessWidget {
-  const _ExamCard({required this.exam, required this.onTap});
+class ExamCard extends StatelessWidget {
+  const ExamCard({
+    required this.exam,
+    required this.readiness,
+    required this.onTap,
+    super.key,
+  });
 
-  final _Exam exam;
+  final SessionExam exam;
+  final double readiness;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final locale = Localizations.localeOf(context).toString();
-    return NinjaScheduleSurface(
+    final colors = context.colors;
+    final tone = readiness >= .8
+        ? colors.lecture
+        : readiness >= .5
+        ? colors.warn
+        : colors.danger;
+    return AppCard(
+      radius: AppRadius.row,
       onTap: onTap,
-      semanticLabel: '${exam.subject}, ${exam.typeName}',
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sectionGap,
+      ),
       child: Row(
-        spacing: 14,
-        crossAxisAlignment: .start,
         children: [
-          Container(
-            width: 54,
-            padding: const .symmetric(vertical: 10),
-            decoration: BoxDecoration(
-              color: exam.color.withValues(alpha: .12),
-              borderRadius: .circular(NinjaRadius.control),
-            ),
+          AppIconTile(
+            size: 48,
+            radius: AppRadius.banner,
+            background: colors.tintOf(exam.color),
+            foreground: exam.color,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('${exam.days}', style: AppText.metric),
+                Text(context.l10n.examsDaysShort, style: AppText.gridTag),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sectionGap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${exam.days}',
-                  style: NinjaText.tabular(
-                    NinjaText.headline.copyWith(color: exam.color),
-                  ),
+                  exam.subject,
+                  style: AppText.headlineStrong.copyWith(color: colors.ink),
                 ),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  context.l10n.sessionDaysShort,
-                  style: NinjaText.helper.copyWith(color: exam.color),
+                  [
+                    exam.typeName,
+                    DateFormat.MMMd(
+                      Localizations.localeOf(context).toString(),
+                    ).format(exam.date),
+                    if (exam.room.isNotEmpty) exam.room,
+                  ].join(' · '),
+                  style: AppText.subtext.copyWith(color: colors.muted),
                 ),
               ],
             ),
           ),
-          Expanded(
+          const SizedBox(width: AppSpacing.gap),
+          SizedBox(
+            width: AppControlSize.touchTarget,
             child: Column(
-              crossAxisAlignment: .start,
               children: [
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 2,
-                  children: [
-                    Text(
-                      exam.typeName,
-                      style: NinjaText.microLabel.copyWith(color: exam.color),
-                    ),
-                    Text(
-                      '· ${DateFormat('d MMMM', locale).format(exam.date)} '
-                      '${exam.time}',
-                      style: NinjaText.tabular(
-                        NinjaText.helper.copyWith(
-                          color: colors.muted,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3),
                 Text(
-                  exam.subject,
-                  style: NinjaText.body.copyWith(
-                    color: colors.ink,
-                    fontWeight: .w600,
-                  ),
+                  '${(readiness * 100).round()}%',
+                  style: AppText.bodyBold.copyWith(color: tone),
                 ),
-                if (exam.teacher.isNotEmpty || exam.room != '—') ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    [
-                      if (exam.teacher.isNotEmpty) exam.teacher,
-                      if (exam.room != '—') exam.room,
-                    ].join(' · '),
-                    style: NinjaText.subtext.copyWith(
-                      color: colors.muted,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 10),
-                Row(
-                  spacing: 8,
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: .circular(NinjaRadius.pill),
-                        child: SizedBox(
-                          height: 8,
-                          child: Stack(
-                            fit: .expand,
-                            children: [
-                              ColoredBox(color: colors.surfaceAlt),
-                              FractionallySizedBox(
-                                alignment: .centerLeft,
-                                widthFactor: exam.readiness.clamp(0.0, 1.0),
-                                child: ColoredBox(color: colors.brand),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '${(exam.readiness * 100).round()}%',
-                      style: NinjaText.tabular(
-                        NinjaText.helper.copyWith(color: colors.muted),
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 5),
+                AppProgressBar(
+                  value: readiness,
+                  height: AppSpacing.xs,
+                  color: tone,
                 ),
               ],
             ),

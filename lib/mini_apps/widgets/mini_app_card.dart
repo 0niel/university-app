@@ -25,39 +25,39 @@ class MiniAppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
+    final identity = <Widget>[
+      MiniAppIconTile(emoji: app.iconEmoji, accent: context.colors.accent),
+      const SizedBox(width: AppSpacing.sectionGap),
+      Expanded(
+        child: MiniAppCardInfo(app: app, showStatus: showStatus),
+      ),
+    ];
     final row = Semantics(
       button: true,
       enabled: !app.isHidden,
       label: app.name,
       child: Opacity(
         opacity: app.isHidden ? 0.55 : 1,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
-          ),
-          child: AppPressable(
-            onTap: onTap,
-            onLongPress: onLongPress,
-            child: Padding(
-              padding: const .all(16),
-              child: Row(
-                children: [
-                  MiniAppIconTile(
-                    emoji: app.iconEmoji,
-                    accent: colors.brand,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: MiniAppCardInfo(app: app, showStatus: showStatus),
-                  ),
-                  const SizedBox(width: 8),
-                  MiniAppCardMeta(app: app),
-                ],
-              ),
-            ),
-          ),
+        child: AppCard(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: largeText
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(children: identity),
+                    const SizedBox(height: AppSpacing.md),
+                    MiniAppCardMeta(app: app),
+                  ],
+                )
+              : Row(
+                  children: [
+                    ...identity,
+                    const SizedBox(width: AppSpacing.sm),
+                    MiniAppCardMeta(app: app),
+                  ],
+                ),
         ),
       ),
     );

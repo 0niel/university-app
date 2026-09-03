@@ -10,7 +10,7 @@ class _TypeChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => NinjaChip(
+  Widget build(BuildContext context) => AppChip(
     label: _materialTypeLabel(context.l10n, type),
     selected: selected,
     onTap: onTap,

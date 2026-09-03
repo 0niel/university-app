@@ -10,12 +10,17 @@ class AllCommunitiesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toLanguageTag();
-    return BlocProvider(
-      create: (context) {
-        final cubit = CommunityCatalogCubit(repository: context.read());
-        unawaited(cubit.load(locale: locale));
-        return cubit;
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) {
+            final cubit = CommunityCatalogCubit(repository: context.read());
+            unawaited(cubit.load(locale: locale));
+            return cubit;
+          },
+        ),
+        BlocProvider(create: (_) => JoinedCommunitiesCubit()),
+      ],
       child: const AllCommunitiesView(),
     );
   }

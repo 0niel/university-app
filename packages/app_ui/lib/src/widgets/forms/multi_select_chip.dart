@@ -1,4 +1,8 @@
-import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_filter_chip.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:flutter/material.dart';
 
 class MultiSelectChip<T> extends StatelessWidget {
@@ -9,158 +13,83 @@ class MultiSelectChip<T> extends StatelessWidget {
     required this.labelBuilder,
     super.key,
     this.chipColorBuilder,
-    this.selectedColor,
-    this.unselectedColor,
-    this.borderRadius = 12.0,
-    this.spacing = 8.0,
-    this.runSpacing = 8.0,
+    this.spacing = AppSpacing.sm,
+    this.runSpacing = AppSpacing.sm,
     this.maxItems,
-    this.direction = Axis.horizontal,
     this.icon,
     this.isSingleSelect = false,
     this.label,
+    this.overflowLabelBuilder,
   });
 
   final List<T> items;
-
   final List<T> selectedItems;
-
   final void Function(List<T>) onSelectionChanged;
-
   final String Function(T item) labelBuilder;
-
   final Color? Function(T item)? chipColorBuilder;
-
-  final Color? selectedColor;
-
-  final Color? unselectedColor;
-
-  final double borderRadius;
-
   final double spacing;
-
   final double runSpacing;
-
   final int? maxItems;
-
-  final Axis direction;
-
-  final IconData? icon;
-
+  final AppLineIcon? icon;
   final bool isSingleSelect;
-
   final String? label;
+  final String Function(int hidden)? overflowLabelBuilder;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colors;
-    final defaultSelectedColor = colors.primary;
-    final defaultUnselectedColor = colors.background03;
+    final colors = context.colors;
     final maxItems = this.maxItems;
     final label = this.label;
-
-    final displayedItems = maxItems != null && items.length > maxItems
+    final displayed = maxItems != null && items.length > maxItems
         ? items.sublist(0, maxItems)
         : items;
+    final hidden = maxItems == null ? 0 : items.length - maxItems;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         if (label != null) ...[
-          Text(
-            label,
-            style: AppText.bodyStrong.copyWith(
-              color: colors.active,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 12),
+          Text(label, style: AppText.bodyStrong.copyWith(color: colors.ink)),
+          const SizedBox(height: AppSpacing.md),
         ],
         Wrap(
           spacing: spacing,
           runSpacing: runSpacing,
-          direction: direction,
-          children: displayedItems.map((item) {
-            final isSelected = selectedItems.contains(item);
-            final itemColor = chipColorBuilder?.call(item);
-
-            final activeColor =
-                selectedColor ?? itemColor ?? defaultSelectedColor;
-            final inactiveColor = unselectedColor ?? defaultUnselectedColor;
-
-            void handleSelected() {
-              final selected = !isSelected;
-              var newSelectedItems = <T>[...selectedItems];
-
-              if (isSingleSelect) {
-                if (selected) {
-                  newSelectedItems = [item];
-                } else {
-                  newSelectedItems = [];
-                }
-              } else {
-                if (selected) {
-                  newSelectedItems.add(item);
-                } else {
-                  newSelectedItems.remove(item);
-                }
-              }
-
-              onSelectionChanged(newSelectedItems);
-            }
-
-            return AppPressable(
-              onTap: handleSelected,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? activeColor.withValues(alpha: 0.15)
-                      : inactiveColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(borderRadius),
-                  border: Border.all(
-                    color: isSelected ? activeColor : Colors.transparent,
-                    width: 1.5,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(
-                        icon,
-                        size: 16,
-                        color: isSelected ? activeColor : colors.deactive,
-                      ),
-                      const SizedBox(width: 6),
-                    ],
-                    Text(
-                      labelBuilder(item),
-                      style: AppText.caption.copyWith(
-                        color: isSelected ? activeColor : colors.deactive,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
+          children: [
+            for (final item in displayed)
+              AppChip(
+                label: labelBuilder(item),
+                leadingIcon: icon,
+                color: chipColorBuilder?.call(item),
+                selected: selectedItems.contains(item),
+                onTap: () => _toggle(item),
               ),
-            );
-          }).toList(),
+          ],
         ),
-        if (maxItems != null && items.length > maxItems) ...[
-          const SizedBox(height: 8),
+        if (hidden > 0) ...[
+          const SizedBox(height: AppSpacing.sm),
           Text(
-            'Ещё ${items.length - maxItems} элемент(ов)',
-            style: AppText.caption.copyWith(
-              color: colors.deactive,
-            ),
+            overflowLabelBuilder?.call(hidden) ?? '+$hidden',
+            style: AppText.caption.copyWith(color: colors.muted),
           ),
         ],
       ],
     );
+  }
+
+  void _toggle(T item) {
+    final selected = !selectedItems.contains(item);
+    if (isSingleSelect) {
+      onSelectionChanged(selected ? [item] : <T>[]);
+      return;
+    }
+    final next = <T>[...selectedItems];
+    if (selected) {
+      next.add(item);
+    } else {
+      next.remove(item);
+    }
+    onSelectionChanged(next);
   }
 }

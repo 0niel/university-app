@@ -15,7 +15,7 @@ class SearchScopeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final reduceMotion =
         (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
         (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
@@ -26,7 +26,7 @@ class SearchScopeChip extends StatelessWidget {
       semanticsSelected: selected,
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-          minHeight: NinjaMetrics.minTouchTarget,
+          minHeight: AppControlSize.iconButton,
         ),
         child: AnimatedContainer(
           duration: reduceMotion
@@ -39,15 +39,15 @@ class SearchScopeChip extends StatelessWidget {
             vertical: AppSpacing.gap,
           ),
           decoration: BoxDecoration(
-            color: selected ? colors.brand : colors.surfaceAlt,
-            borderRadius: BorderRadius.circular(NinjaRadius.pill),
+            color: selected ? colors.accent : colors.surface2,
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: NinjaText.button.copyWith(
-              color: selected ? colors.onBrand : colors.ink,
+            style: AppText.button.copyWith(
+              color: selected ? colors.onAccent : colors.ink,
             ),
           ),
         ),

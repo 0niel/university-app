@@ -51,7 +51,7 @@ class EditIdentitySheet extends StatefulWidget {
   State<EditIdentitySheet> createState() => _EditIdentitySheetState();
 }
 
-enum _HandleState { idle, checking, available, taken, invalid }
+enum _HandleState { idle, checking, available, taken, invalid, failed }
 
 class _EditIdentitySheetState extends State<EditIdentitySheet> {
   static final _handleRegex = RegExp(r'^[a-z0-9_]{3,20}$');
@@ -129,7 +129,7 @@ class _EditIdentitySheetState extends State<EditIdentitySheet> {
         name: 'EditIdentitySheet',
       );
       if (mounted && request == _request) {
-        setState(() => _state = .idle);
+        setState(() => _state = .failed);
       }
     }
   }
@@ -170,6 +170,7 @@ class _EditIdentitySheetState extends State<EditIdentitySheet> {
     final (String? error, String? helper) = switch (_state) {
       .taken => (l10n.identityHandleTaken, null),
       .invalid => (l10n.identityHandleInvalid, null),
+      .failed => (l10n.identityHandleCheckError, null),
       .available => (null, l10n.identityHandleAvailable),
       .idle || .checking => (null, l10n.identityHandleHelp),
     };
@@ -178,19 +179,23 @@ class _EditIdentitySheetState extends State<EditIdentitySheet> {
       mainAxisSize: .min,
       crossAxisAlignment: .start,
       children: [
-        NinjaInput(
+        AppInputField(
           controller: _name,
+          enabled: !_saving,
+          fillColor: context.colors.surface,
           label: l10n.identityNameLabel,
           placeholder: l10n.identityNameHint,
           textInputAction: .next,
         ),
-        const SizedBox(height: 14),
-        NinjaInput(
+        const SizedBox(height: AppSpacing.sectionGap),
+        AppInputField(
           controller: _handle,
+          enabled: !_saving,
+          fillColor: context.colors.surface,
           label: l10n.identityHandleLabel,
           placeholder: l10n.identityHandleHint,
-          leadingIcon: const AppLineIconWidget(AppLineIcon.at),
-          clearable: false,
+          leadingIcon: AppLineIcon.at,
+          showClear: false,
           success: _state == .available,
           inputFormatters: [
             const _HandleEditFormatter(),
@@ -200,8 +205,14 @@ class _EditIdentitySheetState extends State<EditIdentitySheet> {
           errorText: error,
           helperText: helper,
         ),
-        const SizedBox(height: 18),
-        NinjaButton.primary(
+        if (_state == .failed)
+          AppButton(
+            label: l10n.retry,
+            variant: AppButtonVariant.text,
+            onPressed: () => _onHandleChanged(_handle.text),
+          ),
+        const SizedBox(height: AppSpacing.fieldGap),
+        AppButton.primary(
           label: _saving ? l10n.identitySaving : l10n.profileEditSave,
           expanded: true,
           size: .large,

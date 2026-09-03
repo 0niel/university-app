@@ -13,7 +13,7 @@ class _ContributorsShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final onBecomeContributor = this.onBecomeContributor;
 
@@ -21,7 +21,7 @@ class _ContributorsShell extends StatelessWidget {
       padding: const .all(16),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: .circular(NinjaRadius.card),
+        borderRadius: .circular(AppRadius.card),
       ),
       child: Column(
         crossAxisAlignment: .start,
@@ -30,13 +30,17 @@ class _ContributorsShell extends StatelessWidget {
           Row(
             spacing: 10,
             children: [
-              AppLineIconWidget(.people, size: 16, color: colors.ink),
+              AppLineIconWidget(
+                .people,
+                size: AppIconSize.sm,
+                color: colors.ink,
+              ),
               Expanded(
                 child: loading
                     ? const NinjaSkeleton(width: 140, height: 16)
                     : Text(
                         l10n.toolsContributorsCount(contributors.length),
-                        style: NinjaText.headline.copyWith(
+                        style: AppText.headline.copyWith(
                           color: colors.ink,
                           fontWeight: .w600,
                         ),

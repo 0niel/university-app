@@ -89,14 +89,14 @@ class _CalendarHeaderState extends State<CalendarHeader> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final reduceMotion =
         MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     final animation = reduceMotion ? null : widget.animationController;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Column(
         children: [
           CalendarWeeksHeader(
@@ -128,11 +128,11 @@ class _CalendarHeaderState extends State<CalendarHeader> {
                     : const AlwaysStoppedAnimation(1),
                 child: Column(
                   children: [
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     _buildSearchBar(colors),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     _buildMonthSelector(colors),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                   ],
                 ),
               ),
@@ -142,10 +142,10 @@ class _CalendarHeaderState extends State<CalendarHeader> {
     );
   }
 
-  Widget _buildSearchBar(NinjaColors colors) {
+  Widget _buildSearchBar(AppColors colors) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: NinjaMetrics.screenPadding,
+        horizontal: AppSpacing.screen,
       ),
       child: Builder(
         builder: (context) => AppPressable(
@@ -155,12 +155,15 @@ class _CalendarHeaderState extends State<CalendarHeader> {
             tag: 'searchHero',
             child: Container(
               constraints: const BoxConstraints(
-                minHeight: NinjaMetrics.minTouchTarget,
+                minHeight: AppControlSize.touchTarget,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sectionGap,
+                vertical: AppSpacing.gap,
+              ),
               decoration: BoxDecoration(
                 color: colors.surface,
-                borderRadius: BorderRadius.circular(NinjaRadius.card),
+                borderRadius: BorderRadius.circular(AppRadius.card),
               ),
               child: Row(
                 children: [
@@ -169,10 +172,10 @@ class _CalendarHeaderState extends State<CalendarHeader> {
                     size: 18,
                     color: colors.muted,
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.gap),
                   Text(
                     context.l10n.search,
-                    style: NinjaText.body.copyWith(color: colors.muted),
+                    style: AppText.body.copyWith(color: colors.muted),
                   ),
                 ],
               ),
@@ -183,7 +186,7 @@ class _CalendarHeaderState extends State<CalendarHeader> {
     );
   }
 
-  Widget _buildMonthSelector(NinjaColors colors) {
+  Widget _buildMonthSelector(AppColors colors) {
     final locale = Localizations.localeOf(context).toLanguageTag();
     final months = List.generate(12, (index) {
       final raw = DateFormat.MMM(
@@ -199,13 +202,13 @@ class _CalendarHeaderState extends State<CalendarHeader> {
         MediaQuery.accessibleNavigationOf(context);
 
     return SizedBox(
-      height: 48,
+      height: AppControlSize.buttonMedium,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: months.length,
         padding: const EdgeInsets.symmetric(
-          horizontal: NinjaMetrics.screenPadding,
+          horizontal: AppSpacing.screen,
         ),
         controller: _monthScrollController,
         itemBuilder: (context, index) {
@@ -227,21 +230,21 @@ class _CalendarHeaderState extends State<CalendarHeader> {
                       : const Duration(milliseconds: 180),
                   curve: Curves.easeOutCubic,
                   constraints: const BoxConstraints(
-                    minHeight: NinjaMetrics.minTouchTarget,
+                    minHeight: AppControlSize.touchTarget,
                   ),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
                   decoration: BoxDecoration(
-                    color: isSelected ? colors.brand : Colors.transparent,
-                    borderRadius: BorderRadius.circular(NinjaRadius.pill),
+                    color: isSelected ? colors.accent : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppRadius.full),
                   ),
                   child: Text(
                     months[index],
                     maxLines: 1,
-                    style: NinjaText.subtext.copyWith(
-                      color: isSelected ? colors.onBrand : colors.mutedDark,
+                    style: AppText.subtext.copyWith(
+                      color: isSelected ? colors.onAccent : colors.muted,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

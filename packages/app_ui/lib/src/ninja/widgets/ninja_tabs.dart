@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:app_ui/src/ninja/ninja_colors.dart';
-import 'package:app_ui/src/ninja/ninja_text.dart';
-import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_press_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,10 +14,8 @@ class NinjaTabs<T> extends StatefulWidget {
     required this.value,
     super.key,
     this.onChanged,
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: NinjaMetrics.screenPadding,
-    ),
-    this.spacing = 8,
+    this.padding = const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+    this.spacing = AppSpacing.contentGap,
   });
 
   final List<NinjaTab<T>> tabs;
@@ -71,9 +70,7 @@ class _NinjaTabsState<T> extends State<NinjaTabs<T>> {
       _revealScheduled = false;
       if (!mounted) return;
       final target = _tabKeys[widget.value]?.currentContext?.findRenderObject();
-      if (target == null || !_scrollController.hasClients) {
-        return;
-      }
+      if (target == null || !_scrollController.hasClients) return;
       final position = _scrollController.position;
       final viewport = RenderAbstractViewport.maybeOf(target);
       if (viewport == null) return;
@@ -100,38 +97,34 @@ class _NinjaTabsState<T> extends State<NinjaTabs<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          controller: _scrollController,
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          physics: const BouncingScrollPhysics(),
-          padding: widget.padding,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final (index, tab) in widget.tabs.indexed) ...[
-                if (index > 0) SizedBox(width: widget.spacing),
-                _NinjaTabItem(
-                  key: _tabKeys.putIfAbsent(
-                    tab.value,
-                    GlobalKey.new,
-                  ),
-                  tab: tab,
-                  colors: colors,
-                  selected: tab.value == widget.value,
-                  maxWidth: constraints.maxWidth,
-                  onTap: widget.onChanged == null
-                      ? null
-                      : () => widget.onChanged?.call(tab.value),
-                ),
-              ],
+    final colors = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: colors.line)),
+      ),
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        padding: widget.padding,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            for (final (index, tab) in widget.tabs.indexed) ...[
+              if (index > 0) SizedBox(width: widget.spacing),
+              _NinjaTabItem<T>(
+                key: _tabKeys.putIfAbsent(tab.value, GlobalKey.new),
+                tab: tab,
+                selected: tab.value == widget.value,
+                onTap: widget.onChanged == null
+                    ? null
+                    : () => widget.onChanged?.call(tab.value),
+              ),
             ],
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
@@ -144,112 +137,89 @@ class NinjaTab<T> {
   final int? count;
 }
 
+typedef AppTabs<T> = NinjaTabs<T>;
+
+typedef AppTab<T> = NinjaTab<T>;
+
 class _NinjaTabItem<T> extends StatelessWidget {
   const _NinjaTabItem({
     required this.tab,
-    required this.colors,
     required this.selected,
-    required this.maxWidth,
     required this.onTap,
     super.key,
   });
 
   final NinjaTab<T> tab;
-  final NinjaColors colors;
   final bool selected;
-  final double maxWidth;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final count = tab.count;
-    final maxLabelWidth = (maxWidth - (count == null ? 72 : 116))
-        .clamp(64, double.infinity)
-        .toDouble();
     final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     final duration =
-        reduceMotion ? Duration.zero : const Duration(milliseconds: 180);
-    return Semantics(
-      button: true,
-      selected: selected,
+        reduceMotion ? Duration.zero : const Duration(milliseconds: 200);
+
+    return AppPressState(
+      onTap: onTap,
       enabled: onTap != null,
-      child: AppPressable(
-        haptics: !selected,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: duration,
-          curve: Curves.easeOutCubic,
+      haptics: !selected,
+      semanticsLabel: tab.label,
+      semanticsButton: true,
+      semanticsSelected: selected,
+      builder: (context, {required pressed}) => Transform.translate(
+        offset: const Offset(0, 1),
+        child: Container(
           constraints: const BoxConstraints(
-            minHeight: NinjaMetrics.minTouchTarget,
+            minHeight: AppControlSize.touchTarget,
+            minWidth: AppControlSize.touchTarget,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          padding:
+              const EdgeInsets.only(top: AppSpacing.gap, bottom: AppSpacing.md),
           decoration: BoxDecoration(
-            color: selected ? colors.ink : colors.surfaceAlt,
-            borderRadius: BorderRadius.circular(NinjaRadius.pill),
+            border: Border(
+              bottom: BorderSide(
+                color: selected ? colors.accent : Colors.transparent,
+                width: 2,
+              ),
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               AnimatedDefaultTextStyle(
                 duration: duration,
-                curve: Curves.easeOutCubic,
-                style: NinjaText.button.copyWith(
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                  color: selected ? colors.onInk : colors.mutedDark,
+                curve: Curves.easeOut,
+                style: AppText.tab.copyWith(
+                  color: selected ? colors.ink : colors.muted,
                 ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: maxLabelWidth,
-                  ),
-                  child: Text(
-                    tab.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+                child:
+                    Text(tab.label, maxLines: 1, overflow: TextOverflow.fade),
               ),
               if (count != null) ...[
-                const SizedBox(width: 7),
-                _NinjaTabBadge(
-                  count: count,
-                  background: colors.surface,
-                  foreground: colors.mutedDark,
+                const SizedBox(width: AppSpacing.xsm),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colors.surface2,
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.compactGap,
+                      vertical: AppSpacing.xxs,
+                    ),
+                    child: Text(
+                      '$count',
+                      style: AppText.sans(11, FontWeight.w600).copyWith(
+                        color: colors.muted,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NinjaTabBadge extends StatelessWidget {
-  const _NinjaTabBadge({
-    required this.count,
-    required this.background,
-    required this.foreground,
-  });
-
-  final int count;
-  final Color background;
-  final Color foreground;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(NinjaRadius.pill),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-        child: Text(
-          '$count',
-          style: NinjaText.badge.copyWith(
-            letterSpacing: 0,
-            color: foreground,
           ),
         ),
       ),

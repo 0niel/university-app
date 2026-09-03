@@ -21,11 +21,11 @@ class _CustomSchedulesCreateForm extends StatelessWidget {
       child: Column(
         mainAxisSize: .min,
         children: [
-          NinjaFormInput(
+          AppInputField(
             controller: nameController,
             label: l10n.customSchedulesNameLabel,
             placeholder: l10n.customSchedulesNameHint,
-            onValidate: (value) {
+            validator: (value) {
               if (value == null || value.isEmpty) {
                 return l10n.customSchedulesNameRequired;
               }
@@ -33,15 +33,15 @@ class _CustomSchedulesCreateForm extends StatelessWidget {
               return null;
             },
           ),
-          const SizedBox(height: 16),
-          NinjaInput(
+          const SizedBox(height: AppSpacing.lg),
+          AppInputField(
             controller: descriptionController,
             label: l10n.customSchedulesDescLabel,
             placeholder: l10n.customSchedulesDescHint,
             maxLines: 3,
           ),
-          const SizedBox(height: 24),
-          NinjaButton.primary(
+          const SizedBox(height: AppSpacing.xlg),
+          AppButton.primary(
             label: isEditing
                 ? l10n.customSchedulesSaveChanges
                 : l10n.customSchedulesCreate,

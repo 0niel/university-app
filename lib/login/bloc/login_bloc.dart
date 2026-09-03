@@ -66,7 +66,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     LoginWithPasswordSubmitted event,
     Emitter<LoginState> emit,
   ) async {
-    if (!state.isValid) return;
+    if (!state.isValid || state.status.isInProgress) return;
     emit(state.copyWith(status: .inProgress, errorKind: null));
     try {
       await userRepository.logInWithPassword(
@@ -89,7 +89,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     EmailLinkRequested event,
     Emitter<LoginState> emit,
   ) async {
-    if (!state.isEmailValid) return;
+    if (!state.isEmailValid || state.status.isInProgress) return;
     emit(state.copyWith(status: .inProgress, errorKind: null));
     try {
       await userRepository.sendLoginEmailLink(email: state.email.value);
@@ -104,6 +104,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     ContinueAsGuestRequested event,
     Emitter<LoginState> emit,
   ) async {
+    if (state.status.isInProgress) return;
     emit(state.copyWith(status: .inProgress, errorKind: null));
     try {
       await userRepository.signInAnonymously();

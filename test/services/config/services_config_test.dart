@@ -79,6 +79,9 @@ void main() {
       everyElement(
         anyOf(
           equals('/schedule'),
+          startsWith('/schedule/'),
+          startsWith('/profile/'),
+          startsWith('/feed/'),
           startsWith('/services/'),
         ),
       ),

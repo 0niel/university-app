@@ -1,5 +1,4 @@
 export 'ninja_action_button.dart';
-export 'ninja_app_bar.dart';
 export 'ninja_avatar.dart';
 export 'ninja_badge.dart';
 export 'ninja_banner.dart';
@@ -14,6 +13,7 @@ export 'ninja_error_state.dart';
 export 'ninja_glyph.dart';
 export 'ninja_lesson_row.dart';
 export 'ninja_list_cell.dart';
+export 'ninja_pill_button.dart';
 export 'ninja_progress_bar.dart';
 export 'ninja_progress_ring.dart';
 export 'ninja_skeleton.dart';

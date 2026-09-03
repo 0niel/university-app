@@ -7,42 +7,45 @@ class _ByTypeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
-    return NinjaScheduleSurface(
+    return AppCard(
       child: Column(
         crossAxisAlignment: .start,
         children: [
           Text(
             l10n.analyticsByType,
-            style: NinjaText.headline.copyWith(color: colors.ink),
+            style: AppText.headline.copyWith(color: colors.ink),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.sectionGap),
           for (final (type, share) in stats.typeShares) ...[
             Row(
               mainAxisAlignment: .spaceBetween,
               children: [
-                Text(
-                  LessonCard.getLessonTypeName(l10n, type),
-                  style: NinjaText.subtext.copyWith(color: colors.ink),
+                Expanded(
+                  child: Text(
+                    LessonCard.getLessonTypeName(l10n, type),
+                    style: AppText.subtext.copyWith(color: colors.ink),
+                  ),
                 ),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   '${(share * 100).round()}%',
-                  style: NinjaText.tabular(
-                    NinjaText.subtext.copyWith(color: colors.muted),
+                  style: AppText.tabular(
+                    AppText.subtext.copyWith(color: colors.muted),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: AppSpacing.xsm),
             ClipRRect(
-              borderRadius: .circular(NinjaRadius.pill),
+              borderRadius: .circular(AppRadius.full),
               child: SizedBox(
-                height: 8,
+                height: AppSpacing.sm,
                 child: Stack(
                   fit: .expand,
                   children: [
-                    ColoredBox(color: colors.surfaceAlt),
+                    ColoredBox(color: colors.surface2),
                     FractionallySizedBox(
                       alignment: .centerLeft,
                       widthFactor: share.clamp(0.0, 1.0),
@@ -54,12 +57,12 @@ class _ByTypeCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
           ],
           if (stats.typeShares.isEmpty)
             Text(
               l10n.noData,
-              style: NinjaText.subtext.copyWith(color: colors.muted),
+              style: AppText.subtext.copyWith(color: colors.muted),
             ),
         ],
       ),

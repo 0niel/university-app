@@ -6,7 +6,7 @@ class _ReviewsSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Column(
-      spacing: 8,
+      spacing: AppSpacing.sm,
       children: [
         _ReviewCardSkeleton(),
         _ReviewCardSkeleton(),

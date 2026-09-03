@@ -13,7 +13,7 @@ class ContributorsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return BlocConsumer<ContributorsBloc, ContributorsState>(
       listener: (context, state) {
         if (state.status == .failure) {
@@ -34,13 +34,13 @@ class ContributorsContent extends StatelessWidget {
   Widget _content(
     BuildContext context,
     ContributorsState state,
-    NinjaColors colors,
+    AppColors colors,
   ) {
     if (state.status == .failure && state.contributors.contributors.isEmpty) {
       return Padding(
         key: const ValueKey('contributors-failure'),
         padding: const EdgeInsets.symmetric(
-          horizontal: NinjaMetrics.screenPadding,
+          horizontal: AppSpacing.screen,
         ),
         child: NinjaErrorCard(
           title: context.l10n.errorLoadingContributors,
@@ -68,7 +68,7 @@ class ContributorsContent extends StatelessWidget {
         height: 177,
         child: ListView.separated(
           padding: const EdgeInsets.symmetric(
-            horizontal: NinjaMetrics.screenPadding,
+            horizontal: AppSpacing.screen,
           ),
           scrollDirection: Axis.horizontal,
           itemCount: isLoading ? 4 : items.length,

@@ -8,28 +8,34 @@ class _AddOptionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return AppPressable(
       onTap: onTap,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: colors.surfaceAlt,
-          borderRadius: BorderRadius.circular(NinjaRadius.control),
+          color: colors.surface2,
+          borderRadius: BorderRadius.circular(AppRadius.field),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: 13,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AppLineIconWidget(
                 AppLineIcon.plus,
                 size: 19,
-                color: colors.brand,
+                color: colors.accent,
               ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: NinjaText.button.copyWith(color: colors.brand),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: AppText.button.copyWith(color: colors.accent),
+                ),
               ),
             ],
           ),

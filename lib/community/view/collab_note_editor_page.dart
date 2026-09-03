@@ -26,7 +26,7 @@ class CollabNoteEditorPage extends StatelessWidget {
         editorName: editorName,
       ),
       child: Scaffold(
-        backgroundColor: context.ninja.canvas,
+        backgroundColor: context.colors.canvas,
         resizeToAvoidBottomInset: true,
         body: const SafeArea(child: CollabNoteEditorView()),
       ),

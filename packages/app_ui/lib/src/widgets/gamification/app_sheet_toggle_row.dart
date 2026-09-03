@@ -1,5 +1,9 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_divider.dart';
+import 'package:app_ui/src/widgets/app_toggle.dart';
+import 'package:flutter/widgets.dart';
 
 class AppSheetToggleRow extends StatelessWidget {
   const AppSheetToggleRow({
@@ -20,41 +24,40 @@ class AppSheetToggleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final subtitleText = subtitle;
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        if (!isFirst)
-          Divider(height: 0.5, thickness: 0.5, color: colors.divider),
+        if (!isFirst) const AppDivider(),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Row(
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       title,
-                      style: AppText.bodyLarge.copyWith(color: colors.active),
+                      style: AppText.body.copyWith(color: colors.ink),
                     ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 1),
+                    if (subtitleText != null) ...[
+                      const SizedBox(height: AppSpacing.xxs),
                       Text(
-                        subtitle!,
-                        style: AppText.captionSmall.copyWith(
-                          color: colors.deactiveDarker,
-                        ),
+                        subtitleText,
+                        style: AppText.caption.copyWith(color: colors.muted),
                       ),
                     ],
                   ],
                 ),
               ),
-              Switch(
+              const SizedBox(width: AppSpacing.md),
+              AppSwitch(
                 value: value,
                 onChanged: onChanged,
-                activeThumbColor: Colors.white,
-                activeTrackColor: colors.primary,
-                inactiveTrackColor: colors.surfaceLow,
-                inactiveThumbColor: Colors.white,
+                semanticsLabel: title,
               ),
             ],
           ),

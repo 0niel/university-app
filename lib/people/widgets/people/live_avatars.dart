@@ -22,7 +22,7 @@ class _LiveAvatars extends StatelessWidget {
               child: Container(
                 padding: const .all(2),
                 decoration: BoxDecoration(
-                  color: context.ninja.surface,
+                  color: context.colors.surface,
                   shape: .circle,
                 ),
                 child: NinjaAvatar(

@@ -8,7 +8,7 @@ class WhenAndNumber extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final scale = Theme.of(context).scale;
     String two(int n) => n.toString().padLeft(2, '0');
     String formatTime(TimeOfDay time) =>
@@ -25,7 +25,7 @@ class WhenAndNumber extends StatelessWidget {
         SizedBox(width: scale.space(8)),
         Text(
           '$start - $end',
-          style: NinjaText.subtext.copyWith(
+          style: AppText.subtext.copyWith(
             color: colors.muted,
             fontWeight: .w500,
           ),
@@ -43,7 +43,7 @@ class WhenAndNumber extends StatelessWidget {
             ),
             child: Text(
               '${lessonBells.number} пара',
-              style: NinjaText.helper.copyWith(
+              style: AppText.captionSmall.copyWith(
                 color: colors.muted,
                 fontWeight: .w600,
               ),

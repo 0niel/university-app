@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class CollabNotesSkeleton extends StatelessWidget {
   const CollabNotesSkeleton({super.key});
@@ -7,48 +8,48 @@ class CollabNotesSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NinjaSkeletonGroup(
-      child: ListView.builder(
+      semanticsLabel: context.l10n.loadingContent,
+      child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const .fromLTRB(0, 8, 0, 96),
-        itemCount: 6,
-        itemBuilder: (itemContext, _) => Padding(
-          padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
-            0,
-            NinjaMetrics.screenPadding,
-            10,
-          ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: itemContext.ninja.surface,
-              borderRadius: BorderRadius.circular(NinjaRadius.card),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  NinjaSkeleton(
-                    width: 44,
-                    height: 44,
-                    radius: NinjaRadius.control,
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 6,
-                      children: [
-                        NinjaSkeleton.bar(widthFactor: 0.6),
-                        NinjaSkeleton.bar(height: 11, widthFactor: 0.4),
-                        NinjaSkeleton.bar(height: 11),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        padding: const .fromLTRB(
+          AppSpacing.screen,
+          AppSpacing.zero,
+          AppSpacing.screen,
+          96,
         ),
+        children: [
+          AppListGroup(
+            children: [
+              for (var index = 0; index < 6; index++)
+                const Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      NinjaSkeleton(
+                        width: 44,
+                        height: 44,
+                        radius: AppRadius.tile,
+                      ),
+                      SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 3,
+                          children: [
+                            NinjaSkeleton.bar(height: 14.5, widthFactor: 0.75),
+                            NinjaSkeleton.bar(widthFactor: 0.5),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

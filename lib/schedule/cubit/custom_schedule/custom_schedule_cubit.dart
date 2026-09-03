@@ -287,6 +287,8 @@ class CustomScheduleCubit extends HydratedCubit<CustomScheduleState>
     _syncReminders(_reminderNamespace);
   }
 
+  void refreshReminders() => _syncAllReminders();
+
   void _syncReminders(String _) {
     if (remindersRepository == null) return;
     _reminderSyncPending = true;

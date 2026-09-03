@@ -3,31 +3,15 @@ library;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/view/nfc_pass_view.dart';
 
-/// Renders the pass screen for a side-by-side read against `options/6c.html`.
+import 'gallery_fonts.dart';
+
 void main() {
-  setUpAll(() async {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    final loader = FontLoader('Inter');
-    for (final weight in const [
-      'Regular',
-      'Medium',
-      'SemiBold',
-      'Bold',
-    ]) {
-      loader.addFont(
-        rootBundle.load(
-          'packages/app_ui/assets/fonts/Inter/Inter-$weight.ttf',
-        ),
-      );
-    }
-    await loader.load();
-  });
+  setUpAll(loadGalleryFonts);
 
   Future<void> shoot(
     WidgetTester tester,
@@ -50,9 +34,7 @@ void main() {
             backgroundColor: context.ninja.canvas,
             body: NfcPassView(
               state: state,
-              deviceName: 'Pixel 8',
               onConnect: () {},
-              onUnbind: () {},
               onEnterCode: () {},
               onRetry: () {},
             ),

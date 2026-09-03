@@ -338,7 +338,7 @@ $GeoSharingSettingsCopyWith<$Res> get geoSettings {
 /// @nodoc
 mixin _$GeoSharingSettings {
 
- bool get sharing;@JsonKey(unknownEnumValue: GeoVisibility.all) GeoVisibility get visibility;@JsonKey(unknownEnumValue: GeoPrecision.exact) GeoPrecision get precision; bool get privacyForcedGhost;
+ bool get sharing;@JsonKey(unknownEnumValue: GeoVisibility.none) GeoVisibility get visibility;@JsonKey(unknownEnumValue: GeoPrecision.exact) GeoPrecision get precision; bool get privacyForcedGhost;
 /// Create a copy of GeoSharingSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -371,7 +371,7 @@ abstract mixin class $GeoSharingSettingsCopyWith<$Res>  {
   factory $GeoSharingSettingsCopyWith(GeoSharingSettings value, $Res Function(GeoSharingSettings) _then) = _$GeoSharingSettingsCopyWithImpl;
 @useResult
 $Res call({
- bool sharing,@JsonKey(unknownEnumValue: GeoVisibility.all) GeoVisibility visibility,@JsonKey(unknownEnumValue: GeoPrecision.exact) GeoPrecision precision, bool privacyForcedGhost
+ bool sharing,@JsonKey(unknownEnumValue: GeoVisibility.none) GeoVisibility visibility,@JsonKey(unknownEnumValue: GeoPrecision.exact) GeoPrecision precision, bool privacyForcedGhost
 });
 
 
@@ -479,7 +479,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool sharing, @JsonKey(unknownEnumValue: GeoVisibility.all)  GeoVisibility visibility, @JsonKey(unknownEnumValue: GeoPrecision.exact)  GeoPrecision precision,  bool privacyForcedGhost)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool sharing, @JsonKey(unknownEnumValue: GeoVisibility.none)  GeoVisibility visibility, @JsonKey(unknownEnumValue: GeoPrecision.exact)  GeoPrecision precision,  bool privacyForcedGhost)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GeoSharingSettings() when $default != null:
 return $default(_that.sharing,_that.visibility,_that.precision,_that.privacyForcedGhost);case _:
@@ -500,7 +500,7 @@ return $default(_that.sharing,_that.visibility,_that.precision,_that.privacyForc
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool sharing, @JsonKey(unknownEnumValue: GeoVisibility.all)  GeoVisibility visibility, @JsonKey(unknownEnumValue: GeoPrecision.exact)  GeoPrecision precision,  bool privacyForcedGhost)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool sharing, @JsonKey(unknownEnumValue: GeoVisibility.none)  GeoVisibility visibility, @JsonKey(unknownEnumValue: GeoPrecision.exact)  GeoPrecision precision,  bool privacyForcedGhost)  $default,) {final _that = this;
 switch (_that) {
 case _GeoSharingSettings():
 return $default(_that.sharing,_that.visibility,_that.precision,_that.privacyForcedGhost);case _:
@@ -520,7 +520,7 @@ return $default(_that.sharing,_that.visibility,_that.precision,_that.privacyForc
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool sharing, @JsonKey(unknownEnumValue: GeoVisibility.all)  GeoVisibility visibility, @JsonKey(unknownEnumValue: GeoPrecision.exact)  GeoPrecision precision,  bool privacyForcedGhost)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool sharing, @JsonKey(unknownEnumValue: GeoVisibility.none)  GeoVisibility visibility, @JsonKey(unknownEnumValue: GeoPrecision.exact)  GeoPrecision precision,  bool privacyForcedGhost)?  $default,) {final _that = this;
 switch (_that) {
 case _GeoSharingSettings() when $default != null:
 return $default(_that.sharing,_that.visibility,_that.precision,_that.privacyForcedGhost);case _:
@@ -535,11 +535,11 @@ return $default(_that.sharing,_that.visibility,_that.precision,_that.privacyForc
 
 @JsonSerializable(checked: true)
 class _GeoSharingSettings implements GeoSharingSettings {
-  const _GeoSharingSettings({this.sharing = true, @JsonKey(unknownEnumValue: GeoVisibility.all) this.visibility = GeoVisibility.all, @JsonKey(unknownEnumValue: GeoPrecision.exact) this.precision = GeoPrecision.exact, this.privacyForcedGhost = false});
+  const _GeoSharingSettings({this.sharing = false, @JsonKey(unknownEnumValue: GeoVisibility.none) this.visibility = GeoVisibility.all, @JsonKey(unknownEnumValue: GeoPrecision.exact) this.precision = GeoPrecision.exact, this.privacyForcedGhost = false});
   factory _GeoSharingSettings.fromJson(Map<String, dynamic> json) => _$GeoSharingSettingsFromJson(json);
 
 @override@JsonKey() final  bool sharing;
-@override@JsonKey(unknownEnumValue: GeoVisibility.all) final  GeoVisibility visibility;
+@override@JsonKey(unknownEnumValue: GeoVisibility.none) final  GeoVisibility visibility;
 @override@JsonKey(unknownEnumValue: GeoPrecision.exact) final  GeoPrecision precision;
 @override@JsonKey() final  bool privacyForcedGhost;
 
@@ -576,7 +576,7 @@ abstract mixin class _$GeoSharingSettingsCopyWith<$Res> implements $GeoSharingSe
   factory _$GeoSharingSettingsCopyWith(_GeoSharingSettings value, $Res Function(_GeoSharingSettings) _then) = __$GeoSharingSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- bool sharing,@JsonKey(unknownEnumValue: GeoVisibility.all) GeoVisibility visibility,@JsonKey(unknownEnumValue: GeoPrecision.exact) GeoPrecision precision, bool privacyForcedGhost
+ bool sharing,@JsonKey(unknownEnumValue: GeoVisibility.none) GeoVisibility visibility,@JsonKey(unknownEnumValue: GeoPrecision.exact) GeoPrecision precision, bool privacyForcedGhost
 });
 
 

@@ -5,55 +5,45 @@ class MyLocationMarker extends StatelessWidget {
 
   final bool isGhost;
 
+  static const dotSize = 14.0;
+
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final tint = isGhost ? colors.muted : colors.brand;
-
+    final colors = context.colors;
+    final tone = isGhost ? colors.muted2 : colors.accent;
+    const ringSize = dotSize + friendMarkerRingWidth * 2;
     return _MarkerPop(
       child: Column(
         mainAxisSize: .min,
         children: [
-          SizedBox(
-            width: 64,
-            height: 64,
+          SizedBox.square(
+            dimension: ringSize + 16,
             child: Stack(
               alignment: Alignment.center,
               clipBehavior: .none,
               children: [
-                if (!isGhost)
-                  Container(
-                    width: 54,
-                    height: 54,
-                    decoration: BoxDecoration(
-                      color: colors.brand.withValues(alpha: 0.18),
-                      shape: .circle,
-                    ),
-                  ),
+                if (!isGhost &&
+                    !MediaQuery.disableAnimationsOf(context) &&
+                    !MediaQuery.accessibleNavigationOf(context))
+                  AppPulseDot(size: ringSize, color: tone),
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: ringSize,
+                  height: ringSize,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: colors.surface,
                     shape: .circle,
                   ),
-                  alignment: Alignment.center,
-                  child: isGhost
-                      ? AppLineIconWidget(.hide, size: 18, color: tint)
-                      : Container(
-                          width: 16,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: tint,
-                            shape: .circle,
-                          ),
-                        ),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(color: tone, shape: .circle),
+                    child: const SizedBox.square(dimension: dotSize),
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 4),
-          _NamePill(label: context.l10n.friendsYou, color: tint),
+          const SizedBox(height: 3),
+          _NamePill(label: context.l10n.friendsYou, color: tone),
         ],
       ),
     );

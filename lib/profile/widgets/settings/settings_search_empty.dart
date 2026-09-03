@@ -12,18 +12,15 @@ class SettingsSearchEmpty extends StatelessWidget {
     final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         24,
-        NinjaMetrics.screenPadding,
+        AppSpacing.screen,
         8,
       ),
-      child: NinjaEmptyState(
-        icon: AppLineIconWidget(
-          AppLineIcon.search,
-          color: context.ninja.muted,
-        ),
+      child: AppEmptyState(
+        lineIcon: AppLineIcon.search,
         title: l10n.searchNoResults,
-        message: l10n.searchNoResultsHint,
+        subtitle: l10n.searchNoResultsHint,
         actionLabel: l10n.clear,
         onAction: onClear,
       ).animateEmptyState(),

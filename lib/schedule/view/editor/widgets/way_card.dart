@@ -19,61 +19,61 @@ class _WayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final badge = this.badge;
-    return NinjaScheduleSurface(
+    return AppCard(
       onTap: onTap,
-      semanticLabel: title,
+      semanticsLabel: title,
       child: Row(
-        spacing: 8,
+        spacing: AppSpacing.sm,
         children: [
           Container(
-            width: 44,
-            height: 44,
-            margin: const .only(right: 6),
+            width: AppControlSize.touchTarget,
+            height: AppControlSize.touchTarget,
+            margin: const .only(right: AppSpacing.xsm),
             decoration: BoxDecoration(
-              color: colors.brandTint,
+              color: colors.tint,
               shape: .circle,
             ),
             child: Center(
               child: AppLineIconWidget(
                 icon,
                 size: 21,
-                color: colors.brandInk,
+                color: colors.accent,
               ),
             ),
           ),
           Expanded(
             child: Column(
               crossAxisAlignment: .start,
-              spacing: 3,
+              spacing: ScheduleMetrics.compactGap,
               children: [
                 Row(
                   children: [
                     Flexible(
                       child: Text(
                         title,
-                        style: NinjaText.body.copyWith(
+                        style: AppText.body.copyWith(
                           color: colors.ink,
                           fontWeight: .w700,
                         ),
                       ),
                     ),
                     if (recommended && badge != null) ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Container(
                         padding: const .symmetric(
-                          horizontal: 8,
-                          vertical: 2,
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xxs,
                         ),
                         decoration: BoxDecoration(
-                          color: colors.brand,
-                          borderRadius: .circular(NinjaRadius.pill),
+                          color: colors.accent,
+                          borderRadius: .circular(AppRadius.full),
                         ),
                         child: Text(
                           badge,
-                          style: NinjaText.badge.copyWith(
-                            color: colors.onBrand,
+                          style: AppText.badge.copyWith(
+                            color: colors.onAccent,
                           ),
                         ),
                       ),
@@ -82,7 +82,7 @@ class _WayCard extends StatelessWidget {
                 ),
                 Text(
                   description,
-                  style: NinjaText.subtext.copyWith(
+                  style: AppText.subtext.copyWith(
                     color: colors.muted,
                     height: 1.35,
                   ),
@@ -90,7 +90,7 @@ class _WayCard extends StatelessWidget {
               ],
             ),
           ),
-          AppLineIconWidget(.chevronR, size: 16, color: colors.chevron),
+          AppLineIconWidget(.chevronR, size: 16, color: colors.muted2),
         ],
       ),
     );

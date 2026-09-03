@@ -18,8 +18,8 @@ class MiniAppTokensSkeleton extends StatelessWidget {
               margin: const .only(bottom: 8),
               padding: const .all(14),
               decoration: BoxDecoration(
-                color: context.ninja.surface,
-                borderRadius: BorderRadius.circular(NinjaRadius.card),
+                color: context.colors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.card),
               ),
               child: const Row(
                 children: [
@@ -33,7 +33,11 @@ class MiniAppTokensSkeleton extends StatelessWidget {
                       ],
                     ),
                   ),
-                  NinjaSkeleton(width: 40, height: 40, radius: 12),
+                  NinjaSkeleton(
+                    width: 40,
+                    height: 40,
+                    radius: AppRadius.iconTile,
+                  ),
                 ],
               ),
             ),

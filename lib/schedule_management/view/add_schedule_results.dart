@@ -1,14 +1,15 @@
 part of 'add_schedule_page.dart';
 
 class _AddScheduleResults extends StatelessWidget {
-  const _AddScheduleResults({required this.target});
+  const _AddScheduleResults({required this.target, required this.onRetry});
 
   final ScheduleTarget target;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.ninja;
+    final colors = context.colors;
     return BlocBuilder<SearchBloc, SearchState>(
       builder: (context, search) {
         final results = _resultsFor(search);
@@ -16,29 +17,46 @@ class _AddScheduleResults extends StatelessWidget {
           if (search.status == .loading) {
             return const _AddScheduleResultsSkeleton();
           }
+          if (search.status == .failure) {
+            return ListView(
+              padding: const EdgeInsets.all(AppSpacing.screen),
+              children: [
+                AppErrorState(
+                  title: l10n.searchFailed,
+                  message: l10n.tryAgain,
+                  primaryLabel: l10n.retry,
+                  footnote: null,
+                  onPrimary: onRetry,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                _CreateScheduleRow(onTap: () => _openCreate(context)),
+              ],
+            );
+          }
           return _EmptyScheduleResults(onCreate: () => _openCreate(context));
         }
 
-        final addedIds = _addedIds(context.watch<ScheduleBloc>().state);
+        final scheduleState = context.watch<ScheduleBloc>().state;
         return ListView(
           padding: const EdgeInsets.only(bottom: 24),
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 0,
-                NinjaMetrics.screenPadding,
+                AppSpacing.screen,
                 10,
               ),
               child: Text(
                 l10n.addScheduleFound(results.length),
-                style: NinjaText.headline.copyWith(color: colors.ink),
+                style: AppText.headline.copyWith(color: colors.ink),
               ),
             ),
             for (final result in results)
               _AddScheduleResultRow(
+                key: ValueKey('${result.target.name}:${result.id}'),
                 result: result,
-                added: addedIds.contains(result.id),
+                added: result.isAdded(scheduleState),
               ),
             const SizedBox(height: 18),
             _CreateScheduleRow(onTap: () => _openCreate(context)),
@@ -56,12 +74,6 @@ class _AddScheduleResults extends StatelessWidget {
     .classroom => [
       for (final classroom in search.classrooms.results) .classroom(classroom),
     ],
-  };
-
-  Set<String> _addedIds(ScheduleState state) => {
-    for (final entry in state.groupsSchedule) entry.$1,
-    for (final entry in state.teachersSchedule) entry.$1,
-    for (final entry in state.classroomsSchedule) entry.$1,
   };
 
   void _openCreate(BuildContext context) {
@@ -102,4 +114,10 @@ class _AddScheduleResult {
   final String id;
   final String? subtitle;
   final void Function(ScheduleBloc bloc) onSubscribe;
+
+  bool isAdded(ScheduleState state) => switch (target) {
+    .group => state.groupsSchedule.any((entry) => entry.$1 == id),
+    .teacher => state.teachersSchedule.any((entry) => entry.$1 == id),
+    .classroom => state.classroomsSchedule.any((entry) => entry.$1 == id),
+  };
 }

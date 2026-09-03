@@ -5,7 +5,7 @@ class _StatsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return NinjaSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
       child: ListView(
@@ -34,9 +34,9 @@ class _StatsSkeleton extends StatelessWidget {
               0,
               0,
             ),
-            child: NinjaSkeletonMedia(height: 220, radius: NinjaRadius.card),
+            child: NinjaSkeletonMedia(height: 220, radius: AppRadius.card),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           Row(
             mainAxisAlignment: .center,
             spacing: 16,

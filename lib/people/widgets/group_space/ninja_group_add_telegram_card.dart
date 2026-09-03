@@ -13,20 +13,20 @@ class NinjaGroupAddTelegramCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: NinjaListCell(
           title: label,
           showDivider: false,
-          titleColor: colors.brandInk,
+          titleColor: colors.accent,
           showChevron: false,
-          trailing: AppLineIconWidget(.plus, size: 18, color: colors.brandInk),
+          trailing: AppLineIconWidget(.plus, size: 18, color: colors.accent),
           onTap: onTap,
         ),
       ),

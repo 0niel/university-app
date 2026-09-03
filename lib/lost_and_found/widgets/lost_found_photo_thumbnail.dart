@@ -15,7 +15,7 @@ class LostFoundPhotoThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return SizedBox.square(
       dimension: 72,
       child: Stack(
@@ -23,7 +23,7 @@ class LostFoundPhotoThumbnail extends StatelessWidget {
           Semantics(
             image: true,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(NinjaRadius.control),
+              borderRadius: BorderRadius.circular(AppRadius.field),
               child: Image.memory(
                 image.bytes,
                 width: 72,
@@ -38,7 +38,7 @@ class LostFoundPhotoThumbnail extends StatelessWidget {
             top: 0,
             end: 0,
             child: SizedBox.square(
-              dimension: NinjaMetrics.minTouchTarget,
+              dimension: AppControlSize.iconButton,
               child: AppPressable(
                 pressedScale: 0.9,
                 onTap: onRemove,

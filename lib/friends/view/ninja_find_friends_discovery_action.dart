@@ -19,48 +19,48 @@ class NinjaFindFriendsDiscoveryAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
-    final foreground = accented ? colors.onAccentSoft : colors.ink;
-    final mutedForeground = accented ? colors.onAccentSoftMuted : colors.muted;
+    final colors = context.colors;
+    final foreground = accented ? colors.ink : colors.ink;
+    final mutedForeground = accented ? colors.muted : colors.muted;
     return AppPressable(
       onTap: onTap,
       semanticsLabel: '$title, $subtitle',
       semanticsButton: true,
       child: Container(
         constraints: const BoxConstraints(minHeight: 124),
-        padding: const .all(16),
+        padding: const .all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: accented ? colors.accentSoft : colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          color: accented ? colors.tint2 : colors.surface,
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Column(
           crossAxisAlignment: .start,
           children: [
             Container(
-              width: NinjaMetrics.minTouchTarget,
-              height: NinjaMetrics.minTouchTarget,
+              width: AppControlSize.iconButton,
+              height: AppControlSize.iconButton,
               alignment: .center,
               decoration: BoxDecoration(
                 color: accented
-                    ? colors.onAccentSoft.withValues(alpha: 0.12)
-                    : colors.surfaceAlt,
+                    ? colors.ink.withValues(alpha: 0.12)
+                    : colors.surface2,
                 shape: .circle,
               ),
               child: AppLineIconWidget(icon, size: 20, color: foreground),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Text(
               title,
               maxLines: 1,
               overflow: .ellipsis,
-              style: NinjaText.headline.copyWith(color: foreground),
+              style: AppText.headline.copyWith(color: foreground),
             ),
             const SizedBox(height: 3),
             Text(
               subtitle,
               maxLines: 2,
               overflow: .ellipsis,
-              style: NinjaText.subtext.copyWith(color: mutedForeground),
+              style: AppText.subtext.copyWith(color: mutedForeground),
             ),
           ],
         ),

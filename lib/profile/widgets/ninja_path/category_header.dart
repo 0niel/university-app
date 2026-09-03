@@ -13,7 +13,7 @@ class _CategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Row(
       children: [
         Expanded(
@@ -21,15 +21,15 @@ class _CategoryHeader extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: .ellipsis,
-            style: NinjaText.title.copyWith(color: colors.ink),
+            style: AppText.title.copyWith(color: colors.ink),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: AppSpacing.gap),
         Text(
           '$done / $total',
-          style: NinjaText.tabular(
-            NinjaText.microLabel.copyWith(color: colors.mutedDark),
-          ),
+          style: AppText.captionSmall
+              .copyWith(color: colors.muted)
+              .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
         ),
       ],
     );

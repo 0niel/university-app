@@ -45,7 +45,7 @@ class _GroupSpaceViewState extends State<GroupSpaceView> {
           }
         },
         builder: (context, state) => Scaffold(
-          backgroundColor: context.ninja.canvas,
+          backgroundColor: context.colors.canvas,
           body: SafeArea(
             bottom: false,
             child: Column(
@@ -119,9 +119,9 @@ class _GroupSpaceViewState extends State<GroupSpaceView> {
         .failure => Padding(
           key: const ValueKey('group-space-error'),
           padding: const .fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             24,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             0,
           ),
           child: NinjaErrorState(
@@ -134,15 +134,15 @@ class _GroupSpaceViewState extends State<GroupSpaceView> {
         .success when !state.space.hasGroup => Padding(
           key: const ValueKey('group-space-empty'),
           padding: const .fromLTRB(
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             24,
-            NinjaMetrics.screenPadding,
+            AppSpacing.screen,
             0,
           ),
           child: NinjaEmptyState(
             icon: AppLineIconWidget(
               AppLineIcon.people,
-              color: context.ninja.muted,
+              color: context.colors.muted,
             ),
             title: l10n.noGroupsSelected,
             message: l10n.peopleGroupSpaceSub,
@@ -162,7 +162,7 @@ class _GroupSpaceViewState extends State<GroupSpaceView> {
     return RefreshIndicator(
       key: const ValueKey('group-space-content'),
       onRefresh: context.read<GroupSpaceCubit>().load,
-      color: context.ninja.ink,
+      color: context.colors.ink,
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
@@ -263,7 +263,7 @@ class _GroupSpaceViewState extends State<GroupSpaceView> {
                     child: ListView.separated(
                       scrollDirection: .horizontal,
                       padding: const .symmetric(
-                        horizontal: NinjaMetrics.screenPadding,
+                        horizontal: AppSpacing.screen,
                       ),
                       itemCount: space.birthdays.length,
                       separatorBuilder: (_, _) => const SizedBox(width: 10),

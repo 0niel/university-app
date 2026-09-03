@@ -105,7 +105,7 @@ class MentorshipView extends StatelessWidget {
       listener: (context, _) =>
           _showError(context, context.l10n.mentorshipRefreshError),
       builder: (context, state) => Scaffold(
-        backgroundColor: context.ninja.canvas,
+        backgroundColor: context.colors.canvas,
         body: Column(
           children: [
             NinjaCommunityHeader(

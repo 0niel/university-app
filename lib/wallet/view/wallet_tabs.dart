@@ -8,7 +8,7 @@ class _WalletTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final tabs = [
       (WalletTab.earn, l10n.walletTabEarn),
@@ -17,14 +17,14 @@ class _WalletTabs extends StatelessWidget {
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: NinjaMetrics.screenPadding,
-        vertical: 8,
+        horizontal: AppSpacing.screen,
+        vertical: AppSpacing.sm,
       ),
       child: Container(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(AppSpacing.xs),
         decoration: BoxDecoration(
-          color: colors.surfaceAlt,
-          borderRadius: BorderRadius.circular(NinjaRadius.pill),
+          color: colors.surface2,
+          borderRadius: BorderRadius.circular(AppRadius.full),
         ),
         child: Row(
           children: [
@@ -42,14 +42,16 @@ class _WalletTabs extends StatelessWidget {
                         : const Duration(milliseconds: 180),
                     curve: Curves.easeOutCubic,
                     constraints: const BoxConstraints(
-                      minHeight: NinjaMetrics.minTouchTarget,
+                      minHeight: AppControlSize.iconButton,
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                    ),
                     decoration: BoxDecoration(
                       color: value == tab.$1
-                          ? colors.brand
+                          ? colors.accent
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(NinjaRadius.pill),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     alignment: Alignment.center,
                     child: Text(
@@ -57,10 +59,8 @@ class _WalletTabs extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: NinjaText.buttonSmall.copyWith(
-                        color: value == tab.$1
-                            ? colors.onBrand
-                            : colors.mutedDark,
+                      style: AppText.buttonSmall.copyWith(
+                        color: value == tab.$1 ? colors.onAccent : colors.muted,
                       ),
                     ),
                   ),

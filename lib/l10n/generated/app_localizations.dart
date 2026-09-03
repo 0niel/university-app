@@ -3380,6 +3380,12 @@ abstract class AppLocalizations {
   /// **'Classes'**
   String get legendLessons;
 
+  /// No description provided for @legendHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Public holiday'**
+  String get legendHoliday;
+
   /// No description provided for @legendRetake.
   ///
   /// In en, this message translates to:
@@ -7697,13 +7703,13 @@ abstract class AppLocalizations {
   /// No description provided for @loginEmailPlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'student@university.example'**
+  /// **'name@example.com'**
   String get loginEmailPlaceholder;
 
   /// No description provided for @loginEmailError.
   ///
   /// In en, this message translates to:
-  /// **'Use an approved university email address'**
+  /// **'Enter a valid email address'**
   String get loginEmailError;
 
   /// No description provided for @loginPasswordError.
@@ -9455,7 +9461,7 @@ abstract class AppLocalizations {
   /// Marketplace screen title
   ///
   /// In en, this message translates to:
-  /// **'Marketplace'**
+  /// **'Market'**
   String get marketTitle;
 
   /// Marketplace header subtitle with the listing count
@@ -14695,6 +14701,4242 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pan the map, pinch or double tap to zoom'**
   String get mapInteractiveHint;
+
+  /// Onboarding welcome headline; the accent word is onboardingWelcomeTitleAccent
+  ///
+  /// In en, this message translates to:
+  /// **'University\nin one tap'**
+  String get onboardingWelcomeTitle;
+
+  /// Accent (italic) word inside onboardingWelcomeTitle
+  ///
+  /// In en, this message translates to:
+  /// **'tap'**
+  String get onboardingWelcomeTitleAccent;
+
+  /// Onboarding welcome lead paragraph
+  ///
+  /// In en, this message translates to:
+  /// **'Classes, deadlines, free rooms and your pass — no extra tabs.'**
+  String get onboardingWelcomeLead;
+
+  /// Welcome feature row title
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule with changes'**
+  String get onboardingFeatureScheduleTitle;
+
+  /// Welcome feature row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedules and swaps — right in your feed'**
+  String get onboardingFeatureScheduleSub;
+
+  /// Welcome feature row title
+  ///
+  /// In en, this message translates to:
+  /// **'Free rooms nearby'**
+  String get onboardingFeatureRoomsTitle;
+
+  /// Welcome feature row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Where to study during a break'**
+  String get onboardingFeatureRoomsSub;
+
+  /// Welcome feature row title
+  ///
+  /// In en, this message translates to:
+  /// **'Friends on campus'**
+  String get onboardingFeatureFriendsTitle;
+
+  /// Welcome feature row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Shared gaps and who is where right now'**
+  String get onboardingFeatureFriendsSub;
+
+  /// Welcome primary button
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardingStart;
+
+  /// Welcome secondary button
+  ///
+  /// In en, this message translates to:
+  /// **'I already have an account'**
+  String get onboardingHaveAccount;
+
+  /// Group picker lead paragraph
+  ///
+  /// In en, this message translates to:
+  /// **'Your schedule will load automatically. You can change it in Settings.'**
+  String get onboardingGroupLead;
+
+  /// Group search field placeholder (example group code)
+  ///
+  /// In en, this message translates to:
+  /// **'ИКБО-01-24'**
+  String get onboardingGroupPlaceholder;
+
+  /// Group picker empty state, text before the accent action
+  ///
+  /// In en, this message translates to:
+  /// **'Group not found. Check the spelling or '**
+  String get onboardingGroupNotFound;
+
+  /// Group picker empty state, accent part
+  ///
+  /// In en, this message translates to:
+  /// **'create your own schedule'**
+  String get onboardingGroupNotFoundAction;
+
+  /// Group picker empty state, trailing punctuation
+  ///
+  /// In en, this message translates to:
+  /// **'.'**
+  String get onboardingGroupNotFoundSuffix;
+
+  /// Onboarding continue button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onboardingContinue;
+
+  /// Onboarding settings step title
+  ///
+  /// In en, this message translates to:
+  /// **'A couple of settings'**
+  String get onboardingSettingsTitle;
+
+  /// Onboarding settings step lead
+  ///
+  /// In en, this message translates to:
+  /// **'You can change everything later.'**
+  String get onboardingSettingsLead;
+
+  /// Notifications toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Classes, deadlines, changes'**
+  String get onboardingPushSub;
+
+  /// Location toggle title
+  ///
+  /// In en, this message translates to:
+  /// **'Location on campus'**
+  String get onboardingGeoTitle;
+
+  /// Location toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'For the map and free rooms'**
+  String get onboardingGeoSub;
+
+  /// Profile visibility toggle title
+  ///
+  /// In en, this message translates to:
+  /// **'Show me to friends'**
+  String get onboardingFriendsTitle;
+
+  /// Profile visibility toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Only while you are on campus'**
+  String get onboardingFriendsSub;
+
+  /// Toast when the OS notification permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Allow notifications in the system settings'**
+  String get onboardingPushDenied;
+
+  /// Toast when the OS location permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location access in the system settings'**
+  String get onboardingGeoDenied;
+
+  /// Toast when a settings update fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the setting. Try again.'**
+  String get onboardingSettingsSaveError;
+
+  /// Toast after finishing onboarding
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome, {group}'**
+  String onboardingWelcomeToast(String group);
+
+  /// Progress bar semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}'**
+  String onboardingStepSemantics(int step, int total);
+
+  /// Compact relative time in minutes on news cards
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String newsTimeMinutes(int count);
+
+  /// Compact relative time in hours on news cards
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h'**
+  String newsTimeHours(int count);
+
+  /// Compact relative time for the previous day
+  ///
+  /// In en, this message translates to:
+  /// **'yesterday'**
+  String get newsTimeYesterday;
+
+  /// Compact relative time in days on news cards
+  ///
+  /// In en, this message translates to:
+  /// **'{count} d'**
+  String newsTimeDays(int count);
+
+  /// Compact relative time for a just published item
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get newsTimeNow;
+
+  /// Semantics label of the source rail on the news page
+  ///
+  /// In en, this message translates to:
+  /// **'News sources'**
+  String get newsSourcesSemantics;
+
+  /// Relative publish time suffix on the article page
+  ///
+  /// In en, this message translates to:
+  /// **'{time} ago'**
+  String articleTimeAgo(String time);
+
+  /// Toast after removing an article from saved
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from saved'**
+  String get articleUnsaved;
+
+  /// Semantics label of the save button when the article is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from saved'**
+  String get articleRemoveFromSaved;
+
+  /// Source kind label on the article source card
+  ///
+  /// In en, this message translates to:
+  /// **'Official channel'**
+  String get articleSourceOfficial;
+
+  /// Source kind label for Telegram sources
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram channel'**
+  String get articleSourceTelegram;
+
+  /// Source kind label for RSS sources
+  ///
+  /// In en, this message translates to:
+  /// **'RSS feed'**
+  String get articleSourceRss;
+
+  /// Subscriber count on the article source card
+  ///
+  /// In en, this message translates to:
+  /// **'{count} subscribers'**
+  String articleSourceSubscribers(String count);
+
+  /// Source card pill when the source is followed
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get articleSourceSubscribed;
+
+  /// Source card pill when the source is not followed
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get articleSourceSubscribe;
+
+  /// Toast after following a news source
+  ///
+  /// In en, this message translates to:
+  /// **'You follow {name}'**
+  String articleSourceFollowedToast(String name);
+
+  /// Toast after unfollowing a news source
+  ///
+  /// In en, this message translates to:
+  /// **'Unfollowed'**
+  String get articleSourceUnfollowedToast;
+
+  /// Story viewer button that opens the article
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get storyRead;
+
+  /// Semantics label of the story viewer close button
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get storyClose;
+
+  /// Semantics label of the story viewer left tap zone
+  ///
+  /// In en, this message translates to:
+  /// **'Previous story'**
+  String get storyPrevious;
+
+  /// Semantics label of the story viewer right tap zone
+  ///
+  /// In en, this message translates to:
+  /// **'Next story'**
+  String get storyNext;
+
+  /// Story viewer empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No stories from this source yet'**
+  String get storyEmpty;
+
+  /// Overline above the joined communities group
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get communitiesMine;
+
+  /// Overline above the community cards when no category is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get communitiesRecommended;
+
+  /// Join button label when the user joined the community
+  ///
+  /// In en, this message translates to:
+  /// **'You are a member'**
+  String get communitiesMember;
+
+  /// Toast after joining a community
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to {name}'**
+  String communitiesJoinedToast(String name);
+
+  /// Toast after leaving a community
+  ///
+  /// In en, this message translates to:
+  /// **'You left the community'**
+  String get communitiesLeftToast;
+
+  /// Empty state of the joined communities group
+  ///
+  /// In en, this message translates to:
+  /// **'Join a community and it will appear here'**
+  String get communitiesMineEmpty;
+
+  /// Empty state of the community cards list
+  ///
+  /// In en, this message translates to:
+  /// **'No communities in this category yet'**
+  String get communitiesEmptyCategory;
+
+  /// Semantics label of the accent plus button on the communities page
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest a community'**
+  String get communitiesSuggest;
+
+  /// Community page feed section title
+  ///
+  /// In en, this message translates to:
+  /// **'Feed'**
+  String get communityFeed;
+
+  /// Community page feed section action that opens the chat
+  ///
+  /// In en, this message translates to:
+  /// **'write'**
+  String get communityWrite;
+
+  /// Community feed empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'Community posts'**
+  String get communityFeedEmpty;
+
+  /// Community feed empty state subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Organizers post in the chat — open it to write'**
+  String get communityFeedEmptySub;
+
+  /// Community stat card label
+  ///
+  /// In en, this message translates to:
+  /// **'members'**
+  String get communityStatMembers;
+
+  /// Community stat card label for the chat platform
+  ///
+  /// In en, this message translates to:
+  /// **'platform'**
+  String get communityStatPlatform;
+
+  /// Community stat card label for the catalog category
+  ///
+  /// In en, this message translates to:
+  /// **'category'**
+  String get communityStatCategory;
+
+  /// Semantics label of the community link
+  ///
+  /// In en, this message translates to:
+  /// **'Open chat'**
+  String get communityOpenChat;
+
+  /// Platform name for web links
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get communityPlatformWeb;
+
+  /// Schedule header overline
+  ///
+  /// In en, this message translates to:
+  /// **'Week {week} · {parity}'**
+  String scheduleWeekOverline(int week, String parity);
+
+  /// Changes banner
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} change this week} other{{count} changes this week}}'**
+  String scheduleChangesThisWeek(int count);
+
+  /// Banner action
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get scheduleShow;
+
+  /// Compare banner
+  ///
+  /// In en, this message translates to:
+  /// **'Comparing with {name}'**
+  String scheduleCompareWith(String name);
+
+  /// Compare banner
+  ///
+  /// In en, this message translates to:
+  /// **'common windows:'**
+  String get scheduleCommonWindows;
+
+  /// Compare banner
+  ///
+  /// In en, this message translates to:
+  /// **'no common windows today'**
+  String get scheduleNoCommonWindows;
+
+  /// Compare banner action
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get scheduleCompareOff;
+
+  /// Schedule view segment
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get scheduleViewDay;
+
+  /// Day view link
+  ///
+  /// In en, this message translates to:
+  /// **'← week'**
+  String get schedulePrevWeek;
+
+  /// Day view link
+  ///
+  /// In en, this message translates to:
+  /// **'week →'**
+  String get scheduleNextWeek;
+
+  /// Day lesson count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no classes} =1{{count} class} other{{count} classes}}'**
+  String scheduleDayLessons(int count);
+
+  /// Gap row
+  ///
+  /// In en, this message translates to:
+  /// **'break {minutes} min'**
+  String scheduleBreakMinutes(int minutes);
+
+  /// Empty day card
+  ///
+  /// In en, this message translates to:
+  /// **'Free day'**
+  String get scheduleFreeDayTitle;
+
+  /// Empty day card
+  ///
+  /// In en, this message translates to:
+  /// **'No classes. You can add your own event.'**
+  String get scheduleFreeDaySubtitle;
+
+  /// Week view pill
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with a friend'**
+  String get scheduleCompareFriend;
+
+  /// Week legend
+  ///
+  /// In en, this message translates to:
+  /// **'Lab'**
+  String get scheduleLegendLab;
+
+  /// Week legend
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get scheduleLegendCancel;
+
+  /// Week legend
+  ///
+  /// In en, this message translates to:
+  /// **'tap — add your own'**
+  String get scheduleLegendAddOwn;
+
+  /// Month card meta
+  ///
+  /// In en, this message translates to:
+  /// **'{year} · semester {semester}'**
+  String scheduleMonthMeta(int year, int semester);
+
+  /// Month stats overline
+  ///
+  /// In en, this message translates to:
+  /// **'THIS MONTH'**
+  String get scheduleMonthStatsTitle;
+
+  /// Month stats
+  ///
+  /// In en, this message translates to:
+  /// **'Study days'**
+  String get scheduleStudyDays;
+
+  /// Month stats
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get scheduleLessonsLabel;
+
+  /// Month stats
+  ///
+  /// In en, this message translates to:
+  /// **'Tests'**
+  String get scheduleExamsLabel;
+
+  /// Month legend
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} lecture} other{{count} lectures}}'**
+  String scheduleLecturesCount(int count);
+
+  /// Month legend
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} practice} other{{count} practices}}'**
+  String schedulePracticesCount(int count);
+
+  /// Month legend
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} lab} other{{count} labs}}'**
+  String scheduleLabsCount(int count);
+
+  /// Lesson type short
+  ///
+  /// In en, this message translates to:
+  /// **'LEC'**
+  String get lessonShortLecture;
+
+  /// Lesson type short
+  ///
+  /// In en, this message translates to:
+  /// **'PRAC'**
+  String get lessonShortPractice;
+
+  /// Lesson type short
+  ///
+  /// In en, this message translates to:
+  /// **'LAB'**
+  String get lessonShortLab;
+
+  /// Lesson type short
+  ///
+  /// In en, this message translates to:
+  /// **'PE'**
+  String get lessonShortPe;
+
+  /// Lesson type short
+  ///
+  /// In en, this message translates to:
+  /// **'CONS'**
+  String get lessonShortConsult;
+
+  /// Lesson type short
+  ///
+  /// In en, this message translates to:
+  /// **'EXAM'**
+  String get lessonShortExam;
+
+  /// Lesson type short
+  ///
+  /// In en, this message translates to:
+  /// **'CRED'**
+  String get lessonShortCredit;
+
+  /// Lesson type short
+  ///
+  /// In en, this message translates to:
+  /// **'CRS'**
+  String get lessonShortCourse;
+
+  /// Lesson type short
+  ///
+  /// In en, this message translates to:
+  /// **'IND'**
+  String get lessonShortIndividual;
+
+  /// Lesson type short
+  ///
+  /// In en, this message translates to:
+  /// **'OWN'**
+  String get lessonShortOwn;
+
+  /// Lesson row tag
+  ///
+  /// In en, this message translates to:
+  /// **'· cancelled'**
+  String get lessonTagCancelled;
+
+  /// Lesson row tag
+  ///
+  /// In en, this message translates to:
+  /// **'· in progress, {minutes} min left'**
+  String lessonTagLive(int minutes);
+
+  /// Lesson row tag
+  ///
+  /// In en, this message translates to:
+  /// **'· next'**
+  String get lessonTagNext;
+
+  /// Lesson row tag
+  ///
+  /// In en, this message translates to:
+  /// **'· room changed'**
+  String get lessonTagMoved;
+
+  /// Lesson row tag
+  ///
+  /// In en, this message translates to:
+  /// **'· new'**
+  String get lessonTagNew;
+
+  /// Lesson row meta
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get lessonMetaCancelled;
+
+  /// Lesson row meta
+  ///
+  /// In en, this message translates to:
+  /// **'{type} · {room} instead of {oldRoom}'**
+  String lessonMetaMoved(String type, String room, String oldRoom);
+
+  /// Lesson row meta suffix
+  ///
+  /// In en, this message translates to:
+  /// **'finished'**
+  String get lessonMetaPast;
+
+  /// Lesson actions sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Open class'**
+  String get scheduleActionOpen;
+
+  /// Lesson actions sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Report a mistake'**
+  String get scheduleActionReport;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'Class hidden'**
+  String get scheduleLessonHidden;
+
+  /// Changes sheet subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'This week · updated {time}'**
+  String scheduleChangesSubtitle(String time);
+
+  /// Changes sheet subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get scheduleChangesSubtitleWeek;
+
+  /// Change tag
+  ///
+  /// In en, this message translates to:
+  /// **'Moved'**
+  String get scheduleChangeTagMoved;
+
+  /// Change tag
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get scheduleChangeTagCancelled;
+
+  /// Change tag
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get scheduleChangeTagNew;
+
+  /// Change tag
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get scheduleChangeTagTeacher;
+
+  /// Change tag
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get scheduleChangeTagRoom;
+
+  /// Change sub
+  ///
+  /// In en, this message translates to:
+  /// **'added'**
+  String get scheduleChangeAdded;
+
+  /// Changes sheet CTA
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get scheduleChangesAck;
+
+  /// Add lesson sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Own class'**
+  String get scheduleAddTitle;
+
+  /// Add lesson sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Club, consultation, meeting — it will appear in the schedule'**
+  String get scheduleAddSubtitle;
+
+  /// Add lesson sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get scheduleAddName;
+
+  /// Add lesson sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Place (optional)'**
+  String get scheduleAddPlace;
+
+  /// Add lesson sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get scheduleAddType;
+
+  /// Add lesson sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get scheduleAddDay;
+
+  /// Add lesson sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get scheduleAddSlot;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'Class added to the schedule'**
+  String get scheduleAddDone;
+
+  /// Activity type
+  ///
+  /// In en, this message translates to:
+  /// **'Own'**
+  String get activityTypeOwn;
+
+  /// Activity type
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get activityTypeEvent;
+
+  /// Activity type
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get activityTypeRetake;
+
+  /// Activity type
+  ///
+  /// In en, this message translates to:
+  /// **'Extra class'**
+  String get activityTypeExtra;
+
+  /// Compare sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Compare schedules'**
+  String get scheduleCompareTitle;
+
+  /// Compare sheet
+  ///
+  /// In en, this message translates to:
+  /// **'We will show your friend\'s busy slots and common windows'**
+  String get scheduleCompareSubtitle;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'Comparing with {name}'**
+  String scheduleCompareStarted(String name);
+
+  /// Compare sheet empty
+  ///
+  /// In en, this message translates to:
+  /// **'No friends with a group yet'**
+  String get scheduleCompareNoFriends;
+
+  /// Compare sheet empty
+  ///
+  /// In en, this message translates to:
+  /// **'Add friends — their groups will appear here'**
+  String get scheduleCompareNoFriendsHint;
+
+  /// Compare sheet row
+  ///
+  /// In en, this message translates to:
+  /// **'group not set'**
+  String get scheduleCompareNoGroup;
+
+  /// Note sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Only you can see it · can be shared with the group'**
+  String get scheduleNoteSubtitle;
+
+  /// Note sheet
+  ///
+  /// In en, this message translates to:
+  /// **'What to remember…'**
+  String get scheduleNotePlaceholder;
+
+  /// Note sheet
+  ///
+  /// In en, this message translates to:
+  /// **'+ file'**
+  String get scheduleNoteAddFile;
+
+  /// Note sheet
+  ///
+  /// In en, this message translates to:
+  /// **'+ board photo'**
+  String get scheduleNoteAddBoard;
+
+  /// Note sheet
+  ///
+  /// In en, this message translates to:
+  /// **'#tag'**
+  String get scheduleNoteTag;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'Note saved'**
+  String get scheduleNoteSaved;
+
+  /// Remind option
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min before'**
+  String scheduleRemindIn(int minutes);
+
+  /// Remind option
+  ///
+  /// In en, this message translates to:
+  /// **'1 hour before'**
+  String get scheduleRemindHour;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'Will remind {minutes} min before'**
+  String scheduleRemindSet(int minutes);
+
+  /// Share option
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get scheduleShareLink;
+
+  /// Share option
+  ///
+  /// In en, this message translates to:
+  /// **'To calendar'**
+  String get scheduleShareCalendar;
+
+  /// Share option
+  ///
+  /// In en, this message translates to:
+  /// **'As image'**
+  String get scheduleShareImage;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get scheduleLinkCopied;
+
+  /// Filter sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get scheduleFilterTitle;
+
+  /// Filter sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Shown in grey'**
+  String get scheduleFilterPastSub;
+
+  /// Filter sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get scheduleFilterCancelled;
+
+  /// Filter sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Struck through'**
+  String get scheduleFilterCancelledSub;
+
+  /// Lesson page banner
+  ///
+  /// In en, this message translates to:
+  /// **'Class cancelled'**
+  String get lessonCancelledBanner;
+
+  /// Lesson page banner
+  ///
+  /// In en, this message translates to:
+  /// **'Room changed: {from} → {to}'**
+  String lessonMovedBanner(String from, String to);
+
+  /// Lesson page card
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get lessonTimeLabel;
+
+  /// Lesson page card
+  ///
+  /// In en, this message translates to:
+  /// **'class {number}'**
+  String lessonNumberMeta(int number);
+
+  /// Lesson page card
+  ///
+  /// In en, this message translates to:
+  /// **'on the map'**
+  String get lessonOnMap;
+
+  /// Lesson page action
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get lessonFiles;
+
+  /// Lesson page section action
+  ///
+  /// In en, this message translates to:
+  /// **'add'**
+  String get lessonMaterialsAdd;
+
+  /// Lesson page section
+  ///
+  /// In en, this message translates to:
+  /// **'How was it?'**
+  String get lessonHowWasIt;
+
+  /// Lesson page card
+  ///
+  /// In en, this message translates to:
+  /// **'Group note'**
+  String get lessonGroupNote;
+
+  /// Lesson page card
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet — share what was important'**
+  String get lessonGroupNoteEmpty;
+
+  /// Teacher sheet stat
+  ///
+  /// In en, this message translates to:
+  /// **'rating'**
+  String get scheduleTeacherRating;
+
+  /// Teacher sheet stat
+  ///
+  /// In en, this message translates to:
+  /// **'reviews'**
+  String get scheduleTeacherReviews;
+
+  /// Teacher sheet stat
+  ///
+  /// In en, this message translates to:
+  /// **'subjects'**
+  String get scheduleTeacherSubjects;
+
+  /// Teacher sheet action
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get scheduleTeacherWrite;
+
+  /// Teacher sheet action
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a review'**
+  String get scheduleTeacherReview;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'No contacts for this teacher yet'**
+  String get scheduleTeacherNoContacts;
+
+  /// Semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Export week'**
+  String get scheduleWeekExport;
+
+  /// Semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get scheduleFilterSemantics;
+
+  /// Semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Add own class'**
+  String get scheduleAddLessonSemantics;
+
+  /// Semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Class actions'**
+  String get scheduleMoreSemantics;
+
+  /// Risk badge on grades/attendance cards
+  ///
+  /// In en, this message translates to:
+  /// **'RISK'**
+  String get riskBadge;
+
+  /// Grades page title
+  ///
+  /// In en, this message translates to:
+  /// **'Grades'**
+  String get gradesTitle;
+
+  /// Grades header refresh button semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get gradesRefresh;
+
+  /// Grades error state title
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load'**
+  String get gradesErrorTitle;
+
+  /// Grades error message with the last save date
+  ///
+  /// In en, this message translates to:
+  /// **'Last grades were saved on {date}.'**
+  String gradesErrorSaved(String date);
+
+  /// Grades error message without a save date
+  ///
+  /// In en, this message translates to:
+  /// **'No saved grades yet.'**
+  String get gradesErrorNoData;
+
+  /// GPA card label
+  ///
+  /// In en, this message translates to:
+  /// **'Personal GPA'**
+  String get gradesGpaLabel;
+
+  /// GPA delta over the last month
+  ///
+  /// In en, this message translates to:
+  /// **'{delta} this month'**
+  String gradesGpaDelta(String delta);
+
+  /// GPA card right label
+  ///
+  /// In en, this message translates to:
+  /// **'To the raised scholarship'**
+  String get gradesScholarshipLabel;
+
+  /// Hint naming the weakest subject
+  ///
+  /// In en, this message translates to:
+  /// **'get {subject} to 4+'**
+  String gradesScholarshipHint(String subject);
+
+  /// Hint when GPA is above the scholarship threshold
+  ///
+  /// In en, this message translates to:
+  /// **'threshold reached'**
+  String get gradesScholarshipReached;
+
+  /// Current term segment
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get gradesTermCurrent;
+
+  /// Previous term segment
+  ///
+  /// In en, this message translates to:
+  /// **'Sem {n}'**
+  String gradesTermSemester(int n);
+
+  /// Grades empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No subjects yet'**
+  String get gradesNoSubjectsTitle;
+
+  /// Grades empty state subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your group schedule and subjects will appear here'**
+  String get gradesNoSubjectsSubtitle;
+
+  /// Grades empty state for a past term
+  ///
+  /// In en, this message translates to:
+  /// **'No grades for this term'**
+  String get gradesTermEmpty;
+
+  /// Fallback teacher line
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher not set'**
+  String get gradesTeacherUnknown;
+
+  /// Add-mark sheet subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Add a grade'**
+  String get gradesAddMarkSubtitle;
+
+  /// Toast after adding a mark
+  ///
+  /// In en, this message translates to:
+  /// **'Grade {mark} added'**
+  String gradesMarkAdded(int mark);
+
+  /// Remove last mark action
+  ///
+  /// In en, this message translates to:
+  /// **'Remove last'**
+  String get gradesRemoveLast;
+
+  /// Mark pill semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Grade {mark}'**
+  String gradesMarkSemantics(int mark);
+
+  /// Attendance page title
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get attendanceTitle;
+
+  /// Add absence button / sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Log an absence'**
+  String get attendanceAddAbsence;
+
+  /// Attendance stat caption
+  ///
+  /// In en, this message translates to:
+  /// **'personal log'**
+  String get attendanceStatSemester;
+
+  /// Attendance stat caption
+  ///
+  /// In en, this message translates to:
+  /// **'absences'**
+  String get attendanceStatMissed;
+
+  /// Attendance stat caption
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{subject at risk} other{subjects at risk}}'**
+  String attendanceStatRisk(int count);
+
+  /// Weekly bars card title
+  ///
+  /// In en, this message translates to:
+  /// **'By week'**
+  String get attendanceWeeksTitle;
+
+  /// Weekly bars range
+  ///
+  /// In en, this message translates to:
+  /// **'{month} → now'**
+  String attendanceWeeksRange(String month);
+
+  /// Risk banner text
+  ///
+  /// In en, this message translates to:
+  /// **'{subject}: {count, plural, =1{{count} unexcused absence} other{{count} unexcused absences}}. Estimated attendance is below 70%; check the course requirements with your teacher.'**
+  String attendanceRiskBanner(String subject, int count);
+
+  /// Attendance section overline
+  ///
+  /// In en, this message translates to:
+  /// **'By subject'**
+  String get attendanceBySubjects;
+
+  /// Absence row text
+  ///
+  /// In en, this message translates to:
+  /// **'Absence · {reason}'**
+  String attendanceMissRow(String reason);
+
+  /// Absence reason
+  ///
+  /// In en, this message translates to:
+  /// **'sick (personal record)'**
+  String get attendanceReasonSick;
+
+  /// Absence reason
+  ///
+  /// In en, this message translates to:
+  /// **'no reason'**
+  String get attendanceReasonNone;
+
+  /// Attach certificate action
+  ///
+  /// In en, this message translates to:
+  /// **'Sick'**
+  String get attendanceCertificate;
+
+  /// Remove absence action
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get attendanceRemoveAbsence;
+
+  /// Note under a risky subject
+  ///
+  /// In en, this message translates to:
+  /// **'This is a personal estimate from the available schedule. Ask your teacher about assessment and make-up requirements.'**
+  String get attendanceRiskNote;
+
+  /// Attendance empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No classes yet'**
+  String get attendanceNoLessonsTitle;
+
+  /// Attendance empty state subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your group schedule — stats appear after the first classes'**
+  String get attendanceNoLessonsSubtitle;
+
+  /// Absence sheet field label
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get attendanceSheetSubject;
+
+  /// Absence sheet field label
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get attendanceSheetDate;
+
+  /// Absence sheet field label
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get attendanceSheetReason;
+
+  /// Absence sheet CTA
+  ///
+  /// In en, this message translates to:
+  /// **'Log'**
+  String get attendanceSheetSubmit;
+
+  /// Toast after logging an absence
+  ///
+  /// In en, this message translates to:
+  /// **'Absence logged'**
+  String get attendanceAbsenceAdded;
+
+  /// Expand row semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Show absences for {subject}'**
+  String attendanceExpandSemantics(String subject);
+
+  /// Cowork page title
+  ///
+  /// In en, this message translates to:
+  /// **'Coworking'**
+  String get coworkTitle;
+
+  /// Cowork venue line
+  ///
+  /// In en, this message translates to:
+  /// **'Personal plan on this device'**
+  String get coworkVenue;
+
+  /// Free seats pill
+  ///
+  /// In en, this message translates to:
+  /// **'{count} free'**
+  String coworkFree(int count);
+
+  /// Cowork zone
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet'**
+  String get coworkZoneQuiet;
+
+  /// Cowork zone
+  ///
+  /// In en, this message translates to:
+  /// **'Common'**
+  String get coworkZoneCommon;
+
+  /// Cowork zone
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting rooms'**
+  String get coworkZoneMeeting;
+
+  /// Seat map windows strip
+  ///
+  /// In en, this message translates to:
+  /// **'SCHEMATIC LAYOUT'**
+  String get coworkWindows;
+
+  /// Legend
+  ///
+  /// In en, this message translates to:
+  /// **'not verified'**
+  String get coworkLegendFree;
+
+  /// Legend
+  ///
+  /// In en, this message translates to:
+  /// **'taken'**
+  String get coworkLegendTaken;
+
+  /// Legend
+  ///
+  /// In en, this message translates to:
+  /// **'selected'**
+  String get coworkLegendMine;
+
+  /// Details row label
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get coworkTimeLabel;
+
+  /// Details time value
+  ///
+  /// In en, this message translates to:
+  /// **'{from} → {until} · {hours} h'**
+  String coworkTimeValue(String from, String until, int hours);
+
+  /// Details row label
+  ///
+  /// In en, this message translates to:
+  /// **'Extension'**
+  String get coworkExtendLabel;
+
+  /// Extension value before booking
+  ///
+  /// In en, this message translates to:
+  /// **'for your personal plan'**
+  String get coworkExtendAvailable;
+
+  /// Extension action
+  ///
+  /// In en, this message translates to:
+  /// **'extend until {until}'**
+  String coworkExtendAction(String until);
+
+  /// Extension exhausted
+  ///
+  /// In en, this message translates to:
+  /// **'until closing'**
+  String get coworkExtendMax;
+
+  /// Details row label
+  ///
+  /// In en, this message translates to:
+  /// **'Friends nearby'**
+  String get coworkFriendsLabel;
+
+  /// No friends nearby
+  ///
+  /// In en, this message translates to:
+  /// **'no recent locations'**
+  String get coworkFriendsNone;
+
+  /// Disabled CTA
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a seat'**
+  String get coworkPickSeat;
+
+  /// Book CTA
+  ///
+  /// In en, this message translates to:
+  /// **'Save {seat} · until {until}'**
+  String coworkBook(String seat, String until);
+
+  /// Cancel CTA
+  ///
+  /// In en, this message translates to:
+  /// **'Remove saved seat'**
+  String get coworkCancelBooking;
+
+  /// Toast after booking
+  ///
+  /// In en, this message translates to:
+  /// **'Seat {seat} saved until {until}'**
+  String coworkBooked(String seat, String until);
+
+  /// Toast after cancelling
+  ///
+  /// In en, this message translates to:
+  /// **'Saved seat removed'**
+  String get coworkBookingCancelled;
+
+  /// Seat cell semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Seat {seat}'**
+  String coworkSeatSemantics(String seat);
+
+  /// Map search pill placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Room, department, canteen'**
+  String get mapSearchPlaceholder;
+
+  /// Semantics label of the friends-on-map toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Friends on the map'**
+  String get mapFriendsToggle;
+
+  /// Semantics label of the campus chips row
+  ///
+  /// In en, this message translates to:
+  /// **'Campus'**
+  String get mapCampusFilter;
+
+  /// Semantics of the sheet chevron when collapsed
+  ///
+  /// In en, this message translates to:
+  /// **'Expand list'**
+  String get mapExpandSheet;
+
+  /// Semantics of the sheet chevron when expanded
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse list'**
+  String get mapCollapseSheet;
+
+  /// Title of the free rooms sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Free now'**
+  String get freeRoomsNowTitle;
+
+  /// Meta line under the free rooms title
+  ///
+  /// In en, this message translates to:
+  /// **'{campus} · until the next class at {time} · {count, plural, =1{{count} room} other{{count} rooms}}'**
+  String freeRoomsMeta(String campus, String time, int count);
+
+  /// Meta line when no next class today
+  ///
+  /// In en, this message translates to:
+  /// **'{campus} · no more classes today · {count, plural, =1{{count} room} other{{count} rooms}}'**
+  String freeRoomsMetaEndOfDay(String campus, int count);
+
+  /// Badge on the booked room row
+  ///
+  /// In en, this message translates to:
+  /// **'saved'**
+  String get freeRoomsYourSeat;
+
+  /// Generic room kind label
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get freeRoomsKind;
+
+  /// Time left, whole hours
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String freeRoomsLeftHours(int hours);
+
+  /// Time left, hours and minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String freeRoomsLeftHoursMinutes(int hours, int minutes);
+
+  /// Time left, minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String freeRoomsLeftMinutes(int minutes);
+
+  /// Empty state of the free rooms list
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found in {campus}. Try another campus.'**
+  String freeRoomsNothingFound(String campus);
+
+  /// Empty state without campus filter
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found. Try another query.'**
+  String get freeRoomsNothingFoundAll;
+
+  /// Placeholder label on the room sheet photo
+  ///
+  /// In en, this message translates to:
+  /// **'room photo'**
+  String get roomPhotoPlaceholder;
+
+  /// Room sheet badge
+  ///
+  /// In en, this message translates to:
+  /// **'free until {time}'**
+  String roomFreeUntilBadge(String time);
+
+  /// Room sheet badge when no upcoming class
+  ///
+  /// In en, this message translates to:
+  /// **'free until the end of the day'**
+  String get roomFreeEndOfDayBadge;
+
+  /// Room sheet meta line with floor
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} · {campus}, floor {floor}'**
+  String roomMetaFloor(String kind, String campus, int floor);
+
+  /// Room sheet meta line without floor
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} · {campus}'**
+  String roomMetaNoFloor(String kind, String campus);
+
+  /// Room sheet stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Free for'**
+  String get roomStatFreeFor;
+
+  /// Room sheet stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Floor'**
+  String get roomStatFloor;
+
+  /// Room sheet stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Building'**
+  String get roomStatBuilding;
+
+  /// Room sheet CTA
+  ///
+  /// In en, this message translates to:
+  /// **'Save place'**
+  String get roomBook;
+
+  /// Room sheet CTA when booked
+  ///
+  /// In en, this message translates to:
+  /// **'Saved until {time}'**
+  String roomBooked(String time);
+
+  /// Toast after booking
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · saved until {time}'**
+  String roomBookedToast(String name, String time);
+
+  /// Toast after releasing a booking
+  ///
+  /// In en, this message translates to:
+  /// **'Saved place removed'**
+  String get roomReleasedToast;
+
+  /// Semantics of the route circle button
+  ///
+  /// In en, this message translates to:
+  /// **'Show on the floor plan'**
+  String get roomRoute;
+
+  /// Toast when a room cannot be located
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is not on the campus floor plans'**
+  String roomNotOnPlan(String name);
+
+  /// Badge for a room that is not free now
+  ///
+  /// In en, this message translates to:
+  /// **'busy'**
+  String get roomTakenBadge;
+
+  /// Home offline banner
+  ///
+  /// In en, this message translates to:
+  /// **'Offline · showing saved data'**
+  String get homeOfflineBanner;
+
+  /// Home greeting before noon; the name follows in accent italic
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning, '**
+  String get homeGreetingMorning;
+
+  /// Home greeting before 18:00
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon, '**
+  String get homeGreetingDay;
+
+  /// Home greeting after 18:00
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening, '**
+  String get homeGreetingEvening;
+
+  /// Home status line when the day has no lessons
+  ///
+  /// In en, this message translates to:
+  /// **'no classes'**
+  String get homeStatusNoLessons;
+
+  /// Home status line during a lesson
+  ///
+  /// In en, this message translates to:
+  /// **'class {index} of {count} in progress'**
+  String homeStatusOngoing(int index, int count);
+
+  /// Home status line: next lesson time
+  ///
+  /// In en, this message translates to:
+  /// **'next at {time}'**
+  String homeStatusNext(String time);
+
+  /// Home status line: first lesson time today
+  ///
+  /// In en, this message translates to:
+  /// **'first at {time}'**
+  String homeStatusFirst(String time);
+
+  /// Home status line for another day
+  ///
+  /// In en, this message translates to:
+  /// **'starts at {time}'**
+  String homeStatusStart(String time);
+
+  /// Home status line when all lessons are over
+  ///
+  /// In en, this message translates to:
+  /// **'done for today'**
+  String get homeStatusDone;
+
+  /// Home hero pill before the first lesson
+  ///
+  /// In en, this message translates to:
+  /// **'First class in {minutes} min'**
+  String homeHeroFirstIn(int minutes);
+
+  /// Home hero pill during a lesson
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get homeHeroNow;
+
+  /// Home hero pill during a break
+  ///
+  /// In en, this message translates to:
+  /// **'Break · {minutes} min'**
+  String homeHeroBreak(int minutes);
+
+  /// Home hero title when lessons are over
+  ///
+  /// In en, this message translates to:
+  /// **'Done for today.'**
+  String get homeHeroDoneTitle;
+
+  /// Home hero accent line after the last lesson
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} class behind} other{{count} classes behind}}'**
+  String homeHeroDoneLessons(int count);
+
+  /// Home hero tomorrow summary
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow {lessons}, first at {time}'**
+  String homeHeroTomorrow(String lessons, String time);
+
+  /// Home hero tomorrow summary when tomorrow is free
+  ///
+  /// In en, this message translates to:
+  /// **'No classes tomorrow'**
+  String get homeHeroTomorrowFree;
+
+  /// Home hero nearest deadline chip
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline · {left}'**
+  String homeHeroDeadlineChip(String left);
+
+  /// Home hero deadline chip when nothing is due
+  ///
+  /// In en, this message translates to:
+  /// **'No deadlines'**
+  String get homeHeroDeadlineNone;
+
+  /// Home hero button that selects tomorrow
+  ///
+  /// In en, this message translates to:
+  /// **'Plan for tomorrow'**
+  String get homeHeroTomorrowPlan;
+
+  /// Home hero overline for another day
+  ///
+  /// In en, this message translates to:
+  /// **'FIRST CLASS'**
+  String get homeHeroFirstLesson;
+
+  /// Home hero free-day title
+  ///
+  /// In en, this message translates to:
+  /// **'No classes.'**
+  String get homeHeroFreeTitle;
+
+  /// Home hero free-day body
+  ///
+  /// In en, this message translates to:
+  /// **'Close a deadline, visit the cowork or check the events board.'**
+  String get homeHeroFreeBody;
+
+  /// Home who-goes chip label
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} going} other{{count} going}}'**
+  String homeWhoGoesCount(int count);
+
+  /// Home who-goes chip label without classmates
+  ///
+  /// In en, this message translates to:
+  /// **'Who is going'**
+  String get homeWhoGoesEmpty;
+
+  /// Who-goes sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Who is going to class'**
+  String get homeWhoGoesTitle;
+
+  /// Who-goes sheet subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total}'**
+  String homeWhoGoesSubtitle(int count, int total);
+
+  /// Who-goes sheet CTA
+  ///
+  /// In en, this message translates to:
+  /// **'I am going too'**
+  String get homeWhoGoesMe;
+
+  /// Who-goes sheet CTA after confirming
+  ///
+  /// In en, this message translates to:
+  /// **'You are going'**
+  String get homeWhoGoesMeDone;
+
+  /// Who-goes row status
+  ///
+  /// In en, this message translates to:
+  /// **'going'**
+  String get homeWhoGoesGoing;
+
+  /// Who-goes sheet empty text
+  ///
+  /// In en, this message translates to:
+  /// **'Classmates will appear here once they pick your group'**
+  String get homeWhoGoesNoClassmates;
+
+  /// Toast after confirming attendance intent
+  ///
+  /// In en, this message translates to:
+  /// **'You are going to class'**
+  String get homeGoingToast;
+
+  /// Home break hero free room row
+  ///
+  /// In en, this message translates to:
+  /// **'{room} is free'**
+  String homeFreeRoomTitle(String room);
+
+  /// Home break hero free room subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'until {time}'**
+  String homeFreeRoomUntil(String time);
+
+  /// Home break hero free rooms fallback subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'find a place for the break'**
+  String get homeFreeRoomsSub;
+
+  /// Home status strip streak pill
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days in a row'**
+  String homeStreakDays(int count);
+
+  /// Home status strip xp label
+  ///
+  /// In en, this message translates to:
+  /// **'{xp} XP'**
+  String homeXp(String xp);
+
+  /// Home status strip deadlines pill
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} deadline} other{{count} deadlines}}'**
+  String homeDeadlinesCount(int count);
+
+  /// Home status strip exam pill
+  ///
+  /// In en, this message translates to:
+  /// **'Test in {days} d'**
+  String homeExamIn(int days);
+
+  /// Home status strip exam pill on the day
+  ///
+  /// In en, this message translates to:
+  /// **'Test today'**
+  String get homeExamToday;
+
+  /// Home quick actions section action
+  ///
+  /// In en, this message translates to:
+  /// **'all services'**
+  String get homeAllServices;
+
+  /// Home deadlines section action
+  ///
+  /// In en, this message translates to:
+  /// **'+ add'**
+  String get homeAddDeadline;
+
+  /// Home deadlines empty text
+  ///
+  /// In en, this message translates to:
+  /// **'All done. Keep it up.'**
+  String get homeDeadlinesAllDone;
+
+  /// Home trending section action
+  ///
+  /// In en, this message translates to:
+  /// **'all'**
+  String get homeAllLower;
+
+  /// Home trending row meta
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} reply} other{{count} replies}}'**
+  String homeRepliesCount(int count);
+
+  /// Home lesson row meta for a moved lesson
+  ///
+  /// In en, this message translates to:
+  /// **'{type} · {room} instead of {old}'**
+  String homeLessonMoved(String type, String room, String old);
+
+  /// Home deadline row right label when done
+  ///
+  /// In en, this message translates to:
+  /// **'done'**
+  String get homeDeadlineDone;
+
+  /// Note sheet character counter
+  ///
+  /// In en, this message translates to:
+  /// **'{count} / {max}'**
+  String homeNoteChars(int count, int max);
+
+  /// Home header search button semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get homeSearchLabel;
+
+  /// Home clock pill week parity suffix
+  ///
+  /// In en, this message translates to:
+  /// **'· {parity}'**
+  String homeWeekParity(String parity);
+
+  /// Notifications sheet header action
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get notificationsReadAll;
+
+  /// Notifications sheet empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get notificationsEmptyTitle;
+
+  /// Notifications sheet empty state subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule changes and pushes will show up here'**
+  String get notificationsEmptySubtitle;
+
+  /// Notification age: just now
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get notifTimeNow;
+
+  /// Notification age in minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String notifTimeMinutes(int count);
+
+  /// Notification age in hours
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h'**
+  String notifTimeHours(int count);
+
+  /// Notification age: yesterday
+  ///
+  /// In en, this message translates to:
+  /// **'yesterday'**
+  String get notifTimeYesterday;
+
+  /// Schedule change notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Moved · {subject}'**
+  String notifChangeMoved(String subject);
+
+  /// Schedule change notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled · {subject}'**
+  String notifChangeCancelled(String subject);
+
+  /// Schedule change notification title
+  ///
+  /// In en, this message translates to:
+  /// **'New class · {subject}'**
+  String notifChangeAdded(String subject);
+
+  /// Schedule change notification title
+  ///
+  /// In en, this message translates to:
+  /// **'New room · {subject}'**
+  String notifChangeRoom(String subject);
+
+  /// Schedule change notification title
+  ///
+  /// In en, this message translates to:
+  /// **'New teacher · {subject}'**
+  String notifChangeTeacher(String subject);
+
+  /// Schedule change notification detail
+  ///
+  /// In en, this message translates to:
+  /// **'instead of {value}'**
+  String notifChangeInsteadOf(String value);
+
+  /// Fallback title for a push without a title
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get notifPushDefaultTitle;
+
+  /// Offline banner text
+  ///
+  /// In en, this message translates to:
+  /// **'Offline · showing saved data'**
+  String get offlineBannerCached;
+
+  /// Profile level card: rank name and XP
+  ///
+  /// In en, this message translates to:
+  /// **'{rank} · {xp} XP'**
+  String profileRankXp(String rank, String xp);
+
+  /// Profile level card: place in group
+  ///
+  /// In en, this message translates to:
+  /// **'#{rank} in group'**
+  String profileGroupPlace(int rank);
+
+  /// Profile level card when group rank is unknown
+  ///
+  /// In en, this message translates to:
+  /// **'no place yet'**
+  String get profileGroupPlaceUnknown;
+
+  /// Profile level card footer
+  ///
+  /// In en, this message translates to:
+  /// **'{xp} XP to level {level} · streak {days} d.'**
+  String profileXpToLevelStreak(String xp, int level, int days);
+
+  /// Rank label for level 1-9
+  ///
+  /// In en, this message translates to:
+  /// **'Shinobi'**
+  String get profileRankShinobi;
+
+  /// Rank label for level 10-19
+  ///
+  /// In en, this message translates to:
+  /// **'Chunin'**
+  String get profileRankChunin;
+
+  /// Rank label for level 20-29
+  ///
+  /// In en, this message translates to:
+  /// **'Jonin'**
+  String get profileRankJonin;
+
+  /// Rank label for level 30+
+  ///
+  /// In en, this message translates to:
+  /// **'Kage'**
+  String get profileRankKage;
+
+  /// Profile metric card label
+  ///
+  /// In en, this message translates to:
+  /// **'GPA'**
+  String get profileMetricGpa;
+
+  /// Profile metric card label
+  ///
+  /// In en, this message translates to:
+  /// **'attendance'**
+  String get profileMetricAttendance;
+
+  /// Profile metric card label: days until next test
+  ///
+  /// In en, this message translates to:
+  /// **'to exam'**
+  String get profileMetricExam;
+
+  /// Short day count
+  ///
+  /// In en, this message translates to:
+  /// **'{days} d'**
+  String profileDaysShort(int days);
+
+  /// Profile quests section title
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly quests'**
+  String get profileWeekQuests;
+
+  /// Profile quests section meta
+  ///
+  /// In en, this message translates to:
+  /// **'until Sunday'**
+  String get profileUntilSunday;
+
+  /// Quest reward
+  ///
+  /// In en, this message translates to:
+  /// **'+{xp} XP'**
+  String profileQuestXp(int xp);
+
+  /// Quest progress label
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total}'**
+  String profileQuestProgress(int done, int total);
+
+  /// Profile quests empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No quests are available yet'**
+  String get profileQuestsEmpty;
+
+  /// Profile achievements action
+  ///
+  /// In en, this message translates to:
+  /// **'all {count}'**
+  String profileAllBadges(int count);
+
+  /// Locked badge card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Soon · {percent}%'**
+  String profileBadgeSoon(int percent);
+
+  /// Profile achievements empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Your first achievement is close'**
+  String get profileBadgesEmpty;
+
+  /// Profile friends row meta
+  ///
+  /// In en, this message translates to:
+  /// **'{count} · {campus} on the map'**
+  String profileFriendsMeta(int count, int campus);
+
+  /// Profile row to the pass
+  ///
+  /// In en, this message translates to:
+  /// **'NFC Pass'**
+  String get profileStudentCard;
+
+  /// Student card number
+  ///
+  /// In en, this message translates to:
+  /// **'No. {number}'**
+  String profileCardNumber(String number);
+
+  /// Edit profile sheet field label
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get profileEditAbout;
+
+  /// Edit profile sheet about placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'A personal note about yourself'**
+  String get profileEditAboutHint;
+
+  /// Edit profile sheet field label
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram'**
+  String get profileEditTelegram;
+
+  /// Edit profile sheet telegram placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'@username'**
+  String get profileEditTelegramHint;
+
+  /// Edit profile sheet name label
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get profileEditName;
+
+  /// Toast after saving the profile
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get profileUpdatedToast;
+
+  /// Semantics of the camera badge on the edit-profile avatar
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get profileChangePhoto;
+
+  /// Toast when tapping the camera badge
+  ///
+  /// In en, this message translates to:
+  /// **'Photo upload is coming soon'**
+  String get profilePhotoSoon;
+
+  /// Leaderboard scope segment
+  ///
+  /// In en, this message translates to:
+  /// **'Institute'**
+  String get leaderboardScopeInstitute;
+
+  /// Leaderboard scope segment
+  ///
+  /// In en, this message translates to:
+  /// **'University'**
+  String get leaderboardScopeUniversity;
+
+  /// Leaderboard row XP
+  ///
+  /// In en, this message translates to:
+  /// **'{xp} XP'**
+  String leaderboardXp(String xp);
+
+  /// Leaderboard footer hint
+  ///
+  /// In en, this message translates to:
+  /// **'{xp} XP to place {place}. Finish the weekly quests.'**
+  String leaderboardHintGap(int place, String xp);
+
+  /// Leaderboard footer hint for top-3
+  ///
+  /// In en, this message translates to:
+  /// **'You are in the top three. Keep the pace!'**
+  String get leaderboardHintTop;
+
+  /// Leaderboard empty state
+  ///
+  /// In en, this message translates to:
+  /// **'The rating is empty for now'**
+  String get leaderboardEmpty;
+
+  /// Leaderboard error state
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the rating'**
+  String get leaderboardError;
+
+  /// Settings section overline
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearanceSection;
+
+  /// Settings accent colour picker label
+  ///
+  /// In en, this message translates to:
+  /// **'Accent'**
+  String get settingsAccentLabel;
+
+  /// Settings widget preview row title
+  ///
+  /// In en, this message translates to:
+  /// **'Lock screen widget'**
+  String get settingsLockWidget;
+
+  /// Widget preview overline
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT · {time}'**
+  String settingsWidgetNext(String time);
+
+  /// Widget preview tag
+  ///
+  /// In en, this message translates to:
+  /// **'preview'**
+  String get settingsWidgetPreview;
+
+  /// Widget preview when there is no upcoming lesson
+  ///
+  /// In en, this message translates to:
+  /// **'No classes'**
+  String get settingsWidgetNoLesson;
+
+  /// Settings schedule group row
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get settingsGroup;
+
+  /// Settings toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show past classes'**
+  String get settingsShowPast;
+
+  /// Settings toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Greyed out, below the current one'**
+  String get settingsShowPastSub;
+
+  /// Settings toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show cancelled'**
+  String get settingsShowCancelled;
+
+  /// Settings toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Struck through'**
+  String get settingsShowCancelledSub;
+
+  /// Settings toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Only my subgroup'**
+  String get settingsOnlySubgroup;
+
+  /// Settings toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Hides the other subgroup\'s classes'**
+  String get settingsOnlySubgroupSub;
+
+  /// Settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Export to calendar'**
+  String get settingsExportCalendar;
+
+  /// Settings export action
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get settingsExportSync;
+
+  /// Toast after calendar export
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule added to the calendar'**
+  String get settingsExportDone;
+
+  /// Toast when there is nothing to export
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a schedule first'**
+  String get settingsExportNoSchedule;
+
+  /// Settings toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'15 minutes before start'**
+  String get settingsNotifyLessonsSub;
+
+  /// Settings toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Deadlines'**
+  String get settingsNotifyDeadlines;
+
+  /// Settings toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'A day and an hour before'**
+  String get settingsNotifyDeadlinesSub;
+
+  /// Settings toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Important only'**
+  String get settingsNotifyNewsSub;
+
+  /// Settings privacy toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show me to friends'**
+  String get settingsShowToFriends;
+
+  /// Settings privacy toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Only on campus'**
+  String get settingsShowToFriendsSub;
+
+  /// Settings privacy toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get settingsGeo;
+
+  /// Settings privacy toggle subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Map and rooms'**
+  String get settingsGeoSub;
+
+  /// Settings sign-out row
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get settingsSignOutFull;
+
+  /// Settings footer
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} · build {build}'**
+  String settingsVersionBuild(String version, String build);
+
+  /// Settings row to the full notifications page
+  ///
+  /// In en, this message translates to:
+  /// **'All notifications'**
+  String get settingsAllNotifications;
+
+  /// Friends hero overline
+  ///
+  /// In en, this message translates to:
+  /// **'Shared gaps today'**
+  String get friendsCommonWindowsToday;
+
+  /// Friends hero title
+  ///
+  /// In en, this message translates to:
+  /// **'Free time with friends'**
+  String get friendsCompareHeroTitle;
+
+  /// Friends hero subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'From your friend’s group schedule'**
+  String get friendsCompareHeroSub;
+
+  /// Friends hero action
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get friendsCompare;
+
+  /// Friends filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get friendsFilterAll;
+
+  /// Friends filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'On the map'**
+  String get friendsFilterCampus;
+
+  /// Friends privacy card title
+  ///
+  /// In en, this message translates to:
+  /// **'Location sharing is your choice'**
+  String get friendsPrivacyTitle;
+
+  /// Friends privacy card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Friends see your last shared location. Manage access in map settings; campus and floor detection are unavailable.'**
+  String get friendsPrivacySub;
+
+  /// Friends on-campus filter empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No one is sharing a recent location'**
+  String get friendsCampusEmpty;
+
+  /// Toast when a friend cannot be messaged
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has no Telegram handle'**
+  String friendsNoTelegram(String name);
+
+  /// Friends page error state
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load friends'**
+  String get friendsLoadError;
+
+  /// Semantics of the send button
+  ///
+  /// In en, this message translates to:
+  /// **'Message {name}'**
+  String friendsMessage(String name);
+
+  /// Abbreviation inside the 'all sources' circle on the news source rail
+  ///
+  /// In en, this message translates to:
+  /// **'ALL'**
+  String get newsSourceAllAbbr;
+
+  /// Toast after saving an article
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get articleSaved;
+
+  /// Join community button
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get communitiesJoin;
+
+  /// Services search pill placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Find a service, room, person'**
+  String get servicesSearchPlaceholder;
+
+  /// Services edit-mode banner
+  ///
+  /// In en, this message translates to:
+  /// **'Star the services you want on Home'**
+  String get servicesEditBanner;
+
+  /// Semantics of the star toggle when off
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Home'**
+  String get servicesFavoriteAdd;
+
+  /// Semantics of the star toggle when on
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Home'**
+  String get servicesFavoriteRemove;
+
+  /// NFC card title when idle
+  ///
+  /// In en, this message translates to:
+  /// **'Open the turnstile'**
+  String get servicesNfcOpenTitle;
+
+  /// NFC card title when active
+  ///
+  /// In en, this message translates to:
+  /// **'Hold near the turnstile'**
+  String get servicesNfcActiveTitle;
+
+  /// NFC card subtitle when active
+  ///
+  /// In en, this message translates to:
+  /// **'Active for 30 seconds · tap to cancel'**
+  String get servicesNfcActiveSub;
+
+  /// NFC card subtitle with the bound pass id
+  ///
+  /// In en, this message translates to:
+  /// **'Pass no. {id}'**
+  String servicesNfcPassSub(String id);
+
+  /// NFC card subtitle when no pass is bound
+  ///
+  /// In en, this message translates to:
+  /// **'Pass not connected · tap to connect'**
+  String get servicesNfcConnectSub;
+
+  /// NFC card subtitle when the device has no NFC
+  ///
+  /// In en, this message translates to:
+  /// **'NFC is unavailable on this device'**
+  String get servicesNfcUnavailableSub;
+
+  /// Services section title
+  ///
+  /// In en, this message translates to:
+  /// **'Campus'**
+  String get servicesSectionCampus;
+
+  /// Services section title
+  ///
+  /// In en, this message translates to:
+  /// **'Studies'**
+  String get servicesSectionStudy;
+
+  /// Services row title for the NFC pass
+  ///
+  /// In en, this message translates to:
+  /// **'Pass'**
+  String get serviceNfcTitle;
+
+  /// Services row title for the session page
+  ///
+  /// In en, this message translates to:
+  /// **'Exams'**
+  String get serviceExamsTitle;
+
+  /// Services row title for the marketplace
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get serviceMarketTitle;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Rooms and routes'**
+  String get serviceMapSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Free right now'**
+  String get serviceRoomsSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Seats and booking'**
+  String get serviceCoworkSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'NFC campus pass'**
+  String get serviceNfcSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks and due dates'**
+  String get serviceDeadlinesSub;
+
+  /// Services row subtitle when no exam is scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'Tests and exams'**
+  String get serviceExamsSub;
+
+  /// Services row subtitle with days to the nearest exam
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Test today} =1{Test in {count} day} other{Test in {count} days}}'**
+  String serviceExamsInDays(int count);
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'GPA and semester marks'**
+  String get serviceGradesSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Absences and stats'**
+  String get serviceAttendanceSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Group notes'**
+  String get serviceNotesSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets, solutions, cheat sheets'**
+  String get serviceKbSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Grant and credits'**
+  String get serviceToolsSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'University channels'**
+  String get serviceNewsSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Clubs and sections'**
+  String get serviceCommunitiesSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Who is on campus'**
+  String get serviceFriendsSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Group votes'**
+  String get servicePollsSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Events this week'**
+  String get serviceEventsSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Student listings'**
+  String get serviceMarketSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Found and lost items'**
+  String get serviceLostSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Balance and grant'**
+  String get serviceWalletSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Mini apps'**
+  String get serviceAppsSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Walk around the campus'**
+  String get serviceVirtualTourSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Classmates and group'**
+  String get servicePeopleSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Friends on the map'**
+  String get serviceFriendsMapSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Build a team'**
+  String get serviceTeamFinderSub;
+
+  /// Services row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Mentors and advice'**
+  String get serviceMentorshipSub;
+
+  /// Services row subtitle for external links
+  ///
+  /// In en, this message translates to:
+  /// **'Opens in the browser'**
+  String get serviceExternalSub;
+
+  /// Search sheet field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Room, subject, person, service'**
+  String get searchSheetPlaceholder;
+
+  /// Search sheet empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found. Try “A-318” or “calculus”.'**
+  String get searchSheetNoResults;
+
+  /// Search result kind
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get searchTagSubject;
+
+  /// Search result kind
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get searchTagService;
+
+  /// Search result subtitle for subjects
+  ///
+  /// In en, this message translates to:
+  /// **'in the schedule'**
+  String get searchSubjectInSchedule;
+
+  /// Deadlines hero label
+  ///
+  /// In en, this message translates to:
+  /// **'Completed deadlines'**
+  String get deadlinesClosedSemester;
+
+  /// Deadlines hero total
+  ///
+  /// In en, this message translates to:
+  /// **'of {total}'**
+  String deadlinesOfTotal(int total);
+
+  /// Deadlines group title
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get deadlinesGroupToday;
+
+  /// Deadline row right label when done
+  ///
+  /// In en, this message translates to:
+  /// **'done'**
+  String get deadlineLeftDone;
+
+  /// Deadlines info card title
+  ///
+  /// In en, this message translates to:
+  /// **'Shared group deadlines'**
+  String get deadlinesSharedTitle;
+
+  /// Deadlines info card body
+  ///
+  /// In en, this message translates to:
+  /// **'The monitor adds one — everyone sees it. {shared} of {total} are shared.'**
+  String deadlinesSharedBody(int shared, int total);
+
+  /// Toast after completing a deadline
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline closed'**
+  String get deadlineDoneToast;
+
+  /// Undo action
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// Semantics of the + header button
+  ///
+  /// In en, this message translates to:
+  /// **'Add deadline'**
+  String get deadlinesAddSemantics;
+
+  /// Add deadline sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'New deadline'**
+  String get addDeadlineTitle;
+
+  /// Add deadline title field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'What to hand in'**
+  String get addDeadlineWhatHint;
+
+  /// Add deadline subject label
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get addDeadlineSubject;
+
+  /// Add deadline due label
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get addDeadlineDue;
+
+  /// Add deadline due pill
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get addDeadlinePickDate;
+
+  /// Add deadline toggle title
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with the group'**
+  String get addDeadlineSharedTitle;
+
+  /// Add deadline toggle subtitle with classmates count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Visible to {count} person} other{Visible to all {count} people}}'**
+  String addDeadlineSharedSub(int count);
+
+  /// Add deadline toggle subtitle without a count
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone in the group will see it'**
+  String get addDeadlineSharedSubGeneric;
+
+  /// Toast after creating a deadline
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline added · I\'ll remind you a day before'**
+  String get addDeadlineToast;
+
+  /// Exams page title
+  ///
+  /// In en, this message translates to:
+  /// **'Assessment'**
+  String get examsTitle;
+
+  /// Exams page header meta
+  ///
+  /// In en, this message translates to:
+  /// **'session in {count} d'**
+  String examsSessionIn(int count);
+
+  /// Exams hero badge
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nearest · today} =1{Nearest · in {count} day} other{Nearest · in {count} days}}'**
+  String examsNearestIn(int count);
+
+  /// Exams readiness label
+  ///
+  /// In en, this message translates to:
+  /// **'Readiness'**
+  String get examsReadiness;
+
+  /// Exams topics section title
+  ///
+  /// In en, this message translates to:
+  /// **'Topics for the test'**
+  String get examsTopicsTitle;
+
+  /// Exams topics section hint
+  ///
+  /// In en, this message translates to:
+  /// **'tick what you\'ve covered'**
+  String get examsTopicsHint;
+
+  /// Exams topics empty row
+  ///
+  /// In en, this message translates to:
+  /// **'Add topics — readiness is calculated automatically'**
+  String get examsTopicsEmpty;
+
+  /// Exams add-topic row and sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Add topic'**
+  String get examsAddTopic;
+
+  /// Exams add-topic field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Topic'**
+  String get examsTopicHint;
+
+  /// Semantics of the swipe-to-delete on a topic
+  ///
+  /// In en, this message translates to:
+  /// **'Remove topic'**
+  String get examsRemoveTopic;
+
+  /// Exams plan section title
+  ///
+  /// In en, this message translates to:
+  /// **'Study plan'**
+  String get examsPlanTitle;
+
+  /// Exams plan rebuild action
+  ///
+  /// In en, this message translates to:
+  /// **'rebuild'**
+  String get examsPlanRebuild;
+
+  /// Exams plan empty row
+  ///
+  /// In en, this message translates to:
+  /// **'All topics covered — time to rest'**
+  String get examsPlanEmpty;
+
+  /// Exams plan row minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String examsPlanMinutes(int count);
+
+  /// Exams list overline
+  ///
+  /// In en, this message translates to:
+  /// **'All assessments'**
+  String get examsAllTitle;
+
+  /// Exams day tile unit
+  ///
+  /// In en, this message translates to:
+  /// **'D'**
+  String get examsDaysShort;
+
+  /// Semantics of an exam card
+  ///
+  /// In en, this message translates to:
+  /// **'Show {subject}'**
+  String examsSelectSemantics(String subject);
+
+  /// Tools page title
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get toolsPageTitle;
+
+  /// Tools tab
+  ///
+  /// In en, this message translates to:
+  /// **'GPA'**
+  String get toolsTabGpa;
+
+  /// Tools tab
+  ///
+  /// In en, this message translates to:
+  /// **'Grant'**
+  String get toolsTabGrant;
+
+  /// Tools tab
+  ///
+  /// In en, this message translates to:
+  /// **'Credits'**
+  String get toolsTabEcts;
+
+  /// Tools tab
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get toolsTabCommunity;
+
+  /// Tools GPA hero label
+  ///
+  /// In en, this message translates to:
+  /// **'GPA forecast for the session'**
+  String get toolsGpaForecast;
+
+  /// Tools GPA hint
+  ///
+  /// In en, this message translates to:
+  /// **'Increased grant · 100%'**
+  String get toolsGpaHintAllFives;
+
+  /// Tools GPA hint
+  ///
+  /// In en, this message translates to:
+  /// **'Increased grant possible with ≥ 50% fives'**
+  String get toolsGpaHintHalfFives;
+
+  /// Tools GPA hint
+  ///
+  /// In en, this message translates to:
+  /// **'There is a three — base grant only'**
+  String get toolsGpaHintThree;
+
+  /// Tools marks card hint
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a mark to change it'**
+  String get toolsMarksHint;
+
+  /// Tools marks empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Add your group\'s schedule — subjects will appear here'**
+  String get toolsMarksEmpty;
+
+  /// Semantics of a mark tile
+  ///
+  /// In en, this message translates to:
+  /// **'{subject}: mark {mark}'**
+  String toolsMarkSemantics(String subject, int mark);
+
+  /// Grant row
+  ///
+  /// In en, this message translates to:
+  /// **'Base'**
+  String get toolsGrantBase;
+
+  /// Grant row
+  ///
+  /// In en, this message translates to:
+  /// **'Increased · studies'**
+  String get toolsGrantStudy;
+
+  /// Grant row
+  ///
+  /// In en, this message translates to:
+  /// **'Increased · science'**
+  String get toolsGrantScience;
+
+  /// Grant row
+  ///
+  /// In en, this message translates to:
+  /// **'Social'**
+  String get toolsGrantSocial;
+
+  /// Grant row value
+  ///
+  /// In en, this message translates to:
+  /// **'no application'**
+  String get toolsGrantNoApplication;
+
+  /// Grant row value
+  ///
+  /// In en, this message translates to:
+  /// **'not eligible'**
+  String get toolsGrantNotEligible;
+
+  /// Grant toggle row
+  ///
+  /// In en, this message translates to:
+  /// **'Event participation'**
+  String get toolsGrantEvent;
+
+  /// Grant toggle row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'1 per semester is required'**
+  String get toolsGrantEventSub;
+
+  /// Money value
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} ₽'**
+  String toolsRubles(String amount);
+
+  /// Positive money value
+  ///
+  /// In en, this message translates to:
+  /// **'+{amount} ₽'**
+  String toolsRublesPlus(String amount);
+
+  /// Grant note
+  ///
+  /// In en, this message translates to:
+  /// **'The increased grant needs: no threes, ≥ 50% fives and 1 event. Now — {done} of 3: {rest}.'**
+  String toolsGrantNote(int done, String rest);
+
+  /// Grant note when everything is done
+  ///
+  /// In en, this message translates to:
+  /// **'The increased grant needs: no threes, ≥ 50% fives and 1 event. All conditions are met — apply.'**
+  String get toolsGrantNoteDone;
+
+  /// Grant note remainder
+  ///
+  /// In en, this message translates to:
+  /// **'fix {subject}'**
+  String toolsGrantRestThrees(String subject);
+
+  /// Grant note remainder
+  ///
+  /// In en, this message translates to:
+  /// **'more fives needed'**
+  String get toolsGrantRestFives;
+
+  /// Grant note remainder
+  ///
+  /// In en, this message translates to:
+  /// **'attend an event'**
+  String get toolsGrantRestEvent;
+
+  /// ECTS card label
+  ///
+  /// In en, this message translates to:
+  /// **'Earned this year'**
+  String get toolsEctsEarned;
+
+  /// ECTS card value
+  ///
+  /// In en, this message translates to:
+  /// **'{earned} / {total} cr.'**
+  String toolsEctsValue(int earned, int total);
+
+  /// ECTS legend item
+  ///
+  /// In en, this message translates to:
+  /// **'{credits} {subject}'**
+  String toolsEctsLegend(int credits, String subject);
+
+  /// Polls header meta
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unanswered'**
+  String pollsOpenCount(int count);
+
+  /// Poll card author line for own polls
+  ///
+  /// In en, this message translates to:
+  /// **'Your poll'**
+  String get pollsAuthorYou;
+
+  /// Poll card author line
+  ///
+  /// In en, this message translates to:
+  /// **'Community poll'**
+  String get pollsAuthorCommunity;
+
+  /// Poll status
+  ///
+  /// In en, this message translates to:
+  /// **'closed'**
+  String get pollsStatusClosed;
+
+  /// Poll status
+  ///
+  /// In en, this message translates to:
+  /// **'open'**
+  String get pollsStatusOpen;
+
+  /// Poll status with deadline
+  ///
+  /// In en, this message translates to:
+  /// **'until {date}'**
+  String pollsStatusUntil(String date);
+
+  /// Poll footer suffix
+  ///
+  /// In en, this message translates to:
+  /// **'you answered'**
+  String get pollsYouAnswered;
+
+  /// Toast after voting
+  ///
+  /// In en, this message translates to:
+  /// **'Vote counted'**
+  String get pollsVoteCounted;
+
+  /// Events filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get eventsFilterToday;
+
+  /// Events filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get eventsFilterFree;
+
+  /// Events filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'Going'**
+  String get eventsFilterGoing;
+
+  /// Event price pill
+  ///
+  /// In en, this message translates to:
+  /// **'free'**
+  String get eventsFreeLabel;
+
+  /// Event attendees count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} going} other{{count} going}}'**
+  String eventsGoingCount(int count);
+
+  /// RSVP pill when going
+  ///
+  /// In en, this message translates to:
+  /// **'Going ✓'**
+  String get eventsGoingChecked;
+
+  /// Empty card for the Going filter
+  ///
+  /// In en, this message translates to:
+  /// **'You are not going anywhere yet'**
+  String get eventsEmptyGoingTitle;
+
+  /// Empty card subtitle for the Going filter
+  ///
+  /// In en, this message translates to:
+  /// **'Tap “Going” on an event and it will show up here.'**
+  String get eventsEmptyGoingSub;
+
+  /// Empty card for the Today filter
+  ///
+  /// In en, this message translates to:
+  /// **'No events today'**
+  String get eventsEmptyTodayTitle;
+
+  /// Toast after RSVP
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your plans'**
+  String get eventsToastGoing;
+
+  /// Toast after RSVP removal
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from your plans'**
+  String get eventsToastRemoved;
+
+  /// Lost and found segment
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get lostFoundTabAll;
+
+  /// Lost and found segment and tag
+  ///
+  /// In en, this message translates to:
+  /// **'Found'**
+  String get lostFoundTabFoundShort;
+
+  /// Lost and found segment and tag
+  ///
+  /// In en, this message translates to:
+  /// **'Looking'**
+  String get lostFoundTabLostShort;
+
+  /// Security desk info card title
+  ///
+  /// In en, this message translates to:
+  /// **'Security desk'**
+  String get lostFoundSecurityTitle;
+
+  /// Security desk info card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Give found documents or valuables to a security staff member'**
+  String get lostFoundSecuritySub;
+
+  /// Empty list for the All segment
+  ///
+  /// In en, this message translates to:
+  /// **'No listings yet'**
+  String get lostFoundEmptyAll;
+
+  /// Send button semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Contact {name}'**
+  String lostFoundContactAuthor(String name);
+
+  /// Wallet balance card overline
+  ///
+  /// In en, this message translates to:
+  /// **'Shuriken balance'**
+  String get walletBalanceTitle;
+
+  /// Wallet balance card action
+  ///
+  /// In en, this message translates to:
+  /// **'Top up'**
+  String get walletTopUp;
+
+  /// Top-up sheet subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'how to earn shurikens'**
+  String get walletTopUpSubtitle;
+
+  /// Wallet summary card
+  ///
+  /// In en, this message translates to:
+  /// **'Income this month'**
+  String get walletIncomeMonth;
+
+  /// Wallet summary card
+  ///
+  /// In en, this message translates to:
+  /// **'Spent this month'**
+  String get walletSpendMonth;
+
+  /// Wallet summary card subline
+  ///
+  /// In en, this message translates to:
+  /// **'in {month}'**
+  String walletForMonth(String month);
+
+  /// Wallet summary card subline
+  ///
+  /// In en, this message translates to:
+  /// **'nothing earned yet'**
+  String get walletNoIncome;
+
+  /// Wallet history overline
+  ///
+  /// In en, this message translates to:
+  /// **'Operations'**
+  String get walletOperations;
+
+  /// Student card row title
+  ///
+  /// In en, this message translates to:
+  /// **'Pass is active'**
+  String get walletPassActive;
+
+  /// Student card row title
+  ///
+  /// In en, this message translates to:
+  /// **'Pass has expired'**
+  String get walletPassExpired;
+
+  /// Student card row title
+  ///
+  /// In en, this message translates to:
+  /// **'No pass linked'**
+  String get walletPassMissing;
+
+  /// Student card row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Student card · until {date}'**
+  String walletPassValidUntil(String date);
+
+  /// Student card row subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Add your student card number in the profile'**
+  String get walletPassMissingSub;
+
+  /// Balance card number line
+  ///
+  /// In en, this message translates to:
+  /// **'No. {number}'**
+  String walletCardNumber(String number);
+
+  /// Notes filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get collabNotesFilterAll;
+
+  /// Notes filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get collabNotesFilterNew;
+
+  /// Notes filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get collabNotesFilterMine;
+
+  /// Notes filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get collabNotesFilterGroup;
+
+  /// Notes filter chip
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get collabNotesFilterPersonal;
+
+  /// Note kind tile
+  ///
+  /// In en, this message translates to:
+  /// **'LEC'**
+  String get collabNotesKindLecture;
+
+  /// Note kind tile
+  ///
+  /// In en, this message translates to:
+  /// **'PRAC'**
+  String get collabNotesKindPractice;
+
+  /// Note kind tile
+  ///
+  /// In en, this message translates to:
+  /// **'LAB'**
+  String get collabNotesKindLab;
+
+  /// Note kind tile
+  ///
+  /// In en, this message translates to:
+  /// **'DOC'**
+  String get collabNotesKindDoc;
+
+  /// Note row subject line
+  ///
+  /// In en, this message translates to:
+  /// **'Personal note'**
+  String get collabNotesPersonalLabel;
+
+  /// Note row subject line
+  ///
+  /// In en, this message translates to:
+  /// **'Group note'**
+  String get collabNotesGroupLabel;
+
+  /// Notes stats card title
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{You have no notes yet} =1{You maintain {count} note} other{You maintain {count} notes}}'**
+  String collabNotesStatsTitle(int count);
+
+  /// Notes stats card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Shared notes are visible to the whole group'**
+  String get collabNotesStatsSub;
+
+  /// Notes stats card trailing
+  ///
+  /// In en, this message translates to:
+  /// **'{count} new'**
+  String collabNotesStatsNew(int count);
+
+  /// Knowledge bank search placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Subject, tickets, teacher'**
+  String get knowledgeSearchHint;
+
+  /// Material downloads count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} download} other{{count} downloads}}'**
+  String knowledgeDownloads(int count);
+
+  /// Material likes
+  ///
+  /// In en, this message translates to:
+  /// **'♥ {count}'**
+  String knowledgeLikes(int count);
+
+  /// Material price
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} shuriken} other{{count} shurikens}}'**
+  String knowledgePriceShurikens(int count);
+
+  /// Knowledge bank empty search text before the link
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found. Ask your group — '**
+  String get knowledgeEmptySearchText;
+
+  /// Knowledge bank empty search link
+  ///
+  /// In en, this message translates to:
+  /// **'create a request'**
+  String get knowledgeCreateRequest;
+
+  /// Shared request text
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for materials: {query}. Does anyone have them?'**
+  String knowledgeRequestShareText(String query);
+
+  /// Download icon semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get knowledgeDownload;
+
+  /// Market card action
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get marketWrite;
+
+  /// Market card action for own listings
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get marketManage;
+
+  /// Heart button semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favourites'**
+  String get marketFavoriteAdd;
+
+  /// Heart button semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favourites'**
+  String get marketFavoriteRemove;
+
+  /// Accent word inside the login welcome title
+  ///
+  /// In en, this message translates to:
+  /// **'back'**
+  String get loginWelcomeBackAccent;
+
+  /// Accent word inside the email sign-in title
+  ///
+  /// In en, this message translates to:
+  /// **'continue'**
+  String get authEmailHeaderTitleAccent;
+
+  /// Accent word inside the check-email title
+  ///
+  /// In en, this message translates to:
+  /// **'email'**
+  String get authCheckEmailTitleAccent;
+
+  /// Accent word inside the sign-up title
+  ///
+  /// In en, this message translates to:
+  /// **'account'**
+  String get authSignUpTitleAccent;
+
+  /// Accent word inside the password reset title
+  ///
+  /// In en, this message translates to:
+  /// **'reset'**
+  String get authPasswordResetTitleAccent;
+
+  /// Subtitle of the email sign-in step
+  ///
+  /// In en, this message translates to:
+  /// **'We will send a 6-digit code to your email.'**
+  String get authEmailHeaderSubtitle;
+
+  /// Attendance chart section title on the lesson page
+  ///
+  /// In en, this message translates to:
+  /// **'Group attendance'**
+  String get lessonAttendanceTitle;
+
+  /// Meta label for the attendance chart on the lesson page
+  ///
+  /// In en, this message translates to:
+  /// **'last 5'**
+  String get lessonAttendanceMeta;
+
+  /// Lesson actions sheet row that hides the lesson
+  ///
+  /// In en, this message translates to:
+  /// **'Hide from schedule'**
+  String get scheduleActionHide;
+
+  /// Teacher sheet stat label for the office room
+  ///
+  /// In en, this message translates to:
+  /// **'office'**
+  String get scheduleTeacherRoom;
+
+  /// No description provided for @roomLocalPlanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A personal note on this device. It does not reserve the room or guarantee a free seat.'**
+  String get roomLocalPlanHint;
+
+  /// No description provided for @roomAvailabilityUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Current availability is unknown'**
+  String get roomAvailabilityUnknown;
+
+  /// No description provided for @roomRemoveSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove saved place'**
+  String get roomRemoveSaved;
+
+  /// No description provided for @mapFriendsOutdoorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends are shown on the campus map. Indoor positions and floors are unknown.'**
+  String get mapFriendsOutdoorHint;
+
+  /// No description provided for @coworkLocalPlanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A personal plan, not a reservation. The layout is schematic; seat availability and queues are not checked.'**
+  String get coworkLocalPlanHint;
+
+  /// No description provided for @coworkLocalPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal plan'**
+  String get coworkLocalPlan;
+
+  /// No description provided for @coworkSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save. Please try again.'**
+  String get coworkSaveError;
+
+  /// No description provided for @coworkClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a seat between 08:00 and 22:00'**
+  String get coworkClosed;
+
+  /// No description provided for @communitiesSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get communitiesSave;
+
+  /// No description provided for @communitiesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get communitiesSaved;
+
+  /// No description provided for @communitiesSavedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a community to see it here'**
+  String get communitiesSavedEmpty;
+
+  /// No description provided for @homeTrendingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No discussions yet'**
+  String get homeTrendingEmpty;
+
+  /// No description provided for @homeFavoritesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose quick actions in Services'**
+  String get homeFavoritesEmpty;
+
+  /// No description provided for @onboardingFriendsSharingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your location with friends'**
+  String get onboardingFriendsSharingSub;
+
+  /// No description provided for @onboardingGeoSystemSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Location access can be turned off in system settings'**
+  String get onboardingGeoSystemSettings;
+
+  /// No description provided for @toolsLocalEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal estimate saved on this device. Check scholarship amounts and eligibility with your university.'**
+  String get toolsLocalEstimate;
+
+  /// No description provided for @toolsNoValue.
+  ///
+  /// In en, this message translates to:
+  /// **'not entered'**
+  String get toolsNoValue;
+
+  /// No description provided for @toolsGpaPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Your forecast, not an official grade record'**
+  String get toolsGpaPersonal;
+
+  /// No description provided for @toolsEctsTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit target'**
+  String get toolsEctsTarget;
+
+  /// No description provided for @personalRecordsNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal records on this device. Not official university data.'**
+  String get personalRecordsNotice;
+
+  /// No description provided for @attendanceEstimateNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance is estimated from the schedule and your logged absences, not verified presence.'**
+  String get attendanceEstimateNotice;
+
+  /// No description provided for @gradesScholarshipDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'GPA reference: 4.75. This does not establish scholarship eligibility.'**
+  String get gradesScholarshipDisclaimer;
+
+  /// No description provided for @profileLocalFieldsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'About and Telegram are saved only on this device and are not visible to other users.'**
+  String get profileLocalFieldsNote;
+
+  /// No description provided for @articleSourceChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'News source'**
+  String get articleSourceChannel;
+
+  /// No description provided for @deadlineSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline added'**
+  String get deadlineSaved;
+
+  /// No description provided for @scheduleLinkUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A link to this schedule is not available yet. Share text, an image or a calendar instead.'**
+  String get scheduleLinkUnavailable;
+
+  /// No description provided for @scheduleReminderLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This reminder is already scheduled. Changing or cancelling it is not available yet.'**
+  String get scheduleReminderLocked;
+
+  /// No description provided for @settingsAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced settings'**
+  String get settingsAdvanced;
+
+  /// No description provided for @settingsLessonReactionsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactions next to classes'**
+  String get settingsLessonReactionsSub;
+
+  /// No description provided for @settingsWidgetRefreshRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh requested'**
+  String get settingsWidgetRefreshRequested;
+
+  /// No description provided for @identityHandleCheckError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check the username. Try again'**
+  String get identityHandleCheckError;
+
+  /// No description provided for @authPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPasswordLabel;
+
+  /// No description provided for @authConfirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get authConfirmPasswordLabel;
+
+  /// No description provided for @settingsWidgetUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'The schedule widget is available on Android'**
+  String get settingsWidgetUnsupported;
+
+  /// No description provided for @miniAppsReportFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the report. Try again.'**
+  String get miniAppsReportFailure;
+
+  /// No description provided for @miniAppsRevRestoreFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore this version. Try again.'**
+  String get miniAppsRevRestoreFailure;
+
+  /// No description provided for @miniAppsTokensFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update deployment tokens. Try again.'**
+  String get miniAppsTokensFailure;
+
+  /// No description provided for @nfcPassMediaUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Background unavailable. Select another file.'**
+  String get nfcPassMediaUnavailable;
+
+  /// No description provided for @lessonPairOrdinal.
+  ///
+  /// In en, this message translates to:
+  /// **'Period {number}'**
+  String lessonPairOrdinal(int number);
+
+  /// No description provided for @lessonFileKilobytes.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} KB'**
+  String lessonFileKilobytes(String size);
+
+  /// No description provided for @lessonFileMegabytes.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} MB'**
+  String lessonFileMegabytes(String size);
+
+  /// No description provided for @scheduleShortCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'CANC'**
+  String get scheduleShortCancelled;
+
+  /// No description provided for @pollsCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the poll. Try again.'**
+  String get pollsCreateError;
+
+  /// No description provided for @knowledgeUploadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not upload the material. Try again.'**
+  String get knowledgeUploadError;
+
+  /// No description provided for @knowledgeFileError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read this file. Choose a file up to 50 MB.'**
+  String get knowledgeFileError;
+
+  /// No description provided for @postDetailCommentsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load comments'**
+  String get postDetailCommentsLoadError;
+
+  /// No description provided for @scheduleNoteChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist'**
+  String get scheduleNoteChecklist;
+
+  /// No description provided for @servicesSectionFirstParty.
+  ///
+  /// In en, this message translates to:
+  /// **'Built for campus'**
+  String get servicesSectionFirstParty;
+
+  /// No description provided for @knowledgeSubjectsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects'**
+  String get knowledgeSubjectsTitle;
+
+  /// No description provided for @knowledgeSubjectsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select up to 10 subjects'**
+  String get knowledgeSubjectsHint;
+
+  /// No description provided for @knowledgeSubjectsSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search subjects'**
+  String get knowledgeSubjectsSearch;
+
+  /// No description provided for @knowledgeSubjectsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load subjects'**
+  String get knowledgeSubjectsLoadError;
+
+  /// No description provided for @knowledgeSubjectsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No subjects found'**
+  String get knowledgeSubjectsEmpty;
+
+  /// No description provided for @knowledgeSubjectsApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get knowledgeSubjectsApply;
+
+  /// No description provided for @knowledgeSubjectsFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select subjects'**
+  String get knowledgeSubjectsFilter;
+
+  /// No description provided for @knowledgeUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Material published'**
+  String get knowledgeUploadSuccess;
+
+  /// No description provided for @exportSelectedDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get exportSelectedDay;
+
+  /// No description provided for @exportImagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Image preview'**
+  String get exportImagePreview;
+
+  /// No description provided for @exportImagePages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pages · PNG'**
+  String exportImagePages(int count);
+
+  /// No description provided for @exportImageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The full schedule with dates, teachers and rooms. Longer periods are split into pages.'**
+  String get exportImageHint;
+
+  /// No description provided for @exportCalendarSafeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes go into a separate calendar. Personal events stay untouched; exporting again updates our entries.'**
+  String get exportCalendarSafeHint;
+
+  /// No description provided for @exportCalendarMobileOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'The system calendar is available on mobile. Use an .ics file on this device.'**
+  String get exportCalendarMobileOnly;
+
+  /// No description provided for @reminderTimeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a future time before the class starts.'**
+  String get reminderTimeInvalid;
+
+  /// No description provided for @compareDayView.
+  ///
+  /// In en, this message translates to:
+  /// **'By day'**
+  String get compareDayView;
+
+  /// No description provided for @compareWeekView.
+  ///
+  /// In en, this message translates to:
+  /// **'Week overview'**
+  String get compareWeekView;
+
+  /// No description provided for @compareWindowsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to meet'**
+  String get compareWindowsTitle;
+
+  /// No description provided for @compareNoWindows.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared gaps of at least 30 minutes between classes'**
+  String get compareNoWindows;
+
+  /// No description provided for @compareWindowsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes classes and events. Gaps are shown only between them.'**
+  String get compareWindowsHint;
+
+  /// No description provided for @compareChangeSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get compareChangeSchedule;
+
+  /// No description provided for @authGuestUpgradeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your guest account'**
+  String get authGuestUpgradeTitle;
+
+  /// No description provided for @authGuestUpgradeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link an email to keep your schedule, settings and progress.'**
+  String get authGuestUpgradeSubtitle;
+
+  /// No description provided for @authGuestUpgradeSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get authGuestUpgradeSendCode;
+
+  /// No description provided for @authGuestUpgradeVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify email'**
+  String get authGuestUpgradeVerify;
+
+  /// No description provided for @authGuestUpgradePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set password'**
+  String get authGuestUpgradePassword;
+
+  /// No description provided for @authGuestUpgradeDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Account saved'**
+  String get authGuestUpgradeDone;
+
+  /// No description provided for @authGuestUpgradeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the account. Check your details and try again.'**
+  String get authGuestUpgradeError;
+
+  /// No description provided for @authGuestExitWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing out permanently loses access to this guest account. Link an email first to keep your data.'**
+  String get authGuestExitWarning;
+
+  /// No description provided for @settingsColorCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom color'**
+  String get settingsColorCustom;
+
+  /// No description provided for @settingsColorHex.
+  ///
+  /// In en, this message translates to:
+  /// **'HEX'**
+  String get settingsColorHex;
+
+  /// No description provided for @settingsColorHue.
+  ///
+  /// In en, this message translates to:
+  /// **'Hue'**
+  String get settingsColorHue;
+
+  /// No description provided for @settingsColorSaturation.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturation'**
+  String get settingsColorSaturation;
+
+  /// No description provided for @settingsColorBrightness.
+  ///
+  /// In en, this message translates to:
+  /// **'Brightness'**
+  String get settingsColorBrightness;
+
+  /// No description provided for @friendsInviteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Join me on University Ninja! Install the app to open this invitation and add me as a friend:\n{link}'**
+  String friendsInviteMessage(String link);
+
+  /// No description provided for @scheduleSimultaneousLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} simultaneous classes'**
+  String scheduleSimultaneousLessons(int count);
+
+  /// No description provided for @authAnyEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use any email address you own.'**
+  String get authAnyEmailHint;
+
+  /// No description provided for @exportCalendarIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Some events have no end time. Choose PNG, text or .ics to keep everything.'**
+  String get exportCalendarIncomplete;
+
+  /// No description provided for @exportUnscheduledEventsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Events without a time remain in images and text. Calendars include only timed or explicitly all-day events.'**
+  String get exportUnscheduledEventsHint;
+
+  /// No description provided for @exportAllDay.
+  ///
+  /// In en, this message translates to:
+  /// **'All day'**
+  String get exportAllDay;
+
+  /// No description provided for @exportEntriesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Events: {count}'**
+  String exportEntriesCount(int count);
+
+  /// No description provided for @knowledgePurchaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock material?'**
+  String get knowledgePurchaseTitle;
+
+  /// No description provided for @knowledgePurchaseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock “{title}” for {price}. Shurikens are charged once; reopening is free.'**
+  String knowledgePurchaseBody(String title, String price);
+
+  /// No description provided for @knowledgePurchaseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock and open'**
+  String get knowledgePurchaseConfirm;
+
+  /// No description provided for @knowledgePurchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not unlock the material. Check your balance and try again.'**
+  String get knowledgePurchaseFailed;
+
+  /// No description provided for @knowledgePurchasePriceChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The price changed. Open the material again to confirm the new price.'**
+  String get knowledgePurchasePriceChanged;
+
+  /// No description provided for @knowledgePurchaseInsufficient.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough shurikens'**
+  String get knowledgePurchaseInsufficient;
 }
 
 class _AppLocalizationsDelegate

@@ -35,6 +35,76 @@ void main() {
 
     DiscourseBloc buildBloc() => DiscourseBloc(communityRepository);
 
+    blocTest<DiscourseBloc, DiscourseState>(
+      'appends the next page without duplicating topics or users',
+      setUp: () =>
+          when(
+            () => communityRepository.getTopTopics(page: 1),
+          ).thenAnswer(
+            (_) async => TopTopicsResponse(
+              topics: [topic, topic.copyWith(id: 2)],
+              users: [user],
+              hasMore: true,
+            ),
+          ),
+      build: buildBloc,
+      seed: () => const DiscourseState(
+        status: DiscourseStatus.loaded,
+        topTopics: TopTopicsResponse(
+          topics: [topic],
+          users: [user],
+          hasMore: true,
+        ),
+      ),
+      act: (bloc) => bloc.add(const DiscourseTopTopicsNextPageRequested()),
+      expect: () => [
+        isA<DiscourseState>().having(
+          (state) => state.isLoadingMore,
+          'loading',
+          true,
+        ),
+        isA<DiscourseState>()
+            .having(
+              (state) => state.topTopics!.topics.map((topic) => topic.id),
+              'ids',
+              [1, 2],
+            )
+            .having((state) => state.topTopics!.users.length, 'users', 1)
+            .having((state) => state.page, 'page', 1)
+            .having((state) => state.isLoadingMore, 'loading', false),
+      ],
+    );
+
+    blocTest<DiscourseBloc, DiscourseState>(
+      'pagination failures preserve the visible feed and page cursor',
+      setUp: () => when(
+        () => communityRepository.getTopTopics(page: 1),
+      ).thenThrow(GetTopTopicsFailure(Exception('network'))),
+      build: buildBloc,
+      seed: () => const DiscourseState(
+        status: DiscourseStatus.loaded,
+        topTopics: TopTopicsResponse(
+          topics: [topic],
+          users: [user],
+          hasMore: true,
+        ),
+      ),
+      act: (bloc) => bloc.add(const DiscourseTopTopicsNextPageRequested()),
+      expect: () => [
+        isA<DiscourseState>().having(
+          (state) => state.isLoadingMore,
+          'loading',
+          true,
+        ),
+        isA<DiscourseState>()
+            .having((state) => state.topTopics!.topics, 'topics', [topic])
+            .having((state) => state.page, 'page', 0)
+            .having((state) => state.loadMoreFailed, 'retry', true)
+            .having((state) => state.status, 'status', DiscourseStatus.loaded),
+      ],
+      errors: () => [isA<GetTopTopicsFailure>()],
+    );
+
     test('initial state is DiscourseState()', () {
       expect(buildBloc().state, equals(const DiscourseState()));
     });

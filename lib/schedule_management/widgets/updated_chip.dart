@@ -9,7 +9,7 @@ class _UpdatedChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: NinjaText.helper.copyWith(color: context.ninja.onAccentSoftMuted),
+      style: AppText.captionSmall.copyWith(color: context.colors.muted),
     );
   }
 }

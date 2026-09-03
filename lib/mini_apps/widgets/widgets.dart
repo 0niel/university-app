@@ -4,5 +4,6 @@ export 'mini_app_consent_sheet.dart';
 export 'mini_app_labels.dart';
 export 'mini_app_report_sheet.dart';
 export 'mini_app_revisions_sheet.dart';
+export 'mini_app_scaffold.dart';
 export 'mini_app_secret_sheet.dart';
 export 'mini_app_tokens_sheet.dart';

@@ -14,7 +14,6 @@ class AppTimeWheelGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
     final label = this.label;
     return Column(
       mainAxisSize: .min,
@@ -22,7 +21,7 @@ class AppTimeWheelGroup extends StatelessWidget {
         if (label != null) ...[
           Text(
             label.toUpperCase(),
-            style: NinjaText.microLabel.copyWith(color: colors.muted),
+            style: AppText.overline.copyWith(color: context.colors.muted),
           ),
           const SizedBox(height: 8),
         ],

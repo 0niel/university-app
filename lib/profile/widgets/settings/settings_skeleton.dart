@@ -27,9 +27,9 @@ class SettingsSkeleton extends StatelessWidget {
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
         padding: const .fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           8,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           32,
         ),
         child: Column(
@@ -38,18 +38,18 @@ class SettingsSkeleton extends StatelessWidget {
             if (identity) ...[
               NinjaSkeleton(
                 height: 80 + grow * 40,
-                radius: NinjaRadius.card,
+                radius: AppRadius.card,
               ),
-              const SizedBox(height: 18),
-              const NinjaSkeleton(height: 54, radius: NinjaRadius.control),
+              const SizedBox(height: AppSpacing.fieldGap),
+              const NinjaSkeleton(height: 54, radius: AppRadius.field),
             ],
             for (final count in rowCounts) ...[
-              const SizedBox(height: 28),
+              const SizedBox(height: AppSpacing.sheetBottom),
               const NinjaSkeleton.bar(height: 19, widthFactor: .38),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               NinjaSkeleton(
                 height: rowHeight * count + 8,
-                radius: NinjaRadius.card,
+                radius: AppRadius.card,
               ),
             ],
           ],

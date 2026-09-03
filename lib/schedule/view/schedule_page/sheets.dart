@@ -1,6 +1,9 @@
-export 'sheets/class_actions_sheet.dart';
-export 'sheets/hide_lesson_dialog.dart';
-export 'sheets/lesson_reminder_sheet.dart';
-export 'sheets/reaction_sheet.dart';
-export 'sheets/schedule_export_sheet.dart';
+export 'sheets/add_lesson_sheet.dart';
+export 'sheets/compare_sheet.dart';
+export 'sheets/lesson_actions_sheet.dart';
+export 'sheets/lesson_note_sheet.dart';
+export 'sheets/lesson_remind_sheet.dart';
+export 'sheets/schedule_actions_sheet.dart';
+export 'sheets/schedule_changes_sheet.dart';
 export 'sheets/schedule_filter_sheet.dart';
+export 'sheets/schedule_share_sheet.dart';

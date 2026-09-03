@@ -6,10 +6,10 @@ class WalletHistoryRowSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.ninja.surface,
-        borderRadius: BorderRadius.circular(NinjaRadius.card),
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: const Row(
         children: [
@@ -18,12 +18,12 @@ class WalletHistoryRowSkeleton extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 NinjaSkeleton.bar(widthFactor: 0.55, height: 15),
-                SizedBox(height: 8),
+                SizedBox(height: AppSpacing.sm),
                 NinjaSkeleton.bar(height: 11, widthFactor: 0.28),
               ],
             ),
           ),
-          SizedBox(width: 12),
+          SizedBox(width: AppSpacing.md),
           NinjaSkeleton(width: 42, height: 16),
         ],
       ),

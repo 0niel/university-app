@@ -11,13 +11,13 @@ class NinjaGroupSpaceHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: .circular(NinjaRadius.card),
+          borderRadius: .circular(AppRadius.card),
         ),
         child: Padding(
           padding: const .all(16),
@@ -29,8 +29,8 @@ class NinjaGroupSpaceHero extends StatelessWidget {
                 height: 44,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: colors.brandTint,
-                  borderRadius: .circular(14),
+                  color: colors.tint,
+                  borderRadius: .circular(AppRadius.tile),
                 ),
                 child: Text(space.emoji, style: const TextStyle(fontSize: 21)),
               ),
@@ -43,7 +43,7 @@ class NinjaGroupSpaceHero extends StatelessWidget {
                       space.group ?? context.l10n.groupSpaceMyGroup,
                       maxLines: 2,
                       overflow: .ellipsis,
-                      style: NinjaText.title.copyWith(color: colors.ink),
+                      style: AppText.title.copyWith(color: colors.ink),
                     ),
                     Wrap(
                       spacing: 8,
@@ -53,7 +53,7 @@ class NinjaGroupSpaceHero extends StatelessWidget {
                         TeamAvatarStack(names: space.memberNames, size: 26),
                         Text(
                           context.l10n.groupSpaceMembers(space.memberCount),
-                          style: NinjaText.helper.copyWith(
+                          style: AppText.caption.copyWith(
                             fontWeight: .w700,
                             color: colors.muted,
                           ),

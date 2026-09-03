@@ -8,7 +8,7 @@ class _ClearIcon extends StatelessWidget {
     return AppLineIconWidget(
       .close,
       size: 17,
-      color: context.ninja.muted,
+      color: context.colors.muted,
     );
   }
 }

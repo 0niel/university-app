@@ -14,7 +14,7 @@ class TopicNewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final comments = (topic.postsCount - 1).clamp(0, 9999);
     final excerpt = topic.excerpt;
     final forumUrl = context.read<UniversityConfig>().communityForumUrl;
@@ -24,10 +24,10 @@ class TopicNewsCard extends StatelessWidget {
       semanticsLabel: topic.title,
       child: Container(
         width: 296,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(NinjaRadius.card),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,7 +38,7 @@ class TopicNewsCard extends StatelessWidget {
                   child: Container(
                     width: 22,
                     height: 22,
-                    color: colors.surfaceAlt,
+                    color: colors.surface2,
                     child: Image.network(
                       discourseAvatarUrl(forumUrl, author),
                       excludeFromSemantics: true,
@@ -47,36 +47,36 @@ class TopicNewsCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     author?.username ?? Uri.parse(forumUrl).host,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: NinjaText.subtext.copyWith(color: colors.ink),
+                    style: AppText.subtext.copyWith(color: colors.ink),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   topicTimeAgo(context.l10n, topic.lastPostedAt),
-                  style: NinjaText.helper.copyWith(color: colors.muted),
+                  style: AppText.captionSmall.copyWith(color: colors.muted),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Text(
               topic.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: NinjaText.headline.copyWith(color: colors.ink),
+              style: AppText.headline.copyWith(color: colors.ink),
             ),
             if (excerpt != null && excerpt.isNotEmpty) ...[
-              const SizedBox(height: 6),
+              const SizedBox(height: AppSpacing.xsm),
               Text(
                 excerpt,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: NinjaText.subtext.copyWith(
+                style: AppText.subtext.copyWith(
                   height: 1.45,
                   color: colors.muted,
                 ),
@@ -87,8 +87,8 @@ class TopicNewsCard extends StatelessWidget {
               children: [
                 Text(
                   '${topic.likeCount}',
-                  style: NinjaText.tabular(
-                    NinjaText.helper.copyWith(color: colors.mutedDark),
+                  style: AppText.tabular(
+                    AppText.captionSmall.copyWith(color: colors.muted),
                   ),
                 ),
                 const SizedBox(width: 5),
@@ -97,11 +97,11 @@ class TopicNewsCard extends StatelessWidget {
                   size: 14,
                   color: colors.muted,
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: AppSpacing.sectionGap),
                 Text(
                   '$comments',
-                  style: NinjaText.tabular(
-                    NinjaText.helper.copyWith(color: colors.mutedDark),
+                  style: AppText.tabular(
+                    AppText.captionSmall.copyWith(color: colors.muted),
                   ),
                 ),
                 const SizedBox(width: 5),
@@ -114,7 +114,7 @@ class TopicNewsCard extends StatelessWidget {
                 AppLineIconWidget(
                   AppLineIcon.chevronR,
                   size: 16,
-                  color: colors.chevron,
+                  color: colors.muted2,
                 ),
               ],
             ),

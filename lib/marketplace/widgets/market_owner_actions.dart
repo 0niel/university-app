@@ -18,7 +18,7 @@ class MarketOwnerActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final actions = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -29,7 +29,7 @@ class MarketOwnerActions extends StatelessWidget {
           onPressed: isBusy ? null : onToggleSold,
           icon: AppLineIconWidget(
             AppLineIcon.check,
-            color: isSold ? colors.brandInk : colors.ink,
+            color: isSold ? colors.accent : colors.ink,
           ),
         ),
         NinjaIconButton(
@@ -37,7 +37,7 @@ class MarketOwnerActions extends StatelessWidget {
           onPressed: isBusy ? null : onDelete,
           icon: AppLineIconWidget(
             AppLineIcon.trash,
-            color: colors.scarlet,
+            color: colors.exam,
           ),
         ),
       ],

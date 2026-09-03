@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -96,8 +98,7 @@ void main() {
       );
 
       blocTest<KnowledgeBankCubit, KnowledgeBankState>(
-        'still emits populated with an empty list for the source that throws, '
-        'keeping the other sources',
+        'reports a material loading failure while keeping secondary sources',
         setUp: () =>
             when(
               () => campusRepository.getPublicMaterials(),
@@ -111,13 +112,44 @@ void main() {
         expect: () => const <KnowledgeBankState>[
           KnowledgeBankState(status: KnowledgeBankStatus.loading),
           KnowledgeBankState(
-            status: KnowledgeBankStatus.populated,
+            status: KnowledgeBankStatus.failure,
             profile: profile,
             authors: [author],
           ),
         ],
         errors: () => [isA<Exception>()],
       );
+
+      test('ignores a load that completes after disposal', () async {
+        final response = Completer<List<StudyMaterial>>();
+        when(
+          () => campusRepository.getPublicMaterials(),
+        ).thenAnswer((_) => response.future);
+        final cubit = buildCubit();
+        final loading = cubit.load();
+        await cubit.close();
+        response.complete([note]);
+        await loading;
+        expect(cubit.isClosed, isTrue);
+      });
+
+      test('a stale load cannot replace the latest material list', () async {
+        final old = Completer<List<StudyMaterial>>();
+        final latest = Completer<List<StudyMaterial>>();
+        var calls = 0;
+        when(() => campusRepository.getPublicMaterials()).thenAnswer(
+          (_) => calls++ == 0 ? old.future : latest.future,
+        );
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        final first = cubit.load();
+        final second = cubit.load();
+        latest.complete([cheatsheet]);
+        await second;
+        old.complete([note]);
+        await first;
+        expect(cubit.state.materials, [cheatsheet]);
+      });
 
       blocTest<KnowledgeBankCubit, KnowledgeBankState>(
         'preserves cached data and emits failure when every source fails',
@@ -236,6 +268,46 @@ void main() {
         errors: () => [isA<Exception>()],
       );
     });
+
+    test(
+      'purchase refreshes the wallet only after authoritative success',
+      () async {
+        when(
+          () =>
+              campusRepository.purchasePublicMaterial(note, expectedPrice: 40),
+        ).thenAnswer((_) async {});
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        await cubit.purchaseMaterial(note, expectedPrice: 40);
+        verifyInOrder([
+          () =>
+              campusRepository.purchasePublicMaterial(note, expectedPrice: 40),
+          () => gamificationRepository.getProfile(),
+        ]);
+        expect(cubit.state.profile, profile);
+      },
+    );
+
+    test(
+      'a rejected purchase propagates without a wallet update or retry',
+      () async {
+        when(
+          () =>
+              campusRepository.purchasePublicMaterial(note, expectedPrice: 40),
+        ).thenThrow(const MaterialPurchaseException(.insufficientBalance));
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        await expectLater(
+          cubit.purchaseMaterial(note, expectedPrice: 40),
+          throwsA(isA<MaterialPurchaseException>()),
+        );
+        verify(
+          () =>
+              campusRepository.purchasePublicMaterial(note, expectedPrice: 40),
+        ).called(1);
+        verifyNever(() => gamificationRepository.getProfile());
+      },
+    );
 
     group('filteredMaterials', () {
       test('returns all materials when type is "all"', () {

@@ -37,7 +37,7 @@ class StacAppAvatarParser extends StacParser<StacAppAvatar> {
     return AppAvatar(
       name: model.name,
       size: model.size,
-      color: parseHexColor(model.color),
+      color: parseAppColor(context, model.color),
     );
   }
 }

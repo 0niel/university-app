@@ -15,37 +15,41 @@ class MiniAppCardInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Column(
       crossAxisAlignment: .start,
       children: [
         Row(
           children: [
             if (app.isFeatured) ...[
-              AppLineIconWidget(.star, size: 14, color: colors.brand),
-              const SizedBox(width: 4),
+              AppLineIconWidget(
+                .star,
+                size: AppIconSize.xs,
+                color: colors.accent,
+              ),
+              const SizedBox(width: AppSpacing.xs),
             ],
             Flexible(
               child: Text(
                 app.name,
                 maxLines: 1,
                 overflow: .ellipsis,
-                style: NinjaText.headline.copyWith(color: colors.ink),
+                style: AppText.headline.copyWith(color: colors.ink),
               ),
             ),
             if (showStatus) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               MiniAppStatusPill(status: app.status),
             ],
           ],
         ),
         if (app.description.isNotEmpty) ...[
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             app.description,
             maxLines: 2,
             overflow: .ellipsis,
-            style: NinjaText.subtext.copyWith(color: colors.muted),
+            style: AppText.subtext.copyWith(color: colors.muted),
           ),
         ],
       ],

@@ -8,13 +8,18 @@ class _MarketplaceCardContentSkeleton extends StatelessWidget {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NinjaSkeleton(width: 86, height: 24),
-        SizedBox(height: 7),
-        NinjaSkeleton.bar(height: 17),
-        SizedBox(height: 7),
-        NinjaSkeleton.bar(height: 17, widthFactor: 0.72),
-        SizedBox(height: 10),
-        NinjaSkeleton.bar(height: 11, widthFactor: 0.52),
+        NinjaSkeleton.bar(height: 13, widthFactor: .9),
+        SizedBox(height: 3),
+        NinjaSkeleton.bar(height: 13, widthFactor: .6),
+        SizedBox(height: AppSpacing.xsm),
+        NinjaSkeleton(width: 70, height: 15),
+        SizedBox(height: AppSpacing.xs),
+        NinjaSkeleton.bar(height: 11.5, widthFactor: .7),
+        SizedBox(height: AppSpacing.sectionGap),
+        SizedBox(
+          width: double.infinity,
+          child: NinjaSkeleton(height: 36, radius: AppRadius.full),
+        ),
       ],
     );
   }

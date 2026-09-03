@@ -11,7 +11,7 @@ class SupportBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Padding(
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       child: NinjaBanner(
         title: l10n.settingsSupportTitle,
         body: l10n.settingsSupportSubtitle,

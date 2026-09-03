@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -33,6 +35,76 @@ void main() {
   setUp(() => repository = MockStudyGroupsRepository());
 
   group('StudyGroupCubit', () {
+    test('does not mutate after disposal', () async {
+      final cubit = StudyGroupCubit(repository: repository);
+      await cubit.close();
+      expect(await cubit.removeMember('u2'), isFalse);
+      expect(
+        await cubit.respondJoinRequest(inviteId: 'i1', accept: true),
+        isFalse,
+      );
+      verifyNever(() => repository.removeMember(any()));
+    });
+
+    test(
+      'a failed mutation does not leave an invalidated load pending',
+      () async {
+        final response = Completer<MyStudyGroup>();
+        when(repository.getMyGroup).thenAnswer((_) => response.future);
+        when(
+          () => repository.inviteByUserId('u2'),
+        ).thenThrow(StateError('offline'));
+        final cubit = StudyGroupCubit(repository: repository);
+        addTearDown(cubit.close);
+        final loading = cubit.load();
+        expect(await cubit.inviteByUserId('u2'), isFalse);
+        expect(cubit.state.status, StudyGroupStatus.failure);
+        response.complete(owned);
+        await loading;
+        expect(cubit.state.status, StudyGroupStatus.failure);
+      },
+    );
+
+    test('does not emit after disposal during a load', () async {
+      final response = Completer<MyStudyGroup>();
+      when(repository.getMyGroup).thenAnswer((_) => response.future);
+      final cubit = StudyGroupCubit(repository: repository);
+      final loading = cubit.load();
+      await cubit.close();
+      response.complete(owned);
+      await loading;
+      expect(cubit.isClosed, isTrue);
+    });
+
+    test('a stale load cannot overwrite a newer result', () async {
+      final old = Completer<MyStudyGroup>();
+      final latest = Completer<MyStudyGroup>();
+      var calls = 0;
+      when(repository.getMyGroup).thenAnswer(
+        (_) => calls++ == 0 ? old.future : latest.future,
+      );
+      final cubit = StudyGroupCubit(repository: repository);
+      addTearDown(cubit.close);
+      final first = cubit.load();
+      final second = cubit.load();
+      latest.complete(none);
+      await second;
+      old.complete(owned);
+      await first;
+      expect(cubit.state.data, none);
+    });
+
+    test('reports a reload failure after a successful mutation', () async {
+      when(() => repository.inviteByUserId('u2')).thenAnswer((_) async {});
+      when(
+        repository.getMyGroup,
+      ).thenThrow(const GetMyStudyGroupFailure('offline'));
+      final cubit = StudyGroupCubit(repository: repository);
+      addTearDown(cubit.close);
+      expect(await cubit.inviteByUserId('u2'), isFalse);
+      expect(cubit.state.status, StudyGroupStatus.failure);
+    });
+
     test('initial state is initial/empty', () {
       expect(
         StudyGroupCubit(repository: repository).state,

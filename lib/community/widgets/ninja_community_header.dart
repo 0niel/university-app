@@ -15,13 +15,10 @@ class NinjaCommunityHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: CommunityPageHeader(
-        title: title,
-        subtitle: subtitle,
-        actions: [?trailing],
-      ),
+    return CommunityPageHeader(
+      title: title,
+      subtitle: subtitle,
+      actions: [?trailing],
     );
   }
 }

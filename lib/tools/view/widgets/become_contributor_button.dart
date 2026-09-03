@@ -9,7 +9,7 @@ class BecomeContributorButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Semantics(
       button: true,
@@ -18,22 +18,28 @@ class BecomeContributorButton extends StatelessWidget {
         onTap: onTap,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: colors.brandTint,
-            borderRadius: .circular(NinjaRadius.pill),
+            color: colors.tint,
+            borderRadius: .circular(AppRadius.full),
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 44),
+            constraints: const BoxConstraints(
+              minHeight: AppControlSize.touchTarget,
+            ),
             child: Padding(
               padding: const .symmetric(horizontal: 14, vertical: 10),
               child: Row(
                 mainAxisSize: .min,
                 spacing: 6,
                 children: [
-                  AppLineIconWidget(.plus, size: 16, color: colors.brandInk),
+                  AppLineIconWidget(
+                    .plus,
+                    size: AppIconSize.sm,
+                    color: colors.accent,
+                  ),
                   Text(
                     l10n.toolsBecomeContributor,
-                    style: NinjaText.helper.copyWith(
-                      color: colors.brandInk,
+                    style: AppText.caption.copyWith(
+                      color: colors.accent,
                       fontWeight: .w600,
                     ),
                   ),

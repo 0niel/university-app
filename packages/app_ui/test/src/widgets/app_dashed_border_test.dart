@@ -24,5 +24,27 @@ void main() {
         findsWidgets,
       );
     });
+
+    testWidgets('keeps the child size (the border is a foreground painter)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Center(
+            child: AppDashedBorder(
+              color: Color(0xFF000000),
+              radius: 10,
+              strokeWidth: 1,
+              child: SizedBox(width: 120, height: 54),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(AppDashedBorder)),
+        const Size(120, 54),
+      );
+    });
   });
 }

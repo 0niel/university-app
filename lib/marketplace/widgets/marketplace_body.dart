@@ -4,15 +4,13 @@ import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/community/widgets/accent_header_action.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/marketplace/config/marketplace_category.dart';
 import 'package:rtu_mirea_app/marketplace/cubit/marketplace_cubit.dart';
 import 'package:rtu_mirea_app/marketplace/widgets/marketplace_grid.dart';
 import 'package:rtu_mirea_app/marketplace/widgets/marketplace_grid_skeleton.dart';
-import 'package:rtu_mirea_app/marketplace/widgets/marketplace_hero.dart';
-
-part 'marketplace_header.dart';
 
 class MarketplaceBody extends StatefulWidget {
   const MarketplaceBody({
@@ -21,12 +19,18 @@ class MarketplaceBody extends StatefulWidget {
     required this.onDelete,
     required this.onSell,
     super.key,
+    this.onContact,
+    this.favoriteIds = const {},
+    this.onToggleFavorite,
   });
 
   final ValueChanged<MarketListing> onOpen;
   final ValueChanged<MarketListing> onToggleSold;
   final ValueChanged<MarketListing> onDelete;
   final VoidCallback? onSell;
+  final ValueChanged<MarketListing>? onContact;
+  final Set<String> favoriteIds;
+  final ValueChanged<String>? onToggleFavorite;
 
   @override
   State<MarketplaceBody> createState() => _MarketplaceBodyState();
@@ -47,67 +51,58 @@ class _MarketplaceBodyState extends State<MarketplaceBody> {
     setState(() => _query = '');
   }
 
+  Future<void> _search() => showAppSheet<void>(
+    context,
+    title: context.l10n.search,
+    child: AppSearchBar(
+      controller: _searchController,
+      hintText: context.l10n.searchPlaceholder,
+      autofocus: true,
+      onChanged: (value) => setState(() => _query = value.trim()),
+      onSubmitted: (_) => Navigator.of(context, rootNavigator: true).pop(),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<MarketplaceCubit>().state;
-    final isColdLoad = state.status == .loading && state.items.isEmpty;
-    final isColdFailure = state.status == .failure && state.items.isEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
-            14,
-            NinjaMetrics.screenPadding,
-            0,
-          ),
-          child: _MarketplaceHeader(busy: state.status == .loading),
-        ),
-        if (!isColdFailure)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              NinjaMetrics.screenPadding,
-              16,
-              NinjaMetrics.screenPadding,
-              0,
+        AppInnerHeader(
+          title: context.l10n.marketTitle,
+          onBack: () => Navigator.of(context).maybePop(),
+          backSemanticsLabel: context.l10n.back,
+          actions: [
+            accentHeaderAction(
+              semanticsLabel: context.l10n.marketSell,
+              onTap: widget.onSell,
             ),
-            child: MarketplaceHero(
-              count: state.items.length,
-              loading: isColdLoad,
-            ),
-          ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            NinjaMetrics.screenPadding,
-            16,
-            NinjaMetrics.screenPadding,
-            0,
-          ),
-          child: NinjaInput(
-            controller: _searchController,
-            placeholder: context.l10n.searchPlaceholder,
-            leadingIcon: const AppLineIconWidget(AppLineIcon.search),
-            textInputAction: TextInputAction.search,
-            onChanged: (value) => setState(() => _query = value.trim()),
-          ),
+          ],
         ),
-        const SizedBox(height: 12),
-        NinjaChipRow(
-          children: [
+        const SizedBox(height: AppSpacing.screen),
+        AppChipRow<String>(
+          value: state.filterKey,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          onChanged: (value) => value == '__search'
+              ? unawaited(_search())
+              : context.read<MarketplaceCubit>().filterChanged(value),
+          items: [
             for (final key in [
               'all',
               ...UniversityConfig.current.marketplaceCategoryKeys,
             ])
-              NinjaChip(
+              AppChipRowItem(
+                value: key,
                 label: MarketplaceCategories.label(context.l10n, key),
-                selected: state.filterKey == key,
-                onTap: () =>
-                    context.read<MarketplaceCubit>().filterChanged(key),
               ),
+            AppChipRowItem(
+              value: '__search',
+              label: context.l10n.search,
+            ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.sectionGap),
         Expanded(
           child: NinjaStateSwitcher(child: _content(context, state)),
         ),
@@ -121,8 +116,8 @@ class _MarketplaceBodyState extends State<MarketplaceBody> {
     }
     return RefreshIndicator(
       key: const ValueKey('market-content'),
-      color: context.ninja.brand,
-      backgroundColor: context.ninja.surface,
+      color: context.colors.accent,
+      backgroundColor: context.colors.surface,
       onRefresh: context.read<MarketplaceCubit>().load,
       child: _result(context, state),
     );
@@ -133,7 +128,7 @@ class _MarketplaceBodyState extends State<MarketplaceBody> {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(
-          horizontal: NinjaMetrics.screenPadding,
+          horizontal: AppSpacing.screen,
         ),
         children: [
           NinjaErrorState(
@@ -160,10 +155,10 @@ class _MarketplaceBodyState extends State<MarketplaceBody> {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
-          NinjaMetrics.screenPadding,
-          32,
-          NinjaMetrics.screenPadding,
-          24,
+          AppSpacing.screen,
+          AppSpacing.xxl,
+          AppSpacing.screen,
+          AppSpacing.xlg,
         ),
         children: [
           if (searching)
@@ -202,6 +197,9 @@ class _MarketplaceBodyState extends State<MarketplaceBody> {
       onOpen: widget.onOpen,
       onToggleSold: widget.onToggleSold,
       onDelete: widget.onDelete,
+      onContact: widget.onContact,
+      favoriteIds: widget.favoriteIds,
+      onToggleFavorite: widget.onToggleFavorite,
     );
   }
 }

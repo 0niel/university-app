@@ -10,12 +10,17 @@ class SchedulePageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return Padding(
-      padding: const .fromLTRB(8, 8, 16, 8),
+      padding: const .fromLTRB(
+        AppSpacing.sm,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
       child: Row(
         children: [
-          NinjaIconButton(
+          AppIconButton(
             icon: const AppLineIconWidget(
               .chevronL,
               size: 20,
@@ -27,13 +32,16 @@ class SchedulePageHeader extends StatelessWidget {
             child: Text(
               title,
               textAlign: .center,
-              style: NinjaText.headline.copyWith(
+              style: AppText.headline.copyWith(
                 color: colors.ink,
                 fontWeight: .w700,
               ),
             ),
           ),
-          if (trailing != null) trailing! else const SizedBox(width: 40),
+          if (trailing != null)
+            trailing!
+          else
+            const SizedBox(width: AppSpacing.xxlg),
         ],
       ),
     );

@@ -7,11 +7,11 @@ class _CreateScheduleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: NinjaMetrics.screenPadding,
+        horizontal: AppSpacing.screen,
       ),
       child: AppPressable(
         onTap: onTap,
@@ -21,7 +21,7 @@ class _CreateScheduleRow extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
+            borderRadius: BorderRadius.circular(AppRadius.card),
           ),
           child: Row(
             children: [
@@ -36,19 +36,19 @@ class _CreateScheduleRow extends StatelessWidget {
                           TextSpan(text: '${l10n.addScheduleNotFound} '),
                           TextSpan(
                             text: l10n.addScheduleCreateTitle,
-                            style: NinjaText.body.copyWith(
+                            style: AppText.body.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: colors.brandInk,
+                              color: colors.accent,
                             ),
                           ),
                         ],
-                        style: NinjaText.body.copyWith(color: colors.mutedDark),
+                        style: AppText.body.copyWith(color: colors.muted),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       l10n.addScheduleCreateSubtitle,
-                      style: NinjaText.subtext.copyWith(color: colors.muted),
+                      style: AppText.subtext.copyWith(color: colors.muted),
                     ),
                   ],
                 ),
@@ -57,7 +57,7 @@ class _CreateScheduleRow extends StatelessWidget {
               AppLineIconWidget(
                 AppLineIcon.chevronR,
                 size: 16,
-                color: colors.chevron,
+                color: colors.muted2,
               ),
             ],
           ),

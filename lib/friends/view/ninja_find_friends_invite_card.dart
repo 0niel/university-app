@@ -9,10 +9,10 @@ class NinjaFindFriendsInviteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     return Padding(
-      padding: const .symmetric(horizontal: NinjaMetrics.screenPadding),
+      padding: const .symmetric(horizontal: AppSpacing.screen),
       child: AppPressable(
         onTap: onTap,
         semanticsLabel:
@@ -21,18 +21,18 @@ class NinjaFindFriendsInviteCard extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: .circular(NinjaRadius.card),
+            borderRadius: .circular(AppRadius.card),
           ),
           child: Padding(
-            padding: const .all(16),
+            padding: const .all(AppSpacing.lg),
             child: Row(
               children: [
                 Container(
-                  width: NinjaMetrics.minTouchTarget,
-                  height: NinjaMetrics.minTouchTarget,
+                  width: AppControlSize.iconButton,
+                  height: AppControlSize.iconButton,
                   alignment: .center,
                   decoration: BoxDecoration(
-                    color: colors.surfaceAlt,
+                    color: colors.surface2,
                     shape: .circle,
                   ),
                   child: AppLineIconWidget(
@@ -41,7 +41,7 @@ class NinjaFindFriendsInviteCard extends StatelessWidget {
                     color: colors.ink,
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: AppSpacing.sectionGap),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: .start,
@@ -51,13 +51,13 @@ class NinjaFindFriendsInviteCard extends StatelessWidget {
                         l10n.friendsInviteTelegram,
                         maxLines: 1,
                         overflow: .ellipsis,
-                        style: NinjaText.headline.copyWith(color: colors.ink),
+                        style: AppText.headline.copyWith(color: colors.ink),
                       ),
                       Text(
                         l10n.friendsInviteTelegramSub,
                         maxLines: 2,
                         overflow: .ellipsis,
-                        style: NinjaText.helper.copyWith(color: colors.muted),
+                        style: AppText.caption.copyWith(color: colors.muted),
                       ),
                     ],
                   ),

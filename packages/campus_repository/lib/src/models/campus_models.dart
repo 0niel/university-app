@@ -11,6 +11,7 @@ export 'group_note_save_result.dart';
 export 'group_post_search_result.dart';
 export 'group_space.dart';
 export 'market_listing.dart';
+export 'material_access.dart';
 export 'mentor.dart';
 export 'poll.dart';
 export 'study_material.dart';

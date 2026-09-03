@@ -103,7 +103,7 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return PopScope<void>(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -114,7 +114,12 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView> {
           EditorHeader(onBack: () => unawaited(_exit())),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                AppSpacing.fieldGap,
+                AppSpacing.screen,
+                AppSpacing.xlg,
+              ),
               children: [
                 TextField(
                   controller: _titleController,
@@ -122,20 +127,18 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView> {
                   maxLines: null,
                   onChanged: context.read<NoteEditorCubit>().titleChanged,
                   cursorColor: colors.ink,
-                  style: NinjaText.display.copyWith(
+                  style: AppText.displaySmall.copyWith(
                     color: colors.ink,
-                    fontWeight: .w700,
                   ),
                   decoration: _decoration(
                     context.l10n.collabNotesTitleHint,
-                    NinjaText.display.copyWith(
+                    AppText.displaySmall.copyWith(
                       color: colors.muted,
-                      fontWeight: .w700,
                     ),
                   ),
                 ),
                 const NoteSaveStatus(),
-                const SizedBox(height: 18),
+                const SizedBox(height: AppSpacing.fieldGap),
                 TextField(
                   controller: _contentController,
                   focusNode: _contentFocus,
@@ -145,13 +148,13 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView> {
                   onChanged: context.read<NoteEditorCubit>().contentChanged,
                   keyboardType: .multiline,
                   cursorColor: colors.ink,
-                  style: NinjaText.body.copyWith(
+                  style: AppText.body.copyWith(
                     color: colors.ink,
                     height: 1.5,
                   ),
                   decoration: _decoration(
                     context.l10n.collabNotesBodyHint,
-                    NinjaText.body.copyWith(
+                    AppText.body.copyWith(
                       color: colors.muted,
                       height: 1.5,
                     ),

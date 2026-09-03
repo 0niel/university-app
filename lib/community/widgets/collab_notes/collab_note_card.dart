@@ -1,6 +1,7 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/community/models/note_kind.dart';
 import 'package:rtu_mirea_app/community/widgets/collab_notes/collab_note_card_title.dart';
 import 'package:rtu_mirea_app/community/widgets/collab_notes/collab_note_icon.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -13,66 +14,60 @@ class CollabNoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final excerpt = note.content.trim().replaceAll('\n', ' ');
     final editor = note.updatedByName.isEmpty ? '' : ' · ${note.updatedByName}';
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        NinjaMetrics.screenPadding,
-        0,
-        NinjaMetrics.screenPadding,
-        10,
-      ),
-      child: AppPressable(
-        onTap: onTap,
-        semanticsLabel: note.title,
-        semanticsButton: onTap != null,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(NinjaRadius.card),
+    return AppPressable(
+      onTap: onTap,
+      semanticsLabel: note.title,
+      semanticsButton: onTap != null,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.surface,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const CollabNoteIcon(),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: .start,
-                    children: [
-                      CollabNoteCardTitle(note: note),
-                      const SizedBox(height: 2),
+          child: Row(
+            children: [
+              CollabNoteIcon(kind: NoteKind.fromTitle(note.title)),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: .start,
+                  children: [
+                    CollabNoteCardTitle(note: note),
+                    const SizedBox(height: 3),
+                    Text(
+                      context.l10n.collabNotesUpdated(
+                            _relativeTime(context, note.updatedAt),
+                          ) +
+                          editor,
+                      maxLines: 1,
+                      overflow: .ellipsis,
+                      style: AppText.sans(12, FontWeight.w400).copyWith(
+                        color: colors.muted,
+                      ),
+                    ),
+                    if (excerpt.isNotEmpty) ...[
+                      const SizedBox(height: 5),
                       Text(
-                        context.l10n.collabNotesUpdated(
-                              _relativeTime(context, note.updatedAt),
-                            ) +
-                            editor,
-                        maxLines: 1,
+                        excerpt,
+                        maxLines: 2,
                         overflow: .ellipsis,
-                        style: NinjaText.helper.copyWith(
+                        style: AppText.subtext.copyWith(
                           color: colors.muted,
                         ),
                       ),
-                      if (excerpt.isNotEmpty) ...[
-                        const SizedBox(height: 5),
-                        Text(
-                          excerpt,
-                          maxLines: 2,
-                          overflow: .ellipsis,
-                          style: NinjaText.subtext.copyWith(
-                            color: colors.mutedDark,
-                          ),
-                        ),
-                      ],
                     ],
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                AppLineIconWidget(.chevronR, size: 16, color: colors.chevron),
-              ],
-            ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              AppLineIconWidget(.chevronR, size: 16, color: colors.muted2),
+            ],
           ),
         ),
       ),

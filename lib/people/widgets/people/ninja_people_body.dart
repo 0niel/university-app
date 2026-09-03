@@ -49,6 +49,15 @@ class NinjaPeopleBody extends StatelessWidget {
         onRetry: onRetry,
       );
     }
+    if (state.tab == .friends &&
+        state.friends.isEmpty &&
+        state.requests.isEmpty &&
+        state.failedSources.contains(PeopleSource.friends)) {
+      return PeopleColdError(
+        key: const ValueKey('people-friends-error'),
+        onRetry: onRetry,
+      );
+    }
     if (state.tab == .group &&
         !state.studyGroup.hasGroup &&
         state.failedSources.contains(PeopleSource.studyGroup)) {

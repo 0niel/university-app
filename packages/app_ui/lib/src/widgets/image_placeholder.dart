@@ -1,5 +1,8 @@
-import 'package:app_ui/app_ui.dart';
-import 'package:flutter/material.dart';
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/widgets/app_line_icon.dart';
+import 'package:app_ui/src/widgets/app_stripe_placeholder.dart';
+import 'package:flutter/widgets.dart';
 
 class ImagePlaceholder extends StatelessWidget {
   const ImagePlaceholder({
@@ -9,6 +12,7 @@ class ImagePlaceholder extends StatelessWidget {
     this.shape = BoxShape.rectangle,
     this.borderRadius,
   });
+
   final double? height;
   final double? width;
   final BoxShape shape;
@@ -16,23 +20,22 @@ class ImagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appColors = Theme.of(context).colors;
+    final colors = context.colors;
 
-    return Container(
+    return SizedBox(
       height: height,
       width: width,
-      decoration: BoxDecoration(
-        color: appColors.background03,
+      child: AppStripePlaceholder(
         shape: shape,
         borderRadius: shape == BoxShape.rectangle
-            ? (borderRadius ?? BorderRadius.circular(16))
+            ? (borderRadius ?? BorderRadius.circular(AppRadius.lg))
             : null,
-      ),
-      child: Center(
-        child: Icon(
-          Icons.image_outlined,
-          size: 40,
-          color: appColors.deactive.withValues(alpha: 0.5),
+        base: colors.surface2,
+        stripe: colors.surface,
+        child: AppLineIconWidget(
+          AppLineIcon.image,
+          size: AppIconSize.lg,
+          color: colors.muted2,
         ),
       ),
     );

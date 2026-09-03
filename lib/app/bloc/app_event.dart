@@ -12,12 +12,13 @@ class AppOpened extends AppEvent {
 }
 
 class InteractedMessageReceived extends AppEvent {
-  const InteractedMessageReceived(this.message);
+  const InteractedMessageReceived(this.message, {this.userId});
 
   final RemoteMessage message;
+  final String? userId;
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, userId];
 }
 
 class ThemeChanged extends AppEvent {

@@ -2,64 +2,66 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+import '../kit_harness.dart';
 
-  group('showAppConfirmDialog', () {
-    testWidgets('resolves true on confirm', (tester) async {
-      bool? result;
-      await tester.pumpWidget(
-        wrap(
-          Builder(
-            builder: (context) => AppButton.primary(
-              label: 'open',
-              onPressed: () async {
-                result = await showAppConfirmDialog(
-                  context,
-                  title: 'Удалить?',
-                  message: 'Это действие необратимо',
-                  confirmLabel: 'Удалить',
-                  cancelLabel: 'Отмена',
-                  destructive: true,
-                );
-              },
-            ),
+void main() {
+  Widget host(Future<void> Function(BuildContext) onTap) => wrapKit(
+        Builder(
+          builder: (context) => AppPressable(
+            onTap: () => onTap(context),
+            child: const Text('open'),
           ),
         ),
       );
+
+  group('showAppConfirmDialog', () {
+    testWidgets('resolves true on confirm and renders the icon', (
+      tester,
+    ) async {
+      bool? result;
+      await tester.pumpWidget(
+        host(
+          (context) async {
+            result = await showAppConfirmDialog(
+              context,
+              title: 'Удалить?',
+              message: 'Это действие необратимо',
+              confirmLabel: 'Удалить',
+              cancelLabel: 'Отмена',
+              destructive: true,
+              icon: const AppLineIconWidget(AppLineIcon.trash),
+            );
+          },
+        ),
+      );
+
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
       expect(find.text('Удалить?'), findsOneWidget);
       expect(find.text('Это действие необратимо'), findsOneWidget);
+      expect(find.byType(AppLineIconWidget), findsOneWidget);
+      expect(find.byType(AppDialog), findsOneWidget);
+
       await tester.tap(find.text('Удалить'));
       await tester.pumpAndSettle();
       expect(result, isTrue);
     });
 
-    testWidgets('resolves false on cancel and on barrier dismiss', (
-      tester,
-    ) async {
+    testWidgets('resolves false on cancel', (tester) async {
       bool? result;
       await tester.pumpWidget(
-        wrap(
-          Builder(
-            builder: (context) => AppButton.primary(
-              label: 'open',
-              onPressed: () async {
-                result = await showAppConfirmDialog(
-                  context,
-                  title: 'T',
-                  confirmLabel: 'Да',
-                  cancelLabel: 'Нет',
-                );
-              },
-            ),
-          ),
+        host(
+          (context) async {
+            result = await showAppConfirmDialog(
+              context,
+              title: 'T',
+              confirmLabel: 'Да',
+              cancelLabel: 'Нет',
+            );
+          },
         ),
       );
+
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Нет'));
@@ -68,41 +70,35 @@ void main() {
     });
   });
 
-  group('AppButton loading', () {
-    testWidgets('shows spinner and blocks taps', (tester) async {
-      var taps = 0;
+  group('showAppDialog', () {
+    testWidgets('wraps custom content in a canvas r28 card', (tester) async {
       await tester.pumpWidget(
-        wrap(
-          AppButton.primary(
-            label: 'Сохранить',
-            loading: true,
-            onPressed: () => taps++,
+        host(
+          (context) => showAppDialog<void>(
+            context,
+            builder: (_) => const Padding(
+              padding: EdgeInsets.all(20),
+              child: Text('custom'),
+            ),
           ),
         ),
       );
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      await tester.tap(find.byType(AppButton));
-      await tester.pump();
-      expect(taps, 0);
-    });
-  });
 
-  group('AppFab', () {
-    testWidgets('renders extended label with null heroTag', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          AppFab.extended(
-            icon: AppLineIcon.plus,
-            label: 'Создать',
-            onPressed: () {},
-          ),
-        ),
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.text('custom'), findsOneWidget);
+
+      final card = kitDecoration(
+        tester,
+        find
+            .ancestor(
+              of: find.text('custom'),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
       );
-      final fab = tester.widget<FloatingActionButton>(
-        find.byType(FloatingActionButton),
-      );
-      expect(fab.heroTag, isNull);
-      expect(find.text('Создать'), findsOneWidget);
+      expect(card.color, kitColors.canvas);
+      expect(card.borderRadius, BorderRadius.circular(AppRadius.dialog));
     });
   });
 }

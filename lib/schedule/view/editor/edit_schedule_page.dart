@@ -8,6 +8,7 @@ import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/utils/lesson_repeat.dart';
 import 'package:rtu_mirea_app/schedule/view/custom_lesson_editor_page.dart';
 import 'package:rtu_mirea_app/schedule/widgets/lesson_card.dart';
+import 'package:rtu_mirea_app/schedule/widgets/schedule_metrics.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 part 'widgets/edit_lesson_row.dart';
@@ -26,7 +27,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final l10n = context.l10n;
     final cubit = context.watch<CustomScheduleCubit>();
     final schedule = cubit.scheduleById(widget.scheduleId);
@@ -43,28 +44,29 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
 
     return Scaffold(
       backgroundColor: colors.canvas,
-      appBar: NinjaAppBar.inner(
-        title: l10n.editScheduleTitle,
-        onBack: () => Navigator.of(context).maybePop(),
-        backSemanticLabel: l10n.back,
-      ),
       body: SafeArea(
         top: false,
         bottom: false,
         child: Column(
           children: [
+            AppInnerHeader(
+              title: l10n.editScheduleTitle,
+              onBack: () => Navigator.of(context).maybePop(),
+              backSemanticsLabel: l10n.back,
+            ),
             SizedBox(
-              height: 60,
+              height: ScheduleMetrics.weekdayStripHeight,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.fromLTRB(
-                  NinjaMetrics.screenPadding,
-                  8,
-                  NinjaMetrics.screenPadding,
-                  8,
+                  AppSpacing.screen,
+                  AppSpacing.sm,
+                  AppSpacing.screen,
+                  AppSpacing.sm,
                 ),
                 itemCount: dayLabels.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                separatorBuilder: (_, _) =>
+                    const SizedBox(width: AppSpacing.sm),
                 itemBuilder: (context, index) {
                   final label = dayLabels[index];
                   final selected = _weekday == index + 1;
@@ -73,16 +75,16 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                     semanticsLabel: label,
                     semanticsSelected: selected,
                     child: Container(
-                      width: 48,
+                      width: AppControlSize.buttonMedium,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: selected ? colors.brand : colors.surface,
-                        borderRadius: BorderRadius.circular(NinjaRadius.pill),
+                        color: selected ? colors.accent : colors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.full),
                       ),
                       child: Text(
                         label,
-                        style: NinjaText.subtext.copyWith(
-                          color: selected ? colors.onBrand : colors.mutedDark,
+                        style: AppText.subtext.copyWith(
+                          color: selected ? colors.onAccent : colors.muted,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -93,12 +95,12 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             ),
             Expanded(
               child: schedule == null
-                  ? Center(
+                  ? SingleChildScrollView(
                       child: Padding(
                         padding: const .symmetric(
-                          horizontal: NinjaMetrics.screenPadding,
+                          horizontal: AppSpacing.screen,
                         ),
-                        child: NinjaEmptyState(
+                        child: AppEmptyState(
                           title: l10n.editScheduleNotFound,
                           icon: AppLineIconWidget(
                             AppLineIcon.calendar,
@@ -114,13 +116,13 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                       children: [
                         Padding(
                           padding: const .fromLTRB(
-                            NinjaMetrics.screenPadding,
-                            8,
-                            NinjaMetrics.screenPadding,
-                            12,
+                            AppSpacing.screen,
+                            AppSpacing.sm,
+                            AppSpacing.screen,
+                            AppSpacing.md,
                           ),
                           child: Row(
-                            spacing: 6,
+                            spacing: AppSpacing.xsm,
                             children: [
                               AppLineIconWidget(
                                 .swipe,
@@ -130,7 +132,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                               Expanded(
                                 child: Text(
                                   l10n.editScheduleSwipeHint,
-                                  style: NinjaText.helper.copyWith(
+                                  style: AppText.captionSmall.copyWith(
                                     color: colors.muted,
                                   ),
                                 ),
@@ -140,12 +142,12 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                         ),
                         Expanded(
                           child: lessons.isEmpty
-                              ? Center(
+                              ? SingleChildScrollView(
                                   child: Padding(
                                     padding: const .symmetric(
-                                      horizontal: NinjaMetrics.screenPadding,
+                                      horizontal: AppSpacing.screen,
                                     ),
-                                    child: NinjaEmptyState(
+                                    child: AppEmptyState(
                                       title: l10n.editScheduleEmptyDay,
                                       icon: AppLineIconWidget(
                                         AppLineIcon.plus,
@@ -159,10 +161,10 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                                 ).animateEmptyState()
                               : ReorderableListView.builder(
                                   padding: const .fromLTRB(
-                                    NinjaMetrics.screenPadding,
-                                    0,
-                                    NinjaMetrics.screenPadding,
-                                    8,
+                                    AppSpacing.screen,
+                                    AppSpacing.zero,
+                                    AppSpacing.screen,
+                                    AppSpacing.sm,
                                   ),
                                   buildDefaultDragHandles: false,
                                   itemCount: lessons.length,
@@ -181,7 +183,9 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                                         'edit-${lesson.subject}-'
                                         '${lesson.lessonBells.startTime}',
                                       ),
-                                      padding: const .only(bottom: 10),
+                                      padding: const .only(
+                                        bottom: AppSpacing.gap,
+                                      ),
                                       child: _EditLessonRow(
                                         lesson: lesson,
                                         index: index,
@@ -199,15 +203,15 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                         ),
                         Padding(
                           padding: const .fromLTRB(
-                            NinjaMetrics.screenPadding,
-                            8,
-                            NinjaMetrics.screenPadding,
-                            24,
+                            AppSpacing.screen,
+                            AppSpacing.sm,
+                            AppSpacing.screen,
+                            AppSpacing.xlg,
                           ),
-                          child: NinjaButton.primary(
+                          child: AppButton.primary(
                             label: l10n.addClass,
                             expanded: true,
-                            size: NinjaButtonSize.large,
+                            size: AppButtonSize.large,
                             onPressed: _addLesson,
                           ),
                         ),

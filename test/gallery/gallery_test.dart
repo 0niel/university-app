@@ -3,38 +3,21 @@ library;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart' hide TimeOfDay;
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rtu_mirea_app/community/cubit/deadlines/deadlines.dart';
 import 'package:rtu_mirea_app/community/widgets/deadlines/deadline_group.dart';
 import 'package:rtu_mirea_app/feed/widgets/widgets.dart';
-import 'package:rtu_mirea_app/home/view/dashboard/dashboard.dart';
-import 'package:rtu_mirea_app/home/view/home_day_pager.dart';
-import 'package:rtu_mirea_app/home/view/home_deadline_row.dart';
-import 'package:rtu_mirea_app/home/view/home_lesson_hero.dart';
-import 'package:rtu_mirea_app/home/view/home_section_header.dart';
-import 'package:rtu_mirea_app/home/view/home_section_list.dart';
-import 'package:rtu_mirea_app/home/view/home_today_row.dart';
+import 'package:rtu_mirea_app/home/view/home_day_lessons.dart';
+import 'package:rtu_mirea_app/home/view/widgets/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_body.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
+import 'gallery_fonts.dart';
+import 'schedule_gallery.dart';
+
 void main() {
-  setUpAll(() async {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    final loader = FontLoader('Inter');
-    for (final weight in const [
-      'Regular',
-      'Medium',
-      'SemiBold',
-      'Bold',
-    ]) {
-      loader.addFont(
-        rootBundle.load(
-          'packages/app_ui/assets/fonts/Inter/Inter-$weight.ttf',
-        ),
-      );
-    }
-    await loader.load();
-  });
+  setUpAll(loadGalleryFonts);
 
   _homeSheets();
   _scheduleSheets();
@@ -103,245 +86,157 @@ Future<void> _sheet(
 }
 
 void _homeSheets() {
-  final deadlines = [
-    Deadline(
-      id: 'd1',
-      title: 'Отчёт по лабораторной №3',
-      dueAt: _now.add(const Duration(days: 1)),
-      source: DeadlineSource.me,
-      subjectName: 'Матанализ',
+  final lessons = [
+    _lesson(
+      subject: 'Математический анализ',
+      startHour: 10,
+      startMinute: 40,
+      endHour: 12,
+      endMinute: 10,
     ),
-    Deadline(
-      id: 'd2',
-      title: 'Курсовая — глава 2',
-      dueAt: _now.add(const Duration(days: 4)),
-      source: DeadlineSource.me,
-      subjectName: 'Физика',
+    _lesson(
+      subject: 'Физика',
+      startHour: 12,
+      startMinute: 20,
+      endHour: 13,
+      endMinute: 50,
+      room: '120 А',
+    ),
+    _lesson(
+      subject: 'Английский язык',
+      startHour: 14,
+      startMinute: 0,
+      endHour: 15,
+      endMinute: 30,
+      room: 'Б-105',
+      type: LessonType.practice,
     ),
   ];
-
-  final current = _lesson(
-    subject: 'Математический анализ',
-    startHour: 10,
-    startMinute: 40,
-    endHour: 12,
-    endMinute: 10,
-  );
-  final next = _lesson(
-    subject: 'Физика',
-    startHour: 12,
-    startMinute: 20,
-    endHour: 13,
-    endMinute: 50,
-    room: '120 А',
-  );
-  final third = _lesson(
-    subject: 'Английский язык',
-    startHour: 14,
-    startMinute: 0,
-    endHour: 15,
-    endMinute: 30,
-    room: 'Б-105',
-    type: LessonType.practice,
-  );
-
-  testWidgets('6a · home board', (tester) async {
-    await _sheet(
-      tester,
-      'home_6a',
-      dark: true,
-      CustomScrollView(
-        slivers: [
-          HomeDashboardHeader(
-            day: _now,
-            locale: 'ru',
-            userName: 'Анна Соколова',
-            greeting: 'Привет, Анна',
-            loading: false,
-            searchKey: GlobalKey(),
-          ),
-          SliverToBoxAdapter(
-            child: HomeTitleBlock(
-              day: _now,
-              locale: 'ru',
-              status: (
-                kind: HomeDayStatusKind.live,
-                lessonCount: 3,
-                minutes: 44,
-                startsAt: null,
-              ),
-              loading: false,
-              offline: false,
-            ),
-          ),
-          SliverList.list(
+  final entries = homeDayEntries(day: _now, lessons: lessons, now: _now);
+  for (final dark in [false, true]) {
+    testWidgets('6a · home board${dark ? ' (dark)' : ''}', (tester) async {
+      await _sheet(
+        tester,
+        dark ? 'home_6a_dark' : 'home_6a',
+        dark: dark,
+        height: 1100,
+        Builder(
+          builder: (context) => ListView(
+            padding: const EdgeInsets.fromLTRB(20, 56, 20, 28),
             children: [
+              HomeTopRow(
+                userName: 'Анна Соколова',
+                now: _now,
+                dotColor: context.colors.accent,
+                searchKey: GlobalKey(),
+              ),
+              const HomeGreeting(
+                greeting: 'Доброе утро,',
+                name: 'Анна',
+                subtitle: 'Сегодня · идёт пара',
+              ),
               const _GalleryDayStrip(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: HomeLessonHero(
-                  lesson: current,
-                  day: _now,
-                  now: _now,
-                  isCurrent: true,
+              const SizedBox(height: 14),
+              _GalleryHero(entries: entries, kind: HomeHeroKind.during),
+              HomeLessonsGroup(
+                entries: entries,
+                featuredEntry: homeHeroEntry(entries, HomeHeroKind.during),
+                onOpen: (_) {},
+              ),
+              HomeDeadlinesGroup(
+                state: DeadlinesState(
+                  status: DeadlinesStatus.ready,
+                  deadlines: [
+                    Deadline(
+                      id: 'd1',
+                      title: 'Отчёт по лабораторной №3',
+                      dueAt: _now.add(const Duration(days: 1)),
+                      source: DeadlineSource.me,
+                      subjectName: 'Матанализ',
+                      isMine: true,
+                    ),
+                    Deadline(
+                      id: 'd2',
+                      title: 'Курсовая — глава 2',
+                      dueAt: _now.add(const Duration(days: 4)),
+                      source: DeadlineSource.me,
+                      subjectName: 'Физика',
+                      isMine: true,
+                    ),
+                  ],
                 ),
-              ),
-              const HomeSectionHeader(title: 'Дедлайны', action: 'все'),
-              HomeSectionList(
-                children: [
-                  for (final deadline in deadlines)
-                    HomeDeadlineRow(deadline: deadline),
-                ],
-              ),
-              const HomeSectionHeader(title: 'Сегодня', action: 'все'),
-              HomeSectionList(
-                children: [
-                  HomeTodayRow(lesson: next, isNext: true),
-                  HomeTodayRow(lesson: third, isNext: false),
-                ],
+                now: _now,
+                onAdd: () {},
+                onOpen: () {},
+                onToggle: (_) {},
+                onRetry: () {},
               ),
             ],
           ),
-        ],
-      ),
-    );
-  });
+        ),
+      );
+    });
+  }
+}
 
-  testWidgets('6a · home board (dark)', (tester) async {
-    await _sheet(
-      tester,
-      'home_6a_dark',
-      dark: true,
-      CustomScrollView(
-        slivers: [
-          HomeDashboardHeader(
-            day: _now,
-            locale: 'ru',
-            userName: 'Анна Соколова',
-            greeting: 'Привет, Анна',
-            loading: false,
-            searchKey: GlobalKey(),
-          ),
-          SliverToBoxAdapter(
-            child: HomeTitleBlock(
-              day: _now,
-              locale: 'ru',
-              status: (
-                kind: HomeDayStatusKind.live,
-                lessonCount: 3,
-                minutes: 44,
-                startsAt: null,
-              ),
-              loading: false,
-              offline: false,
-            ),
-          ),
-          SliverList.list(
-            children: [
-              const _GalleryDayStrip(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: HomeLessonHero(
-                  lesson: current,
-                  day: _now,
-                  now: _now,
-                  isCurrent: true,
-                ),
-              ),
-              const HomeSectionHeader(title: 'Сегодня', action: 'все'),
-              HomeSectionList(
-                children: [
-                  HomeTodayRow(lesson: next, isNext: true),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  });
+class _GalleryHero extends StatelessWidget {
+  const _GalleryHero({required this.entries, required this.kind});
+  final List<HomeLessonEntry> entries;
+  final HomeHeroKind kind;
+
+  @override
+  Widget build(BuildContext context) => HomeHero(
+    entries: entries,
+    kind: kind,
+    tomorrow: const [],
+    now: _now,
+    onOpen: (_) {},
+    onRoute: (_) {},
+    onNote: (_) {},
+    onFreeRooms: () {},
+    onDeadlines: () {},
+    onTomorrow: () {},
+  );
 }
 
 void _scheduleSheets() {
-  final current = _lesson(
-    subject: 'Математический анализ',
-    startHour: 10,
-    startMinute: 40,
-    endHour: 12,
-    endMinute: 10,
-  );
-  final next = _lesson(
-    subject: 'Физика',
-    startHour: 12,
-    startMinute: 20,
-    endHour: 13,
-    endMinute: 50,
-    room: '120 А',
-    type: LessonType.laboratoryWork,
-  );
-  final third = _lesson(
-    subject: 'Английский язык',
-    startHour: 14,
-    startMinute: 0,
-    endHour: 15,
-    endMinute: 30,
-    room: 'Б-105',
-    type: LessonType.practice,
-  );
-  testWidgets('6d · schedule day', (tester) async {
-    await _sheet(
-      tester,
-      'schedule_6d',
-      dark: true,
-      ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const HomeSectionHeader(
-            title: 'Среда, 13 августа',
-            action: 'сегодня',
-            topPadding: 10,
-          ),
-          const _GalleryDayStrip(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: HomeLessonHero(
-              lesson: current,
-              day: _now,
-              now: _now,
-              isCurrent: true,
-            ),
-          ),
-          const HomeSectionHeader(title: 'Далее', action: 'все'),
-          HomeSectionList(
-            children: [
-              HomeTodayRow(lesson: next, isNext: true),
-              HomeTodayRow(lesson: third, isNext: false),
-            ],
-          ),
-        ],
-      ),
-    );
-  });
+  for (final view in ScheduleView.values) {
+    for (final dark in [false, true]) {
+      testWidgets('6d · schedule ${view.name}${dark ? ' dark' : ''}', (
+        tester,
+      ) async {
+        await _sheet(
+          tester,
+          'schedule_${view.name}${dark ? '_dark' : ''}',
+          dark: dark,
+          scheduleGalleryScene(view: view),
+        );
+      });
+    }
+  }
+  for (final dark in [false, true]) {
+    testWidgets('6e · lesson${dark ? ' dark' : ''}', (tester) async {
+      await _sheet(
+        tester,
+        'lesson${dark ? '_dark' : ''}',
+        dark: dark,
+        lessonGalleryScene(),
+      );
+    });
+  }
 }
 
 class _GalleryDayStrip extends StatelessWidget {
   const _GalleryDayStrip();
   @override
-  Widget build(BuildContext context) {
-    final days = List.generate(
-      7,
-      (index) => DateTime(2026, 8, 11 + index),
-    );
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 2, 20, 7),
-      child: HomeDayPager(
-        days: days,
-        lessonCounts: const [3, 4, 3, 4, 2, 0, 0],
-        selectedIndex: 2,
-        onSelected: (_) {},
-      ),
-    );
-  }
+  Widget build(BuildContext context) => HomeWeekPills(
+    days: homeWeekDays(_now),
+    lessonCounts: const [3, 4, 3, 4, 2, 0, 0],
+    selectedIndex: _now.weekday - 1,
+    today: _now,
+    changedDays: const {},
+    onSelected: (_) {},
+  );
 }
 
 void _deadlineSheets() {

@@ -1,6 +1,5 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/schedule/widgets/ninja_schedule_surface.dart';
 import 'package:rtu_mirea_app/schedule_diff/widgets/schedule_diff_item_card.dart';
 import 'package:schedule/schedule.dart';
 
@@ -22,24 +21,24 @@ class ScheduleDiffSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     final scale = Theme.of(context).scale;
     return SliverToBoxAdapter(
       child: Container(
         margin: .symmetric(
-          horizontal: NinjaMetrics.screenPadding,
+          horizontal: AppSpacing.screen,
           vertical: scale.space(12),
         ),
         child: Column(
           crossAxisAlignment: .start,
           children: [
-            NinjaScheduleSurface(
+            AppCard(
               padding: .all(scale.space(16)),
               child: Row(
                 children: [
                   Container(
-                    width: scale.size(NinjaMetrics.minTouchTarget),
-                    height: scale.size(NinjaMetrics.minTouchTarget),
+                    width: scale.size(AppControlSize.touchTarget),
+                    height: scale.size(AppControlSize.touchTarget),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.1),
@@ -54,7 +53,7 @@ class ScheduleDiffSection extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: NinjaText.headline.copyWith(
+                          style: AppText.headline.copyWith(
                             color: colors.ink,
                             fontWeight: .bold,
                           ),
@@ -62,7 +61,7 @@ class ScheduleDiffSection extends StatelessWidget {
                         SizedBox(height: scale.space(8)),
                         Text(
                           subtitle,
-                          style: NinjaText.body.copyWith(color: colors.muted),
+                          style: AppText.body.copyWith(color: colors.muted),
                         ),
                       ],
                     ),

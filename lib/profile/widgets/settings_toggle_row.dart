@@ -11,7 +11,7 @@ class SettingsToggleRow extends StatelessWidget {
     this.sub,
     this.icon,
     this.lineIcon,
-    this.horizontalPadding = 8,
+    this.horizontalPadding = 16,
   });
 
   final String label;
@@ -32,8 +32,18 @@ class SettingsToggleRow extends StatelessWidget {
       lineIcon: lineIcon,
       showChevron: false,
       horizontalPadding: horizontalPadding,
+      verticalPadding: 13,
+      minimumHeight: 64,
       enabled: onChanged != null,
-      trailing: NinjaSwitch(value: value, onChanged: onChanged),
+      trailing: SizedBox(
+        width: 48,
+        height: 28,
+        child: AppSwitch(
+          value: value,
+          onChanged: onChanged,
+          semanticsLabel: label,
+        ),
+      ),
       onTap: onChanged == null ? null : () => onChanged(!value),
     );
   }

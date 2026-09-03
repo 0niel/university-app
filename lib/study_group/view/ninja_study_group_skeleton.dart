@@ -5,21 +5,21 @@ class NinjaStudyGroupSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.ninja;
+    final colors = context.colors;
     return NinjaSkeletonGroup(
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
         padding: const .fromLTRB(
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           12,
-          NinjaMetrics.screenPadding,
+          AppSpacing.screen,
           32,
         ),
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
               color: colors.surface,
-              borderRadius: .circular(NinjaRadius.card),
+              borderRadius: .circular(AppRadius.card),
             ),
             child: const Padding(
               padding: .all(16),
@@ -33,7 +33,7 @@ class NinjaStudyGroupSkeleton extends StatelessWidget {
                         dimension: 44,
                         child: NinjaSkeleton(
                           height: 44,
-                          radius: NinjaRadius.control,
+                          radius: AppRadius.field,
                         ),
                       ),
                       Expanded(
@@ -55,7 +55,7 @@ class NinjaStudyGroupSkeleton extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const NinjaSkeleton(height: 52, radius: NinjaRadius.button),
+          const NinjaSkeleton(height: 52, radius: AppRadius.full),
           const SizedBox(height: 28),
           const NinjaSkeleton.bar(height: 19, widthFactor: 0.4),
           const SizedBox(height: 10),
@@ -63,7 +63,7 @@ class NinjaStudyGroupSkeleton extends StatelessWidget {
             DecoratedBox(
               decoration: BoxDecoration(
                 color: colors.surface,
-                borderRadius: .circular(NinjaRadius.card),
+                borderRadius: .circular(AppRadius.card),
               ),
               child: const Padding(
                 padding: .all(16),
