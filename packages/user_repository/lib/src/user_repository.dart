@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:auth_client/auth_client.dart';
 import 'package:deep_link_client/deep_link_client.dart';
 import 'package:package_info_client/package_info_client.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:user_repository/src/models/user.dart';
 import 'package:user_repository/src/user_failure.dart';
 import 'package:user_repository/src/user_storage.dart';
@@ -16,22 +17,41 @@ class UserRepository {
     required this._packageInfoClient,
     required this._deepLinkService,
     required this._storage,
+    this.initializeUser,
+    this.onInitializationError,
+    this.initializationTimeout = const Duration(seconds: 8),
   });
 
   final AuthenticationClient _authenticationClient;
   final UserStorage _storage;
   final PackageInfoClient _packageInfoClient;
   final DeepLinkService _deepLinkService;
+  final Future<void> Function(String userId)? initializeUser;
+  final void Function(Object error, StackTrace stackTrace)?
+  onInitializationError;
+  final Duration initializationTimeout;
 
   /// Stream of [User] which will emit the current user when
   /// the authentication state.
   ///
-  Stream<User> get user => _authenticationClient.user.map((authenticationUser) {
-    if (authenticationUser.isAnonymous) {
-      return User.anonymous;
+  Stream<User> get user =>
+      _authenticationClient.user.switchMap((authenticationUser) {
+        if (authenticationUser.isAnonymous) {
+          return Stream.value(User.anonymous);
+        }
+        return Stream.fromFuture(_initializeUser(authenticationUser));
+      });
+
+  Future<User> _initializeUser(AuthenticationUser authenticationUser) async {
+    try {
+      await initializeUser
+          ?.call(authenticationUser.id)
+          .timeout(initializationTimeout);
+    } on Object catch (error, stackTrace) {
+      onInitializationError?.call(error, stackTrace);
     }
     return User.fromAuthenticationUser(authenticationUser: authenticationUser);
-  });
+  }
 
   /// A stream of incoming email links used to authenticate the user.
   ///
