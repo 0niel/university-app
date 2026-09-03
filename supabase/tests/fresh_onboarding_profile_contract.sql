@@ -45,6 +45,19 @@ begin
     raise exception 'Academic bootstrap privileges are invalid';
   end if;
 
+  if to_regprocedure('public.set_user_identity(text,text,text)') is null
+    or to_regprocedure('app_api_v1.set_user_identity(text,text,text)') is null then
+    raise exception 'Identity RPC signature is missing';
+  end if;
+  if has_function_privilege('anon', 'public.set_user_identity(text,text,text)', 'execute')
+    or has_function_privilege('anon', 'app_api_v1.set_user_identity(text,text,text)', 'execute')
+    or not has_function_privilege('authenticated', 'public.set_user_identity(text,text,text)', 'execute')
+    or not has_function_privilege('authenticated', 'app_api_v1.set_user_identity(text,text,text)', 'execute')
+    or (select prosecdef from pg_catalog.pg_proc
+        where oid = 'public.set_user_identity(text,text,text)'::regprocedure) then
+    raise exception 'Identity RPC privileges are invalid';
+  end if;
+
   foreach v_user in array array[
     v_normal_cached, v_guest_cached, v_normal_selected, v_guest_selected
   ] loop
@@ -99,10 +112,17 @@ begin
     execute 'set local role authenticated';
 
     if not v_guest then
-      perform public.set_user_identity(
-        'fresh-onboarding-a', 'Bootstrap Contract Normal',
-        'boot_' || left(replace(v_user::text, '-', ''), 15)
+      v_snapshot := public.set_user_identity(
+        p_organization_id => 'fresh-onboarding-a',
+        p_full_name => 'Bootstrap Contract Normal',
+        p_handle => 'boot_' || left(replace(v_user::text, '-', ''), 15)
       );
+      if v_snapshot->'academic'->>'fullName'
+        is distinct from 'Bootstrap Contract Normal'
+        or v_snapshot->'academic'->>'handle'
+          is distinct from 'boot_' || left(replace(v_user::text, '-', ''), 15) then
+        raise exception 'Identity RPC returned an incompatible profile';
+      end if;
     end if;
     perform public.ensure_gamification_profile('fresh-onboarding-a');
     perform public.record_active_day();
@@ -195,6 +215,17 @@ begin
   exception when insufficient_privilege then null;
   end;
   execute 'reset role';
+  if not exists (
+    select 1 from core.user_academic_profiles
+    where user_id = v_peer and organization_id = 'fresh-onboarding-a'
+      and full_name = 'Bootstrap Contract Peer' and handle is null
+  ) or not exists (
+    select 1 from core.user_academic_profiles
+    where user_id = v_outsider and organization_id = 'fresh-onboarding-b'
+      and full_name = 'Bootstrap Contract Outside' and handle is null
+  ) then
+    raise exception 'Identity RPC mutated another user';
+  end if;
   raise notice 'fresh_onboarding_profile_contract PASS: four normal/guest cached/selected flows, profile-missing denial, minimal identity, roster, people, wallet, tenant isolation, idempotence, anonymous skip, missing-auth denial';
 end;
 $$;

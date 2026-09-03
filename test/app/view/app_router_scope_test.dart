@@ -115,6 +115,9 @@ void main() {
     when(() => preferences.get(any())).thenAnswer((_) async => null);
     friends = _Friends();
     gamification = _Gamification();
+    when(
+      () => gamification.ensureAcademicProfile(any()),
+    ).thenAnswer((_) async {});
     when(() => gamification.getProfileOverview(any())).thenThrow(
       Exception('offline fixture'),
     );
