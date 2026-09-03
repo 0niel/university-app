@@ -8,6 +8,8 @@ begin
     'app_api_v1.get_listings(text)',
     'app_api_v1.create_listing(text,text,integer,text,text,text)',
     'app_api_v1.create_listing(text,text,integer,text,text,text,boolean)',
+    'app_api_v1.create_listing_v2(text,text,integer,text,text,boolean,jsonb,text,boolean)',
+    'app_api_v1.update_listing(uuid,text,integer,text,text,boolean,jsonb,text,boolean)',
     'app_api_v1.set_listing_sold(uuid,boolean)',
     'app_api_v1.delete_listing(uuid)'
   ] loop
@@ -24,6 +26,8 @@ begin
     'public.get_listings(text)',
     'public.create_listing(text,text,integer,text,text,text)',
     'public.create_listing(text,text,integer,text,text,text,boolean)',
+    'public.create_listing_v2(text,text,integer,text,text,boolean,jsonb,text,boolean)',
+    'public.update_listing(uuid,text,integer,text,text,boolean,jsonb,text,boolean)',
     'public.set_listing_sold(uuid,boolean)',
     'public.delete_listing(uuid)'
   ] loop
@@ -65,6 +69,8 @@ declare
   v_outsider uuid := extensions.gen_random_uuid();
   v_listing_id uuid;
   v_private_listing_id uuid;
+  v_contact_listing_id uuid;
+  v_hidden_contact_listing_id uuid;
   v_rows jsonb;
 begin
   insert into core.organizations (id, name)
@@ -160,14 +166,18 @@ begin
 
   perform set_config('request.jwt.claim.sub', v_buyer::text, true);
   select app_api_v1.get_listings('market-test-a') into v_rows;
-  if jsonb_array_length(v_rows) <> 2
+  if v_rows is null or jsonb_array_length(v_rows) <> 2
     or not exists (
       select 1
       from jsonb_array_elements(v_rows) row
       where row->>'id' = v_listing_id::text
         and row->>'sellerName' = 'Seller U.'
-        and row->>'sellerHandle' = 'seller_user'
+        and row ? 'telegramHandle'
+        and row->>'telegramHandle' is null
+        and row->>'sellerHandle' is null
         and (row->>'showContact')::boolean
+        and (row->>'isFree')::boolean is false
+        and (row->>'price')::integer = 1200
         and row->>'emoji' = '📚'
     )
     or not exists (
@@ -175,11 +185,97 @@ begin
       from jsonb_array_elements(v_rows) row
       where row->>'id' = v_private_listing_id::text
         and row->>'sellerHandle' is null
+        and row ? 'telegramHandle'
+        and row->>'telegramHandle' is null
         and not (row->>'showContact')::boolean
+        and (row->>'isFree')::boolean is true
+        and (row->>'price')::integer = 0
     )
   then
     raise exception 'Marketplace read or contact privacy contract is invalid';
   end if;
+
+  perform set_config('request.jwt.claim.sub', v_seller::text, true);
+  v_contact_listing_id := public.create_listing_v2(
+    'market-test-a', 'Telegram contact', 1500, 'books', 'Textbook',
+    false, '[]'::jsonb, '@explicit_seller', true
+  );
+  v_hidden_contact_listing_id := public.create_listing_v2(
+    'market-test-a', 'Private Telegram contact', 0, 'books', 'Gift',
+    true, '[]'::jsonb, 'private_seller', false
+  );
+  select public.get_listings('market-test-a') into v_rows;
+  if v_rows is null or jsonb_array_length(v_rows) <> 4
+    or not exists (
+      select 1 from jsonb_array_elements(v_rows) row
+      where row->>'id' = v_hidden_contact_listing_id::text
+        and row->>'telegramHandle' = 'private_seller'
+        and (row->>'isMine')::boolean is true
+        and (row->>'showContact')::boolean is false
+        and (row->>'isFree')::boolean is true
+        and (row->>'price')::integer = 0
+    ) then
+    raise exception 'Seller cannot edit the private Telegram contact';
+  end if;
+
+  perform set_config('request.jwt.claim.sub', v_buyer::text, true);
+  select public.get_listings('market-test-a') into v_rows;
+  if v_rows is null or jsonb_array_length(v_rows) <> 4
+    or not exists (
+      select 1 from jsonb_array_elements(v_rows) row
+      where row->>'id' = v_contact_listing_id::text
+        and row->>'telegramHandle' = 'explicit_seller'
+        and row->>'sellerHandle' is null
+        and (row->>'showContact')::boolean is true
+    )
+    or not exists (
+      select 1 from jsonb_array_elements(v_rows) row
+      where row->>'id' = v_hidden_contact_listing_id::text
+        and row ? 'telegramHandle'
+        and row->>'telegramHandle' is null
+        and row->>'sellerHandle' is null
+        and (row->>'showContact')::boolean is false
+    ) then
+    raise exception 'Explicit Telegram contact privacy contract is invalid';
+  end if;
+  begin
+    perform public.update_listing(v_contact_listing_id,
+      'Changed by buyer', 100, 'books', 'Changed',
+      false, '[]'::jsonb, 'buyer_contact', true);
+    raise exception 'Buyer replaced a foreign seller contact';
+  exception
+    when insufficient_privilege then null;
+  end;
+
+  perform set_config('request.jwt.claim.sub', v_seller::text, true);
+  perform public.update_listing(v_contact_listing_id,
+    'Telegram contact', 1500, 'books', 'Textbook',
+    false, '[]'::jsonb, 'updated_seller', false);
+  perform set_config('request.jwt.claim.sub', v_buyer::text, true);
+  select public.get_listings('market-test-a') into v_rows;
+  if v_rows is null or not exists (
+    select 1 from jsonb_array_elements(v_rows) row
+    where row->>'id' = v_contact_listing_id::text
+      and row ? 'telegramHandle'
+      and row->>'telegramHandle' is null
+      and (row->>'showContact')::boolean is false
+  ) then
+    raise exception 'Disabling Telegram contact did not hide it from buyers';
+  end if;
+
+  perform set_config('request.jwt.claim.sub', v_seller::text, true);
+  select public.get_listings('market-test-a') into v_rows;
+  if v_rows is null or not exists (
+    select 1 from jsonb_array_elements(v_rows) row
+    where row->>'id' = v_contact_listing_id::text
+      and row->>'telegramHandle' = 'updated_seller'
+      and (row->>'showContact')::boolean is false
+  ) then
+    raise exception 'Seller contact update did not persist';
+  end if;
+  perform public.delete_listing(v_contact_listing_id);
+  perform public.delete_listing(v_hidden_contact_listing_id);
+  perform set_config('request.jwt.claim.sub', v_buyer::text, true);
 
   begin
     perform app_api_v1.set_listing_sold(v_listing_id, true);

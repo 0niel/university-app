@@ -52,7 +52,7 @@ begin
   insert into storage.objects (bucket_id, name, owner_id, metadata)
   select 'lesson-materials', f.owner_id || '/' || path, f.owner_id::text,
     '{"size":3,"mimetype":"application/pdf"}'::jsonb
-  from unnest(array['bank/paid','bank/free','bank/legacy','lesson/one','lesson/private','bank/orphan']) path;
+  from unnest(array['bank/paid','bank/free','bank/legacy','bank/current','lesson/one','lesson/private','bank/orphan']) path;
   insert into storage.objects (bucket_id, name, owner_id, metadata) values
     ('lesson-materials', f.owner_id || '/bank/wrong-owner', f.foreign_id::text,
       '{"size":3,"mimetype":"application/pdf"}'),
@@ -229,6 +229,20 @@ begin
     'note', 0, 0, false, 'free.pdf', f.owner_id || '/bank/free', 'application/pdf', 3);
   if (select shurikens from core.user_gamification_profiles where user_id = f.owner_id) <> 120 then
     raise exception 'Same object republish granted a second upload reward';
+  end if;
+  perform public.create_public_material_v3('material-access-contract', 'Current client', array['Math'],
+    'note', 0, 0, false, 'current.pdf', f.owner_id || '/bank/current', 'application/pdf', 3);
+  perform pg_temp.expect_material_error(format(
+    'select public.create_public_material_v3(%L,%L,array[%L],%L,0,0,false,%L,%L,%L,3)',
+    'material-access-contract', 'Missing upload', 'Math', 'note', 'missing.pdf',
+    f.owner_id || '/bank/missing', 'application/pdf'), '42501');
+  perform pg_temp.expect_material_error(format(
+    'select public.create_public_material_v3(%L,%L,array[%L],%L,0,0,false,%L,%L,%L,3)',
+    'material-foreign-contract', 'Foreign tenant', 'Math', 'note', 'current.pdf',
+    f.owner_id || '/bank/current', 'application/pdf'), '42501');
+  if (select shurikens from core.user_gamification_profiles where user_id = f.owner_id) <> 150
+    or (select count(*) from core.shuriken_ledger where user_id = f.owner_id) <> 5 then
+    raise exception 'Current material publishing reward or rejection accounting is invalid';
   end if;
 end;
 $$;
