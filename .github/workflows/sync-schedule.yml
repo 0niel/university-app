@@ -54,7 +54,7 @@ jobs:
             '--schedule-base-url',
             $env:SCHEDULE_SOURCE_BASE_URL,
             '--fetch-concurrency',
-            '16',
+            '12',
             '--batch-size',
             '8'
           )

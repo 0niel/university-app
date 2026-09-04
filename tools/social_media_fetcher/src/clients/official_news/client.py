@@ -96,6 +96,7 @@ def _extract_title(link: Any) -> str:
         "h2",
         "h3",
         "h4",
+        ".events-block-body",
     )
     for selector in selectors:
         node = link.select_one(selector)
@@ -103,9 +104,13 @@ def _extract_title(link: Any) -> str:
             title = node.get_text(" ", strip=True)
             if title:
                 return title
+    attribute_title = str(link.get("title") or "").strip()
+    if attribute_title:
+        return attribute_title
     text = link.get_text(" ", strip=True)
     text = _DATE_PATTERN.sub("", text)
-    return re.sub(r"(?:^|\s)#[^#]+?(?=\s#|$)", " ", text).strip()
+    text = re.sub(r"(?:^|\s)#[^\s#]+", " ", text)
+    return " ".join(text.split())
 
 
 def _raw_item(
