@@ -151,7 +151,7 @@ dependencies {
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.5"
     implementation "com.android.support:multidex:2.0.1"
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.3.21"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.4.10"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
     implementation project(':native-feature-api')
     if (findProject(':nfc-pass-private') != null) {
