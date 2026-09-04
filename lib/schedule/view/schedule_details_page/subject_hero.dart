@@ -11,8 +11,6 @@ class _SubjectHero extends StatelessWidget {
     final colors = context.colors;
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toString();
-    final room = lesson.classrooms.firstOrNull;
-    final campus = room?.campus?.shortName ?? room?.campus?.name;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
       child: Column(
@@ -72,16 +70,12 @@ class _SubjectHero extends StatelessWidget {
                   caption: [
                     if (lessonNumberOf(lesson) case final number?)
                       l10n.lessonPairOrdinal(number),
-                    if (campus != null && campus.isNotEmpty) campus,
                   ].join(' · '),
                 ),
                 _LessonInfoCard(
                   label: l10n.classroom,
                   value: _classroomLine(l10n, lesson),
-                  caption: [
-                    if (campus != null && campus.isNotEmpty) campus,
-                    l10n.lessonOnMap,
-                  ].join(' · '),
+                  caption: l10n.lessonOnMap,
                   onTap: () => const MapRoute().push<void>(context),
                 ),
               ];

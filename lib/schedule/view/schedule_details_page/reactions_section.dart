@@ -64,6 +64,7 @@ class _ReactionsSection extends StatelessWidget {
           title: context.l10n.lessonHowWasIt,
         ),
         AppStateSwitcher(
+          alignment: AlignmentDirectional.topStart,
           child: loading
               ? const _ReactionsSkeleton(key: ValueKey('reactions_skeleton'))
               : AnimatedOpacity(

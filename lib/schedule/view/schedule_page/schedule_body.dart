@@ -12,6 +12,7 @@ import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/utils/schedule_diff_engine.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_calendar_notice.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_clock_ticker.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_date_pager.dart';
@@ -239,7 +240,12 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                     SliverToBoxAdapter(
                       child: ScheduleHeader(
                         day: _day,
-                        name: selected?.name,
+                        name: switch (selected) {
+                          SelectedTeacherSchedule(:final teacher) =>
+                            shortTeacherName(teacher.name),
+                          _ => selected?.name,
+                        },
+                        nameSemanticsLabel: selected?.name,
                         topInset: topInset,
                       ),
                     ),

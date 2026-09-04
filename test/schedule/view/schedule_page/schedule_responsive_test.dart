@@ -193,6 +193,44 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('teacher schedule header uses surname and initials', (
+    tester,
+  ) async {
+    when(
+      () => changes.matchesTarget(
+        ScheduleTargetType.teacher,
+        'Акатъев Ярослав Алексеевич',
+      ),
+    ).thenReturn(true);
+    when(
+      () => changes.load(
+        targetType: ScheduleTargetType.teacher,
+        target: 'Акатъев Ярослав Алексеевич',
+      ),
+    ).thenAnswer((_) async {});
+    when(() => schedule.state).thenReturn(
+      const ScheduleState(
+        status: ScheduleStatus.loaded,
+        selectedSchedule: SelectedTeacherSchedule(
+          teacher: Teacher(name: 'Акатъев Ярослав Алексеевич'),
+          schedule: [],
+        ),
+      ),
+    );
+
+    await tester.pumpApp(subject(), size: const Size(390, 844));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Акатъев Я. А.'), findsOneWidget);
+    expect(find.text('Акатъев Ярослав Алексеевич'), findsNothing);
+    expect(
+      find.bySemanticsLabel('Акатъев Ярослав Алексеевич'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('loading keeps navigation chrome and shows skeleton rows', (
     tester,
   ) async {

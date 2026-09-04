@@ -14,7 +14,21 @@ String lessonTypeName(AppLocalizations l10n, LessonType type) =>
 
 String singleClassroomText(AppLocalizations l10n, LessonSchedulePart lesson) {
   if (lesson.classrooms.isEmpty) return l10n.classroomNotSpecified;
-  return lesson.classrooms.firstOrNull?.name ?? l10n.classroomNotSpecified;
+  final classroom = lesson.classrooms.firstOrNull;
+  return classroom == null
+      ? l10n.classroomNotSpecified
+      : classroomLabel(classroom);
+}
+
+String classroomLabel(Classroom classroom) {
+  final room = classroom.name.trim();
+  final shortCampus = classroom.campus?.shortName?.trim();
+  final campusName = classroom.campus?.name.trim();
+  final campus = shortCampus != null && shortCampus.isNotEmpty
+      ? shortCampus
+      : campusName;
+  if (campus == null || campus.isEmpty || room == campus) return room;
+  return '$room · $campus';
 }
 
 String lessonMetaText(AppLocalizations l10n, LessonSchedulePart lesson) {
@@ -76,6 +90,23 @@ String teacherInitials(String name) {
   final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
   final letters = parts.take(2).map((part) => part[0].toUpperCase());
   return letters.isEmpty ? '?' : letters.join();
+}
+
+String shortTeacherName(String name) {
+  final parts = name
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((part) => part.isNotEmpty)
+      .toList();
+  if (parts.length < 2) return parts.isEmpty ? '' : parts.first;
+  final initials = parts
+      .skip(1)
+      .expand((part) => part.split('.'))
+      .where((part) => part.isNotEmpty)
+      .take(2)
+      .map((part) => '${String.fromCharCode(part.runes.first).toUpperCase()}.')
+      .join(' ');
+  return initials.isEmpty ? parts.first : '${parts.first} $initials';
 }
 
 String capitalizeFirst(String value) {

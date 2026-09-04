@@ -92,6 +92,11 @@ void main() {
       );
       await tester.pumpAndSettle();
       const mainReactions = {'brain', 'thinking', 'sleepy', 'fire'};
+      final initialLeft = tester
+          .getTopLeft(
+            find.byKey(const ValueKey('lesson-reaction-brain')),
+          )
+          .dx;
       for (final reaction in ReactionType.values) {
         expect(
           find.byKey(ValueKey('lesson-reaction-${reaction.name}')),
@@ -121,6 +126,14 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(selected, reaction.name);
+        expect(
+          tester
+              .getTopLeft(
+                find.byKey(const ValueKey('lesson-reaction-brain')),
+              )
+              .dx,
+          closeTo(initialLeft, .1),
+        );
         final selectedChip = find.byKey(
           ValueKey('lesson-reaction-${reaction.name}'),
         );

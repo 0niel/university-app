@@ -19,6 +19,7 @@ on:
         required: true
         type: choice
         options:
+          - 5.2.0+1004201
           - 5.2.0+1002401
           - 5.2.0+1002601
           - 5.2.0+2435.13.10
@@ -67,6 +68,10 @@ jobs:
           [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
           test "$TARGET_TRACK" = staging
           case "$PLATFORM:$RELEASE_VERSION" in
+            android:5.2.0+1004201)
+              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
+              baseline_sha=6fe7e47beaa7f2a4114023a2b4744cfc1da17657
+              ;;
             android:5.2.0+1002401|android:5.2.0+1002601)
               app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
               baseline_sha=4aa0e01a5a9fc58cfc83288610b3c4f88943ef72
@@ -107,6 +112,7 @@ jobs:
         env:
           SOURCE_SHA: ${{ steps.inputs.outputs.source_sha }}
           BASELINE_SHA: ${{ steps.inputs.outputs.baseline_sha }}
+          RELEASE_VERSION: ${{ steps.inputs.outputs.release_version }}
         run: |
           python3 - <<'PY'
           import os
@@ -114,13 +120,36 @@ jobs:
 
           baseline = os.environ["BASELINE_SHA"]
           source = os.environ["SOURCE_SHA"]
-          allowed = {
+          legacy_allowed = {
               "lib/di/app_scope.dart",
               "packages/user_repository/lib/src/user_repository.dart",
               "packages/gamification_repository/lib/src/gamification_repository.dart",
               "packages/user_repository/test/src/user_repository_test.dart",
               "packages/gamification_repository/test/src/gamification_repository_test.dart",
           }
+          current_allowed = {
+              ".github/workflows/shorebird-patch.yml",
+              "lib/home/view/home_dashboard_content.dart",
+              "lib/schedule/view/schedule_details_page/helpers.dart",
+              "lib/schedule/view/schedule_details_page/reactions_section.dart",
+              "lib/schedule/view/schedule_details_page/subject_hero.dart",
+              "lib/schedule/view/schedule_page/day_timeline.dart",
+              "lib/schedule/view/schedule_page/lesson_text.dart",
+              "lib/schedule/view/schedule_page/schedule_body.dart",
+              "lib/schedule/view/schedule_page/schedule_day_view.dart",
+              "lib/schedule/view/schedule_page/schedule_header.dart",
+              "lib/schedule/view/schedule_page/schedule_week_view.dart",
+              "lib/top_discussions/view/discourse_topic_utils.dart",
+              "lib/top_discussions/view/topic_news_card.dart",
+              "test/schedule/view/schedule_details_page/lesson_progress_card_test.dart",
+              "test/schedule/view/schedule_details_page/lesson_reaction_picker_test.dart",
+              "test/schedule/view/schedule_page/lesson_meta_test.dart",
+              "test/schedule/view/schedule_page/schedule_reference_geometry_test.dart",
+              "test/schedule/view/schedule_page/schedule_responsive_test.dart",
+              "test/schedule/view/schedule_page/schedule_timeline_lesson_test.dart",
+              "test/top_discussions/view/discourse_topic_utils_test.dart",
+          }
+          allowed = current_allowed if os.environ["RELEASE_VERSION"] == "5.2.0+1004201" else legacy_allowed
           def git(*args):
               return subprocess.check_output(["git", *args]).decode().strip()
 

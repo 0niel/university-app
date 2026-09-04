@@ -13,12 +13,10 @@ String topicTimeAgo(AppLocalizations l10n, DateTime? posted) {
   return l10n.justNow;
 }
 
-void openDiscourseTopic(String forumUrl, int id) {
-  unawaited(
-    launchUrlString(
-      Uri.parse(forumUrl).resolve('t/$id').toString(),
-      mode: .externalApplication,
-    ),
+Future<bool> openDiscourseTopic(String forumUrl, int id) {
+  return launchUrlString(
+    Uri.parse(forumUrl).resolve('t/$id').toString(),
+    mode: .externalApplication,
   );
 }
 

@@ -436,7 +436,10 @@ class ScheduleWeekView extends StatelessWidget {
                           ? context.l10n.scheduleShortCancelled
                           : lessonShortLabel(context.l10n, lesson.lessonType),
                       bottomLabel: _availabilityLabel(
-                        lesson.classrooms.firstOrNull?.name ?? '—',
+                        switch (lesson.classrooms.firstOrNull) {
+                          final classroom? => classroomLabel(classroom),
+                          null => '—',
+                        },
                         free: friendFree,
                       ),
                       tone: lessonAccentOf(context, lesson),
