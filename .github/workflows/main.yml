@@ -184,6 +184,7 @@ jobs:
           - package_info_client
           - permission_client
           - preferences_repository
+          - promo_repository
           - rtu_mirea_schedule_api_client
           - schedule
           - schedule_exporter_repository
