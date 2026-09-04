@@ -158,6 +158,7 @@ class Settings(BaseSettings):
                 category="university",
                 link_selector='a[href*="/news/"]',
                 article_selectors=(
+                    ".news-item-text",
                     "article",
                     ".news-detail",
                     ".detail-text",

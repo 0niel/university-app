@@ -14,23 +14,26 @@ concurrency:
 
 jobs:
   cleanup:
-    if: >-
-      vars.SUPABASE_URL != '' &&
-      vars.INGEST_ORGANIZATION_ID != ''
+    if: vars.SUPABASE_URL != ''
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Remove expired and orphaned story media
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          ORGANIZATION_ID: ${{ vars.INGEST_ORGANIZATION_ID }}
-          INGEST_KEY: ${{ secrets.INGEST_API_KEY }}
+          ORGANIZATION_ID: ${{ vars.APP_ORGANIZATION_ID || 'mirea' }}
+          INGEST_KEY: ${{ secrets.SUPABASE_INGEST_KEY }}
         run: |
           test -n "${INGEST_KEY}"
           payload="$(jq -n \
             --arg organization_id "${ORGANIZATION_ID}" \
             '{entity:"story_media_cleanup", organization_id:$organization_id}')"
           curl --fail-with-body --silent --show-error \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --retry 3 \
+            --retry-delay 2 \
+            --retry-max-time 120 \
             --request POST \
             --header "content-type: application/json" \
             --header "x-ingest-key: ${INGEST_KEY}" \

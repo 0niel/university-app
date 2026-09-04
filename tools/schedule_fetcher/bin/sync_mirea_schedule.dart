@@ -7,6 +7,7 @@ import 'package:args/command_runner.dart' show UsageException;
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:rtu_mirea_schedule_api_client/rtu_mirea_schedule_api_client.dart';
+import 'package:schedule_fetcher/source_fetcher.dart';
 
 const kScheduleBaseUrl = 'https://schedule-of.mirea.ru';
 const _minimumFullSyncTargetCounts = {
@@ -192,6 +193,11 @@ class SyncMireaSchedule {
   final String _sourceName;
   final String _sourceOrganizationName;
   final String _sourceTimezone;
+  late final RetryingSourceClient _sourceClient = RetryingSourceClient(
+    httpClient: _httpClient,
+    authorization: _sourceAuthorization,
+    log: stderr.writeln,
+  );
   String? _syncRunId;
   Map<String, String> _previousTargetHashes = const {};
   DateTime? _lastFullReingestAt;
@@ -539,37 +545,10 @@ class SyncMireaSchedule {
   }
 
   Stream<_ScheduleTarget> _fetchTargets({required String? match}) async* {
-    String? nextPageToken;
-    do {
-      final query = <String, String>{};
-      if (nextPageToken != null) query['pageToken'] = nextPageToken;
-      if (match != null && match.trim().isNotEmpty) {
-        query['match'] = match.trim();
-      }
-
-      final uri = _scheduleBaseUrl
-          .resolve('/schedule/api/search')
-          .replace(queryParameters: query.isEmpty ? null : query);
-      final response = await _getWithRetry(
-        uri,
-        accept: 'application/json',
-        timeout: const Duration(seconds: 45),
-        label: 'schedule search',
-      );
-
-      if (response.statusCode != HttpStatus.ok) {
-        throw StateError(
-          'Schedule search failed: ${response.statusCode} ${response.body}',
-        );
-      }
-
-      final json = jsonDecode(response.body) as Map<String, Object?>;
-      nextPageToken = json['nextPageToken'] as String?;
-      final data = json['data'] as List<Object?>? ?? const [];
-      for (final item in data.whereType<Map<String, Object?>>()) {
-        yield _ScheduleTarget.fromJson(item);
-      }
-    } while (nextPageToken != null);
+    final pager = ScheduleSearchPager(_sourceClient, _scheduleBaseUrl);
+    await for (final item in pager.fetch(match: match)) {
+      yield _ScheduleTarget.fromJson(item);
+    }
   }
 
   Future<Map<String, Object?>> _normalizeTarget(_ScheduleTarget target) async {
@@ -598,7 +577,7 @@ class SyncMireaSchedule {
         'includeMeta': 'true',
       },
     );
-    final response = await _getWithRetry(
+    final response = await _sourceClient.get(
       calendarFeedUri,
       accept: 'text/calendar,*/*',
       timeout: const Duration(seconds: 60),
@@ -654,43 +633,6 @@ class SyncMireaSchedule {
         'source_hash': sourceHash,
       },
     };
-  }
-
-  Future<http.Response> _getWithRetry(
-    Uri uri, {
-    required String accept,
-    required Duration timeout,
-    required String label,
-  }) async {
-    for (var attempt = 1; attempt <= 3; attempt++) {
-      try {
-        final response = await _httpClient
-            .get(
-              uri,
-              headers: {
-                HttpHeaders.acceptHeader: accept,
-                if (_sourceAuthorization != null &&
-                    _sourceAuthorization.isNotEmpty)
-                  HttpHeaders.authorizationHeader: _sourceAuthorization,
-                HttpHeaders.userAgentHeader:
-                    'university-app-schedule-fetcher/0.1',
-              },
-            )
-            .timeout(timeout);
-        if (!_isRetryableStatus(response.statusCode) || attempt == 3) {
-          return response;
-        }
-      } on Object catch (error) {
-        if (attempt == 3 || !_isRetryableIngestError(error)) rethrow;
-      }
-
-      final delay = Duration(seconds: attempt * 2);
-      stderr.writeln(
-        'Retry $label attempt=${attempt + 1} after ${delay.inSeconds}s',
-      );
-      await Future<void>.delayed(delay);
-    }
-    throw StateError('$label retry loop ended unexpectedly');
   }
 
   List<Map<String, Object?>> _splitTargetPayload(Map<String, Object?> target) {
@@ -784,13 +726,13 @@ class SyncMireaSchedule {
           return response;
         }
 
-        if (attempt == 3 || !_isRetryableStatus(response.statusCode)) {
+        if (attempt == 3 || !isRetryableHttpStatus(response.statusCode)) {
           throw StateError(
             '$label failed: ${response.statusCode} ${response.body}',
           );
         }
       } catch (error) {
-        if (attempt == 3 || !_isRetryableIngestError(error)) rethrow;
+        if (attempt == 3 || !isRetryableHttpError(error)) rethrow;
       }
 
       final delay = Duration(seconds: attempt * 2);
@@ -1017,14 +959,4 @@ int _nonNegativeInt(String value, String name) {
 int? _optionalPositiveInt(String? value, String name) {
   if (value == null || value.trim().isEmpty) return null;
   return _positiveInt(value, name);
-}
-
-bool _isRetryableIngestError(Object error) {
-  return error is http.ClientException ||
-      error is SocketException ||
-      error is TimeoutException;
-}
-
-bool _isRetryableStatus(int statusCode) {
-  return statusCode == HttpStatus.tooManyRequests || statusCode >= 500;
 }

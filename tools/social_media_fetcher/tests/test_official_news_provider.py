@@ -59,6 +59,57 @@ def test_parse_news_html_honors_limit_and_ignores_index_links() -> None:
     assert [item["ID"] for item in items] == ["one"]
 
 
+def test_parse_news_html_maps_current_mirea_cards() -> None:
+    fixture = Path(__file__).parent / "fixtures" / "mirea_news_current.html"
+
+    items = parse_news_html(
+        fixture.read_text(encoding="utf-8"),
+        limit=10,
+        news_url="https://www.mirea.ru/news/",
+    )
+
+    assert [item["ID"] for item in items] == ["current-article", "body-title"]
+    assert items[0]["NAME"] == "Текущая университетская новость"
+    assert items[1]["NAME"] == "Новость с заголовком в карточке"
+
+
+def test_parse_news_html_removes_hashtags_without_removing_fallback_title() -> None:
+    html = """
+    <a href="/news/fallback-title/">
+      <span>#студентам</span>
+      <span>#сотрудникам</span>
+      Заголовок после хештегов
+      <time>04.09.2026</time>
+    </a>
+    """
+
+    items = parse_news_html(
+        html,
+        limit=10,
+        news_url="https://www.mirea.ru/news/",
+    )
+
+    assert items[0]["NAME"] == "Заголовок после хештегов"
+
+
+def test_parse_news_html_prefers_visible_title_over_link_tooltip() -> None:
+    html = """
+    <a href="/news/visible-title/" title="Open link">
+      <span class="events-block-body">Article summary</span>
+      <h3>Visible article title</h3>
+      <time>04.09.2026</time>
+    </a>
+    """
+
+    items = parse_news_html(
+        html,
+        limit=10,
+        news_url="https://university.example/news/",
+    )
+
+    assert items[0]["NAME"] == "Visible article title"
+
+
 def test_parse_article_html_extracts_content_and_absolute_images() -> None:
     fixture = Path(__file__).parent / "fixtures" / "mirea_article.html"
 
@@ -70,6 +121,26 @@ def test_parse_article_html_extracts_content_and_absolute_images() -> None:
     assert "Полный текст университетской новости" in content
     assert "window.tracking" not in content
     assert images == ["https://www.mirea.ru/upload/news/detail.webp"]
+
+
+def test_parse_article_html_extracts_current_mirea_article_container() -> None:
+    fixture = Path(__file__).parent / "fixtures" / "mirea_article_current.html"
+    settings = Settings(
+        _env_file=None,
+        MIREA_ENABLED=True,
+        APP_ORGANIZATION_ID="mirea",
+    )
+
+    content, images = parse_article_html(
+        fixture.read_text(encoding="utf-8"),
+        "https://www.mirea.ru/news/current-article/",
+        article_selectors=settings.official_news_source.article_selectors,
+    )
+
+    assert "Текущий полный текст университетской новости" in content
+    assert "Похожая новость" not in content
+    assert "window.tracking" not in content
+    assert images == ["https://www.mirea.ru/upload/news/current-detail.webp"]
 
 
 def test_generic_news_source_uses_its_own_url_and_branding() -> None:
