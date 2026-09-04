@@ -6,6 +6,7 @@ import 'package:community_repository/community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:promo_repository/promo_repository.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/community/cubit/deadlines/deadlines.dart';
@@ -24,6 +25,7 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/notifications/notifications.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
+import 'package:rtu_mirea_app/promo/promo.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
 import 'package:rtu_mirea_app/search/search.dart';
@@ -219,6 +221,16 @@ class HomeDashboardContent extends StatelessWidget {
                     : '$dayLabel · ${homeStatusLabel(l10n, entries, kind)}',
               ),
             ),
+            const PromoBannerSlot(
+              placement: PromoPlacement.home,
+              homeSlot: PromoHomeSlot.top,
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                AppSpacing.lg,
+                AppSpacing.screen,
+                0,
+              ),
+            ),
             HomeStoriesRail(
               sources: sources,
               seenSourceIds: context.watch<HomeStoriesCubit>().state,
@@ -334,6 +346,17 @@ class HomeDashboardContent extends StatelessWidget {
                 onExam: () => const ScheduleSessionRoute().go(context),
               ),
             ),
+            PromoBannerSlot(
+              placement: PromoPlacement.home,
+              homeSlot: PromoHomeSlot.afterToday,
+              now: now,
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                AppSpacing.sectionGap,
+                AppSpacing.screen,
+                0,
+              ),
+            ),
             if (preferences.isSectionEnabled(HomeSection.smartChips))
               inset(
                 HomeQuickActions(
@@ -371,6 +394,17 @@ class HomeDashboardContent extends StatelessWidget {
                   ),
                 ),
               ),
+            PromoBannerSlot(
+              placement: PromoPlacement.home,
+              homeSlot: PromoHomeSlot.bottom,
+              now: now,
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                AppSpacing.section,
+                AppSpacing.screen,
+                0,
+              ),
+            ),
           ],
         ),
         if (showCoach)

@@ -13,6 +13,7 @@ import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_toggle_row.dart';
+import 'package:rtu_mirea_app/promo/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 
 part 'select_row.dart';
@@ -157,6 +158,7 @@ Future<void> showSyncPolicySheet(
 Future<void> showHomeContentSheet(BuildContext context) {
   final l10n = context.l10n;
   final cubit = context.read<UiPreferencesCubit>();
+  final dismissals = context.read<PromoDismissalsCubit>();
   return showAppSheet<void>(
     context,
     title: l10n.settingsHomeContentTitle,
@@ -178,6 +180,15 @@ Future<void> showHomeContentSheet(BuildContext context) {
                   onChanged: (value) =>
                       cubit.setSection(section, enabled: value),
                 ),
+              SettingsToggleRow(
+                label: l10n.settingsShowPromoBanners,
+                horizontalPadding: AppSpacing.xl,
+                value: state.showPromoBanners,
+                onChanged: (value) {
+                  cubit.setShowPromoBanners(value: value);
+                  if (value) dismissals.reset();
+                },
+              ),
             ],
           );
         },

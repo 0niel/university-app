@@ -16,6 +16,7 @@ List<RouteBase> get $appRoutes => [
   $globalSearchRoute,
   $shellRouteData,
   $slideshowRoute,
+  $promoDetailsRoute,
 ];
 
 RouteBase get $onboardingRoute => GoRouteData.$route(
@@ -1432,4 +1433,33 @@ mixin $SlideshowRoute on GoRouteData {
   @override
   void replace(BuildContext context) =>
       context.replace(location, extra: _self.$extra);
+}
+
+RouteBase get $promoDetailsRoute => GoRouteData.$route(
+  path: '/promo/:slug',
+  factory: $PromoDetailsRoute._fromState,
+);
+
+mixin $PromoDetailsRoute on GoRouteData {
+  static PromoDetailsRoute _fromState(GoRouterState state) =>
+      PromoDetailsRoute(slug: state.pathParameters['slug']!);
+
+  PromoDetailsRoute get _self => this as PromoDetailsRoute;
+
+  @override
+  String get location =>
+      GoRouteData.$location('/promo/${Uri.encodeComponent(_self.slug)}');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
 }

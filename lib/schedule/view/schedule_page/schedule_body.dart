@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:promo_repository/promo_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
+import 'package:rtu_mirea_app/promo/promo.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
@@ -259,6 +261,14 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             ScheduleCalendarNotice(day: _day),
+                            PromoBannerSlot(
+                              placement: PromoPlacement.schedule,
+                              now: widget.now,
+                              compact: true,
+                              padding: const EdgeInsets.only(
+                                bottom: AppSpacing.sm,
+                              ),
+                            ),
                             if (state.isOffline) ...[
                               AppBanner(
                                 message: l10n.offlineFromCache,

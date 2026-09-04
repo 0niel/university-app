@@ -42,6 +42,7 @@ workspace:
   - packages/package_info_client
   - packages/permission_client
   - packages/preferences_repository
+  - packages/promo_repository
   - packages/schedule_exporter_repository
   - packages/schedule_repository
   - packages/share_launcher
@@ -218,6 +219,8 @@ dependencies:
   platform: ^3.0.2
   preferences_repository:
     path: packages/preferences_repository
+  promo_repository:
+    path: packages/promo_repository
   qr_flutter: ^4.1.0
   queue: ^3.0.0
   responsive_framework: ^1.5.1

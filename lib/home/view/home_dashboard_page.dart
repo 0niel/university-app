@@ -12,6 +12,7 @@ import 'package:rtu_mirea_app/home/cubit/home_stories_cubit.dart';
 import 'package:rtu_mirea_app/home/view/home_dashboard_content.dart';
 import 'package:rtu_mirea_app/home/view/home_dashboard_metrics.dart';
 import 'package:rtu_mirea_app/navigation/tab_reselect_notifier.dart';
+import 'package:rtu_mirea_app/promo/promo.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/services/services.dart';
 import 'package:rtu_mirea_app/top_discussions/top_discussions.dart';
@@ -79,11 +80,9 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
     super.didChangeDependencies();
     if (!_catalogRequested) {
       _catalogRequested = true;
-      unawaited(
-        context.read<ServiceCatalogCubit>().load(
-          locale: Localizations.localeOf(context).languageCode,
-        ),
-      );
+      final locale = Localizations.localeOf(context).languageCode;
+      unawaited(context.read<ServiceCatalogCubit>().load(locale: locale));
+      unawaited(context.read<PromoBannersCubit>().load(locale: locale));
     }
     final mode = TickerMode.getValuesNotifier(context);
     if (identical(mode, _tickerMode)) return;

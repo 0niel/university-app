@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:news_repository/news_repository.dart';
+import 'package:promo_repository/promo_repository.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/community/cubit/deadlines/deadlines.dart';
@@ -15,6 +16,7 @@ import 'package:rtu_mirea_app/home/cubit/home_stories_cubit.dart';
 import 'package:rtu_mirea_app/home/view/home_dashboard_content.dart';
 import 'package:rtu_mirea_app/notifications/notifications.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
+import 'package:rtu_mirea_app/promo/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/services/services.dart';
 import 'package:rtu_mirea_app/top_discussions/top_discussions.dart';
@@ -46,6 +48,12 @@ class _Favorites extends MockCubit<FavoriteServicesState>
 class _Catalog extends MockCubit<ServiceCatalogState>
     implements ServiceCatalogCubit {}
 
+class _Promo extends MockCubit<PromoBannersState>
+    implements PromoBannersCubit {}
+
+class _PromoDismissals extends MockCubit<PromoDismissalsState>
+    implements PromoDismissalsCubit {}
+
 class _Notifications extends MockCubit<NotificationsState>
     implements NotificationsCubit {}
 
@@ -68,6 +76,7 @@ Widget homeDashboardFixture({
   Widget? child,
   DateTime? clock,
   DateTime? selectedDay,
+  List<PromoBanner>? promoBanners,
   List<SchedulePart>? scheduleOverride,
   String userName = 'Олег Ковалёв',
 }) {
@@ -271,6 +280,18 @@ Widget homeDashboardFixture({
   final catalog = _Catalog();
   when(() => catalog.state).thenReturn(const ServiceCatalogState());
   when(() => catalog.load(locale: 'ru')).thenAnswer((_) async {});
+  registerFallbackValue(PromoPlacement.home);
+  registerFallbackValue(
+    const PromoBanner(id: '', slug: '', title: '', ctaUrl: 'https://x.y'),
+  );
+  final promo = _Promo();
+  when(() => promo.state).thenReturn(
+    PromoBannersState(loaded: true, banners: promoBanners ?? const []),
+  );
+  when(() => promo.load(locale: 'ru')).thenAnswer((_) async {});
+  when(() => promo.trackImpression(any(), any())).thenReturn(null);
+  final promoDismissals = _PromoDismissals();
+  when(() => promoDismissals.state).thenReturn(const PromoDismissalsState());
   final notifications = _Notifications();
   when(() => notifications.state).thenReturn(
     NotificationsState(
@@ -349,6 +370,8 @@ Widget homeDashboardFixture({
         BlocProvider<UiPreferencesCubit>.value(value: preferences),
         BlocProvider<FavoriteServicesCubit>.value(value: favorites),
         BlocProvider<ServiceCatalogCubit>.value(value: catalog),
+        BlocProvider<PromoBannersCubit>.value(value: promo),
+        BlocProvider<PromoDismissalsCubit>.value(value: promoDismissals),
         BlocProvider<NotificationsCubit>.value(value: notifications),
         BlocProvider<ExamReadinessCubit>.value(value: exam),
         BlocProvider<HomeCubit>.value(value: home),

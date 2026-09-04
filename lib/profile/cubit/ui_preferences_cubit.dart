@@ -24,6 +24,10 @@ class UiPreferencesCubit extends HydratedCubit<UiPreferencesState> {
     emit(state.copyWith(showLessonReactions: value));
   }
 
+  void setShowPromoBanners({required bool value}) {
+    emit(state.copyWith(showPromoBanners: value));
+  }
+
   void setLessonTypeColor(String lessonType, int color) {
     emit(
       state.copyWith(

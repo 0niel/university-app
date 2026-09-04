@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UiPreferencesState {
 
-@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson) Set<HomeSection> get enabledSections; bool get showLessonReactions; Map<String, int> get lessonTypeColors;
+@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson) Set<HomeSection> get enabledSections; bool get showLessonReactions; bool get showPromoBanners; Map<String, int> get lessonTypeColors;
 /// Create a copy of UiPreferencesState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $UiPreferencesStateCopyWith<UiPreferencesState> get copyWith => _$UiPreferencesS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UiPreferencesState&&const DeepCollectionEquality().equals(other.enabledSections, enabledSections)&&(identical(other.showLessonReactions, showLessonReactions) || other.showLessonReactions == showLessonReactions)&&const DeepCollectionEquality().equals(other.lessonTypeColors, lessonTypeColors));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UiPreferencesState&&const DeepCollectionEquality().equals(other.enabledSections, enabledSections)&&(identical(other.showLessonReactions, showLessonReactions) || other.showLessonReactions == showLessonReactions)&&(identical(other.showPromoBanners, showPromoBanners) || other.showPromoBanners == showPromoBanners)&&const DeepCollectionEquality().equals(other.lessonTypeColors, lessonTypeColors));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(enabledSections),showLessonReactions,const DeepCollectionEquality().hash(lessonTypeColors));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(enabledSections),showLessonReactions,showPromoBanners,const DeepCollectionEquality().hash(lessonTypeColors));
 
 @override
 String toString() {
-  return 'UiPreferencesState(enabledSections: $enabledSections, showLessonReactions: $showLessonReactions, lessonTypeColors: $lessonTypeColors)';
+  return 'UiPreferencesState(enabledSections: $enabledSections, showLessonReactions: $showLessonReactions, showPromoBanners: $showPromoBanners, lessonTypeColors: $lessonTypeColors)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $UiPreferencesStateCopyWith<$Res>  {
   factory $UiPreferencesStateCopyWith(UiPreferencesState value, $Res Function(UiPreferencesState) _then) = _$UiPreferencesStateCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson) Set<HomeSection> enabledSections, bool showLessonReactions, Map<String, int> lessonTypeColors
+@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson) Set<HomeSection> enabledSections, bool showLessonReactions, bool showPromoBanners, Map<String, int> lessonTypeColors
 });
 
 
@@ -65,10 +65,11 @@ class _$UiPreferencesStateCopyWithImpl<$Res>
 
 /// Create a copy of UiPreferencesState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabledSections = null,Object? showLessonReactions = null,Object? lessonTypeColors = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabledSections = null,Object? showLessonReactions = null,Object? showPromoBanners = null,Object? lessonTypeColors = null,}) {
   return _then(_self.copyWith(
 enabledSections: null == enabledSections ? _self.enabledSections : enabledSections // ignore: cast_nullable_to_non_nullable
 as Set<HomeSection>,showLessonReactions: null == showLessonReactions ? _self.showLessonReactions : showLessonReactions // ignore: cast_nullable_to_non_nullable
+as bool,showPromoBanners: null == showPromoBanners ? _self.showPromoBanners : showPromoBanners // ignore: cast_nullable_to_non_nullable
 as bool,lessonTypeColors: null == lessonTypeColors ? _self.lessonTypeColors : lessonTypeColors // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,
   ));
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson)  Set<HomeSection> enabledSections,  bool showLessonReactions,  Map<String, int> lessonTypeColors)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson)  Set<HomeSection> enabledSections,  bool showLessonReactions,  bool showPromoBanners,  Map<String, int> lessonTypeColors)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UiPreferencesState() when $default != null:
-return $default(_that.enabledSections,_that.showLessonReactions,_that.lessonTypeColors);case _:
+return $default(_that.enabledSections,_that.showLessonReactions,_that.showPromoBanners,_that.lessonTypeColors);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.enabledSections,_that.showLessonReactions,_that.lessonType
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson)  Set<HomeSection> enabledSections,  bool showLessonReactions,  Map<String, int> lessonTypeColors)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson)  Set<HomeSection> enabledSections,  bool showLessonReactions,  bool showPromoBanners,  Map<String, int> lessonTypeColors)  $default,) {final _that = this;
 switch (_that) {
 case _UiPreferencesState():
-return $default(_that.enabledSections,_that.showLessonReactions,_that.lessonTypeColors);case _:
+return $default(_that.enabledSections,_that.showLessonReactions,_that.showPromoBanners,_that.lessonTypeColors);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +197,10 @@ return $default(_that.enabledSections,_that.showLessonReactions,_that.lessonType
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson)  Set<HomeSection> enabledSections,  bool showLessonReactions,  Map<String, int> lessonTypeColors)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson)  Set<HomeSection> enabledSections,  bool showLessonReactions,  bool showPromoBanners,  Map<String, int> lessonTypeColors)?  $default,) {final _that = this;
 switch (_that) {
 case _UiPreferencesState() when $default != null:
-return $default(_that.enabledSections,_that.showLessonReactions,_that.lessonTypeColors);case _:
+return $default(_that.enabledSections,_that.showLessonReactions,_that.showPromoBanners,_that.lessonTypeColors);case _:
   return null;
 
 }
@@ -211,7 +212,7 @@ return $default(_that.enabledSections,_that.showLessonReactions,_that.lessonType
 @JsonSerializable()
 
 class _UiPreferencesState extends UiPreferencesState {
-  const _UiPreferencesState({@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson) final  Set<HomeSection> enabledSections = kAllHomeSections, this.showLessonReactions = true, final  Map<String, int> lessonTypeColors = kDefaultLessonTypeColors}): _enabledSections = enabledSections,_lessonTypeColors = lessonTypeColors,super._();
+  const _UiPreferencesState({@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson) final  Set<HomeSection> enabledSections = kAllHomeSections, this.showLessonReactions = true, this.showPromoBanners = true, final  Map<String, int> lessonTypeColors = kDefaultLessonTypeColors}): _enabledSections = enabledSections,_lessonTypeColors = lessonTypeColors,super._();
   factory _UiPreferencesState.fromJson(Map<String, dynamic> json) => _$UiPreferencesStateFromJson(json);
 
  final  Set<HomeSection> _enabledSections;
@@ -222,6 +223,7 @@ class _UiPreferencesState extends UiPreferencesState {
 }
 
 @override@JsonKey() final  bool showLessonReactions;
+@override@JsonKey() final  bool showPromoBanners;
  final  Map<String, int> _lessonTypeColors;
 @override@JsonKey() Map<String, int> get lessonTypeColors {
   if (_lessonTypeColors is EqualUnmodifiableMapView) return _lessonTypeColors;
@@ -243,16 +245,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UiPreferencesState&&const DeepCollectionEquality().equals(other._enabledSections, _enabledSections)&&(identical(other.showLessonReactions, showLessonReactions) || other.showLessonReactions == showLessonReactions)&&const DeepCollectionEquality().equals(other._lessonTypeColors, _lessonTypeColors));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UiPreferencesState&&const DeepCollectionEquality().equals(other._enabledSections, _enabledSections)&&(identical(other.showLessonReactions, showLessonReactions) || other.showLessonReactions == showLessonReactions)&&(identical(other.showPromoBanners, showPromoBanners) || other.showPromoBanners == showPromoBanners)&&const DeepCollectionEquality().equals(other._lessonTypeColors, _lessonTypeColors));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_enabledSections),showLessonReactions,const DeepCollectionEquality().hash(_lessonTypeColors));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_enabledSections),showLessonReactions,showPromoBanners,const DeepCollectionEquality().hash(_lessonTypeColors));
 
 @override
 String toString() {
-  return 'UiPreferencesState(enabledSections: $enabledSections, showLessonReactions: $showLessonReactions, lessonTypeColors: $lessonTypeColors)';
+  return 'UiPreferencesState(enabledSections: $enabledSections, showLessonReactions: $showLessonReactions, showPromoBanners: $showPromoBanners, lessonTypeColors: $lessonTypeColors)';
 }
 
 
@@ -263,7 +265,7 @@ abstract mixin class _$UiPreferencesStateCopyWith<$Res> implements $UiPreference
   factory _$UiPreferencesStateCopyWith(_UiPreferencesState value, $Res Function(_UiPreferencesState) _then) = __$UiPreferencesStateCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson) Set<HomeSection> enabledSections, bool showLessonReactions, Map<String, int> lessonTypeColors
+@JsonKey(fromJson: _homeSectionsFromJson, toJson: _homeSectionsToJson) Set<HomeSection> enabledSections, bool showLessonReactions, bool showPromoBanners, Map<String, int> lessonTypeColors
 });
 
 
@@ -280,10 +282,11 @@ class __$UiPreferencesStateCopyWithImpl<$Res>
 
 /// Create a copy of UiPreferencesState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enabledSections = null,Object? showLessonReactions = null,Object? lessonTypeColors = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabledSections = null,Object? showLessonReactions = null,Object? showPromoBanners = null,Object? lessonTypeColors = null,}) {
   return _then(_UiPreferencesState(
 enabledSections: null == enabledSections ? _self._enabledSections : enabledSections // ignore: cast_nullable_to_non_nullable
 as Set<HomeSection>,showLessonReactions: null == showLessonReactions ? _self.showLessonReactions : showLessonReactions // ignore: cast_nullable_to_non_nullable
+as bool,showPromoBanners: null == showPromoBanners ? _self.showPromoBanners : showPromoBanners // ignore: cast_nullable_to_non_nullable
 as bool,lessonTypeColors: null == lessonTypeColors ? _self._lessonTypeColors : lessonTypeColors // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,
   ));

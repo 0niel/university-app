@@ -12203,4 +12203,78 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get pollsQuestionTextHint => 'Текст вопроса';
+
+  @override
+  String get promoHideSheetTitle => 'Скрыть предложение';
+
+  @override
+  String get promoHideSheetSubtitle =>
+      'Вернуть партнёрские предложения можно в настройках главной.';
+
+  @override
+  String promoSnoozeDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Скрыть на $count дней',
+      few: 'Скрыть на $count дня',
+      one: 'Скрыть на $count день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String promoSnoozeHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Скрыть на $count часов',
+      few: 'Скрыть на $count часа',
+      one: 'Скрыть на $count час',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get promoHideForever => 'Больше не показывать';
+
+  @override
+  String get promoHiddenToast =>
+      'Скрыто. Партнёрские предложения можно вернуть в настройках главной.';
+
+  @override
+  String get promoDetailsTitle => 'Как заработать';
+
+  @override
+  String get promoNotFound => 'Предложение больше не доступно';
+
+  @override
+  String get promoOpenLinkError => 'Не удалось открыть ссылку';
+
+  @override
+  String get promoContactTitle => 'Остались вопросы?';
+
+  @override
+  String get promoContactTelegram => 'Написать в Telegram';
+
+  @override
+  String get promoWrite => 'Написать';
+
+  @override
+  String get promoSectionFacts => 'Коротко о главном';
+
+  @override
+  String get promoSectionSteps => 'Как начать';
+
+  @override
+  String get promoSectionChecklist => 'Что нужно';
+
+  @override
+  String get promoSectionFaq => 'Частые вопросы';
+
+  @override
+  String get promoSectionLinks => 'Полезное';
+
+  @override
+  String get settingsShowPromoBanners => 'Партнёрские предложения';
 }

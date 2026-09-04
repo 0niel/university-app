@@ -36,6 +36,7 @@ import 'package:rtu_mirea_app/onboarding/view/onboarding_page.dart';
 import 'package:rtu_mirea_app/people/people.dart';
 import 'package:rtu_mirea_app/polls/polls.dart';
 import 'package:rtu_mirea_app/profile/profile.dart';
+import 'package:rtu_mirea_app/promo/promo.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/schedule_diff/view/view.dart';
 import 'package:rtu_mirea_app/schedule_management/schedule_management.dart';
@@ -628,6 +629,19 @@ class MentorshipRoute extends GoRouteData with $MentorshipRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const MentorshipPage();
+  }
+}
+
+@TypedGoRoute<PromoDetailsRoute>(path: '/promo/:slug')
+@immutable
+class PromoDetailsRoute extends GoRouteData with $PromoDetailsRoute {
+  const PromoDetailsRoute({required this.slug});
+
+  final String slug;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return PromoDetailsPage(slug: slug);
   }
 }
 
