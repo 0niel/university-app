@@ -36,6 +36,7 @@ export 'app_press_state.dart';
 export 'app_pressable.dart';
 export 'app_privacy_chip.dart';
 export 'app_progress_ring.dart';
+export 'app_promo_card.dart';
 export 'app_pulse_dot.dart';
 export 'app_reaction_chip.dart';
 export 'app_row_trailing.dart';

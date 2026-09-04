@@ -11780,5 +11780,87 @@
   "pollsQuestionTextHint": "Question text",
   "@pollsQuestionTextHint": {
     "description": "Creator wizard question text field hint"
+  },
+  "promoHideSheetTitle": "Hide this offer",
+  "@promoHideSheetTitle": {
+    "description": "Title of the sheet with promo banner dismiss options"
+  },
+  "promoHideSheetSubtitle": "You can bring partner offers back in the home screen settings.",
+  "@promoHideSheetSubtitle": {
+    "description": "Subtitle of the promo dismiss sheet"
+  },
+  "promoSnoozeDays": "{count, plural, one{Hide for {count} day} other{Hide for {count} days}}",
+  "@promoSnoozeDays": {
+    "description": "Snooze option measured in days",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promoSnoozeHours": "{count, plural, one{Hide for {count} hour} other{Hide for {count} hours}}",
+  "@promoSnoozeHours": {
+    "description": "Snooze option measured in hours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promoHideForever": "Don't show again",
+  "@promoHideForever": {
+    "description": "Permanent dismiss option for a promo banner"
+  },
+  "promoHiddenToast": "Hidden. Partner offers can be re-enabled in home settings.",
+  "@promoHiddenToast": {
+    "description": "Toast after hiding a promo banner forever"
+  },
+  "promoDetailsTitle": "How to earn",
+  "@promoDetailsTitle": {
+    "description": "Header title of the promo details page"
+  },
+  "promoNotFound": "This offer is no longer available",
+  "@promoNotFound": {
+    "description": "Empty state when a promo slug is unknown"
+  },
+  "promoOpenLinkError": "Couldn't open the link",
+  "@promoOpenLinkError": {
+    "description": "Toast when a promo link fails to launch"
+  },
+  "promoContactTitle": "Questions?",
+  "@promoContactTitle": {
+    "description": "Default title of the promo contact card"
+  },
+  "promoContactTelegram": "Message on Telegram",
+  "@promoContactTelegram": {
+    "description": "Semantics label for the promo Telegram contact button"
+  },
+  "promoWrite": "Message",
+  "@promoWrite": {
+    "description": "Action label on the promo contact card"
+  },
+  "promoSectionFacts": "Key facts",
+  "@promoSectionFacts": {
+    "description": "Fallback title for a promo facts section"
+  },
+  "promoSectionSteps": "How to start",
+  "@promoSectionSteps": {
+    "description": "Fallback title for a promo steps section"
+  },
+  "promoSectionChecklist": "What you need",
+  "@promoSectionChecklist": {
+    "description": "Fallback title for a promo checklist section"
+  },
+  "promoSectionFaq": "FAQ",
+  "@promoSectionFaq": {
+    "description": "Fallback title for a promo FAQ section"
+  },
+  "promoSectionLinks": "Useful links",
+  "@promoSectionLinks": {
+    "description": "Fallback title for a promo links section"
+  },
+  "settingsShowPromoBanners": "Partner offers",
+  "@settingsShowPromoBanners": {
+    "description": "Home content toggle that shows or hides promo banners"
   }
 }

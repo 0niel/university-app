@@ -20905,6 +20905,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Question text'**
   String get pollsQuestionTextHint;
+
+  /// Title of the sheet with promo banner dismiss options
+  ///
+  /// In en, this message translates to:
+  /// **'Hide this offer'**
+  String get promoHideSheetTitle;
+
+  /// Subtitle of the promo dismiss sheet
+  ///
+  /// In en, this message translates to:
+  /// **'You can bring partner offers back in the home screen settings.'**
+  String get promoHideSheetSubtitle;
+
+  /// Snooze option measured in days
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Hide for {count} day} other{Hide for {count} days}}'**
+  String promoSnoozeDays(int count);
+
+  /// Snooze option measured in hours
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Hide for {count} hour} other{Hide for {count} hours}}'**
+  String promoSnoozeHours(int count);
+
+  /// Permanent dismiss option for a promo banner
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t show again'**
+  String get promoHideForever;
+
+  /// Toast after hiding a promo banner forever
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden. Partner offers can be re-enabled in home settings.'**
+  String get promoHiddenToast;
+
+  /// Header title of the promo details page
+  ///
+  /// In en, this message translates to:
+  /// **'How to earn'**
+  String get promoDetailsTitle;
+
+  /// Empty state when a promo slug is unknown
+  ///
+  /// In en, this message translates to:
+  /// **'This offer is no longer available'**
+  String get promoNotFound;
+
+  /// Toast when a promo link fails to launch
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the link'**
+  String get promoOpenLinkError;
+
+  /// Default title of the promo contact card
+  ///
+  /// In en, this message translates to:
+  /// **'Questions?'**
+  String get promoContactTitle;
+
+  /// Semantics label for the promo Telegram contact button
+  ///
+  /// In en, this message translates to:
+  /// **'Message on Telegram'**
+  String get promoContactTelegram;
+
+  /// Action label on the promo contact card
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get promoWrite;
+
+  /// Fallback title for a promo facts section
+  ///
+  /// In en, this message translates to:
+  /// **'Key facts'**
+  String get promoSectionFacts;
+
+  /// Fallback title for a promo steps section
+  ///
+  /// In en, this message translates to:
+  /// **'How to start'**
+  String get promoSectionSteps;
+
+  /// Fallback title for a promo checklist section
+  ///
+  /// In en, this message translates to:
+  /// **'What you need'**
+  String get promoSectionChecklist;
+
+  /// Fallback title for a promo FAQ section
+  ///
+  /// In en, this message translates to:
+  /// **'FAQ'**
+  String get promoSectionFaq;
+
+  /// Fallback title for a promo links section
+  ///
+  /// In en, this message translates to:
+  /// **'Useful links'**
+  String get promoSectionLinks;
+
+  /// Home content toggle that shows or hides promo banners
+  ///
+  /// In en, this message translates to:
+  /// **'Partner offers'**
+  String get settingsShowPromoBanners;
 }
 
 class _AppLocalizationsDelegate

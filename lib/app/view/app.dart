@@ -29,6 +29,7 @@ import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/nfc_pass.dart';
 import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
+import 'package:rtu_mirea_app/promo/promo.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
@@ -81,6 +82,7 @@ class App extends StatelessWidget {
             RepositoryProvider.value(value: appScope.campusRepository),
             RepositoryProvider.value(value: appScope.studyGroupsRepository),
             RepositoryProvider.value(value: appScope.serviceCatalogRepository),
+            RepositoryProvider.value(value: appScope.promoRepository),
             RepositoryProvider.value(
               value: appScope.localNotificationsRepository,
             ),
@@ -106,6 +108,10 @@ class App extends StatelessWidget {
                 ),
               ),
               BlocProvider(create: (_) => SyncPreferencesCubit()),
+              BlocProvider(
+                create: (_) => PromoBannersCubit(appScope.promoRepository),
+              ),
+              BlocProvider(create: (_) => PromoDismissalsCubit()),
               BlocProvider(
                 create: (_) =>
                     PassSecurityCubit(localAuthClient: LocalAuthClient()),

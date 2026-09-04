@@ -29,6 +29,7 @@ abstract class UiPreferencesState with _$UiPreferencesState {
     @Default(kAllHomeSections)
     Set<HomeSection> enabledSections,
     @Default(true) bool showLessonReactions,
+    @Default(true) bool showPromoBanners,
     @Default(kDefaultLessonTypeColors) Map<String, int> lessonTypeColors,
   }) = _UiPreferencesState;
 

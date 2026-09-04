@@ -12011,4 +12011,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pollsQuestionTextHint => 'Question text';
+
+  @override
+  String get promoHideSheetTitle => 'Hide this offer';
+
+  @override
+  String get promoHideSheetSubtitle =>
+      'You can bring partner offers back in the home screen settings.';
+
+  @override
+  String promoSnoozeDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Hide for $count days',
+      one: 'Hide for $count day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String promoSnoozeHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Hide for $count hours',
+      one: 'Hide for $count hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get promoHideForever => 'Don\'t show again';
+
+  @override
+  String get promoHiddenToast =>
+      'Hidden. Partner offers can be re-enabled in home settings.';
+
+  @override
+  String get promoDetailsTitle => 'How to earn';
+
+  @override
+  String get promoNotFound => 'This offer is no longer available';
+
+  @override
+  String get promoOpenLinkError => 'Couldn\'t open the link';
+
+  @override
+  String get promoContactTitle => 'Questions?';
+
+  @override
+  String get promoContactTelegram => 'Message on Telegram';
+
+  @override
+  String get promoWrite => 'Message';
+
+  @override
+  String get promoSectionFacts => 'Key facts';
+
+  @override
+  String get promoSectionSteps => 'How to start';
+
+  @override
+  String get promoSectionChecklist => 'What you need';
+
+  @override
+  String get promoSectionFaq => 'FAQ';
+
+  @override
+  String get promoSectionLinks => 'Useful links';
+
+  @override
+  String get settingsShowPromoBanners => 'Partner offers';
 }

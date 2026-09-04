@@ -19,6 +19,7 @@ import 'package:package_info_client/package_info_client.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:persistent_storage/persistent_storage.dart';
 import 'package:preferences_repository/preferences_repository.dart';
+import 'package:promo_repository/promo_repository.dart';
 import 'package:rtu_mirea_app/common/utils/logger.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/main/bootstrap/bloc_observer_initializer.dart';
@@ -52,6 +53,7 @@ abstract class AppScope implements Scope {
   CommunityRepository get communityRepository;
   CommunityCatalogRepository get communityCatalogRepository;
   ServiceCatalogRepository get serviceCatalogRepository;
+  PromoRepository get promoRepository;
   NewsRepository get newsRepository;
   ArticleRepository get articleRepository;
   NfcPassRepository get nfcPassRepository;
@@ -199,6 +201,13 @@ class AppScopeContainer extends ScopeContainer implements AppScope {
       organizationId: _universityConfigDep.get.organizationId,
     ),
   );
+  late final Dep<PromoRepository> _promoRepositoryDep = dep(
+    () => PromoRepository(
+      supabase: _supabaseClientDep.get,
+      organizationId: _universityConfigDep.get.organizationId,
+      cache: _persistentStorageDep.get,
+    ),
+  );
   late final Dep<NewsRepository> _newsRepositoryDep = dep(
     () => NewsRepository(
       dataSource: SupabaseNewsRemoteDataSource(_supabaseClientDep.get),
@@ -316,6 +325,8 @@ class AppScopeContainer extends ScopeContainer implements AppScope {
   @override
   ServiceCatalogRepository get serviceCatalogRepository =>
       _serviceCatalogRepositoryDep.get;
+  @override
+  PromoRepository get promoRepository => _promoRepositoryDep.get;
   @override
   NewsRepository get newsRepository => _newsRepositoryDep.get;
   @override
