@@ -107,4 +107,31 @@ void main() {
 
     expect(lessonNumberOf(lesson), 1);
   });
+
+  group('schedule labels', () {
+    test('shortens a full teacher name without changing compact names', () {
+      expect(
+        shortTeacherName('Акатьев Ярослав Алексеевич'),
+        'Акатьев Я. А.',
+      );
+      expect(shortTeacherName('Соколова М. В.'), 'Соколова М. В.');
+      expect(shortTeacherName('Иванов И.И.'), 'Иванов И. И.');
+    });
+
+    test('adds the short campus name to the classroom', () {
+      expect(
+        classroomLabel(
+          const Classroom(
+            name: 'А-415-6',
+            campus: Campus(
+              name: 'Проспект Вернадского, д.78',
+              shortName: 'В-78',
+            ),
+          ),
+        ),
+        'А-415-6 · В-78',
+      );
+      expect(classroomLabel(const Classroom(name: 'Online')), 'Online');
+    });
+  });
 }

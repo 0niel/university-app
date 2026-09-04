@@ -25,8 +25,6 @@ class ScheduleLessonEntry extends ScheduleTimelineEntry {
 
   bool get moved => isMoved(change);
 
-  String? get movedRoom => change?.newValue.rooms.firstOrNull;
-
   String? get previousRoom => change?.oldValue.rooms.firstOrNull;
 }
 

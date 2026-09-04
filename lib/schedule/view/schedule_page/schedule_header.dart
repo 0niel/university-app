@@ -11,11 +11,13 @@ class ScheduleHeader extends StatelessWidget {
   const ScheduleHeader({
     required this.day,
     required this.name,
+    this.nameSemanticsLabel,
     this.topInset = 0,
     super.key,
   });
   final DateTime day;
   final String? name;
+  final String? nameSemanticsLabel;
   final double topInset;
 
   @override
@@ -53,7 +55,7 @@ class ScheduleHeader extends StatelessWidget {
         Flexible(
           child: AppPressable(
             onTap: () => const ScheduleManagementRoute().push<void>(context),
-            semanticsLabel: name ?? l10n.schedules,
+            semanticsLabel: nameSemanticsLabel ?? name ?? l10n.schedules,
             child: Container(
               constraints: const BoxConstraints(
                 minHeight: AppControlSize.touchTarget,

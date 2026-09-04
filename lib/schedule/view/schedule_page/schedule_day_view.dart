@@ -422,7 +422,7 @@ class ScheduleTimelineLesson extends StatelessWidget {
       else if (entry.moved && entry.previousRoom != null)
         l10n.lessonMetaMoved(
           type,
-          entry.movedRoom ?? singleClassroomText(l10n, lesson),
+          singleClassroomText(l10n, lesson),
           entry.previousRoom!,
         )
       else ...[

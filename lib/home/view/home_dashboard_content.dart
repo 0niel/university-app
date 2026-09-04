@@ -34,16 +34,9 @@ import 'package:rtu_mirea_app/top_discussions/top_discussions.dart';
 import 'package:rtu_mirea_app/top_discussions/view/discourse_topic_utils.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-Future<void> _openTopic(BuildContext context, DiscourseTopic topic) async {
-  final repository = context.read<CommunityRepository>();
+void _openTopic(BuildContext context, DiscourseTopic topic) {
   final forumUrl = context.read<UniversityConfig>().communityForumUrl;
-  try {
-    final post = await repository.getTopicFirstPost(topic.id);
-    if (!context.mounted) return;
-    DiscoursePostOverviewRoute(postId: post.id).go(context);
-  } on Exception {
-    openDiscourseTopic(forumUrl, topic.id);
-  }
+  unawaited(openDiscourseTopic(forumUrl, topic.id));
 }
 
 class HomeDashboardContent extends StatelessWidget {
@@ -388,7 +381,7 @@ class HomeDashboardContent extends StatelessWidget {
                 HomeTrendingGroup(
                   state: context.watch<DiscourseBloc>().state,
                   onAll: () => const CommunitiesRoute().go(context),
-                  onOpen: (topic) => unawaited(_openTopic(context, topic)),
+                  onOpen: (topic) => _openTopic(context, topic),
                   onRetry: () => context.read<DiscourseBloc>().add(
                     const DiscourseTopTopicsRequested(),
                   ),

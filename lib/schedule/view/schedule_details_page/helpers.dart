@@ -39,8 +39,11 @@ String _timeRange(LessonSchedulePart lesson) {
 }
 
 String _classroomLine(AppLocalizations l10n, LessonSchedulePart lesson) {
-  return lesson.classrooms.firstOrNull?.name ??
-      l10n.lessonDetailsRoomNotSpecified;
+  if (lesson.classrooms.isEmpty) return l10n.lessonDetailsRoomNotSpecified;
+  final classroom = lesson.classrooms.firstOrNull;
+  return classroom == null
+      ? l10n.lessonDetailsRoomNotSpecified
+      : classroomLabel(classroom);
 }
 
 String _materialTypeLabel(AppLocalizations l10n, LessonMaterialType type) {

@@ -11,7 +11,7 @@ import '../../../helpers/pump_app.dart';
 import 'mock_schedule_repository.dart';
 
 void main() {
-  testWidgets('future lesson does not show an empty progress card', (
+  testWidgets('future lesson shows campus and no empty progress card', (
     tester,
   ) async {
     final scheduleRepository = MockScheduleRepository();
@@ -38,7 +38,15 @@ void main() {
       subject: 'Логика',
       lessonType: .lecture,
       teachers: const [],
-      classrooms: const [],
+      classrooms: const [
+        Classroom(
+          name: 'А-415-6',
+          campus: Campus(
+            name: 'Проспект Вернадского, д.78',
+            shortName: 'В-78',
+          ),
+        ),
+      ],
       lessonBells: LessonBells(
         number: 1,
         startTime: const TimeOfDay(hour: 9, minute: 0),
@@ -71,6 +79,7 @@ void main() {
 
     expect(find.text('Скоро'), findsNothing);
     expect(find.text('0%'), findsNothing);
+    expect(find.text('А-415-6 · В-78'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

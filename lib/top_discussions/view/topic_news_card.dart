@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:community_repository/community_repository.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +22,7 @@ class TopicNewsCard extends StatelessWidget {
     final forumUrl = context.read<UniversityConfig>().communityForumUrl;
 
     return AppPressable(
-      onTap: () => openDiscourseTopic(forumUrl, topic.id),
+      onTap: () => unawaited(openDiscourseTopic(forumUrl, topic.id)),
       semanticsLabel: topic.title,
       child: Container(
         width: 296,

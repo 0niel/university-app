@@ -49,7 +49,8 @@ void main() {
     expect(tester.getSize(actions).height, closeTo(74, .5));
     expect(tester.getSize(actions).width, closeTo(81.5, .5));
     expect(find.text('Вторник, 1 сентября'), findsOneWidget);
-    expect(find.text('В-78 · на карте'), findsOneWidget);
+    expect(find.text('И-204 · В-78'), findsOneWidget);
+    expect(find.text('на карте'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
