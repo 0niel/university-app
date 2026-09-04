@@ -155,6 +155,14 @@ void main() {
     expect(workflow, contains('artifact_run_id:'));
     expect(workflow, contains('verify_build_number:'));
     expect(workflow, contains('verify_marketing_version:'));
+    expect(workflow, contains('verify_release_status:'));
+    expect(workflow, contains('&& !inputs.verify_release_status'));
+    expect(workflow, contains('status_args+=(--release-status)'));
+    expect(workflow, contains(r'"${status_args[@]}"'));
+    expect(
+      workflow,
+      contains('App Store build number is required for release status'),
+    );
     expect(workflow, contains('actions: read'));
     expect(workflow, contains('group: shorebird-ios-release'));
     expect(workflow, contains('cancel-in-progress: false'));

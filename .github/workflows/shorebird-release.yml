@@ -18,6 +18,11 @@ on:
         required: false
         type: string
         default: ''
+      verify_release_status:
+        description: Check App Store release state without building or uploading
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   actions: read
@@ -29,7 +34,7 @@ concurrency:
 
 jobs:
   release:
-    if: ${{ inputs.artifact_run_id == '' && inputs.verify_build_number == '' && inputs.verify_marketing_version == '' }}
+    if: ${{ inputs.artifact_run_id == '' && inputs.verify_build_number == '' && inputs.verify_marketing_version == '' && !inputs.verify_release_status }}
     runs-on: macos-15
     timeout-minutes: 60
     environment: beta
@@ -288,7 +293,7 @@ jobs:
 
   publish:
     needs: release
-    if: ${{ always() && (needs.release.result == 'success' || inputs.artifact_run_id != '' || inputs.verify_build_number != '' || inputs.verify_marketing_version != '') }}
+    if: ${{ always() && (needs.release.result == 'success' || inputs.artifact_run_id != '' || inputs.verify_build_number != '' || inputs.verify_marketing_version != '' || inputs.verify_release_status) }}
     runs-on: macos-15
     timeout-minutes: 30
     environment: beta
@@ -307,6 +312,7 @@ jobs:
           APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
           APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+          VERIFY_RELEASE_STATUS: ${{ inputs.verify_release_status }}
           VERIFY_BUILD_NUMBER: ${{ inputs.verify_build_number }}
           VERIFY_MARKETING_VERSION: ${{ inputs.verify_marketing_version }}
         run: |
@@ -335,6 +341,10 @@ jobs:
           fi
           if [[ -z "$VERIFY_BUILD_NUMBER" && -n "$VERIFY_MARKETING_VERSION" ]]; then
             printf 'App Store build number is required for verification\n' >&2
+            exit 1
+          fi
+          if [[ "$VERIFY_RELEASE_STATUS" == 'true' && -z "$VERIFY_BUILD_NUMBER" ]]; then
+            printf 'App Store build number is required for release status\n' >&2
             exit 1
           fi
           if [[ -n "$ARTIFACT_RUN_ID" && -n "$VERIFY_BUILD_NUMBER" ]]; then
@@ -405,7 +415,12 @@ jobs:
           APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
           VERIFY_BUILD_NUMBER: ${{ inputs.verify_build_number }}
           VERIFY_MARKETING_VERSION: ${{ inputs.verify_marketing_version }}
+          VERIFY_RELEASE_STATUS: ${{ inputs.verify_release_status }}
         run: |
+          status_args=()
+          if [[ "$VERIFY_RELEASE_STATUS" == 'true' ]]; then
+            status_args+=(--release-status)
+          fi
           build_number="$VERIFY_BUILD_NUMBER"
           marketing_version="$VERIFY_MARKETING_VERSION"
           if [[ -z "$build_number" ]]; then
@@ -432,7 +447,8 @@ jobs:
             --issuer-id "$APPSTORE_API_ISSUER_ID" \
             --private-key "$HOME/.appstoreconnect/private_keys/AuthKey_$APPSTORE_API_KEY_ID.p8" \
             --timeout 1200 \
-            --interval 30
+            --interval 30 \
+            "${status_args[@]}"
 
       - name: Remove App Store Connect key
         if: always()
