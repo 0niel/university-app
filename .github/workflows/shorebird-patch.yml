@@ -150,6 +150,7 @@ jobs:
               "test/top_discussions/view/discourse_topic_utils_test.dart",
           }
           allowed = current_allowed if os.environ["RELEASE_VERSION"] == "5.2.0+1004201" else legacy_allowed
+          added = {"test/top_discussions/view/discourse_topic_utils_test.dart"} if allowed is current_allowed else set()
           def git(*args):
               return subprocess.check_output(["git", *args]).decode().strip()
 
@@ -159,11 +160,16 @@ jobs:
           changed = set(filter(None, git("diff", "--name-only", "--no-renames", "-z", baseline, source).split("\0")))
           if changed != allowed:
               raise SystemExit("Hotfix must change exactly the five approved Dart files")
-          for revision in (baseline, source):
-              for path in sorted(allowed):
-                  entry = git("ls-tree", revision, "--", path)
-                  if not entry.startswith("100644 blob "):
-                      raise SystemExit("Hotfix paths must remain regular source files")
+          for path in sorted(allowed):
+              source_entry = git("ls-tree", source, "--", path)
+              baseline_entry = git("ls-tree", baseline, "--", path)
+              if not source_entry.startswith("100644 blob "):
+                  raise SystemExit("Hotfix paths must remain regular source files")
+              if path in added:
+                  if baseline_entry:
+                      raise SystemExit("Added hotfix paths must not exist in the baseline")
+              elif not baseline_entry.startswith("100644 blob "):
+                  raise SystemExit("Hotfix paths must remain regular source files")
           subprocess.run(["git", "diff", "--check", baseline, source], check=True)
           PY
 
