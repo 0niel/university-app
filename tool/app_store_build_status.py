@@ -183,6 +183,67 @@ def wait_for_build(
         time.sleep(interval)
 
 
+def get_release_status(
+    client: AppStoreConnectClient,
+    bundle_id: str,
+    marketing_version: str,
+    build_id: str,
+) -> dict[str, object]:
+    apps = client.get(
+        "/v1/apps", {"filter[bundleId]": bundle_id, "limit": "2"}
+    ).get("data", [])
+    if len(apps) != 1:
+        raise RuntimeError(f"App Store app is unavailable for {bundle_id}")
+    response = client.get(
+        f"/v1/apps/{apps[0]['id']}/appStoreVersions",
+        {
+            "filter[platform]": "IOS",
+            "filter[versionString]": marketing_version,
+            "include": "build,appStoreVersionPhasedRelease",
+            "limit": "2",
+        },
+    )
+    versions = response.get("data", [])
+    if len(versions) != 1:
+        raise RuntimeError(f"App Store version is unavailable for {marketing_version}")
+    version = versions[0]
+    attributes = version.get("attributes", {})
+    if (
+        attributes.get("platform") != "IOS"
+        or attributes.get("versionString") != marketing_version
+    ):
+        raise RuntimeError("App Store version does not match the requested release")
+    relationships = version.get("relationships", {})
+    selected_build = relationships.get("build", {}).get("data") or {}
+    if not build_id or selected_build.get("id") != build_id:
+        raise RuntimeError("App Store version does not select the verified build")
+    state = attributes.get("appVersionState") or attributes.get("appStoreState")
+    if not state:
+        raise RuntimeError("App Store release state is unavailable")
+    phased_release = relationships.get("appStoreVersionPhasedRelease", {}).get("data")
+    phased_state = None
+    if phased_release:
+        included = [
+            item for item in response.get("included", [])
+            if item.get("type") == "appStoreVersionPhasedReleases"
+            and item.get("id") == phased_release.get("id")
+        ]
+        if len(included) != 1:
+            raise RuntimeError("App Store phased release status is unavailable")
+        phased_state = included[0].get("attributes", {}).get("phasedReleaseState")
+        if not phased_state:
+            raise RuntimeError("App Store phased release state is unavailable")
+    return {
+        "app_store_version_id": version.get("id"),
+        "app_version_state": state,
+        "release_type": attributes.get("releaseType"),
+        "earliest_release_date": attributes.get("earliestReleaseDate"),
+        "downloadable": attributes.get("downloadable"),
+        "phased_release_state": phased_state,
+        "selected_build_id": selected_build["id"],
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--bundle-id", required=True)
@@ -193,6 +254,7 @@ def main() -> None:
     parser.add_argument("--private-key", required=True, type=Path)
     parser.add_argument("--timeout", type=int, default=1200)
     parser.add_argument("--interval", type=int, default=30)
+    parser.add_argument("--release-status", action="store_true")
     arguments = parser.parse_args()
     if arguments.timeout <= 0 or arguments.interval <= 0:
         raise SystemExit("Timeout and interval must be positive")
@@ -209,6 +271,13 @@ def main() -> None:
         arguments.timeout,
         arguments.interval,
     )
+    if arguments.release_status:
+        result.update(get_release_status(
+            client,
+            arguments.bundle_id,
+            arguments.marketing_version,
+            result["build_id"],
+        ))
     print(json.dumps(result, sort_keys=True))
 
 
