@@ -1,9 +1,11 @@
+import 'package:stac_bridge/src/widgets/kit/kit_slider_dropdown_parsers.dart';
 import 'package:stac_bridge/src/widgets/material/material_button_parsers.dart';
 import 'package:stac_bridge/src/widgets/material/material_form_parsers.dart';
 import 'package:stac_bridge/src/widgets/material/material_shell_parsers.dart';
 import 'package:stac_bridge/src/widgets/material/material_surface_parsers.dart';
 import 'package:stac_framework/stac_framework.dart';
 
+export 'package:stac_bridge/src/widgets/kit/kit_slider_dropdown_parsers.dart';
 export 'material_button_parsers.dart';
 export 'material_form_parsers.dart';
 export 'material_icon_names.dart';
@@ -20,6 +22,7 @@ const List<StacParser<Object?>> materialOverrideParsers = [
   StacCircleAvatarKitParser(),
   StacCircularProgressKitParser(),
   StacDividerKitParser(),
+  StacDropdownMenuKitParser(),
   StacElevatedButtonKitParser(),
   StacFilledButtonKitParser(),
   StacFloatingActionButtonKitParser(),
@@ -29,6 +32,7 @@ const List<StacParser<Object?>> materialOverrideParsers = [
   StacListTileKitParser(),
   StacOutlinedButtonKitParser(),
   StacRadioKitParser(),
+  StacSliderKitParser(),
   StacSwitchKitParser(),
   StacTextButtonKitParser(),
   StacTextFieldKitParser(),

@@ -46,6 +46,7 @@ export 'app_segmented_bar.dart';
 export 'app_segmented_control.dart';
 export 'app_service_tile.dart';
 export 'app_sheet.dart';
+export 'app_slider.dart';
 export 'app_smart_chip.dart';
 export 'app_source_badge.dart';
 export 'app_spinner.dart';
