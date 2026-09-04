@@ -1,7 +1,7 @@
 // moderate-content — LLM auto-moderation for user-generated content.
 //
 // Called by DB triggers / pg_cron via pg_net (internal.dispatch_moderation_job)
-// with { job_id }. Claims the job through app_api_v1.moderation_begin,
+// with { job_id }. Claims the job through the moderation_begin RPC,
 // classifies the content through OpenRouter and closes the job with
 // moderation_finish (which records the decision and deletes destructive
 // spam). Deployed with verify_jwt=false; auth is a shared secret header.
@@ -87,7 +87,6 @@ Deno.serve(async (req: Request) => {
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { db: { schema: "app_api_v1" } },
   );
 
   const { data: begin, error: beginError } = await supabase.rpc(
