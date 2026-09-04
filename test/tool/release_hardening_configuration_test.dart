@@ -1,8 +1,50 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:xml/xml.dart';
 
 void main() {
+  test('keeps voice input optional without filtering Android devices', () {
+    final manifest = XmlDocument.parse(
+      File('android/app/src/main/AndroidManifest.xml').readAsStringSync(),
+    ).rootElement;
+    const android = 'http://schemas.android.com/apk/res/android';
+    final microphones = manifest
+        .findElements('uses-feature')
+        .where(
+          (element) =>
+              element.getAttribute('name', namespace: android) ==
+              'android.hardware.microphone',
+        );
+
+    expect(microphones, hasLength(1));
+    expect(
+      microphones.single.getAttribute('required', namespace: android),
+      'false',
+    );
+    expect(
+      manifest
+          .findElements('uses-permission')
+          .any(
+            (element) =>
+                element.getAttribute('name', namespace: android) ==
+                'android.permission.RECORD_AUDIO',
+          ),
+      isTrue,
+    );
+    expect(
+      manifest
+          .findElements('queries')
+          .expand((queries) => queries.findAllElements('action'))
+          .any(
+            (element) =>
+                element.getAttribute('name', namespace: android) ==
+                'android.speech.RecognitionService',
+          ),
+      isTrue,
+    );
+  });
+
   test('hardens Android production releases', () {
     final gradle = File('android/app/build.gradle').readAsStringSync();
     final workflow = File(
