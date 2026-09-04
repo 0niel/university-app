@@ -1,9 +1,10 @@
 // moderate-content — LLM auto-moderation for user-generated content.
 //
 // Called by DB triggers / pg_cron via pg_net (internal.dispatch_moderation_job)
-// with { job_id }. Loads the content, classifies it through OpenRouter,
-// records a decision in core.moderation_decisions and deletes destructive
-// spam. Deployed with verify_jwt=false; auth is a shared secret header.
+// with { job_id }. Claims the job through app_api_v1.moderation_begin,
+// classifies the content through OpenRouter and closes the job with
+// moderation_finish (which records the decision and deletes destructive
+// spam). Deployed with verify_jwt=false; auth is a shared secret header.
 //
 //   supabase secrets set OPENROUTER_API_KEY=<key> \
 //     MODERATION_WEBHOOK_SECRET=<random> \
@@ -15,25 +16,32 @@
 //
 // Ad-hoc check without side effects:
 //   POST { "classify": { "kind": "marketplace", "title": "...", "body": "..." } }
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { classify, type ModerationInput } from "./classifier.ts";
-import {
-  type ContentType,
-  type CoreClient,
-  loadContent,
-  removeContent,
-} from "./content.ts";
 
-const MAX_ATTEMPTS = 6;
 const DEFAULT_REMOVE_THRESHOLD = 0.85;
 
-interface JobRow {
-  id: string;
-  content_type: ContentType;
-  content_id: string;
-  status: string;
-  attempts: number;
+type Action = "none" | "deleted" | "flagged" | "dry_run";
+
+interface BeginResult {
+  status: "ok" | "skipped";
+  reason?: string;
+  verdict?: string;
+  job?: { id: string; content_type: string; content_id: string };
+  content?: ModerationInput & {
+    author_id: string | null;
+    organization_id: string | null;
+  };
+  content_hash?: string;
 }
+
+interface RemovedObjects {
+  bucket: string;
+  paths: string[];
+}
+
+// deno-lint-ignore no-explicit-any
+type ApiClient = SupabaseClient<any, any, any>;
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
@@ -74,99 +82,58 @@ Deno.serve(async (req: Request) => {
   if (typeof body.job_id !== "string") {
     return json({ error: "job_id is required" }, 400);
   }
+  const jobId = body.job_id;
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { db: { schema: "core" } },
+    { db: { schema: "app_api_v1" } },
   );
 
-  const job = await claimJob(supabase, body.job_id);
-  if (!job) return json({ skipped: true, reason: "job not pending" });
+  const { data: begin, error: beginError } = await supabase.rpc(
+    "moderation_begin",
+    { p_job_id: jobId },
+  );
+  if (beginError) {
+    console.error(`moderation_begin ${jobId} failed:`, beginError.message);
+    return json({ job_id: jobId, error: beginError.message }, 500);
+  }
+  const started = begin as BeginResult;
+  if (started.status !== "ok" || !started.content || !started.content_hash) {
+    return json({ job_id: jobId, skipped: true, ...started });
+  }
 
   try {
-    const outcome = await processJob(supabase, job, apiKey);
-    await supabase
-      .from("moderation_jobs")
-      .update({
-        status: "done",
-        last_error: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", job.id);
-    return json({ job_id: job.id, ...outcome });
+    const outcome = await judge(supabase, jobId, started, apiKey);
+    return json({ job_id: jobId, ...outcome });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`moderation job ${job.id} failed:`, message);
-    const failed = job.attempts >= MAX_ATTEMPTS;
-    const backoffMinutes = Math.min(60, 2 ** job.attempts);
-    await supabase
-      .from("moderation_jobs")
-      .update({
-        status: failed ? "failed" : "pending",
-        last_error: message.slice(0, 500),
-        next_attempt_at: new Date(Date.now() + backoffMinutes * 60_000)
-          .toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", job.id);
-    return json({ job_id: job.id, error: message }, 500);
+    console.error(`moderation job ${jobId} failed:`, message);
+    await supabase.rpc("moderation_fail", {
+      p_job_id: jobId,
+      p_error: message,
+    });
+    return json({ job_id: jobId, error: message }, 500);
   }
 });
 
-async function claimJob(
-  supabase: CoreClient,
+async function judge(
+  supabase: ApiClient,
   jobId: string,
-): Promise<JobRow | null> {
-  const { data: job } = await supabase
-    .from("moderation_jobs")
-    .select("id, content_type, content_id, status, attempts")
-    .eq("id", jobId)
-    .maybeSingle();
-  if (!job || job.status !== "pending") return null;
-  const { data: claimed } = await supabase
-    .from("moderation_jobs")
-    .update({
-      attempts: job.attempts + 1,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", jobId)
-    .eq("attempts", job.attempts)
-    .select("id, content_type, content_id, status, attempts")
-    .maybeSingle();
-  return (claimed as JobRow | null) ?? null;
-}
-
-async function processJob(
-  supabase: CoreClient,
-  job: JobRow,
+  started: BeginResult,
   apiKey: string,
 ): Promise<Record<string, unknown>> {
-  const loaded = await loadContent(supabase, job.content_type, job.content_id);
-  if (!loaded) return { skipped: true, reason: "content gone" };
-
-  const excerpt = `${loaded.input.title}\n${loaded.input.body}`.slice(0, 1000);
-  const hash = await sha256(
-    JSON.stringify([loaded.input.title, loaded.input.body, loaded.input.extra]),
+  const content = started.content!;
+  const result = await classify(
+    {
+      kind: content.kind,
+      title: content.title,
+      body: content.body,
+      extra: content.extra,
+    },
+    apiKey,
   );
 
-  const { data: previous } = await supabase
-    .from("moderation_decisions")
-    .select("id, verdict")
-    .eq("content_type", job.content_type)
-    .eq("content_id", job.content_id)
-    .eq("content_hash", hash)
-    .limit(1)
-    .maybeSingle();
-  if (previous) {
-    return {
-      skipped: true,
-      reason: "already judged",
-      verdict: previous.verdict,
-    };
-  }
-
-  const result = await classify(loaded.input, apiKey);
   const dryRun = (Deno.env.get("MODERATION_DRY_RUN") ?? "").toLowerCase() ===
     "true";
   const threshold = Number(
@@ -175,34 +142,36 @@ async function processJob(
   const shouldRemove = result.verdict === "remove" &&
     result.confidence >= threshold;
 
-  let action: "none" | "deleted" | "flagged" | "dry_run" = "none";
+  let action: Action = "none";
   if (shouldRemove) {
     action = dryRun ? "dry_run" : "deleted";
   } else if (result.verdict !== "allow") {
     action = "flagged";
   }
 
-  const { error: insertError } = await supabase
-    .from("moderation_decisions")
-    .insert({
-      content_type: job.content_type,
-      content_id: job.content_id,
-      author_id: loaded.authorId,
-      organization_id: loaded.organizationId,
-      content_hash: hash,
-      content_excerpt: excerpt,
-      verdict: result.verdict,
-      category: result.category,
-      confidence: Number(result.confidence.toFixed(3)),
-      reason: result.reason,
-      model: result.model,
-      action,
-      latency_ms: result.latencyMs,
-    });
-  if (insertError) throw insertError;
+  const { data: removed, error: finishError } = await supabase.rpc(
+    "moderation_finish",
+    {
+      p_job_id: jobId,
+      p_decision: {
+        verdict: result.verdict,
+        category: result.category,
+        confidence: Number(result.confidence.toFixed(3)),
+        reason: result.reason,
+        model: result.model,
+        action,
+        latency_ms: result.latencyMs,
+        content_hash: started.content_hash,
+        content_excerpt: `${content.title}\n${content.body}`.slice(0, 1000),
+        author_id: content.author_id,
+        organization_id: content.organization_id,
+      },
+    },
+  );
+  if (finishError) throw finishError;
 
   if (action === "deleted") {
-    await removeContent(supabase, job.content_type, job.content_id);
+    await removeObjects(supabase, removed as RemovedObjects | null);
   }
 
   return {
@@ -214,14 +183,27 @@ async function processJob(
   };
 }
 
-async function sha256(text: string): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(text),
-  );
-  return [...new Uint8Array(digest)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+async function removeObjects(
+  supabase: ApiClient,
+  removed: RemovedObjects | null,
+): Promise<void> {
+  if (!removed?.bucket || !Array.isArray(removed.paths)) return;
+  const marker = `/${removed.bucket}/`;
+  const paths = [
+    ...new Set(
+      removed.paths
+        .filter((path): path is string => typeof path === "string" && !!path)
+        .map((path) => {
+          const index = path.indexOf(marker);
+          return index >= 0 ? path.slice(index + marker.length) : path;
+        }),
+    ),
+  ];
+  if (paths.length === 0) return;
+  const { error } = await supabase.storage.from(removed.bucket).remove(paths);
+  if (error) {
+    console.warn(`storage cleanup failed (${removed.bucket}):`, error.message);
+  }
 }
 
 function json(data: unknown, status = 200): Response {
