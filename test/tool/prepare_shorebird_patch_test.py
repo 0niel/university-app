@@ -1,3 +1,4 @@
+import hashlib
 import importlib.util
 import os
 from pathlib import Path
@@ -149,6 +150,102 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
     def test_requested_source_must_match_the_checkout(self):
         with self.assertRaisesRegex(ValueError, "Checked-out commit"):
             self.project(self.baseline)
+
+
+class NavigationFirebaseTest(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name).resolve()
+        self.target = self.root / "android/app/google-services.json"
+        self.target.parent.mkdir(parents=True)
+        self.config = b'{"project_info":{"project_id":"fixture"}}\n'
+        context = patch.object(MODULE, "NAV_FIREBASE_SHA256", hashlib.sha256(self.config).hexdigest())
+        context.start()
+        self.addCleanup(context.stop)
+
+    def test_exact_released_native_bytes_are_required(self):
+        self.target.write_bytes(self.config)
+        MODULE.verify_navigation_firebase(self.root)
+        self.target.write_bytes(self.config.replace(b"\n", b"\r\n"))
+        with self.assertRaisesRegex(ValueError, "differs from the verified release"):
+            MODULE.verify_navigation_firebase(self.root)
+
+    def test_missing_file_and_symlink_are_rejected(self):
+        with self.assertRaisesRegex(ValueError, "Missing or invalid"):
+            MODULE.verify_navigation_firebase(self.root)
+        self.target.write_bytes(self.config)
+        with patch.object(Path, "is_symlink", return_value=True):
+            with self.assertRaisesRegex(ValueError, "Missing or invalid"):
+                MODULE.verify_navigation_firebase(self.root)
+
+
+class NavigationProjectionTest(unittest.TestCase):
+    git = PrepareShorebirdPatchTest.git
+    write = PrepareShorebirdPatchTest.write
+    commit = PrepareShorebirdPatchTest.commit
+    pin = PrepareShorebirdPatchTest.pin
+
+    def setUp(self):
+        PrepareShorebirdPatchTest.setUp(self)
+        self.pin("NAV_BASELINE_SHA", self.reviewed)
+        for path in MODULE.NAV_RUNTIME_PATHS:
+            self.write(path, b"void reviewedNavigation() {}\n")
+        for path in MODULE.NAV_TEST_PATHS:
+            self.write(path, b"void main() {}\n")
+        self.pin("NAV_REVIEWED_SOURCE_SHA", self.commit())
+
+    def project(self):
+        source = self.git("rev-parse", "HEAD")
+        return MODULE.projection(self.root, source, source, MODULE.NAV_RELEASE_VERSION)
+
+    def test_navigation_keeps_baseline_native_dependencies_and_assets_without_overlays(self):
+        overrides, receipt = self.project()
+        self.assertEqual(overrides, {})
+        self.assertEqual(receipt["baseline_sha"], self.reviewed)
+        self.assertEqual(receipt["release_version"], "5.2.1+1005801")
+        MODULE.verify_worktree(self.root, overrides)
+        for path in (MODULE.MANIFEST, "pubspec.yaml", "pubspec.lock", "assets/font.ttf"):
+            self.assertEqual(MODULE.blob(self.root, self.reviewed, path), (self.root / path).read_bytes())
+
+    def test_even_reviewed_native_assets_and_dependency_changes_are_rejected(self):
+        reviewed = self.git("rev-parse", "HEAD")
+        for path in (MODULE.MANIFEST, "pubspec.yaml", "pubspec.lock", "assets/new.ttf", "lib/unreviewed.dart"):
+            with self.subTest(path=path):
+                self.git("reset", "--hard", reviewed)
+                self.write(path, b"unapproved change\n")
+                self.pin("NAV_REVIEWED_SOURCE_SHA", self.commit())
+                with self.assertRaisesRegex(ValueError, "Only the reviewed navigation"):
+                    self.project()
+
+    def test_ios_uses_the_same_unchanged_native_projection(self):
+        source = self.git("rev-parse", "HEAD")
+        overrides, receipt = MODULE.projection(self.root, source, source, MODULE.NAV_IOS_RELEASE_VERSION)
+        self.assertEqual(overrides, {})
+        self.assertEqual(receipt["release_version"], "5.2.1+2439.14.43")
+        self.assertEqual(receipt["projection_sha256"], self.project()[1]["projection_sha256"])
+        self.assertFalse((self.root / "android/app/google-services.json").exists())
+        self.write("ios/Runner/Info.plist", b"changed native configuration")
+        source = self.commit()
+        self.pin("NAV_REVIEWED_SOURCE_SHA", source)
+        with self.assertRaisesRegex(ValueError, "Only the reviewed navigation"):
+            MODULE.projection(self.root, source, source, MODULE.NAV_IOS_RELEASE_VERSION)
+
+    def test_runtime_tail_cannot_change_even_approved_files_after_review(self):
+        self.write(sorted(MODULE.NAV_RUNTIME_PATHS)[0], b"void unreviewedTail() {}\n")
+        self.commit()
+        with self.assertRaisesRegex(ValueError, "explicitly reviewed snapshot"):
+            self.project()
+
+    def test_workflow_tail_has_distinct_receipt_and_runtime_drift_still_fails(self):
+        _, original = self.project()
+        self.write(".github/workflows/shorebird-patch.yml", b"name: Patch\n")
+        self.commit()
+        overrides, updated = self.project()
+        self.assertNotEqual(original["projection_sha256"], updated["projection_sha256"])
+        self.write(sorted(MODULE.NAV_RUNTIME_PATHS)[0], b"void drift() {}\n")
+        with self.assertRaisesRegex(ValueError, "Unexpected tracked changes"):
+            MODULE.verify_worktree(self.root, overrides)
 
 
 if __name__ == "__main__":
