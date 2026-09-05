@@ -116,154 +116,148 @@ class _QuestionCard extends StatelessWidget {
         showError && question.textController.text.trim().isEmpty;
     final optionsInvalid =
         showError && question.hasOptions && !question.isValid;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.surface2,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.sectionGap),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.pollsQuestionNumber(index + 1),
-                    style: AppText.captionStrong.copyWith(
-                      color: colors.muted,
-                    ),
+    return AppCard(
+      color: colors.surface2,
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            key: question.editorKey,
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.pollsQuestionNumber(index + 1),
+                  style: AppText.captionStrong.copyWith(
+                    color: colors.muted,
                   ),
                 ),
-                if (canMoveUp)
-                  AppIconButton(
-                    tooltip: l10n.pollsMoveUp,
-                    size: AppIconButtonSize.small,
-                    shape: AppIconButtonShape.circle,
-                    tone: AppIconButtonTone.plain,
-                    icon: const AppLineIconWidget(
-                      AppLineIcon.chevronU,
-                      size: 16,
-                    ),
-                    onPressed: onMoveUp,
+              ),
+              if (canMoveUp)
+                AppIconButton(
+                  tooltip: l10n.pollsMoveUp,
+                  size: AppIconButtonSize.small,
+                  shape: AppIconButtonShape.circle,
+                  tone: AppIconButtonTone.plain,
+                  icon: const AppLineIconWidget(
+                    AppLineIcon.chevronU,
+                    size: 16,
                   ),
-                if (canMoveDown)
-                  AppIconButton(
-                    tooltip: l10n.pollsMoveDown,
-                    size: AppIconButtonSize.small,
-                    shape: AppIconButtonShape.circle,
-                    tone: AppIconButtonTone.plain,
-                    icon: const AppLineIconWidget(
-                      AppLineIcon.chevronD,
-                      size: 16,
-                    ),
-                    onPressed: onMoveDown,
-                  ),
-                if (canRemove)
-                  AppIconButton(
-                    tooltip: l10n.pollsRemoveQuestion,
-                    size: AppIconButtonSize.small,
-                    shape: AppIconButtonShape.circle,
-                    tone: AppIconButtonTone.plain,
-                    icon: const AppLineIconWidget(AppLineIcon.trash, size: 16),
-                    onPressed: onRemove,
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            AppInputField(
-              controller: question.textController,
-              placeholder: l10n.pollsQuestionTextHint,
-              errorText: textInvalid ? l10n.pollsQuestionTextRequired : null,
-              maxLength: 300,
-              onChanged: (_) => onChanged(),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final kind in PollQuestionKind.values)
-                  AppChip.filter(
-                    label: _kindLabel(l10n, kind),
-                    selected: question.kind == kind,
-                    onTap: () => onKindChanged(kind),
-                  ),
-              ],
-            ),
-            if (question.hasOptions) ...[
-              const SizedBox(height: AppSpacing.sm),
-              for (final (optionIndex, controller)
-                  in question.optionControllers.indexed) ...[
-                if (optionIndex > 0) const SizedBox(height: AppSpacing.xsm),
-                Row(
-                  key: ValueKey(controller),
-                  children: [
-                    if (question.kind == PollQuestionKind.quiz)
-                      AppRadio<int>(
-                        value: optionIndex,
-                        groupValue: question.correctIndex,
-                        semanticsLabel:
-                            '${l10n.pollsOptionHint(optionIndex + 1)}, '
-                            '${l10n.pollsTypeQuiz}',
-                        onChanged: (value) {
-                          question.correctIndex = value;
-                          onChanged();
-                        },
-                      ),
-                    Expanded(
-                      child: AppInputField(
-                        controller: controller,
-                        placeholder: l10n.pollsOptionHint(optionIndex + 1),
-                        maxLength: 200,
-                        onChanged: (_) => onChanged(),
-                      ),
-                    ),
-                    if (question.optionControllers.length > 2)
-                      AppIconButton(
-                        tooltip: l10n.pollsRemoveOption,
-                        size: AppIconButtonSize.small,
-                        shape: AppIconButtonShape.circle,
-                        tone: AppIconButtonTone.plain,
-                        icon: const AppLineIconWidget(
-                          AppLineIcon.close,
-                          size: 14,
-                        ),
-                        onPressed: () => onRemoveOption(optionIndex),
-                      ),
-                  ],
+                  onPressed: onMoveUp,
                 ),
-              ],
-              if (optionsInvalid)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.xxs),
-                  child: Text(
-                    l10n.pollsDistinctOptionsRequired,
-                    style: AppText.caption.copyWith(color: colors.danger),
+              if (canMoveDown)
+                AppIconButton(
+                  tooltip: l10n.pollsMoveDown,
+                  size: AppIconButtonSize.small,
+                  shape: AppIconButtonShape.circle,
+                  tone: AppIconButtonTone.plain,
+                  icon: const AppLineIconWidget(
+                    AppLineIcon.chevronD,
+                    size: 16,
                   ),
+                  onPressed: onMoveDown,
                 ),
-              if (question.optionControllers.length < 10)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.xsm),
-                  child: AppButton.text(
-                    label: l10n.pollsAddOption,
-                    icon: const AppLineIconWidget(AppLineIcon.plus, size: 14),
-                    onPressed: onAddOption,
-                  ),
+              if (canRemove)
+                AppIconButton(
+                  tooltip: l10n.pollsRemoveQuestion,
+                  size: AppIconButtonSize.small,
+                  shape: AppIconButtonShape.circle,
+                  tone: AppIconButtonTone.plain,
+                  icon: const AppLineIconWidget(AppLineIcon.trash, size: 16),
+                  onPressed: onRemove,
                 ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppInputField(
+            controller: question.textController,
+            placeholder: l10n.pollsQuestionTextHint,
+            errorText: textInvalid ? l10n.pollsQuestionTextRequired : null,
+            maxLength: 300,
+            textInputAction: TextInputAction.next,
+            onChanged: (_) => onChanged(),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppChipRow<PollQuestionKind>(
+            value: question.kind,
+            onChanged: onKindChanged,
+            items: [
+              for (final kind in PollQuestionKind.values)
+                AppChipRowItem(value: kind, label: _kindLabel(l10n, kind)),
+            ],
+          ),
+          if (question.hasOptions) ...[
             const SizedBox(height: AppSpacing.sm),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: AppCheckbox(
-                value: question.isRequired,
-                label: l10n.pollsQuestionRequired,
-                onChanged: onRequiredChanged,
+            for (final (optionIndex, controller)
+                in question.optionControllers.indexed) ...[
+              if (optionIndex > 0) const SizedBox(height: AppSpacing.xsm),
+              Row(
+                key: ValueKey(controller),
+                children: [
+                  if (question.kind == PollQuestionKind.quiz)
+                    AppRadio<int>(
+                      value: optionIndex,
+                      groupValue: question.correctIndex,
+                      semanticsLabel:
+                          '${l10n.pollsOptionHint(optionIndex + 1)}, '
+                          '${l10n.pollsTypeQuiz}',
+                      onChanged: (value) {
+                        question.correctIndex = value;
+                        onChanged();
+                      },
+                    ),
+                  Expanded(
+                    child: AppInputField(
+                      controller: controller,
+                      placeholder: l10n.pollsOptionHint(optionIndex + 1),
+                      maxLength: 200,
+                      textInputAction: TextInputAction.next,
+                      onChanged: (_) => onChanged(),
+                    ),
+                  ),
+                  if (question.optionControllers.length > 2)
+                    AppIconButton(
+                      tooltip: l10n.pollsRemoveOption,
+                      size: AppIconButtonSize.small,
+                      shape: AppIconButtonShape.circle,
+                      tone: AppIconButtonTone.plain,
+                      icon: const AppLineIconWidget(
+                        AppLineIcon.close,
+                        size: 14,
+                      ),
+                      onPressed: () => onRemoveOption(optionIndex),
+                    ),
+                ],
               ),
-            ),
+            ],
+            if (optionsInvalid)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xxs),
+                child: Text(
+                  l10n.pollsDistinctOptionsRequired,
+                  style: AppText.caption.copyWith(color: colors.danger),
+                ),
+              ),
+            if (question.optionControllers.length < 10)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xsm),
+                child: AppButton.text(
+                  label: l10n.pollsAddOption,
+                  icon: const AppLineIconWidget(AppLineIcon.plus, size: 14),
+                  onPressed: onAddOption,
+                ),
+              ),
           ],
-        ),
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: AppCheckbox(
+              value: question.isRequired,
+              label: l10n.pollsQuestionRequired,
+              onChanged: onRequiredChanged,
+            ),
+          ),
+        ],
       ),
     );
   }

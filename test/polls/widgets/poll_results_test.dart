@@ -104,4 +104,47 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('Правильный ответ'), findsOneWidget);
   });
+
+  testWidgets(
+    'empty results do not invent a zero rating and preserve long options',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 1100);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      const longOption =
+          'Подробный вариант ответа с пояснением, которое должно быть видно '
+          'полностью даже при увеличенном размере текста';
+      await pump(
+        tester,
+        poll.copyWith(
+          canSeeResults: true,
+          questions: const [
+            PollQuestion(
+              id: 'rating',
+              position: 1,
+              text: 'Без оценок',
+              kind: PollQuestionKind.rating,
+            ),
+            PollQuestion(
+              id: 'choice',
+              text: 'Без голосов',
+              kind: PollQuestionKind.single,
+              options: [PollOption(id: 'option', text: longOption)],
+            ),
+          ],
+        ),
+        textScale: 2,
+      );
+      expect(find.text('Пока нет ответов'), findsNWidgets(2));
+      expect(tester.widget<Text>(find.text(longOption)).maxLines, isNull);
+      final l10n = tester.element(find.byType(PollResults)).l10n;
+      expect(find.text(l10n.pollsRatingAverage('0.0')), findsNothing);
+      expect(
+        tester.getTopLeft(find.text('Без голосов')).dy,
+        lessThan(tester.getTopLeft(find.text('Без оценок')).dy),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

@@ -11,10 +11,12 @@ class MarketplaceGrid extends StatelessWidget {
     required this.onOpen,
     super.key,
     this.onContact,
+    this.sliver = false,
     this.favoriteIds = const {},
     this.onToggleFavorite,
   });
 
+  final bool sliver;
   final List<MarketListing> items;
   final Set<String> pendingIds;
   final ValueChanged<MarketListing> onOpen;
@@ -29,14 +31,7 @@ class MarketplaceGrid extends StatelessWidget {
       MediaQuery.sizeOf(context).width,
       scale,
     );
-    return GridView.builder(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.screen,
-        AppSpacing.zero,
-        AppSpacing.screen,
-        ninjaBottomInset(context) + AppSpacing.lg,
-      ),
+    final grid = SliverGrid.builder(
       itemCount: items.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: columns,
@@ -59,5 +54,20 @@ class MarketplaceGrid extends StatelessWidget {
         ).animateListItem(index: index);
       },
     );
+    final padded = SliverPadding(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.screen,
+        AppSpacing.zero,
+        AppSpacing.screen,
+        ninjaBottomInset(context) + AppSpacing.lg,
+      ),
+      sliver: grid,
+    );
+    return sliver
+        ? padded
+        : CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [padded],
+          );
   }
 }

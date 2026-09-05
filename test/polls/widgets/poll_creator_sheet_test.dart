@@ -37,6 +37,8 @@ void main() {
   Future<void> pump(
     WidgetTester tester, {
     Size size = const Size(900, 1400),
+    bool modal = false,
+    double textScale = 1,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -45,20 +47,40 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.darkTheme,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         locale: const Locale('ru'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: NinjaToastHost(
-            child: SingleChildScrollView(child: PollCreatorSheet(cubit: cubit)),
+            child: modal
+                ? Builder(
+                    builder: (context) => AppButton.primary(
+                      label: 'Open creator',
+                      onPressed: () =>
+                          showPollCreatorSheet(context, cubit: cubit),
+                    ),
+                  )
+                : SingleChildScrollView(child: PollCreatorSheet(cubit: cubit)),
           ),
         ),
       ),
     );
+    if (modal) {
+      await tester.tap(find.text('Open creator'));
+      await tester.pumpAndSettle();
+    }
   }
 
   Future<void> tap(WidgetTester tester, Finder finder) async {
+    await tester.pumpAndSettle();
     await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
     await tester.tap(finder);
     await tester.pumpAndSettle();
   }
@@ -92,6 +114,75 @@ void main() {
       allowChange: any(named: 'allowChange'),
     ),
   ).captured;
+
+  testWidgets(
+    'modal keeps navigation visible above the keyboard on a small screen',
+    (tester) async {
+      await pump(tester, size: const Size(320, 600), modal: true);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 240);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).first, 'Опрос дня');
+      final next = find.text('Далее');
+      expect(next.hitTestable(), findsOneWidget);
+      expect(tester.getBottomRight(next).dy, lessThanOrEqualTo(360));
+      await tester.tap(next);
+      await tester.pumpAndSettle();
+      expect(find.text('2 из 4'), findsOneWidget);
+      expect(tester.testTextInput.isVisible, isFalse);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'preview edits target question and preserves draft at large text',
+    (tester) async {
+      await pump(tester, size: const Size(320, 700), modal: true, textScale: 2);
+      await tester.enterText(find.byType(TextField).first, 'Опрос дня');
+      await tap(tester, find.text('Далее'));
+      await tap(tester, find.text('Текст'));
+      await tester.enterText(find.byType(TextField), 'Первый вопрос');
+      await tap(tester, find.text('Добавить вопрос'));
+      await tap(tester, find.text('Текст').last);
+      await tester.enterText(find.byType(TextField).last, 'Второй вопрос');
+      await tap(tester, find.text('Далее'));
+      await tap(tester, find.text('Далее'));
+      final l10n = tester.element(find.byType(PollCreatorSheet)).l10n;
+      await tap(
+        tester,
+        find.byTooltip('${l10n.edit}: ${l10n.pollsQuestionNumber(2)}'),
+      );
+      expect(find.text('Вопрос 2').hitTestable(), findsOneWidget);
+      expect(
+        tester.widget<TextField>(find.byType(TextField).last).controller!.text,
+        'Второй вопрос',
+      );
+      await tester.enterText(
+        find.byType(TextField).last,
+        'Исправленный вопрос',
+      );
+      await tap(tester, find.text('Далее'));
+      await tap(tester, find.text('Далее'));
+      expect(find.text('Вопрос 2. Исправленный вопрос'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('validation brings the first invalid question back into view', (
+    tester,
+  ) async {
+    await pump(tester, size: const Size(320, 600), modal: true);
+    await tester.enterText(find.byType(TextField).first, 'Опрос дня');
+    await tap(tester, find.text('Далее'));
+    await tap(tester, find.text('Добавить вопрос'));
+    await tap(tester, find.text('Текст').last);
+    await tester.enterText(find.byType(TextField).last, 'Второй вопрос');
+    await tap(tester, find.text('Далее'));
+
+    expect(find.text('Вопрос 1').hitTestable(), findsOneWidget);
+    expect(find.text('Введите текст вопроса'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('blocks leaving the basics step without a title', (
     tester,

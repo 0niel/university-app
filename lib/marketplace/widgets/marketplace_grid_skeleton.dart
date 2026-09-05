@@ -17,6 +17,8 @@ class MarketplaceGridSkeleton extends StatelessWidget {
     return NinjaSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
       child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(
           AppSpacing.screen,
           AppSpacing.zero,

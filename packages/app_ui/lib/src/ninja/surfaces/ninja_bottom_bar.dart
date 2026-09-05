@@ -23,7 +23,7 @@ class NinjaBottomBar extends StatelessWidget {
   final ValueChanged<int> onSelected;
 
   static const double topPadding = 14;
-  static const double bottomPadding = 24;
+  static const double bottomPadding = 6;
 
   static double extentOf(BuildContext context) {
     final viewport = _NinjaBottomBarViewportData.maybeOf(context);

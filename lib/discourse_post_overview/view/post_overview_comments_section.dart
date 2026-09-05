@@ -9,12 +9,14 @@ class PostOverviewCommentsSection extends StatelessWidget {
     required this.comments,
     this.loadFailed = false,
     this.onRetry,
+    this.sourceUri,
     super.key,
   });
 
   final List<DiscoursePostComment> comments;
   final bool loadFailed;
   final VoidCallback? onRetry;
+  final Uri? sourceUri;
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +51,10 @@ class PostOverviewCommentsSection extends StatelessWidget {
             padding: EdgeInsets.zero,
             itemCount: comments.length,
             separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (context, index) =>
-                PostOverviewCommentTile(comment: comments[index]),
+            itemBuilder: (context, index) => PostOverviewCommentTile(
+              comment: comments[index],
+              sourceUri: sourceUri,
+            ),
           ),
       ],
     );

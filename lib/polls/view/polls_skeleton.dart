@@ -14,19 +14,25 @@ class PollsSkeleton extends StatelessWidget {
           for (var index = 0; index < 3; index++) ...[
             if (index > 0) const SizedBox(height: AppSpacing.cardGap),
             const AppCard(
-              radius: AppRadius.row,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   NinjaSkeleton.bar(widthFactor: .4, height: 10),
                   SizedBox(height: AppSpacing.sectionGap),
                   NinjaSkeleton.bar(widthFactor: .85, height: 16),
-                  SizedBox(height: AppSpacing.sectionGap),
-                  NinjaSkeleton(height: 44, radius: AppRadius.tile),
-                  SizedBox(height: AppSpacing.xsm),
-                  NinjaSkeleton(height: 44, radius: AppRadius.tile),
-                  SizedBox(height: AppSpacing.xsm),
-                  NinjaSkeleton(height: 44, radius: AppRadius.tile),
+                  SizedBox(height: AppSpacing.sm),
+                  NinjaSkeleton.bar(widthFactor: .65),
+                  SizedBox(height: AppSpacing.md),
+                  NinjaSkeleton.bar(widthFactor: .5, height: 10),
+                  SizedBox(height: AppSpacing.md),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: NinjaSkeleton(
+                      width: 92,
+                      height: 44,
+                      radius: AppRadius.tile,
+                    ),
+                  ),
                 ],
               ),
             ),

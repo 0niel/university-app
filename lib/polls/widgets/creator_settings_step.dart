@@ -46,17 +46,25 @@ class _SettingsStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SettingsToggle(
-          title: l10n.pollsAnonymous,
-          subtitle: l10n.pollsAnonymousSub,
-          value: anonymous,
-          onChanged: onAnonymousChanged,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        _SettingsToggle(
-          title: l10n.pollsAllowChange,
-          value: allowChange,
-          onChanged: onAllowChangeChanged,
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              AppSettingsToggleRow(
+                title: l10n.pollsAnonymous,
+                subtitle: l10n.pollsAnonymousSub,
+                value: anonymous,
+                isFirst: true,
+                onChanged: onAnonymousChanged,
+              ),
+              AppSettingsToggleRow(
+                title: l10n.pollsAllowChange,
+                value: allowChange,
+                isLast: true,
+                onChanged: onAllowChangeChanged,
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
@@ -116,54 +124,6 @@ class _SettingsStep extends StatelessWidget {
             onPressed: onPickTime,
           ),
         ],
-      ],
-    );
-  }
-}
-
-class _SettingsToggle extends StatelessWidget {
-  const _SettingsToggle({
-    required this.title,
-    required this.value,
-    required this.onChanged,
-    this.subtitle,
-  });
-
-  final String title;
-  final String? subtitle;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final subtitle = this.subtitle;
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: AppText.body.copyWith(
-                  color: colors.ink,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              if (subtitle != null) ...[
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  subtitle,
-                  style: AppText.subtext.copyWith(color: colors.muted),
-                ),
-              ],
-            ],
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        AppToggle(value: value, onChanged: onChanged),
       ],
     );
   }

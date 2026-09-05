@@ -54,63 +54,64 @@ class PeopleView extends StatelessWidget {
         body: SafeArea(
           top: false,
           bottom: false,
-          child: Column(
-            spacing: 4,
-            children: [
-              NinjaPeopleHeader(
-                title: context.l10n.peopleTitle,
-                search: const GlobalSearchButton(),
-                addLabel: context.l10n.friendsAddFriend,
-                onAdd: () => unawaited(onAdd()),
-              ),
-              Padding(
-                padding: const .symmetric(
-                  horizontal: AppSpacing.screen,
-                  vertical: 8,
-                ),
-                child: NinjaTabs<PeopleTab>(
-                  value: state.tab,
-                  onChanged: context.read<PeopleCubit>().tabChanged,
-                  padding: EdgeInsets.zero,
-                  spacing: 18,
-                  tabs: [
-                    NinjaTab(
-                      value: .friends,
-                      label: context.l10n.peopleTabFriends(
-                        state.friends.length,
-                      ),
-                    ),
-                    NinjaTab(
-                      value: .group,
-                      label: context.l10n.peopleTabGroup(
-                        state.studyGroup.members.length,
-                      ),
-                    ),
-                  ],
+          child: NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) => [
+              SliverToBoxAdapter(
+                child: NinjaPeopleHeader(
+                  title: context.l10n.peopleTitle,
+                  search: const GlobalSearchButton(),
+                  addLabel: context.l10n.friendsAddFriend,
+                  onAdd: () => unawaited(onAdd()),
                 ),
               ),
-              Expanded(
-                child: RefreshIndicator(
-                  color: context.colors.ink,
-                  onRefresh: onRefresh,
-                  child: NinjaStateSwitcher(
-                    child: NinjaPeopleBody(
-                      key: ValueKey(state.tab),
-                      state: state,
-                      onRetry: onRefresh,
-                      onAdd: onAdd,
-                      onCreateGroup: onCreateGroup,
-                      onJoinByCode: onJoinByCode,
-                      onDiscoverGroups: onDiscoverGroups,
-                      onManageGroup: onManageGroup,
-                      onAddToFriends: onAddToFriends,
-                      onRespondFriendRequest: onRespondFriendRequest,
-                      onRespondGroupInvite: onRespondGroupInvite,
-                    ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const .symmetric(
+                    horizontal: AppSpacing.screen,
+                    vertical: 8,
+                  ),
+                  child: NinjaTabs<PeopleTab>(
+                    value: state.tab,
+                    onChanged: context.read<PeopleCubit>().tabChanged,
+                    padding: EdgeInsets.zero,
+                    spacing: 18,
+                    tabs: [
+                      NinjaTab(
+                        value: .friends,
+                        label: context.l10n.peopleTabFriends(
+                          state.friends.length,
+                        ),
+                      ),
+                      NinjaTab(
+                        value: .group,
+                        label: context.l10n.peopleTabGroup(
+                          state.studyGroup.members.length,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ],
+            body: RefreshIndicator(
+              color: context.colors.ink,
+              onRefresh: onRefresh,
+              child: NinjaStateSwitcher(
+                child: NinjaPeopleBody(
+                  key: ValueKey(state.tab),
+                  state: state,
+                  onRetry: onRefresh,
+                  onAdd: onAdd,
+                  onCreateGroup: onCreateGroup,
+                  onJoinByCode: onJoinByCode,
+                  onDiscoverGroups: onDiscoverGroups,
+                  onManageGroup: onManageGroup,
+                  onAddToFriends: onAddToFriends,
+                  onRespondFriendRequest: onRespondFriendRequest,
+                  onRespondGroupInvite: onRespondGroupInvite,
+                ),
+              ),
+            ),
           ),
         ),
       ),

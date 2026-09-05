@@ -20,6 +20,12 @@ def step(name):
 
 
 class GooglePlayReleaseWorkflowTest(unittest.TestCase):
+    def test_production_requires_explicit_track_and_keeps_internal_default(self):
+        self.assertIn("default: internal", WORKFLOW)
+        self.assertIn("          - production", WORKFLOW)
+        self.assertIn("RELEASE_TRACK: ${{ inputs.track || 'internal' }}", WORKFLOW)
+        self.assertIn('--track "$RELEASE_TRACK"', step("Upload beta to Google Play"))
+
     def resolve(self, event, requested_tag="", found_tag="", api_status=0):
         script = textwrap.dedent(step("Resolve beta release").split("run: |\n", 1)[1])
         bash = os.environ.get("TEST_BASH") or shutil.which("bash")

@@ -16,6 +16,12 @@ import '../../../helpers/pump_app.dart';
 import 'schedule_test_data.dart';
 
 void main() {
+  Finder contentPager() => find
+      .descendant(
+        of: find.byType(ScheduleDatePager),
+        matching: find.byType(PageView),
+      )
+      .first;
   for (final topInset in [0.0, 43.0]) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(
@@ -51,6 +57,37 @@ void main() {
       );
     }
   }
+
+  testWidgets('week strip settles before changing the schedule date', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      scheduleGalleryScene(),
+      size: const Size(390, 844),
+    );
+    await tester.pumpAndSettle();
+    final initial = tester
+        .widget<ScheduleDatePager>(find.byType(ScheduleDatePager))
+        .day;
+    final strip = find.byKey(const ValueKey('schedule-day-strip'));
+    final gesture = await tester.startGesture(tester.getCenter(strip));
+    await gesture.moveBy(const Offset(-30, 0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(-230, 0));
+    await tester.pump();
+    expect(
+      tester.widget<ScheduleDatePager>(find.byType(ScheduleDatePager)).day,
+      initial,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+    final selected = tester
+        .widget<ScheduleDatePager>(find.byType(ScheduleDatePager))
+        .day;
+    expect(selected, DateTime(initial.year, initial.month, initial.day + 7));
+    expect(selected.weekday, initial.weekday);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('landscape notch stays outside day and month controls', (
     tester,
@@ -107,7 +144,7 @@ void main() {
         ),
         size: const Size(390, 844),
       );
-      final pager = find.byType(PageView);
+      final pager = contentPager();
       final controller = tester.widget<PageView>(pager).controller!;
       final initial = controller.page!;
       final gesture = await tester.startGesture(tester.getCenter(pager));
@@ -118,6 +155,8 @@ void main() {
       expect(controller.page, greaterThan(initial));
       expect(controller.page, lessThan(initial + 1));
       await gesture.moveBy(const Offset(-180, 0));
+      await tester.pump();
+      expect(selected, anchor);
       await gesture.up();
       await tester.pumpAndSettle();
       expect(selected, switch (view) {
@@ -135,6 +174,88 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('cancelled page swipe never publishes a transient selected day', (
+    tester,
+  ) async {
+    final anchor = DateTime(2026, 1, 31);
+    final reported = <DateTime>[];
+    await tester.pumpApp(
+      Scaffold(
+        body: ScheduleDatePager(
+          day: anchor,
+          anchor: anchor,
+          view: ScheduleView.month,
+          onDay: reported.add,
+          builder: (_, day) =>
+              SizedBox(height: 400, child: Text(day.toIso8601String())),
+        ),
+      ),
+      size: const Size(390, 844),
+    );
+    final pager = contentPager();
+    final controller = tester.widget<PageView>(pager).controller!;
+    final initial = controller.page!;
+    final gesture = await tester.startGesture(tester.getCenter(pager));
+    await gesture.moveBy(const Offset(-30, 0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(-240, 0));
+    await tester.pump();
+    expect(controller.page, greaterThan(initial + .5));
+    expect(reported, isEmpty);
+    await gesture.moveBy(const Offset(250, 0));
+    await tester.pump(const Duration(milliseconds: 300));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.page, initial);
+    expect(reported, isEmpty);
+  });
+
+  testWidgets(
+    'rapid programmatic retargeting animates to the final date '
+    'without reporting intermediate pages',
+    (tester) async {
+      final anchor = DateTime(2026, 1, 31);
+      var selected = anchor;
+      late ValueChanged<DateTime> select;
+      final reported = <DateTime>[];
+      await tester.pumpApp(
+        Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              select = (day) => setState(() => selected = day);
+              return ScheduleDatePager(
+                day: selected,
+                anchor: anchor,
+                view: ScheduleView.day,
+                onDay: (day) {
+                  reported.add(day);
+                  select(day);
+                },
+                builder: (_, day) =>
+                    SizedBox(height: 400, child: Text(day.toIso8601String())),
+              );
+            },
+          ),
+        ),
+        size: const Size(390, 844),
+      );
+      final controller = tester.widget<PageView>(contentPager()).controller!;
+      final initial = controller.page!;
+      select(DateTime(2026, 2, 3));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 80));
+      expect(controller.page, greaterThan(initial));
+      expect(controller.page, lessThan(initial + 3));
+      select(DateTime(2026, 1, 30));
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(controller.page, initial - 1);
+      expect(selected, DateTime(2026, 1, 30));
+      expect(reported, isEmpty);
+    },
+  );
 
   testWidgets(
     'interrupting a programmatic page move restores the actual date',
@@ -164,7 +285,7 @@ void main() {
         ),
         size: const Size(390, 844),
       );
-      final pager = find.byType(PageView);
+      final pager = contentPager();
       final controller = tester.widget<PageView>(pager).controller!;
       select(anchor.add(const Duration(days: 3)));
       await tester.pump();
@@ -188,7 +309,7 @@ void main() {
   ) async {
     await tester.pumpApp(scheduleGalleryScene(), size: const Size(390, 844));
     await tester.pumpAndSettle();
-    final pager = tester.widget<PageView>(find.byType(PageView));
+    final pager = tester.widget<PageView>(contentPager());
     final controller = pager.controller!;
     final animation = controller.animateToPage(
       controller.page!.round() + 1,
@@ -213,7 +334,7 @@ void main() {
     await tester.pumpAndSettle();
     final strip = find.byKey(const ValueKey('schedule-pinned-days'));
     final initialTop = tester.getTopLeft(strip).dy;
-    await tester.drag(find.byType(PageView), const Offset(0, -600));
+    await tester.drag(contentPager(), const Offset(0, -600));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(strip).dy, lessThan(initialTop));
     expect(tester.getTopLeft(strip).dy, closeTo(0, 1));

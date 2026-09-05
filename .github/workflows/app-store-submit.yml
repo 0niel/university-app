@@ -11,6 +11,11 @@ on:
         description: Processed App Store build number
         required: true
         type: string
+      replace_pending_review:
+        description: Replace the previous build waiting for review
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -32,6 +37,7 @@ jobs:
       IOS_APP_BUNDLE_ID: pro.oniel.it.university
       MARKETING_VERSION: ${{ inputs.marketing_version }}
       BUILD_NUMBER: ${{ inputs.build_number }}
+      REPLACE_PENDING_REVIEW: ${{ inputs.replace_pending_review }}
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -86,13 +92,17 @@ jobs:
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
           APP_STORE_CONNECT_DISABLE_JWT_CACHE: 'true'
         run: |
+          arguments=()
+          if [[ "$REPLACE_PENDING_REVIEW" = true ]]; then
+            arguments+=(--replace-pending-review)
+          fi
           python3 tool/app_store_submit.py \
             --bundle-id "$IOS_APP_BUNDLE_ID" \
             --marketing-version "$MARKETING_VERSION" \
             --build-number "$BUILD_NUMBER" \
             --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
             --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
-            --private-key "$RUNNER_TEMP/app-store-submit.p8"
+            --private-key "$RUNNER_TEMP/app-store-submit.p8" "${arguments[@]}"
 
       - name: Verify App Store submission
         env:

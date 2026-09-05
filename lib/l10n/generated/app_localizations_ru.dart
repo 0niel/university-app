@@ -5173,10 +5173,10 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get knowledgeUpload => 'Залить';
+  String get knowledgeUpload => 'Загрузить';
 
   @override
-  String get knowledgeUploadTitle => 'Залить материал';
+  String get knowledgeUploadTitle => 'Загрузить материал';
 
   @override
   String get knowledgeUploadSubtitle => 'делись конспектами — получай сюрикены';
@@ -6435,7 +6435,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mentorshipBecomeSubtitle =>
-      'помогай младшим — получай сюрикены и репутацию';
+      'Выбери темы, формат общения и расскажи, чем можешь помочь';
 
   @override
   String get mentorshipRequestSheetTitle => 'Запрос ментору';
@@ -6523,13 +6523,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mentorshipRewardSubtitle => '+ значок «Ментор» в профиле';
 
   @override
-  String get mentorshipTopicsLabel => 'В ЧЁМ ШАРИШЬ';
+  String get mentorshipTopicsLabel => 'В чём шаришь';
 
   @override
-  String get mentorshipLevelLabel => 'ТВОЙ УРОВЕНЬ';
+  String get mentorshipCustomTopicLabel => 'Своя тема';
 
   @override
-  String get mentorshipFormatLabel => 'ФОРМАТ';
+  String get mentorshipCustomTopicHint => 'Например, Flutter или матанализ';
+
+  @override
+  String get mentorshipTopicsLimit => 'До 20 тем, до 60 символов в каждой';
+
+  @override
+  String get mentorshipBioLabel => 'О себе';
+
+  @override
+  String get mentorshipPending => 'Ожидает ответа';
+
+  @override
+  String get mentorshipAccepted => 'Встреча согласована';
+
+  @override
+  String get mentorshipLevelLabel => 'Твой уровень';
+
+  @override
+  String get mentorshipFormatLabel => 'Формат общения';
 
   @override
   String get mentorshipPriceTitle => 'Цена сессии';
@@ -6563,10 +6581,10 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get mentorshipTopicLabel => 'ТЕМА';
+  String get mentorshipTopicLabel => 'Тема';
 
   @override
-  String get mentorshipWhenLabel => 'КОГДА УДОБНО';
+  String get mentorshipWhenLabel => 'Когда удобно';
 
   @override
   String get mentorshipWhenTonight => 'Сегодня вечером';
@@ -6590,7 +6608,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mentorshipWhenShortWeek => 'на этой неделе';
 
   @override
-  String get mentorshipMessageLabel => 'СООБЩЕНИЕ';
+  String get mentorshipMessageLabel => 'Сообщение';
 
   @override
   String get mentorshipMessageHint =>
@@ -6678,7 +6696,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mentorshipCancelConfirmBody =>
-      'Заявка будет закрыта, а зарезервированные сюрикены вернутся студенту. Сессия не будет засчитана.';
+      'Заявка будет закрыта. Сессия не будет засчитана как завершённая.';
 
   @override
   String get mentorshipCancelConfirmAction => 'Отменить заявку';
@@ -11198,6 +11216,131 @@ class AppLocalizationsRu extends AppLocalizations {
   String get collabNotesCollaboratorsTooltip => 'Соавторы конспекта';
 
   @override
+  String get noteToolbarFormat => 'Форматирование';
+
+  @override
+  String get noteToolbarInsert => 'Вставить';
+
+  @override
+  String get noteLinkInvalidUrl => 'Введите корректную ссылку';
+
+  @override
+  String get noteDrawingStylusOnly => 'Только стилус';
+
+  @override
+  String get noteDrawingTouchDraw => 'Рисовать пальцем';
+
+  @override
+  String get noteDrawingResetView => 'Показать весь холст';
+
+  @override
+  String noteDrawingColor(int index) {
+    return 'Цвет $index';
+  }
+
+  @override
+  String get noteDrawingSaveError => 'Не удалось сохранить рисунок';
+
+  @override
+  String get noteTextToolsTitle => 'Действия с текстом';
+
+  @override
+  String get noteTextToolsDescription =>
+      'Выбранный текст будет передан выбранному приложению. Перевод и обработка доступны, если их поддерживают установленные приложения.';
+
+  @override
+  String get noteTextToolsSelectText => 'Сначала выделите текст в конспекте';
+
+  @override
+  String get noteTextToolsUnavailable =>
+      'Подходящих приложений не найдено. Текст можно скопировать или отправить.';
+
+  @override
+  String get noteTextToolsLoading => 'Ищем приложения…';
+
+  @override
+  String get noteTextToolsWorking => 'Ожидаем результат…';
+
+  @override
+  String get noteTextToolsFailure => 'Не удалось обработать текст';
+
+  @override
+  String get noteTextToolsNoResult => 'Приложение не вернуло изменённый текст';
+
+  @override
+  String get noteTextToolsPreview => 'Результат';
+
+  @override
+  String get noteTextToolsApply => 'Заменить выделенный текст';
+
+  @override
+  String get noteTextToolsChanged =>
+      'Конспект или выделение изменились. Результат можно скопировать.';
+
+  @override
+  String get noteTextToolsReadOnly => 'Конспект доступен только для чтения';
+
+  @override
+  String get noteTextToolsCopy => 'Копировать';
+
+  @override
+  String get noteTextToolsShare => 'Поделиться';
+
+  @override
+  String get noteTextToolsCopied => 'Текст скопирован';
+
+  @override
+  String get noteSearchHint => 'Найти в конспекте';
+
+  @override
+  String get noteSearchNoMatches => 'Нет совпадений';
+
+  @override
+  String get noteSearchPrevious => 'Предыдущее совпадение';
+
+  @override
+  String get noteSearchNext => 'Следующее совпадение';
+
+  @override
+  String get noteOutlineTitle => 'Оглавление';
+
+  @override
+  String get noteOutlineEmpty =>
+      'Добавьте заголовки через форматирование — они появятся здесь.';
+
+  @override
+  String get noteReadingMode => 'Режим чтения';
+
+  @override
+  String get noteEditingMode => 'Редактировать';
+
+  @override
+  String get noteExportDocument => 'Экспорт в PDF';
+
+  @override
+  String get noteExportAttachment => 'Вложение';
+
+  @override
+  String get noteExportError => 'Не удалось подготовить или отправить документ';
+
+  @override
+  String get noteRecoveryConflict =>
+      'На устройстве есть несохранённый черновик. Серверная версия тоже изменилась.';
+
+  @override
+  String get noteRecoveryReview => 'Выбрать версию';
+
+  @override
+  String get noteRecoveryKeepLocal => 'Оставить черновик';
+
+  @override
+  String get noteRecoveryUseServer => 'Использовать серверную';
+
+  @override
+  String get noteRecoveryBody =>
+      'Сейчас открыт локальный черновик. Его можно экспортировать перед выбором. Если оставить черновик, он заменит текущую серверную версию.';
+
+  @override
   String get noteToolbarBold => 'Жирный';
 
   @override
@@ -12189,6 +12332,19 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get pollsEmptyQuestions => 'В этом опросе нет вопросов';
+
+  @override
+  String pollsQuestionsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count вопроса',
+      many: '$count вопросов',
+      few: '$count вопроса',
+      one: '$count вопрос',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get pollsClosesFuture => 'Выберите время завершения в будущем';

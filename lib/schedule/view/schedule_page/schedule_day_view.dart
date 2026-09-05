@@ -5,6 +5,7 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/day_timeline.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_activity_builder.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_dates.dart';
@@ -462,44 +463,49 @@ class ScheduleTimelineLesson extends StatelessWidget {
               lesson.lessonType == LessonType.credit)
         ? LessonRowState.exam
         : LessonRowState.plain;
-    return AppLessonRow(
-      outerVerticalInset: 0,
-      scheduleStyle: true,
-      title: lesson.subject,
-      time: '${lesson.lessonBells.startTime}',
-      endTime: '${lesson.lessonBells.endTime}',
-      state: state,
-      color: lessonAccentOf(context, lesson),
-      typeLabel: lessonShortLabel(l10n, lesson.lessonType),
-      chipLabel: entry.cancelled
-          ? l10n.lessonTagCancelled
-          : status.live
-          ? l10n.lessonTagLive(status.minutesLeft)
-          : entry.moved
-          ? l10n.lessonTagMoved
-          : entry.isNext
-          ? l10n.lessonTagNext
-          : entry.isNew
-          ? l10n.lessonTagNew
-          : null,
-      chipColor: entry.cancelled
-          ? context.colors.danger
-          : entry.moved
-          ? context.colors.warn
-          : context.colors.accent,
-      meta: meta,
-      progress: status.live && !entry.cancelled ? status.progress : null,
-      inset: 0,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.fieldGap,
-        AppSpacing.lg,
-        AppSpacing.xsm,
-        AppSpacing.lg,
+    return LessonActivityBuilder(
+      lesson: lesson,
+      day: day,
+      builder: (context, annotations) => AppLessonRow(
+        annotations: annotations,
+        outerVerticalInset: 0,
+        scheduleStyle: true,
+        title: lesson.subject,
+        time: '${lesson.lessonBells.startTime}',
+        endTime: '${lesson.lessonBells.endTime}',
+        state: state,
+        color: lessonAccentOf(context, lesson),
+        typeLabel: lessonShortLabel(l10n, lesson.lessonType),
+        chipLabel: entry.cancelled
+            ? l10n.lessonTagCancelled
+            : status.live
+            ? l10n.lessonTagLive(status.minutesLeft)
+            : entry.moved
+            ? l10n.lessonTagMoved
+            : entry.isNext
+            ? l10n.lessonTagNext
+            : entry.isNew
+            ? l10n.lessonTagNew
+            : null,
+        chipColor: entry.cancelled
+            ? context.colors.danger
+            : entry.moved
+            ? context.colors.warn
+            : context.colors.accent,
+        meta: meta,
+        progress: status.live && !entry.cancelled ? status.progress : null,
+        inset: 0,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.fieldGap,
+          AppSpacing.lg,
+          AppSpacing.xsm,
+          AppSpacing.lg,
+        ),
+        onTap: () =>
+            ScheduleDetailsRoute($extra: (lesson, day)).push<void>(context),
+        onLongPress: () =>
+            showLessonActionsSheet(context, lesson: lesson, day: day),
       ),
-      onTap: () =>
-          ScheduleDetailsRoute($extra: (lesson, day)).push<void>(context),
-      onLongPress: () =>
-          showLessonActionsSheet(context, lesson: lesson, day: day),
     );
   }
 }

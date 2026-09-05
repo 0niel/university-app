@@ -1,5 +1,6 @@
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/widgets/app_filter_chip.dart';
+import 'package:app_ui/src/widgets/app_horizontal_scroll_view.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:flutter/material.dart';
 
@@ -23,9 +24,7 @@ class AppChipRow<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      clipBehavior: Clip.none,
+    return AppHorizontalScrollView(
       padding: padding,
       controller: controller,
       child: Row(

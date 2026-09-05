@@ -37,6 +37,9 @@ class ArticleContentModel {
           title ??= block.title;
           categoryId ??= block.categoryId;
           body.add(VideoBlock(videoUrl: block.videoUrl));
+        case SlideshowIntroductionBlock():
+          title ??= block.title;
+          imageUrl ??= block.coverImageUrl;
         case TextLeadParagraphBlock():
           if (lead == null) {
             lead = block.text;
@@ -62,6 +65,8 @@ class ArticleContentModel {
           body.add(block);
           texts.add(block.content.replaceAll(RegExp('<[^>]*>'), ' '));
         case VideoBlock():
+          body.add(block);
+        case SlideshowBlock() || SlideBlock():
           body.add(block);
         default:
           break;

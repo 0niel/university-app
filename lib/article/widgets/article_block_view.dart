@@ -3,12 +3,20 @@ import 'package:flutter/widgets.dart';
 import 'package:news_blocks/news_blocks.dart';
 import 'package:news_blocks_ui/news_blocks_ui.dart' show Video;
 import 'package:rtu_mirea_app/article/widgets/article_html.dart';
+import 'package:rtu_mirea_app/article/widgets/article_media.dart';
 import 'package:rtu_mirea_app/feed/widgets/widgets.dart';
 
 class ArticleBlockView extends StatelessWidget {
-  const ArticleBlockView({required this.block, super.key});
+  const ArticleBlockView({
+    required this.block,
+    super.key,
+    this.gallery = const [],
+    this.sourceUri,
+  });
 
   final NewsBlock block;
+  final List<String> gallery;
+  final Uri? sourceUri;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +43,8 @@ class ArticleBlockView extends StatelessWidget {
         ),
       ),
       ImageBlock(:final imageUrl) => FeedImage(
-        imageUrl: imageUrl,
+        imageUrl: articleImageUrl(imageUrl, sourceUri: sourceUri),
+        gallery: gallery,
         radius: AppRadius.card,
         height: 220,
         width: double.infinity,
@@ -44,7 +53,50 @@ class ArticleBlockView extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.card),
         child: Video(block: block),
       ),
-      HtmlBlock(:final content) => ArticleHtml(content: content),
+      HtmlBlock(:final content) => ArticleHtml(
+        content: content,
+        sourceUri: sourceUri,
+        gallery: gallery,
+      ),
+      SlideshowBlock(:final slides) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: AppSpacing.sectionGap,
+        children: [
+          for (final slide in slides)
+            ArticleBlockView(
+              block: slide,
+              gallery: gallery,
+              sourceUri: sourceUri,
+            ),
+        ],
+      ),
+      SlideBlock(
+        :final imageUrl,
+        :final caption,
+        :final description,
+        :final photoCredit,
+      ) =>
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: AppSpacing.sm,
+          children: [
+            FeedImage(
+              imageUrl: articleImageUrl(imageUrl, sourceUri: sourceUri),
+              gallery: gallery,
+              radius: AppRadius.card,
+              height: 220,
+              width: double.infinity,
+            ),
+            if (caption.isNotEmpty) Text(caption, style: AppText.subtextStrong),
+            if (description.isNotEmpty)
+              Text(description, style: AppText.paragraph),
+            if (photoCredit.isNotEmpty)
+              Text(
+                photoCredit,
+                style: AppText.caption.copyWith(color: colors.muted),
+              ),
+          ],
+        ),
       _ => const SizedBox.shrink(),
     };
   }

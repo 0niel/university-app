@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:app_ui/app_ui.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:perfect_freehand/perfect_freehand.dart';
+import 'package:rtu_mirea_app/community/widgets/collab_notes/editor/drawing_canvas.dart';
 import 'package:rtu_mirea_app/community/widgets/collab_notes/editor/drawing_canvas_painter.dart';
 import 'package:rtu_mirea_app/community/widgets/collab_notes/editor/drawing_stroke.dart';
 import 'package:rtu_mirea_app/community/widgets/collab_notes/editor/drawing_tool.dart';
@@ -60,20 +59,36 @@ class CollabNoteDrawingPage extends StatefulWidget {
 }
 
 class _CollabNoteDrawingPageState extends State<CollabNoteDrawingPage> {
-  final GlobalKey _boundaryKey = GlobalKey();
+  final _canvasKey = GlobalKey<DrawingCanvasState>();
   final _strokes = <DrawingStroke>[];
   final _redoStack = <DrawingStroke>[];
-  final _activePoints = <PointVector>[];
+  late final Size _canvasSize;
   DrawingTool _tool = DrawingTool.pen;
   DrawingStrokeWidth _strokeWidth = DrawingStrokeWidth.medium;
   Color? _color;
-  int? _activePointer;
-  var _stylusActive = false;
+  bool _stylusOnly = false;
+  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    _strokes.addAll(widget.initialStrokes);
+    var width = 768.0;
+    var height = 1024.0;
+    for (final stroke in widget.initialStrokes) {
+      if (stroke.canvasSize case final size?) {
+        width = math.max(width, size.width);
+        height = math.max(height, size.height);
+      } else {
+        for (final point in stroke.points) {
+          width = math.max(width, point.x + stroke.width);
+          height = math.max(height, point.y + stroke.width);
+        }
+      }
+    }
+    _canvasSize = Size(width, height);
+    _strokes.addAll(
+      widget.initialStrokes.map((stroke) => stroke.withCanvasSize(_canvasSize)),
+    );
   }
 
   List<Color> _palette(BuildContext context) {
@@ -88,73 +103,8 @@ class _CollabNoteDrawingPageState extends State<CollabNoteDrawingPage> {
     ];
   }
 
-  Color _resolvedColor(BuildContext context) =>
-      _color ?? _palette(context).first;
-
-  void _handlePointerDown(PointerDownEvent event) {
-    if (event.kind == PointerDeviceKind.stylus) {
-      _stylusActive = true;
-    } else if (_stylusActive) {
-      return;
-    }
-    if (_activePointer != null) return;
-    _activePointer = event.pointer;
-    _activePoints
-      ..clear()
-      ..add(
-        PointVector(
-          event.localPosition.dx,
-          event.localPosition.dy,
-          event.pressure,
-        ),
-      );
-    setState(() {});
-  }
-
-  void _handlePointerMove(PointerMoveEvent event) {
-    if (event.pointer != _activePointer) return;
-    _activePoints.add(
-      PointVector(
-        event.localPosition.dx,
-        event.localPosition.dy,
-        event.pressure,
-      ),
-    );
-    setState(() {});
-  }
-
-  void _endStroke(int pointer) {
-    if (pointer != _activePointer) return;
-    _activePointer = null;
-    if (_activePoints.length > 1) {
-      _strokes.add(
-        DrawingStroke(
-          points: List.of(_activePoints),
-          color: _resolvedColor(context),
-          width: _strokeWidth.value(_tool),
-          isEraser: _tool == .eraser,
-        ),
-      );
-      _redoStack.clear();
-    }
-    _activePoints.clear();
-    setState(() {});
-  }
-
-  void _handlePointerUp(PointerUpEvent event) {
-    if (event.kind == PointerDeviceKind.stylus) _stylusActive = false;
-    _endStroke(event.pointer);
-  }
-
-  void _handlePointerCancel(PointerCancelEvent event) {
-    if (event.kind == PointerDeviceKind.stylus) _stylusActive = false;
-    if (event.pointer != _activePointer) return;
-    _activePointer = null;
-    _activePoints.clear();
-    setState(() {});
-  }
-
   void _undo() {
+    _canvasKey.currentState?.finishStroke();
     if (_strokes.isEmpty) return;
     setState(() => _redoStack.add(_strokes.removeLast()));
   }
@@ -165,6 +115,7 @@ class _CollabNoteDrawingPageState extends State<CollabNoteDrawingPage> {
   }
 
   Future<void> _clear() async {
+    _canvasKey.currentState?.finishStroke();
     if (_strokes.isEmpty) return;
     final confirmed = await showAppConfirmDialog(
       context,
@@ -182,6 +133,8 @@ class _CollabNoteDrawingPageState extends State<CollabNoteDrawingPage> {
   }
 
   Future<void> _insert() async {
+    if (_saving) return;
+    _canvasKey.currentState?.finishStroke();
     if (_strokes.isEmpty) {
       showNinjaToast(
         context,
@@ -190,45 +143,66 @@ class _CollabNoteDrawingPageState extends State<CollabNoteDrawingPage> {
       );
       return;
     }
-    final boundary =
-        _boundaryKey.currentContext?.findRenderObject()
-            as RenderRepaintBoundary?;
-    if (boundary == null) return;
-    final image = await boundary.toImage(pixelRatio: 2);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData == null || !mounted) return;
-    Navigator.of(context).pop(
-      CollabNoteDrawingResult(
-        bytes: byteData.buffer.asUint8List(),
-        strokes: List.of(_strokes),
-      ),
-    );
+    final strokes = List<DrawingStroke>.unmodifiable(_strokes);
+    final background = context.colors.surface;
+    setState(() => _saving = true);
+    ui.Image? image;
+    ui.Picture? picture;
+    try {
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final ratio = math.min<double>(
+        2,
+        4096 / math.max(_canvasSize.width, _canvasSize.height),
+      );
+      canvas.scale(ratio);
+      DrawingCanvasPainter(
+        strokes: strokes,
+        backgroundColor: background,
+      ).paint(canvas, _canvasSize);
+      picture = recorder.endRecording();
+      image = await picture.toImage(
+        (_canvasSize.width * ratio).ceil(),
+        (_canvasSize.height * ratio).ceil(),
+      );
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (bytes == null) throw StateError('Empty drawing image');
+      if (!mounted) return;
+      Navigator.of(context).pop(
+        CollabNoteDrawingResult(
+          bytes: bytes.buffer.asUint8List(),
+          strokes: strokes,
+        ),
+      );
+    } on Object {
+      if (mounted) {
+        showNinjaToast(
+          context,
+          showCheck: false,
+          message: context.l10n.noteDrawingSaveError,
+        );
+      }
+    } finally {
+      image?.dispose();
+      picture?.dispose();
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final palette = _palette(context);
-    final color = _resolvedColor(context);
-    final liveStroke = _activePoints.length > 1
-        ? DrawingStroke(
-            points: List.of(_activePoints),
-            color: color,
-            width: _strokeWidth.value(_tool),
-            isEraser: _tool == .eraser,
-          )
-        : null;
+    final color = _color ?? palette.first;
     return ColoredBox(
       color: colors.canvas,
       child: SafeArea(
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.screen,
-                AppSpacing.sm,
-                AppSpacing.screen,
-                AppSpacing.sm,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.sm,
               ),
               child: Row(
                 children: [
@@ -238,52 +212,57 @@ class _CollabNoteDrawingPageState extends State<CollabNoteDrawingPage> {
                       size: 20,
                     ),
                     tooltip: context.l10n.back,
-                    onPressed: () => Navigator.of(context).maybePop(),
+                    onPressed: _saving
+                        ? null
+                        : () => Navigator.of(context).maybePop(),
                   ),
-                  const SizedBox(width: AppSpacing.md),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       context.l10n.noteDrawingTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppText.headline.copyWith(color: colors.ink),
                     ),
                   ),
+                  const SizedBox(width: AppSpacing.sm),
                   AppButton.primary(
                     label: context.l10n.noteDrawingInsert,
                     size: AppButtonSize.small,
-                    onPressed: () => unawaited(_insert()),
+                    onPressed: _saving ? null : () => unawaited(_insert()),
                   ),
                 ],
               ),
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screen,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.card),
-                  child: RepaintBoundary(
-                    key: _boundaryKey,
-                    child: Listener(
-                      behavior: HitTestBehavior.opaque,
-                      onPointerDown: _handlePointerDown,
-                      onPointerMove: _handlePointerMove,
-                      onPointerUp: _handlePointerUp,
-                      onPointerCancel: _handlePointerCancel,
-                      child: CustomPaint(
-                        size: Size.infinite,
-                        painter: DrawingCanvasPainter(
-                          strokes: [..._strokes, ?liveStroke],
-                          backgroundColor: colors.surface,
-                        ),
-                      ),
-                    ),
+                  child: DrawingCanvas(
+                    key: _canvasKey,
+                    canvasSize: _canvasSize,
+                    strokes: _strokes,
+                    color: color,
+                    backgroundColor: colors.surface,
+                    tool: _tool,
+                    width: _strokeWidth.value(_tool),
+                    stylusOnly: _stylusOnly,
+                    enabled: !_saving,
+                    onStylusDetected: () {
+                      if (!_stylusOnly) setState(() => _stylusOnly = true);
+                    },
+                    onStrokeCompleted: (stroke) => setState(() {
+                      _strokes.add(stroke);
+                      _redoStack.clear();
+                    }),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.sm),
             DrawingToolbar(
+              enabled: !_saving,
               tool: _tool,
               onToolChanged: (tool) => setState(() => _tool = tool),
               color: color,
@@ -297,10 +276,12 @@ class _CollabNoteDrawingPageState extends State<CollabNoteDrawingPage> {
               onUndo: _undo,
               onRedo: _redo,
               onClear: () => unawaited(_clear()),
+              stylusOnly: _stylusOnly,
+              onStylusOnlyChanged: (value) =>
+                  setState(() => _stylusOnly = value),
+              onResetView: () => _canvasKey.currentState?.resetView(),
             ),
-            SizedBox(
-              height: MediaQuery.viewPaddingOf(context).bottom + AppSpacing.md,
-            ),
+            const SizedBox(height: AppSpacing.sm),
           ],
         ),
       ),

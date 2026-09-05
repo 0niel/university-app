@@ -79,6 +79,89 @@ void main() {
   );
 
   group('LessonReactionsCubit', () {
+    test(
+      'rebuilding cards shares the summary request including empty counts',
+      () async {
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        for (var i = 0; i < 3; i++) {
+          await cubit.ensureSummary(
+            subjectName: 'Матан',
+            lessonDate: lessonDate,
+            lessonBells: bells,
+          );
+        }
+        verify(
+          () => scheduleRepository.getLessonReactionSummary(
+            subjectName: 'Матан',
+            lessonDate: lessonDate,
+            lessonBellsNumber: 1,
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'details refresh wins over an earlier card request '
+      'and clears removed reactions',
+      () async {
+        final response = Completer<LessonReactionResponse>();
+        when(
+          () => scheduleRepository.getLessonReactionSummary(
+            subjectName: 'Матан',
+            lessonDate: lessonDate,
+            lessonBellsNumber: 1,
+          ),
+        ).thenAnswer((_) => response.future);
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        final pending = cubit.loadSummary(
+          subjectName: 'Матан',
+          lessonDate: lessonDate,
+          lessonBells: bells,
+        );
+        cubit.updateSummary(
+          subjectName: 'Матан',
+          lessonDate: lessonDate,
+          lessonBells: bells,
+          response: const LessonReactionResponse(
+            counts: {'brain': 2},
+            userReaction: 'brain',
+          ),
+        );
+        response.complete(const LessonReactionResponse(counts: {'fire': 1}));
+        await pending;
+        expect(cubit.state.summaries.single.userReaction, ReactionType.brain);
+        cubit.updateSummary(
+          subjectName: 'Матан',
+          lessonDate: lessonDate,
+          lessonBells: bells,
+          response: const LessonReactionResponse(counts: {}),
+        );
+        expect(cubit.state.summaries, isEmpty);
+      },
+    );
+
+    test(
+      'unnumbered lessons use the same fallback as lesson details',
+      () async {
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        await cubit.loadSummary(
+          subjectName: 'Матан',
+          lessonDate: lessonDate,
+          lessonBells: bells.copyWith(number: null),
+        );
+        verify(
+          () => scheduleRepository.getLessonReactionSummary(
+            subjectName: 'Матан',
+            lessonDate: lessonDate,
+            lessonBellsNumber: 1,
+          ),
+        ).called(1);
+      },
+    );
+
     test('initial state is LessonReactionsState()', () {
       expect(buildCubit().state, equals(const LessonReactionsState()));
     });

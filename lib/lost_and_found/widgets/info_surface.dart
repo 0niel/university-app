@@ -7,12 +7,8 @@ class _InfoSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: context.colors.surface2,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
+    return AppCard(
+      color: context.colors.surface2,
       child: child,
     );
   }

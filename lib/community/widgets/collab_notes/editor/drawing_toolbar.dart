@@ -17,6 +17,10 @@ class DrawingToolbar extends StatelessWidget {
     required this.onUndo,
     required this.onRedo,
     required this.onClear,
+    required this.stylusOnly,
+    required this.onStylusOnlyChanged,
+    required this.onResetView,
+    this.enabled = true,
     super.key,
   });
 
@@ -32,251 +36,140 @@ class DrawingToolbar extends StatelessWidget {
   final VoidCallback onUndo;
   final VoidCallback onRedo;
   final VoidCallback onClear;
+  final bool stylusOnly;
+  final ValueChanged<bool> onStylusOnlyChanged;
+  final VoidCallback onResetView;
+  final bool enabled;
+
+  Widget _button(
+    AppLineIcon icon,
+    String label,
+    VoidCallback? onTap, {
+    bool selected = false,
+  }) => Semantics(
+    selected: selected,
+    child: AppIconButton(
+      icon: AppLineIconWidget(icon, size: 20),
+      tooltip: label,
+      tone: selected ? AppIconButtonTone.tonal : AppIconButtonTone.plain,
+      onPressed: enabled ? onTap : null,
+    ),
+  );
+
+  Widget _strip(List<Widget> children) => SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Row(mainAxisSize: MainAxisSize.min, children: children),
+  );
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+    final tools = [
+      _button(
+        AppLineIcon.pencil,
+        l10n.noteDrawingPen,
+        () => onToolChanged(.pen),
+        selected: tool == .pen,
+      ),
+      _button(
+        AppLineIcon.brush,
+        l10n.noteDrawingMarker,
+        () => onToolChanged(.marker),
+        selected: tool == .marker,
+      ),
+      _button(
+        AppLineIcon.eraser,
+        l10n.noteDrawingEraser,
+        () => onToolChanged(.eraser),
+        selected: tool == .eraser,
+      ),
+      _button(
+        AppLineIcon.lock,
+        stylusOnly ? l10n.noteDrawingStylusOnly : l10n.noteDrawingTouchDraw,
+        () => onStylusOnlyChanged(!stylusOnly),
+        selected: stylusOnly,
+      ),
+      _button(AppLineIcon.view, l10n.noteDrawingResetView, onResetView),
+    ];
+    final actions = [
+      _button(AppLineIcon.undo, l10n.noteDrawingUndo, canUndo ? onUndo : null),
+      _button(AppLineIcon.redo, l10n.noteDrawingRedo, canRedo ? onRedo : null),
+      _button(
+        AppLineIcon.trash,
+        l10n.noteDrawingClear,
+        canUndo ? onClear : null,
+      ),
+    ];
+    final paletteControls = [
+      for (final (index, entry) in palette.indexed)
+        Semantics(
+          selected: entry.toARGB32() == color.toARGB32(),
+          child: AppIconButton(
+            tooltip: l10n.noteDrawingColor(index + 1),
+            tone: entry.toARGB32() == color.toARGB32()
+                ? AppIconButtonTone.tonal
+                : AppIconButtonTone.plain,
+            onPressed: enabled ? () => onColorChanged(entry) : null,
+            icon: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(color: entry, shape: BoxShape.circle),
+            ),
+          ),
+        ),
+      const SizedBox(width: AppSpacing.md),
+      for (final width in DrawingStrokeWidth.values)
+        Semantics(
+          selected: width == strokeWidth,
+          child: AppIconButton(
+            tooltip: switch (width) {
+              DrawingStrokeWidth.thin => l10n.noteDrawingWidthThin,
+              DrawingStrokeWidth.medium => l10n.noteDrawingWidthMedium,
+              DrawingStrokeWidth.thick => l10n.noteDrawingWidthThick,
+            },
+            tone: width == strokeWidth
+                ? AppIconButtonTone.tonal
+                : AppIconButtonTone.plain,
+            onPressed: enabled ? () => onStrokeWidthChanged(width) : null,
+            icon: Container(
+              width: 6.0 + width.index * 4,
+              height: 6.0 + width.index * 4,
+              decoration: BoxDecoration(
+                color: context.colors.ink,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ),
+    ];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth >= 1000) {
+            return Row(
+              children: [
+                ...tools,
+                const Spacer(),
+                ...paletteControls,
+                const Spacer(),
+                ...actions,
+              ],
+            );
+          }
+          return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              for (final entry in palette)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.sm),
-                  child: _ColorSwatch(
-                    color: entry,
-                    selected: entry.toARGB32() == color.toARGB32(),
-                    onTap: () => onColorChanged(entry),
-                  ),
-                ),
+              Row(
+                children: [
+                  Expanded(child: _strip(tools)),
+                  ...actions,
+                ],
+              ),
+              _strip(paletteControls),
             ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-          child: Row(
-            children: [
-              _ToolButton(
-                icon: AppLineIcon.pencil,
-                selected: tool == .pen,
-                semanticsLabel: l10n.noteDrawingPen,
-                onTap: () => onToolChanged(.pen),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              _ToolButton(
-                icon: AppLineIcon.brush,
-                selected: tool == .marker,
-                semanticsLabel: l10n.noteDrawingMarker,
-                onTap: () => onToolChanged(.marker),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              _ToolButton(
-                icon: AppLineIcon.eraser,
-                selected: tool == .eraser,
-                semanticsLabel: l10n.noteDrawingEraser,
-                onTap: () => onToolChanged(.eraser),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              for (final width in DrawingStrokeWidth.values)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.sm),
-                  child: _WidthDot(
-                    diameter: 6 + width.index * 4,
-                    selected: width == strokeWidth,
-                    semanticsLabel: switch (width) {
-                      DrawingStrokeWidth.thin => l10n.noteDrawingWidthThin,
-                      DrawingStrokeWidth.medium => l10n.noteDrawingWidthMedium,
-                      DrawingStrokeWidth.thick => l10n.noteDrawingWidthThick,
-                    },
-                    onTap: () => onStrokeWidthChanged(width),
-                  ),
-                ),
-              const Spacer(),
-              _ActionIcon(
-                icon: AppLineIcon.undo,
-                enabled: canUndo,
-                semanticsLabel: l10n.noteDrawingUndo,
-                onTap: onUndo,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              _ActionIcon(
-                icon: AppLineIcon.redo,
-                enabled: canRedo,
-                semanticsLabel: l10n.noteDrawingRedo,
-                onTap: onRedo,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              _ActionIcon(
-                icon: AppLineIcon.trash,
-                enabled: true,
-                destructive: true,
-                semanticsLabel: l10n.noteDrawingClear,
-                onTap: onClear,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ColorSwatch extends StatelessWidget {
-  const _ColorSwatch({
-    required this.color,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final Color color;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppPressable(
-      onTap: onTap,
-      semanticsButton: true,
-      semanticsSelected: selected,
-      child: Container(
-        width: 32,
-        height: 32,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? context.colors.surface2 : null,
-          shape: BoxShape.circle,
-        ),
-        child: Container(
-          width: selected ? 22 : 18,
-          height: selected ? 22 : 18,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-      ),
-    );
-  }
-}
-
-class _ToolButton extends StatelessWidget {
-  const _ToolButton({
-    required this.icon,
-    required this.selected,
-    required this.semanticsLabel,
-    required this.onTap,
-  });
-
-  final AppLineIcon icon;
-  final bool selected;
-  final String semanticsLabel;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return AppPressable(
-      onTap: onTap,
-      semanticsButton: true,
-      semanticsSelected: selected,
-      semanticsLabel: semanticsLabel,
-      child: Container(
-        width: AppControlSize.iconButton,
-        height: AppControlSize.iconButton,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? colors.tint : colors.surface2,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-        ),
-        child: AppLineIconWidget(
-          icon,
-          size: 19,
-          color: selected ? colors.accent : colors.ink,
-        ),
-      ),
-    );
-  }
-}
-
-class _WidthDot extends StatelessWidget {
-  const _WidthDot({
-    required this.diameter,
-    required this.selected,
-    required this.semanticsLabel,
-    required this.onTap,
-  });
-
-  final double diameter;
-  final bool selected;
-  final String semanticsLabel;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return AppPressable(
-      onTap: onTap,
-      semanticsButton: true,
-      semanticsSelected: selected,
-      semanticsLabel: semanticsLabel,
-      child: Container(
-        width: AppControlSize.iconButtonSmall,
-        height: AppControlSize.iconButtonSmall,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? colors.tint : colors.surface2,
-          shape: BoxShape.circle,
-        ),
-        child: Container(
-          width: diameter,
-          height: diameter,
-          decoration: BoxDecoration(
-            color: selected ? colors.accent : colors.muted,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionIcon extends StatelessWidget {
-  const _ActionIcon({
-    required this.icon,
-    required this.enabled,
-    required this.semanticsLabel,
-    required this.onTap,
-    this.destructive = false,
-  });
-
-  final AppLineIcon icon;
-  final bool enabled;
-  final bool destructive;
-  final String semanticsLabel;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final tint = !enabled
-        ? colors.muted2
-        : (destructive ? colors.exam : colors.ink);
-    return AppPressable(
-      onTap: enabled ? onTap : null,
-      semanticsButton: true,
-      semanticsLabel: semanticsLabel,
-      child: Container(
-        width: AppControlSize.iconButtonSmall,
-        height: AppControlSize.iconButtonSmall,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: colors.surface2,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-        ),
-        child: AppLineIconWidget(icon, size: 17, color: tint),
+          );
+        },
       ),
     );
   }

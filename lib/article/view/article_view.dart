@@ -121,6 +121,7 @@ class ArticleView extends StatelessWidget {
     return SelectionArea(
       key: const Key('articleContent_body'),
       child: ArticleBody(
+        sourceUri: state.uri,
         model: ArticleContentModel.fromBlocks(
           state.content,
           fallbackTitle: state.title,

@@ -10,6 +10,12 @@ mixin _LessonReactionQueue on _LessonDetailsLoader {
   @override
   void _onDetailsLoaded(LessonDetailsResponse details) {
     _queuedUserReaction = details.reactions.userReaction;
+    context.read<LessonReactionsCubit?>()?.updateSummary(
+      subjectName: widget.lesson.subject,
+      lessonDate: widget.selectedDate,
+      lessonBells: widget.lesson.lessonBells,
+      response: details.reactions,
+    );
   }
 
   Future<void> _toggleReaction(String reaction) {

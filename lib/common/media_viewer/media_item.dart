@@ -12,6 +12,7 @@ class MediaItem {
     this.mimeType,
     this.sizeBytes,
     this.previewUrl,
+    this.heroTag,
   });
 
   final String url;
@@ -21,6 +22,7 @@ class MediaItem {
   final String? mimeType;
   final int? sizeBytes;
   final String? previewUrl;
+  final Object? heroTag;
 
   static MediaKind kindOf({String? mimeType, String? fileName}) {
     final mime = (mimeType ?? '').toLowerCase();

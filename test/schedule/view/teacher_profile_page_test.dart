@@ -6,12 +6,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/view/teacher_profile_page.dart';
+import 'package:schedule_repository/schedule_repository.dart' show Teacher;
 
 class MockCampusRepository extends Mock implements CampusRepository {}
 
 void main() {
+  testWidgets('teacher photo opens the shared viewer', (tester) async {
+    final repository = MockCampusRepository();
+    when(
+      () => repository.getTeacherProfile(any()),
+    ).thenAnswer((_) async => TeacherProfile.empty);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: RepositoryProvider<CampusRepository>.value(
+          value: repository,
+          child: const TeacherProfilePage(
+            teacherName: 'Teacher',
+            teacher: Teacher(
+              name: 'Teacher',
+              photoUrl: 'https://example.com/teacher.png',
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byType(AppAvatar).first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    final viewer = tester.widget<MediaViewerPage>(find.byType(MediaViewerPage));
+    expect(viewer.items.single.url, 'https://example.com/teacher.png');
+    expect(viewer.items.single.heroTag, isNotNull);
+    expect(tester.takeException(), isNull);
+  });
+
   group('TeacherProfilePage reviews skeleton', () {
     late CampusRepository repository;
 

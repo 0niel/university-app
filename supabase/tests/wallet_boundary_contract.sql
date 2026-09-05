@@ -54,7 +54,8 @@ begin
       raise exception 'Trusted RPC has unsafe execution context: %', v_function;
     end if;
     if has_function_privilege('anon', v_signature, 'EXECUTE')
-      or has_function_privilege('anon', 'public.' || v_function, 'EXECUTE')
+      or (v_function <> 'record_active_day()' and
+        has_function_privilege('anon', 'public.' || v_function, 'EXECUTE'))
       or not has_function_privilege('authenticated', v_signature, 'EXECUTE')
       or not has_function_privilege(
         'authenticated', 'public.' || v_function, 'EXECUTE'

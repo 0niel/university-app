@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/room_photo_gallery.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/room_photo_placeholder.dart';
+import 'package:rtu_mirea_app/free_rooms/widgets/room_photo_tile.dart';
 
 import '../../helpers/pump_app.dart';
 
@@ -87,5 +89,43 @@ void main() {
 
     expect(find.text('Камера'), findsOneWidget);
     expect(find.text('Галерея'), findsOneWidget);
+  });
+  testWidgets('room photo opens the whole collection with its source hero', (
+    tester,
+  ) async {
+    final photos = [
+      for (var i = 0; i < 2; i++)
+        RoomPhoto(
+          id: '$i',
+          path: '$i.png',
+          createdBy: 'user',
+          createdAt: DateTime(2026),
+          url: 'https://example.com/$i.png',
+        ),
+    ];
+    when(
+      () => repository.getRoomPhotos(
+        campus: any(named: 'campus'),
+        roomKey: any(named: 'roomKey'),
+      ),
+    ).thenAnswer((_) async => photos);
+    await pump(tester);
+    await tester.pump();
+    final source = find
+        .descendant(
+          of: find.byType(RoomPhotoGallery),
+          matching: find.byType(Hero),
+        )
+        .first;
+    final tag = tester.widget<Hero>(source).tag;
+    await tester.tap(find.byType(RoomPhotoTile).first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    final viewer = tester.widget<MediaViewerPage>(find.byType(MediaViewerPage));
+    expect(viewer.items, hasLength(2));
+    expect(viewer.items.first.heroTag, tag);
+    expect(viewer.items.last.heroTag, isNot(tag));
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
   });
 }

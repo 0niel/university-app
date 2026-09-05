@@ -62,7 +62,7 @@ class _MiniAppSubmitViewState extends State<MiniAppSubmitView> {
         confirmLabel: context.l10n.miniAppsModerationConfirm,
         cancelLabel: context.l10n.cancel,
       );
-      if (!confirmed) return;
+      if (!mounted || !confirmed) return;
     }
     setState(() {
       for (final screen in _screens) {
@@ -163,6 +163,25 @@ class _MiniAppSubmitViewState extends State<MiniAppSubmitView> {
     );
   }
 
+  Future<void> _openDocumentation() async {
+    var opened = false;
+    try {
+      opened = await launchUrl(
+        Uri.https('docs.mirea.ninja', '/'),
+        mode: LaunchMode.externalApplication,
+      );
+    } on Exception {
+      opened = false;
+    }
+    if (!opened && mounted) {
+      showNinjaToast(
+        context,
+        showCheck: false,
+        message: context.l10n.promoOpenLinkError,
+      );
+    }
+  }
+
   void _onStatus(BuildContext context, MiniAppSubmitState state) {
     final l10n = context.l10n;
     final message = switch (state.status) {
@@ -193,94 +212,107 @@ class _MiniAppSubmitViewState extends State<MiniAppSubmitView> {
       listener: _onStatus,
       builder: (context, state) {
         final submitting = state.status == .submitting;
-        return MiniAppScaffold(
-          title: l10n.miniAppsSubmitTitle,
-          body: ListView(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.screen,
-              0,
-              AppSpacing.screen,
-              ninjaBottomInset(context) + AppSpacing.lg,
-            ),
-            children: [
-              Text(
-                l10n.miniAppsSubmitSubtitle,
-                style: AppText.body.copyWith(color: colors.muted),
-              ),
-              const SizedBox(height: AppSpacing.screen),
-              _MetadataSection(
-                nameController: _nameController,
-                slugController: _slugController,
-                descriptionController: _descriptionController,
-                emojiController: _emojiController,
-                onNameChanged: _syncSlug,
-                onSlugEdited: () => _slugEdited = true,
-              ),
-              const SizedBox(height: 18),
-              _CategorySection(
-                category: _category,
-                onChanged: (value) => setState(() => _category = value),
-              ),
-              const SizedBox(height: 18),
-              if (_sourceKind == .hosted) ...[
-                _SubmitSectionLabel(
-                  title: l10n.miniAppsTplTitle,
-                  subtitle: l10n.miniAppsTplSubtitle,
+        return Scaffold(
+          backgroundColor: colors.canvas,
+          body: SafeArea(
+            bottom: false,
+            top: false,
+            child: CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: [
+                SliverToBoxAdapter(
+                  child: AppInnerHeader(
+                    title: l10n.miniAppsSubmitTitle,
+                    onBack: () => Navigator.of(context).maybePop(),
+                    backSemanticsLabel: l10n.back,
+                  ),
                 ),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final template in miniAppTemplates)
-                      NinjaChip(
-                        label: template.nameBuilder(context),
-                        onTap: () => unawaited(_applyTemplate(template)),
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.screen,
+                    AppSpacing.lg,
+                    AppSpacing.screen,
+                    ninjaBottomInset(context) + AppSpacing.lg,
+                  ),
+                  sliver: SliverList.list(
+                    children: [
+                      Text(
+                        l10n.miniAppsSubmitSubtitle,
+                        style: AppText.body.copyWith(color: colors.muted),
                       ),
-                  ],
+                      const SizedBox(height: AppSpacing.sm),
+                      NinjaListCell(
+                        title: 'docs.mirea.ninja',
+                        horizontalPadding: 0,
+                        leading: const AppLineIconWidget(
+                          .link,
+                          size: AppIconSize.md,
+                        ),
+                        onTap: () => unawaited(_openDocumentation()),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      _MetadataSection(
+                        nameController: _nameController,
+                        slugController: _slugController,
+                        descriptionController: _descriptionController,
+                        emojiController: _emojiController,
+                        onNameChanged: _syncSlug,
+                        onSlugEdited: () => _slugEdited = true,
+                      ),
+                      const SizedBox(height: 18),
+                      _CategorySection(
+                        category: _category,
+                        onChanged: (value) => setState(() => _category = value),
+                      ),
+                      const SizedBox(height: 18),
+                      _SourceSection(
+                        sourceKind: _sourceKind,
+                        originController: _originController,
+                        entryPathController: _entryPathController,
+                        screens: _screens,
+                        onKindChanged: (kind) =>
+                            setState(() => _sourceKind = kind),
+                        onPreview: (screen) => unawaited(_preview(screen)),
+                        onAddScreen: _addScreen,
+                        onApplyTemplate: (template) =>
+                            unawaited(_applyTemplate(template)),
+                        onRemoveScreen: _removeScreen,
+                      ),
+                      if (_sourceKind == .remote) ...[
+                        const SizedBox(height: 18),
+                        _PermissionsSection(
+                          permissions: _permissions,
+                          onToggled: (permission) => setState(() {
+                            if (!_permissions.remove(permission)) {
+                              _permissions.add(permission);
+                            }
+                          }),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.xlg),
+                      NinjaButton.primary(
+                        label: submitting
+                            ? l10n.miniAppsSubmitSending
+                            : l10n.miniAppsSubmitSend,
+                        expanded: true,
+                        loading: submitting,
+                        onPressed: submitting
+                            ? null
+                            : () => unawaited(_submit(asDraft: false)),
+                      ),
+                      const SizedBox(height: AppSpacing.gap),
+                      NinjaButton.text(
+                        label: l10n.miniAppsSubmitDraft,
+                        expanded: true,
+                        onPressed: submitting
+                            ? null
+                            : () => unawaited(_submit(asDraft: true)),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 18),
               ],
-              _SourceSection(
-                sourceKind: _sourceKind,
-                originController: _originController,
-                entryPathController: _entryPathController,
-                screens: _screens,
-                onKindChanged: (kind) => setState(() => _sourceKind = kind),
-                onPreview: (screen) => unawaited(_preview(screen)),
-                onAddScreen: _addScreen,
-                onRemoveScreen: _removeScreen,
-              ),
-              if (_sourceKind == .remote) ...[
-                const SizedBox(height: 18),
-                _PermissionsSection(
-                  permissions: _permissions,
-                  onToggled: (permission) => setState(() {
-                    if (!_permissions.remove(permission)) {
-                      _permissions.add(permission);
-                    }
-                  }),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.xlg),
-              NinjaButton.primary(
-                label: submitting
-                    ? l10n.miniAppsSubmitSending
-                    : l10n.miniAppsSubmitSend,
-                expanded: true,
-                loading: submitting,
-                onPressed: submitting
-                    ? null
-                    : () => unawaited(_submit(asDraft: false)),
-              ),
-              const SizedBox(height: AppSpacing.gap),
-              NinjaButton.outline(
-                label: l10n.miniAppsSubmitDraft,
-                expanded: true,
-                onPressed: submitting
-                    ? null
-                    : () => unawaited(_submit(asDraft: true)),
-              ),
-            ],
+            ),
           ),
         );
       },

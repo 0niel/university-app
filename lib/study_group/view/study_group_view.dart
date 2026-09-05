@@ -185,13 +185,13 @@ class StudyGroupView extends StatelessWidget {
         bottom: false,
         child: BlocBuilder<StudyGroupCubit, StudyGroupState>(
           builder: (context, state) {
-            return Column(
-              children: [
-                CommunityPageHeader(title: l10n.studyGroupTitle),
-                Expanded(
-                  child: NinjaStateSwitcher(child: _body(context, state)),
+            return NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                SliverToBoxAdapter(
+                  child: CommunityPageHeader(title: l10n.studyGroupTitle),
                 ),
               ],
+              body: NinjaStateSwitcher(child: _body(context, state)),
             );
           },
         ),

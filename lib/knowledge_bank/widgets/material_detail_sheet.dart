@@ -5,6 +5,7 @@ import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/knowledge_bank/config/knowledge_material_types.dart';
+import 'package:rtu_mirea_app/knowledge_bank/widgets/material_thumbnail.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -15,12 +16,13 @@ Future<void> showMaterialDetailSheet(
   required Future<void> Function() onDownload,
   required Future<String?> Function() resolveShareUrl,
   required Future<void> Function() onDelete,
+  String? previewUrl,
 }) async {
   final l10n = context.l10n;
   final action = await showAppSheet<String>(
     context,
     title: l10n.knowledgeMaterialDetailTitle,
-    child: _MaterialDetailContent(material: material),
+    child: _MaterialDetailContent(material: material, previewUrl: previewUrl),
   );
   if (!context.mounted || action == null) return;
   switch (action) {
@@ -63,9 +65,10 @@ Future<void> showMaterialDetailSheet(
 }
 
 class _MaterialDetailContent extends StatelessWidget {
-  const _MaterialDetailContent({required this.material});
+  const _MaterialDetailContent({required this.material, this.previewUrl});
 
   final StudyMaterial material;
+  final String? previewUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +79,22 @@ class _MaterialDetailContent extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (previewUrl?.isNotEmpty ?? false) ...[
+          AppPressable(
+            semanticsLabel: l10n.open,
+            onTap: material.hasFile
+                ? () => Navigator.of(context).pop('open')
+                : null,
+            child: AspectRatio(
+              aspectRatio: 16 / 10,
+              child: MaterialThumbnail(
+                previewUrl: previewUrl,
+                mimeType: material.mimeType,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         Text(
           material.title,
           style: AppText.title.copyWith(color: colors.ink),
@@ -193,11 +212,14 @@ class _MetaRow extends StatelessWidget {
               style: AppText.subtext.copyWith(color: colors.muted),
             ),
           ),
-          Text(
-            value,
-            style: AppText.subtext.copyWith(
-              color: colors.ink,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: AppText.subtext.copyWith(
+                color: colors.ink,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

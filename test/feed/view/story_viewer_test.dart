@@ -8,9 +8,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:news_blocks/news_blocks.dart';
+import 'package:news_repository/news_repository.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
+import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
+import 'package:rtu_mirea_app/common/media_viewer/widgets/media_top_bar.dart';
 import 'package:rtu_mirea_app/feed/bloc/feed_bloc.dart';
+import 'package:rtu_mirea_app/feed/view/story_viewer/story_slide.dart';
 import 'package:rtu_mirea_app/feed/view/story_viewer/story_viewer_page.dart';
+import 'package:rtu_mirea_app/home/view/widgets/home_stories_rail.dart';
 
 import '../../helpers/pump_app.dart';
 
@@ -69,6 +74,228 @@ void main() {
       ),
     ),
   );
+
+  void loadedStories({bool images = false}) {
+    when(() => feed.state).thenReturn(
+      FeedState(
+        status: .populated,
+        feed: {
+          'science': [
+            for (final id in ['first', 'second'])
+              PostMediumBlock(
+                id: id,
+                categoryId: 'science',
+                author: 'Наука',
+                publishedAt: DateTime(2026),
+                imageUrl: images ? 'https://example.com/$id.png' : '',
+                title: id,
+              ),
+          ],
+        },
+      ),
+    );
+  }
+
+  testWidgets('story avatar keeps its launch hero through dismissal', (
+    tester,
+  ) async {
+    loadedStories();
+    await tester.pumpApp(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<FeedBloc>.value(value: feed),
+          BlocProvider<CategoriesBloc>.value(value: categories),
+        ],
+        child: const Scaffold(
+          body: HomeStoriesRail(
+            sources: [
+              NewsSourceItem(
+                sourceType: 'telegram',
+                sourceId: 'science',
+                sourceName: 'Наука',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final sourceTag = tester.widget<Hero>(find.byType(Hero)).tag;
+    await tester.tap(find.byType(HomeStoryItem));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    final hero = tester.widget<Hero>(
+      find.descendant(
+        of: find.byType(StoryViewerPage),
+        matching: find.byType(Hero),
+      ),
+    );
+    expect(hero.tag, sourceTag);
+    await tester.tap(find.byKey(const Key('storyViewer_close')));
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeStoryItem), findsOneWidget);
+    expect(tester.widget<Hero>(find.byType(Hero)).tag, sourceTag);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('horizontal swipes navigate without dismissing the story', (
+    tester,
+  ) async {
+    loadedStories();
+    await tester.pumpApp(subject(reducedMotion: true));
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.dragFrom(const Offset(240, 180), const Offset(-120, 0));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('storyViewer_slide_second')),
+      findsOneWidget,
+    );
+    await tester.dragFrom(const Offset(100, 180), const Offset(120, 0));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('storyViewer_slide_first')),
+      findsOneWidget,
+    );
+    expect(find.byType(StoryViewerPage), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('photo inspection pauses stories until the media viewer closes', (
+    tester,
+  ) async {
+    loadedStories(images: true);
+    await tester.pumpApp(subject());
+    await tester.tap(find.text('Open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    tester.widget<StorySlide>(find.byType(StorySlide)).onMediaReady!();
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('storyViewer_viewImage')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(seconds: 3));
+    final viewer = tester.widget<MediaViewerPage>(find.byType(MediaViewerPage));
+    expect(viewer.items.single.url, 'https://example.com/first.png');
+    expect(viewer.items.single.heroTag, isNotNull);
+    expect(
+      find.byKey(const ValueKey('storyViewer_slide_first')),
+      findsOneWidget,
+    );
+    tester.widget<MediaTopBar>(find.byType(MediaTopBar)).onClose();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 1100));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(MediaViewerPage), findsNothing);
+    expect(
+      find.byKey(const ValueKey('storyViewer_slide_second')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('double tapping a photo opens inspection without advancing', (
+    tester,
+  ) async {
+    loadedStories(images: true);
+    await tester.pumpApp(subject(reducedMotion: true));
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    final point = tester.getCenter(
+      find.byKey(const Key('storyViewer_nextZone')),
+    );
+    await tester.tapAt(point);
+    await tester.pump(const Duration(milliseconds: 80));
+    await tester.tapAt(point);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(MediaViewerPage), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('storyViewer_slide_first')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('cancelling an early photo press resumes autoplay', (
+    tester,
+  ) async {
+    loadedStories(images: true);
+    await tester.pumpApp(subject());
+    await tester.tap(find.text('Open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    tester.widget<StorySlide>(find.byType(StorySlide)).onMediaReady!();
+    await tester.pump();
+    final press = await tester.startGesture(const Offset(200, 150));
+    await press.cancel();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1100));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(
+      find.byKey(const ValueKey('storyViewer_slide_second')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a photo tap near expiry advances exactly one story', (
+    tester,
+  ) async {
+    loadedStories(images: true);
+    await tester.pumpApp(subject());
+    await tester.tap(find.text('Open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    tester.widget<StorySlide>(find.byType(StorySlide)).onMediaReady!();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.tap(find.byKey(const Key('storyViewer_nextZone')));
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(StoryViewerPage), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('storyViewer_slide_second')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('revisiting a transitioning story keeps photo heroes unique', (
+    tester,
+  ) async {
+    loadedStories(images: true);
+    await tester.pumpApp(subject());
+    await tester.tap(find.text('Open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    tester
+        .widget<GestureDetector>(find.byKey(const Key('storyViewer_nextZone')))
+        .onTap!();
+    await tester.pump(const Duration(milliseconds: 16));
+    tester
+        .widget<GestureDetector>(find.byKey(const Key('storyViewer_prevZone')))
+        .onTap!();
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.tap(find.byKey(const Key('storyViewer_viewImage')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(MediaViewerPage), findsOneWidget);
+    expect(
+      tester
+          .widget<MediaViewerPage>(find.byType(MediaViewerPage))
+          .items
+          .single
+          .url,
+      'https://example.com/first.png',
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets('pending stories remain closable and request the source once', (
     tester,

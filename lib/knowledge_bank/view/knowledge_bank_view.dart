@@ -4,6 +4,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/knowledge_bank/cubit/knowledge_bank_cubit.dart';
 import 'package:rtu_mirea_app/knowledge_bank/utils/material_search.dart';
@@ -35,6 +36,24 @@ class KnowledgeBankView extends StatefulWidget {
 
 class _KnowledgeBankViewState extends State<KnowledgeBankView> {
   final Set<String> _openingMaterialIds = {};
+  final _heroScope = Object();
+
+  Object? _heroTag(StudyMaterial material) {
+    final preview = context
+        .read<KnowledgeBankCubit>()
+        .state
+        .previewUrls[material.previewPath];
+    return MediaItem.kindOf(
+                  mimeType: material.mimeType,
+                  fileName: material.fileName,
+                ) ==
+                MediaKind.image &&
+            preview != null &&
+            preview.isNotEmpty
+        ? (_heroScope, material.id)
+        : null;
+  }
+
   final _searchController = TextEditingController();
   String _query = '';
   Set<String> _subjects = {};
@@ -78,6 +97,14 @@ class _KnowledgeBankViewState extends State<KnowledgeBankView> {
     Future<void> Function() materialUploaded,
   ) async {
     final l10n = context.l10n;
+    if (context.read<AppBloc?>()?.state.status.isLoggedIn == false) {
+      showNinjaToast(
+        context,
+        message: l10n.lessonDetailsSignInUpload,
+        showCheck: false,
+      );
+      return;
+    }
     final created = await showAppSheet<bool>(
       context,
       title: l10n.knowledgeUploadTitle,
@@ -101,18 +128,6 @@ class _KnowledgeBankViewState extends State<KnowledgeBankView> {
       ...material.subjects,
   }.toList()..sort();
 
-  List<String> _popularSubjects(List<StudyMaterial> materials) {
-    final counts = <String, int>{};
-    for (final material in materials) {
-      for (final subject in material.subjects) {
-        counts[subject] = (counts[subject] ?? 0) + 1;
-      }
-    }
-    final subjects = counts.keys.toList()
-      ..sort((a, b) => counts[b]!.compareTo(counts[a]!));
-    return subjects.take(8).toList();
-  }
-
   Future<void> _chooseSubjects() async {
     final selected = await showMaterialSubjectPicker(
       context,
@@ -124,10 +139,32 @@ class _KnowledgeBankViewState extends State<KnowledgeBankView> {
     setState(() => _subjects = selected);
   }
 
-  void _toggleQuickSubject(String subject) {
-    setState(() {
-      if (!_subjects.remove(subject)) _subjects.add(subject);
-    });
+  Future<void> _chooseSort() async {
+    final l10n = context.l10n;
+    final selected = await showAppSheet<String>(
+      context,
+      title: l10n.miniAppsSortTitle,
+      child: AppListGroup(
+        children: [
+          for (final option in [
+            ('popular', l10n.knowledgeSortPopular),
+            ('new', l10n.knowledgeSortNew),
+          ])
+            AppListRow(
+              title: option.$2,
+              isFirst: option.$1 == 'popular',
+              trailing: option.$1 == _sort
+                  ? const AppLineIconWidget(AppLineIcon.check)
+                  : null,
+              onTap: () => Navigator.of(
+                context,
+                rootNavigator: true,
+              ).pop(option.$1),
+            ),
+        ],
+      ),
+    );
+    if (mounted && selected != null) setState(() => _sort = selected);
   }
 
   Future<Uri?> _resolveAccess(
@@ -229,6 +266,7 @@ class _KnowledgeBankViewState extends State<KnowledgeBankView> {
             fileName: material.fileName,
             mimeType: material.mimeType,
             sizeBytes: material.fileSize,
+            heroTag: _heroTag(material),
           ),
         ],
       );
@@ -293,6 +331,7 @@ class _KnowledgeBankViewState extends State<KnowledgeBankView> {
   ) => showMaterialDetailSheet(
     context,
     material: material,
+    previewUrl: cubit.state.previewUrls[material.previewPath],
     onOpen: () => _openMaterial(context, cubit, material),
     onDownload: () => _download(context, cubit, material),
     resolveShareUrl: () async {
@@ -354,151 +393,157 @@ class _KnowledgeBankViewState extends State<KnowledgeBankView> {
         )
         .toList(growable: false);
     final sortedMaterials = _sorted(materials);
-    final quickSubjects = _popularSubjects(state.materials);
     return Scaffold(
       backgroundColor: colors.canvas,
-      body: Column(
-        children: [
-          AppInnerHeader(
-            title: l10n.knowledgeTitle,
-            onBack: () => Navigator.of(context).maybePop(),
-            backSemanticsLabel: l10n.back,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.screen,
-              AppSpacing.screen,
-              AppSpacing.screen,
-              AppSpacing.md,
+      body: RefreshIndicator(
+        color: colors.accent,
+        backgroundColor: colors.surface,
+        onRefresh: cubit.load,
+        child: CustomScrollView(
+          key: const PageStorageKey('knowledge-bank-scroll'),
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          slivers: [
+            SliverToBoxAdapter(
+              child: AppInnerHeader(
+                title: l10n.knowledgeTitle,
+                onBack: () => Navigator.of(context).maybePop(),
+                backSemanticsLabel: l10n.back,
+                trailingLabel: l10n.knowledgeUpload,
+                onTrailingLabelTap: () =>
+                    unawaited(_upload(context, cubit.materialUploaded)),
+              ),
             ),
-            child: AppSearchBar(
-              controller: _searchController,
-              hintText: l10n.knowledgeSearchHint,
-              onCanvas: true,
-              trailingIcon: null,
-              onChanged: (value) => setState(() => _query = value),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                AppSpacing.screen,
+                AppSpacing.screen,
+                AppSpacing.md,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: AppSearchBar(
+                        controller: _searchController,
+                        hintText: l10n.knowledgeSearchHint,
+                        onCanvas: true,
+                        trailingIcon: null,
+                        onChanged: (value) => setState(() => _query = value),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    AppIconButton(
+                      icon: const AppLineIconWidget(AppLineIcon.filter),
+                      tone: _subjects.isNotEmpty ? .tonal : .secondary,
+                      tooltip: _subjects.isEmpty
+                          ? l10n.knowledgeSubjectsFilter
+                          : l10n.knowledgeSubjectsFilterCount(_subjects.length),
+                      onPressed: () => unawaited(_chooseSubjects()),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          SizedBox(
-            height: AppControlSize.iconButton,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screen,
+                ),
+                child: _KnowledgeFilters(
+                  value: state.type,
+                  onChanged: cubit.typeChanged,
+                ),
+              ),
+            ),
+            SliverPadding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.screen,
+                vertical: AppSpacing.sm,
               ),
-              children: [
-                AppChip.filter(
-                  label: l10n.knowledgeSubjectsFilter,
-                  leadingIcon: AppLineIcon.filter,
-                  count: _subjects.isEmpty ? null : _subjects.length,
-                  selected: _subjects.isNotEmpty,
-                  onTap: () => unawaited(_chooseSubjects()),
-                ),
-                for (final subject in quickSubjects) ...[
-                  const SizedBox(width: AppSpacing.xsm),
-                  AppChip.filter(
-                    label: subject,
-                    selected: _subjects.contains(subject),
-                    onTap: () => _toggleQuickSubject(subject),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sectionGap),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-            child: _KnowledgeFilters(
-              value: state.type,
-              onChanged: cubit.typeChanged,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sectionGap),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-            child: Row(
-              children: [
-                Expanded(
-                  child: AppChipRow<String>(
-                    value: _sort,
-                    onChanged: (value) => setState(() => _sort = value),
-                    items: [
-                      AppChipRowItem(
-                        value: 'popular',
-                        label: l10n.knowledgeSortPopular,
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: AppPressable(
+                        semanticsLabel: l10n.miniAppsSortTitle,
+                        onTap: () => unawaited(_chooseSort()),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 44),
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  _sort == 'popular'
+                                      ? l10n.knowledgeSortPopular
+                                      : l10n.knowledgeSortNew,
+                                  style: AppText.caption.copyWith(
+                                    color: colors.muted,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.xs),
+                              AppLineIconWidget(
+                                AppLineIcon.chevronD,
+                                size: 14,
+                                color: colors.muted,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      AppChipRowItem(
-                        value: 'new',
-                        label: l10n.knowledgeSortNew,
+                    ),
+                    AppIconButton(
+                      icon: AppLineIconWidget(
+                        _gridView ? AppLineIcon.clipboard : AppLineIcon.grid,
                       ),
-                    ],
-                  ),
+                      tone: .plain,
+                      size: .compact,
+                      tooltip: _gridView
+                          ? l10n.knowledgeViewList
+                          : l10n.knowledgeViewGrid,
+                      onPressed: () => unawaited(_setGridView(!_gridView)),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                AppIconButton(
-                  icon: const AppLineIconWidget(AppLineIcon.clipboard),
-                  tone: _gridView ? .secondary : .tonal,
-                  size: .compact,
-                  tooltip: l10n.knowledgeViewList,
-                  onPressed: () => unawaited(_setGridView(false)),
-                ),
-                const SizedBox(width: AppSpacing.xsm),
-                AppIconButton(
-                  icon: const AppLineIconWidget(AppLineIcon.grid),
-                  tone: _gridView ? .tonal : .secondary,
-                  size: .compact,
-                  tooltip: l10n.knowledgeViewGrid,
-                  onPressed: () => unawaited(_setGridView(true)),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sectionGap),
-          Expanded(
-            child: RefreshIndicator(
-              color: colors.accent,
-              backgroundColor: colors.surface,
-              onRefresh: cubit.load,
-              child: KnowledgeBankList(
-                isLoading: isLoading,
-                isFailure: isFailure,
-                isFiltered:
-                    query.isNotEmpty ||
-                    state.type != 'all' ||
-                    _subjects.isNotEmpty,
-                materials: sortedMaterials,
-                authors: state.authors,
-                previewUrls: state.previewUrls,
-                gridView: _gridView,
-                onLike: (material) =>
-                    unawaited(_toggleLike(context, cubit, material)),
-                onLongPress: (material) =>
-                    unawaited(_showDetail(context, cubit, material)),
-                footer: AppButton.secondary(
-                  label: l10n.knowledgeUpload,
-                  onPressed: () =>
-                      unawaited(_upload(context, cubit.materialUploaded)),
-                ),
-                openingMaterialIds: _openingMaterialIds,
-                onOpen: (material) =>
-                    unawaited(_openMaterial(context, cubit, material)),
-                onDownload: (material) =>
-                    unawaited(_download(context, cubit, material)),
-                onRetry: () => unawaited(cubit.load()),
-                onUpload: () =>
-                    unawaited(_upload(context, cubit.materialUploaded)),
-                onResetFilter: () {
-                  _searchController.clear();
-                  setState(() {
-                    _query = '';
-                    _subjects.clear();
-                  });
-                  cubit.typeChanged('all');
-                },
               ),
             ),
-          ),
-        ],
+            KnowledgeBankList(
+              isLoading: isLoading,
+              isFailure: isFailure,
+              isFiltered:
+                  query.isNotEmpty ||
+                  state.type != 'all' ||
+                  _subjects.isNotEmpty,
+              materials: sortedMaterials,
+              authors: state.authors,
+              previewUrls: state.previewUrls,
+              gridView: _gridView,
+              heroTagForMaterial: _heroTag,
+              onLike: (material) =>
+                  unawaited(_toggleLike(context, cubit, material)),
+              onLongPress: (material) =>
+                  unawaited(_showDetail(context, cubit, material)),
+              openingMaterialIds: _openingMaterialIds,
+              onOpen: (material) =>
+                  unawaited(_openMaterial(context, cubit, material)),
+              onDownload: (material) =>
+                  unawaited(_download(context, cubit, material)),
+              onRetry: () => unawaited(cubit.load()),
+              onUpload: () =>
+                  unawaited(_upload(context, cubit.materialUploaded)),
+              onResetFilter: () {
+                _searchController.clear();
+                setState(() {
+                  _query = '';
+                  _subjects.clear();
+                });
+                cubit.typeChanged('all');
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -344,11 +344,9 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                       ),
                     ),
                     if (selected != null && _view == ScheduleView.day)
-                      SliverPersistentHeader(
-                        pinned: true,
-                        delegate: ScheduleDayStripHeader(
+                      PinnedHeaderSliver(
+                        child: ScheduleDayStripHeader(
                           strip: strip,
-                          height: strip.extent(context),
                           background: context.colors.canvas,
                         ),
                       ),

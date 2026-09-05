@@ -17,9 +17,11 @@ class _LegendDot extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(color: color, shape: .circle),
         ),
-        Text(
-          label,
-          style: AppText.captionSmall.copyWith(color: context.colors.muted),
+        Flexible(
+          child: Text(
+            label,
+            style: AppText.captionSmall.copyWith(color: context.colors.muted),
+          ),
         ),
       ],
     );

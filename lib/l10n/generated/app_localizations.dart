@@ -11099,7 +11099,7 @@ abstract class AppLocalizations {
   /// No description provided for @mentorshipBecomeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'help juniors — earn shurikens and reputation'**
+  /// **'Choose your topics, meeting formats and how you can help'**
   String get mentorshipBecomeSubtitle;
 
   /// No description provided for @mentorshipRequestSheetTitle.
@@ -11267,19 +11267,55 @@ abstract class AppLocalizations {
   /// No description provided for @mentorshipTopicsLabel.
   ///
   /// In en, this message translates to:
-  /// **'WHAT YOU\'RE GOOD AT'**
+  /// **'What you\'re good at'**
   String get mentorshipTopicsLabel;
+
+  /// No description provided for @mentorshipCustomTopicLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own topic'**
+  String get mentorshipCustomTopicLabel;
+
+  /// No description provided for @mentorshipCustomTopicHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example, Flutter or calculus'**
+  String get mentorshipCustomTopicHint;
+
+  /// No description provided for @mentorshipTopicsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 20 topics, 60 characters each'**
+  String get mentorshipTopicsLimit;
+
+  /// No description provided for @mentorshipBioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'About you'**
+  String get mentorshipBioLabel;
+
+  /// No description provided for @mentorshipPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting a reply'**
+  String get mentorshipPending;
+
+  /// No description provided for @mentorshipAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Session agreed'**
+  String get mentorshipAccepted;
 
   /// No description provided for @mentorshipLevelLabel.
   ///
   /// In en, this message translates to:
-  /// **'YOUR LEVEL'**
+  /// **'Your level'**
   String get mentorshipLevelLabel;
 
   /// No description provided for @mentorshipFormatLabel.
   ///
   /// In en, this message translates to:
-  /// **'FORMAT'**
+  /// **'Meeting format'**
   String get mentorshipFormatLabel;
 
   /// No description provided for @mentorshipPriceTitle.
@@ -11327,13 +11363,13 @@ abstract class AppLocalizations {
   /// No description provided for @mentorshipTopicLabel.
   ///
   /// In en, this message translates to:
-  /// **'TOPIC'**
+  /// **'Topic'**
   String get mentorshipTopicLabel;
 
   /// No description provided for @mentorshipWhenLabel.
   ///
   /// In en, this message translates to:
-  /// **'WHEN WORKS FOR YOU'**
+  /// **'When works for you'**
   String get mentorshipWhenLabel;
 
   /// No description provided for @mentorshipWhenTonight.
@@ -11381,7 +11417,7 @@ abstract class AppLocalizations {
   /// No description provided for @mentorshipMessageLabel.
   ///
   /// In en, this message translates to:
-  /// **'MESSAGE'**
+  /// **'Message'**
   String get mentorshipMessageLabel;
 
   /// No description provided for @mentorshipMessageHint.
@@ -11537,7 +11573,7 @@ abstract class AppLocalizations {
   /// No description provided for @mentorshipCancelConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'The request will close and any reserved shurikens will be returned to the student. The session will not count as completed.'**
+  /// **'The request will close. The session will not count as completed.'**
   String get mentorshipCancelConfirmBody;
 
   /// No description provided for @mentorshipCancelConfirmAction.
@@ -19196,6 +19232,240 @@ abstract class AppLocalizations {
   /// **'Note collaborators'**
   String get collabNotesCollaboratorsTooltip;
 
+  /// No description provided for @noteToolbarFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Formatting'**
+  String get noteToolbarFormat;
+
+  /// No description provided for @noteToolbarInsert.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert'**
+  String get noteToolbarInsert;
+
+  /// No description provided for @noteLinkInvalidUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid link'**
+  String get noteLinkInvalidUrl;
+
+  /// No description provided for @noteDrawingStylusOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Stylus only'**
+  String get noteDrawingStylusOnly;
+
+  /// No description provided for @noteDrawingTouchDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw with touch'**
+  String get noteDrawingTouchDraw;
+
+  /// No description provided for @noteDrawingResetView.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit canvas'**
+  String get noteDrawingResetView;
+
+  /// No description provided for @noteDrawingColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color {index}'**
+  String noteDrawingColor(int index);
+
+  /// No description provided for @noteDrawingSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save drawing'**
+  String get noteDrawingSaveError;
+
+  /// No description provided for @noteTextToolsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text actions'**
+  String get noteTextToolsTitle;
+
+  /// No description provided for @noteTextToolsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected text will be sent to the app you choose. Translation and processing depend on the apps installed on your device.'**
+  String get noteTextToolsDescription;
+
+  /// No description provided for @noteTextToolsSelectText.
+  ///
+  /// In en, this message translates to:
+  /// **'Select text in your note first'**
+  String get noteTextToolsSelectText;
+
+  /// No description provided for @noteTextToolsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No compatible apps found. You can copy or share the text.'**
+  String get noteTextToolsUnavailable;
+
+  /// No description provided for @noteTextToolsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding apps…'**
+  String get noteTextToolsLoading;
+
+  /// No description provided for @noteTextToolsWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the result…'**
+  String get noteTextToolsWorking;
+
+  /// No description provided for @noteTextToolsFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not process the text'**
+  String get noteTextToolsFailure;
+
+  /// No description provided for @noteTextToolsNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'The app did not return modified text'**
+  String get noteTextToolsNoResult;
+
+  /// No description provided for @noteTextToolsPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get noteTextToolsPreview;
+
+  /// No description provided for @noteTextToolsApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace selected text'**
+  String get noteTextToolsApply;
+
+  /// No description provided for @noteTextToolsChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The note or selection changed. You can copy the result.'**
+  String get noteTextToolsChanged;
+
+  /// No description provided for @noteTextToolsReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This note is read-only'**
+  String get noteTextToolsReadOnly;
+
+  /// No description provided for @noteTextToolsCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get noteTextToolsCopy;
+
+  /// No description provided for @noteTextToolsShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get noteTextToolsShare;
+
+  /// No description provided for @noteTextToolsCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Text copied'**
+  String get noteTextToolsCopied;
+
+  /// No description provided for @noteSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Find in note'**
+  String get noteSearchHint;
+
+  /// No description provided for @noteSearchNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get noteSearchNoMatches;
+
+  /// No description provided for @noteSearchPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous match'**
+  String get noteSearchPrevious;
+
+  /// No description provided for @noteSearchNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next match'**
+  String get noteSearchNext;
+
+  /// No description provided for @noteOutlineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Outline'**
+  String get noteOutlineTitle;
+
+  /// No description provided for @noteOutlineEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add headings using formatting to see them here.'**
+  String get noteOutlineEmpty;
+
+  /// No description provided for @noteReadingMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading mode'**
+  String get noteReadingMode;
+
+  /// No description provided for @noteEditingMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get noteEditingMode;
+
+  /// No description provided for @noteExportDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Export PDF'**
+  String get noteExportDocument;
+
+  /// No description provided for @noteExportAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment'**
+  String get noteExportAttachment;
+
+  /// No description provided for @noteExportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare or share the document'**
+  String get noteExportError;
+
+  /// No description provided for @noteRecoveryConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has an unsaved draft. The server version has also changed.'**
+  String get noteRecoveryConflict;
+
+  /// No description provided for @noteRecoveryReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a version'**
+  String get noteRecoveryReview;
+
+  /// No description provided for @noteRecoveryKeepLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep draft'**
+  String get noteRecoveryKeepLocal;
+
+  /// No description provided for @noteRecoveryUseServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Use server version'**
+  String get noteRecoveryUseServer;
+
+  /// No description provided for @noteRecoveryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are viewing the local draft. You can export it before choosing. Keeping the draft will replace the current server version.'**
+  String get noteRecoveryBody;
+
   /// No description provided for @noteToolbarBold.
   ///
   /// In en, this message translates to:
@@ -20881,6 +21151,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This poll has no questions'**
   String get pollsEmptyQuestions;
+
+  /// No description provided for @pollsQuestionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} question} other{{count} questions}}'**
+  String pollsQuestionsCount(num count);
 
   /// No description provided for @pollsClosesFuture.
   ///

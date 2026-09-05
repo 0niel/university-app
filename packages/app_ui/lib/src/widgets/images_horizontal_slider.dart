@@ -5,7 +5,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:open_filex/open_filex.dart';
 
 class ImagesHorizontalSlider extends StatelessWidget {
   const ImagesHorizontalSlider({
@@ -36,6 +35,8 @@ class ImagesHorizontalSlider extends StatelessWidget {
           return GalleryImageItem(
             key: ValueKey('${index + 1}:${images[index + 1]}'),
             imageUrl: images[index + 1],
+            galleryImageUrls: images,
+            galleryIndex: index + 1,
             semanticLabel: semanticLabel,
             errorMessage: errorMessage,
             onOpen: onOpen,
@@ -53,11 +54,15 @@ class GalleryImageItem extends StatefulWidget {
     this.semanticLabel,
     this.errorMessage,
     this.onOpen,
+    this.galleryImageUrls,
+    this.galleryIndex = 0,
   });
   final String imageUrl;
   final String? semanticLabel;
   final String? errorMessage;
   final Future<void> Function(String)? onOpen;
+  final List<String>? galleryImageUrls;
+  final int galleryIndex;
 
   @override
   State<GalleryImageItem> createState() => _GalleryImageItemState();
@@ -65,8 +70,9 @@ class GalleryImageItem extends StatefulWidget {
 
 class _GalleryImageItemState extends State<GalleryImageItem> {
   bool _isLoading = false;
+  final _heroTag = Object();
 
-  Future<void> _openImageInSystemGallery(BuildContext context) async {
+  Future<void> _openImage(BuildContext context) async {
     if (_isLoading) return;
 
     try {
@@ -78,15 +84,23 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
       if (onOpen != null) {
         await onOpen(widget.imageUrl);
       } else {
-        final file = await DefaultCacheManager().getSingleFile(widget.imageUrl);
-        final result = await OpenFilex.open(file.path, type: 'image/jpeg');
-        if (result.type != ResultType.done) {
-          throw StateError(result.message);
-        }
+        final images = widget.galleryImageUrls;
+        final hasGallery = images != null && images.isNotEmpty;
+        final index =
+            hasGallery ? widget.galleryIndex.clamp(0, images.length - 1) : 0;
+        await Navigator.of(context).push(
+          ImagesViewGallery.route(
+            imageUrls: hasGallery ? images : [widget.imageUrl],
+            initialIndex: index,
+            heroTags: {index: _heroTag},
+            reducedMotion: MediaQuery.disableAnimationsOf(context) ||
+                MediaQuery.accessibleNavigationOf(context),
+          ),
+        );
       }
     } on Object catch (e, st) {
       log(
-        'Failed to open image in system gallery',
+        'Failed to open image',
         error: e,
         stackTrace: st,
         name: 'GalleryImageItem',
@@ -112,7 +126,7 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
     final colors = context.colors;
 
     return AppPressable(
-      onTap: _isLoading ? null : () => _openImageInSystemGallery(context),
+      onTap: _isLoading ? null : () => _openImage(context),
       semanticsLabel: widget.semanticLabel,
       semanticsButton: true,
       child: Container(
@@ -124,23 +138,27 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
         ),
         child: Stack(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.card),
-              child: CachedNetworkImage(
-                imageUrl: widget.imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                memCacheWidth: 320,
-                maxWidthDiskCache: 640,
-                cacheManager: DefaultCacheManager(),
-                placeholder: (context, url) => const AppStripePlaceholder(
-                  child: AppSpinner(),
+            Hero(
+              tag: _heroTag,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                child: CachedNetworkImage(
+                  imageUrl: widget.imageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  memCacheWidth: 320,
+                  maxWidthDiskCache: 640,
+                  cacheManager: DefaultCacheManager(),
+                  placeholder: (context, url) => const AppStripePlaceholder(
+                    child: AppSpinner(),
+                  ),
+                  errorWidget: (context, url, error) =>
+                      const ImagePlaceholder(),
                 ),
-                errorWidget: (context, url, error) => const ImagePlaceholder(),
               ),
             ),
-            if (_isLoading)
+            if (_isLoading && widget.onOpen != null)
               Positioned.fill(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.card),

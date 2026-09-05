@@ -168,31 +168,28 @@ class TeamFinderView extends StatelessWidget {
           _showError(context, context.l10n.teamFinderRefreshError),
       builder: (context, _) => Scaffold(
         backgroundColor: context.colors.canvas,
-        floatingActionButton: AppFab.extended(
-          icon: AppLineIcon.plus,
-          label: context.l10n.teamFinderCreateCta,
-          onPressed: () => unawaited(_create(context)),
-        ),
-        body: Column(
-          children: [
-            AppScreenHeader(
-              title: context.l10n.teamFinderTitle,
-              subtitle: context.l10n.teamFinderSubtitle,
-            ),
-            Expanded(
-              child: TeamFinderBody(
-                onCreate: () => unawaited(_create(context)),
-                onApply: (team) => unawaited(_apply(context, team)),
-                onWithdraw: (team) => unawaited(_withdraw(context, team)),
-                onLeave: (team) => unawaited(_leave(context, team)),
-                onApplications: (team) =>
-                    unawaited(_applications(context, team)),
-                onDelete: (team) => unawaited(_delete(context, team)),
-                onEdit: (team) => unawaited(_create(context, editing: team)),
-                onCloseToggle: (team) => unawaited(_closeToggle(context, team)),
+        body: TeamFinderBody(
+          header: AppInnerHeader(
+            title: context.l10n.teamFinderTitle,
+            subtitle: context.l10n.teamFinderSubtitle,
+            onBack: () => Navigator.of(context).maybePop(),
+            backSemanticsLabel: context.l10n.back,
+            actions: [
+              AppHeaderAction(
+                icon: AppLineIcon.plus,
+                semanticsLabel: context.l10n.teamFinderCreateCta,
+                onTap: () => unawaited(_create(context)),
               ),
-            ),
-          ],
+            ],
+          ),
+          onCreate: () => unawaited(_create(context)),
+          onApply: (team) => unawaited(_apply(context, team)),
+          onWithdraw: (team) => unawaited(_withdraw(context, team)),
+          onLeave: (team) => unawaited(_leave(context, team)),
+          onApplications: (team) => unawaited(_applications(context, team)),
+          onDelete: (team) => unawaited(_delete(context, team)),
+          onEdit: (team) => unawaited(_create(context, editing: team)),
+          onCloseToggle: (team) => unawaited(_closeToggle(context, team)),
         ),
       ),
     );

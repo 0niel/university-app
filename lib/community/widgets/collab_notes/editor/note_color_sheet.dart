@@ -14,66 +14,66 @@ List<Color> noteKitTones(BuildContext context) {
   ];
 }
 
-Future<Color?> showNoteColorSheet(
+class NoteColorSelection {
+  const NoteColorSelection(this.color);
+
+  final Color? color;
+}
+
+Future<NoteColorSelection?> showNoteColorSheet(
   BuildContext context, {
   required String title,
+  Color? initialColor,
 }) {
-  return showAppSheet<Color?>(
+  return showAppSheet<NoteColorSelection>(
     context,
     title: title,
-    child: const _NoteColorSheet(),
+    child: _NoteColorSheet(initialColor: initialColor),
   );
 }
 
-class _NoteColorSheet extends StatelessWidget {
-  const _NoteColorSheet();
+class _NoteColorSheet extends StatefulWidget {
+  const _NoteColorSheet({required this.initialColor});
+
+  final Color? initialColor;
+
+  @override
+  State<_NoteColorSheet> createState() => _NoteColorSheetState();
+}
+
+class _NoteColorSheetState extends State<_NoteColorSheet> {
+  late Color? _color = widget.initialColor;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final tones = noteKitTones(context);
+    final l10n = context.l10n;
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.md,
-          children: [
-            AppPressable(
-              onTap: () => Navigator.of(context).pop(),
-              semanticsButton: true,
-              semanticsLabel: context.l10n.noteColorDefault,
-              child: Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: colors.surface2,
-                  shape: BoxShape.circle,
-                ),
-                child: AppLineIconWidget(
-                  AppLineIcon.close,
-                  size: 16,
-                  color: colors.muted,
-                ),
-              ),
-            ),
-            for (final tone in tones)
-              AppPressable(
-                onTap: () => Navigator.of(context).pop(tone),
-                semanticsButton: true,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: tone,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-          ],
+        AppColorPalette(
+          value: _color?.toARGB32() ?? 0,
+          swatches: {
+            for (final tone in noteKitTones(context)) tone.toARGB32(),
+          }.toList(),
+          onChanged: (value) => setState(() => _color = Color(value)),
+          customLabel: l10n.settingsColorCustom,
+          hexLabel: l10n.settingsColorHex,
+          hexInvalidLabel: l10n.settingsColorHexInvalid,
         ),
         const SizedBox(height: AppSpacing.sm),
+        AppButton.text(
+          label: l10n.noteColorDefault,
+          onPressed: () =>
+              Navigator.of(context).pop(const NoteColorSelection(null)),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        AppButton.primary(
+          label: l10n.done,
+          expanded: true,
+          onPressed: () =>
+              Navigator.of(context).pop(NoteColorSelection(_color)),
+        ),
       ],
     );
   }

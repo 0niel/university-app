@@ -12,6 +12,7 @@ import 'package:rtu_mirea_app/mini_apps/runtime/mini_apps_runtime.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_template.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/widgets.dart';
 import 'package:stac_bridge/stac_bridge.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 part 'mini_app_submit_view.dart';
 part 'metadata_section.dart';

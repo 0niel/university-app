@@ -39,6 +39,9 @@ class PostOverviewBody extends StatelessWidget {
           return const PostOverviewSkeleton();
         }
         if (post != null) {
+          final sourceUri = Uri.tryParse(
+            context.read<UniversityConfig>().communityForumUrl,
+          )?.resolve('t/${post.topicId}');
           return RefreshIndicator(
             color: context.colors.accent,
             backgroundColor: context.colors.surface2,
@@ -87,7 +90,10 @@ class PostOverviewBody extends StatelessWidget {
                   ),
                   sliver: SliverToBoxAdapter(
                     child: SelectionArea(
-                      child: PostOverviewHtml(data: post.cooked),
+                      child: PostOverviewHtml(
+                        data: post.cooked,
+                        sourceUri: sourceUri,
+                      ),
                     ),
                   ),
                 ),
@@ -100,6 +106,7 @@ class PostOverviewBody extends StatelessWidget {
                   ),
                   sliver: SliverToBoxAdapter(
                     child: PostOverviewCommentsSection(
+                      sourceUri: sourceUri,
                       comments: state.comments,
                       loadFailed: state.status == .commentsFailure,
                       onRetry: () => context.read<PostOverviewBloc>().add(

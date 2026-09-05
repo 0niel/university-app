@@ -55,6 +55,46 @@ void main() {
       expect(find.text('ИКБО-09-22'), findsOneWidget);
     });
 
+    testWidgets('search scrolls away and returns with its query intact', (
+      tester,
+    ) async {
+      when(() => repository.searchGroups(any())).thenAnswer(
+        (_) async => List.generate(
+          24,
+          (index) => StudyGroupSummary(
+            id: 'g$index',
+            name: 'Group $index',
+            memberCount: 3,
+          ),
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Group');
+      tester.testTextInput.hide();
+      await tester.pumpAndSettle(const Duration(milliseconds: 400));
+      expect(find.byType(AppSearchBar).hitTestable(), findsOneWidget);
+
+      await tester.drag(
+        find.byKey(const ValueKey('results')),
+        const Offset(0, -600),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(AppSearchBar).hitTestable(), findsNothing);
+      expect(tester.takeException(), isNull);
+
+      await tester.drag(
+        find.byKey(const ValueKey('results')),
+        const Offset(0, 1200),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(AppSearchBar).hitTestable(), findsOneWidget);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'Group',
+      );
+    });
+
     testWidgets('group cards stay on plain surfaces with a pill action', (
       tester,
     ) async {

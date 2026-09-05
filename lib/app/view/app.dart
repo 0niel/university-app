@@ -79,6 +79,9 @@ class App extends StatelessWidget {
             RepositoryProvider.value(value: appScope.userRepository),
             RepositoryProvider.value(value: appScope.gamificationRepository),
             RepositoryProvider.value(value: appScope.friendsRepository),
+            RepositoryProvider.value(
+              value: appScope.notificationInboxRepository,
+            ),
             RepositoryProvider.value(value: appScope.campusRepository),
             RepositoryProvider.value(value: appScope.studyGroupsRepository),
             RepositoryProvider.value(value: appScope.serviceCatalogRepository),

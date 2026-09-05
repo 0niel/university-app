@@ -37,7 +37,33 @@ class PollsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaStateSwitcher(child: _content(context));
+    if (!isLoading && !isFailure && polls.isNotEmpty) {
+      return SliverList.separated(
+        key: const ValueKey('polls-ready'),
+        itemCount: polls.length,
+        findItemIndexCallback: (key) {
+          final index = polls.indexWhere((poll) => ValueKey(poll.id) == key);
+          return index < 0 ? null : index;
+        },
+        itemBuilder: (context, index) {
+          final poll = polls[index];
+          return PollCard(
+            key: ValueKey(poll.id),
+            poll: poll,
+            onOpen: () => onOpen(poll),
+            onOwnerActions: poll.isMine ? () => onOwnerActions(poll) : null,
+            onChangeAnswers: onChangeAnswers == null
+                ? null
+                : () => onChangeAnswers!(poll),
+            onResults: onResults == null ? null : () => onResults!(poll),
+          );
+        },
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.cardGap),
+      );
+    }
+    return SliverToBoxAdapter(
+      child: NinjaStateSwitcher(child: _content(context)),
+    );
   }
 
   Widget _content(BuildContext context) {
@@ -77,23 +103,6 @@ class PollsBody extends StatelessWidget {
         onAction: onCreate,
       );
     }
-    return Column(
-      key: const ValueKey('polls-ready'),
-      children: [
-        for (final (index, poll) in polls.indexed) ...[
-          if (index > 0) const SizedBox(height: AppSpacing.cardGap),
-          PollCard(
-            key: ValueKey(poll.id),
-            poll: poll,
-            onOpen: () => onOpen(poll),
-            onOwnerActions: poll.isMine ? () => onOwnerActions(poll) : null,
-            onChangeAnswers: onChangeAnswers == null
-                ? null
-                : () => onChangeAnswers!(poll),
-            onResults: onResults == null ? null : () => onResults!(poll),
-          ).animateListItem(index: index),
-        ],
-      ],
-    );
+    return const SizedBox.shrink();
   }
 }

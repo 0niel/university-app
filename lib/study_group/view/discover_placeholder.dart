@@ -8,6 +8,7 @@ class _DiscoverPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const .fromLTRB(
         AppSpacing.screen,

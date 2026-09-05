@@ -84,7 +84,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(GridView), findsOneWidget);
+      expect(find.byType(SliverGrid), findsOneWidget);
       expect(find.byType(AppStripePlaceholder), findsOneWidget);
     });
 
@@ -213,6 +213,73 @@ void main() {
       expect(find.text('Беспроводная мышь'), findsOneWidget);
       expect(find.text('Учебник физики'), findsNothing);
       expect(cubit.state.filterKey, 'all');
+    });
+
+    testWidgets('search and categories leave the viewport with listings', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(
+          MarketplaceState(
+            status: .ready,
+            items: List.generate(
+              20,
+              (index) => MarketListing(
+                id: 'listing-$index',
+                title: 'Listing $index',
+                price: 100,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final search = find.byType(AppSearchField);
+      expect(tester.getTopLeft(search).dy, greaterThanOrEqualTo(0));
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -550));
+      await tester.pumpAndSettle();
+
+      expect(search.hitTestable(), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('compact filters apply free-only listings from the sheet', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(
+          const MarketplaceState(
+            status: .ready,
+            items: [
+              MarketListing(
+                id: 'free',
+                title: 'Free book',
+                price: 0,
+                isFree: true,
+              ),
+              MarketListing(id: 'paid', title: 'Paid book', price: 500),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(AppSwitch), findsNothing);
+
+      await tester.tap(find.byTooltip('Фильтры'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(AppSwitch));
+      await tester.tap(find.text('Применить'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Free book'), findsOneWidget);
+      expect(find.text('Paid book'), findsNothing);
+      final filterButton = tester.widget<AppIconButton>(
+        find.byWidgetPredicate(
+          (widget) => widget is AppIconButton && widget.tooltip == 'Фильтры',
+        ),
+      );
+      expect(filterButton.dot, isTrue);
     });
 
     testWidgets('confirms deletion before invoking the Cubit', (tester) async {

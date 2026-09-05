@@ -138,13 +138,8 @@ void main() {
       expect(sortAction, findsOneWidget);
       expect(tester.getRect(sortAction).height, greaterThanOrEqualTo(44));
 
-      final pill = tester.widget<Container>(
-        find.descendant(of: sortAction, matching: find.byType(Container)).first,
-      );
-      expect(
-        (pill.decoration! as BoxDecoration).borderRadius,
-        BorderRadius.circular(AppRadius.full),
-      );
+      expect(tester.getRect(sortAction).width, lessThanOrEqualTo(48));
+      expect(find.byType(NinjaIconButton), findsWidgets);
 
       await tester.tap(sortAction);
       await tester.pumpAndSettle();
@@ -186,6 +181,51 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  testWidgets(
+    'categories scroll horizontally and controls leave the viewport',
+    (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final cubit = MockMiniAppsCatalogCubit();
+      when(() => cubit.state).thenReturn(
+        MiniAppsCatalogState(
+          status: MiniAppsCatalogStatus.populated,
+          isSearching: true,
+          apps: List.generate(
+            30,
+            (i) => MiniApp(id: '$i', slug: 'app-$i', name: 'App $i'),
+          ),
+        ),
+      );
+      when(
+        () => cubit.categoryChanged(MiniAppCategory.other),
+      ).thenAnswer((_) async {});
+      await tester.pumpWidget(
+        _wrap(
+          BlocProvider<MiniAppsCatalogCubit>.value(
+            value: cubit,
+            child: const MiniAppsView(),
+          ),
+          reduceMotion: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final categories = find.byKey(const ValueKey('mini-apps-categories'));
+      await tester.drag(categories, const Offset(-1000, 0));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Другое'));
+      verify(() => cubit.categoryChanged(MiniAppCategory.other)).called(1);
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -1100));
+      await tester.pumpAndSettle();
+      expect(find.byType(AppInnerHeader).hitTestable(), findsNothing);
+      expect(find.byType(NinjaInput).hitTestable(), findsNothing);
+      expect(categories.hitTestable(), findsNothing);
+      expect(find.byType(MiniAppCard).hitTestable(), findsWidgets);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   group('MiniAppsView empty states', () {
     late MiniAppsCatalogCubit cubit;

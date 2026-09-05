@@ -18,6 +18,7 @@ void main() {
     VoidCallback? onOwnerActions,
     VoidCallback? onChangeAnswers,
     VoidCallback? onResults,
+    VoidCallback? onOpen,
     double textScale = 1,
   }) => tester.pumpWidget(
     MaterialApp(
@@ -32,12 +33,14 @@ void main() {
         child: child!,
       ),
       home: Scaffold(
-        body: PollCard(
-          poll: poll,
-          onOpen: () {},
-          onOwnerActions: onOwnerActions,
-          onChangeAnswers: onChangeAnswers,
-          onResults: onResults,
+        body: SingleChildScrollView(
+          child: PollCard(
+            poll: poll,
+            onOpen: onOpen ?? () {},
+            onOwnerActions: onOwnerActions,
+            onChangeAnswers: onChangeAnswers,
+            onResults: onResults,
+          ),
         ),
       ),
     ),
@@ -101,10 +104,8 @@ void main() {
         basePoll.copyWith(iParticipated: true, allowChange: true),
         onChangeAnswers: () => changed = true,
       );
-      final results = tester.widget<AppButton>(
-        find.widgetWithText(AppButton, 'Результаты'),
-      );
-      expect(results.onPressed, isNull);
+      expect(find.widgetWithText(AppButton, 'Результаты'), findsNothing);
+      expect(find.text('Результаты пока скрыты'), findsOneWidget);
       await tester.tap(find.text('Изменить ответы'));
       expect(changed, isTrue);
     },
@@ -168,5 +169,127 @@ void main() {
     expect(find.text('Результаты'), findsOneWidget);
     await tester.tap(find.text('Результаты'));
     expect(opened, isTrue);
+  });
+
+  testWidgets('title opens the poll and owner action does not open it', (
+    tester,
+  ) async {
+    var opened = 0;
+    var managed = 0;
+    await pump(
+      tester,
+      basePoll,
+      onOpen: () => opened++,
+      onOwnerActions: () => managed++,
+    );
+    await tester.tap(find.text(basePoll.title));
+    expect(opened, 1);
+    await tester.tap(find.byTooltip('Управление опросом'));
+    expect(managed, 1);
+    expect(opened, 1);
+  });
+
+  const resultQuestion = PollQuestion(
+    id: 'q',
+    text: 'Выберите время',
+    kind: PollQuestionKind.single,
+    myOptionIds: ['b'],
+    options: [
+      PollOption(id: 'a', text: 'Утро', votes: 3),
+      PollOption(id: 'b', text: 'Вечер', votes: 7),
+    ],
+  );
+
+  testWidgets(
+    'answered public poll previews actual results and chosen answer',
+    (tester) async {
+      await pump(
+        tester,
+        basePoll.copyWith(
+          iParticipated: true,
+          canSeeResults: true,
+          questions: [resultQuestion],
+        ),
+      );
+      expect(find.text('70%'), findsOneWidget);
+      expect(find.text('30%'), findsOneWidget);
+      expect(find.textContaining('1 вопрос'), findsOneWidget);
+      expect(find.byType(AppProgressBar), findsNWidgets(2));
+    },
+  );
+
+  testWidgets(
+    'result preview remains usable with large text on narrow screens',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 1100);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      var opened = false;
+      await pump(
+        tester,
+        basePoll.copyWith(
+          iParticipated: true,
+          canSeeResults: true,
+          questions: [
+            resultQuestion.copyWith(
+              options: const [
+                PollOption(
+                  id: 'a',
+                  text: 'В первой половине дня, сразу после лекций',
+                  votes: 3,
+                ),
+                PollOption(
+                  id: 'b',
+                  text: 'Поздно вечером после всех занятий',
+                  votes: 7,
+                ),
+              ],
+            ),
+          ],
+        ),
+        textScale: 2,
+        onOpen: () => opened = true,
+      );
+      expect(tester.takeException(), isNull);
+      expect(find.text('70%'), findsOneWidget);
+      await tester.ensureVisible(find.text('Результаты'));
+      await tester.tap(find.text('Результаты'));
+      expect(opened, isTrue);
+    },
+  );
+
+  testWidgets('private payload and pre-vote results never enter card preview', (
+    tester,
+  ) async {
+    for (final poll in [
+      basePoll.copyWith(
+        iParticipated: true,
+        isMine: true,
+        questions: [resultQuestion],
+      ),
+      basePoll.copyWith(canSeeResults: true, questions: [resultQuestion]),
+    ]) {
+      await pump(tester, poll);
+      expect(find.byType(AppProgressBar), findsNothing);
+      expect(find.text('70%'), findsNothing);
+      expect(find.text('Утро'), findsNothing);
+    }
+  });
+
+  testWidgets('simple poll keeps compact controls and a compact card', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await pump(tester, basePoll);
+    expect(tester.getSize(find.byType(PollCard)).height, lessThan(260));
+    expect(tester.getSize(find.byType(AppButton)).width, lessThan(180));
+    expect(
+      tester.getSize(find.byType(AppButton)).height,
+      greaterThanOrEqualTo(44),
+    );
   });
 }

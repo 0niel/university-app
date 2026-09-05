@@ -18,6 +18,44 @@ class LessonReactionsCubit extends HydratedCubit<LessonReactionsState> {
   final ScheduleRepository _scheduleRepository;
   final Map<String, int> _slotVersions = {};
   final Map<String, Future<void>> _mutationQueues = {};
+  final Map<String, DateTime> _summaryRequestedAt = {};
+
+  Future<void> ensureSummary({
+    required String subjectName,
+    required DateTime lessonDate,
+    required LessonBells lessonBells,
+  }) async {
+    final key = _slotKey(subjectName, lessonDate, lessonBells);
+    final now = DateTime.now();
+    final requested = _summaryRequestedAt[key];
+    if (requested != null &&
+        now.difference(requested) < const Duration(minutes: 2)) {
+      return;
+    }
+    _summaryRequestedAt[key] = now;
+    await loadSummary(
+      subjectName: subjectName,
+      lessonDate: lessonDate,
+      lessonBells: lessonBells,
+    );
+  }
+
+  void updateSummary({
+    required String subjectName,
+    required DateTime lessonDate,
+    required LessonBells lessonBells,
+    required LessonReactionResponse response,
+  }) {
+    if (isClosed) return;
+    _beginOperation(subjectName, lessonDate, lessonBells);
+    _applyLoadedSummary(
+      subjectName: subjectName,
+      lessonDate: lessonDate,
+      lessonBells: lessonBells,
+      counts: ReactionCounts.fromJson(response.counts),
+      userReaction: _reactionTypeFromWire(response.userReaction),
+    );
+  }
 
   Future<void> loadSummary({
     required String subjectName,
@@ -29,7 +67,7 @@ class LessonReactionsCubit extends HydratedCubit<LessonReactionsState> {
       final response = await _scheduleRepository.getLessonReactionSummary(
         subjectName: subjectName,
         lessonDate: lessonDate,
-        lessonBellsNumber: lessonBells.number ?? 0,
+        lessonBellsNumber: lessonBells.number ?? 1,
       );
       if (isClosed || !_isLatestOperation(operation)) return;
       _applyLoadedSummary(
@@ -105,7 +143,7 @@ class LessonReactionsCubit extends HydratedCubit<LessonReactionsState> {
       await _scheduleRepository.postLessonReaction(
         subjectName: subjectName,
         lessonDate: lessonDate,
-        lessonBellsNumber: lessonBells.number ?? 0,
+        lessonBellsNumber: lessonBells.number ?? 1,
         reactionType: reactionType.name,
       );
     } on Exception catch (error, stackTrace) {
@@ -176,7 +214,7 @@ class LessonReactionsCubit extends HydratedCubit<LessonReactionsState> {
       await _scheduleRepository.deleteLessonReaction(
         subjectName: subjectName,
         lessonDate: lessonDate,
-        lessonBellsNumber: lessonBells.number ?? 0,
+        lessonBellsNumber: lessonBells.number ?? 1,
       );
     } on Exception catch (error, stackTrace) {
       addError(error, stackTrace);

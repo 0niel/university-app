@@ -63,73 +63,91 @@ class _MiniAppsViewState extends State<MiniAppsView> {
     final colors = context.colors;
     final l10n = context.l10n;
     final state = context.watch<MiniAppsCatalogCubit>().state;
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
+        MediaQuery.accessibleNavigationOf(context);
+    final searchField = state.isSearching
+        ? Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: _MiniAppsSearchField(controller: _searchController),
+          )
+        : const SizedBox.shrink();
     return Scaffold(
       backgroundColor: colors.canvas,
-      floatingActionButton: AppFab.extended(
+      floatingActionButton: AppFab(
         icon: AppLineIcon.plus,
-        label: l10n.miniAppsCreate,
+        tooltip: l10n.miniAppsCreate,
         onPressed: () => context.go('/services/apps/submit'),
       ),
       body: SafeArea(
+        bottom: false,
         top: false,
-        child: Column(
-          children: [
-            _MiniAppsAppBar(
-              isModerator: state.isModerator,
-              isSearching: state.isSearching,
-              onSearchToggled: _toggleSearch,
-            ),
-            const SizedBox(height: AppSpacing.xlg),
-            Expanded(
-              child: NestedScrollView(
-                headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.screen,
-                      0,
-                      AppSpacing.screen,
-                      AppSpacing.lg,
-                    ),
-                    sliver: SliverToBoxAdapter(
-                      child: _MiniAppsHero(count: state.apps.length),
-                    ),
-                  ),
-                ],
-                body: Column(
-                  children: [
-                    if (state.isSearching)
-                      _MiniAppsSearchField(controller: _searchController),
-                    const SizedBox(height: AppSpacing.sectionGap),
-                    _CategoryChips(category: state.category),
-                    Padding(
-                      padding: const .fromLTRB(
-                        AppSpacing.screen,
-                        8,
-                        AppSpacing.screen,
-                        10,
+        child: RefreshIndicator(
+          color: colors.accent,
+          backgroundColor: colors.surface,
+          onRefresh: () => context.read<MiniAppsCatalogCubit>().load(),
+          child: CustomScrollView(
+            key: const PageStorageKey('mini-apps-catalog'),
+            physics: const AlwaysScrollableScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              SliverToBoxAdapter(
+                child: _MiniAppsAppBar(
+                  isModerator: state.isModerator,
+                  isSearching: state.isSearching,
+                  onSearchToggled: _toggleSearch,
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.screen,
+                  AppSpacing.lg,
+                  AppSpacing.screen,
+                  AppSpacing.lg,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: _MiniAppsHero(count: state.apps.length),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: reduceMotion
+                    ? searchField
+                    : AnimatedSize(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        alignment: Alignment.topCenter,
+                        child: searchField,
                       ),
-                      child: Align(
-                        alignment: AlignmentDirectional.centerEnd,
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                  child: Row(
+                    children: [
+                      Expanded(child: _CategoryChips(category: state.category)),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: AppSpacing.sm,
+                          right: AppSpacing.screen,
+                        ),
                         child: _MiniAppsSortButton(
                           label: _miniAppSortLabel(l10n, state.sort),
                           onPressed: () => unawaited(_openSort()),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: _CatalogBody(
-                        state: state,
-                        onOpen: _openApp,
-                        onActions: (app) => unawaited(_openActions(app)),
-                        onCreate: () => context.go('/services/apps/submit'),
-                        onResetFilters: _resetFilters,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              _CatalogBody(
+                state: state,
+                onOpen: _openApp,
+                onActions: (app) => unawaited(_openActions(app)),
+                onCreate: () => context.go('/services/apps/submit'),
+                onResetFilters: _resetFilters,
+              ),
+            ],
+          ),
         ),
       ),
     );

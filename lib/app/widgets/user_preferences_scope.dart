@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
 import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
+import 'package:rtu_mirea_app/notifications/data/notification_inbox_repository.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
 
 class UserPreferencesScope extends StatelessWidget {
@@ -32,7 +33,12 @@ class UserPreferencesScope extends StatelessWidget {
               return cubit;
             },
           ),
-          BlocProvider(create: (_) => NotificationsCubit(userId: userId)),
+          BlocProvider(
+            create: (context) => NotificationsCubit(
+              userId: userId,
+              repository: context.read<NotificationInboxRepository>(),
+            ),
+          ),
           BlocProvider(
             create: (context) {
               final cubit = GeoSharingCubit(

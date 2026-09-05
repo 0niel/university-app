@@ -167,6 +167,10 @@ class StacImageKitParser extends StacParser<KitModel> {
       fit: boxFitOf(stringOrNullOf(model, 'fit')),
       radius: 0,
       semanticLabel: stringOrNullOf(model, 'semanticLabel'),
+      enablePreview:
+          boolOf(model, 'enablePreview', fallback: true) &&
+          actionOf(context, model, const ['onTap', 'onPressed']) == null,
+      onTap: actionOf(context, model, const ['onTap', 'onPressed']),
     );
   }
 }

@@ -13,6 +13,7 @@ class NoteLinkInput {
 Future<NoteLinkInput?> showNoteLinkSheet(
   BuildContext context, {
   String initialText = '',
+  String initialUrl = '',
   bool showTextField = true,
 }) {
   return showAppSheet<NoteLinkInput>(
@@ -20,6 +21,7 @@ Future<NoteLinkInput?> showNoteLinkSheet(
     title: context.l10n.noteLinkTitle,
     child: _NoteLinkSheet(
       initialText: initialText,
+      initialUrl: initialUrl,
       showTextField: showTextField,
     ),
   );
@@ -28,10 +30,12 @@ Future<NoteLinkInput?> showNoteLinkSheet(
 class _NoteLinkSheet extends StatefulWidget {
   const _NoteLinkSheet({
     required this.initialText,
+    required this.initialUrl,
     required this.showTextField,
   });
 
   final String initialText;
+  final String initialUrl;
   final bool showTextField;
 
   @override
@@ -39,7 +43,8 @@ class _NoteLinkSheet extends StatefulWidget {
 }
 
 class _NoteLinkSheetState extends State<_NoteLinkSheet> {
-  late final _urlController = TextEditingController();
+  late final _urlController = TextEditingController(text: widget.initialUrl);
+  bool _showError = false;
   late final _textController = TextEditingController(text: widget.initialText);
 
   @override
@@ -50,8 +55,11 @@ class _NoteLinkSheetState extends State<_NoteLinkSheet> {
   }
 
   void _submit() {
-    final url = _urlController.text.trim();
-    if (url.isEmpty) return;
+    final url = normalizeNoteLink(_urlController.text);
+    if (url == null) {
+      setState(() => _showError = true);
+      return;
+    }
     final text = _textController.text.trim();
     Navigator.of(context).pop(
       NoteLinkInput(url: url, text: text.isEmpty ? url : text),
@@ -71,6 +79,10 @@ class _NoteLinkSheetState extends State<_NoteLinkSheet> {
           placeholder: l10n.noteLinkUrlHint,
           keyboardType: TextInputType.url,
           autofocus: true,
+          errorText: _showError ? l10n.noteLinkInvalidUrl : null,
+          onChanged: (_) {
+            if (_showError) setState(() => _showError = false);
+          },
           textInputAction: widget.showTextField
               ? TextInputAction.next
               : TextInputAction.done,
@@ -96,4 +108,22 @@ class _NoteLinkSheetState extends State<_NoteLinkSheet> {
       ],
     );
   }
+}
+
+String? normalizeNoteLink(String input) {
+  final text = input.trim();
+  if (text.isEmpty || RegExp(r'\s').hasMatch(text)) return null;
+  final parsed = Uri.tryParse(text);
+  if (parsed == null) return null;
+  final uri = parsed.hasScheme ? parsed : Uri.tryParse('https://$text');
+  if (uri == null) return null;
+  if ((uri.scheme == 'https' || uri.scheme == 'http') &&
+      uri.host.isNotEmpty &&
+      uri.userInfo.isEmpty) {
+    return uri.toString();
+  }
+  if ((uri.scheme == 'mailto' || uri.scheme == 'tel') && uri.path.isNotEmpty) {
+    return uri.toString();
+  }
+  return null;
 }

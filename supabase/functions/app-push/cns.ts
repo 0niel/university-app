@@ -60,6 +60,7 @@ export interface PushContent {
   body: string;
   route: string;
   type: string;
+  notification_id?: string;
 }
 
 /// Sends one push to a CNS endpoint. The message carries payloads for all
@@ -69,7 +70,11 @@ export async function publishPush(
   endpointArn: string,
   push: PushContent,
 ): Promise<void> {
-  const data = { type: push.type, route: push.route };
+  const data = {
+    type: push.type,
+    route: push.route,
+    ...(push.notification_id ? { notification_id: push.notification_id } : {}),
+  };
   const gcm = JSON.stringify({
     notification: { title: push.title, body: push.body },
     data,

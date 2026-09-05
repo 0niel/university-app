@@ -22,6 +22,9 @@ class PeoplePage extends StatefulWidget {
 
 class _PeoplePageState extends State<PeoplePage> {
   late final PeopleCubit _cubit;
+  Uri? _observedLocation;
+  Uri? _pendingLocation;
+  bool _handlingLocation = false;
 
   @override
   void initState() {
@@ -31,20 +34,57 @@ class _PeoplePageState extends State<PeoplePage> {
       studyGroupsRepository: context.read(),
       currentUserId: context.read<AppBloc>().state.user.id,
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final location = GoRouterState.of(context).uri;
+    if (location == _observedLocation) return;
+    _observedLocation = location;
+    _pendingLocation = location;
+    if (_handlingLocation) return;
+    _handlingLocation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_initialize());
+      unawaited(_handleLocations());
     });
   }
 
-  Future<void> _initialize() async {
-    if (!mounted) return;
-    await _cubit.load();
-    if (!mounted) return;
-    await _handleAddDeepLink();
-    if (!mounted) return;
-    await _handleJoinGroupDeepLink();
-    if (mounted && GoRouterState.of(context).uri.hasQuery) {
-      context.go('/services/people');
+  Future<void> _handleLocations() async {
+    try {
+      while (mounted && _pendingLocation != null) {
+        final location = _pendingLocation!;
+        _pendingLocation = null;
+        await _cubit.load();
+        if (!mounted) return;
+        if (_pendingLocation != null) continue;
+        final query = location.queryParameters;
+        final manageGroup = query['manageGroup'] == '1';
+        if (query['tab'] == 'group' || manageGroup) {
+          _cubit.tabChanged(PeopleTab.group);
+        } else if (query['tab'] == 'friends') {
+          _cubit.tabChanged(PeopleTab.friends);
+        }
+        await _handleAddDeepLink(query['add']);
+        if (!mounted) return;
+        if (_pendingLocation != null) continue;
+        await _handleJoinGroupDeepLink(query['joinGroup']);
+        if (!mounted) return;
+        if (_pendingLocation != null) continue;
+        final studyGroup = _cubit.state.studyGroup;
+        final canManage =
+            !_cubit.state.failedSources.contains(PeopleSource.studyGroup) &&
+            studyGroup.hasGroup &&
+            studyGroup.group != null &&
+            studyGroup.isOwner;
+        if (location.hasQuery) {
+          _observedLocation = Uri(path: '/services/people');
+          context.go('/services/people');
+        }
+        if (manageGroup && canManage) await _manageGroup();
+      }
+    } finally {
+      _handlingLocation = false;
     }
   }
 
@@ -54,9 +94,8 @@ class _PeoplePageState extends State<PeoplePage> {
     super.dispose();
   }
 
-  Future<void> _handleJoinGroupDeepLink() async {
+  Future<void> _handleJoinGroupDeepLink(String? code) async {
     if (!mounted) return;
-    final code = GoRouterState.of(context).uri.queryParameters['joinGroup'];
     if (code == null || code.isEmpty) return;
     final joined = await _cubit.joinGroupByCode(code);
     final group = _cubit.state.studyGroup.group;
@@ -75,9 +114,8 @@ class _PeoplePageState extends State<PeoplePage> {
     }
   }
 
-  Future<void> _handleAddDeepLink() async {
+  Future<void> _handleAddDeepLink(String? addUserId) async {
     if (!mounted) return;
-    final addUserId = GoRouterState.of(context).uri.queryParameters['add'];
     if (addUserId == null || addUserId.isEmpty) return;
     if (addUserId == context.read<AppBloc>().state.user.id) return;
     final sent = await _cubit.sendFriendRequest(addUserId);

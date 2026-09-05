@@ -6318,7 +6318,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mentorshipBecomeSubtitle =>
-      'help juniors — earn shurikens and reputation';
+      'Choose your topics, meeting formats and how you can help';
 
   @override
   String get mentorshipRequestSheetTitle => 'Request to a mentor';
@@ -6405,13 +6405,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mentorshipRewardSubtitle => '+ a «Mentor» badge on your profile';
 
   @override
-  String get mentorshipTopicsLabel => 'WHAT YOU\'RE GOOD AT';
+  String get mentorshipTopicsLabel => 'What you\'re good at';
 
   @override
-  String get mentorshipLevelLabel => 'YOUR LEVEL';
+  String get mentorshipCustomTopicLabel => 'Your own topic';
 
   @override
-  String get mentorshipFormatLabel => 'FORMAT';
+  String get mentorshipCustomTopicHint => 'For example, Flutter or calculus';
+
+  @override
+  String get mentorshipTopicsLimit => 'Up to 20 topics, 60 characters each';
+
+  @override
+  String get mentorshipBioLabel => 'About you';
+
+  @override
+  String get mentorshipPending => 'Awaiting a reply';
+
+  @override
+  String get mentorshipAccepted => 'Session agreed';
+
+  @override
+  String get mentorshipLevelLabel => 'Your level';
+
+  @override
+  String get mentorshipFormatLabel => 'Meeting format';
 
   @override
   String get mentorshipPriceTitle => 'Session price';
@@ -6443,10 +6461,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get mentorshipTopicLabel => 'TOPIC';
+  String get mentorshipTopicLabel => 'Topic';
 
   @override
-  String get mentorshipWhenLabel => 'WHEN WORKS FOR YOU';
+  String get mentorshipWhenLabel => 'When works for you';
 
   @override
   String get mentorshipWhenTonight => 'Tonight';
@@ -6470,7 +6488,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mentorshipWhenShortWeek => 'this week';
 
   @override
-  String get mentorshipMessageLabel => 'MESSAGE';
+  String get mentorshipMessageLabel => 'Message';
 
   @override
   String get mentorshipMessageHint =>
@@ -6556,7 +6574,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mentorshipCancelConfirmBody =>
-      'The request will close and any reserved shurikens will be returned to the student. The session will not count as completed.';
+      'The request will close. The session will not count as completed.';
 
   @override
   String get mentorshipCancelConfirmAction => 'Cancel request';
@@ -11032,6 +11050,131 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collabNotesCollaboratorsTooltip => 'Note collaborators';
 
   @override
+  String get noteToolbarFormat => 'Formatting';
+
+  @override
+  String get noteToolbarInsert => 'Insert';
+
+  @override
+  String get noteLinkInvalidUrl => 'Enter a valid link';
+
+  @override
+  String get noteDrawingStylusOnly => 'Stylus only';
+
+  @override
+  String get noteDrawingTouchDraw => 'Draw with touch';
+
+  @override
+  String get noteDrawingResetView => 'Fit canvas';
+
+  @override
+  String noteDrawingColor(int index) {
+    return 'Color $index';
+  }
+
+  @override
+  String get noteDrawingSaveError => 'Could not save drawing';
+
+  @override
+  String get noteTextToolsTitle => 'Text actions';
+
+  @override
+  String get noteTextToolsDescription =>
+      'Selected text will be sent to the app you choose. Translation and processing depend on the apps installed on your device.';
+
+  @override
+  String get noteTextToolsSelectText => 'Select text in your note first';
+
+  @override
+  String get noteTextToolsUnavailable =>
+      'No compatible apps found. You can copy or share the text.';
+
+  @override
+  String get noteTextToolsLoading => 'Finding apps…';
+
+  @override
+  String get noteTextToolsWorking => 'Waiting for the result…';
+
+  @override
+  String get noteTextToolsFailure => 'Could not process the text';
+
+  @override
+  String get noteTextToolsNoResult => 'The app did not return modified text';
+
+  @override
+  String get noteTextToolsPreview => 'Result';
+
+  @override
+  String get noteTextToolsApply => 'Replace selected text';
+
+  @override
+  String get noteTextToolsChanged =>
+      'The note or selection changed. You can copy the result.';
+
+  @override
+  String get noteTextToolsReadOnly => 'This note is read-only';
+
+  @override
+  String get noteTextToolsCopy => 'Copy';
+
+  @override
+  String get noteTextToolsShare => 'Share';
+
+  @override
+  String get noteTextToolsCopied => 'Text copied';
+
+  @override
+  String get noteSearchHint => 'Find in note';
+
+  @override
+  String get noteSearchNoMatches => 'No matches';
+
+  @override
+  String get noteSearchPrevious => 'Previous match';
+
+  @override
+  String get noteSearchNext => 'Next match';
+
+  @override
+  String get noteOutlineTitle => 'Outline';
+
+  @override
+  String get noteOutlineEmpty =>
+      'Add headings using formatting to see them here.';
+
+  @override
+  String get noteReadingMode => 'Reading mode';
+
+  @override
+  String get noteEditingMode => 'Edit';
+
+  @override
+  String get noteExportDocument => 'Export PDF';
+
+  @override
+  String get noteExportAttachment => 'Attachment';
+
+  @override
+  String get noteExportError => 'Could not prepare or share the document';
+
+  @override
+  String get noteRecoveryConflict =>
+      'This device has an unsaved draft. The server version has also changed.';
+
+  @override
+  String get noteRecoveryReview => 'Choose a version';
+
+  @override
+  String get noteRecoveryKeepLocal => 'Keep draft';
+
+  @override
+  String get noteRecoveryUseServer => 'Use server version';
+
+  @override
+  String get noteRecoveryBody =>
+      'You are viewing the local draft. You can export it before choosing. Keeping the draft will replace the current server version.';
+
+  @override
   String get noteToolbarBold => 'Bold';
 
   @override
@@ -11999,6 +12142,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pollsEmptyQuestions => 'This poll has no questions';
+
+  @override
+  String pollsQuestionsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions',
+      one: '$count question',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get pollsClosesFuture => 'Choose a future closing time';

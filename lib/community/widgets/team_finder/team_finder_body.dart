@@ -22,8 +22,10 @@ class TeamFinderBody extends StatefulWidget {
     required this.onCloseToggle,
     super.key,
     this.onCreate,
+    this.header,
   });
 
+  final Widget? header;
   final VoidCallback? onCreate;
   final ValueChanged<Team> onApply;
   final ValueChanged<Team> onWithdraw;
@@ -87,86 +89,93 @@ class _TeamFinderBodyState extends State<TeamFinderBody> {
     final state = context.watch<TeamFinderCubit>().state;
     final config = UniversityConfig.current;
     final l10n = context.l10n;
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screen,
-            AppSpacing.sm,
-            AppSpacing.screen,
-            0,
-          ),
-          child: AppSearchField(
-            controller: _search,
-            hintText: l10n.teamFinderSearchHint,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        AppChipRow<String>(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-          value: state.filterKey,
-          onChanged: context.read<TeamFinderCubit>().filterChanged,
-          items: [
-            AppChipRowItem(value: 'all', label: l10n.teamFinderFilterAll),
-            for (final kind in config.teamKindKeys)
-              AppChipRowItem(
-                value: kind,
-                label: teamKindFilterLabel(l10n, kind),
-              ),
-            AppChipRowItem(value: 'mine', label: l10n.teamFinderFilterMine),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              for (final role in config.teamRoleKeys)
-                AppChip.filter(
-                  label: teamRoleLabel(l10n, role),
-                  selected: _roleFilter.contains(role),
-                  onTap: () => setState(() {
-                    if (!_roleFilter.remove(role)) _roleFilter.add(role);
-                  }),
-                ),
-            ],
-          ),
-        ),
-        Expanded(child: NinjaStateSwitcher(child: _content(context, state))),
-      ],
-    );
-  }
-
-  Widget _content(BuildContext context, TeamFinderState state) {
-    if (state.status == .loading && state.teams.isEmpty) {
-      return const TeamListSkeleton(key: ValueKey('teams-loading'));
-    }
     return RefreshIndicator(
-      key: ValueKey('teams-${_variantKey(state)}'),
       color: context.colors.ink,
       onRefresh: context.read<TeamFinderCubit>().load,
-      child: _list(context, state),
+      child: CustomScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                if (widget.header != null) widget.header!,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.screen,
+                    AppSpacing.sm,
+                    AppSpacing.screen,
+                    0,
+                  ),
+                  child: AppSearchField(
+                    controller: _search,
+                    hintText: l10n.teamFinderSearchHint,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppChipRow<String>(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screen,
+                  ),
+                  value: state.filterKey,
+                  onChanged: context.read<TeamFinderCubit>().filterChanged,
+                  items: [
+                    AppChipRowItem(
+                      value: 'all',
+                      label: l10n.teamFinderFilterAll,
+                    ),
+                    for (final kind in config.teamKindKeys)
+                      AppChipRowItem(
+                        value: kind,
+                        label: teamKindFilterLabel(l10n, kind),
+                      ),
+                    AppChipRowItem(
+                      value: 'mine',
+                      label: l10n.teamFinderFilterMine,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screen,
+                  ),
+                  child: Row(
+                    spacing: AppSpacing.sm,
+                    children: [
+                      for (final role in config.teamRoleKeys)
+                        AppChip.filter(
+                          label: teamRoleLabel(l10n, role),
+                          selected: _roleFilter.contains(role),
+                          onTap: () => setState(() {
+                            if (!_roleFilter.remove(role)) {
+                              _roleFilter.add(role);
+                            }
+                          }),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+            ),
+          ),
+          if (state.status == .loading && state.teams.isEmpty)
+            const SliverToBoxAdapter(
+              child: TeamListSkeleton(key: ValueKey('teams-loading')),
+            )
+          else
+            _list(context, state),
+        ],
+      ),
     );
-  }
-
-  String _variantKey(TeamFinderState state) {
-    if (state.status == .failure && state.teams.isEmpty) return 'failure';
-    final teams = _refine(state.visibleTeams);
-    if (teams.isEmpty) {
-      return state.visibleTeams.isEmpty
-          ? 'empty-${state.filterKey}'
-          : 'search-empty-${state.filterKey}-$_query-${_roleFilter.length}';
-    }
-    return 'list-${state.filterKey}-$_query-${_roleFilter.length}';
   }
 
   Widget _list(BuildContext context, TeamFinderState state) {
     final l10n = context.l10n;
     if (state.status == .failure && state.teams.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+      return SliverList.list(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -189,8 +198,7 @@ class _TeamFinderBodyState extends State<TeamFinderBody> {
     final base = state.visibleTeams;
     final teams = _refine(base);
     if (teams.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+      return SliverList.list(
         children: [
           if (base.isEmpty)
             Padding(
@@ -225,35 +233,36 @@ class _TeamFinderBodyState extends State<TeamFinderBody> {
       );
     }
     final now = DateTime.now();
-    return ListView.builder(
-      physics: const AlwaysScrollableScrollPhysics(),
+    return SliverPadding(
       padding: EdgeInsets.fromLTRB(
         0,
         8,
         0,
         ninjaBottomInset(context) + AppSpacing.lg,
       ),
-      itemCount: teams.length,
-      itemBuilder: (context, index) {
-        final team = teams[index];
-        final busy =
-            state.pendingApplyIds.contains(team.id) ||
-            state.pendingDeleteIds.contains(team.id) ||
-            state.pendingLeaveIds.contains(team.id) ||
-            state.pendingUpdateIds.contains(team.id);
-        return TeamCard(
-          team: team,
-          now: now,
-          isBusy: busy,
-          onApply: () => widget.onApply(team),
-          onWithdraw: () => widget.onWithdraw(team),
-          onLeave: () => widget.onLeave(team),
-          onApplications: () => widget.onApplications(team),
-          onDelete: () => widget.onDelete(team),
-          onEdit: () => widget.onEdit(team),
-          onCloseToggle: () => widget.onCloseToggle(team),
-        ).animateListItem(key: ValueKey(team.id), index: index);
-      },
+      sliver: SliverList.builder(
+        itemCount: teams.length,
+        itemBuilder: (context, index) {
+          final team = teams[index];
+          final busy =
+              state.pendingApplyIds.contains(team.id) ||
+              state.pendingDeleteIds.contains(team.id) ||
+              state.pendingLeaveIds.contains(team.id) ||
+              state.pendingUpdateIds.contains(team.id);
+          return TeamCard(
+            team: team,
+            now: now,
+            isBusy: busy,
+            onApply: () => widget.onApply(team),
+            onWithdraw: () => widget.onWithdraw(team),
+            onLeave: () => widget.onLeave(team),
+            onApplications: () => widget.onApplications(team),
+            onDelete: () => widget.onDelete(team),
+            onEdit: () => widget.onEdit(team),
+            onCloseToggle: () => widget.onCloseToggle(team),
+          ).animateListItem(key: ValueKey(team.id), index: index);
+        },
+      ),
     );
   }
 }

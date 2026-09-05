@@ -21,10 +21,14 @@ class MentorshipBody extends StatefulWidget {
     required this.onAction,
     required this.onOpenTelegram,
     super.key,
+    this.header,
+    this.onOpenMentor,
   });
 
+  final Widget? header;
   final VoidCallback onEditProfile;
   final ValueChanged<Mentor> onRequest;
+  final ValueChanged<Mentor>? onOpenMentor;
   final ValueChanged<MentorRequest> onReply;
   final void Function(MentorRequest, MentorRequestAction) onAction;
   final ValueChanged<String> onOpenTelegram;
@@ -60,17 +64,31 @@ class _MentorshipBodyState extends State<MentorshipBody> {
     return RefreshIndicator(
       color: context.colors.ink,
       onRefresh: context.read<MentorshipCubit>().load,
-      child: ListView(
+      child: CustomScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.only(
-          top: 14,
-          bottom: ninjaBottomInset(context) + AppSpacing.lg,
-        ),
-        children: [
-          if (state.mentors.isNotEmpty) ..._searchHeader(context, state),
-          if (!state.isMentor) _profileCta(context, state),
-          ..._requests(context, state),
-          NinjaStateSwitcher(child: _mentors(context, state)),
+        slivers: [
+          if (widget.header != null) SliverToBoxAdapter(child: widget.header),
+          SliverPadding(
+            padding: EdgeInsets.only(
+              top: AppSpacing.sm,
+              bottom: ninjaBottomInset(context) + AppSpacing.lg,
+            ),
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                SliverList.list(
+                  children: [
+                    if (state.mentors.isNotEmpty)
+                      ..._searchHeader(context, state),
+                    if (!state.isMentor && state.mentors.isNotEmpty)
+                      _profileCta(context, state),
+                    ..._requests(context, state),
+                  ],
+                ),
+                _mentors(context, state),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -78,7 +96,10 @@ class _MentorshipBodyState extends State<MentorshipBody> {
 
   List<Widget> _searchHeader(BuildContext context, MentorshipState state) {
     final topics = [
-      for (final topic in UniversityConfig.current.mentorTopicKeys)
+      for (final topic in {
+        ...UniversityConfig.current.mentorTopicKeys,
+        for (final mentor in state.mentors) ...mentor.topics,
+      })
         if (state.mentors.any((mentor) => mentor.topics.contains(topic))) topic,
     ];
     return [
@@ -94,7 +115,10 @@ class _MentorshipBodyState extends State<MentorshipBody> {
           hintText: context.l10n.mentorshipSearchHint,
           onCanvas: true,
           onChanged: _onSearchChanged,
-          onClear: () => setState(() => _query = ''),
+          onClear: () {
+            _debounce?.cancel();
+            setState(() => _query = '');
+          },
         ),
       ),
       if (topics.isNotEmpty)
@@ -270,41 +294,47 @@ class _MentorshipBodyState extends State<MentorshipBody> {
 
   Widget _mentors(BuildContext context, MentorshipState state) {
     if (state.status == .loading && state.mentors.isEmpty) {
-      return const MentorshipSkeleton(key: ValueKey('mentors-loading'));
+      return const SliverToBoxAdapter(
+        child: MentorshipSkeleton(key: ValueKey('mentors-loading')),
+      );
     }
     if (state.status == .failure && state.mentors.isEmpty) {
-      return Padding(
-        key: const ValueKey('mentors-failure'),
-        padding: const .fromLTRB(
-          AppSpacing.screen,
-          22,
-          AppSpacing.screen,
-          0,
-        ),
-        child: NinjaErrorState(
-          title: context.l10n.mentorshipLoadError,
-          message: context.l10n.mentorshipLoadErrorSubtitle,
-          retryLabel: context.l10n.retry,
-          onRetry: () => unawaited(context.read<MentorshipCubit>().load()),
+      return SliverToBoxAdapter(
+        child: Padding(
+          key: const ValueKey('mentors-failure'),
+          padding: const .fromLTRB(
+            AppSpacing.screen,
+            22,
+            AppSpacing.screen,
+            0,
+          ),
+          child: NinjaErrorState(
+            title: context.l10n.mentorshipLoadError,
+            message: context.l10n.mentorshipLoadErrorSubtitle,
+            retryLabel: context.l10n.retry,
+            onRetry: () => unawaited(context.read<MentorshipCubit>().load()),
+          ),
         ),
       );
     }
     if (state.mentors.isEmpty) {
-      return Padding(
-        key: const ValueKey('mentors-empty'),
-        padding: const .fromLTRB(
-          AppSpacing.screen,
-          22,
-          AppSpacing.screen,
-          0,
+      return SliverToBoxAdapter(
+        child: Padding(
+          key: const ValueKey('mentors-empty'),
+          padding: const .fromLTRB(
+            AppSpacing.screen,
+            22,
+            AppSpacing.screen,
+            0,
+          ),
+          child: NinjaEmptyState.screen(
+            icon: const AppLineIconWidget(AppLineIcon.people, size: 24),
+            title: context.l10n.mentorshipEmptyTitle,
+            message: context.l10n.mentorshipEmptySubtitle,
+            actionLabel: context.l10n.mentorshipBecomeCta,
+            onAction: widget.onEditProfile,
+          ).animateEmptyState(),
         ),
-        child: NinjaEmptyState.screen(
-          icon: const AppLineIconWidget(AppLineIcon.people, size: 24),
-          title: context.l10n.mentorshipEmptyTitle,
-          message: context.l10n.mentorshipEmptySubtitle,
-          actionLabel: context.l10n.mentorshipBecomeCta,
-          onAction: widget.onEditProfile,
-        ).animateEmptyState(),
       );
     }
     final filtered = [
@@ -314,33 +344,38 @@ class _MentorshipBodyState extends State<MentorshipBody> {
           mentor,
     ];
     if (filtered.isEmpty) {
-      return Padding(
-        key: const ValueKey('mentors-search-empty'),
-        padding: const .fromLTRB(
-          AppSpacing.screen,
-          22,
-          AppSpacing.screen,
-          0,
+      return SliverToBoxAdapter(
+        child: Padding(
+          key: const ValueKey('mentors-search-empty'),
+          padding: const .fromLTRB(
+            AppSpacing.screen,
+            22,
+            AppSpacing.screen,
+            0,
+          ),
+          child: AppEmptyState(
+            icon: const AppLineIconWidget(AppLineIcon.search, size: 24),
+            title: context.l10n.mentorshipSearchEmptyTitle,
+            subtitle: context.l10n.mentorshipSearchEmptySubtitle,
+          ).animateEmptyState(),
         ),
-        child: AppEmptyState(
-          icon: const AppLineIconWidget(AppLineIcon.search, size: 24),
-          title: context.l10n.mentorshipSearchEmptyTitle,
-          subtitle: context.l10n.mentorshipSearchEmptySubtitle,
-        ).animateEmptyState(),
       );
     }
-    return Column(
+    return SliverList.builder(
       key: const ValueKey('mentors-list'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final (index, mentor) in filtered.indexed)
-          MentorCard(
-            mentor: mentor,
-            onEdit: mentor.isMe ? widget.onEditProfile : null,
-            onRequest: mentor.isMe ? null : () => widget.onRequest(mentor),
-            onTelegram: _telegramCallback(mentor, state.requests),
-          ).animateListItem(key: ValueKey(mentor.userId), index: index),
-      ],
+      itemCount: filtered.length,
+      itemBuilder: (context, index) {
+        final mentor = filtered[index];
+        return MentorCard(
+          mentor: mentor,
+          onEdit: mentor.isMe ? widget.onEditProfile : null,
+          onRequest: mentor.isMe ? null : () => widget.onRequest(mentor),
+          onOpen: widget.onOpenMentor == null
+              ? null
+              : () => widget.onOpenMentor!(mentor),
+          onTelegram: _telegramCallback(mentor, state.requests),
+        ).animateListItem(key: ValueKey(mentor.userId), index: index);
+      },
     );
   }
 

@@ -10,12 +10,16 @@ class EditorHeader extends StatefulWidget {
     required this.onBack,
     required this.onShare,
     required this.onMore,
+    this.reading = false,
+    this.onReading,
     super.key,
   });
 
   final VoidCallback onBack;
   final VoidCallback onShare;
   final VoidCallback onMore;
+  final bool reading;
+  final VoidCallback? onReading;
 
   @override
   State<EditorHeader> createState() => _EditorHeaderState();
@@ -45,6 +49,7 @@ class _EditorHeaderState extends State<EditorHeader> {
     final presenceLabel = editors.length <= 1
         ? context.l10n.collabNotesPresenceSolo
         : context.l10n.collabNotesPresenceEditing(editors.length);
+    final wide = MediaQuery.sizeOf(context).width >= 720;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screen,
@@ -59,41 +64,27 @@ class _EditorHeaderState extends State<EditorHeader> {
             tooltip: context.l10n.back,
             onPressed: widget.onBack,
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: _titleController,
-                      builder: (context, value, _) => value.text.isEmpty
-                          ? Text(
-                              context.l10n.collabNotesTitleHint,
-                              style: AppText.headline.copyWith(
-                                color: colors.muted,
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                    EditableText(
-                      key: const ValueKey('collab-note-title-field'),
-                      controller: _titleController,
-                      focusNode: _titleFocus,
-                      readOnly: !state.canRename,
-                      onChanged: context.read<NoteEditorCubit>().titleChanged,
-                      style: AppText.headline.copyWith(
-                        color: state.readOnly ? colors.muted2 : colors.ink,
-                      ),
-                      cursorColor: colors.ink,
-                      backgroundCursorColor: colors.canvas,
-                      selectionColor: colors.tint,
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => _titleFocus.unfocus(),
-                    ),
-                  ],
+                AppInputField(
+                  key: const ValueKey('collab-note-title-field'),
+                  controller: _titleController,
+                  focusNode: _titleFocus,
+                  readOnly: !state.canRename || widget.reading,
+                  placeholder: context.l10n.collabNotesTitleHint,
+                  fillColor: colors.canvas,
+                  showClear: false,
+                  maxLength: 200,
+                  textCapitalization: TextCapitalization.sentences,
+                  onChanged: context.read<NoteEditorCubit>().titleChanged,
+                  textStyle: AppText.headline.copyWith(
+                    color: state.readOnly ? colors.muted2 : colors.ink,
+                  ),
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _titleFocus.unfocus(),
                 ),
                 if (editors.length > 1)
                   Semantics(
@@ -114,13 +105,12 @@ class _EditorHeaderState extends State<EditorHeader> {
                         ),
                       ],
                     ),
-                  )
-                else
-                  const NoteSaveStatus(),
+                  ),
+                const NoteSaveStatus(),
               ],
             ),
           ),
-          if (editors.isNotEmpty) ...[
+          if (wide && editors.isNotEmpty) ...[
             const SizedBox(width: AppSpacing.sm),
             Semantics(
               label: context.l10n.collabNotesCollaboratorsTooltip,
@@ -128,12 +118,24 @@ class _EditorHeaderState extends State<EditorHeader> {
             ),
           ],
           const SizedBox(width: AppSpacing.xs),
-          AppIconButton(
-            icon: const AppLineIconWidget(AppLineIcon.share, size: 18),
-            tooltip: context.l10n.share,
-            size: .small,
-            onPressed: widget.onShare,
-          ),
+          if (widget.onReading != null)
+            AppIconButton(
+              icon: AppLineIconWidget(
+                widget.reading ? AppLineIcon.pencil : AppLineIcon.view,
+                size: 18,
+              ),
+              tooltip: widget.reading
+                  ? context.l10n.noteEditingMode
+                  : context.l10n.noteReadingMode,
+              onPressed: widget.onReading,
+            ),
+          if (wide)
+            AppIconButton(
+              icon: const AppLineIconWidget(AppLineIcon.share, size: 18),
+              tooltip: context.l10n.share,
+              size: .small,
+              onPressed: widget.onShare,
+            ),
           const SizedBox(width: AppSpacing.xs),
           AppIconButton(
             icon: const AppLineIconWidget(AppLineIcon.more, size: 18),

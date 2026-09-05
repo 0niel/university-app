@@ -12,9 +12,8 @@ class _CategorySection extends StatelessWidget {
       crossAxisAlignment: .start,
       children: [
         _SubmitSectionLabel(title: context.l10n.miniAppsSubmitCategory),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        NinjaChipRow(
+          padding: EdgeInsets.zero,
           children: [
             for (final value in MiniAppCategory.values)
               NinjaChip(

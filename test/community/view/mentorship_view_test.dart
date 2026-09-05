@@ -15,7 +15,12 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import '../../helpers/mocks/mock_mentorship_cubit.dart';
 
 void main() {
-  setUpAll(() => registerFallbackValue(const MentorProfileDraft()));
+  setUpAll(() {
+    registerFallbackValue(const MentorProfileDraft());
+    registerFallbackValue(
+      const MentorRequestDraft(mentorUserId: 'mentor-1', topic: 'python'),
+    );
+  });
 
   group('MentorshipView', () {
     late MentorshipCubit cubit;
@@ -136,7 +141,7 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('confirms cancellation before releasing an escrow', (
+    testWidgets('confirms cancellation before closing a request', (
       tester,
     ) async {
       const request = MentorRequest(
@@ -164,7 +169,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.textContaining('зарезервированные сюрикены вернутся'),
+        find.textContaining('Сессия не будет засчитана'),
         findsOneWidget,
       );
       verifyNever(() => cubit.actOnRequest('request-1', .cancel));
@@ -287,8 +292,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Ответить в Telegram'), warnIfMissed: false);
-
+    expect(find.text('Ответить в Telegram'), findsNothing);
     expect(replies, 0);
   });
 
@@ -318,6 +322,64 @@ void main() {
 
     expect(action?.wireValue, 'cancel');
   });
+
+  testWidgets(
+    'pending outgoing cancellation and confirmation states match permissions',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(320, 700));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      for (final request in [
+        const MentorRequest(
+          id: 'pending',
+          mentorUserId: 'mentor',
+          requesterId: 'me',
+          isIncoming: false,
+        ),
+        const MentorRequest(
+          id: 'unconfirmed',
+          mentorUserId: 'mentor',
+          requesterId: 'me',
+          isIncoming: false,
+          status: MentorRequestStatus.completionPending,
+          mentorConfirmed: true,
+        ),
+        const MentorRequest(
+          id: 'confirmed',
+          mentorUserId: 'mentor',
+          requesterId: 'me',
+          isIncoming: false,
+          status: MentorRequestStatus.completionPending,
+          requesterConfirmed: true,
+        ),
+      ]) {
+        MentorRequestAction? action;
+        await tester.pumpWidget(
+          _app(
+            MediaQuery.withClampedTextScaling(
+              minScaleFactor: 2,
+              maxScaleFactor: 2,
+              child: Scaffold(
+                body: SingleChildScrollView(
+                  child: MentorRequestCard(
+                    request: request,
+                    onReply: () {},
+                    onAction: (value) => action = value,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        if (request.id == 'unconfirmed') {
+          expect(find.text('Отменить заявку'), findsNothing);
+        } else {
+          await tester.tap(find.text('Отменить заявку'));
+          expect(action, MentorRequestAction.cancel);
+        }
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
 
   testWidgets('profile and request forms support 320px at 200% text', (
     tester,
@@ -376,10 +438,6 @@ void main() {
     await tester.tap(find.text('Python'));
     await tester.pump();
 
-    await tester.tap(find.text('Сохранить'), warnIfMissed: false);
-    await tester.pump();
-    verifyNever(() => cubit.saveProfile(any()));
-
     final telegram = find.byWidgetPredicate(
       (widget) =>
           widget is AppInputField && widget.leadingIcon == AppLineIcon.at,
@@ -388,10 +446,186 @@ void main() {
     await tester.enterText(telegram, 'mentor_ninja');
     await tester.pump();
 
-    await tester.ensureVisible(find.text('Сохранить'));
-    await tester.tap(find.text('Сохранить'));
+    final save = find.byKey(const Key('mentorProfile_save'));
+    await tester.ensureVisible(save);
+    await tester.pumpAndSettle();
+    await tester.tap(save);
     await tester.pump();
     verify(() => cubit.saveProfile(any())).called(1);
+  });
+
+  for (final editing in [false, true]) {
+    testWidgets(
+      'saves an uncommitted custom topic with zero price editing=$editing',
+      (tester) async {
+        final cubit = MockMentorshipCubit();
+        when(() => cubit.state).thenReturn(const MentorshipState());
+        when(() => cubit.saveProfile(any())).thenAnswer((_) async => false);
+        await tester.pumpWidget(
+          _app(
+            BlocProvider<MentorshipCubit>.value(
+              value: cubit,
+              child: Scaffold(
+                body: MentorProfileSheet(
+                  current: editing
+                      ? const Mentor(
+                          userId: 'me',
+                          fullName: 'Me',
+                          topics: ['python'],
+                          telegramHandle: 'mentor_ninja',
+                          price: 200,
+                        )
+                      : null,
+                ),
+              ),
+            ),
+          ),
+        );
+        if (!editing) {
+          await tester.enterText(
+            find.byKey(const Key('mentorProfile_telegram')),
+            'mentor_ninja',
+          );
+        }
+        final scroll = find
+            .descendant(
+              of: find.byKey(const Key('mentorProfile_scroll')),
+              matching: find.byType(Scrollable),
+            )
+            .first;
+        final topic = find.byKey(const Key('mentorProfile_customTopic'));
+        await tester.scrollUntilVisible(topic, 180, scrollable: scroll);
+        await tester.enterText(topic, '  Flutter   и Dart  ');
+        await tester.pumpAndSettle();
+        final save = find.byKey(const Key('mentorProfile_save'));
+        await tester.scrollUntilVisible(save, 180, scrollable: scroll);
+        await tester.pumpAndSettle();
+        expect(tester.widget<AppButton>(save).onPressed, isNotNull);
+        await tester.tap(save);
+        await tester.pumpAndSettle();
+        final draft =
+            verify(() => cubit.saveProfile(captureAny())).captured.single
+                as MentorProfileDraft;
+        expect(
+          draft.topics,
+          editing ? ['python', 'Flutter и Dart'] : ['Flutter и Dart'],
+        );
+        expect(draft.price, 0);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('request saves the selected custom topic', (tester) async {
+    final cubit = MockMentorshipCubit();
+    when(() => cubit.state).thenReturn(const MentorshipState());
+    when(() => cubit.sendRequest(any())).thenAnswer((_) async => false);
+    await tester.pumpWidget(
+      _app(
+        BlocProvider<MentorshipCubit>.value(
+          value: cubit,
+          child: const Scaffold(
+            body: MentorRequestSheet(
+              mentor: Mentor(
+                userId: 'mentor',
+                fullName: 'Mentor',
+                topics: ['python', 'Flutter и Dart'],
+                price: 250,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Flutter и Dart'));
+    await tester.pump();
+    final send = find.byKey(const Key('mentorRequest_send'));
+    await tester.scrollUntilVisible(
+      send,
+      150,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const Key('mentorRequest_scroll')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.tap(send);
+    await tester.pumpAndSettle();
+    final draft =
+        verify(() => cubit.sendRequest(captureAny())).captured.single
+            as MentorRequestDraft;
+    expect(draft.topic, 'Flutter и Dart');
+    expect(draft.mentorUserId, 'mentor');
+    expect(find.textContaining('250'), findsNothing);
+  });
+
+  testWidgets('profile modal remains scrollable above keyboard at 200% text', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    tester.view.viewInsets = const FakeViewPadding(bottom: 240);
+    addTearDown(tester.view.resetViewInsets);
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final cubit = MockMentorshipCubit();
+    when(() => cubit.state).thenReturn(const MentorshipState());
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.darkTheme,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('ru'),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showAppSheet<void>(
+                context,
+                title: 'Стань ментором',
+                scrollable: false,
+                maxHeightFraction: .92,
+                child: BlocProvider<MentorshipCubit>.value(
+                  value: cubit,
+                  child: const MentorProfileSheet(),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    final scroll = find
+        .descendant(
+          of: find.byKey(const Key('mentorProfile_scroll')),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Scrollable &&
+                widget.axisDirection == AxisDirection.down,
+          ),
+        )
+        .first;
+    expect(scroll, findsOneWidget);
+    final save = find.byKey(const Key('mentorProfile_save'));
+    await tester.scrollUntilVisible(
+      save,
+      180,
+      scrollable: scroll,
+      maxScrolls: 40,
+    );
+    expect(tester.getBottomLeft(save).dy, lessThanOrEqualTo(460));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('mentor list scroll view reserves the shell bottom inset', (
@@ -427,8 +661,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final listView = tester.widget<ListView>(find.byType(ListView));
-    final padding = listView.padding! as EdgeInsets;
+    final scroll = tester.widget<CustomScrollView>(
+      find.byType(CustomScrollView),
+    );
+    final padding =
+        (scroll.slivers.last as SliverPadding).padding as EdgeInsets;
     expect(padding.bottom, 40 + AppSpacing.lg);
   });
 }
