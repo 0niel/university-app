@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:app_ui/app_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:local_notifications_repository/local_notifications_repository.dart';
 import 'package:permission_client/permission_client.dart';
+import 'package:rtu_mirea_app/app/view/app_device_token_sync.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/login/widgets/widgets.dart';
+import 'package:rtu_mirea_app/notifications/notification_permission.dart';
 import 'package:rtu_mirea_app/onboarding/widgets/setting_toggle_row.dart';
 import 'package:rtu_mirea_app/onboarding/widgets/theme_card.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
@@ -71,9 +72,9 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
   Future<void> _loadPermissions() async {
     final request = ++_request;
     try {
-      final push =
-          !kIsWeb &&
-          await context.read<LocalNotificationsRepository>().hasPermission();
+      final push = await hasNotificationPermission(
+        context.read<LocalNotificationsRepository>(),
+      );
       final geo = await widget.permissionClient.locationWhenInUseStatus();
       if (!mounted || request != _request) return;
       setState(() {
@@ -118,13 +119,15 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
 
   Future<void> _togglePush(bool value) async {
     final previous = _settings;
-    if (_busy || _settingsLoading || previous == null || kIsWeb) return;
+    if (_busy || _settingsLoading || previous == null) return;
     _request++;
     setState(() => _busy = true);
     try {
       final granted =
           !value ||
-          await context.read<LocalNotificationsRepository>().ensurePermission();
+          await requestNotificationPermission(
+            context.read<LocalNotificationsRepository>(),
+          );
       if (!mounted) return;
       if (!granted) {
         ToastManager.showWarning(
@@ -133,6 +136,7 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
         );
         return;
       }
+      if (value) unawaited(AppDeviceTokenSync.refresh(context));
       final saved = await context.read<GamificationRepository>().updateSettings(
         previous.copyWith(notificationsEnabled: value),
         previous: previous,
@@ -262,7 +266,7 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
                 title: l10n.notifications,
                 subtitle: l10n.onboardingPushSub,
                 value: _push,
-                onChanged: busy || _settings == null || kIsWeb
+                onChanged: busy || _settings == null
                     ? null
                     : (value) => unawaited(_togglePush(value)),
               ),

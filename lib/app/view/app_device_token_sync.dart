@@ -16,18 +16,32 @@ class AppDeviceTokenSync extends StatefulWidget {
   final DeviceTokenSyncController? controller;
   final Widget child;
 
+  static Future<void> refresh(BuildContext context) =>
+      context
+          .findAncestorStateOfType<_AppDeviceTokenSyncState>()
+          ?._synchronize() ??
+      Future<void>.value();
+
   @override
   State<AppDeviceTokenSync> createState() => _AppDeviceTokenSyncState();
 }
 
-class _AppDeviceTokenSyncState extends State<AppDeviceTokenSync> {
+class _AppDeviceTokenSyncState extends State<AppDeviceTokenSync>
+    with WidgetsBindingObserver {
   Future<void> _controllerReady = Future.value();
   final _retiring = <DeviceTokenSyncController>[];
   var _controllerRevision = 0;
+  Timer? _retryTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _retryTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        unawaited(_synchronize());
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       unawaited(_synchronize());
@@ -48,8 +62,15 @@ class _AppDeviceTokenSyncState extends State<AppDeviceTokenSync> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _retryTimer?.cancel();
     unawaited(widget.controller?.pause());
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(_synchronize());
   }
 
   Future<void> _synchronize() async {
@@ -62,7 +83,7 @@ class _AppDeviceTokenSyncState extends State<AppDeviceTokenSync> {
       await controller?.synchronizeUser(
         state.status.isLoggedIn ? state.user.id : null,
       );
-    } on Exception catch (error, stackTrace) {
+    } on Object catch (error, stackTrace) {
       log('Device token sync failed', error: error, stackTrace: stackTrace);
     }
   }

@@ -7,7 +7,7 @@ Deno.test("inbox identity is included on every push platform", async () => {
   try {
     globalThis.fetch = (_input, init) => {
       calls++;
-      const params = new URLSearchParams(init!.body as string);
+      const params = new URLSearchParams((init as { body: string }).body);
       const message = JSON.parse(params.get("Message")!);
       for (const platform of ["GCM", "HMS", "RUSTORE"]) {
         assert.deepEqual(JSON.parse(message[platform]).data, {

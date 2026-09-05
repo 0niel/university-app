@@ -54,6 +54,7 @@ Deno.test("endpoint registration signs encoded payload and parses JSON and XML",
     for (
       const response of [
         '{"EndpointArn":"test-endpoint"}',
+        '{"CreatePlatformEndpointResponse":{"CreatePlatformEndpointResult":{"EndpointArn":"test-endpoint"}}}',
         "<EndpointArn>test-endpoint</EndpointArn>",
       ]
     ) {
@@ -64,7 +65,7 @@ Deno.test("endpoint registration signs encoded payload and parses JSON and XML",
         assert.equal(params.get("Action"), "CreatePlatformEndpoint");
         assert.equal(params.get("PlatformApplicationArn"), "test-channel");
         assert.equal(params.get("Token"), "токен +/&=");
-        assert.equal(params.get("ResponseFormat"), "json");
+        assert.equal(params.get("ResponseFormat"), "JSON");
         return Promise.resolve(new Response(response));
       };
       assert.equal(
@@ -86,6 +87,7 @@ Deno.test("publish signs all platform payloads without sending a notification", 
       calls++;
       const params = assertSignedRequest(input, init);
       assert.equal(params.get("Action"), "Publish");
+      assert.equal(params.get("ResponseFormat"), "JSON");
       assert.equal(params.get("TargetArn"), "test-endpoint");
       assert.equal(params.get("MessageStructure"), "json");
       const message = JSON.parse(params.get("Message")!);
@@ -110,6 +112,29 @@ Deno.test("publish signs all platform payloads without sending a notification", 
       type: "schedule",
     });
     assert.equal(calls, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+Deno.test("CNS JSON endpoint ARN decodes escaped slashes before caching", async () => {
+  const originalFetch = globalThis.fetch;
+  const arn = "arn:aws:sns::folder:endpoint/GCM/app/device";
+  try {
+    globalThis.fetch = () =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            CreatePlatformEndpointResponse: {
+              CreatePlatformEndpointResult: { EndpointArn: arn },
+            },
+          }).replaceAll("/", "\\/"),
+        ),
+      );
+    assert.equal(
+      await createPlatformEndpoint(config, "channel", "fixture-token"),
+      arn,
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -157,7 +182,7 @@ Deno.test("only explicit publish endpoint failures affect device state", async (
             ErrorResponse: {
               Error: {
                 Code: code,
-                SubCode: subCode,
+                Subcode: subCode,
                 Message: "EndpointDisabled private diagnostic",
               },
             },

@@ -5,6 +5,11 @@ import 'package:rtu_mirea_app/main/bootstrap/firebase_initializer.dart';
 void main() {
   const disabled = FirebaseConfig(
     enabled: false,
+    androidApiKey: '',
+    iosApiKey: '',
+    webApiKey: '',
+    macosApiKey: '',
+    webVapidKey: '',
     apiKey: '',
     projectId: '',
     messagingSenderId: '',
@@ -23,6 +28,11 @@ void main() {
   const configured = FirebaseConfig(
     enabled: true,
     apiKey: 'api-key',
+    androidApiKey: 'android-key',
+    iosApiKey: 'ios-key',
+    webApiKey: '',
+    macosApiKey: '',
+    webVapidKey: '',
     projectId: 'university-project',
     messagingSenderId: '123',
     webAppId: 'web-app',
@@ -54,13 +64,21 @@ void main() {
     final ios = configured.optionsFor(.ios);
 
     expect(android?.appId, 'android-app');
+    expect(android?.apiKey, 'android-key');
     expect(ios?.appId, 'ios-app');
+    expect(ios?.apiKey, 'ios-key');
     expect(ios?.iosBundleId, 'app.university');
+    expect(configured.optionsFor(.web)?.apiKey, 'api-key');
   });
 
   test('rejects partial Firebase configuration', () {
     const partial = FirebaseConfig(
       enabled: true,
+      androidApiKey: '',
+      iosApiKey: '',
+      webApiKey: '',
+      macosApiKey: '',
+      webVapidKey: '',
       apiKey: 'api-key',
       projectId: '',
       messagingSenderId: '',

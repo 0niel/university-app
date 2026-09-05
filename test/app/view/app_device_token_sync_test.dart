@@ -18,6 +18,69 @@ void main() {
     user: User(id: id, isNewUser: false),
   );
 
+  for (final resume in [false, true]) {
+    testWidgets(
+      'recovers initial token failure on ${resume ? 'resume' : 'timer'}',
+      (tester) async {
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        final app = _App();
+        when(() => app.state).thenReturn(user('A'));
+        when(() => app.stream).thenAnswer((_) => const Stream.empty());
+        var attempts = 0;
+        final registered = <String>[];
+        final refresh = StreamController<String>.broadcast();
+        final controller = DeviceTokenSyncController(
+          getToken: () async {
+            if (++attempts == 1) throw StateError('APNs token not ready');
+            return 'ready';
+          },
+          tokenRefresh: refresh.stream,
+          register: (token) async => registered.add(token),
+          unregister: (_) async {},
+          deleteToken: () async {},
+          onError: (error, stackTrace) => fail('$error'),
+        );
+        await tester.pumpWidget(
+          BlocProvider<AppBloc>.value(
+            value: app,
+            child: AppDeviceTokenSync(
+              controller: controller,
+              child: const SizedBox(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+        expect(attempts, 1);
+        expect(registered, isEmpty);
+        if (resume) {
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.paused,
+          );
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.resumed,
+          );
+          await tester.pumpAndSettle();
+        } else {
+          await tester.pump(const Duration(minutes: 1));
+          await tester.pumpAndSettle();
+        }
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+        expect(attempts, 2);
+        expect(registered, ['ready']);
+        await tester.pump(const Duration(minutes: 1));
+        expect(registered, ['ready']);
+        await tester.pumpWidget(const SizedBox());
+        await refresh.close();
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   for (final rapid in [false, true]) {
     testWidgets('rebinds authenticated identity changes rapid=$rapid', (
       tester,

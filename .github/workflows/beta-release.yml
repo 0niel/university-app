@@ -191,6 +191,8 @@ jobs:
         run: |
           printf '%s\n' "$UNIVERSITY_CONFIG_JSON" > "$RUNNER_TEMP/university.json"
           printf '%s\n' "$FIREBASE_CONFIG_JSON" > "$RUNNER_TEMP/firebase.json"
+          python3 tool/configure_firebase.py --config "$RUNNER_TEMP/firebase.json" \
+            --platform android --android-output android/app/google-services.json
           dart run tool/configure_university.dart \
             --config "$RUNNER_TEMP/university.json"
 

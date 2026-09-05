@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_notifications_client/local_notifications_client.dart';
 import 'package:local_notifications_repository/local_notifications_repository.dart';
@@ -10,6 +11,7 @@ class _MockPermissionClient extends Mock implements PermissionClient {}
 
 void main() {
   setUpAll(() => registerFallbackValue(DateTime(2030)));
+  tearDown(() => debugDefaultTargetPlatformOverride = null);
 
   late _MockClient client;
   late _MockPermissionClient permissionClient;
@@ -37,6 +39,25 @@ void main() {
       ),
     ).thenAnswer((_) async {});
   });
+
+  for (final platform in [
+    TargetPlatform.macOS,
+    TargetPlatform.windows,
+    TargetPlatform.linux,
+  ]) {
+    test('$platform uses native client permissions', () async {
+      debugDefaultTargetPlatformOverride = platform;
+      when(client.hasDesktopPermission).thenAnswer((_) async => false);
+      when(client.requestPermission).thenAnswer((_) async => true);
+      expect(await repository.hasPermission(), isFalse);
+      verifyNever(permissionClient.notificationsStatus);
+      verifyNever(client.requestPermission);
+      expect(await repository.ensurePermission(), isTrue);
+      verify(client.init).called(1);
+      verify(client.requestPermission).called(1);
+      verifyNever(permissionClient.requestNotifications);
+    });
+  }
 
   group('syncLessonReminders', () {
     test('permission denial leaves existing reminders untouched', () async {
