@@ -248,5 +248,59 @@ class NavigationProjectionTest(unittest.TestCase):
             MODULE.verify_worktree(self.root, overrides)
 
 
+class ReadStateProjectionTest(unittest.TestCase):
+    git = PrepareShorebirdPatchTest.git
+    write = PrepareShorebirdPatchTest.write
+    commit = PrepareShorebirdPatchTest.commit
+    pin = PrepareShorebirdPatchTest.pin
+
+    def setUp(self):
+        NavigationProjectionTest.setUp(self)
+        baseline = self.git("rev-parse", "HEAD")
+        self.pin("READ_STATE_BASELINES", {version: baseline for version in MODULE.READ_STATE_BASELINES})
+        for path in MODULE.READ_STATE_RUNTIME_PATHS | MODULE.READ_STATE_SUPPORT_PATHS:
+            self.write(path, b"reviewed read state\n")
+        self.pin("READ_STATE_REVIEWED_SHA", self.commit())
+
+    def project(self):
+        source = self.git("rev-parse", "HEAD")
+        return MODULE.projection(self.root, source, source, "5.2.1+1006201")
+
+    def test_all_current_releases_keep_native_files_identical(self):
+        source = self.git("rev-parse", "HEAD")
+        for version, baseline in MODULE.READ_STATE_BASELINES.items():
+            with self.subTest(version=version):
+                overrides, receipt = MODULE.projection(self.root, source, source, version)
+                self.assertEqual(overrides, {})
+                self.assertEqual(receipt["baseline_sha"], baseline)
+                self.assertEqual(receipt["reviewed_source_sha"], MODULE.READ_STATE_REVIEWED_SHA)
+                self.assertEqual(receipt["release_version"], version)
+                MODULE.verify_worktree(self.root, overrides)
+                for path in (MODULE.MANIFEST, "pubspec.yaml", "pubspec.lock", "assets/font.ttf"):
+                    self.assertEqual(MODULE.blob(self.root, baseline, path), (self.root / path).read_bytes())
+
+    def test_read_state_snapshot_rejects_even_reviewed_native_or_dependency_changes(self):
+        for path in (MODULE.MANIFEST, "pubspec.yaml", "pubspec.lock", "assets/font.ttf", "packages/promo_repository/android/build.gradle"):
+            with self.subTest(path=path):
+                previous = self.git("rev-parse", "HEAD")
+                self.write(path, b"unreviewed native change\n")
+                self.pin("READ_STATE_REVIEWED_SHA", self.commit())
+                with self.assertRaisesRegex(ValueError, "Only the reviewed read-state"):
+                    self.project()
+                self.git("reset", "--hard", previous)
+
+    def test_migration_cannot_change_after_review(self):
+        path = next(path for path in MODULE.READ_STATE_SUPPORT_PATHS if path.startswith("supabase/migrations/"))
+        self.write(path, b"changed migration\n")
+        self.commit()
+        with self.assertRaisesRegex(ValueError, "explicitly reviewed read-state"):
+            self.project()
+
+    def test_policy_only_tail_is_supported(self):
+        self.write("tool/prepare_shorebird_patch.py", b"policy support\n")
+        self.commit()
+        self.project()
+
+
 if __name__ == "__main__":
     unittest.main()
