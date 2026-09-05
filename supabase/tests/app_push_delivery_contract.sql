@@ -56,11 +56,17 @@ begin
     raise exception 'Null recipient must not match all devices';
   end if;
   execute 'reset role';
-  update core.friendships set organization_id='push-rpc-b' where id=friendship;
+  begin
+    update core.friendships set organization_id='push-rpc-b' where id=friendship;
+    raise exception 'Friendship must not cross participant organizations';
+  exception when check_violation then
+    null;
+  end;
   execute 'set local role service_role';
   payload := public.get_friend_push_context(friendship);
-  if payload->>'requester_name' is not null or payload->>'addressee_name' is not null then
-    raise exception 'Friend context crossed organization profile scope';
+  if payload->>'requester_name' is distinct from 'Sender'
+    or payload->>'addressee_name' is distinct from 'Recipient' then
+    raise exception 'Rejected organization change altered friend context';
   end if;
   execute 'reset role';
 end;
