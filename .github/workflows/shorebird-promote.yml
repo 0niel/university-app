@@ -23,6 +23,8 @@ on:
         required: true
         type: choice
         options:
+          - 5.2.1+1006201
+          - 5.2.1+2439.15.54
           - 5.2.1+1005801
           - 5.2.1+2439.14.43
           - 5.2.1+1005301
@@ -71,10 +73,10 @@ jobs:
           [[ "$STAGING_RUN_ID" =~ ^[1-9][0-9]*$ ]]
           [[ "$PATCH_NUMBER" =~ ^[1-9][0-9]*$ ]]
           case "$PLATFORM:$RELEASE_VERSION" in
-            android:5.2.1+1005801|android:5.2.1+1005301|android:5.2.0+1004201|android:5.2.0+1002401|android:5.2.0+1002601|android:5.2.0+1001301|android:5.2.0+1001601|android:5.1.0+1000201)
+            android:5.2.1+1006201|android:5.2.1+1005801|android:5.2.1+1005301|android:5.2.0+1004201|android:5.2.0+1002401|android:5.2.0+1002601|android:5.2.0+1001301|android:5.2.0+1001601|android:5.1.0+1000201)
               app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
               ;;
-            ios:5.2.1+2439.14.43|ios:5.2.0+2435.13.10)
+            ios:5.2.1+2439.15.54|ios:5.2.1+2439.14.43|ios:5.2.0+2435.13.10)
               app_id=21c47e68-a64f-49c1-af6e-4a406dfe266f
               ;;
             *)
@@ -144,6 +146,16 @@ jobs:
               "5.2.1+2439.14.43": ("506602c5d8da2cac5a6180d26b753f415d381819", "281f0761b65405ab48a69e8c3df92e63bdc101da"),
               "5.2.1+1005801": ("506602c5d8da2cac5a6180d26b753f415d381819", "281f0761b65405ab48a69e8c3df92e63bdc101da"),
           }
+          read_state_reviewed = "d958d00217238a815931d879ed8abc684a8c7cc3"
+          read_state_baselines = {
+              "5.2.1+1005801": "506602c5d8da2cac5a6180d26b753f415d381819",
+              "5.2.1+2439.14.43": "506602c5d8da2cac5a6180d26b753f415d381819",
+              "5.2.1+1006201": "781b2ff4a14c9888331eb61b156a2cb0c7e4515b",
+              "5.2.1+2439.15.54": "ee51aeee41bf3c48925c6a524e9e9e90c40b0dd1",
+          }
+          version = os.environ["RELEASE_VERSION"]
+          if version in read_state_baselines and (receipt.get("reviewed_source_sha") == read_state_reviewed or version not in projections):
+              projections[version] = (read_state_baselines[version], read_state_reviewed)
           if os.environ["RELEASE_VERSION"] in projections:
               baseline, reviewed = projections[os.environ["RELEASE_VERSION"]]
               if receipt.get("baseline_sha") != baseline or receipt.get("reviewed_source_sha") != reviewed:

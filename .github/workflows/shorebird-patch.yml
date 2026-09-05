@@ -19,6 +19,8 @@ on:
         required: true
         type: choice
         options:
+          - 5.2.1+1006201
+          - 5.2.1+2439.15.54
           - 5.2.1+1005801
           - 5.2.1+2439.14.43
           - 5.2.1+1005301
@@ -76,6 +78,14 @@ jobs:
           [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
           test "$TARGET_TRACK" = staging
           case "$PLATFORM:$RELEASE_VERSION" in
+            android:5.2.1+1006201)
+              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
+              baseline_sha=781b2ff4a14c9888331eb61b156a2cb0c7e4515b
+              ;;
+            ios:5.2.1+2439.15.54)
+              app_id=21c47e68-a64f-49c1-af6e-4a406dfe266f
+              baseline_sha=ee51aeee41bf3c48925c6a524e9e9e90c40b0dd1
+              ;;
             android:5.2.1+1005801)
               app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
               baseline_sha=506602c5d8da2cac5a6180d26b753f415d381819
@@ -129,7 +139,7 @@ jobs:
           persist-credentials: false
 
       - name: Verify hotfix boundary
-        if: steps.inputs.outputs.release_version != '5.2.1+1005301' && steps.inputs.outputs.release_version != '5.2.1+1005801' && steps.inputs.outputs.release_version != '5.2.1+2439.14.43'
+        if: steps.inputs.outputs.release_version != '5.2.1+1005301' && steps.inputs.outputs.release_version != '5.2.1+1005801' && steps.inputs.outputs.release_version != '5.2.1+2439.14.43' && steps.inputs.outputs.release_version != '5.2.1+1006201' && steps.inputs.outputs.release_version != '5.2.1+2439.15.54'
         env:
           SOURCE_SHA: ${{ steps.inputs.outputs.source_sha }}
           BASELINE_SHA: ${{ steps.inputs.outputs.baseline_sha }}
@@ -196,7 +206,7 @@ jobs:
 
       - name: Prepare verified runtime projection
         id: projection
-        if: inputs.release_version == '5.2.1+1005301' || inputs.release_version == '5.2.1+1005801' || inputs.release_version == '5.2.1+2439.14.43'
+        if: inputs.release_version == '5.2.1+1005301' || inputs.release_version == '5.2.1+1005801' || inputs.release_version == '5.2.1+2439.14.43' || inputs.release_version == '5.2.1+1006201' || inputs.release_version == '5.2.1+2439.15.54'
         run: |
           git show "$WORKFLOW_SHA:tool/prepare_shorebird_patch.py" > "$RUNNER_TEMP/prepare_shorebird_patch.py"
           python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
@@ -216,7 +226,7 @@ jobs:
 
       - name: Verify locked workspace
         run: |
-          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 || "$RELEASE_VERSION" = 5.2.1+1005801 || "$RELEASE_VERSION" = 5.2.1+2439.14.43 ]]; then
+          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 || "$RELEASE_VERSION" = 5.2.1+1005801 || "$RELEASE_VERSION" = 5.2.1+2439.14.43 || "$RELEASE_VERSION" = 5.2.1+1006201 || "$RELEASE_VERSION" = 5.2.1+2439.15.54 ]]; then
             python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
               --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --release-version "$RELEASE_VERSION" --verify-worktree
           else
@@ -238,17 +248,17 @@ jobs:
         run: flutter test --no-pub test/schedule test/top_discussions
 
       - name: Test user initialization
-        if: steps.inputs.outputs.release_version != '5.2.0+1004201' && steps.inputs.outputs.release_version != '5.2.1+1005301' && steps.inputs.outputs.release_version != '5.2.1+1005801' && steps.inputs.outputs.release_version != '5.2.1+2439.14.43'
+        if: steps.inputs.outputs.release_version != '5.2.0+1004201' && steps.inputs.outputs.release_version != '5.2.1+1005301' && steps.inputs.outputs.release_version != '5.2.1+1005801' && steps.inputs.outputs.release_version != '5.2.1+2439.14.43' && steps.inputs.outputs.release_version != '5.2.1+1006201' && steps.inputs.outputs.release_version != '5.2.1+2439.15.54'
         working-directory: packages/user_repository
         run: flutter test --no-pub test/src/user_repository_test.dart
 
       - name: Test academic profile initialization
-        if: steps.inputs.outputs.release_version != '5.2.0+1004201' && steps.inputs.outputs.release_version != '5.2.1+1005301' && steps.inputs.outputs.release_version != '5.2.1+1005801' && steps.inputs.outputs.release_version != '5.2.1+2439.14.43'
+        if: steps.inputs.outputs.release_version != '5.2.0+1004201' && steps.inputs.outputs.release_version != '5.2.1+1005301' && steps.inputs.outputs.release_version != '5.2.1+1005801' && steps.inputs.outputs.release_version != '5.2.1+2439.14.43' && steps.inputs.outputs.release_version != '5.2.1+1006201' && steps.inputs.outputs.release_version != '5.2.1+2439.15.54'
         working-directory: packages/gamification_repository
         run: dart test test/src/gamification_repository_test.dart
 
       - name: Test reviewed runtime changes
-        if: steps.inputs.outputs.release_version == '5.2.1+1005301' || steps.inputs.outputs.release_version == '5.2.1+1005801' || steps.inputs.outputs.release_version == '5.2.1+2439.14.43'
+        if: steps.inputs.outputs.release_version == '5.2.1+1005301' || steps.inputs.outputs.release_version == '5.2.1+1005801' || steps.inputs.outputs.release_version == '5.2.1+2439.14.43' || steps.inputs.outputs.release_version == '5.2.1+1006201' || steps.inputs.outputs.release_version == '5.2.1+2439.15.54'
         env:
           BASELINE_SHA: ${{ steps.inputs.outputs.baseline_sha }}
         run: |
@@ -306,7 +316,7 @@ jobs:
 
       - name: Prepare verified runtime projection
         id: projection
-        if: inputs.release_version == '5.2.1+1005301' || inputs.release_version == '5.2.1+1005801' || inputs.release_version == '5.2.1+2439.14.43'
+        if: inputs.release_version == '5.2.1+1005301' || inputs.release_version == '5.2.1+1005801' || inputs.release_version == '5.2.1+2439.14.43' || inputs.release_version == '5.2.1+1006201' || inputs.release_version == '5.2.1+2439.15.54'
         run: |
           git show "$WORKFLOW_SHA:tool/prepare_shorebird_patch.py" > "$RUNNER_TEMP/prepare_shorebird_patch.py"
           python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
@@ -407,7 +417,7 @@ jobs:
 
       - name: Verify locked workspace
         run: |
-          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 || "$RELEASE_VERSION" = 5.2.1+1005801 || "$RELEASE_VERSION" = 5.2.1+2439.14.43 ]]; then
+          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 || "$RELEASE_VERSION" = 5.2.1+1005801 || "$RELEASE_VERSION" = 5.2.1+2439.14.43 || "$RELEASE_VERSION" = 5.2.1+1006201 || "$RELEASE_VERSION" = 5.2.1+2439.15.54 ]]; then
             python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
               --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --release-version "$RELEASE_VERSION" --verify-worktree
           else
@@ -526,7 +536,7 @@ jobs:
           printf '%s\n' "$FIREBASE_CONFIG_JSON" > "$RUNNER_TEMP/firebase.json"
           firebase_verify_args=()
           firebase_args=(--config "$RUNNER_TEMP/firebase.json" --platform "$PLATFORM")
-          if [[ "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1005801 ]]; then
+          if [[ "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1005801 || "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1006201 ]]; then
             git show "$BASELINE_SHA:tool/configure_firebase.py" > "$RUNNER_TEMP/configure_firebase.py"
             firebase_args+=(--android-output android/app/google-services.json)
             firebase_verify_args+=(--verify-native-firebase)
@@ -535,7 +545,7 @@ jobs:
           fi
           python3 "$RUNNER_TEMP/configure_firebase.py" "${firebase_args[@]}"
           dart run tool/configure_university.dart --config "$RUNNER_TEMP/university.json"
-          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 || "$RELEASE_VERSION" = 5.2.1+1005801 || "$RELEASE_VERSION" = 5.2.1+2439.14.43 ]]; then
+          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 || "$RELEASE_VERSION" = 5.2.1+1005801 || "$RELEASE_VERSION" = 5.2.1+2439.14.43 || "$RELEASE_VERSION" = 5.2.1+1006201 || "$RELEASE_VERSION" = 5.2.1+2439.15.54 ]]; then
             python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
               --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --release-version "$RELEASE_VERSION" --verify-worktree "${firebase_verify_args[@]}"
           else
@@ -767,7 +777,7 @@ jobs:
               "track": patch["channel"],
               "staging_run_id": os.environ["GITHUB_RUN_ID"],
           }
-          if os.environ["RELEASE_VERSION"] in ("5.2.1+1005301", "5.2.1+1005801", "5.2.1+2439.14.43"):
+          if os.environ["RELEASE_VERSION"] in ("5.2.1+1005301", "5.2.1+1005801", "5.2.1+2439.14.43", "5.2.1+1006201", "5.2.1+2439.15.54"):
               projection = json.loads((root / "shorebird-projection.json").read_text())
               if projection["source_sha"] != receipt["source_sha"] or projection["release_version"] != receipt["release_version"]:
                   raise SystemExit("Projection receipt identity mismatch")

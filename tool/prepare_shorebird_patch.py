@@ -27,6 +27,50 @@ NAV_TEST_PATHS = {
     "test/navigation/deep_links_test.dart",
     "test/navigation/schedule_route_payload_test.dart",
 }
+READ_STATE_REVIEWED_SHA = "d958d00217238a815931d879ed8abc684a8c7cc3"
+READ_STATE_BASELINES = {
+    "5.2.1+1005801": "506602c5d8da2cac5a6180d26b753f415d381819",
+    "5.2.1+2439.14.43": "506602c5d8da2cac5a6180d26b753f415d381819",
+    "5.2.1+1006201": "781b2ff4a14c9888331eb61b156a2cb0c7e4515b",
+    "5.2.1+2439.15.54": "ee51aeee41bf3c48925c6a524e9e9e90c40b0dd1",
+}
+READ_STATE_RUNTIME_PATHS = {
+    'lib/app/view/app.dart',
+    'lib/app/widgets/local_notification_listener.dart',
+    'lib/app/widgets/user_preferences_scope.dart',
+    'lib/notifications/cubit/notifications_cubit.dart',
+    'lib/notifications/data/notification_inbox_repository.dart',
+    'lib/notifications/view/notifications_sheet.dart',
+    'lib/notifications/view/push_history_listener.dart',
+    'lib/notifications/view/schedule_changes_read_scope.dart',
+    'lib/profile/widgets/notifications_toggle_row.dart',
+    'lib/profile/widgets/settings_sheets.dart',
+    'lib/promo/cubit/promo_dismissals_cubit.dart',
+    'lib/schedule/view/changes/changes_page.dart',
+    'lib/schedule/view/schedule_page/schedule_body.dart',
+    'lib/schedule/view/schedule_page/sheets/schedule_changes_sheet.dart',
+    'packages/promo_repository/lib/promo_repository.dart',
+    'packages/promo_repository/lib/src/client/promo_client.dart',
+    'packages/promo_repository/lib/src/models/promo_dismissal.dart',
+    'packages/promo_repository/lib/src/promo_repository.dart',
+}
+READ_STATE_SUPPORT_PATHS = {
+    'supabase/migrations/20260905170626_promo_banner_dismissals.sql',
+    'supabase/migrations/20260905170648_schedule_notification_read_state.sql',
+    'supabase/tests/promo_banner_dismissals_contract.sql',
+    'supabase/tests/schedule_notification_reads_contract.sql',
+    'test/app/view/app_router_scope_test.dart',
+    'test/notifications/cubit/notification_inbox_sync_test.dart',
+    'test/notifications/cubit/notifications_cubit_test.dart',
+    'test/notifications/data/notification_inbox_repository_test.dart',
+    'test/notifications/view/push_history_listener_test.dart',
+    'test/notifications/view/schedule_changes_read_scope_test.dart',
+    'test/profile/view/notifications_settings_page_test.dart',
+    'test/profile/widgets/notifications_toggle_row_test.dart',
+    'test/promo/cubit/promo_dismissals_sync_test.dart',
+    'test/promo/view/promo_banner_slot_test.dart',
+    'test/schedule/view/schedule_page/schedule_responsive_test.dart',
+}
 WORKFLOW_PATHS = {
     "packages/app_ui/test/src/widgets/app_horizontal_scroll_view_test.dart",
     "supabase/tests/guest_active_day_contract.sql",
@@ -119,12 +163,40 @@ def navigation_projection(root, source_sha, workflow_sha, release_version):
     }
 
 
+def read_state_projection(root, source_sha, workflow_sha, release_version):
+    baseline = READ_STATE_BASELINES[release_version]
+    for ancestor, descendant in ((baseline, READ_STATE_REVIEWED_SHA), (READ_STATE_REVIEWED_SHA, source_sha), (source_sha, workflow_sha)):
+        git(root, "merge-base", "--is-ancestor", ancestor, descendant)
+    if changed(root, READ_STATE_REVIEWED_SHA, source_sha) - WORKFLOW_PATHS:
+        raise ValueError("Runtime source differs from the explicitly reviewed read-state snapshot")
+    support = WORKFLOW_PATHS | NAV_TEST_PATHS | READ_STATE_SUPPORT_PATHS | {"test/tool/configure_firebase_test.py"}
+    delta = changed(root, baseline, source_sha)
+    if delta - NAV_RUNTIME_PATHS - READ_STATE_RUNTIME_PATHS - support:
+        raise ValueError("Only the reviewed read-state runtime and support files may change")
+    after = tree(root, source_sha)
+    for path in delta:
+        if not after.get(path, "").startswith("100644 blob "):
+            raise ValueError(f"Changed paths must remain regular files: {path}")
+    digest = hashlib.sha256(json.dumps(after, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return {}, {
+        "baseline_sha": baseline,
+        "reviewed_source_sha": READ_STATE_REVIEWED_SHA,
+        "source_sha": source_sha,
+        "release_version": release_version,
+        "projection_sha256": digest,
+    }
+
+
 def projection(root, source_sha, workflow_sha, release_version=RELEASE_VERSION):
     for value in (source_sha, workflow_sha):
         if not re.fullmatch(r"[0-9a-f]{40}", value):
             raise ValueError("A full commit SHA is required")
     if git(root, "rev-parse", "HEAD").decode().strip() != source_sha:
         raise ValueError("Checked-out commit does not match source_sha")
+    if release_version in READ_STATE_BASELINES:
+        reviewed = subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor", READ_STATE_REVIEWED_SHA, source_sha], capture_output=True)
+        if reviewed.returncode == 0 or release_version not in (NAV_RELEASE_VERSION, NAV_IOS_RELEASE_VERSION):
+            return read_state_projection(root, source_sha, workflow_sha, release_version)
     if release_version in (NAV_RELEASE_VERSION, NAV_IOS_RELEASE_VERSION):
         return navigation_projection(root, source_sha, workflow_sha, release_version)
     if release_version != RELEASE_VERSION:
@@ -185,7 +257,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-sha", required=True)
     parser.add_argument("--workflow-sha", required=True)
-    parser.add_argument("--release-version", choices=(RELEASE_VERSION, NAV_RELEASE_VERSION, NAV_IOS_RELEASE_VERSION), default=RELEASE_VERSION)
+    parser.add_argument("--release-version", choices=(RELEASE_VERSION, *READ_STATE_BASELINES), default=RELEASE_VERSION)
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--verify-worktree", action="store_true")
@@ -209,8 +281,8 @@ def main():
     if arguments.apply or arguments.verify_worktree:
         verify_worktree(root, overrides)
     if arguments.verify_native_firebase:
-        if arguments.release_version != NAV_RELEASE_VERSION:
-            raise ValueError("Native Firebase reconstruction is only supported for the reviewed navigation release")
+        if arguments.release_version not in (NAV_RELEASE_VERSION, "5.2.1+1006201"):
+            raise ValueError("Native Firebase reconstruction is only supported for the reviewed Android releases")
         verify_navigation_firebase(root)
     if arguments.receipt:
         arguments.receipt.write_text(json.dumps(receipt, sort_keys=True) + "\n", encoding="utf-8")
