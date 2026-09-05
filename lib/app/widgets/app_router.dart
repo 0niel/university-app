@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:rtu_mirea_app/app/locale/locale_cubit.dart';
+import 'package:rtu_mirea_app/app/widgets/app_system_ui_surface.dart';
 import 'package:rtu_mirea_app/app/widgets/root_app_wrapper.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/debug/debug_panel.dart';
@@ -62,15 +63,17 @@ class AppRouter extends StatelessWidget {
       ],
     );
 
-    return RootAppWrapper(
-      router: router,
-      child: DebugOverlay(
-        child: AppScale.create(
-          child: AppTourOverlay(
-            router: router,
-            child: NinjaToastHost(
-              bottomInset: toastBottomInset,
-              child: responsive,
+    return AppSystemUiSurface(
+      child: RootAppWrapper(
+        router: router,
+        child: DebugOverlay(
+          child: AppScale.create(
+            child: AppTourOverlay(
+              router: router,
+              child: NinjaToastHost(
+                bottomInset: toastBottomInset,
+                child: responsive,
+              ),
             ),
           ),
         ),
