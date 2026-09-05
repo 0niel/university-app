@@ -19,6 +19,7 @@ on:
         required: true
         type: choice
         options:
+          - 5.2.1+1005301
           - 5.2.0+1004201
           - 5.2.0+1002401
           - 5.2.0+1002601
@@ -44,7 +45,11 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
+    env:
+      SOURCE_SHA: ${{ inputs.source_sha }}
+      RELEASE_VERSION: ${{ inputs.release_version }}
+      WORKFLOW_SHA: ${{ github.workflow_sha }}
     defaults:
       run:
         shell: bash
@@ -54,6 +59,7 @@ jobs:
       release_version: ${{ steps.inputs.outputs.release_version }}
       app_id: ${{ steps.inputs.outputs.app_id }}
       baseline_sha: ${{ steps.inputs.outputs.baseline_sha }}
+      projection_sha256: ${{ steps.projection.outputs.projection_sha256 }}
     steps:
       - name: Validate requested target
         id: inputs
@@ -68,6 +74,10 @@ jobs:
           [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
           test "$TARGET_TRACK" = staging
           case "$PLATFORM:$RELEASE_VERSION" in
+            android:5.2.1+1005301)
+              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
+              baseline_sha=892c735ac0b46f3b8f6621b1d67d12342c45cc84
+              ;;
             android:5.2.0+1004201)
               app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
               baseline_sha=6fe7e47beaa7f2a4114023a2b4744cfc1da17657
@@ -109,6 +119,7 @@ jobs:
           persist-credentials: false
 
       - name: Verify hotfix boundary
+        if: steps.inputs.outputs.release_version != '5.2.1+1005301'
         env:
           SOURCE_SHA: ${{ steps.inputs.outputs.source_sha }}
           BASELINE_SHA: ${{ steps.inputs.outputs.baseline_sha }}
@@ -173,6 +184,16 @@ jobs:
           subprocess.run(["git", "diff", "--check", baseline, source], check=True)
           PY
 
+      - name: Prepare verified runtime projection
+        id: projection
+        if: inputs.release_version == '5.2.1+1005301'
+        run: |
+          git show "$WORKFLOW_SHA:tool/prepare_shorebird_patch.py" > "$RUNNER_TEMP/prepare_shorebird_patch.py"
+          python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
+            --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" \
+            --apply --receipt "$RUNNER_TEMP/shorebird-projection.json" \
+            --github-output "$GITHUB_OUTPUT"
+
       - name: Set up Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
@@ -185,7 +206,12 @@ jobs:
 
       - name: Verify locked workspace
         run: |
-          git diff --exit-code
+          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 ]]; then
+            python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
+              --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --verify-worktree
+          else
+            git diff --exit-code
+          fi
 
       - name: Analyze hotfix
         env:
@@ -202,14 +228,44 @@ jobs:
         run: flutter test --no-pub test/schedule test/top_discussions
 
       - name: Test user initialization
-        if: steps.inputs.outputs.release_version != '5.2.0+1004201'
+        if: steps.inputs.outputs.release_version != '5.2.0+1004201' && steps.inputs.outputs.release_version != '5.2.1+1005301'
         working-directory: packages/user_repository
         run: flutter test --no-pub test/src/user_repository_test.dart
 
       - name: Test academic profile initialization
-        if: steps.inputs.outputs.release_version != '5.2.0+1004201'
+        if: steps.inputs.outputs.release_version != '5.2.0+1004201' && steps.inputs.outputs.release_version != '5.2.1+1005301'
         working-directory: packages/gamification_repository
         run: dart test test/src/gamification_repository_test.dart
+
+      - name: Test reviewed runtime changes
+        if: steps.inputs.outputs.release_version == '5.2.1+1005301'
+        env:
+          BASELINE_SHA: ${{ steps.inputs.outputs.baseline_sha }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import subprocess
+
+          paths = subprocess.check_output([
+              "git", "diff", "--name-only", "--no-renames", os.environ["BASELINE_SHA"], os.environ["SOURCE_SHA"],
+          ]).decode().splitlines()
+          groups = {}
+          for path in paths:
+              if not path.endswith("_test.dart"):
+                  continue
+              if path.startswith("test/"):
+                  groups.setdefault(".", []).append(path)
+              elif path.startswith("packages/") and "/test/" in path:
+                  package, relative = path.split("/test/", 1)
+                  groups.setdefault(package, []).append("test/" + relative)
+          if not groups.get("."):
+              raise SystemExit("The reviewed runtime must include regression tests")
+          for package, tests in sorted(groups.items()):
+              flutter = "sdk: flutter" in (Path(package) / "pubspec.yaml").read_text()
+              command = ["flutter", "test", "--no-pub"] if flutter else ["dart", "test"]
+              subprocess.run([*command, "--concurrency=2", *sorted(tests)], cwd=package, check=True)
+          PY
 
   patch:
     needs: validate
@@ -221,6 +277,7 @@ jobs:
         shell: bash
     env:
       CI: "true"
+      WORKFLOW_SHA: ${{ github.workflow_sha }}
       PLATFORM: ${{ needs.validate.outputs.platform }}
       RELEASE_VERSION: ${{ needs.validate.outputs.release_version }}
       SOURCE_SHA: ${{ needs.validate.outputs.source_sha }}
@@ -233,7 +290,19 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ needs.validate.outputs.source_sha }}
+          fetch-depth: 0
           persist-credentials: false
+
+      - name: Prepare verified runtime projection
+        id: projection
+        if: inputs.release_version == '5.2.1+1005301'
+        run: |
+          git show "$WORKFLOW_SHA:tool/prepare_shorebird_patch.py" > "$RUNNER_TEMP/prepare_shorebird_patch.py"
+          python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
+            --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" \
+            --expected-projection "${{ needs.validate.outputs.projection_sha256 }}" \
+            --apply --receipt "$RUNNER_TEMP/shorebird-projection.json" \
+            --github-output "$GITHUB_OUTPUT"
 
       - name: Verify patch configuration
         env:
@@ -327,7 +396,12 @@ jobs:
 
       - name: Verify locked workspace
         run: |
-          git diff --exit-code
+          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 ]]; then
+            python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
+              --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --verify-worktree
+          else
+            git diff --exit-code
+          fi
 
       - name: Configure Android signing
         if: needs.validate.outputs.platform == 'android'
@@ -438,7 +512,12 @@ jobs:
           printf '%s\n' "$UNIVERSITY_CONFIG_JSON" > "$RUNNER_TEMP/university.json"
           printf '%s\n' "$FIREBASE_CONFIG_JSON" > "$RUNNER_TEMP/firebase.json"
           dart run tool/configure_university.dart --config "$RUNNER_TEMP/university.json"
-          git diff --exit-code -- android ios assets pubspec.yaml pubspec.lock .fvmrc shorebird.yaml
+          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 ]]; then
+            python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
+              --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --verify-worktree
+          else
+            git diff --exit-code -- android ios assets pubspec.yaml pubspec.lock .fvmrc shorebird.yaml
+          fi
           python3 - <<'PY'
           import os
           import re
@@ -665,6 +744,11 @@ jobs:
               "track": patch["channel"],
               "staging_run_id": os.environ["GITHUB_RUN_ID"],
           }
+          if os.environ["RELEASE_VERSION"] == "5.2.1+1005301":
+              projection = json.loads((root / "shorebird-projection.json").read_text())
+              if projection["source_sha"] != receipt["source_sha"] or projection["release_version"] != receipt["release_version"]:
+                  raise SystemExit("Projection receipt identity mismatch")
+              receipt.update({key: projection[key] for key in ("baseline_sha", "reviewed_source_sha", "projection_sha256")})
           print(json.dumps(receipt, sort_keys=True))
           receipt["artifacts"] = sorted(
               [{key: item[key] for key in ("arch", "platform", "hash", "size", "patch_id")} for item in patch["artifacts"]],

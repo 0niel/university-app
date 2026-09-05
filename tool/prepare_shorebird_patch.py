@@ -1,0 +1,164 @@
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import re
+import subprocess
+
+
+BASELINE_SHA = "892c735ac0b46f3b8f6621b1d67d12342c45cc84"
+REVIEWED_SOURCE_SHA = "0a5f375a1a312a6bb45567677852ee22242420ab"
+RELEASE_VERSION = "5.2.1+1005301"
+WORKFLOW_PATHS = {
+    "supabase/tests/guest_active_day_contract.sql",
+    "supabase/tests/mentorship_contract.sql",
+    ".github/workflows/shorebird-patch.yml",
+    ".github/workflows/shorebird-promote.yml",
+    "tool/prepare_shorebird_patch.py",
+    "test/tool/prepare_shorebird_patch_test.py",
+    "test/tool/shorebird_patch_workflow_test.py",
+}
+MANIFEST = "android/app/src/main/AndroidManifest.xml"
+PROCESS_TEXT = (
+    '        <intent>\n'
+    '            <action android:name="android.intent.action.PROCESS_TEXT" />\n'
+    '            <data android:mimeType="text/plain" />\n'
+    '        </intent>\n'
+).encode()
+DART_PACKAGES = {
+    "barcode": ("2.2.9", "7b6729c37e3b7f34233e2318d866e8c48ddb46c1f7ad01ff7bb2a8de1da2b9f4"),
+    "bidi": ("2.0.13", "77f475165e94b261745cf1032c751e2032b8ed92ccb2bf5716036db79320637d"),
+    "pdf": ("3.12.0", "e47a275b267873d5944ad5f5ff0dcc7ac2e36c02b3046a0ffac9b72fd362c44b"),
+}
+
+
+def git(root, *args, input=None):
+    return subprocess.check_output(["git", "-C", str(root), *args], input=input)
+
+
+def changed(root, before, after):
+    return set(filter(None, git(root, "diff", "--name-only", "--no-renames", "-z", before, after).decode().split("\0")))
+
+
+def tree(root, revision):
+    result = {}
+    for entry in git(root, "ls-tree", "-rz", "--full-tree", revision).split(b"\0"):
+        if entry:
+            metadata, path = entry.split(b"\t", 1)
+            result[path.decode()] = metadata.decode()
+    return result
+
+
+def blob(root, revision, path):
+    return git(root, "show", f"{revision}:{path}")
+
+
+def validate_dependencies(baseline, source):
+    root_before = baseline["pubspec.yaml"]
+    root_after = source["pubspec.yaml"]
+    normalized = re.sub(rb"(?m)^version: [^\n]+$", b"version: reviewed", root_after)
+    expected = re.sub(rb"(?m)^version: [^\n]+$", b"version: reviewed", root_before)
+    if normalized.replace(b"  pdf: 3.12.0\n", b"", 1) != expected:
+        raise ValueError("Only the reviewed pure Dart PDF dependency may change")
+    lock = source["pubspec.lock"].decode()
+    blocks = dict(re.findall(r"(?m)^  ([a-z0-9_]+):\n((?:^ {4}[^\n]*\n)+)", lock))
+    for name, (version, digest) in DART_PACKAGES.items():
+        block = blocks.get(name, "")
+        if (
+            f'    version: "{version}"\n' not in block
+            or digest not in block
+            or '      url: "https://pub.dev"\n' not in block
+            or '    source: hosted\n' not in block
+        ):
+            raise ValueError(f"Unexpected reviewed dependency: {name}")
+        lock = lock.replace(f"  {name}:\n{block}", "", 1)
+    if lock.encode() != baseline["pubspec.lock"]:
+        raise ValueError("Existing locked dependencies must remain identical to the release")
+    return root_before.replace(b"  pdfx:", b"  pdf: 3.12.0\n  pdfx:", 1)
+
+
+def projection(root, source_sha, workflow_sha):
+    for value in (source_sha, workflow_sha):
+        if not re.fullmatch(r"[0-9a-f]{40}", value):
+            raise ValueError("A full commit SHA is required")
+    if git(root, "rev-parse", "HEAD").decode().strip() != source_sha:
+        raise ValueError("Checked-out commit does not match source_sha")
+    for ancestor, descendant in ((BASELINE_SHA, REVIEWED_SOURCE_SHA), (REVIEWED_SOURCE_SHA, source_sha), (source_sha, workflow_sha)):
+        git(root, "merge-base", "--is-ancestor", ancestor, descendant)
+    if changed(root, REVIEWED_SOURCE_SHA, source_sha) - WORKFLOW_PATHS:
+        raise ValueError("Runtime source differs from the explicitly reviewed snapshot")
+    before = tree(root, BASELINE_SHA)
+    after = tree(root, source_sha)
+    for path in changed(root, BASELINE_SHA, source_sha):
+        if not after.get(path, "").startswith("100644 blob "):
+            raise ValueError(f"Changed paths must remain regular files: {path}")
+        protected = path.startswith(("android/", "ios/", "macos/", "windows/", "linux/", "web/", "assets/")) or path in {".fvmrc", "shorebird.yaml"}
+        package_resource = path.startswith("packages/") and not path.endswith(".dart")
+        if (protected or package_resource) and path != MANIFEST and before.get(path) != after.get(path):
+            raise ValueError(f"Native configuration and bundled assets must remain unchanged: {path}")
+    paths = (MANIFEST, "pubspec.yaml", "pubspec.lock")
+    baseline = {path: blob(root, BASELINE_SHA, path) for path in paths}
+    source = {path: blob(root, source_sha, path) for path in paths}
+    if source[MANIFEST].count(PROCESS_TEXT) != 1 or source[MANIFEST].replace(PROCESS_TEXT, b"", 1) != baseline[MANIFEST]:
+        raise ValueError("The only reviewed manifest change is the optional PROCESS_TEXT query")
+    overrides = {MANIFEST: baseline[MANIFEST], "pubspec.yaml": validate_dependencies(baseline, source)}
+    identities = {path: value for path, value in after.items()}
+    for path, data in overrides.items():
+        identities[path] = "projection sha256 " + hashlib.sha256(data).hexdigest()
+    digest = hashlib.sha256(json.dumps(identities, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return overrides, {
+        "baseline_sha": BASELINE_SHA,
+        "reviewed_source_sha": REVIEWED_SOURCE_SHA,
+        "source_sha": source_sha,
+        "release_version": RELEASE_VERSION,
+        "projection_sha256": digest,
+    }
+
+
+def verify_worktree(root, overrides):
+    if git(root, "ls-files", "--others", "--exclude-standard"):
+        raise ValueError("Unexpected untracked files in the projected workspace")
+    dirty = set(filter(None, git(root, "diff", "HEAD", "--name-only", "-z").decode().split("\0")))
+    if dirty - overrides.keys():
+        raise ValueError("Unexpected tracked changes in the projected workspace")
+    for path, data in overrides.items():
+        target = root / path
+        if target.is_symlink() or target.read_bytes().replace(b"\r\n", b"\n") != data:
+            raise ValueError(f"Projection drift: {path}")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source-sha", required=True)
+    parser.add_argument("--workflow-sha", required=True)
+    parser.add_argument("--repo", type=Path, default=Path.cwd())
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--verify-worktree", action="store_true")
+    parser.add_argument("--receipt", type=Path)
+    parser.add_argument("--github-output", type=Path)
+    parser.add_argument("--expected-projection")
+    arguments = parser.parse_args()
+    root = arguments.repo.resolve()
+    overrides, receipt = projection(root, arguments.source_sha, arguments.workflow_sha)
+    if arguments.expected_projection and arguments.expected_projection != receipt["projection_sha256"]:
+        raise ValueError("The build projection differs from the validated projection")
+    if arguments.apply:
+        if git(root, "diff", "HEAD", "--name-only"):
+            raise ValueError("Projection requires a clean tracked checkout")
+        for path, data in overrides.items():
+            target = root / path
+            if target.is_symlink() or not target.resolve().is_relative_to(root):
+                raise ValueError("Projection paths must remain inside the checkout")
+            target.write_bytes(data)
+    if arguments.apply or arguments.verify_worktree:
+        verify_worktree(root, overrides)
+    if arguments.receipt:
+        arguments.receipt.write_text(json.dumps(receipt, sort_keys=True) + "\n", encoding="utf-8")
+    if arguments.github_output:
+        with arguments.github_output.open("a", encoding="utf-8") as output:
+            output.write(f"projection_sha256={receipt['projection_sha256']}\n")
+    print(json.dumps(receipt, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

@@ -23,6 +23,7 @@ on:
         required: true
         type: choice
         options:
+          - 5.2.1+1005301
           - 5.2.0+1004201
           - 5.2.0+1002401
           - 5.2.0+1002601
@@ -68,7 +69,7 @@ jobs:
           [[ "$STAGING_RUN_ID" =~ ^[1-9][0-9]*$ ]]
           [[ "$PATCH_NUMBER" =~ ^[1-9][0-9]*$ ]]
           case "$PLATFORM:$RELEASE_VERSION" in
-            android:5.2.0+1004201|android:5.2.0+1002401|android:5.2.0+1002601|android:5.2.0+1001301|android:5.2.0+1001601|android:5.1.0+1000201)
+            android:5.2.1+1005301|android:5.2.0+1004201|android:5.2.0+1002401|android:5.2.0+1002601|android:5.2.0+1001301|android:5.2.0+1001601|android:5.1.0+1000201)
               app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
               ;;
             ios:5.2.0+2435.13.10)
@@ -136,6 +137,12 @@ jobs:
           }
           if any(receipt.get(key) != value for key, value in expected.items()):
               raise SystemExit("The staging receipt does not match the requested promotion")
+          if os.environ["RELEASE_VERSION"] == "5.2.1+1005301":
+              if receipt.get("baseline_sha") != "892c735ac0b46f3b8f6621b1d67d12342c45cc84" or receipt.get("reviewed_source_sha") != "0a5f375a1a312a6bb45567677852ee22242420ab":
+                  raise SystemExit("The staging receipt does not match the reviewed runtime projection")
+              digest = receipt.get("projection_sha256", "")
+              if len(digest) != 64 or any(character not in "0123456789abcdef" for character in digest):
+                  raise SystemExit("The staging receipt has no valid projection digest")
           if not isinstance(receipt.get("patch_id"), int) or receipt["patch_id"] < 1 or not receipt.get("artifacts"):
               raise SystemExit("The staging receipt has no valid patch artifacts")
           print(json.dumps(expected, sort_keys=True))
