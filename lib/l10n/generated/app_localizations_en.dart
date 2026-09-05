@@ -3710,7 +3710,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friendsShareGeo => 'Share my location';
 
   @override
-  String get friendsShareGeoSub => 'updates while Friends on the map is open';
+  String get friendsShareGeoSub =>
+      'send location updates to your chosen audience';
 
   @override
   String get friendsPrivacySyncError =>
@@ -3720,7 +3721,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friendsGhostSub => 'temporarily hide from everyone';
 
   @override
-  String get friendsWhoSeesExact => 'WHO SEES MY EXACT LOCATION';
+  String get friendsWhoSeesExact => 'WHO SEES MY LOCATION';
 
   @override
   String get friendsVisAll => 'All friends';
@@ -3738,7 +3739,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friendsVisNoneSub => 'you\'\'re not on the map';
 
   @override
-  String get friendsPrecisionHeader => 'PRECISION FOR OTHERS';
+  String get friendsPrecisionHeader => 'LOCATION PRECISION';
 
   @override
   String get friendsPrecisionExact => 'Exact';
@@ -12083,4 +12084,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsShowPromoBanners => 'Partner offers';
+
+  @override
+  String get friendsStudentsTab => 'Students';
+
+  @override
+  String get friendsStudentsEmptyTitle => 'No students on the map yet';
+
+  @override
+  String get friendsStudentsEmptySub =>
+      'Students appear here when they choose to share with everyone. You can browse without sharing your own location.';
+
+  @override
+  String get friendsStudentsSub =>
+      'Only students who chose to share with everyone are shown. Locations may be approximate.';
+
+  @override
+  String get friendsVisStudents => 'Everyone';
+
+  @override
+  String get friendsVisStudentsSub =>
+      'Any signed-in student can see your profile and location without adding you as a friend. Visibility continues until you hide yourself or turn sharing off.';
+
+  @override
+  String get friendsVisFriendsSub =>
+      'Only accepted friends can see your location. Your profile will not appear on the student map.';
+
+  @override
+  String get friendsPublicProfile => 'Shares with all students';
+
+  @override
+  String get friendsBackgroundTitle => 'Location updates';
+
+  @override
+  String get friendsBackgroundMobileSub =>
+      'On phones, background updates require location permission and may be limited by battery saving. Force-closing the app or restarting the device can stop sharing; open the app to resume.';
+
+  @override
+  String get friendsBackgroundForegroundSub =>
+      'On this platform, your location updates while the app is open and active. Sharing stops when it is closed or suspended.';
+
+  @override
+  String get friendsBackgroundActive => 'Background location is active';
+
+  @override
+  String get friendsBackgroundInactive => 'Background location is not active';
+
+  @override
+  String get friendsLocationRetry => 'Enable location access';
+
+  @override
+  String friendsMapPeopleCount(int count) {
+    return 'On the map: $count';
+  }
+
+  @override
+  String get friendsLocationUnavailable =>
+      'Location is unavailable. You can still browse students on the map.';
+
+  @override
+  String get friendsLocationPublishFailed =>
+      'Your latest location could not be shared. Check your connection; updates will retry automatically.';
+
+  @override
+  String get friendsLocationServiceDisabled =>
+      'Location services are turned off on your device. The map remains available.';
+
+  @override
+  String get friendsLocationUnsupported =>
+      'This device cannot provide your location. You can still browse the map.';
+
+  @override
+  String get friendsLocationLocating => 'Finding your location…';
+
+  @override
+  String get friendsLocationForegroundActive =>
+      'Updates while the app is active';
 }

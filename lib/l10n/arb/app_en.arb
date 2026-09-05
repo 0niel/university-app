@@ -3732,13 +3732,13 @@
   "@friendsRemove": {},
   "friendsShareGeo": "Share my location",
   "@friendsShareGeo": {},
-  "friendsShareGeoSub": "updates while Friends on the map is open",
+  "friendsShareGeoSub": "send location updates to your chosen audience",
   "@friendsShareGeoSub": {},
   "friendsPrivacySyncError": "The server did not confirm your privacy settings. Location publishing is stopped on this device — retry the sync.",
   "@friendsPrivacySyncError": {},
   "friendsGhostSub": "temporarily hide from everyone",
   "@friendsGhostSub": {},
-  "friendsWhoSeesExact": "WHO SEES MY EXACT LOCATION",
+  "friendsWhoSeesExact": "WHO SEES MY LOCATION",
   "@friendsWhoSeesExact": {},
   "friendsVisAll": "All friends",
   "@friendsVisAll": {},
@@ -3750,7 +3750,7 @@
   "@friendsVisNone": {},
   "friendsVisNoneSub": "you''re not on the map",
   "@friendsVisNoneSub": {},
-  "friendsPrecisionHeader": "PRECISION FOR OTHERS",
+  "friendsPrecisionHeader": "LOCATION PRECISION",
   "@friendsPrecisionHeader": {},
   "friendsPrecisionExact": "Exact",
   "@friendsPrecisionExact": {},
@@ -11862,5 +11862,33 @@
   "settingsShowPromoBanners": "Partner offers",
   "@settingsShowPromoBanners": {
     "description": "Home content toggle that shows or hides promo banners"
-  }
+  },
+  "friendsStudentsTab": "Students",
+  "friendsStudentsEmptyTitle": "No students on the map yet",
+  "friendsStudentsEmptySub": "Students appear here when they choose to share with everyone. You can browse without sharing your own location.",
+  "friendsStudentsSub": "Only students who chose to share with everyone are shown. Locations may be approximate.",
+  "friendsVisStudents": "Everyone",
+  "friendsVisStudentsSub": "Any signed-in student can see your profile and location without adding you as a friend. Visibility continues until you hide yourself or turn sharing off.",
+  "friendsVisFriendsSub": "Only accepted friends can see your location. Your profile will not appear on the student map.",
+  "friendsPublicProfile": "Shares with all students",
+  "friendsBackgroundTitle": "Location updates",
+  "friendsBackgroundMobileSub": "On phones, background updates require location permission and may be limited by battery saving. Force-closing the app or restarting the device can stop sharing; open the app to resume.",
+  "friendsBackgroundForegroundSub": "On this platform, your location updates while the app is open and active. Sharing stops when it is closed or suspended.",
+  "friendsBackgroundActive": "Background location is active",
+  "friendsBackgroundInactive": "Background location is not active",
+  "friendsLocationRetry": "Enable location access",
+  "friendsMapPeopleCount": "On the map: {count}",
+  "friendsLocationUnavailable": "Location is unavailable. You can still browse students on the map.",
+  "@friendsMapPeopleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "friendsLocationPublishFailed": "Your latest location could not be shared. Check your connection; updates will retry automatically.",
+  "friendsLocationServiceDisabled": "Location services are turned off on your device. The map remains available.",
+  "friendsLocationUnsupported": "This device cannot provide your location. You can still browse the map.",
+  "friendsLocationLocating": "Finding your location…",
+  "friendsLocationForegroundActive": "Updates while the app is active"
 }

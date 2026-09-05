@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:friends_repository/friends_repository.dart';
 import 'package:latlong2/latlong.dart';
@@ -24,6 +25,8 @@ class NinjaFriendsPanel extends StatelessWidget {
     this.myLatitude,
     this.myLongitude,
     this.controller,
+    this.showingStudents = false,
+    this.onShowStudentsChanged,
   });
 
   final List<Friend> friends;
@@ -34,6 +37,8 @@ class NinjaFriendsPanel extends StatelessWidget {
   final VoidCallback onAddFriend;
   final double? myLatitude;
   final double? myLongitude;
+  final bool showingStudents;
+  final ValueChanged<bool>? onShowStudentsChanged;
 
   final DraggableScrollableController? controller;
 
@@ -88,30 +93,26 @@ class NinjaFriendsPanel extends StatelessWidget {
           children: [
             AppEmptyState(
               lineIcon: AppLineIcon.people,
-              title: l10n.friendsEmptyTitle,
-              subtitle: l10n.friendsEmptySub,
+              title: showingStudents
+                  ? l10n.friendsStudentsEmptyTitle
+                  : l10n.friendsEmptyTitle,
+              subtitle: showingStudents
+                  ? l10n.friendsStudentsEmptySub
+                  : l10n.friendsEmptySub,
             ),
-            const SizedBox(height: AppSpacing.sectionGap),
-            FriendsPillButton(
-              label: l10n.friendsAddFriend,
-              icon: .plus,
-              onTap: onAddFriend,
-            ),
+            if (!showingStudents) ...[
+              const SizedBox(height: AppSpacing.sectionGap),
+              FriendsPillButton(
+                label: l10n.friendsAddFriend,
+                icon: .plus,
+                onTap: onAddFriend,
+              ),
+            ],
           ],
         ).animateEmptyState(),
       );
     }
-    return Column(
-      key: const ValueKey('friends'),
-      children: [
-        for (final (index, friend) in friends.indexed)
-          _NinjaFriendCard(
-            friend: friend,
-            distance: _distanceTo(friend, l10n),
-            onTap: () => onFriendTap(friend),
-          ).animateListItem(index: index),
-      ],
-    );
+    return const SizedBox.shrink();
   }
 
   @override
@@ -131,61 +132,119 @@ class NinjaFriendsPanel extends StatelessWidget {
               top: .circular(AppRadius.sheet),
             ),
           ),
-          child: ListView(
-            controller: scrollController,
-            padding: const .only(top: 10, bottom: 24),
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colors.surface2,
-                    borderRadius: .circular(AppRadius.full),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const .fromLTRB(
-                  AppSpacing.screen,
-                  14,
-                  AppSpacing.screen,
-                  12,
-                ),
-                child: Row(
-                  spacing: 8,
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              dragDevices: {
+                ...ScrollConfiguration.of(context).dragDevices,
+                PointerDeviceKind.mouse,
+              },
+            ),
+            child: ListView.builder(
+              controller: scrollController,
+              padding: const .only(top: 10, bottom: 24),
+              itemCount: !loading && !failed && friends.isNotEmpty
+                  ? friends.length + 1
+                  : 2,
+              itemBuilder: (context, index) {
+                if (index > 0) {
+                  if (loading || failed || friends.isEmpty) {
+                    return NinjaStateSwitcher(child: _content(l10n));
+                  }
+                  final friend = friends[index - 1];
+                  return _NinjaFriendCard(
+                    key: ValueKey(friend.userId),
+                    friend: friend,
+                    distance: _distanceTo(friend, l10n),
+                    onTap: () => onFriendTap(friend),
+                  );
+                }
+                return Column(
                   children: [
-                    Text(
-                      l10n.friendsTitle,
-                      style: AppText.title.copyWith(color: colors.ink),
-                    ),
-                    if (loading)
-                      const NinjaSkeleton(
-                        width: 18,
-                        height: 12,
-                        radius: AppRadius.focusOutline,
-                      )
-                    else
-                      Text(
-                        '${friends.length}',
-                        style: AppText.subtext
-                            .copyWith(color: colors.muted)
-                            .copyWith(
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: colors.surface2,
+                          borderRadius: .circular(AppRadius.full),
+                        ),
                       ),
-                    const Spacer(),
-                    FriendsPillButton(
-                      label: l10n.friendsAddShort,
-                      onTap: onAddFriend,
                     ),
+                    Padding(
+                      padding: const .fromLTRB(
+                        AppSpacing.screen,
+                        14,
+                        AppSpacing.screen,
+                        12,
+                      ),
+                      child: Row(
+                        spacing: 8,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              showingStudents
+                                  ? l10n.friendsStudentsTab
+                                  : l10n.friendsTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppText.title.copyWith(color: colors.ink),
+                            ),
+                          ),
+                          if (loading)
+                            const NinjaSkeleton(
+                              width: 18,
+                              height: 12,
+                              radius: AppRadius.focusOutline,
+                            )
+                          else
+                            Text(
+                              '${friends.length}',
+                              style: AppText.subtext
+                                  .copyWith(color: colors.muted)
+                                  .copyWith(
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                            ),
+                          const Spacer(),
+                          FriendsPillButton(
+                            label: l10n.friendsAddShort,
+                            onTap: onAddFriend,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (onShowStudentsChanged != null) ...[
+                      NinjaTabs<bool>(
+                        value: showingStudents,
+                        onChanged: onShowStudentsChanged,
+                        tabs: [
+                          NinjaTab(value: false, label: l10n.friendsTitle),
+                          NinjaTab(value: true, label: l10n.friendsStudentsTab),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      if (showingStudents && friends.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.screen,
+                            0,
+                            AppSpacing.screen,
+                            AppSpacing.md,
+                          ),
+                          child: Text(
+                            l10n.friendsStudentsSub,
+                            style: AppText.caption.copyWith(
+                              color: colors.muted,
+                            ),
+                          ),
+                        ),
+                    ],
                   ],
-                ),
-              ),
-              NinjaStateSwitcher(child: _content(l10n)),
-            ],
+                );
+              },
+            ),
           ),
         );
       },

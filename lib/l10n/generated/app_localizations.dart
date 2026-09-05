@@ -6599,7 +6599,7 @@ abstract class AppLocalizations {
   /// No description provided for @friendsShareGeoSub.
   ///
   /// In en, this message translates to:
-  /// **'updates while Friends on the map is open'**
+  /// **'send location updates to your chosen audience'**
   String get friendsShareGeoSub;
 
   /// No description provided for @friendsPrivacySyncError.
@@ -6617,7 +6617,7 @@ abstract class AppLocalizations {
   /// No description provided for @friendsWhoSeesExact.
   ///
   /// In en, this message translates to:
-  /// **'WHO SEES MY EXACT LOCATION'**
+  /// **'WHO SEES MY LOCATION'**
   String get friendsWhoSeesExact;
 
   /// No description provided for @friendsVisAll.
@@ -6653,7 +6653,7 @@ abstract class AppLocalizations {
   /// No description provided for @friendsPrecisionHeader.
   ///
   /// In en, this message translates to:
-  /// **'PRECISION FOR OTHERS'**
+  /// **'LOCATION PRECISION'**
   String get friendsPrecisionHeader;
 
   /// No description provided for @friendsPrecisionExact.
@@ -21013,6 +21013,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Partner offers'**
   String get settingsShowPromoBanners;
+
+  /// No description provided for @friendsStudentsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Students'**
+  String get friendsStudentsTab;
+
+  /// No description provided for @friendsStudentsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No students on the map yet'**
+  String get friendsStudentsEmptyTitle;
+
+  /// No description provided for @friendsStudentsEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Students appear here when they choose to share with everyone. You can browse without sharing your own location.'**
+  String get friendsStudentsEmptySub;
+
+  /// No description provided for @friendsStudentsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Only students who chose to share with everyone are shown. Locations may be approximate.'**
+  String get friendsStudentsSub;
+
+  /// No description provided for @friendsVisStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get friendsVisStudents;
+
+  /// No description provided for @friendsVisStudentsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Any signed-in student can see your profile and location without adding you as a friend. Visibility continues until you hide yourself or turn sharing off.'**
+  String get friendsVisStudentsSub;
+
+  /// No description provided for @friendsVisFriendsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Only accepted friends can see your location. Your profile will not appear on the student map.'**
+  String get friendsVisFriendsSub;
+
+  /// No description provided for @friendsPublicProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Shares with all students'**
+  String get friendsPublicProfile;
+
+  /// No description provided for @friendsBackgroundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location updates'**
+  String get friendsBackgroundTitle;
+
+  /// No description provided for @friendsBackgroundMobileSub.
+  ///
+  /// In en, this message translates to:
+  /// **'On phones, background updates require location permission and may be limited by battery saving. Force-closing the app or restarting the device can stop sharing; open the app to resume.'**
+  String get friendsBackgroundMobileSub;
+
+  /// No description provided for @friendsBackgroundForegroundSub.
+  ///
+  /// In en, this message translates to:
+  /// **'On this platform, your location updates while the app is open and active. Sharing stops when it is closed or suspended.'**
+  String get friendsBackgroundForegroundSub;
+
+  /// No description provided for @friendsBackgroundActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Background location is active'**
+  String get friendsBackgroundActive;
+
+  /// No description provided for @friendsBackgroundInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Background location is not active'**
+  String get friendsBackgroundInactive;
+
+  /// No description provided for @friendsLocationRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable location access'**
+  String get friendsLocationRetry;
+
+  /// No description provided for @friendsMapPeopleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'On the map: {count}'**
+  String friendsMapPeopleCount(int count);
+
+  /// No description provided for @friendsLocationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is unavailable. You can still browse students on the map.'**
+  String get friendsLocationUnavailable;
+
+  /// No description provided for @friendsLocationPublishFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your latest location could not be shared. Check your connection; updates will retry automatically.'**
+  String get friendsLocationPublishFailed;
+
+  /// No description provided for @friendsLocationServiceDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are turned off on your device. The map remains available.'**
+  String get friendsLocationServiceDisabled;
+
+  /// No description provided for @friendsLocationUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This device cannot provide your location. You can still browse the map.'**
+  String get friendsLocationUnsupported;
+
+  /// No description provided for @friendsLocationLocating.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your location…'**
+  String get friendsLocationLocating;
+
+  /// No description provided for @friendsLocationForegroundActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates while the app is active'**
+  String get friendsLocationForegroundActive;
 }
 
 class _AppLocalizationsDelegate

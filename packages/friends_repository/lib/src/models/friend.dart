@@ -29,7 +29,13 @@ abstract class Friend with _$Friend {
   factory Friend.fromJson(Map<String, Object?> json) => _$FriendFromJson(json);
 
   bool get hasLocation =>
-      latitude?.isFinite == true && longitude?.isFinite == true && !isGhost;
+      latitude?.isFinite == true &&
+      longitude?.isFinite == true &&
+      latitude! >= -90 &&
+      latitude! <= 90 &&
+      longitude! >= -180 &&
+      longitude! <= 180 &&
+      !isGhost;
 
   Friend withoutLocation({bool ghost = true}) => copyWith(
     latitude: null,
