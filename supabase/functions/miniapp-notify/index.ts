@@ -4,11 +4,16 @@ import {
   type CnsConfig,
   cnsConfigFromEnv,
   createPlatformEndpoint,
+  enablePlatformEndpoint,
+  endpointMatchesChannel,
   isMissingEndpointError,
   isStaleEndpointError,
   publishPush,
   type PushContent,
 } from "./cns.ts";
+
+import { deliverToDevice } from "../_shared/push_delivery.ts";
+import { pushBatchBudget, pushRpcFetch } from "../_shared/push_budget.ts";
 
 export interface NotificationRpc {
   rpc(
@@ -18,6 +23,7 @@ export interface NotificationRpc {
 }
 
 export interface NotificationDependencies {
+  now?(): number;
   config(): CnsConfig | null;
   client(): NotificationRpc;
   channel(platform: string): string | null;
@@ -25,6 +31,8 @@ export interface NotificationDependencies {
   publish(config: CnsConfig, arn: string, push: PushContent): Promise<void>;
   stale(error: unknown): boolean;
   missing(error: unknown): boolean;
+  enable(config: CnsConfig, arn: string, token: string): Promise<void>;
+  matches(arn: string, channel: string): boolean;
 }
 
 type Device = {
@@ -50,6 +58,7 @@ export function createNotificationHandler(
   dependencies: NotificationDependencies,
 ) {
   return async (req: Request): Promise<Response> => {
+    const canStartBatch = pushBatchBudget(dependencies.now);
     if (req.method !== "POST") {
       return json({ error: "Method not allowed" }, 405);
     }
@@ -185,68 +194,77 @@ export function createNotificationHandler(
     };
     let delivered = 0;
     let storageFailed = false;
-    const staleTokens: string[] = [];
+    let failed = 0;
+    let deferred = 0;
     const reached = new Set<string>();
-    await Promise.all(devices.map(async (device) => {
-      try {
-        const createEndpoint = async (): Promise<string | null> => {
-          const channel = dependencies.channel(device.platform ?? "");
-          if (!channel) return null;
-          const arn = await dependencies.endpoint(
+    const unique = [
+      ...new Map(devices.map((device) => [device.fcm_token, device])).values(),
+    ];
+    for (let index = 0; index < unique.length; index += 8) {
+      if (!canStartBatch()) {
+        deferred = unique.length - index;
+        break;
+      }
+      await Promise.all(
+        unique.slice(index, index + 8).map(async (device) => {
+          const result = await deliverToDevice(
             config,
-            channel,
-            device.fcm_token,
+            device,
+            push,
+            async (arn) => {
+              const cached = await client.rpc("set_mini_app_push_endpoint", {
+                ...scope,
+                p_fcm_token: device.fcm_token,
+                p_endpoint_arn: arn,
+              });
+              if (cached.error) throw new Error("Endpoint update failed");
+            },
+            { ...dependencies, disabled: dependencies.stale },
           );
-          try {
-            const cached = await client.rpc("set_mini_app_push_endpoint", {
-              ...scope,
-              p_fcm_token: device.fcm_token,
-              p_endpoint_arn: arn,
-            });
-            if (cached.error) {
-              storageFailed = true;
-              return null;
-            }
-          } catch {
-            storageFailed = true;
-            return null;
+          if (result === "delivered") {
+            delivered++;
+            reached.add(device.user_id);
+          } else {
+            failed++;
+            if (result === "storage_failure") storageFailed = true;
           }
-          return arn;
-        };
-        const arn = device.cns_endpoint_arn || await createEndpoint();
-        if (!arn) return;
-        try {
-          await dependencies.publish(config, arn, push);
-        } catch (error) {
-          if (!device.cns_endpoint_arn || !dependencies.missing(error)) {
-            throw error;
-          }
-          const replacement = await createEndpoint();
-          if (!replacement) return;
-          await dependencies.publish(config, replacement, push);
-        }
-        delivered++;
-        reached.add(device.user_id);
-      } catch (error) {
-        if (dependencies.stale(error)) staleTokens.push(device.fcm_token);
-      }
-    }));
-    if (staleTokens.length > 0) {
-      try {
-        const removed = await client.rpc("delete_mini_app_push_devices", {
-          ...scope,
-          p_fcm_tokens: staleTokens,
-        });
-        if (removed.error) storageFailed = true;
-      } catch {
-        storageFailed = true;
-      }
+        }),
+      );
     }
     if (!await finalize([...reached])) {
-      return json({ error: "Notification finalization failed" }, 500);
+      return json({
+        error: "Notification finalization failed",
+        delivered,
+        users: reached.size,
+        failed,
+        deferred,
+      }, 500);
     }
     if (storageFailed) {
-      return json({ error: "Notification device update failed" }, 500);
+      return json({
+        error: "Notification device update failed",
+        delivered,
+        users: reached.size,
+        failed,
+        deferred,
+      }, 500);
+    }
+    if (deferred > 0) {
+      return json({
+        error: "Notification delivery time budget exceeded",
+        delivered,
+        users: reached.size,
+        failed,
+        deferred,
+      }, 503);
+    }
+    if (failed > 0) {
+      return json({
+        error: "Notification delivery failed",
+        delivered,
+        users: reached.size,
+        failed,
+      }, 502);
     }
     return json({ ok: true, delivered, users: reached.size });
   };
@@ -258,12 +276,15 @@ Deno.serve(createNotificationHandler({
     createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { global: { fetch: pushRpcFetch } },
     ),
   channel: channelArnFor,
   endpoint: createPlatformEndpoint,
   publish: publishPush,
   stale: isStaleEndpointError,
   missing: isMissingEndpointError,
+  enable: enablePlatformEndpoint,
+  matches: endpointMatchesChannel,
 }));
 
 async function sha256Hex(value: string): Promise<string> {

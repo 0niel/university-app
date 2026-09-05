@@ -17,6 +17,11 @@ final class FirebaseConfig {
     required this.measurementId,
     required this.iosClientId,
     required this.iosBundleId,
+    required this.androidApiKey,
+    required this.iosApiKey,
+    required this.webApiKey,
+    required this.macosApiKey,
+    required this.webVapidKey,
   });
 
   factory FirebaseConfig.fromEnvironment() => const FirebaseConfig(
@@ -34,6 +39,11 @@ final class FirebaseConfig {
     measurementId: String.fromEnvironment('FIREBASE_MEASUREMENT_ID'),
     iosClientId: String.fromEnvironment('FIREBASE_IOS_CLIENT_ID'),
     iosBundleId: String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID'),
+    androidApiKey: String.fromEnvironment('FIREBASE_ANDROID_API_KEY'),
+    iosApiKey: String.fromEnvironment('FIREBASE_IOS_API_KEY'),
+    webApiKey: String.fromEnvironment('FIREBASE_WEB_API_KEY'),
+    macosApiKey: String.fromEnvironment('FIREBASE_MACOS_API_KEY'),
+    webVapidKey: String.fromEnvironment('FIREBASE_WEB_VAPID_KEY'),
   );
 
   static final current = FirebaseConfig.fromEnvironment();
@@ -52,6 +62,11 @@ final class FirebaseConfig {
   final String measurementId;
   final String iosClientId;
   final String iosBundleId;
+  final String androidApiKey;
+  final String iosApiKey;
+  final String webApiKey;
+  final String macosApiKey;
+  final String webVapidKey;
 
   FirebaseOptions? get currentPlatformOptions {
     if (kIsWeb) return optionsFor(.web);
@@ -68,12 +83,19 @@ final class FirebaseConfig {
     if (target == null) return null;
     if (!enabled) return null;
     final appId = _appIdFor(target);
-    _require(apiKey, 'FIREBASE_API_KEY');
+    final platformApiKey = switch (target) {
+      .android => androidApiKey,
+      .ios => iosApiKey,
+      .web || .windows => webApiKey,
+      .macos => macosApiKey,
+    };
+    final effectiveApiKey = platformApiKey.isEmpty ? apiKey : platformApiKey;
+    _require(effectiveApiKey, 'FIREBASE_API_KEY');
     _require(projectId, 'FIREBASE_PROJECT_ID');
     _require(messagingSenderId, 'FIREBASE_MESSAGING_SENDER_ID');
     _require(appId, _appIdKey(target));
     return FirebaseOptions(
-      apiKey: apiKey,
+      apiKey: effectiveApiKey,
       appId: appId,
       messagingSenderId: messagingSenderId,
       projectId: projectId,
@@ -117,6 +139,7 @@ abstract final class FirebaseRuntime {
 
   static bool get messagingAvailable =>
       isInitialized &&
-      !kIsWeb &&
-      (defaultTargetPlatform == .android || defaultTargetPlatform == .iOS);
+      (kIsWeb
+          ? FirebaseConfig.current.webVapidKey.isNotEmpty
+          : defaultTargetPlatform == .android || defaultTargetPlatform == .iOS);
 }

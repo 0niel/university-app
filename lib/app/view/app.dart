@@ -16,6 +16,7 @@ import 'package:rtu_mirea_app/analytics/bloc/analytics_bloc.dart';
 import 'package:rtu_mirea_app/app/app.dart';
 import 'package:rtu_mirea_app/app/locale/locale_cubit.dart';
 import 'package:rtu_mirea_app/app/services/device_token_sync_controller.dart';
+import 'package:rtu_mirea_app/app/services/web_push_token.dart';
 import 'package:rtu_mirea_app/app/theme/cubit/theme_cubit.dart';
 import 'package:rtu_mirea_app/app/view/app_boot_placeholder.dart';
 import 'package:rtu_mirea_app/app/view/app_device_token_sync.dart';
@@ -249,9 +250,21 @@ class App extends StatelessWidget {
     FriendsRepository repository,
   ) {
     final messaging = FirebaseMessaging.instance;
-    final platform = defaultTargetPlatform == .iOS ? 'ios' : 'android';
+    final platform = kIsWeb
+        ? 'web'
+        : defaultTargetPlatform == .iOS
+        ? 'ios'
+        : 'android';
     return DeviceTokenSyncController(
-      getToken: messaging.getToken,
+      getToken: () async {
+        if (kIsWeb) {
+          return getWebPushToken(
+            messaging,
+            vapidKey: FirebaseConfig.current.webVapidKey,
+          );
+        }
+        return messaging.getToken();
+      },
       tokenRefresh: messaging.onTokenRefresh,
       register: (token) => repository.registerDevice(
         token: token,

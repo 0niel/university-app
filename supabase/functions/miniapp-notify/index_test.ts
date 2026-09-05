@@ -45,6 +45,8 @@ function device(user = "first", endpoint: string | null = "endpoint") {
 
 type RpcResult = { data: unknown; error: unknown };
 type Options = {
+  now?: () => number;
+  onPublish?: () => void;
   context?: unknown;
   devices?: unknown;
   responses?: Record<string, RpcResult | Error>;
@@ -72,6 +74,7 @@ function setup(options: Options = {}) {
     },
   };
   const dependencies: NotificationDependencies = {
+    now: options.now,
     config: () =>
       options.configured === false
         ? null
@@ -83,10 +86,13 @@ function setup(options: Options = {}) {
       return Promise.resolve("created-endpoint");
     },
     publish: (_config, arn, push) => {
+      options.onPublish?.();
       pushes.push({ arn, push });
       const error = options.publishErrors?.[arn];
       return error ? Promise.reject(error) : Promise.resolve();
     },
+    matches: () => true,
+    enable: () => Promise.resolve(),
     stale: (error) => error instanceof Error && error.message === "stale",
     missing: (error) => error instanceof Error && error.message === "missing",
   };
@@ -108,6 +114,55 @@ function finalized(calls: ReturnType<typeof setup>["calls"]) {
   return calls.filter((call) => call.name === "finalize_mini_app_push")
     .map((call) => call.parameters);
 }
+
+Deno.test("delivery budget stops further batches and finalizes only reached users", async () => {
+  let time = 0;
+  const devices = Array.from(
+    { length: 5000 },
+    (_, index) => device(`user-${index}`),
+  );
+  const test = setup({
+    context: {
+      ...validContext,
+      recipients: devices.map((item) => item.user_id),
+    },
+    devices,
+    now: () => time,
+    onPublish: () => {
+      time = 60_000;
+    },
+  });
+  const response = await test.handler(request());
+  equal(response.status, 503);
+  equal(await response.json(), {
+    error: "Notification delivery time budget exceeded",
+    delivered: 8,
+    users: 8,
+    failed: 0,
+    deferred: 4992,
+  });
+  equal(test.pushes.length, 8);
+  equal(finalized(test.calls), [{
+    ...scope,
+    p_user_ids: devices.slice(0, 8).map((item) => item.user_id),
+  }]);
+});
+
+Deno.test("budget consumed during lookup finalizes reservation without publishing", async () => {
+  let ticks = 0;
+  const test = setup({ now: () => ticks++ === 0 ? 0 : 60_000 });
+  const response = await test.handler(request());
+  equal(response.status, 503);
+  equal(await response.json(), {
+    error: "Notification delivery time budget exceeded",
+    delivered: 0,
+    users: 0,
+    failed: 0,
+    deferred: 1,
+  });
+  equal(test.pushes, []);
+  equal(finalized(test.calls), [{ ...scope, p_user_ids: [] }]);
+});
 
 Deno.test("notification bootstrap registers without serving in tests", () => {
   equal(bootstraps, 1);
@@ -155,7 +210,10 @@ Deno.test("unconfigured service fails without creating reservations", async () =
 
 Deno.test("publishes through scoped RPCs and finalizes reached users once", async () => {
   const test = setup({
-    devices: [device("first", null), device("first", "other-endpoint")],
+    devices: [device("first", null), {
+      ...device("first", "other-endpoint"),
+      fcm_token: "other-token-first",
+    }],
   });
   const response = await test.handler(
     request({ ...validBody, page: "/lesson?day=1" }),
@@ -222,28 +280,26 @@ for (
   });
 }
 
-Deno.test("stale cleanup occurs before finalizing only successful recipients", async () => {
+Deno.test("disabled endpoint failure preserves registration and finalizes successful recipients", async () => {
   const test = setup({
     devices: [device("first", "good"), device("second", "bad")],
     publishErrors: { bad: new Error("stale") },
   });
   equal(await (await test.handler(request())).json(), {
-    ok: true,
+    error: "Notification delivery failed",
     delivered: 1,
     users: 1,
+    failed: 1,
   });
-  equal(test.calls.at(-2), {
-    name: "delete_mini_app_push_devices",
-    parameters: {
-      ...scope,
-      p_fcm_tokens: ["token-second"],
-    },
-  });
+  equal(
+    test.calls.some((call) => call.name === "delete_mini_app_push_devices"),
+    false,
+  );
   equal(finalized(test.calls), [{ ...scope, p_user_ids: ["first"] }]);
 });
 
 for (
-  const name of ["set_mini_app_push_endpoint", "delete_mini_app_push_devices"]
+  const name of ["set_mini_app_push_endpoint"]
 ) {
   Deno.test(`${name} failure still finalizes and hides diagnostics`, async () => {
     const test = setup({
@@ -259,6 +315,10 @@ for (
     equal(response.status, 500);
     equal(await response.json(), {
       error: "Notification device update failed",
+      delivered: 0,
+      users: 0,
+      failed: 1,
+      deferred: 0,
     });
     equal(finalized(test.calls), [{ ...scope, p_user_ids: [] }]);
   });
@@ -272,16 +332,23 @@ Deno.test("finalization failures are not reported as successful delivery", async
   });
   const response = await test.handler(request());
   equal(response.status, 500);
-  equal(await response.json(), { error: "Notification finalization failed" });
+  equal(await response.json(), {
+    error: "Notification finalization failed",
+    delivered: 1,
+    users: 1,
+    failed: 0,
+    deferred: 0,
+  });
   equal(finalized(test.calls), [{ ...scope, p_user_ids: ["first"] }]);
 });
 
 Deno.test("unsupported channel releases quota without creating endpoint", async () => {
   const test = setup({ channel: null, devices: [device("first", null)] });
   equal(await (await test.handler(request())).json(), {
-    ok: true,
+    error: "Notification delivery failed",
     delivered: 0,
     users: 0,
+    failed: 1,
   });
   equal(test.endpoints, []);
   equal(test.pushes, []);
@@ -327,9 +394,10 @@ Deno.test("replacement endpoint failure stops after one retry and preserves toke
     },
   });
   equal(await (await test.handler(request())).json(), {
-    ok: true,
+    error: "Notification delivery failed",
     delivered: 0,
     users: 0,
+    failed: 1,
   });
   equal(test.endpoints, ["token-first"]);
   equal(test.pushes.length, 2);
@@ -347,9 +415,10 @@ Deno.test("missing endpoint without configured channel preserves registration", 
     publishErrors: { "missing-cache": new Error("missing") },
   });
   equal(await (await test.handler(request())).json(), {
-    ok: true,
+    error: "Notification delivery failed",
     delivered: 0,
     users: 0,
+    failed: 1,
   });
   equal(test.endpoints, []);
   equal(
@@ -365,9 +434,10 @@ for (
   Deno.test(`${failure} preserves device registration and releases reservation`, async () => {
     const test = setup({ publishErrors: { endpoint: new Error(failure) } });
     equal(await (await test.handler(request())).json(), {
-      ok: true,
+      error: "Notification delivery failed",
       delivered: 0,
       users: 0,
+      failed: 1,
     });
     equal(
       test.calls.some((call) => call.name === "delete_mini_app_push_devices"),

@@ -63,12 +63,26 @@ final class DeviceTokenSyncController {
         }
         _refreshSubscription = _tokenRefresh.listen(
           (token) => unawaited(
-            _enqueue(() => _register(token, generation)).onError(_onError),
+            _enqueue(() async {
+              try {
+                await _register(token, generation);
+              } on Object catch (error, stackTrace) {
+                if (_isCurrent(generation)) {
+                  _active = false;
+                  _generation++;
+                  await _cancelRefresh();
+                }
+                _onError(error, stackTrace);
+              }
+            }),
           ),
           onError: _onError,
         );
         final token = await _onGetToken();
-        if (token != null) await _register(token, generation);
+        if (token == null || token.isEmpty) {
+          throw StateError('Firebase device token is not available yet');
+        }
+        await _register(token, generation);
       } on Object {
         if (_isCurrent(generation)) {
           _active = false;

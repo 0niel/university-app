@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:local_notifications_client/local_notifications_client.dart';
 import 'package:local_notifications_repository/src/lesson_reminder.dart';
 import 'package:local_notifications_repository/src/local_notifications_repository_exception.dart';
@@ -36,15 +37,30 @@ class LocalNotificationsRepository {
   /// Requests the OS notification permission. Returns `true` if granted.
   Future<bool> ensurePermission() async {
     await initialize();
+    if (_isDesktop) return _client.requestPermission();
     final status = await _permissionClient.requestNotifications();
     return status.isGranted;
   }
 
   /// Reads the current notification permission without opening a prompt.
   Future<bool> hasPermission() async {
+    if (_isDesktop) return _client.hasDesktopPermission();
     final status = await _permissionClient.notificationsStatus();
     return status.isGranted;
   }
+
+  bool get _isDesktop =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.macOS ||
+          defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.linux);
+
+  Future<void> showPush({
+    required int id,
+    required String title,
+    required String payload,
+    String? body,
+  }) => _client.showPush(id: id, title: title, body: body, payload: payload);
 
   Future<void> syncLessonReminders({
     required String scheduleId,

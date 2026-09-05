@@ -490,6 +490,8 @@ jobs:
                   raise SystemExit("Provisioning profile team mismatch")
               if profile["Entitlements"]["application-identifier"] != f"{team}.{bundle_id}":
                   raise SystemExit("Provisioning profile bundle mismatch")
+              if bundle_id == os.environ["IOS_APP_BUNDLE_ID"] and profile["Entitlements"].get("aps-environment") != "production":
+                  raise SystemExit("App provisioning profile requires production push notifications")
               profiles[bundle_id] = profile["Name"]
           with (root / "PatchExportOptions.plist").open("wb") as target:
               plistlib.dump({
@@ -511,6 +513,8 @@ jobs:
         run: |
           printf '%s\n' "$UNIVERSITY_CONFIG_JSON" > "$RUNNER_TEMP/university.json"
           printf '%s\n' "$FIREBASE_CONFIG_JSON" > "$RUNNER_TEMP/firebase.json"
+          git show "$WORKFLOW_SHA:tool/configure_firebase.py" > "$RUNNER_TEMP/configure_firebase.py"
+          python3 "$RUNNER_TEMP/configure_firebase.py" --config "$RUNNER_TEMP/firebase.json" --platform "$PLATFORM"
           dart run tool/configure_university.dart --config "$RUNNER_TEMP/university.json"
           if [[ "$RELEASE_VERSION" = 5.2.1+1005301 ]]; then
             python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \

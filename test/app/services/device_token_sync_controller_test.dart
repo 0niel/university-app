@@ -5,6 +5,38 @@ import 'package:rtu_mirea_app/app/services/device_token_sync_controller.dart';
 
 void main() {
   test(
+    'failed token refresh registration can recover for the same user',
+    () async {
+      final refresh = StreamController<String>.broadcast(sync: true);
+      var token = 'first';
+      var rejectRefresh = false;
+      final registered = <String>[];
+      final errors = <Object>[];
+      final controller = DeviceTokenSyncController(
+        getToken: () async => token,
+        tokenRefresh: refresh.stream,
+        register: (value) async {
+          if (rejectRefresh) throw StateError('offline');
+          registered.add(value);
+        },
+        unregister: (_) async {},
+        deleteToken: () async {},
+        onError: (error, _) => errors.add(error),
+      );
+      await controller.synchronizeUser('A');
+      token = 'refreshed';
+      rejectRefresh = true;
+      refresh.add(token);
+      await Future<void>.delayed(Duration.zero);
+      expect(errors, hasLength(1));
+      rejectRefresh = false;
+      await controller.synchronizeUser('A');
+      expect(registered, ['first', 'refreshed']);
+      await controller.pause();
+      await refresh.close();
+    },
+  );
+  test(
     'account replacement invalidates before registering a fresh token',
     () async {
       final fixture = _TokenFixture();

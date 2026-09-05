@@ -6,7 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:local_notifications_repository/local_notifications_repository.dart';
+import 'package:rtu_mirea_app/app/view/app_device_token_sync.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/notifications/notification_permission.dart';
 import 'package:rtu_mirea_app/profile/cubit/profile_cubit.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_toggle_row.dart';
 
@@ -52,9 +54,10 @@ class _NotificationsToggleRowState extends State<NotificationsToggleRow> {
         return;
       }
       final repository = context.read<LocalNotificationsRepository>();
-      final isGranted = await repository.ensurePermission();
+      final isGranted = await requestNotificationPermission(repository);
       if (!mounted || profileCubit.isClosed) return;
       if (isGranted) {
+        unawaited(AppDeviceTokenSync.refresh(context));
         await profileCubit.updateSettings(
           profileCubit.state.settings.copyWith(notificationsEnabled: true),
         );

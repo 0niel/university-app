@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
@@ -7,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_notifications_repository/local_notifications_repository.dart';
+import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
+import 'package:rtu_mirea_app/navigation/deep_links.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 
 class LocalNotificationListener extends StatefulWidget {
@@ -34,9 +37,7 @@ class _LocalNotificationListenerState extends State<LocalNotificationListener>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) unawaited(_recordActiveDay());
     });
-    if (kIsWeb ||
-        (defaultTargetPlatform != TargetPlatform.android &&
-            defaultTargetPlatform != TargetPlatform.iOS)) {
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.fuchsia) {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -62,7 +63,21 @@ class _LocalNotificationListenerState extends State<LocalNotificationListener>
   }
 
   void _open(String payload) {
-    if (mounted && payload == 'custom-schedules') widget.router.go('/schedule');
+    if (!mounted) return;
+    if (payload == 'custom-schedules') {
+      widget.router.go('/schedule');
+      return;
+    }
+    try {
+      final data = jsonDecode(payload);
+      if (data is! Map<String, dynamic> || data['type'] != 'push') return;
+      final state = context.read<AppBloc>().state;
+      if (!state.status.isLoggedIn || data['user_id'] != state.user.id) return;
+      final route = DeepLinks.normalizeLocation(data['route'] as String?);
+      if (route != null) widget.router.go(route);
+    } on Object catch (_) {
+      return;
+    }
   }
 
   @override

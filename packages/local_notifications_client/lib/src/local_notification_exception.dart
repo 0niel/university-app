@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -89,6 +90,10 @@ class LocalNotificationsClient {
   /// Android notification channel name.
   static const channelName = 'Напоминания о парах';
 
+  static const pushChannelId = 'app_push';
+
+  static const pushChannelName = 'Уведомления';
+
   /// Initializes the timezone database, the plugin and the Android channel.
   /// Safe to call once at startup.
   Future<void> init() async {
@@ -108,7 +113,20 @@ class LocalNotificationsClient {
       requestSoundPermission: false,
     );
     await _plugin.initialize(
-      settings: const InitializationSettings(android: android, iOS: darwin),
+      settings: const InitializationSettings(
+        android: android,
+        iOS: darwin,
+        macOS: darwin,
+        linux: LinuxInitializationSettings(defaultActionName: 'Открыть'),
+        windows: WindowsInitializationSettings(
+          appName: String.fromEnvironment(
+            'APP_DISPLAY_NAME',
+            defaultValue: 'University App',
+          ),
+          appUserModelId: 'ninja.mirea.rtu_mirea_mobile',
+          guid: '5be4f1cc-71a0-5903-ab53-88cdf4f30e6d',
+        ),
+      ),
       onDidReceiveNotificationResponse: _onInteraction,
     );
     if (!_launchCaptured) {
@@ -132,10 +150,57 @@ class LocalNotificationsClient {
             importance: Importance.max,
           ),
         );
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(
+          const AndroidNotificationChannel(
+            pushChannelId,
+            pushChannelName,
+            importance: Importance.high,
+          ),
+        );
   }
+
+  Future<void> showPush({
+    required int id,
+    required String title,
+    required String payload,
+    String? body,
+  }) => _plugin.show(
+    id: id,
+    title: title,
+    body: body,
+    payload: payload,
+    notificationDetails: const NotificationDetails(
+      android: AndroidNotificationDetails(
+        pushChannelId,
+        pushChannelName,
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        presentBanner: true,
+        presentList: true,
+      ),
+      macOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentSound: true,
+        presentBanner: true,
+        presentList: true,
+      ),
+      linux: LinuxNotificationDetails(),
+      windows: WindowsNotificationDetails(),
+    ),
+  );
 
   /// Requests the OS notification permission. Returns `true` if granted.
   Future<bool> requestPermission() async {
+    if (kIsWeb) return false;
     final android =
         _plugin
             .resolvePlatformSpecificImplementation<
@@ -157,7 +222,36 @@ class LocalNotificationsClient {
           ) ??
           false;
     }
-    return true;
+    final macos =
+        _plugin
+            .resolvePlatformSpecificImplementation<
+              MacOSFlutterLocalNotificationsPlugin
+            >();
+    if (macos != null) {
+      return await macos.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          ) ??
+          false;
+    }
+    return defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux;
+  }
+
+  Future<bool> hasDesktopPermission() async {
+    if (kIsWeb) return false;
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
+      final options =
+          await _plugin
+              .resolvePlatformSpecificImplementation<
+                MacOSFlutterLocalNotificationsPlugin
+              >()
+              ?.checkPermissions();
+      return options?.isEnabled ?? false;
+    }
+    return defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux;
   }
 
   /// Returns the reminders that are scheduled but haven't fired yet.
