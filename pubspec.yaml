@@ -2,7 +2,7 @@ name: rtu_mirea_app
 description: Mobile application for students of RTU MIREA
 publish_to: 'none'
 
-version: 5.2.0+153
+version: 5.2.1+154
 
 environment:
   sdk: ^3.12.0

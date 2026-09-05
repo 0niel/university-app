@@ -1,8 +1,71 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:xml/xml.dart';
 
 void main() {
+  test('iOS launches a single Flutter scene from the main storyboard', () {
+    final plist = XmlDocument.parse(
+      File('ios/Runner/Info.plist').readAsStringSync(),
+    );
+    final root = plist.rootElement.getElement('dict')!;
+    final manifest = plistValue(root, 'UIApplicationSceneManifest');
+    expect(
+      plistValue(manifest, 'UIApplicationSupportsMultipleScenes').name.local,
+      'false',
+    );
+    final configurations = plistValue(manifest, 'UISceneConfigurations');
+    final scenes = plistValue(
+      configurations,
+      'UIWindowSceneSessionRoleApplication',
+    ).findElements('dict');
+    expect(scenes, hasLength(1));
+    final scene = scenes.single;
+    expect(plistValue(scene, 'UISceneClassName').innerText, 'UIWindowScene');
+    expect(
+      plistValue(scene, 'UISceneDelegateClassName').innerText,
+      'FlutterSceneDelegate',
+    );
+    expect(plistValue(scene, 'UISceneConfigurationName').innerText, 'flutter');
+    final storyboardName = plistValue(scene, 'UISceneStoryboardFile').innerText;
+    final storyboard = XmlDocument.parse(
+      File(
+        'ios/Runner/Base.lproj/$storyboardName.storyboard',
+      ).readAsStringSync(),
+    );
+    final initialController = storyboard.rootElement.getAttribute(
+      'initialViewController',
+    );
+    expect(initialController, isNotNull);
+    final controller = storyboard
+        .findAllElements('viewController')
+        .singleWhere(
+          (element) => element.getAttribute('id') == initialController,
+        );
+    expect(controller.getAttribute('customClass'), 'FlutterViewController');
+  });
+
+  test('iOS registers plugins when the implicit Flutter engine is ready', () {
+    final delegate = File('ios/Runner/AppDelegate.swift').readAsStringSync();
+    expect(delegate, contains('FlutterImplicitEngineDelegate'));
+    expect(
+      delegate,
+      matches(
+        RegExp(
+          r'func didInitializeImplicitFlutterEngine\('
+          r'_ engineBridge: FlutterImplicitEngineBridge\)\s*\{\s*'
+          r'GeneratedPluginRegistrant.register\(with: engineBridge.pluginRegistry\)',
+        ),
+      ),
+    );
+    expect(
+      RegExp(r'GeneratedPluginRegistrant\.register\(').allMatches(delegate),
+      hasLength(1),
+    );
+    expect(delegate, isNot(contains('register(with: self)')));
+    expect(delegate, contains('UNUserNotificationCenter.current().delegate'));
+  });
+
   test('widget uses a distinct bundle identifier for every configuration', () {
     final project = File(
       'ios/Runner.xcodeproj/project.pbxproj',
@@ -98,6 +161,16 @@ void main() {
       ),
     );
   });
+}
+
+XmlElement plistValue(XmlElement dictionary, String key) {
+  final elements = dictionary.childElements.toList();
+  final index = elements.indexWhere(
+    (element) => element.name.local == 'key' && element.innerText == key,
+  );
+  expect(index, isNonNegative, reason: 'Missing plist key $key');
+  expect(index + 1, lessThan(elements.length));
+  return elements[index + 1];
 }
 
 String buildConfiguration(String project, String marker) {
