@@ -28,10 +28,18 @@ class _ScheduleDatePagerState extends State<ScheduleDatePager> {
   late final _paging = SchedulePaging(today: widget.anchor);
   late final _months = ScheduleMonthPaging(today: widget.anchor);
   late final _controller = PageController(initialPage: _pageOf(widget.day));
-  late int _page = _pageOf(widget.day);
-  late int _preferredDay = widget.day.day;
+  late int _page;
+  late int _preferredDay;
   int? _target;
+  int _syncRevision = 0;
   DateTime? _reportedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    _page = _pageOf(widget.day);
+    _preferredDay = widget.day.day;
+  }
 
   int _pageOf(DateTime day) => switch (widget.view) {
     ScheduleView.day => _paging.dayPageOf(day),
@@ -57,8 +65,11 @@ class _ScheduleDatePagerState extends State<ScheduleDatePager> {
     final target = _pageOf(widget.day);
     if (target == _target || target == _page && _target == null) return;
     _target = target;
+    final revision = ++_syncRevision;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_controller.hasClients || _target != target) return;
+      if (!mounted || !_controller.hasClients || revision != _syncRevision) {
+        return;
+      }
       if (MediaQuery.disableAnimationsOf(context) ||
           MediaQuery.accessibleNavigationOf(context) ||
           schedulePagerShouldJump(_page, target)) {
@@ -80,6 +91,7 @@ class _ScheduleDatePagerState extends State<ScheduleDatePager> {
 
   @override
   void dispose() {
+    _syncRevision++;
     _controller.dispose();
     super.dispose();
   }
@@ -88,15 +100,21 @@ class _ScheduleDatePagerState extends State<ScheduleDatePager> {
   Widget build(BuildContext context) =>
       NotificationListener<ScrollNotification>(
         onNotification: (notification) {
-          if (notification.metrics.axis != Axis.horizontal) return false;
+          if (notification.depth != 0 ||
+              notification.metrics.axis != Axis.horizontal) {
+            return false;
+          }
           if (notification is ScrollStartNotification &&
               notification.dragDetails != null) {
             _target = null;
+            _syncRevision++;
           }
-          if (notification is ScrollEndNotification &&
-              _target == null &&
-              _controller.hasClients) {
+          if (notification is ScrollEndNotification && _controller.hasClients) {
             final page = _controller.page?.round();
+            if (_target != null) {
+              if (page == _target) _target = null;
+              return false;
+            }
             if (page != null && page != _pageOf(widget.day)) {
               final day = _dayOf(page);
               _page = page;
@@ -116,13 +134,6 @@ class _ScheduleDatePagerState extends State<ScheduleDatePager> {
           },
           onPageChanged: (page) {
             _page = page;
-            if (_target != null) {
-              if (_target == page) _target = null;
-              return;
-            }
-            final day = _dayOf(page);
-            _reportedDay = day;
-            widget.onDay(day);
           },
           itemBuilder: (context, page) {
             final day = _dayOf(page);

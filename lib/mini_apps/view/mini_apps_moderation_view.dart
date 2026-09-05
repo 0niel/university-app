@@ -10,24 +10,21 @@ class MiniAppsModerationView extends StatelessWidget {
     final state = context.watch<MiniAppsModerationCubit>().state;
     return MiniAppScaffold(
       title: l10n.miniAppsModerationTitle,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.screen,
-              0,
-              AppSpacing.screen,
-              AppSpacing.lg,
-            ),
-            child: Text(
-              l10n.miniAppsModerationSubtitle,
-              style: AppText.body.copyWith(color: colors.muted),
-            ),
+      scrollingHeader: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.screen,
+            0,
+            AppSpacing.screen,
+            AppSpacing.lg,
           ),
-          Expanded(child: _ModerationBody(state: state)),
-        ],
-      ),
+          child: Text(
+            l10n.miniAppsModerationSubtitle,
+            style: AppText.body.copyWith(color: colors.muted),
+          ),
+        ),
+      ],
+      body: _ModerationBody(state: state),
     );
   }
 }

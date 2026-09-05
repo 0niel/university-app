@@ -18,7 +18,9 @@ class CustomHydratedStorage implements Storage {
       (key) => key.startsWith(HydratedStorageKeys.prefix),
     );
     for (final key in keys) {
-      await _storage.remove(key);
+      if (!await _storage.remove(key)) {
+        throw StateError('Local storage removal failed');
+      }
     }
   }
 
@@ -26,7 +28,11 @@ class CustomHydratedStorage implements Storage {
   Future<void> close() => .value();
 
   @override
-  Future<void> delete(String key) => _storage.remove(_key(key));
+  Future<void> delete(String key) async {
+    if (!await _storage.remove(_key(key))) {
+      throw StateError('Local storage removal failed');
+    }
+  }
 
   @override
   Object? read(String key) {
@@ -35,6 +41,9 @@ class CustomHydratedStorage implements Storage {
   }
 
   @override
-  Future<void> write(String key, Object? value) =>
-      _storage.setString(_key(key), jsonEncode(value));
+  Future<void> write(String key, Object? value) async {
+    if (!await _storage.setString(_key(key), jsonEncode(value))) {
+      throw StateError('Local storage write failed');
+    }
+  }
 }

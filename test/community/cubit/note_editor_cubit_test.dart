@@ -4,8 +4,14 @@ import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/community/cubit/note_editor/note_editor.dart';
+import 'package:rtu_mirea_app/community/data/note_draft_store.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
+import '../../helpers/fakes/note_draft_memory_storage.dart';
 import '../../helpers/mocks/mock_campus_repository.dart';
+
+class _MockSpeech extends Mock implements SpeechToText {}
 
 class _FakeRealtimeSession implements CollabNoteRealtimeSession {
   final _editorsController = StreamController<List<String>>.broadcast();
@@ -47,6 +53,7 @@ class _FakeRealtimeSession implements CollabNoteRealtimeSession {
 Future<void> _settle() => Future<void>.delayed(Duration.zero);
 
 void main() {
+  setUpAll(() => registerFallbackValue(SpeechListenOptions()));
   group('NoteEditorCubit', () {
     late CampusRepository repository;
     late CollabNote note;
@@ -62,7 +69,14 @@ void main() {
       );
     });
 
-    NoteEditorCubit buildCubit({CollabNote? withNote, Duration? debounce}) {
+    NoteEditorCubit buildCubit({
+      CollabNote? withNote,
+      Duration? debounce,
+      NoteDraftStore? draftStore,
+      String? userId,
+      Duration? closeTimeout,
+      SpeechToText? speech,
+    }) {
       when(
         () => repository.getGroupNote('note-1'),
       ).thenAnswer((_) async => withNote ?? note);
@@ -71,6 +85,10 @@ void main() {
         note: withNote ?? note,
         editorName: 'Alex',
         saveDebounce: debounce ?? const Duration(days: 1),
+        currentUserId: userId,
+        draftStore: draftStore,
+        closeTimeout: closeTimeout ?? const Duration(seconds: 8),
+        speech: speech,
       );
     }
 
@@ -723,6 +741,454 @@ void main() {
         }
         verifyNever(() => repository.renameGroupNote(any(), any()));
         cubit.discardChanges();
+        await cubit.close();
+      },
+    );
+
+    void stubOffline() {
+      when(
+        () => repository.saveGroupNoteDocument(
+          id: any(named: 'id'),
+          document: any(named: 'document'),
+          expectedRevision: any(named: 'expectedRevision'),
+        ),
+      ).thenThrow(Exception('SocketException: offline'));
+      when(
+        () => repository.renameGroupNote(any(), any()),
+      ).thenThrow(Exception('SocketException: offline'));
+    }
+
+    NoteDraft recoveryDraft({
+      String body = 'QAB',
+      String title = 'Initial',
+      List<Object?>? submittedDocument,
+    }) => NoteDraft(
+      noteId: 'note-1',
+      userId: 'user',
+      token: 'previous-session',
+      baseRevision: 0,
+      baseDocument: const [
+        {'insert': 'AB\n'},
+      ],
+      document: [
+        {'insert': '$body\n'},
+      ],
+      baseTitle: 'Initial',
+      title: title,
+      submittedDocument: submittedDocument,
+    );
+
+    test(
+      'offline close retains both title and delta for a fresh process',
+      () async {
+        stubOffline();
+        final storage = NoteDraftMemoryStorage();
+        final store = NoteDraftStore(storage: storage);
+        final cubit = buildCubit(draftStore: store, userId: 'user')
+          ..titleChanged('Local title');
+        cubit.controller.document.insert(0, 'Local ');
+        await _settle();
+        expect(await cubit.persistLocalDraft(), isTrue);
+        expect(await cubit.flush(), isFalse);
+        await cubit.close();
+        expect(storage.values, hasLength(1));
+        final restartStorage = NoteDraftMemoryStorage()
+          ..values.addAll(storage.values);
+        final restarted = buildCubit(
+          draftStore: NoteDraftStore(storage: restartStorage),
+          userId: 'user',
+        );
+        expect(restarted.state.title, 'Local title');
+        expect(
+          restarted.controller.document.toPlainText(),
+          'Local Body text\n',
+        );
+        expect(restarted.state.hasUnsavedChanges, isTrue);
+        restarted.discardChanges();
+        await restarted.close();
+        expect(restartStorage.values, isEmpty);
+      },
+    );
+
+    test(
+      'recovery rebases a local insertion over a changed server document',
+      () async {
+        stubSave();
+        final storage = NoteDraftMemoryStorage();
+        final store = NoteDraftStore(storage: storage);
+        await store.write(recoveryDraft());
+        final cubit = buildCubit(
+          withNote: note.copyWith(content: 'AXB', documentRevision: 2),
+          draftStore: store,
+          userId: 'user',
+        );
+        expect(cubit.controller.document.toPlainText(), 'QAXB\n');
+        expect(cubit.hasRecoveryConflict, isFalse);
+        expect(await cubit.flush(), isTrue);
+        verify(
+          () => repository.saveGroupNoteDocument(
+            id: 'note-1',
+            document: [
+              {'insert': 'QAXB\n'},
+            ],
+            expectedRevision: 2,
+          ),
+        ).called(1);
+        expect(storage.values, isEmpty);
+        await cubit.close();
+      },
+    );
+
+    test(
+      'an acknowledged draft is cleared without inserting its text twice',
+      () async {
+        final storage = NoteDraftMemoryStorage();
+        final store = NoteDraftStore(storage: storage);
+        await store.write(
+          recoveryDraft(
+            submittedDocument: const [
+              {'insert': 'QAB\n'},
+            ],
+          ),
+        );
+        final cubit = buildCubit(
+          withNote: note.copyWith(content: 'QAB', documentRevision: 1),
+          draftStore: store,
+          userId: 'user',
+        );
+        await _settle();
+        expect(cubit.controller.document.toPlainText(), 'QAB\n');
+        expect(cubit.state.hasUnsavedChanges, isFalse);
+        await cubit.close();
+        expect(storage.values, isEmpty);
+        verifyNever(
+          () => repository.saveGroupNoteDocument(
+            id: any(named: 'id'),
+            document: any(named: 'document'),
+            expectedRevision: any(named: 'expectedRevision'),
+          ),
+        );
+      },
+    );
+
+    test(
+      'recovered formatting and embeds survive another rebase and restart',
+      () async {
+        stubSave();
+        final session = stubRealtime();
+        final storage = NoteDraftMemoryStorage();
+        final store = NoteDraftStore(storage: storage);
+        await store.write(
+          const NoteDraft(
+            noteId: 'note-1',
+            userId: 'user',
+            token: 'rich',
+            baseRevision: 0,
+            baseDocument: [
+              {'insert': 'AB\n'},
+            ],
+            document: [
+              {
+                'insert': 'Q',
+                'attributes': {'bold': true},
+              },
+              {
+                'insert': {'image': 'https://example.com/note.png'},
+              },
+              {'insert': 'AB\n'},
+            ],
+            baseTitle: 'Initial',
+            title: 'Initial',
+          ),
+        );
+        final remote = note.copyWith(
+          content: 'AXB',
+          documentRevision: 1,
+          isPersonal: false,
+        );
+        final cubit = buildCubit(
+          withNote: remote,
+          draftStore: store,
+          userId: 'user',
+        );
+        await _settle();
+        session.emitRemoteChange(snapshot(2, 'AXB!'));
+        await _settle();
+        await cubit.persistLocalDraft();
+        final restartStorage = NoteDraftMemoryStorage()
+          ..values.addAll(storage.values);
+        cubit.discardChanges();
+        await cubit.close();
+        final restored = buildCubit(
+          withNote: remote.copyWith(
+            content: 'AXB!',
+            documentRevision: 2,
+            isPersonal: true,
+          ),
+          draftStore: NoteDraftStore(storage: restartStorage),
+          userId: 'user',
+        );
+        expect(restored.controller.document.toDelta().toJson(), [
+          {
+            'insert': 'Q',
+            'attributes': {'bold': true},
+          },
+          {
+            'insert': {'image': 'https://example.com/note.png'},
+          },
+          {'insert': 'AXB!\n'},
+        ]);
+        expect(await restored.flush(), isTrue);
+        expect(restartStorage.values, isEmpty);
+        await restored.close();
+      },
+    );
+
+    test(
+      'an ambiguous in-flight save requires an explicit recovery choice',
+      () async {
+        final storage = NoteDraftMemoryStorage();
+        final store = NoteDraftStore(storage: storage);
+        await store.write(
+          recoveryDraft(
+            submittedDocument: const [
+              {'insert': 'QAB\n'},
+            ],
+          ),
+        );
+        final cubit = buildCubit(
+          withNote: note.copyWith(content: 'QAXB', documentRevision: 2),
+          draftStore: store,
+          userId: 'user',
+        );
+        expect(cubit.hasRecoveryConflict, isTrue);
+        expect(await cubit.flush(), isFalse);
+        expect(cubit.controller.document.toPlainText(), 'QAB\n');
+        verifyNever(
+          () => repository.saveGroupNoteDocument(
+            id: any(named: 'id'),
+            document: any(named: 'document'),
+            expectedRevision: any(named: 'expectedRevision'),
+          ),
+        );
+        cubit.resolveRecoveryConflict(keepLocal: false);
+        expect(cubit.controller.document.toPlainText(), 'QAXB\n');
+        expect(cubit.hasRecoveryConflict, isFalse);
+        await cubit.close();
+        expect(storage.values, isEmpty);
+      },
+    );
+
+    test(
+      'a recovered title cannot silently replace a concurrent server rename',
+      () async {
+        stubSave();
+        final storage = NoteDraftMemoryStorage();
+        final store = NoteDraftStore(storage: storage);
+        await store.write(recoveryDraft(title: 'Local title'));
+        final cubit = buildCubit(
+          withNote: note.copyWith(content: 'AB', title: 'Remote title'),
+          draftStore: store,
+          userId: 'user',
+        );
+        expect(cubit.hasRecoveryConflict, isTrue);
+        expect(cubit.recoveryServerTitle, 'Remote title');
+        expect(await cubit.flush(), isFalse);
+        verifyNever(() => repository.renameGroupNote(any(), any()));
+        cubit.resolveRecoveryConflict(keepLocal: false);
+        expect(cubit.state.title, 'Remote title');
+        expect(cubit.controller.document.toPlainText(), 'QAB\n');
+        expect(await cubit.flush(), isTrue);
+        expect(storage.values, isEmpty);
+        await cubit.close();
+      },
+    );
+
+    test('missing identity disables local recovery and persistence', () async {
+      stubSave();
+      final storage = NoteDraftMemoryStorage();
+      final store = NoteDraftStore(storage: storage);
+      await store.write(recoveryDraft());
+      final cubit = buildCubit(draftStore: store);
+      expect(cubit.canRecoverLocally, isFalse);
+      expect(cubit.controller.document.toPlainText(), 'Body text\n');
+      cubit.controller.document.insert(0, 'Unscoped ');
+      await _settle();
+      expect(await cubit.persistLocalDraft(), isTrue);
+      expect(
+        store.read(userId: 'user', noteId: 'note-1')?.token,
+        'previous-session',
+      );
+      await cubit.close();
+      expect(storage.values, hasLength(1));
+    });
+
+    test(
+      'a persisted title conflict survives another process restart',
+      () async {
+        final storage = NoteDraftMemoryStorage();
+        final store = NoteDraftStore(storage: storage);
+        await store.write(recoveryDraft(title: 'Local title'));
+        final remote = note.copyWith(content: 'AB', title: 'Remote title');
+        final first = buildCubit(
+          withNote: remote,
+          draftStore: store,
+          userId: 'user',
+        );
+        await first.close();
+        final restartedStorage = NoteDraftMemoryStorage()
+          ..values.addAll(storage.values);
+        final second = buildCubit(
+          withNote: remote,
+          draftStore: NoteDraftStore(storage: restartedStorage),
+          userId: 'user',
+        );
+        expect(second.hasRecoveryConflict, isTrue);
+        expect(await second.flush(), isFalse);
+        verifyNever(() => repository.renameGroupNote(any(), any()));
+        second.discardChanges();
+        await second.close();
+      },
+    );
+
+    test(
+      'close releases the editor after a stalled save '
+      'and preserves recovery for its late acknowledgement',
+      () async {
+        final storage = NoteDraftMemoryStorage();
+        final store = NoteDraftStore(storage: storage);
+        final save = Completer<GroupNoteDocumentSaveResult>();
+        when(
+          () => repository.saveGroupNoteDocument(
+            id: any(named: 'id'),
+            document: any(named: 'document'),
+            expectedRevision: any(named: 'expectedRevision'),
+          ),
+        ).thenAnswer((_) => save.future);
+        final cubit = buildCubit(
+          draftStore: store,
+          userId: 'user',
+          closeTimeout: const Duration(milliseconds: 10),
+        );
+        expect(cubit.canRecoverLocally, isTrue);
+        cubit.controller.document.insert(0, 'Local ');
+        await _settle();
+        final flushing = cubit.flush();
+        await _settle();
+        await cubit.close();
+        expect(cubit.isClosed, isTrue);
+        expect(storage.values, hasLength(1));
+        save.complete(
+          saved(1, [
+            {'insert': 'Local Body text\n'},
+          ]),
+        );
+        expect(await flushing, isFalse);
+        final restartedStorage = NoteDraftMemoryStorage()
+          ..values.addAll(storage.values);
+        final restored = buildCubit(
+          withNote: note.copyWith(
+            content: 'Local Body text',
+            documentRevision: 1,
+          ),
+          draftStore: NoteDraftStore(storage: restartedStorage),
+          userId: 'user',
+        );
+        expect(restored.controller.document.toPlainText(), 'Local Body text\n');
+        expect(restored.state.hasUnsavedChanges, isFalse);
+        await restored.close();
+        expect(restartedStorage.values, isEmpty);
+      },
+    );
+
+    test(
+      'a local storage error preserves the existing disk draft '
+      'and permits retry',
+      () async {
+        stubOffline();
+        final storage = NoteDraftMemoryStorage();
+        final store = NoteDraftStore(storage: storage);
+        final cubit = buildCubit(draftStore: store, userId: 'user');
+        cubit.controller.document.insert(0, 'First ');
+        await _settle();
+        await cubit.persistLocalDraft();
+        storage.failWrites = true;
+        cubit.controller.document.insert(0, 'Latest ');
+        await _settle();
+        expect(await cubit.persistLocalDraft(), isFalse);
+        expect(cubit.localDraftSaveFailed, isTrue);
+        expect(NoteDraft.fromJson(storage.values.values.single)?.document, [
+          {'insert': 'First Body text\n'},
+        ]);
+        storage.failWrites = false;
+        expect(await cubit.persistLocalDraft(), isTrue);
+        expect(cubit.localDraftSaveFailed, isFalse);
+        await cubit.close();
+        expect(NoteDraft.fromJson(storage.values.values.single)?.document, [
+          {'insert': 'Latest First Body text\n'},
+        ]);
+      },
+    );
+
+    test('voice ignores read-only and stale session results', () async {
+      stubSave();
+      final speech = _MockSpeech();
+      final callbacks = <SpeechResultListener>[];
+      when(
+        () => speech.initialize(onError: any(named: 'onError')),
+      ).thenAnswer((_) async => true);
+      when(
+        () => speech.listen(
+          onResult: any(named: 'onResult'),
+          listenOptions: any(named: 'listenOptions'),
+        ),
+      ).thenAnswer((call) async {
+        callbacks.add(call.namedArguments[#onResult] as SpeechResultListener);
+      });
+      when(speech.stop).thenAnswer((_) async {});
+      when(speech.cancel).thenAnswer((_) async {});
+      final cubit = buildCubit(speech: speech);
+      await cubit.startVoiceInput(mutedColorHex: '#999999');
+      final words = SpeechRecognitionResult.init([
+        const SpeechRecognitionWords('Voice ', null, 1),
+      ], ResultType.finalResult);
+      cubit.controller.readOnly = true;
+      callbacks.first(words);
+      expect(cubit.controller.document.toPlainText(), 'Body text\n');
+      await cubit.stopVoiceInput();
+      cubit.controller.readOnly = false;
+      await cubit.startVoiceInput(mutedColorHex: '#999999');
+      callbacks.first(words);
+      expect(cubit.controller.document.toPlainText(), 'Body text\n');
+      callbacks.last(words);
+      expect(cubit.controller.document.toPlainText(), 'Voice Body text\n');
+      await _settle();
+      await cubit.close();
+      await cubit.close();
+      verify(speech.cancel).called(1);
+    });
+
+    test(
+      'read-only during speech initialization never starts listening',
+      () async {
+        final speech = _MockSpeech();
+        final initialize = Completer<bool>();
+        when(
+          () => speech.initialize(onError: any(named: 'onError')),
+        ).thenAnswer((_) => initialize.future);
+        when(speech.cancel).thenAnswer((_) async {});
+        final cubit = buildCubit(speech: speech);
+        final starting = cubit.startVoiceInput(mutedColorHex: '#999999');
+        cubit.controller.readOnly = true;
+        initialize.complete(true);
+        await starting;
+        expect(cubit.state.voiceStatus, NoteVoiceStatus.idle);
+        verifyNever(
+          () => speech.listen(
+            onResult: any(named: 'onResult'),
+            listenOptions: any(named: 'listenOptions'),
+          ),
+        );
         await cubit.close();
       },
     );

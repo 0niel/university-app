@@ -64,6 +64,38 @@ class _PollsViewState extends State<PollsView> {
     );
   }
 
+  Future<void> _chooseCategory() async {
+    final cubit = context.read<PollsCubit>();
+    final l10n = context.l10n;
+    final selected = cubit.state.category;
+    await showAppSheet<void>(
+      context,
+      title: l10n.pollsCategoryLabel,
+      child: Builder(
+        builder: (sheetContext) => Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: AppSpacing.xs,
+          children: [
+            for (final category in <PollCategory?>[
+              null,
+              ...PollCategory.values,
+            ])
+              AppRadioRow(
+                title: category == null
+                    ? l10n.pollsCategoryAll
+                    : pollCategoryLabel(l10n, category),
+                selected: selected == category,
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  cubit.setCategory(category);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -81,6 +113,8 @@ class _PollsViewState extends State<PollsView> {
         backgroundColor: colors.surface,
         onRefresh: cubit.load,
         child: CustomScrollView(
+          key: const PageStorageKey('polls-scroll'),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
@@ -104,14 +138,53 @@ class _PollsViewState extends State<PollsView> {
                 horizontal: AppSpacing.screen,
               ),
               sliver: SliverToBoxAdapter(
-                child: AppSearchField(
-                  controller: _search,
-                  hintText: l10n.pollsSearchHint,
-                  onChanged: cubit.setQuery,
-                  onClear: () => cubit.setQuery(''),
+                child: Row(
+                  spacing: AppSpacing.sm,
+                  children: [
+                    Expanded(
+                      child: AppSearchField(
+                        controller: _search,
+                        hintText: l10n.pollsSearchHint,
+                        onChanged: cubit.setQuery,
+                        onClear: () => cubit.setQuery(''),
+                      ),
+                    ),
+                    AppIconButton(
+                      key: const Key('polls-category'),
+                      tooltip: l10n.pollsCategoryLabel,
+                      backgroundColor: state.category == null
+                          ? null
+                          : colors.tint,
+                      icon: const AppLineIconWidget(AppLineIcon.filter),
+                      onPressed: () => unawaited(_chooseCategory()),
+                    ),
+                  ],
                 ),
               ),
             ),
+            if (state.category case final category?)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.screen,
+                  AppSpacing.xs,
+                  AppSpacing.screen,
+                  0,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: AppButton.text(
+                      key: const Key('polls-clear-category'),
+                      label: pollCategoryLabel(l10n, category),
+                      trailingIcon: const AppLineIconWidget(
+                        AppLineIcon.close,
+                        size: 16,
+                      ),
+                      onPressed: () => cubit.setCategory(null),
+                    ),
+                  ),
+                ),
+              ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -131,70 +204,58 @@ class _PollsViewState extends State<PollsView> {
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.sm),
-                child: AppChipRow<PollCategory?>(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.screen,
-                  ),
-                  value: state.category,
-                  onChanged: cubit.setCategory,
-                  items: [
-                    AppChipRowItem(value: null, label: l10n.pollsCategoryAll),
-                    for (final category in PollCategory.values)
-                      AppChipRowItem(
-                        value: category,
-                        label: pollCategoryLabel(l10n, category),
+            if (state.status == .failure && state.polls.isNotEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.screen,
+                  AppSpacing.md,
+                  AppSpacing.screen,
+                  0,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppBanner(
+                        message: l10n.loadingError,
+                        tone: AppBannerTone.danger,
                       ),
-                  ],
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: AppButton.text(
+                          label: l10n.retry,
+                          onPressed: () => unawaited(cubit.load()),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
                 AppSpacing.screen,
-                AppSpacing.screen,
+                AppSpacing.md,
                 AppSpacing.screen,
                 cubit.hasMore
                     ? AppSpacing.lg
                     : ninjaBottomInset(context) + AppSpacing.lg,
               ),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    if (state.status == .failure && state.polls.isNotEmpty) ...[
-                      AppBanner(
-                        message: l10n.loadingError,
-                        tone: AppBannerTone.danger,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      AppButton.secondary(
-                        label: l10n.retry,
-                        onPressed: () => unawaited(cubit.load()),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                    ],
-                    PollsBody(
-                      isLoading: isLoading,
-                      isFailure: isFailure,
-                      polls: state.polls,
-                      filter: state.filter,
-                      category: state.category,
-                      query: state.query,
-                      onRetry: () => unawaited(cubit.load()),
-                      onCreate: () => unawaited(_create(context)),
-                      onOpen: (poll) => unawaited(_open(context, poll)),
-                      onOwnerActions: (poll) =>
-                          unawaited(_ownerActions(context, poll)),
-                      onChangeAnswers: (poll) =>
-                          unawaited(_changeAnswers(context, poll)),
-                      onResults: (poll) => unawaited(
-                        showPollResultsSheet(context, poll: poll),
-                      ),
-                    ),
-                  ],
-                ),
+              sliver: PollsBody(
+                isLoading: isLoading,
+                isFailure: isFailure,
+                polls: state.polls,
+                filter: state.filter,
+                category: state.category,
+                query: state.query,
+                onRetry: () => unawaited(cubit.load()),
+                onCreate: () => unawaited(_create(context)),
+                onOpen: (poll) => unawaited(_open(context, poll)),
+                onOwnerActions: (poll) =>
+                    unawaited(_ownerActions(context, poll)),
+                onChangeAnswers: (poll) =>
+                    unawaited(_changeAnswers(context, poll)),
+                onResults: (poll) =>
+                    unawaited(showPollResultsSheet(context, poll: poll)),
               ),
             ),
             if (cubit.hasMore && state.polls.isNotEmpty)

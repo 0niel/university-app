@@ -9,6 +9,10 @@ extension DrawingStrokeWidthValue on DrawingStrokeWidth {
       DrawingStrokeWidth.medium => 8.0,
       DrawingStrokeWidth.thick => 14.0,
     };
-    return tool == .marker ? base * 1.8 : base;
+    return switch (tool) {
+      DrawingTool.pen => base,
+      DrawingTool.marker => base * 1.8,
+      DrawingTool.eraser => base * 2.5,
+    };
   }
 }

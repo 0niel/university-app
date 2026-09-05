@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:academic_calendar/academic_calendar.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
@@ -42,78 +40,61 @@ class ScheduleDayStrip extends StatelessWidget {
         changes: changes,
       );
 
-  double extent(BuildContext context) {
-    final scaler = MediaQuery.textScalerOf(context);
-    final maxMarks = weekDaysFor(
-      day,
-    ).map((date) => _marks(context, date).length).fold(0, math.max);
-    final markRows = (maxMarks / 5).ceil();
-    final marksHeight = markRows == 0 ? 0 : markRows * 6 - 2;
-    return math.max(
-      AppControlSize.dayPill,
-      scaler.scale(10) * 1.3 +
-          scaler.scale(15) * 1.3 +
-          AppSpacing.micro * 2 +
-          AppSpacing.xsm * 2 +
-          marksHeight,
-    );
+  List<AppWeekDay> _days(BuildContext context, DateTime start) {
+    final locale = Localizations.localeOf(context).toString();
+    final days = [
+      for (var offset = 0; offset < 7; offset++)
+        DateTime(start.year, start.month, start.day + offset),
+    ];
+    return [
+      for (final date in days)
+        AppWeekDay(
+          '${date.day}',
+          short: DateFormat.E(locale).format(date).toUpperCase(),
+          isWeekend: RussianWorkCalendar.dayInfo(date).isNonWorking,
+          isToday: isSameDate(date, now),
+          semanticsLabel: [
+            DateFormat.yMMMMd(locale).format(date),
+            scheduleDayLabel(context, date),
+            ..._marks(context, date).map((mark) => mark.$1),
+          ].join(', '),
+          dots: _marks(context, date).map((mark) => mark.$2).toList(),
+        ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).toString();
     final days = weekDaysFor(day);
     return AppTourAnchor(
       target: AppTourTarget.scheduleWeek,
-      child: AppWeekStrip(
+      child: AppWeekPager(
         key: const ValueKey('schedule-day-strip'),
         scheduleStyle: true,
-        padding: EdgeInsets.zero,
+        weekStart: days.first,
         selectedIndex: day.weekday - 1,
         onSelected: (index) => onDay(days[index]),
-        days: [
-          for (final date in days)
-            AppWeekDay(
-              '${date.day}',
-              short: DateFormat.E(locale).format(date).toUpperCase(),
-              isWeekend: RussianWorkCalendar.dayInfo(date).isNonWorking,
-              isToday: isSameDate(date, now),
-              semanticsLabel: [
-                DateFormat.yMMMMd(locale).format(date),
-                scheduleDayLabel(context, date),
-                ..._marks(context, date).map((mark) => mark.$1),
-              ].join(', '),
-              dots: _marks(context, date).map((mark) => mark.$2).toList(),
-            ),
-        ],
+        daysBuilder: (start) => _days(context, start),
+        onWeekChanged: (start) => onDay(
+          DateTime(start.year, start.month, start.day + day.weekday - 1),
+        ),
       ),
     );
   }
 }
 
-class ScheduleDayStripHeader extends SliverPersistentHeaderDelegate {
+class ScheduleDayStripHeader extends StatelessWidget {
   const ScheduleDayStripHeader({
     required this.strip,
-    required this.height,
     required this.background,
+    super.key,
   });
 
   final ScheduleDayStrip strip;
-  final double height;
   final Color background;
 
   @override
-  double get minExtent => height + AppSpacing.lg;
-
-  @override
-  double get maxExtent => minExtent;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) => ColoredBox(
+  Widget build(BuildContext context) => ColoredBox(
     key: const ValueKey('schedule-pinned-days'),
     color: background,
     child: Padding(
@@ -126,10 +107,4 @@ class ScheduleDayStripHeader extends SliverPersistentHeaderDelegate {
       child: strip,
     ),
   );
-
-  @override
-  bool shouldRebuild(covariant ScheduleDayStripHeader oldDelegate) =>
-      oldDelegate.strip != strip ||
-      oldDelegate.height != height ||
-      oldDelegate.background != background;
 }

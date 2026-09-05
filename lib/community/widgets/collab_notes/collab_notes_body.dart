@@ -12,10 +12,11 @@ import 'package:rtu_mirea_app/community/widgets/collab_notes/note_actions_sheet.
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class CollabNotesBody extends StatefulWidget {
-  const CollabNotesBody({super.key, this.onOpen, this.onCreate});
+  const CollabNotesBody({super.key, this.onOpen, this.onCreate, this.header});
 
   final ValueChanged<CollabNote>? onOpen;
   final VoidCallback? onCreate;
+  final Widget? header;
 
   @override
   State<CollabNotesBody> createState() => _CollabNotesBodyState();
@@ -36,47 +37,81 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
   Widget build(BuildContext context) {
     final state = context.watch<CollabNotesCubit>().state;
     final l10n = context.l10n;
-    return Column(
-      children: [
-        const SizedBox(height: AppSpacing.screen),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-          child: AppSearchField(
-            controller: _searchController,
-            hintText: l10n.collabNotesSearchHint,
-            onChanged: (value) => setState(() => _query = value.trim()),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sectionGap),
-        AppChipRow<String>(
-          value: _filter,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-          items: [
-            AppChipRowItem(value: 'all', label: l10n.collabNotesFilterAll),
-            AppChipRowItem(value: 'new', label: l10n.collabNotesFilterNew),
-            AppChipRowItem(value: 'mine', label: l10n.collabNotesFilterMine),
-            AppChipRowItem(value: 'group', label: l10n.collabNotesFilterGroup),
-            AppChipRowItem(
-              value: 'personal',
-              label: l10n.collabNotesFilterPersonal,
+    return RefreshIndicator(
+      color: context.colors.ink,
+      onRefresh: context.read<CollabNotesCubit>().load,
+      child: CustomScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                if (widget.header != null) widget.header!,
+                const SizedBox(height: AppSpacing.screen),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screen,
+                  ),
+                  child: AppSearchField(
+                    controller: _searchController,
+                    hintText: l10n.collabNotesSearchHint,
+                    onChanged: (value) => setState(() => _query = value.trim()),
+                    onClear: () => setState(() => _query = ''),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sectionGap),
+                AppChipRow<String>(
+                  value: _filter,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screen,
+                  ),
+                  items: [
+                    AppChipRowItem(
+                      value: 'all',
+                      label: l10n.collabNotesFilterAll,
+                    ),
+                    AppChipRowItem(
+                      value: 'new',
+                      label: l10n.collabNotesFilterNew,
+                    ),
+                    AppChipRowItem(
+                      value: 'mine',
+                      label: l10n.collabNotesFilterMine,
+                    ),
+                    AppChipRowItem(
+                      value: 'group',
+                      label: l10n.collabNotesFilterGroup,
+                    ),
+                    AppChipRowItem(
+                      value: 'personal',
+                      label: l10n.collabNotesFilterPersonal,
+                    ),
+                  ],
+                  onChanged: (value) => setState(() => _filter = value),
+                ),
+                const SizedBox(height: AppSpacing.sectionGap),
+              ],
             ),
-          ],
-          onChanged: (value) => setState(() => _filter = value),
-        ),
-        const SizedBox(height: AppSpacing.sectionGap),
-        Expanded(child: AppStateSwitcher(child: _content(context, state))),
-      ],
+          ),
+          _content(context, state),
+        ],
+      ),
     );
   }
 
   Widget _content(BuildContext context, CollabNotesState state) {
     if (state.status == .loading && state.notes.isEmpty) {
-      return const CollabNotesSkeleton(key: ValueKey('notes-loading'));
+      return const SliverToBoxAdapter(
+        child: CollabNotesSkeleton(key: ValueKey('notes-loading')),
+      );
     }
     if (state.status == .failure && state.notes.isEmpty) {
-      return CollabNotesFailure(
-        key: const ValueKey('notes-failure'),
-        onRetry: context.read<CollabNotesCubit>().load,
+      return SliverToBoxAdapter(
+        child: CollabNotesFailure(
+          key: const ValueKey('notes-failure'),
+          onRetry: context.read<CollabNotesCubit>().load,
+        ),
       );
     }
     final cutoff = DateTime.now().subtract(const Duration(days: 7));
@@ -99,9 +134,8 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
         )
         .toList(growable: false);
     if (notes.isEmpty) {
-      return ListView(
+      return SliverList.list(
         key: const ValueKey('notes-empty'),
-        physics: const AlwaysScrollableScrollPhysics(),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -121,22 +155,21 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
         ],
       );
     }
-    return RefreshIndicator(
-      key: const ValueKey('notes-list'),
-      color: context.colors.ink,
-      onRefresh: context.read<CollabNotesCubit>().load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.screen,
-          AppSpacing.zero,
-          AppSpacing.screen,
-          ninjaBottomInset(context) + AppSpacing.lg,
-        ),
-        children: [
-          AppListGroup(
-            children: [
-              for (final note in notes)
+    return SliverPadding(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.screen,
+        AppSpacing.zero,
+        AppSpacing.screen,
+        ninjaBottomInset(context) + AppSpacing.lg,
+      ),
+      sliver: SliverList.builder(
+        itemCount: notes.length,
+        itemBuilder: (context, index) {
+          final note = notes[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: AppListGroup(
+              children: [
                 CollabNoteCard(
                   key: ValueKey(note.id),
                   note: note,
@@ -145,9 +178,10 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
                     showNoteActionsSheet(context, note),
                   ),
                 ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ).animateListItem(key: ValueKey(note.id), index: index);
+        },
       ),
     );
   }

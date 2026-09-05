@@ -27,11 +27,14 @@ class _MapViewState extends State<MapView> {
   late SvgInteractiveMapController _mapController;
   final _panelController = DraggableScrollableController();
   final _panelExtent = ValueNotifier<double>(0);
+  final _mapViewportPadding = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
   final _query = TextEditingController();
   Timer? _clock;
   String? _pendingRoom;
   double _collapsedPanelSize = .3;
   bool _panelFramePending = false;
+  double _viewportHeight = 0;
+  double _viewportTop = 0;
 
   @override
   void initState() {
@@ -60,6 +63,7 @@ class _MapViewState extends State<MapView> {
     if (widget.mapController == null) _mapController.dispose();
     _panelController.dispose();
     _panelExtent.dispose();
+    _mapViewportPadding.dispose();
     _query.dispose();
     super.dispose();
   }
@@ -77,7 +81,17 @@ class _MapViewState extends State<MapView> {
     }
     if (_panelController.isAttached) {
       _panelExtent.value = _panelController.size;
+      _updateMapViewport(_panelController.size);
     }
+  }
+
+  void _updateMapViewport(double panelSize) {
+    _mapViewportPadding.value = EdgeInsets.fromLTRB(
+      20,
+      _viewportTop,
+      20,
+      _viewportHeight * panelSize + 12,
+    );
   }
 
   void _queryChanged(String value) {
@@ -263,86 +277,89 @@ class _MapViewState extends State<MapView> {
             _collapsedPanelSize =
                 ((bottomInset + compactContentExtent) / constraints.maxHeight)
                     .clamp(.22, .42);
-            return AnimatedBuilder(
-              animation: _panelExtent,
-              builder: (context, _) {
-                final panelSize = _panelController.isAttached
-                    ? _panelController.size
-                    : _query.text.trim().isEmpty
-                    ? _collapsedPanelSize
-                    : .78;
-                final panelHeight = constraints.maxHeight * panelSize;
-                final controlsFit =
-                    constraints.maxHeight - panelHeight >=
-                    MediaQuery.paddingOf(context).top +
-                        166 +
-                        AppControlSize.touchTarget * 3 +
-                        AppSpacing.xsm * 2 +
-                        AppSpacing.md;
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    SvgInteractiveMap(
-                      controller: _mapController,
-                      svgAssetPath: floor.svgPath,
-                      onRoomTap: _openMappedRoom,
-                      viewportPadding: EdgeInsets.fromLTRB(
-                        20,
-                        MediaQuery.paddingOf(context).top + 166,
-                        20,
-                        panelHeight + 12,
-                      ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: MapTopBar(
-                        controller: _query,
-                        campuses: state.availableCampuses,
-                        selectedCampus: state.selectedCampus,
-                        onQueryChanged: _queryChanged,
-                        onCampusSelected: _campus,
-                        onFriends: _friends,
-                      ),
-                    ),
-                    if (controlsFit)
-                      Positioned(
-                        right: 20,
-                        bottom: panelHeight + 12,
-                        child: MapCanvasControls(
-                          onZoomIn: interactive ? _mapController.zoomIn : null,
-                          onZoomOut: interactive
-                              ? _mapController.zoomOut
-                              : null,
-                          onFit: interactive ? _mapController.fit : null,
-                        ),
-                      ),
-                    MapFreeRoomsPanel(
-                      controller: _panelController,
-                      collapsedSize: _collapsedPanelSize,
-                      viewportHeight: constraints.maxHeight,
-                      bottomInset: bottomInset,
-                      compactContentExtent: compactContentExtent,
-                      mapState: state,
-                      onRoomTap: _openRoom,
-                      onFloor: _floor,
-                      onToggle: _togglePanel,
-                      onMappedRoomTap: (room) {
-                        FocusScope.of(context).unfocus();
-                        _mapController.focusRoom(room);
-                        _openMappedRoom(room);
-                      },
-                    ),
-                    if (!interactive)
-                      Positioned(
-                        top: MediaQuery.paddingOf(context).top + 160,
-                        left: 20,
-                        child: const MapLoadingPill(),
-                      ),
-                  ],
-                );
-              },
+            _viewportHeight = constraints.maxHeight;
+            _viewportTop = MediaQuery.paddingOf(context).top + 166;
+            final panelSize = _panelController.isAttached
+                ? _panelController.size
+                : _query.text.trim().isEmpty
+                ? _collapsedPanelSize
+                : .78;
+            _updateMapViewport(panelSize);
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                RepaintBoundary(
+                  child: SvgInteractiveMap(
+                    controller: _mapController,
+                    svgAssetPath: floor.svgPath,
+                    onRoomTap: _openMappedRoom,
+                    viewportPadding: _mapViewportPadding.value,
+                    viewportPaddingListenable: _mapViewportPadding,
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: MapTopBar(
+                    controller: _query,
+                    campuses: state.availableCampuses,
+                    selectedCampus: state.selectedCampus,
+                    onQueryChanged: _queryChanged,
+                    onCampusSelected: _campus,
+                    onFriends: _friends,
+                  ),
+                ),
+                AnimatedBuilder(
+                  animation: _panelExtent,
+                  builder: (context, child) {
+                    final panelHeight =
+                        constraints.maxHeight *
+                        (_panelController.isAttached
+                            ? _panelController.size
+                            : panelSize);
+                    final controlsFit =
+                        constraints.maxHeight - panelHeight >=
+                        _viewportTop +
+                            AppControlSize.touchTarget * 3 +
+                            AppSpacing.xsm * 2 +
+                            AppSpacing.md;
+                    if (!controlsFit) return const SizedBox.shrink();
+                    return Positioned(
+                      right: 20,
+                      bottom: panelHeight + 12,
+                      child: child!,
+                    );
+                  },
+                  child: MapCanvasControls(
+                    onZoomIn: interactive ? _mapController.zoomIn : null,
+                    onZoomOut: interactive ? _mapController.zoomOut : null,
+                    onFit: interactive ? _mapController.fit : null,
+                  ),
+                ),
+                MapFreeRoomsPanel(
+                  controller: _panelController,
+                  collapsedSize: _collapsedPanelSize,
+                  viewportHeight: constraints.maxHeight,
+                  bottomInset: bottomInset,
+                  compactContentExtent: compactContentExtent,
+                  mapState: state,
+                  onRoomTap: _openRoom,
+                  onFloor: _floor,
+                  onToggle: _togglePanel,
+                  onMappedRoomTap: (room) {
+                    FocusScope.of(context).unfocus();
+                    _mapController.focusRoom(room);
+                    _openMappedRoom(room);
+                  },
+                ),
+                if (!interactive)
+                  Positioned(
+                    top: MediaQuery.paddingOf(context).top + 160,
+                    left: 20,
+                    child: const MapLoadingPill(),
+                  ),
+              ],
             );
           },
         );

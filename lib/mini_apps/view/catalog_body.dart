@@ -29,35 +29,32 @@ class _CatalogBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaStateSwitcher(child: _body(context));
-  }
-
-  Widget _body(BuildContext context) {
-    final colors = context.colors;
     final l10n = context.l10n;
-    if (state.status == .loading && state.apps.isEmpty) {
-      return const _CatalogSkeleton(key: ValueKey('catalog-loading'));
+    if (state.status == .loading &&
+        state.apps.isEmpty &&
+        state.myApps.isEmpty) {
+      return const SliverToBoxAdapter(
+        child: _CatalogSkeleton(key: ValueKey('catalog-loading')),
+      );
     }
-    if (state.status == .failure && state.apps.isEmpty) {
-      return SingleChildScrollView(
-        key: const ValueKey('catalog-failure'),
-        padding: _CatalogLayout.statePadding(context),
-        child: NinjaErrorState(
+    if (state.status == .failure &&
+        state.apps.isEmpty &&
+        state.myApps.isEmpty) {
+      return _state(
+        context,
+        NinjaErrorState(
           title: l10n.loadingError,
           message: l10n.tryAgain,
           retryLabel: l10n.retry,
-          onRetry: () => unawaited(
-            context.read<MiniAppsCatalogCubit>().load(),
-          ),
-        ).animateEmptyState(),
+          onRetry: () => unawaited(context.read<MiniAppsCatalogCubit>().load()),
+        ),
       );
     }
     if (state.apps.isEmpty && state.myApps.isEmpty) {
       final filtered = state.query.isNotEmpty || state.category != null;
-      return SingleChildScrollView(
-        key: const ValueKey('catalog-empty'),
-        padding: _CatalogLayout.statePadding(context),
-        child: NinjaEmptyState(
+      return _state(
+        context,
+        NinjaEmptyState(
           icon: AppLineIconWidget(
             filtered ? AppLineIcon.search : AppLineIcon.grid,
           ),
@@ -68,77 +65,81 @@ class _CatalogBody extends StatelessWidget {
           actionLabel: filtered ? l10n.resetFilter : l10n.miniAppsCreate,
           onAction: filtered ? onResetFilters : onCreate,
           outlinedAction: filtered,
-        ).animateEmptyState(),
+        ),
       );
     }
-    return RefreshIndicator(
-      key: const ValueKey('catalog-ready'),
-      color: colors.accent,
-      backgroundColor: colors.surface,
-      onRefresh: () => context.read<MiniAppsCatalogCubit>().load(),
-      child: ListView(
-        padding: EdgeInsets.only(bottom: _CatalogLayout.bottomInset(context)),
-        children: [
-          if (state.recents.isNotEmpty) ...[
-            _CatalogSectionLabel(title: l10n.miniAppsRecents),
-            _RecentMiniApps(
-              apps: state.recents,
-              onOpen: onOpen,
+    return SliverPadding(
+      padding: EdgeInsets.only(bottom: _CatalogLayout.bottomInset(context)),
+      sliver: SliverMainAxisGroup(
+        slivers: [
+          if (state.recents.isNotEmpty &&
+              state.query.isEmpty &&
+              state.category == null)
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  _CatalogSectionLabel(title: l10n.miniAppsRecents),
+                  _RecentMiniApps(apps: state.recents, onOpen: onOpen),
+                  const SizedBox(height: AppSpacing.gap),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.gap),
-          ],
           if (state.myApps.isNotEmpty) ...[
-            _CatalogSectionLabel(title: l10n.miniAppsMyApps),
-            for (final (index, app) in state.myApps.indexed)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.screen,
-                  0,
-                  AppSpacing.screen,
-                  AppSpacing.gap,
-                ),
-                child: MiniAppCard(
-                  app: app,
-                  showStatus: true,
-                  onTap: () => onOpen(app),
-                  onLongPress: () => onActions(app),
-                ).animateListItem(index: index),
-              ),
-            _CatalogSectionLabel(title: l10n.miniAppsCatalogSection),
-          ],
-          for (final (index, app) in state.apps.indexed)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.screen,
-                0,
-                AppSpacing.screen,
-                AppSpacing.gap,
-              ),
-              child: MiniAppCard(
-                app: app,
-                onTap: () => onOpen(app),
-                onLongPress: () => onActions(app),
-              ).animateListItem(index: index),
+            SliverToBoxAdapter(
+              child: _CatalogSectionLabel(title: l10n.miniAppsMyApps),
             ),
+            _cards(state.myApps, showStatus: true),
+            SliverToBoxAdapter(
+              child: _CatalogSectionLabel(title: l10n.miniAppsCatalogSection),
+            ),
+          ],
+          _cards(state.apps),
           if (state.apps.isEmpty)
-            Padding(
-              padding: const .fromLTRB(
-                AppSpacing.screen,
-                16,
-                AppSpacing.screen,
-                0,
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screen,
               ),
-              child: NinjaEmptyState(
-                icon: const AppLineIconWidget(AppLineIcon.search),
-                title: l10n.miniAppsNothingFound,
-                message: l10n.miniAppsNothingFoundSubtitle,
-                actionLabel: l10n.resetFilter,
-                onAction: onResetFilters,
-                outlinedAction: true,
-              ).animateEmptyState(),
+              sliver: SliverToBoxAdapter(
+                child: NinjaEmptyState(
+                  icon: const AppLineIconWidget(AppLineIcon.search),
+                  title: l10n.miniAppsNothingFound,
+                  message: l10n.miniAppsNothingFoundSubtitle,
+                  actionLabel: l10n.resetFilter,
+                  onAction: onResetFilters,
+                  outlinedAction: true,
+                ).animateEmptyState(),
+              ),
             ),
         ],
       ),
     );
   }
+
+  Widget _state(BuildContext context, Widget child) => SliverPadding(
+    padding: _CatalogLayout.statePadding(context),
+    sliver: SliverToBoxAdapter(child: child.animateEmptyState()),
+  );
+
+  Widget _cards(List<MiniApp> apps, {bool showStatus = false}) =>
+      SliverList.builder(
+        itemCount: apps.length,
+        itemBuilder: (context, index) {
+          final app = apps[index];
+          return Padding(
+            key: ValueKey('${showStatus ? 'owned' : 'catalog'}-${app.id}'),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screen,
+              0,
+              AppSpacing.screen,
+              AppSpacing.gap,
+            ),
+            child: MiniAppCard(
+              app: app,
+              showStatus: showStatus,
+              onTap: () => onOpen(app),
+              onLongPress: () => onActions(app),
+            ).animateListItem(index: index),
+          );
+        },
+      );
 }

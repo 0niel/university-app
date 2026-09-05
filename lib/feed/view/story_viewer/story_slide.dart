@@ -16,6 +16,7 @@ class StorySlide extends StatelessWidget {
     this.lead,
     this.imageUrl,
     this.onMediaReady,
+    this.imageHeroTag,
   });
 
   final String title;
@@ -25,6 +26,7 @@ class StorySlide extends StatelessWidget {
   final String readLabel;
   final VoidCallback onRead;
   final VoidCallback? onMediaReady;
+  final Object? imageHeroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,14 @@ class StorySlide extends StatelessWidget {
     final white = context.colors.white;
     final lead = this.lead;
     final imageUrl = this.imageUrl;
+    Widget image(Widget child) => imageHeroTag == null
+        ? child
+        : HeroMode(
+            enabled:
+                !MediaQuery.disableAnimationsOf(context) &&
+                !MediaQuery.accessibleNavigationOf(context),
+            child: Hero(tag: imageHeroTag!, child: child),
+          );
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -54,18 +64,20 @@ class StorySlide extends StatelessWidget {
           ),
         if (imageUrl != null && imageUrl.isNotEmpty)
           IgnorePointer(
-            child: CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.contain,
-              imageBuilder: (context, provider) {
-                onMediaReady?.call();
-                return Image(image: provider, fit: BoxFit.contain);
-              },
-              placeholder: (_, _) => const SizedBox.shrink(),
-              errorWidget: (_, _, _) {
-                onMediaReady?.call();
-                return const SizedBox.shrink();
-              },
+            child: image(
+              CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.contain,
+                imageBuilder: (context, provider) {
+                  onMediaReady?.call();
+                  return Image(image: provider, fit: BoxFit.contain);
+                },
+                placeholder: (_, _) => const SizedBox.shrink(),
+                errorWidget: (_, _, _) {
+                  onMediaReady?.call();
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
           ),
         IgnorePointer(

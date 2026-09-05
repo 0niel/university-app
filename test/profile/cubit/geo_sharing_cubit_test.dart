@@ -4,13 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:friends_repository/friends_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:preferences_repository/preferences_repository.dart';
+import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
 
 class _Preferences extends Mock implements PreferencesRepository {}
 
 class _Friends extends Mock implements FriendsRepository {}
 
+class _MapCubit extends Mock implements FriendsMapCubit {}
+
 void main() {
+  setUpAll(() => registerFallbackValue(const GeoSharingSettings()));
   late _Preferences preferences;
   late _Friends friends;
   late GeoSharingCubit cubit;
@@ -29,6 +33,47 @@ void main() {
     );
   });
   tearDown(() async => cubit.close());
+
+  test(
+    'profile uses session map settings and stops the shared publisher',
+    () async {
+      final map = _MapCubit();
+      final updates = StreamController<FriendsMapState>.broadcast();
+      var mapState = const FriendsMapState(
+        geoSettings: GeoSharingSettings(
+          sharing: true,
+          visibility: .students,
+          precision: .city,
+        ),
+      );
+      when(() => map.stream).thenAnswer((_) => updates.stream);
+      when(() => map.state).thenAnswer((_) => mapState);
+      when(map.initialize).thenAnswer((_) async {});
+      when(() => map.updateGeoSettings(any())).thenAnswer((invocation) async {
+        mapState = mapState.copyWith(
+          geoSettings:
+              invocation.positionalArguments.first as GeoSharingSettings,
+        );
+        updates.add(mapState);
+      });
+      final linked = GeoSharingCubit(
+        preferencesRepository: preferences,
+        friendsRepository: friends,
+        mapCubit: map,
+      );
+      await linked.load();
+      expect(linked.state.settings.visibility, GeoVisibility.students);
+      expect(linked.state.settings.precision, GeoPrecision.city);
+      expect(await linked.setSharing(enabled: false), isTrue);
+      expect(mapState.geoSettings.sharing, isFalse);
+      expect(mapState.geoSettings.visibility, GeoVisibility.none);
+      expect(mapState.geoSettings.precision, GeoPrecision.city);
+      verifyNever(() => friends.setGhostMode(ghost: any(named: 'ghost')));
+      verifyNever(() => preferences.set(any(), any()));
+      await linked.close();
+      await updates.close();
+    },
+  );
 
   test(
     'defaults off until loaded and remains off without saved consent',

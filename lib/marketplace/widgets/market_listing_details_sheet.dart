@@ -38,6 +38,7 @@ class MarketListingDetailsSheet extends StatefulWidget {
 class _MarketListingDetailsSheetState extends State<MarketListingDetailsSheet> {
   final _pageController = PageController();
   var _page = 0;
+  final _heroScope = Object();
 
   @override
   void dispose() {
@@ -46,10 +47,11 @@ class _MarketListingDetailsSheetState extends State<MarketListingDetailsSheet> {
   }
 
   List<MediaItem> get _mediaItems => [
-    for (final media in widget.item.media)
+    for (final (index, media) in widget.item.media.indexed)
       MediaItem(
         url: media.url,
         kind: media.isVideo ? .video : .image,
+        heroTag: media.isVideo ? null : (_heroScope, index),
       ),
   ];
 
@@ -69,6 +71,7 @@ class _MarketListingDetailsSheetState extends State<MarketListingDetailsSheet> {
         children: [
           _MediaCarousel(
             media: item.media,
+            heroScope: _heroScope,
             page: _page,
             controller: _pageController,
             onPageChanged: (value) => setState(() => _page = value),
@@ -157,6 +160,7 @@ class _MarketListingDetailsSheetState extends State<MarketListingDetailsSheet> {
 class _MediaCarousel extends StatelessWidget {
   const _MediaCarousel({
     required this.media,
+    required this.heroScope,
     required this.page,
     required this.controller,
     required this.onPageChanged,
@@ -164,6 +168,7 @@ class _MediaCarousel extends StatelessWidget {
   });
 
   final List<MarketMediaItem> media;
+  final Object heroScope;
   final int page;
   final PageController controller;
   final ValueChanged<int> onPageChanged;
@@ -196,13 +201,16 @@ class _MediaCarousel extends StatelessWidget {
                         if (item.isVideo)
                           const AppStripePlaceholder()
                         else
-                          CachedNetworkImage(
-                            imageUrl: item.url,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) =>
-                                const AppStripePlaceholder(),
-                            errorWidget: (context, url, error) =>
-                                const AppStripePlaceholder(),
+                          Hero(
+                            tag: (heroScope, index),
+                            child: CachedNetworkImage(
+                              imageUrl: item.url,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) =>
+                                  const AppStripePlaceholder(),
+                              errorWidget: (context, url, error) =>
+                                  const AppStripePlaceholder(),
+                            ),
                           ),
                         if (item.isVideo)
                           DecoratedBox(

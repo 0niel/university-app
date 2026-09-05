@@ -120,71 +120,93 @@ class _ServicesViewState extends State<ServicesView> {
     final loadingCatalog =
         catalogState.isLoading && catalogState.catalog == null;
 
-    return ListView(
+    return CustomScrollView(
       controller: _scrollController,
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.screen,
-        0,
-        AppSpacing.screen,
-        AppBottomBar.extentOf(context) + AppSpacing.screen,
-      ),
-      children: [
-        AppScreenHeader(
-          title: l10n.services,
-          padding: EdgeInsets.only(
-            top: math.max(
-              AppSpacing.screenTop,
-              MediaQuery.paddingOf(context).top + 12,
-            ),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.screen,
+            0,
+            AppSpacing.screen,
+            AppBottomBar.extentOf(context) + AppSpacing.screen,
           ),
-          textAction: AppHeaderTextAction(
-            key: const ValueKey('services-edit-toggle'),
-            onTap: _toggleEditMode,
-            label: _editMode ? l10n.servicesEditDone : l10n.servicesConfigure,
+          sliver: SliverList.list(
+            children: [
+              AppScreenHeader(
+                title: l10n.services,
+                padding: EdgeInsets.only(
+                  top: math.max(
+                    AppSpacing.screenTop,
+                    MediaQuery.paddingOf(context).top + 12,
+                  ),
+                ),
+                textAction: AppHeaderTextAction(
+                  key: const ValueKey('services-edit-toggle'),
+                  onTap: _toggleEditMode,
+                  label: _editMode
+                      ? l10n.servicesEditDone
+                      : l10n.servicesConfigure,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.fieldGap),
+              AppTourAnchor(
+                target: .servicesCatalog,
+                child: AppSearchBar.button(
+                  key: const ValueKey('services-search'),
+                  hintText: l10n.servicesSearchPlaceholder,
+                  onCanvas: true,
+                  trailingIcon: null,
+                  onTap: () => unawaited(showSearchSheet(context)),
+                ),
+              ),
+              AnimatedSize(
+                duration: NinjaMotion.of(context),
+                curve: NinjaMotion.enter,
+                alignment: Alignment.topCenter,
+                child: _editMode
+                    ? Padding(
+                        padding: const EdgeInsets.only(
+                          top: AppSpacing.sectionGap,
+                        ),
+                        child: AppBanner(
+                          key: const ValueKey('services-edit-banner'),
+                          message: l10n.servicesEditBanner,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+              for (final section in sections) ...[
+                ServicesSection(
+                  key: ValueKey('services-section-${section.key}'),
+                  section: section,
+                  editMode: _editMode,
+                  isFavorite: (entry) => favorites.ids.contains(entry.id),
+                  onOpen: _open,
+                  onToggleFavorite: _toggleFavorite,
+                ),
+                if (section.key == ServicesDirectory.sectionFirstParty &&
+                    config.isEnabled(.nfcPass)) ...[
+                  const SizedBox(height: AppSpacing.sectionGap),
+                  const ServicesNfcCard(),
+                ],
+              ],
+              if (loadingCatalog) ...[
+                const SizedBox(height: 22),
+                const AppSkeletonGroup(
+                  child: AppListGroup(
+                    radius: AppRadius.lg,
+                    children: [
+                      AppSkeletonRow(),
+                      AppSkeletonRow(),
+                      AppSkeletonRow(),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
-        const SizedBox(height: AppSpacing.fieldGap),
-        AppTourAnchor(
-          target: .servicesCatalog,
-          child: AppSearchBar.button(
-            key: const ValueKey('services-search'),
-            hintText: l10n.servicesSearchPlaceholder,
-            onCanvas: true,
-            trailingIcon: null,
-            onTap: () => unawaited(showSearchSheet(context)),
-          ),
-        ),
-        if (_editMode) ...[
-          const SizedBox(height: AppSpacing.sectionGap),
-          AppBanner(
-            key: const ValueKey('services-edit-banner'),
-            message: l10n.servicesEditBanner,
-          ),
-        ],
-        for (final section in sections) ...[
-          ServicesSection(
-            key: ValueKey('services-section-${section.key}'),
-            section: section,
-            editMode: _editMode,
-            isFavorite: (entry) => favorites.ids.contains(entry.id),
-            onOpen: _open,
-            onToggleFavorite: _toggleFavorite,
-          ),
-          if (section.key == ServicesDirectory.sectionFirstParty &&
-              config.isEnabled(.nfcPass)) ...[
-            const SizedBox(height: AppSpacing.sectionGap),
-            const ServicesNfcCard(),
-          ],
-        ],
-        if (loadingCatalog) ...[
-          const SizedBox(height: 22),
-          const AppSkeletonGroup(
-            child: AppListGroup(
-              radius: AppRadius.lg,
-              children: [AppSkeletonRow(), AppSkeletonRow(), AppSkeletonRow()],
-            ),
-          ),
-        ],
       ],
     );
   }

@@ -3710,7 +3710,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friendsShareGeo => 'Share my location';
 
   @override
-  String get friendsShareGeoSub => 'updates while Friends on the map is open';
+  String get friendsShareGeoSub =>
+      'send location updates to your chosen audience';
 
   @override
   String get friendsPrivacySyncError =>
@@ -3720,7 +3721,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friendsGhostSub => 'temporarily hide from everyone';
 
   @override
-  String get friendsWhoSeesExact => 'WHO SEES MY EXACT LOCATION';
+  String get friendsWhoSeesExact => 'WHO SEES MY LOCATION';
 
   @override
   String get friendsVisAll => 'All friends';
@@ -3738,7 +3739,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friendsVisNoneSub => 'you\'\'re not on the map';
 
   @override
-  String get friendsPrecisionHeader => 'PRECISION FOR OTHERS';
+  String get friendsPrecisionHeader => 'LOCATION PRECISION';
 
   @override
   String get friendsPrecisionExact => 'Exact';
@@ -6317,7 +6318,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mentorshipBecomeSubtitle =>
-      'help juniors — earn shurikens and reputation';
+      'Choose your topics, meeting formats and how you can help';
 
   @override
   String get mentorshipRequestSheetTitle => 'Request to a mentor';
@@ -6404,13 +6405,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mentorshipRewardSubtitle => '+ a «Mentor» badge on your profile';
 
   @override
-  String get mentorshipTopicsLabel => 'WHAT YOU\'RE GOOD AT';
+  String get mentorshipTopicsLabel => 'What you\'re good at';
 
   @override
-  String get mentorshipLevelLabel => 'YOUR LEVEL';
+  String get mentorshipCustomTopicLabel => 'Your own topic';
 
   @override
-  String get mentorshipFormatLabel => 'FORMAT';
+  String get mentorshipCustomTopicHint => 'For example, Flutter or calculus';
+
+  @override
+  String get mentorshipTopicsLimit => 'Up to 20 topics, 60 characters each';
+
+  @override
+  String get mentorshipBioLabel => 'About you';
+
+  @override
+  String get mentorshipPending => 'Awaiting a reply';
+
+  @override
+  String get mentorshipAccepted => 'Session agreed';
+
+  @override
+  String get mentorshipLevelLabel => 'Your level';
+
+  @override
+  String get mentorshipFormatLabel => 'Meeting format';
 
   @override
   String get mentorshipPriceTitle => 'Session price';
@@ -6442,10 +6461,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get mentorshipTopicLabel => 'TOPIC';
+  String get mentorshipTopicLabel => 'Topic';
 
   @override
-  String get mentorshipWhenLabel => 'WHEN WORKS FOR YOU';
+  String get mentorshipWhenLabel => 'When works for you';
 
   @override
   String get mentorshipWhenTonight => 'Tonight';
@@ -6469,7 +6488,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mentorshipWhenShortWeek => 'this week';
 
   @override
-  String get mentorshipMessageLabel => 'MESSAGE';
+  String get mentorshipMessageLabel => 'Message';
 
   @override
   String get mentorshipMessageHint =>
@@ -6555,7 +6574,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mentorshipCancelConfirmBody =>
-      'The request will close and any reserved shurikens will be returned to the student. The session will not count as completed.';
+      'The request will close. The session will not count as completed.';
 
   @override
   String get mentorshipCancelConfirmAction => 'Cancel request';
@@ -11031,6 +11050,131 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collabNotesCollaboratorsTooltip => 'Note collaborators';
 
   @override
+  String get noteToolbarFormat => 'Formatting';
+
+  @override
+  String get noteToolbarInsert => 'Insert';
+
+  @override
+  String get noteLinkInvalidUrl => 'Enter a valid link';
+
+  @override
+  String get noteDrawingStylusOnly => 'Stylus only';
+
+  @override
+  String get noteDrawingTouchDraw => 'Draw with touch';
+
+  @override
+  String get noteDrawingResetView => 'Fit canvas';
+
+  @override
+  String noteDrawingColor(int index) {
+    return 'Color $index';
+  }
+
+  @override
+  String get noteDrawingSaveError => 'Could not save drawing';
+
+  @override
+  String get noteTextToolsTitle => 'Text actions';
+
+  @override
+  String get noteTextToolsDescription =>
+      'Selected text will be sent to the app you choose. Translation and processing depend on the apps installed on your device.';
+
+  @override
+  String get noteTextToolsSelectText => 'Select text in your note first';
+
+  @override
+  String get noteTextToolsUnavailable =>
+      'No compatible apps found. You can copy or share the text.';
+
+  @override
+  String get noteTextToolsLoading => 'Finding apps…';
+
+  @override
+  String get noteTextToolsWorking => 'Waiting for the result…';
+
+  @override
+  String get noteTextToolsFailure => 'Could not process the text';
+
+  @override
+  String get noteTextToolsNoResult => 'The app did not return modified text';
+
+  @override
+  String get noteTextToolsPreview => 'Result';
+
+  @override
+  String get noteTextToolsApply => 'Replace selected text';
+
+  @override
+  String get noteTextToolsChanged =>
+      'The note or selection changed. You can copy the result.';
+
+  @override
+  String get noteTextToolsReadOnly => 'This note is read-only';
+
+  @override
+  String get noteTextToolsCopy => 'Copy';
+
+  @override
+  String get noteTextToolsShare => 'Share';
+
+  @override
+  String get noteTextToolsCopied => 'Text copied';
+
+  @override
+  String get noteSearchHint => 'Find in note';
+
+  @override
+  String get noteSearchNoMatches => 'No matches';
+
+  @override
+  String get noteSearchPrevious => 'Previous match';
+
+  @override
+  String get noteSearchNext => 'Next match';
+
+  @override
+  String get noteOutlineTitle => 'Outline';
+
+  @override
+  String get noteOutlineEmpty =>
+      'Add headings using formatting to see them here.';
+
+  @override
+  String get noteReadingMode => 'Reading mode';
+
+  @override
+  String get noteEditingMode => 'Edit';
+
+  @override
+  String get noteExportDocument => 'Export PDF';
+
+  @override
+  String get noteExportAttachment => 'Attachment';
+
+  @override
+  String get noteExportError => 'Could not prepare or share the document';
+
+  @override
+  String get noteRecoveryConflict =>
+      'This device has an unsaved draft. The server version has also changed.';
+
+  @override
+  String get noteRecoveryReview => 'Choose a version';
+
+  @override
+  String get noteRecoveryKeepLocal => 'Keep draft';
+
+  @override
+  String get noteRecoveryUseServer => 'Use server version';
+
+  @override
+  String get noteRecoveryBody =>
+      'You are viewing the local draft. You can export it before choosing. Keeping the draft will replace the current server version.';
+
+  @override
   String get noteToolbarBold => 'Bold';
 
   @override
@@ -12000,6 +12144,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pollsEmptyQuestions => 'This poll has no questions';
 
   @override
+  String pollsQuestionsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions',
+      one: '$count question',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get pollsClosesFuture => 'Choose a future closing time';
 
   @override
@@ -12083,4 +12238,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsShowPromoBanners => 'Partner offers';
+
+  @override
+  String get friendsStudentsTab => 'Students';
+
+  @override
+  String get friendsStudentsEmptyTitle => 'No students on the map yet';
+
+  @override
+  String get friendsStudentsEmptySub =>
+      'Students appear here when they choose to share with everyone. You can browse without sharing your own location.';
+
+  @override
+  String get friendsStudentsSub =>
+      'Only students who chose to share with everyone are shown. Locations may be approximate.';
+
+  @override
+  String get friendsVisStudents => 'Everyone';
+
+  @override
+  String get friendsVisStudentsSub =>
+      'Any signed-in student can see your profile and location without adding you as a friend. Visibility continues until you hide yourself or turn sharing off.';
+
+  @override
+  String get friendsVisFriendsSub =>
+      'Only accepted friends can see your location. Your profile will not appear on the student map.';
+
+  @override
+  String get friendsPublicProfile => 'Shares with all students';
+
+  @override
+  String get friendsBackgroundTitle => 'Location updates';
+
+  @override
+  String get friendsBackgroundMobileSub =>
+      'On phones, background updates require location permission and may be limited by battery saving. Force-closing the app or restarting the device can stop sharing; open the app to resume.';
+
+  @override
+  String get friendsBackgroundForegroundSub =>
+      'On this platform, your location updates while the app is open and active. Sharing stops when it is closed or suspended.';
+
+  @override
+  String get friendsBackgroundActive => 'Background location is active';
+
+  @override
+  String get friendsBackgroundInactive => 'Background location is not active';
+
+  @override
+  String get friendsLocationRetry => 'Enable location access';
+
+  @override
+  String friendsMapPeopleCount(int count) {
+    return 'On the map: $count';
+  }
+
+  @override
+  String get friendsLocationUnavailable =>
+      'Location is unavailable. You can still browse students on the map.';
+
+  @override
+  String get friendsLocationPublishFailed =>
+      'Your latest location could not be shared. Check your connection; updates will retry automatically.';
+
+  @override
+  String get friendsLocationServiceDisabled =>
+      'Location services are turned off on your device. The map remains available.';
+
+  @override
+  String get friendsLocationUnsupported =>
+      'This device cannot provide your location. You can still browse the map.';
+
+  @override
+  String get friendsLocationLocating => 'Finding your location…';
+
+  @override
+  String get friendsLocationForegroundActive =>
+      'Updates while the app is active';
 }

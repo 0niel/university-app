@@ -2,6 +2,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/community/widgets/widgets.dart';
 import 'package:rtu_mirea_app/knowledge_bank/config/knowledge_material_types.dart';
 import 'package:rtu_mirea_app/knowledge_bank/widgets/material_thumbnail.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -12,6 +13,7 @@ class MaterialGridCard extends StatelessWidget {
     required this.onOpen,
     required this.onDownload,
     this.previewUrl,
+    this.heroTag,
     this.onLike,
     this.onLongPress,
     this.loading = false,
@@ -20,6 +22,7 @@ class MaterialGridCard extends StatelessWidget {
 
   final StudyMaterial material;
   final String? previewUrl;
+  final Object? heroTag;
   final VoidCallback onOpen;
   final VoidCallback onDownload;
   final VoidCallback? onLike;
@@ -43,7 +46,7 @@ class MaterialGridCard extends StatelessWidget {
     final enabled = material.hasFile && !loading;
 
     return AppCard(
-      onTap: onOpen,
+      onTap: enabled ? onOpen : null,
       onLongPress: onLongPress,
       padding: EdgeInsets.zero,
       semanticsLabel: material.title,
@@ -54,6 +57,7 @@ class MaterialGridCard extends StatelessWidget {
           AspectRatio(
             aspectRatio: 16 / 10,
             child: MaterialThumbnail(
+              heroTag: heroTag,
               previewUrl: previewUrl,
               mimeType: material.mimeType,
               iconSize: 28,
@@ -93,6 +97,19 @@ class MaterialGridCard extends StatelessWidget {
                   style: AppText.captionSmall.copyWith(color: colors.muted),
                 ),
                 const SizedBox(height: AppSpacing.sm),
+                PricePill(
+                  free: material.hasFile && material.isFree,
+                  shurikens: material.hasFile && !material.isFree
+                      ? material.price
+                      : null,
+                  locked: !material.hasFile,
+                  text: material.hasFile
+                      ? null
+                      : material.requiresRepublish
+                      ? l10n.knowledgeMaterialRepublishRequired
+                      : l10n.knowledgeMaterialNoAttachment,
+                ),
+                const SizedBox(height: AppSpacing.xs),
                 Row(
                   children: [
                     if (onLike != null)
@@ -118,16 +135,19 @@ class MaterialGridCard extends StatelessWidget {
                       ),
                     ],
                     const Spacer(),
-                    AppIconButton(
-                      icon: AppLineIconWidget(
-                        AppLineIcon.download,
-                        color: enabled ? colors.ink : colors.muted2,
+                    if (loading)
+                      const NinjaSpinner(size: 24)
+                    else
+                      AppIconButton(
+                        icon: AppLineIconWidget(
+                          AppLineIcon.download,
+                          color: enabled ? colors.ink : colors.muted2,
+                        ),
+                        size: AppIconButtonSize.small,
+                        tone: .plain,
+                        tooltip: l10n.knowledgeDownload,
+                        onPressed: enabled ? onDownload : null,
                       ),
-                      size: AppIconButtonSize.small,
-                      tone: .plain,
-                      tooltip: l10n.knowledgeDownload,
-                      onPressed: enabled ? onDownload : null,
-                    ),
                   ],
                 ),
               ],

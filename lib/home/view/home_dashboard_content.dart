@@ -237,6 +237,12 @@ class HomeDashboardContent extends StatelessWidget {
                   (day) => DateUtils.isSameDay(day, selectedDay),
                 ),
                 today: now,
+                lessonCountForDay: (day) =>
+                    homeLessonsForDay(schedule, day).length,
+                lessonColorsForDay: (day) => [
+                  for (final lesson in homeLessonsForDay(schedule, day))
+                    lessonAccentOf(context, lesson),
+                ],
                 lessonCounts: [
                   for (final day in days)
                     homeLessonsForDay(schedule, day).length,

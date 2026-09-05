@@ -47,6 +47,7 @@ class _FreeRoomsViewState extends State<FreeRoomsView> {
         color: context.colors.accent,
         onRefresh: cubit.load,
         child: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.only(
             bottom: ninjaBottomInset(context) + AppSpacing.lg,
@@ -68,26 +69,17 @@ class _FreeRoomsViewState extends State<FreeRoomsView> {
                 onClear: () => cubit.queryChanged(''),
               ),
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  AppChip.filter(
-                    label: l10n.freeRoomsAllBuildings,
-                    selected: state.campus.isEmpty,
-                    onTap: () => cubit.campusChanged(''),
-                  ),
-                  for (final campus in state.campuses) ...[
-                    const SizedBox(width: 6),
-                    AppChip.filter(
-                      label: campus,
-                      selected: state.campus == campus,
-                      onTap: () => cubit.campusChanged(campus),
-                    ),
-                  ],
-                ],
+            AppChipRow<String>(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screen,
               ),
+              value: state.campus,
+              onChanged: cubit.campusChanged,
+              items: [
+                AppChipRowItem(value: '', label: l10n.freeRoomsAllBuildings),
+                for (final campus in state.campuses)
+                  AppChipRowItem(value: campus, label: campus),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),

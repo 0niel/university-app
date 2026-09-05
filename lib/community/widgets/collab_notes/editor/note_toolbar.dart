@@ -61,7 +61,10 @@ class _NoteToolbarState extends State<NoteToolbar> {
     return value is String ? value : null;
   }
 
+  bool get _canEdit => mounted && !widget.readOnly && !_controller.readOnly;
+
   void _toggle(Attribute<dynamic> attribute) {
+    if (!_canEdit) return;
     final active = _has(attribute);
     _controller.formatSelection(
       active ? Attribute.clone(attribute, null) : attribute,
@@ -69,6 +72,7 @@ class _NoteToolbarState extends State<NoteToolbar> {
   }
 
   void _setHeader(int level) {
+    if (!_canEdit) return;
     final current = _headerLevel();
     final target = switch (level) {
       1 => Attribute.h1,
@@ -81,6 +85,7 @@ class _NoteToolbarState extends State<NoteToolbar> {
   }
 
   void _setList(String value) {
+    if (!_canEdit) return;
     final current = _listValue();
     _controller.formatSelection(
       current == value
@@ -95,94 +100,132 @@ class _NoteToolbarState extends State<NoteToolbar> {
   }
 
   Future<void> _insertLink() async {
+    if (!_canEdit) return;
+    final bookmark = _NoteSelectionBookmark(_controller);
     final hasSelection = !_controller.selection.isCollapsed;
-    final input = await showNoteLinkSheet(
-      context,
-      showTextField: !hasSelection,
-    );
-    if (input == null || !mounted) return;
-    if (hasSelection) {
-      _controller.formatSelection(LinkAttribute(input.url));
-      return;
+    final currentLink = _controller
+        .getSelectionStyle()
+        .attributes[Attribute.link.key]
+        ?.value;
+    try {
+      final input = await showNoteLinkSheet(
+        context,
+        initialUrl: currentLink is String ? currentLink : '',
+        showTextField: !hasSelection,
+      );
+      if (input == null || !_canEdit) return;
+      bookmark.restore();
+      if (hasSelection) {
+        _controller.formatSelection(LinkAttribute(input.url));
+        return;
+      }
+      final index = _insertionIndex();
+      _controller
+        ..replaceText(
+          index,
+          0,
+          input.text,
+          TextSelection.collapsed(offset: index + input.text.length),
+        )
+        ..formatText(index, input.text.length, LinkAttribute(input.url));
+    } finally {
+      await bookmark.dispose();
     }
-    final index = _insertionIndex();
-    _controller
-      ..replaceText(
-        index,
-        0,
-        input.text,
-        TextSelection.collapsed(offset: index + input.text.length),
-      )
-      ..formatText(index, input.text.length, LinkAttribute(input.url));
   }
 
   Future<void> _pickColor({required bool highlight}) async {
-    final color = await showNoteColorSheet(
-      context,
-      title: highlight
-          ? context.l10n.noteToolbarHighlight
-          : context.l10n.noteToolbarColor,
-    );
-    if (!mounted) return;
-    final hex = color == null ? null : _colorHex(color);
-    _controller.formatSelection(
-      highlight ? BackgroundAttribute(hex) : ColorAttribute(hex),
-    );
+    if (!_canEdit) return;
+    final bookmark = _NoteSelectionBookmark(_controller);
+    final attribute = highlight ? Attribute.background : Attribute.color;
+    final value = _controller
+        .getSelectionStyle()
+        .attributes[attribute.key]
+        ?.value;
+    final hexValue = value is String
+        ? int.tryParse(value.replaceFirst('#', ''), radix: 16)
+        : null;
+    try {
+      final selection = await showNoteColorSheet(
+        context,
+        title: highlight
+            ? context.l10n.noteToolbarHighlight
+            : context.l10n.noteToolbarColor,
+        initialColor: hexValue == null ? null : Color(0xFF000000 | hexValue),
+      );
+      if (selection == null || !_canEdit) return;
+      bookmark.restore();
+      final color = selection.color;
+      final hex = color == null ? null : _colorHex(color);
+      _controller.formatSelection(
+        highlight ? BackgroundAttribute(hex) : ColorAttribute(hex),
+      );
+    } finally {
+      await bookmark.dispose();
+    }
   }
 
   String _colorHex(Color color) =>
       '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
 
   Future<void> _addImage() async {
-    final source = await showNoteImageSourceSheet(context);
-    if (source == null || !mounted) return;
-    final file = await ImagePicker().pickImage(
-      source: source,
-      imageQuality: 90,
-    );
-    if (file == null || !mounted) return;
-    final upload = await NoteImageIntake.read(file);
-    if (!mounted) return;
-    if (upload == null) {
-      _showToast(context.l10n.noteImageUploadError);
-      return;
-    }
-    _showToast(context.l10n.noteImageUploading, checked: false);
+    if (!mounted || !_canEdit) return;
+    final bookmark = _NoteSelectionBookmark(_controller);
     try {
-      final repository = context.read<CampusRepository>();
-      final url = await repository.uploadNoteMedia(
+      final source = await showNoteImageSourceSheet(context);
+      if (source == null || !mounted || !_canEdit) return;
+      final file = await ImagePicker().pickImage(
+        source: source,
+        imageQuality: 90,
+      );
+      if (file == null || !mounted || !_canEdit) return;
+      final upload = await NoteImageIntake.read(file);
+      if (!mounted || !_canEdit) return;
+      if (upload == null) {
+        _showToast(context.l10n.noteImageUploadError);
+        return;
+      }
+      _showToast(context.l10n.noteImageUploading, checked: false);
+      final url = await context.read<CampusRepository>().uploadNoteMedia(
         bytes: upload.bytes,
         contentType: upload.contentType,
         extension: upload.extension,
       );
-      if (!mounted) return;
+      if (!mounted || !_canEdit) return;
+      bookmark.restore();
       context.read<NoteEditorCubit>().insertImage(url);
     } on Exception {
       if (mounted) _showToast(context.l10n.noteImageUploadError);
+    } finally {
+      await bookmark.dispose();
     }
   }
 
   Future<void> _addDrawing() async {
-    final result = await showCollabNoteDrawingPage(context);
-    if (result == null || !mounted) return;
+    if (!mounted || !_canEdit) return;
+    final bookmark = _NoteSelectionBookmark(_controller);
     try {
-      final repository = context.read<CampusRepository>();
-      final url = await repository.uploadNoteMedia(
+      final result = await showCollabNoteDrawingPage(context);
+      if (result == null || !mounted || !_canEdit) return;
+      final url = await context.read<CampusRepository>().uploadNoteMedia(
         bytes: result.bytes,
         contentType: 'image/png',
         extension: 'png',
       );
-      if (!mounted) return;
+      if (!mounted || !_canEdit) return;
+      bookmark.restore();
       context.read<NoteEditorCubit>().insertDrawing(
         url: url,
         strokesJson: result.strokesJson,
       );
     } on Exception {
       if (mounted) _showToast(context.l10n.noteImageUploadError);
+    } finally {
+      await bookmark.dispose();
     }
   }
 
   Future<void> _toggleVoice(NoteEditorState state) async {
+    if (!_canEdit) return;
     final cubit = context.read<NoteEditorCubit>();
     if (state.voiceStatus == .listening) {
       await cubit.stopVoiceInput();
@@ -190,7 +233,7 @@ class _NoteToolbarState extends State<NoteToolbar> {
     }
     final allowed = await showNoteVoicePermissionSheet(context);
     if (!mounted) return;
-    if (!allowed) return;
+    if (!allowed || !_canEdit) return;
     final mutedHex = _colorHex(context.colors.muted);
     await cubit.startVoiceInput(mutedColorHex: mutedHex);
     if (!mounted) return;
@@ -206,168 +249,266 @@ class _NoteToolbarState extends State<NoteToolbar> {
     showNinjaToast(context, showCheck: checked, message: message);
   }
 
+  Future<void> _showActions(
+    String title,
+    List<_NoteToolbarAction> actions,
+  ) async {
+    if (!_canEdit) return;
+    final bookmark = _NoteSelectionBookmark(_controller);
+    final focus = FocusManager.instance.primaryFocus;
+    try {
+      final action = await showAppSheet<_NoteToolbarAction>(
+        context,
+        title: title,
+        child: AppListGroup(
+          children: [
+            for (final (index, action) in actions.indexed)
+              AppListRow(
+                title: action.label,
+                leading: AppLineIconWidget(action.icon),
+                trailing: action.active
+                    ? const AppLineIconWidget(AppLineIcon.check)
+                    : null,
+                showChevron: false,
+                isFirst: index == 0,
+                onTap: () =>
+                    Navigator.of(context, rootNavigator: true).pop(action),
+              ),
+          ],
+        ),
+      );
+      if (!_canEdit) return;
+      bookmark.restore();
+      if (action != null) await action.run();
+      if (_canEdit && focus?.context != null) focus!.requestFocus();
+    } finally {
+      await bookmark.dispose();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final voiceStatus = context.watch<NoteEditorCubit>().state.voiceStatus;
-    final disabled = widget.readOnly;
-    return SizedBox(
-      height: AppControlSize.iconButtonCompact + AppSpacing.md,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.screen,
-          vertical: AppSpacing.xs,
+    final voiceStatus = context.select<NoteEditorCubit, NoteVoiceStatus>(
+      (cubit) => cubit.state.voiceStatus,
+    );
+    final voiceActive = voiceStatus == .listening;
+    final style = _controller.getSelectionStyle().attributes;
+    bool has(Attribute<dynamic> attribute) => style.containsKey(attribute.key);
+    final headerLevel = style[Attribute.header.key]?.value;
+    final listValue = style[Attribute.list.key]?.value;
+    final disabled = widget.readOnly || _controller.readOnly;
+    final formatting = <_NoteToolbarAction>[
+      _NoteToolbarAction(
+        .textBold,
+        l10n.noteToolbarBold,
+        () => _toggle(Attribute.bold),
+        active: has(Attribute.bold),
+      ),
+      _NoteToolbarAction(
+        .textItalic,
+        l10n.noteToolbarItalic,
+        () => _toggle(Attribute.italic),
+        active: has(Attribute.italic),
+      ),
+      _NoteToolbarAction(
+        .textUnderline,
+        l10n.noteToolbarUnderline,
+        () => _toggle(Attribute.underline),
+        active: has(Attribute.underline),
+      ),
+      _NoteToolbarAction(
+        .textStrike,
+        l10n.noteToolbarStrike,
+        () => _toggle(Attribute.strikeThrough),
+        active: has(Attribute.strikeThrough),
+      ),
+      for (final level in [1, 2, 3])
+        _NoteToolbarAction(
+          .headerLevel,
+          switch (level) {
+            1 => l10n.noteToolbarHeading1,
+            2 => l10n.noteToolbarHeading2,
+            _ => l10n.noteToolbarHeading3,
+          },
+          () => _setHeader(level),
+          active: headerLevel == level,
         ),
-        children: [
-          NoteToolbarButton(
-            icon: .mic,
-            active: voiceStatus == .listening,
-            semanticsLabel: l10n.noteToolbarMic,
-            enabled: !disabled,
-            onTap: () => unawaited(
-              _toggleVoice(context.read<NoteEditorCubit>().state),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .image,
-            semanticsLabel: l10n.noteToolbarImage,
-            enabled: !disabled,
-            onTap: () => unawaited(_addImage()),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .brush,
-            semanticsLabel: l10n.noteToolbarDrawing,
-            enabled: !disabled,
-            onTap: () => unawaited(_addDrawing()),
-          ),
-          const NoteToolbarGap(),
-          NoteToolbarButton(
-            icon: .undo,
-            semanticsLabel: l10n.noteToolbarUndo,
-            enabled: !disabled && _controller.hasUndo,
-            onTap: _controller.undo,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .redo,
-            semanticsLabel: l10n.noteToolbarRedo,
-            enabled: !disabled && _controller.hasRedo,
-            onTap: _controller.redo,
-          ),
-          const NoteToolbarGap(),
-          NoteToolbarButton(
-            icon: .textBold,
-            active: _has(Attribute.bold),
-            semanticsLabel: l10n.noteToolbarBold,
-            enabled: !disabled,
-            onTap: () => _toggle(Attribute.bold),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .textItalic,
-            active: _has(Attribute.italic),
-            semanticsLabel: l10n.noteToolbarItalic,
-            enabled: !disabled,
-            onTap: () => _toggle(Attribute.italic),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .textUnderline,
-            active: _has(Attribute.underline),
-            semanticsLabel: l10n.noteToolbarUnderline,
-            enabled: !disabled,
-            onTap: () => _toggle(Attribute.underline),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .textStrike,
-            active: _has(Attribute.strikeThrough),
-            semanticsLabel: l10n.noteToolbarStrike,
-            enabled: !disabled,
-            onTap: () => _toggle(Attribute.strikeThrough),
-          ),
-          const NoteToolbarGap(),
-          for (final level in const [1, 2, 3]) ...[
+      _NoteToolbarAction(
+        .listBulleted,
+        l10n.noteToolbarBulletList,
+        () => _setList('bullet'),
+        active: listValue == 'bullet',
+      ),
+      _NoteToolbarAction(
+        .listNumbered,
+        l10n.noteToolbarNumberedList,
+        () => _setList('ordered'),
+        active: listValue == 'ordered',
+      ),
+      _NoteToolbarAction(
+        .listCheck,
+        l10n.noteToolbarChecklist,
+        () => _setList('unchecked'),
+        active: listValue == 'checked' || listValue == 'unchecked',
+      ),
+      _NoteToolbarAction(
+        .quote,
+        l10n.noteToolbarQuote,
+        () => _toggle(Attribute.blockQuote),
+        active: has(Attribute.blockQuote),
+      ),
+      _NoteToolbarAction(
+        .codeBlock,
+        l10n.noteToolbarCodeBlock,
+        () => _toggle(Attribute.codeBlock),
+        active: has(Attribute.codeBlock),
+      ),
+      _NoteToolbarAction(
+        .palette,
+        l10n.noteToolbarColor,
+        () => _pickColor(highlight: false),
+        active: has(Attribute.color),
+      ),
+      _NoteToolbarAction(
+        .palette,
+        l10n.noteToolbarHighlight,
+        () => _pickColor(highlight: true),
+        active: has(Attribute.background),
+      ),
+    ];
+    final inserting = <_NoteToolbarAction>[
+      _NoteToolbarAction(
+        .link,
+        l10n.noteToolbarLink,
+        _insertLink,
+        active: has(Attribute.link),
+      ),
+      _NoteToolbarAction(.image, l10n.noteToolbarImage, _addImage),
+      _NoteToolbarAction(.brush, l10n.noteToolbarDrawing, _addDrawing),
+      _NoteToolbarAction(
+        .mic,
+        l10n.noteToolbarMic,
+        () => _toggleVoice(context.read<NoteEditorCubit>().state),
+        active: voiceActive,
+      ),
+    ];
+    return TextFieldTapRegion(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final expanded = constraints.maxWidth >= 720;
+          final buttons = <Widget>[
             NoteToolbarButton(
-              icon: .headerLevel,
-              active: _headerLevel() == level,
-              semanticsLabel: switch (level) {
-                1 => l10n.noteToolbarHeading1,
-                2 => l10n.noteToolbarHeading2,
-                _ => l10n.noteToolbarHeading3,
+              icon: .undo,
+              semanticsLabel: l10n.noteToolbarUndo,
+              enabled: !disabled && _controller.hasUndo,
+              onTap: () {
+                if (_canEdit) _controller.undo();
               },
-              enabled: !disabled,
-              onTap: () => _setHeader(level),
             ),
-            const SizedBox(width: AppSpacing.sm),
-          ],
-          const NoteToolbarGap(),
-          NoteToolbarButton(
-            icon: .listBulleted,
-            active: _listValue() == 'bullet',
-            semanticsLabel: l10n.noteToolbarBulletList,
-            enabled: !disabled,
-            onTap: () => _setList('bullet'),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .listNumbered,
-            active: _listValue() == 'ordered',
-            semanticsLabel: l10n.noteToolbarNumberedList,
-            enabled: !disabled,
-            onTap: () => _setList('ordered'),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .listCheck,
-            active: _listValue() == 'unchecked' || _listValue() == 'checked',
-            semanticsLabel: l10n.noteToolbarChecklist,
-            enabled: !disabled,
-            onTap: () => _setList('unchecked'),
-          ),
-          const NoteToolbarGap(),
-          NoteToolbarButton(
-            icon: .quote,
-            active: _has(Attribute.blockQuote),
-            semanticsLabel: l10n.noteToolbarQuote,
-            enabled: !disabled,
-            onTap: () => _toggle(Attribute.blockQuote),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .codeBlock,
-            active: _has(Attribute.codeBlock),
-            semanticsLabel: l10n.noteToolbarCodeBlock,
-            enabled: !disabled,
-            onTap: () => _toggle(Attribute.codeBlock),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .link,
-            active: _has(Attribute.link),
-            semanticsLabel: l10n.noteToolbarLink,
-            enabled: !disabled,
-            onTap: () => unawaited(_insertLink()),
-          ),
-          const NoteToolbarGap(),
-          NoteToolbarButton(
-            icon: .palette,
-            semanticsLabel: l10n.noteToolbarColor,
-            enabled: !disabled,
-            onTap: () => unawaited(_pickColor(highlight: false)),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          NoteToolbarButton(
-            icon: .palette,
-            semanticsLabel: l10n.noteToolbarHighlight,
-            enabled: !disabled,
-            onTap: () => unawaited(_pickColor(highlight: true)),
-          ),
-        ],
+            NoteToolbarButton(
+              icon: .redo,
+              semanticsLabel: l10n.noteToolbarRedo,
+              enabled: !disabled && _controller.hasRedo,
+              onTap: () {
+                if (_canEdit) _controller.redo();
+              },
+            ),
+            for (final action in formatting.take(expanded ? 3 : 2))
+              NoteToolbarButton(
+                icon: action.icon,
+                semanticsLabel: action.label,
+                active: action.active,
+                enabled: !disabled,
+                onTap: () => unawaited(Future.sync(action.run)),
+              ),
+            if (expanded) ...[
+              for (final action in [
+                formatting[7],
+                formatting[9],
+                ...inserting.skip(1),
+              ])
+                NoteToolbarButton(
+                  icon: action.icon,
+                  semanticsLabel: action.label,
+                  active: action.active,
+                  enabled: !disabled,
+                  onTap: () => unawaited(Future.sync(action.run)),
+                ),
+            ],
+            NoteToolbarButton(
+              icon: .more,
+              semanticsLabel: l10n.noteToolbarFormat,
+              enabled: !disabled,
+              onTap: () =>
+                  unawaited(_showActions(l10n.noteToolbarFormat, formatting)),
+            ),
+            NoteToolbarButton(
+              icon: .plus,
+              semanticsLabel: l10n.noteToolbarInsert,
+              active: voiceActive,
+              enabled: !disabled,
+              onTap: () =>
+                  unawaited(_showActions(l10n.noteToolbarInsert, inserting)),
+            ),
+          ];
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xxs,
+            ),
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: AppSpacing.xxs,
+              children: buttons,
+            ),
+          );
+        },
       ),
     );
   }
+}
+
+class _NoteToolbarAction {
+  const _NoteToolbarAction(
+    this.icon,
+    this.label,
+    this.run, {
+    this.active = false,
+  });
+
+  final AppLineIcon icon;
+  final String label;
+  final FutureOr<void> Function() run;
+  final bool active;
+}
+
+class _NoteSelectionBookmark {
+  _NoteSelectionBookmark(this.controller) : selection = controller.selection {
+    subscription = controller.document.changes.listen((event) {
+      selection = TextSelection(
+        baseOffset: event.change.transformPosition(selection.baseOffset),
+        extentOffset: event.change.transformPosition(selection.extentOffset),
+      );
+    });
+  }
+
+  final QuillController controller;
+  TextSelection selection;
+  late final StreamSubscription<DocChange> subscription;
+
+  void restore() {
+    final end = controller.document.length - 1;
+    controller
+      ..skipRequestKeyboard = true
+      ..updateSelection(
+        TextSelection(
+          baseOffset: selection.baseOffset.clamp(0, end),
+          extentOffset: selection.extentOffset.clamp(0, end),
+        ),
+        ChangeSource.local,
+      );
+  }
+
+  Future<void> dispose() => subscription.cancel();
 }

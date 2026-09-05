@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_blocks/news_blocks.dart';
 import 'package:news_repository/news_repository.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
+import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/feed/bloc/feed_bloc.dart';
 import 'package:rtu_mirea_app/feed/view/story_viewer/story_layout.dart';
 import 'package:rtu_mirea_app/feed/view/story_viewer/story_progress_bars.dart';
@@ -22,12 +23,14 @@ class StoryViewerPage extends StatefulWidget {
     this.onOpenArticle,
     this.slideDuration = const Duration(seconds: 6),
     this.maxStories = 10,
+    this.heroTag,
   });
 
   final String sourceId;
   final ValueChanged<String>? onOpenArticle;
   final Duration slideDuration;
   final int maxStories;
+  final Object? heroTag;
 
   @override
   State<StoryViewerPage> createState() => _StoryViewerPageState();
@@ -46,6 +49,10 @@ class _StoryViewerPageState extends State<StoryViewerPage>
   bool _closing = false;
   bool _active = true;
   bool _mediaReady = false;
+  bool _mediaOpen = false;
+  bool _navigationTapPending = false;
+  double _swipeDistance = 0;
+  final _mediaHeroScope = Object();
   String? _mediaPostId;
   String? _precachedNextId;
 
@@ -102,6 +109,8 @@ class _StoryViewerPageState extends State<StoryViewerPage>
         _active &&
         !_closing &&
         !_dragging &&
+        !_mediaOpen &&
+        !_navigationTapPending &&
         _pointers == 0 &&
         _count > 0 &&
         _mediaReady &&
@@ -112,6 +121,22 @@ class _StoryViewerPageState extends State<StoryViewerPage>
 
   void _releasePointer() {
     _pointers = math.max(0, _pointers - 1);
+    _resume();
+  }
+
+  void _navigationStarted() {
+    _navigationTapPending = true;
+    _timer.stop();
+  }
+
+  void _navigationCancelled() {
+    _navigationTapPending = false;
+    _resume();
+  }
+
+  void _navigate(VoidCallback action) {
+    _navigationTapPending = false;
+    action();
     _resume();
   }
 
@@ -135,19 +160,65 @@ class _StoryViewerPageState extends State<StoryViewerPage>
         _dismiss.value > 110 ||
         (_dismiss.value > 24 && (details.primaryVelocity ?? 0) > 900);
     _closing = close;
+    if (close) {
+      _dragging = false;
+      _timer.stop();
+      unawaited(Navigator.of(context).maybePop());
+      return;
+    }
     await _dismiss.animateTo(
-      close ? MediaQuery.sizeOf(context).height : 0,
+      0,
       duration: _reducedMotion
           ? Duration.zero
-          : Duration(milliseconds: close ? 180 : 280),
+          : const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
     );
     if (!mounted) return;
     _dragging = false;
-    if (close) {
-      unawaited(Navigator.of(context).maybePop());
+    _resume();
+  }
+
+  void _swipeStart(DragStartDetails _) {
+    _dragging = true;
+    _swipeDistance = 0;
+    _timer.stop();
+  }
+
+  void _swipeEnd(DragEndDetails details) {
+    if (_closing) return;
+    _dragging = false;
+    final velocity = details.primaryVelocity ?? 0;
+    if (_swipeDistance < -48 || velocity < -450) {
+      _next();
+    } else if (_swipeDistance > 48 || velocity > 450) {
+      _prev();
     } else {
       _resume();
+    }
+  }
+
+  Future<void> _viewImage(PostBlock post) async {
+    final url = post.imageUrl;
+    if (_mediaOpen || _closing || url == null || url.isEmpty) return;
+    _mediaOpen = true;
+    _timer.stop();
+    try {
+      await showMediaViewer(
+        context,
+        items: [
+          MediaItem(
+            url: url,
+            kind: MediaKind.image,
+            title: post.title,
+            heroTag: (_mediaHeroScope, post.id),
+          ),
+        ],
+      );
+    } finally {
+      if (mounted) {
+        _mediaOpen = false;
+        _resume();
+      }
     }
   }
 
@@ -261,6 +332,13 @@ class _StoryViewerPageState extends State<StoryViewerPage>
         onVerticalDragUpdate: _dragUpdate,
         onVerticalDragEnd: (details) => unawaited(_dragEnd(details)),
         onVerticalDragCancel: () => unawaited(_dragEnd(DragEndDetails())),
+        onHorizontalDragStart: _swipeStart,
+        onHorizontalDragUpdate: (details) => _swipeDistance += details.delta.dx,
+        onHorizontalDragEnd: _swipeEnd,
+        onHorizontalDragCancel: () {
+          _dragging = false;
+          _resume();
+        },
         child: AnimatedBuilder(
           animation: _dismiss,
           builder: (context, child) {
@@ -310,6 +388,7 @@ class _StoryViewerPageState extends State<StoryViewerPage>
                           failed: state.status == FeedStatus.failure,
                           sourceName: _sourceName(context),
                           avatarUrl: _source?.avatarUrl,
+                          heroTag: widget.heroTag,
                           onClose: _close,
                           onRetry: () => context.read<FeedBloc>().add(
                             FeedRequested(category: _category),
@@ -330,8 +409,17 @@ class _StoryViewerPageState extends State<StoryViewerPage>
                           posts[index].publishedAt,
                         ),
                         avatarUrl: _source?.avatarUrl,
-                        onPrev: _prev,
-                        onNext: _next,
+                        heroTag: widget.heroTag,
+                        imageHeroTag: (_mediaHeroScope, posts[index].id),
+                        onViewImage: posts[index].imageUrl?.isNotEmpty == true
+                            ? () => _navigate(
+                                () => unawaited(_viewImage(posts[index])),
+                              )
+                            : null,
+                        onPrev: () => _navigate(_prev),
+                        onNext: () => _navigate(_next),
+                        onNavigationStart: _navigationStarted,
+                        onNavigationCancel: _navigationCancelled,
                         onClose: _close,
                         onRead: () => _read(posts[index]),
                         onMediaReady: () => _onMediaReady(posts[index].id),
@@ -370,12 +458,16 @@ class _StoryHeader extends StatelessWidget {
     required this.onClose,
     this.avatarUrl,
     this.time,
+    this.heroTag,
+    this.onViewImage,
   });
 
   final String sourceName;
   final String? avatarUrl;
   final String? time;
   final VoidCallback onClose;
+  final Object? heroTag;
+  final VoidCallback? onViewImage;
 
   @override
   Widget build(BuildContext context) {
@@ -383,27 +475,38 @@ class _StoryHeader extends StatelessWidget {
     final colors = context.colors;
     final white = colors.white;
     final time = this.time;
+    Widget avatar(Widget child) => heroTag == null
+        ? child
+        : HeroMode(
+            enabled:
+                !MediaQuery.disableAnimationsOf(context) &&
+                !MediaQuery.accessibleNavigationOf(context),
+            child: Hero(tag: heroTag!, child: child),
+          );
     return Row(
       children: [
         ExcludeSemantics(
-          child: Container(
-            width: StoryLayout.avatarSize,
-            height: StoryLayout.avatarSize,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.accent,
-              shape: BoxShape.circle,
+          child: avatar(
+            Container(
+              width: StoryLayout.avatarSize,
+              height: StoryLayout.avatarSize,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: colors.accent,
+                shape: BoxShape.circle,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: avatarUrl != null && avatarUrl!.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: avatarUrl!,
+                      fit: BoxFit.cover,
+                      width: StoryLayout.avatarSize,
+                      height: StoryLayout.avatarSize,
+                      errorWidget: (_, _, _) =>
+                          _StoryInitials(name: sourceName),
+                    )
+                  : _StoryInitials(name: sourceName),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: avatarUrl != null && avatarUrl!.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: avatarUrl!,
-                    fit: BoxFit.cover,
-                    width: StoryLayout.avatarSize,
-                    height: StoryLayout.avatarSize,
-                    errorWidget: (_, _, _) => _StoryInitials(name: sourceName),
-                  )
-                : _StoryInitials(name: sourceName),
           ),
         ),
         const SizedBox(width: AppSpacing.gap),
@@ -429,6 +532,17 @@ class _StoryHeader extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
+        if (onViewImage != null)
+          AppIconButton(
+            key: const Key('storyViewer_viewImage'),
+            icon: const AppLineIconWidget(AppLineIcon.focus),
+            tooltip: l10n.imageViewer,
+            onPressed: onViewImage,
+            tone: AppIconButtonTone.surface,
+            foregroundColor: white,
+            backgroundColor: white.withValues(alpha: .15),
+            shape: AppIconButtonShape.circle,
+          ),
         AppPressState(
           key: const Key('storyViewer_close'),
           onTap: onClose,
@@ -473,8 +587,13 @@ class _StoryScreen extends StatelessWidget {
     required this.onClose,
     required this.onRead,
     required this.onMediaReady,
+    required this.onNavigationStart,
+    required this.onNavigationCancel,
     this.time,
     this.avatarUrl,
+    this.heroTag,
+    this.imageHeroTag,
+    this.onViewImage,
   });
 
   final List<PostBlock> posts;
@@ -488,6 +607,11 @@ class _StoryScreen extends StatelessWidget {
   final VoidCallback onClose;
   final VoidCallback onRead;
   final VoidCallback onMediaReady;
+  final VoidCallback onNavigationStart;
+  final VoidCallback onNavigationCancel;
+  final Object? heroTag;
+  final Object? imageHeroTag;
+  final VoidCallback? onViewImage;
 
   @override
   Widget build(BuildContext context) {
@@ -513,10 +637,19 @@ class _StoryScreen extends StatelessWidget {
                 child: Semantics(
                   button: true,
                   label: l10n.storyPrevious,
-                  child: GestureDetector(
-                    key: const Key('storyViewer_prevZone'),
-                    behavior: HitTestBehavior.opaque,
-                    onTap: onPrev,
+                  child: Listener(
+                    onPointerDown: (_) => onNavigationStart(),
+                    onPointerCancel: (_) => onNavigationCancel(),
+                    child: GestureDetector(
+                      key: const Key('storyViewer_prevZone'),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: onPrev,
+                      onDoubleTap: onViewImage,
+                      onTapCancel: onNavigationCancel,
+                      onDoubleTapCancel: onViewImage == null
+                          ? null
+                          : onNavigationCancel,
+                    ),
                   ),
                 ),
               ),
@@ -525,10 +658,19 @@ class _StoryScreen extends StatelessWidget {
                 child: Semantics(
                   button: true,
                   label: l10n.storyNext,
-                  child: GestureDetector(
-                    key: const Key('storyViewer_nextZone'),
-                    behavior: HitTestBehavior.opaque,
-                    onTap: onNext,
+                  child: Listener(
+                    onPointerDown: (_) => onNavigationStart(),
+                    onPointerCancel: (_) => onNavigationCancel(),
+                    child: GestureDetector(
+                      key: const Key('storyViewer_nextZone'),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: onNext,
+                      onDoubleTap: onViewImage,
+                      onTapCancel: onNavigationCancel,
+                      onDoubleTapCancel: onViewImage == null
+                          ? null
+                          : onNavigationCancel,
+                    ),
                   ),
                 ),
               ),
@@ -536,20 +678,35 @@ class _StoryScreen extends StatelessWidget {
           ),
         ),
         AnimatedSwitcher(
+          layoutBuilder: (current, previous) => Stack(
+            fit: StackFit.expand,
+            children: [
+              for (final child in previous)
+                HeroMode(
+                  enabled: false,
+                  child: ExcludeSemantics(child: IgnorePointer(child: child)),
+                ),
+              ?current,
+            ],
+          ),
           duration:
               MediaQuery.disableAnimationsOf(context) ||
                   MediaQuery.accessibleNavigationOf(context)
               ? Duration.zero
               : const Duration(milliseconds: 180),
-          child: StorySlide(
-            key: ValueKey('storyViewer_slide_${post.id}'),
-            title: post.title,
-            meta: '$sourceName · $resolvedTime',
-            lead: post.description,
-            imageUrl: post.imageUrl,
-            readLabel: l10n.storyRead,
-            onRead: onRead,
-            onMediaReady: onMediaReady,
+          child: RepaintBoundary(
+            key: ValueKey('storyViewer_frame_${post.id}'),
+            child: StorySlide(
+              key: ValueKey('storyViewer_slide_${post.id}'),
+              title: post.title,
+              meta: '$sourceName · $resolvedTime',
+              lead: post.description,
+              imageUrl: post.imageUrl,
+              readLabel: l10n.storyRead,
+              onRead: onRead,
+              onMediaReady: onMediaReady,
+              imageHeroTag: imageHeroTag,
+            ),
           ),
         ),
         Positioned(
@@ -571,6 +728,8 @@ class _StoryScreen extends StatelessWidget {
                 avatarUrl: avatarUrl,
                 time: time,
                 onClose: onClose,
+                heroTag: heroTag,
+                onViewImage: onViewImage,
               ),
             ],
           ),
@@ -604,6 +763,7 @@ class _StoryStagePlaceholder extends StatelessWidget {
     required this.onClose,
     required this.onRetry,
     this.avatarUrl,
+    this.heroTag,
   });
 
   final bool pending;
@@ -612,6 +772,7 @@ class _StoryStagePlaceholder extends StatelessWidget {
   final String? avatarUrl;
   final VoidCallback onClose;
   final VoidCallback onRetry;
+  final Object? heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -667,6 +828,7 @@ class _StoryStagePlaceholder extends StatelessWidget {
                 sourceName: sourceName,
                 avatarUrl: avatarUrl,
                 onClose: onClose,
+                heroTag: heroTag,
               ),
             ],
           ),

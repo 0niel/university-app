@@ -48,6 +48,7 @@ Map<String, dynamic> _$GeoSharingSettingsToJson(_GeoSharingSettings instance) =>
 
 const _$GeoVisibilityEnumMap = {
   GeoVisibility.all: 'all',
+  GeoVisibility.students: 'students',
   GeoVisibility.none: 'none',
 };
 

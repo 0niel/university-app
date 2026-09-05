@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_horizontal_scroll_view.dart';
 import 'package:app_ui/src/widgets/app_press_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -102,9 +103,8 @@ class _NinjaTabsState<T> extends State<NinjaTabs<T>> {
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: colors.line)),
       ),
-      child: SingleChildScrollView(
+      child: AppHorizontalScrollView(
         controller: _scrollController,
-        scrollDirection: Axis.horizontal,
         clipBehavior: Clip.none,
         padding: widget.padding,
         child: Row(

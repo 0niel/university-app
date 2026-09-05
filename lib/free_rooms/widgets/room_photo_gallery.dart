@@ -32,6 +32,8 @@ class RoomPhotoGallery extends StatefulWidget {
 }
 
 class _RoomPhotoGalleryState extends State<RoomPhotoGallery> {
+  final _heroScope = Object();
+
   final _picker = ImagePicker();
   final _pageController = PageController();
   RoomPhotoGalleryStatus _status = RoomPhotoGalleryStatus.loading;
@@ -229,8 +231,12 @@ class _RoomPhotoGalleryState extends State<RoomPhotoGallery> {
     context,
     initialIndex: index,
     items: [
-      for (final photo in _photos)
-        MediaItem(url: photo.url, kind: MediaKind.image),
+      for (final (index, photo) in _photos.indexed)
+        MediaItem(
+          url: photo.url,
+          kind: MediaKind.image,
+          heroTag: (_heroScope, index, photo.id),
+        ),
     ],
   );
 
@@ -238,6 +244,7 @@ class _RoomPhotoGalleryState extends State<RoomPhotoGallery> {
   Widget build(BuildContext context) => RoomPhotoGalleryBody(
     status: _status,
     photos: _photos,
+    heroScope: _heroScope,
     index: _index,
     pageController: _pageController,
     uploadDone: _uploadDone,

@@ -104,6 +104,21 @@ void main() {
     expect(actions.where((action) => action.accented), hasLength(1));
   });
 
+  testWidgets('search scrolls away to leave room for people', (tester) async {
+    tester.view
+      ..physicalSize = const Size(390, 640)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+    final search = find.byType(AppSearchField);
+    expect(search.hitTestable(), findsOneWidget);
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -350));
+    await tester.pumpAndSettle();
+    expect(search.hitTestable(), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('cold load shows card skeletons, not a spinner', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pump();

@@ -23,6 +23,7 @@ on:
         required: true
         type: choice
         options:
+          - 5.2.0+1004201
           - 5.2.0+1002401
           - 5.2.0+1002601
           - 5.2.0+2435.13.10
@@ -67,7 +68,7 @@ jobs:
           [[ "$STAGING_RUN_ID" =~ ^[1-9][0-9]*$ ]]
           [[ "$PATCH_NUMBER" =~ ^[1-9][0-9]*$ ]]
           case "$PLATFORM:$RELEASE_VERSION" in
-            android:5.2.0+1002401|android:5.2.0+1002601|android:5.2.0+1001301|android:5.2.0+1001601|android:5.1.0+1000201)
+            android:5.2.0+1004201|android:5.2.0+1002401|android:5.2.0+1002601|android:5.2.0+1001301|android:5.2.0+1001601|android:5.1.0+1000201)
               app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
               ;;
             ios:5.2.0+2435.13.10)

@@ -72,8 +72,9 @@ void main() {
       workflow,
       contains('A release tag is required for a manual bundle upload'),
     );
-    expect(workflow, contains("github.event_name == 'schedule'"));
-    expect(workflow, contains("cron: '17,47 * * * *'"));
+    expect(workflow, isNot(contains('schedule:')));
+    expect(workflow, contains('group: google-play-internal\n'));
+    expect(workflow, contains("workflow_run.event == 'workflow_dispatch'"));
     expect(
       workflow,
       contains('github.event.workflow_run.head_sha || github.sha'),
@@ -140,7 +141,12 @@ void main() {
     );
     expect(workflow, contains('"Xcode 26.3"'));
     expect(verifySourceIndex, greaterThan(verifyIndex));
-    expect(workflow, contains('flutter analyze lib test'));
+    expect(workflow, contains('flutter analyze --no-pub lib test'));
+    expect(workflow, contains('flutter test --no-pub'));
+    expect(
+      workflow,
+      contains(r'''--flutter-version "$(jq -er '.flutter' .fvmrc)"'''),
+    );
     expect(workflow, isNot(contains('          flutter analyze\n')));
     expect(configureIosIndex, greaterThan(verifyIndex));
     expect(configureIosIndex, greaterThan(verifySourceIndex));
@@ -183,6 +189,13 @@ void main() {
     expect(workflow, contains('--interval 30'));
     expect(workflow, contains("inputs.verify_build_number == ''"));
     expect(workflow, contains("inputs.verify_build_number != ''"));
+    expect(
+      workflow,
+      contains(
+        r"runs-on: ${{ inputs.verify_build_number != '' && "
+        "'ubuntu-latest' || 'macos-15' }}",
+      ),
+    );
     expect(
       workflow,
       contains(

@@ -44,7 +44,10 @@ class CommunityDetailPage extends StatelessWidget {
           title: entry.title,
           sharePositionOrigin: box == null
               ? null
-              : box.localToGlobal(Offset.zero) & box.size,
+              : Rect.fromPoints(
+                  box.localToGlobal(Offset.zero),
+                  box.localToGlobal(box.size.bottomRight(Offset.zero)),
+                ),
         ),
       );
     } on Exception catch (_) {

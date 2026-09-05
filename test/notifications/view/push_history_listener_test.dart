@@ -19,11 +19,25 @@ class _Messaging extends Mock implements FirebaseMessaging {}
 
 class _Storage extends Mock implements Storage {}
 
+class _RefreshingNotificationsCubit extends NotificationsCubit {
+  _RefreshingNotificationsCubit({required super.userId});
+
+  int refreshCalls = 0;
+
+  @override
+  bool get hasInbox => true;
+
+  @override
+  Future<void> refresh() async {
+    refreshCalls++;
+  }
+}
+
 void main() {
   const user = User(id: 'student-a', isNewUser: false);
   const otherUser = User(id: 'student-b', isNewUser: false);
   late AppBloc app;
-  late NotificationsCubit notifications;
+  late _RefreshingNotificationsCubit notifications;
   late _Messaging messaging;
   late StreamController<RemoteMessage> foreground;
 
@@ -41,7 +55,7 @@ void main() {
       userRepository: repository,
       user: user,
     );
-    notifications = NotificationsCubit(userId: user.id);
+    notifications = _RefreshingNotificationsCubit(userId: user.id);
     foreground = StreamController<RemoteMessage>.broadcast();
   }
 
@@ -142,6 +156,79 @@ void main() {
 
     expect(notifications.state.pushes.single.id, 'push:foreground');
     expect(app.state.notificationNavigationId, 0);
+  });
+
+  testWidgets(
+    'server push ids deduplicate delivery and legacy friends open people',
+    (
+      tester,
+    ) async {
+      initialize();
+      await pump(tester);
+      for (final id in ['delivery-one', 'delivery-two']) {
+        foreground.add(
+          RemoteMessage(
+            messageId: id,
+            data: const {
+              'notification_id': 'CA8E65C8-8545-4A49-A047-3797C733BD63',
+              'type': 'friend_request',
+              'title': 'Новая заявка в друзья',
+            },
+          ),
+        );
+        await tester.pump();
+      }
+      expect(notifications.state.pushes, hasLength(1));
+      expect(
+        notifications.state.pushes.single.id,
+        'inbox:ca8e65c8-8545-4a49-a047-3797c733bd63',
+      );
+      expect(
+        notifications.state.pushes.single.route,
+        '/services/people?tab=friends',
+      );
+      expect(notifications.refreshCalls, 3);
+    },
+  );
+
+  testWidgets('invalid server ids retain the delivery id', (tester) async {
+    initialize();
+    await pump(tester);
+    foreground.add(
+      const RemoteMessage(
+        messageId: 'fallback',
+        data: {'notification_id': 'invalid', 'route': 'https://example.com'},
+      ),
+    );
+    await tester.pump();
+    expect(notifications.state.pushes.single.id, 'push:fallback');
+    expect(notifications.state.pushes.single.route, isNull);
+  });
+
+  testWidgets('refreshes on resume and polls only while foreground', (
+    tester,
+  ) async {
+    initialize();
+    tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
+    );
+    await pump(tester);
+    expect(notifications.refreshCalls, 1);
+    await tester.pump(const Duration(minutes: 1));
+    expect(notifications.refreshCalls, 2);
+    tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.paused,
+    );
+    await tester.pump(const Duration(minutes: 2));
+    expect(notifications.refreshCalls, 2);
+    tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
+    );
+    expect(notifications.refreshCalls, 3);
+    app.add(const AppUserChanged(otherUser));
+    await tester.pump();
+    await tester.pump(const Duration(minutes: 1));
+    expect(notifications.refreshCalls, 3);
   });
 
   testWidgets(

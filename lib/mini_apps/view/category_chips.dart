@@ -8,15 +8,22 @@ class _CategoryChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<MiniAppsCatalogCubit>();
-    return NinjaChipRow(
-      children: [
-        for (final value in <MiniAppCategory?>[null, ...MiniAppCategory.values])
-          NinjaChip(
-            label: miniAppCategoryLabel(context, value),
-            selected: category == value,
-            onTap: () => cubit.categoryChanged(value),
-          ),
-      ],
+    return ClipRect(
+      child: NinjaChipRow(
+        key: const ValueKey('mini-apps-categories'),
+        padding: const EdgeInsets.only(left: AppSpacing.screen),
+        children: [
+          for (final value in <MiniAppCategory?>[
+            null,
+            ...MiniAppCategory.values,
+          ])
+            NinjaChip(
+              label: miniAppCategoryLabel(context, value),
+              selected: category == value,
+              onTap: () => cubit.categoryChanged(value),
+            ),
+        ],
+      ),
     );
   }
 }

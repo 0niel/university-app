@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/search/bloc/search_bloc.dart';
@@ -19,6 +19,7 @@ class SearchView extends StatefulWidget {
 }
 
 class _SearchViewState extends State<SearchView> {
+  final _scrollKey = GlobalKey<NestedScrollViewState>();
   late final TextEditingController _controller = TextEditingController(
     text: widget.query,
   );
@@ -34,6 +35,10 @@ class _SearchViewState extends State<SearchView> {
         SearchQueryChanged(searchQuery: _controller.text),
       );
       setState(() => _query = _controller.text);
+      final scroll = _scrollKey.currentState;
+      if (scroll?.outerController.hasClients ?? false) {
+        scroll!.outerController.jumpTo(0);
+      }
     };
     _controller.addListener(_onQueryChanged);
   }
@@ -68,44 +73,47 @@ class _SearchViewState extends State<SearchView> {
         }
       },
       builder: (context, state) {
-        return Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                AppSpacing.screen,
-                math.max(
-                  AppSpacing.screenTop,
-                  MediaQuery.paddingOf(context).top + AppSpacing.md,
+        return NestedScrollView(
+          key: _scrollKey,
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.screen,
+                  math.max(
+                    AppSpacing.screenTop,
+                    MediaQuery.paddingOf(context).top + AppSpacing.md,
+                  ),
+                  AppSpacing.screen,
+                  AppSpacing.lg,
                 ),
-                AppSpacing.screen,
-                AppSpacing.lg,
-              ),
-              child: _SearchControls(
-                controller: _controller,
-                autofocus: (widget.query ?? '').isEmpty,
+                child: _SearchControls(
+                  controller: _controller,
+                  autofocus: (widget.query ?? '').isEmpty,
+                ),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.lg),
-              child: SearchModeSelect(),
-            ),
-            Expanded(
-              child: NinjaStateSwitcher(
-                child: _query.trim().isEmpty
-                    ? SearchZeroState(
-                        key: const ValueKey('search-zero'),
-                        state: state,
-                        onQuerySelected: _setQuery,
-                      )
-                    : SearchResults(
-                        key: const ValueKey('search-results'),
-                        state: state,
-                        query: _query.trim(),
-                        onQuerySelected: _setQuery,
-                      ),
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.lg),
+                child: SearchModeSelect(),
               ),
             ),
           ],
+          body: NinjaStateSwitcher(
+            child: _query.trim().isEmpty
+                ? SearchZeroState(
+                    key: const ValueKey('search-zero'),
+                    state: state,
+                    onQuerySelected: _setQuery,
+                  )
+                : SearchResults(
+                    key: const ValueKey('search-results'),
+                    state: state,
+                    query: _query.trim(),
+                    onQuerySelected: _setQuery,
+                  ),
+          ),
         );
       },
     );

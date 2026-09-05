@@ -28,5 +28,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Геопозиция нужна, чтобы видеть себя на карте и по вашему выбору делиться местоположением с друзьями или всеми студентами.</string>
 </dict>
 </plist>

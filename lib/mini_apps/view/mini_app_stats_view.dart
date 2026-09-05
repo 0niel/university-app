@@ -11,40 +11,35 @@ class MiniAppStatsView extends StatelessWidget {
     final state = context.watch<MiniAppStatsCubit>().state;
     return MiniAppScaffold(
       title: l10n.miniAppsStatsTitle,
-      body: Column(
-        crossAxisAlignment: .stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  app.name,
-                  style: AppText.title.copyWith(color: colors.ink),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  l10n.miniAppsStatsRangeDays(state.range.days),
-                  style: AppText.subtext.copyWith(color: colors.muted),
-                ),
-              ],
-            ),
+      scrollingHeader: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                app.name,
+                style: AppText.title.copyWith(color: colors.ink),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.miniAppsStatsRangeDays(state.range.days),
+                style: AppText.subtext.copyWith(color: colors.muted),
+              ),
+            ],
           ),
-          Padding(
-            padding: const .fromLTRB(
-              AppSpacing.screen,
-              14,
-              AppSpacing.screen,
-              0,
-            ),
-            child: _RangeSelector(range: state.range),
+        ),
+        Padding(
+          padding: const .fromLTRB(
+            AppSpacing.screen,
+            14,
+            AppSpacing.screen,
+            0,
           ),
-          Expanded(
-            child: _StatsContent(app: app, state: state),
-          ),
-        ],
-      ),
+          child: _RangeSelector(range: state.range),
+        ),
+      ],
+      body: _StatsContent(app: app, state: state),
     );
   }
 }

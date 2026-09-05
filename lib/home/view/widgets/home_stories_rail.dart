@@ -48,21 +48,30 @@ class HomeStoriesRail extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 itemCount: sources.length,
                 separatorBuilder: (_, _) => const SizedBox(width: 10),
-                itemBuilder: (context, index) => HomeStoryItem(
-                  source: sources[index],
-                  highlighted: !seenSourceIds.contains(
+                itemBuilder: (context, index) {
+                  final heroTag = (
+                    'story-source',
+                    context,
                     sources[index].sourceId,
-                  ),
-                  onTap: () {
-                    onSourceOpened?.call(sources[index].sourceId);
-                    unawaited(
-                      showStoryViewer(
-                        context,
-                        sourceId: sources[index].sourceId,
-                      ),
-                    );
-                  },
-                ),
+                  );
+                  return HomeStoryItem(
+                    source: sources[index],
+                    heroTag: heroTag,
+                    highlighted: !seenSourceIds.contains(
+                      sources[index].sourceId,
+                    ),
+                    onTap: () {
+                      onSourceOpened?.call(sources[index].sourceId);
+                      unawaited(
+                        showStoryViewer(
+                          context,
+                          sourceId: sources[index].sourceId,
+                          heroTag: heroTag,
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
       ),
     );
@@ -91,12 +100,14 @@ class HomeStoryItem extends StatelessWidget {
     required this.source,
     required this.highlighted,
     required this.onTap,
+    this.heroTag,
     super.key,
   });
 
   final NewsSourceItem source;
   final bool highlighted;
   final VoidCallback onTap;
+  final Object? heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +116,14 @@ class HomeStoryItem extends StatelessWidget {
         ? source.sourceId
         : source.sourceName;
     final avatar = source.avatarUrl;
+    Widget thumbnail(Widget child) => heroTag == null
+        ? child
+        : HeroMode(
+            enabled:
+                !MediaQuery.disableAnimationsOf(context) &&
+                !MediaQuery.accessibleNavigationOf(context),
+            child: Hero(tag: heroTag!, child: child),
+          );
     return AppPressable(
       onTap: onTap,
       semanticsLabel: name,
@@ -113,46 +132,49 @@ class HomeStoryItem extends StatelessWidget {
         child: Column(
           mainAxisSize: .min,
           children: [
-            Container(
-              width: 60,
-              height: 60,
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                shape: .circle,
-                color: highlighted ? colors.accent : colors.surface2,
-              ),
-              child: Container(
+            thumbnail(
+              Container(
+                width: 60,
+                height: 60,
                 padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
                   shape: .circle,
-                  color: colors.canvas,
+                  color: highlighted ? colors.accent : colors.surface2,
                 ),
-                child: ClipOval(
-                  child: avatar == null || avatar.isEmpty
-                      ? ColoredBox(
-                          color: colors.surface,
-                          child: Center(
-                            child: Text(
-                              name.trim().split(RegExp(r'\s+')).length == 1
-                                  ? name.characters
-                                        .take(2)
-                                        .toString()
-                                        .toUpperCase()
-                                  : AppAvatar.initialsOf(name),
-                              style: AppText.sans(
-                                12,
-                                FontWeight.w800,
-                              ).copyWith(color: colors.ink),
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    shape: .circle,
+                    color: colors.canvas,
+                  ),
+                  child: ClipOval(
+                    child: avatar == null || avatar.isEmpty
+                        ? ColoredBox(
+                            color: colors.surface,
+                            child: Center(
+                              child: Text(
+                                name.trim().split(RegExp(r'\s+')).length == 1
+                                    ? name.characters
+                                          .take(2)
+                                          .toString()
+                                          .toUpperCase()
+                                    : AppAvatar.initialsOf(name),
+                                style: AppText.sans(
+                                  12,
+                                  FontWeight.w800,
+                                ).copyWith(color: colors.ink),
+                              ),
                             ),
+                          )
+                        : Image.network(
+                            avatar,
+                            fit: .cover,
+                            errorBuilder: (_, _, _) =>
+                                const AppStripePlaceholder(
+                                  shape: BoxShape.circle,
+                                ),
                           ),
-                        )
-                      : Image.network(
-                          avatar,
-                          fit: .cover,
-                          errorBuilder: (_, _, _) => const AppStripePlaceholder(
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                  ),
                 ),
               ),
             ),

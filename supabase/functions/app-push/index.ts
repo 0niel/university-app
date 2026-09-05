@@ -34,6 +34,7 @@ interface PushPayload {
   body: string;
   route?: string;
   type?: string;
+  notification_id?: string;
 }
 
 Deno.serve(async (req: Request) => {
@@ -83,6 +84,7 @@ Deno.serve(async (req: Request) => {
     body: payload.body ?? "",
     route: payload.route ?? "",
     type: payload.type ?? "app_event",
+    notification_id: payload.notification_id,
   };
 
   let delivered = 0;

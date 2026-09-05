@@ -1,6 +1,7 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mini_apps_repository/mini_apps_repository.dart';
@@ -212,6 +213,44 @@ void main() {
     }
   }
 
+  testWidgets('submission opens documentation in the external browser', (
+    tester,
+  ) async {
+    const channel = MethodChannel('plugins.flutter.io/url_launcher');
+    MethodCall? launchCall;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+      call,
+    ) async {
+      launchCall = call;
+      return true;
+    });
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      ),
+    );
+    final cubit = _SubmitCubit();
+    when(() => cubit.state).thenReturn(const MiniAppSubmitState());
+    await _pump(
+      tester,
+      BlocProvider<MiniAppSubmitCubit>.value(
+        value: cubit,
+        child: const MiniAppSubmitView(),
+      ),
+      scale: 1,
+    );
+    await tester.tap(find.text('docs.mirea.ninja'));
+    await tester.pump();
+    expect(launchCall?.method, 'launch');
+    expect(
+      launchCall?.arguments,
+      containsPair('url', 'https://docs.mirea.ninja/'),
+    );
+    expect(launchCall?.arguments, containsPair('useWebView', false));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('catalog filter without owned apps offers reset, not create', (
     tester,
   ) async {
@@ -232,6 +271,7 @@ void main() {
     expect(find.text('Ничего не нашлось'), findsOneWidget);
     expect(find.text('Мини-аппов пока нет'), findsNothing);
     await tester.ensureVisible(find.text('Сбросить фильтр'));
+    await tester.pump();
     expect(
       tester
           .getRect(find.text('Сбросить фильтр'))
@@ -263,6 +303,7 @@ void main() {
     );
     final retry = find.text('Повторить');
     await tester.ensureVisible(retry);
+    await tester.pump();
     expect(
       tester.getRect(retry).overlaps(tester.getRect(find.byType(AppFab))),
       isFalse,
@@ -309,6 +350,39 @@ void main() {
     verify(() => cubit.fetchPage('/missing')).called(2);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'mini app renderer paints under the host bar and retains the safe inset',
+    (tester) async {
+      const rendererKey = ValueKey('mini-renderer-surface');
+      const controlsKey = ValueKey('mini-renderer-safe-controls');
+      double? inheritedInset;
+      await _pump(
+        tester,
+        AppBottomBarViewport(
+          bottomInset: 96,
+          child: MiniAppScaffold(
+            title: 'Mini app',
+            body: Builder(
+              builder: (context) {
+                inheritedInset = MediaQuery.paddingOf(context).bottom;
+                return const Scaffold(
+                  key: rendererKey,
+                  backgroundColor: Colors.red,
+                  body: SafeArea(child: SizedBox.expand(key: controlsKey)),
+                );
+              },
+            ),
+          ),
+        ),
+        scale: 1,
+      );
+      expect(tester.getRect(find.byKey(rendererKey)).bottom, 844);
+      expect(tester.getRect(find.byKey(controlsKey)).bottom, 844 - 96);
+      expect(inheritedInset, 96);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('inner header keeps 20px margin and 44px back target', (
     tester,

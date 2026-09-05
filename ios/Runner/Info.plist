@@ -7,9 +7,12 @@
 		<key>NSFaceIDUsageDescription</key>
 		<string>Face ID используется, чтобы разблокировать пропуск.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>Геопозиция нужна, чтобы делиться местоположением с друзьями на карте и видеть их рядом.</string>
+		<string>Геопозиция нужна, чтобы видеть себя на карте и по вашему выбору делиться местоположением с друзьями или всеми студентами.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>При включённом обмене геопозицией она обновляется на карте, даже когда приложение свёрнуто. Отключить обмен можно в настройках карты.</string>
 		<key>UIBackgroundModes</key>
 		<array>
+			<string>location</string>
 			<string>fetch</string>
 			<string>remote-notification</string>
 		</array>
@@ -1002,9 +1005,23 @@
 		<key>UIApplicationSceneManifest</key>
 		<dict>
 			<key>UIApplicationSupportsMultipleScenes</key>
-			<true/>
-			<key>UIScene Settings</key>
-			<dict/>
+			<false/>
+			<key>UISceneConfigurations</key>
+			<dict>
+				<key>UIWindowSceneSessionRoleApplication</key>
+				<array>
+					<dict>
+						<key>UISceneClassName</key>
+						<string>UIWindowScene</string>
+						<key>UISceneDelegateClassName</key>
+						<string>FlutterSceneDelegate</string>
+						<key>UISceneConfigurationName</key>
+						<string>flutter</string>
+						<key>UISceneStoryboardFile</key>
+						<string>Main</string>
+					</dict>
+				</array>
+			</dict>
 		</dict>
 	</dict>
 </plist>

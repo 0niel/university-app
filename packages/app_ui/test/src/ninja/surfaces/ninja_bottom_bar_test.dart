@@ -69,7 +69,7 @@ void main() {
       );
     });
 
-    testWidgets('fades the canvas behind the bar and reserves 102px', (
+    testWidgets('fades the canvas behind the bar and reserves 84px', (
       tester,
     ) async {
       late BuildContext captured;
@@ -99,8 +99,8 @@ void main() {
       final gradient = (fade.decoration as BoxDecoration).gradient;
       expect(gradient, isA<LinearGradient>());
       expect((gradient! as LinearGradient).colors.first, kitColors.canvas);
-      expect(NinjaBottomBar.extentOf(captured), 102);
-      expect(tester.getSize(find.byType(NinjaBottomBar)).height, 102);
+      expect(NinjaBottomBar.extentOf(captured), 84);
+      expect(tester.getSize(find.byType(NinjaBottomBar)).height, 84);
     });
 
     testWidgets('badge dots flip to onAccent on the selected item', (
@@ -206,7 +206,7 @@ void main() {
             ),
           ),
         );
-        expect(extent, scale == 1 ? 136 : 148);
+        expect(extent, scale == 1 ? 118 : 130);
         expect(tester.getSize(find.byType(NinjaBottomBar)).height, extent);
         expect(tester.takeException(), isNull);
       });

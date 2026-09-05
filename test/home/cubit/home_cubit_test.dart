@@ -53,6 +53,44 @@ void main() {
       expect: () => const [HomeState(searchCoachShown: true)],
     );
 
+    test(
+      'onboarding changes preserve dismissed coaching and stable storage',
+      () async {
+        final cubit = HomeCubit();
+        addTearDown(cubit.close);
+        expect(cubit.storagePrefix, 'HomeCubit');
+        cubit
+          ..dismissSearchCoach()
+          ..closeOnboarding();
+        expect(cubit.state.settings.onboardingShown, isTrue);
+        expect(cubit.state.searchCoachShown, isTrue);
+        cubit.resetOnboarding();
+        expect(cubit.state.settings.onboardingShown, isFalse);
+        expect(cubit.state.searchCoachShown, isTrue);
+      },
+    );
+
+    test(
+      'a fresh instance restores completed onboarding from storage',
+      () async {
+        final persisted = <String, dynamic>{};
+        when(() => storage.read(any())).thenAnswer(
+          (invocation) => persisted[invocation.positionalArguments.first],
+        );
+        when(() => storage.write(any(), any<dynamic>())).thenAnswer((
+          invocation,
+        ) async {
+          persisted[invocation.positionalArguments.first as String] =
+              invocation.positionalArguments[1];
+        });
+        final first = HomeCubit()..closeOnboarding();
+        await first.close();
+        final restored = HomeCubit();
+        addTearDown(restored.close);
+        expect(restored.state.settings.onboardingShown, isTrue);
+      },
+    );
+
     test('toJson/fromJson round-trips settings and the search coach flag', () {
       final cubit = HomeCubit();
       const state = HomeState(

@@ -7,7 +7,6 @@ import '../../tool/package_test_runtime.dart';
 
 void main() {
   late YamlMap workflow;
-  late YamlMap rootPubspec;
   late YamlMap jobs;
 
   setUpAll(() {
@@ -16,43 +15,39 @@ void main() {
               File('.github/workflows/main.yml').readAsStringSync(),
             )
             as YamlMap;
-    rootPubspec = loadYaml(File('pubspec.yaml').readAsStringSync()) as YamlMap;
     jobs = workflow['jobs'] as YamlMap;
   });
 
-  test('CI matrix covers every workspace package exactly once', () {
+  test('package matrix comes from the change planner', () {
     final packageJob = jobs['workspace-packages'] as YamlMap;
     final strategy = packageJob['strategy'] as YamlMap;
-    final matrix = strategy['matrix'] as YamlMap;
-    final packages = (matrix['package'] as YamlList).cast<String>();
-    final workspace = (rootPubspec['workspace'] as YamlList).cast<String>();
-
-    expect(packages.toSet(), hasLength(packages.length));
     expect(
-      packages.map((package) => 'packages/$package'),
-      unorderedEquals(workspace),
+      strategy['matrix'],
+      r'${{ fromJSON(needs.changes.outputs.package-matrix) }}',
     );
-    for (final package in packages) {
-      expect(File('packages/$package/pubspec.yaml').existsSync(), isTrue);
-    }
+    expect(packageJob['needs'], 'changes');
+    expect(packageJob['if'], "needs.changes.outputs.has-packages == 'true'");
+    final steps = (packageJob['steps'] as YamlList).cast<YamlMap>();
+    final runner = steps.singleWhere(
+      (step) => step['name'] == 'Analyze and test packages',
+    );
+    expect(runner['run'], 'python tool/ci_packages.py');
+    expect(
+      (runner['env'] as YamlMap)['CI_PACKAGES'],
+      r'${{ toJSON(matrix.packages) }}',
+    );
   });
 
-  test('package jobs analyze and test their selected package', () {
-    final packageJob = jobs['workspace-packages'] as YamlMap;
-    final steps = (packageJob['steps'] as YamlList).cast<YamlMap>();
-    final analyze = steps.singleWhere(
-      (step) => step['name'] == 'Analyze package',
+  test('aggregate check rejects failed and cancelled jobs', () {
+    final check = jobs['checks'] as YamlMap;
+    expect(check['if'], 'always()');
+    expect(
+      (check['needs'] as YamlList).cast<String>(),
+      unorderedEquals(jobs.keys.where((key) => key != 'checks')),
     );
-    final test = steps.singleWhere((step) => step['name'] == 'Test package');
-    const packageDirectory = r'packages/${{ matrix.package }}';
-
-    expect(analyze['working-directory'], packageDirectory);
-    expect(analyze['run'], contains('dart analyze --fatal-warnings'));
-    expect(test['working-directory'], packageDirectory);
-    expect(test['run'], contains('flutter test'));
-    expect(test['run'], contains('dart test'));
-    expect(test['run'], contains('tool/package_test_runtime.dart'));
-    expect(test['run'], contains('flutter test --no-pub'));
+    final command = ((check['steps'] as YamlList).single as YamlMap)['run'];
+    expect(command, contains('.changes.result == "success"'));
+    expect(command, contains('.result == "success" or .result == "skipped"'));
   });
 
   test('edge job validates ingestion and mini-app notifications', () {
@@ -205,22 +200,17 @@ void main() {
     });
   });
 
-  test('root analysis resolves standalone Dart projects before running', () {
+  test('standalone projects have their own analysis and test jobs', () {
     final flutterJob = jobs['flutter'] as YamlMap;
-    final steps = (flutterJob['steps'] as YamlList).cast<YamlMap>().toList();
-    final analyzeIndex = steps.indexWhere(
-      (step) => step['name'] == 'Analyze',
-    );
-    expect(analyzeIndex, greaterThanOrEqualTo(0));
-
-    for (final directory in ['wear', 'tools/schedule_fetcher']) {
-      final installIndex = steps.indexWhere(
-        (step) =>
-            step['working-directory'] == directory &&
-            (step['run'] as String? ?? '').contains('pub get'),
-      );
-      expect(installIndex, greaterThanOrEqualTo(0));
-      expect(installIndex, lessThan(analyzeIndex));
+    final steps = (flutterJob['steps'] as YamlList).cast<YamlMap>();
+    final analyze = steps.singleWhere((step) => step['name'] == 'Analyze');
+    expect(analyze['run'], contains('for directory in lib test tool tools'));
+    expect(steps.any((step) => step['working-directory'] == 'wear'), isFalse);
+    for (final name in ['wear', 'schedule-fetcher']) {
+      final job = jobs[name] as YamlMap;
+      final standaloneSteps = (job['steps'] as YamlList).cast<YamlMap>();
+      expect(standaloneSteps.any((step) => step['name'] == 'Analyze'), isTrue);
+      expect(standaloneSteps.any((step) => step['name'] == 'Test'), isTrue);
     }
   });
 

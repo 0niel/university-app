@@ -7,6 +7,7 @@ Future<void> showPollResultsSheet(BuildContext context, {required Poll poll}) {
   return showAppSheet<void>(
     context,
     title: poll.title,
+    maxHeightFraction: .92,
     child: PollResults(poll: poll),
   );
 }
@@ -27,10 +28,13 @@ class PollResults extends StatelessWidget {
         icon: const AppLineIconWidget(AppLineIcon.chart),
       );
     }
+    final questions = [...poll.questions]
+      ..sort((a, b) => a.position.compareTo(b.position));
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final (index, question) in poll.questions.indexed) ...[
+        for (final (index, question) in questions.indexed) ...[
           if (index > 0) const SizedBox(height: AppSpacing.sectionGap),
           _QuestionResult(question: question),
         ],
@@ -76,7 +80,15 @@ class _ChoiceResults extends StatelessWidget {
   Widget build(BuildContext context) {
     final total = question.totalVotes;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (total == 0) ...[
+          Text(
+            context.l10n.pollsResultsNoAnswers,
+            style: AppText.caption.copyWith(color: context.colors.muted),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
         for (final (index, option) in question.options.indexed) ...[
           if (index > 0) const SizedBox(height: AppSpacing.sm),
           _OptionResultBar(
@@ -127,8 +139,6 @@ class _OptionResultBar extends StatelessWidget {
             Expanded(
               child: Text(
                 option.text,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
                 style: AppText.bodyStrong.copyWith(
                   color: mine ? colors.accent : colors.ink,
                 ),
@@ -186,17 +196,14 @@ class _TextResults extends StatelessWidget {
       children: [
         for (final (index, answer) in question.textAnswers.indexed) ...[
           if (index > 0) const SizedBox(height: AppSpacing.sm),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: colors.surface2,
-              borderRadius: BorderRadius.circular(AppRadius.tile),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              child: Text(
-                answer,
-                style: AppText.body.copyWith(color: colors.ink),
-              ),
+          AppCard(
+            color: colors.surface2,
+            radius: AppRadius.tile,
+            padding: const EdgeInsets.all(AppSpacing.md),
+            width: double.infinity,
+            child: Text(
+              answer,
+              style: AppText.body.copyWith(color: colors.ink),
             ),
           ),
         ],
@@ -214,7 +221,13 @@ class _RatingResults extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
-    final average = question.ratingAverage ?? 0;
+    final average = question.ratingAverage;
+    if (question.ratingCount == 0 || average == null) {
+      return Text(
+        l10n.pollsResultsNoAnswers,
+        style: AppText.caption.copyWith(color: colors.muted),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

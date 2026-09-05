@@ -16,6 +16,7 @@ import 'package:schedule_repository/schedule_repository.dart';
 Future<void> showNotificationsSheet(BuildContext context) async {
   final cubit = context.read<NotificationsCubit>();
   final changes = context.read<ScheduleChangesCubit>().state.changes;
+  unawaited(cubit.refresh());
   await showAppSheet<void>(
     context,
     showClose: false,
@@ -65,7 +66,20 @@ class NotificationsSheet extends StatelessWidget {
                         unread,
                       ),
               ),
-              if (feed.isEmpty)
+              if (feed.isEmpty && state.isLoading)
+                const Padding(
+                  padding: EdgeInsets.all(AppSpacing.xlg),
+                  child: Center(child: AppSpinner()),
+                )
+              else if (feed.isEmpty && state.loadFailed)
+                AppEmptyState(
+                  title: l10n.loadingError,
+                  actionLabel: l10n.retry,
+                  onAction: () => unawaited(
+                    context.read<NotificationsCubit>().refresh(),
+                  ),
+                )
+              else if (feed.isEmpty)
                 AppEmptyState.compact(
                   title: l10n.notificationsEmptyTitle,
                   subtitle: l10n.notificationsEmptySubtitle,
@@ -76,6 +90,7 @@ class NotificationsSheet extends StatelessWidget {
                     for (final item in feed)
                       NotificationRow(
                         notification: item,
+                        isUnread: !state.isRead(item.id),
                         timeLabel: notificationAgeLabel(
                           l10n,
                           item.createdAt,

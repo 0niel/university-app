@@ -6,15 +6,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/community/cubit/mentorship/mentorship.dart';
 import 'package:rtu_mirea_app/community/models/models.dart';
+import 'package:rtu_mirea_app/community/widgets/mentorship/mentor_detail_sheet.dart';
 import 'package:rtu_mirea_app/community/widgets/mentorship/mentor_profile_sheet.dart';
 import 'package:rtu_mirea_app/community/widgets/mentorship/mentor_request_sheet.dart';
 import 'package:rtu_mirea_app/community/widgets/mentorship/mentorship_body.dart';
-import 'package:rtu_mirea_app/community/widgets/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MentorshipView extends StatelessWidget {
   const MentorshipView({super.key});
+
+  Future<void> _openMentor(BuildContext context, Mentor mentor) async {
+    final proceed = await showAppSheet<bool>(
+      context,
+      title: mentor.fullName,
+      child: MentorDetailSheet(mentor: mentor),
+    );
+    if (proceed != true || !context.mounted) return;
+    if (mentor.isMe) {
+      await _editProfile(context);
+    } else {
+      await _request(context, mentor);
+    }
+  }
 
   Future<void> _editProfile(BuildContext context) async {
     final cubit = context.read<MentorshipCubit>();
@@ -23,7 +37,8 @@ class MentorshipView extends StatelessWidget {
       title: cubit.state.isMentor
           ? context.l10n.mentorshipMyProfileTitle
           : context.l10n.mentorshipBecomeTitle,
-      subtitle: context.l10n.mentorshipBecomeSubtitle,
+      scrollable: false,
+      maxHeightFraction: .92,
       child: BlocProvider.value(
         value: cubit,
         child: MentorProfileSheet(current: cubit.state.myProfile),
@@ -36,6 +51,8 @@ class MentorshipView extends StatelessWidget {
     final sent = await showAppSheet<bool>(
       context,
       title: context.l10n.mentorshipRequestSheetTitle,
+      scrollable: false,
+      maxHeightFraction: .92,
       child: BlocProvider.value(
         value: cubit,
         child: MentorRequestSheet(mentor: mentor),
@@ -106,26 +123,22 @@ class MentorshipView extends StatelessWidget {
           _showError(context, context.l10n.mentorshipRefreshError),
       builder: (context, state) => Scaffold(
         backgroundColor: context.colors.canvas,
-        body: Column(
-          children: [
-            NinjaCommunityHeader(
-              title: context.l10n.mentorshipTitle,
-              subtitle: context.l10n.mentorshipHeaderSubtitle(
-                state.mentors.length,
-              ),
+        body: MentorshipBody(
+          header: AppInnerHeader(
+            onBack: () => Navigator.of(context).maybePop(),
+            backSemanticsLabel: context.l10n.back,
+            title: context.l10n.mentorshipTitle,
+            subtitle: context.l10n.mentorshipHeaderSubtitle(
+              state.mentors.length,
             ),
-            Expanded(
-              child: MentorshipBody(
-                onEditProfile: () => unawaited(_editProfile(context)),
-                onRequest: (mentor) => unawaited(_request(context, mentor)),
-                onReply: (request) => unawaited(_reply(context, request)),
-                onAction: (request, action) =>
-                    unawaited(_act(context, request, action)),
-                onOpenTelegram: (handle) =>
-                    unawaited(_openTelegram(context, handle)),
-              ),
-            ),
-          ],
+          ),
+          onEditProfile: () => unawaited(_editProfile(context)),
+          onRequest: (mentor) => unawaited(_request(context, mentor)),
+          onOpenMentor: (mentor) => unawaited(_openMentor(context, mentor)),
+          onReply: (request) => unawaited(_reply(context, request)),
+          onAction: (request, action) =>
+              unawaited(_act(context, request, action)),
+          onOpenTelegram: (handle) => unawaited(_openTelegram(context, handle)),
         ),
       ),
     );

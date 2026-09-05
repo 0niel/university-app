@@ -10,7 +10,8 @@ class CollabNotesSkeleton extends StatelessWidget {
     return AppSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
       child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
         padding: EdgeInsets.fromLTRB(
           AppSpacing.screen,
           AppSpacing.zero,

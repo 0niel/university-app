@@ -12,7 +12,8 @@ class CollabNotesFailure extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
       children: [
         const SizedBox(height: AppSpacing.xxxlg),

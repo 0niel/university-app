@@ -54,9 +54,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: NinjaToastHost(
-              child: SingleChildScrollView(
-                child: PollRunnerSheet(poll: value, cubit: cubit),
-              ),
+              child: PollRunnerSheet(poll: value, cubit: cubit),
             ),
           ),
         ),
@@ -449,6 +447,84 @@ void main() {
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
       'Подтверждённый ответ',
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('modal steps remain reachable above the keyboard at 200% text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 240);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetViewInsets);
+    final value = poll.copyWith(
+      questions: const [
+        PollQuestion(
+          id: 'text',
+          text: 'Расскажи подробнее',
+          kind: PollQuestionKind.text,
+        ),
+        PollQuestion(
+          id: 'rating',
+          position: 1,
+          text: 'Оцени встречу',
+          kind: PollQuestionKind.rating,
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.darkTheme,
+        locale: const Locale('ru'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const TextScaler.linear(2),
+            disableAnimations: true,
+          ),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () =>
+                  showPollRunnerSheet(context, poll: value, cubit: cubit),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    final scroll = find
+        .descendant(
+          of: find.byType(CustomScrollView),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.scrollUntilVisible(
+      find.byType(TextField),
+      100,
+      scrollable: scroll,
+    );
+    await tester.enterText(find.byType(TextField), 'Ответ с клавиатуры');
+    final next = find.widgetWithText(AppButton, 'Далее');
+    await tester.scrollUntilVisible(next, 100, scrollable: scroll);
+    await tester.pumpAndSettle();
+    expect(tester.getBottomLeft(next).dy, lessThanOrEqualTo(460));
+    await tester.tap(next);
+    await tester.pumpAndSettle();
+    expect(find.text('2 из 2'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('2 из 2')).dy, greaterThanOrEqualTo(0));
+    expect(tester.state<ScrollableState>(scroll).position.pixels, 0);
+    final animation = tester.widget<TweenAnimationBuilder<double>>(
+      find.byType(TweenAnimationBuilder<double>),
+    );
+    expect(animation.duration, Duration.zero);
     expect(tester.takeException(), isNull);
   });
 }

@@ -42,11 +42,8 @@ class _StatsBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.card),
-          ),
+        NinjaCard(
+          padding: EdgeInsets.zero,
           child: SizedBox(
             height: 260,
             child: Padding(

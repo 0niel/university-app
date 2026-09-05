@@ -9,7 +9,6 @@ import 'package:rtu_mirea_app/common/utils/ninja_initials.dart';
 import 'package:rtu_mirea_app/community/cubit/mentorship/mentorship.dart';
 import 'package:rtu_mirea_app/community/models/models.dart';
 import 'package:rtu_mirea_app/community/view/mentorship_labels.dart';
-import 'package:rtu_mirea_app/community/widgets/mentorship/mentorship_choice_chip.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
@@ -30,6 +29,7 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
         MentorWhenSlot.week.wireValue,
   );
   var _failed = false;
+  var _submitting = false;
 
   MentorWhenSlot _slotFor(String key) =>
       MentorWhenSlot.values.firstWhereOrNull((slot) => slot.wireValue == key) ??
@@ -42,7 +42,18 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
   }
 
   Future<void> _send() async {
-    setState(() => _failed = false);
+    if (_submitting ||
+        _topic.isEmpty ||
+        context.read<MentorshipCubit>().state.pendingMentorIds.contains(
+          widget.mentor.userId,
+        )) {
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _failed = false;
+      _submitting = true;
+    });
     final sent = await context.read<MentorshipCubit>().sendRequest(
       MentorRequestDraft(
         mentorUserId: widget.mentor.userId,
@@ -52,6 +63,7 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
       ),
     );
     if (!mounted) return;
+    setState(() => _submitting = false);
     if (sent) {
       Navigator.of(context).pop(true);
     } else {
@@ -61,121 +73,94 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final sending = context.select<MentorshipCubit, bool>(
+    final stateSending = context.select<MentorshipCubit, bool>(
       (cubit) => cubit.state.pendingMentorIds.contains(widget.mentor.userId),
     );
+    final sending = stateSending || _submitting;
     final slotKeys = UniversityConfig.current.mentorWhenSlotKeys;
-    return SingleChildScrollView(
-      child: Column(
-        spacing: 16,
-        crossAxisAlignment: .start,
+    final fields = <Widget>[
+      if (_failed)
+        AppBanner(
+          message: context.l10n.mentorshipRequestError,
+          tone: .danger,
+        ),
+      _mentorSummary(context),
+      AppFieldLabel(context.l10n.mentorshipTopicLabel),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
         children: [
-          if (_failed)
-            AppBanner(
-              message: context.l10n.mentorshipRequestError,
-              tone: .danger,
+          for (final topic in widget.mentor.topics)
+            NinjaChip(
+              label: mentorTopicLabel(context.l10n, topic),
+              selected: _topic == topic,
+              enabled: !sending,
+              onTap: () => setState(() => _topic = topic),
             ),
-          _mentorSummary(context),
-          _label(context, context.l10n.mentorshipTopicLabel),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final topic in widget.mentor.topics)
-                MentorshipChoiceChip(
-                  label: topic,
-                  selected: _topic == topic,
-                  onPressed: () => setState(() => _topic = topic),
-                ),
-            ],
-          ),
-          _label(context, context.l10n.mentorshipWhenLabel),
-          Column(
-            children: [
-              for (final (index, slotKey) in slotKeys.indexed)
-                AppRadioRow(
-                  title: mentorWhenLabel(context.l10n, slotKey),
-                  subtitle: slotKey == 'tonight'
-                      ? context.l10n.mentorshipWhenTonightHint
-                      : null,
-                  selected: _whenSlot == _slotFor(slotKey),
-                  isFirst: index == 0,
-                  onTap: sending
-                      ? null
-                      : () => setState(() => _whenSlot = _slotFor(slotKey)),
-                ),
-            ],
-          ),
-          _label(context, context.l10n.mentorshipMessageLabel),
-          NinjaInput.multiline(
-            controller: _message,
-            minLines: 2,
-            maxLines: 4,
-            maxLength: 2000,
-            enabled: !sending,
-            placeholder: context.l10n.mentorshipMessageHint,
-          ),
-          _priceHint(context),
-          NinjaButton.primary(
-            label: sending
-                ? context.l10n.teamFinderSending
-                : context.l10n.mentorshipSendRequest,
-            expanded: true,
-            size: NinjaButtonSize.large,
-            loading: sending,
-            onPressed: sending || _topic.isEmpty
-                ? null
-                : () => unawaited(_send()),
-          ),
         ],
       ),
+      AppFieldLabel(context.l10n.mentorshipWhenLabel),
+      Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        children: [
+          for (final slotKey in slotKeys)
+            NinjaChip(
+              label: mentorWhenLabel(context.l10n, slotKey),
+              selected: _whenSlot == _slotFor(slotKey),
+              enabled: !sending,
+              onTap: sending
+                  ? null
+                  : () => setState(() => _whenSlot = _slotFor(slotKey)),
+            ),
+        ],
+      ),
+      AppInputField.multiline(
+        label: context.l10n.mentorshipMessageLabel,
+        controller: _message,
+        minLines: 2,
+        maxLines: 4,
+        maxLength: 2000,
+        enabled: !sending,
+        placeholder: context.l10n.mentorshipMessageHint,
+      ),
+      AppButton.primary(
+        key: const Key('mentorRequest_send'),
+        label: sending
+            ? context.l10n.teamFinderSending
+            : context.l10n.mentorshipSendRequest,
+        expanded: true,
+        size: AppButtonSize.large,
+        loading: sending,
+        onPressed: sending || _topic.isEmpty ? null : () => unawaited(_send()),
+      ),
+    ];
+    return CustomScrollView(
+      key: const Key('mentorRequest_scroll'),
+      shrinkWrap: true,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      slivers: [
+        SliverList.separated(
+          itemCount: fields.length,
+          itemBuilder: (_, index) => fields[index],
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+        ),
+      ],
     );
   }
 
   Widget _mentorSummary(BuildContext context) {
-    return Container(
-      padding: const .all(16),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: .circular(AppRadius.card),
-      ),
-      child: Row(
-        spacing: 12,
-        children: [
-          NinjaAvatar(
+    return AppListGroup(
+      children: [
+        AppListRow(
+          title: widget.mentor.fullName,
+          subtitle: widget.mentor.bio.isEmpty ? null : widget.mentor.bio,
+          leading: NinjaAvatar(
             initials: ninjaInitials(widget.mentor.fullName),
             size: 42,
           ),
-          Expanded(
-            child: Text(
-              widget.mentor.fullName,
-              style: AppText.body.copyWith(color: context.colors.ink),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
-
-  Widget _priceHint(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      padding: const .all(16),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: .circular(AppRadius.card),
-      ),
-      child: Text(
-        widget.mentor.price == 0
-            ? context.l10n.mentorshipFreeSession
-            : context.l10n.mentorshipPaidSession(widget.mentor.price),
-        style: AppText.captionSmall.copyWith(color: colors.muted),
-      ),
-    );
-  }
-
-  Widget _label(BuildContext context, String label) => Text(
-    label,
-    style: AppText.captionSmall.copyWith(color: context.colors.muted),
-  );
 }

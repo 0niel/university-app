@@ -15,6 +15,7 @@ export 'story_viewer_page.dart';
 Future<void> showStoryViewer(
   BuildContext context, {
   required String sourceId,
+  Object? heroTag,
 }) {
   final feedBloc = context.read<FeedBloc>();
   final categoriesBloc = context.read<CategoriesBloc>();
@@ -40,16 +41,23 @@ Future<void> showStoryViewer(
         ],
         child: StoryViewerPage(
           sourceId: sourceId,
+          heroTag: heroTag,
           onOpenArticle: (articleId) {
             if (!context.mounted) return;
             unawaited(ArticleRoute(articleId: articleId).push<void>(context));
           },
         ),
       ),
-      transitionsBuilder: (_, animation, _, child) => FadeTransition(
-        opacity: CurvedAnimation(parent: animation, curve: NinjaMotion.enter),
-        child: child,
-      ),
+      transitionsBuilder: (_, animation, _, child) {
+        final curved = animation.drive(CurveTween(curve: NinjaMotion.enter));
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: .96, end: 1).animate(curved),
+            child: child,
+          ),
+        );
+      },
     ),
   );
 }

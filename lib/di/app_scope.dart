@@ -28,6 +28,7 @@ import 'package:rtu_mirea_app/main/bootstrap/hydrated_storage_initializer.dart';
 import 'package:rtu_mirea_app/main/bootstrap/package_info_initializer.dart';
 import 'package:rtu_mirea_app/main/bootstrap/shared_preferences_initializer.dart';
 import 'package:rtu_mirea_app/main/bootstrap/supabase_initializer.dart';
+import 'package:rtu_mirea_app/notifications/data/notification_inbox_repository.dart';
 import 'package:schedule_exporter_repository/schedule_exporter_repository.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:secure_storage/secure_storage.dart';
@@ -46,6 +47,7 @@ abstract class AppScope implements Scope {
   CampusRepository get campusRepository;
   StudyGroupsRepository get studyGroupsRepository;
   FriendsRepository get friendsRepository;
+  NotificationInboxRepository get notificationInboxRepository;
   GamificationRepository get gamificationRepository;
   ScheduleExporterRepository get scheduleExporterRepository;
   ScheduleRepository get scheduleRepository;
@@ -268,6 +270,10 @@ class AppScopeContainer extends ScopeContainer implements AppScope {
       organizationId: _universityConfigDep.get.organizationId,
     ),
   );
+  late final Dep<NotificationInboxRepository> _notificationInboxRepositoryDep =
+      dep(
+        () => SupabaseNotificationInboxRepository(_supabaseClientDep.get),
+      );
   late final Dep<StudyGroupsRepository> _studyGroupsRepositoryDep = dep(
     () => StudyGroupsRepository(
       supabase: _supabaseClientDep.get,
@@ -347,6 +353,9 @@ class AppScopeContainer extends ScopeContainer implements AppScope {
       _gamificationRepositoryDep.get;
   @override
   FriendsRepository get friendsRepository => _friendsRepositoryDep.get;
+  @override
+  NotificationInboxRepository get notificationInboxRepository =>
+      _notificationInboxRepositoryDep.get;
   @override
   CampusRepository get campusRepository => _campusRepositoryDep.get;
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:news_blocks/news_blocks.dart';
 import 'package:rtu_mirea_app/article/widgets/article_block_view.dart';
 import 'package:rtu_mirea_app/article/widgets/article_content_model.dart';
+import 'package:rtu_mirea_app/article/widgets/article_media.dart';
 import 'package:rtu_mirea_app/article/widgets/article_related.dart';
 import 'package:rtu_mirea_app/article/widgets/article_source_card.dart';
 import 'package:rtu_mirea_app/feed/widgets/widgets.dart';
@@ -13,10 +14,12 @@ class ArticleBody extends StatelessWidget {
     required this.model,
     super.key,
     this.related = const <NewsBlock>[],
+    this.sourceUri,
   });
 
   final ArticleContentModel model;
   final List<NewsBlock> related;
+  final Uri? sourceUri;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +28,12 @@ class ArticleBody extends StatelessWidget {
     final source = model.source;
     final publishedAt = model.publishedAt;
     final lead = model.lead;
+    final cover = articleImageUrl(model.imageUrl, sourceUri: sourceUri);
+    final gallery = articleGallery(
+      cover: model.imageUrl,
+      blocks: model.body,
+      sourceUri: sourceUri,
+    );
     final metaStyle = AppText.subtextStrong.copyWith(color: colors.muted);
 
     return Column(
@@ -80,19 +89,26 @@ class ArticleBody extends StatelessWidget {
             style: AppText.lead.copyWith(color: colors.muted, height: 1.5),
           ),
         ],
-        const SizedBox(height: AppSpacing.screen),
-        FeedImage(
-          key: const Key('article_cover'),
-          imageUrl: model.imageUrl,
-          radius: AppRadius.card,
-          height: 220,
-          width: double.infinity,
-        ),
+        if (cover != null) ...[
+          const SizedBox(height: AppSpacing.screen),
+          FeedImage(
+            key: const Key('article_cover'),
+            imageUrl: cover,
+            gallery: gallery,
+            radius: AppRadius.card,
+            height: 220,
+            width: double.infinity,
+          ),
+        ],
         if (model.body.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.screen),
           for (var i = 0; i < model.body.length; i++) ...[
             if (i > 0) const SizedBox(height: AppSpacing.sectionGap),
-            ArticleBlockView(block: model.body[i]),
+            ArticleBlockView(
+              block: model.body[i],
+              gallery: gallery,
+              sourceUri: sourceUri,
+            ),
           ],
         ],
         if (model.hashtags.isNotEmpty) ...[

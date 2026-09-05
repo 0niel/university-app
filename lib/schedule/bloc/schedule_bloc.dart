@@ -30,7 +30,6 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     ScheduleWidgetUpdater? widgetUpdater,
     ConnectivityClient? connectivityClient,
     SyncPolicy Function()? syncPolicy,
-    this._authRetryDelay = const Duration(milliseconds: 500),
   }) : _widgetUpdater =
            widgetUpdater ??
            const ScheduleWidgetUpdater(HomeScreenWidgetService()),
@@ -53,8 +52,35 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<ScheduleSelected>(_onScheduleSelected);
     on<ScheduleDeleteRequested>(_onScheduleDeleteRequested);
     on<ScheduleReordered>(_onScheduleReordered);
+    on<_ScheduleUserChanged>(_onScheduleUserChanged);
+    on<_RemoteScheduleRestored>((event, emit) async {
+      if (_preferencesRepository?.currentUserId != event.userId ||
+          _activeUserId != event.userId ||
+          state.selectedSchedule != event.previous) {
+        return;
+      }
+      _selectionOwnerId = event.userId;
+      _lastPushedDescriptor = jsonEncode(_descriptorOf(event.selected));
+      emit(state.copyWith(selectedSchedule: event.selected));
+      _persistSelectionOwner();
+      await _onSelectedScheduleRefreshRequested(
+        const SelectedScheduleRefreshRequested(manual: true),
+        emit,
+      );
+    });
 
-    unawaited(restoreSelectedScheduleFromRemote());
+    final preferences = _preferencesRepository;
+    if (preferences != null) {
+      _authSubscription = preferences.userIdChanges.listen(
+        (userId) {
+          if (!isClosed) add(_ScheduleUserChanged(userId));
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          if (!isClosed) addError(error, stackTrace);
+        },
+      );
+      add(_ScheduleUserChanged(preferences.currentUserId));
+    }
   }
 
   static const _selectedSchedulePreferenceKey = 'selected_schedule';
@@ -62,55 +88,106 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   final ScheduleRepository _scheduleRepository;
   final PreferencesRepository? _preferencesRepository;
 
-  final Duration _authRetryDelay;
   final ScheduleWidgetUpdater _widgetUpdater;
   final ConnectivityClient _connectivityClient;
   final SyncPolicy Function() _syncPolicyBuilder;
 
+  @override
+  String get storagePrefix => 'ScheduleBloc';
+
+  StreamSubscription<String?>? _authSubscription;
+  String? _selectionOwnerId;
+  String? _activeUserId;
+  String? _lastPushedDescriptor;
+  int _userGeneration = 0;
+  Future<void> _pendingPush = Future<void>.value();
+
+  void _onScheduleUserChanged(
+    _ScheduleUserChanged event,
+    Emitter<ScheduleState> emit,
+  ) {
+    if (_activeUserId == event.userId) return;
+    _activeUserId = event.userId;
+    _userGeneration += 1;
+    _lastPushedDescriptor = null;
+    final userId = event.userId;
+    if (userId == null) return;
+    final previousOwner = _selectionOwnerId;
+    if (previousOwner != null && previousOwner != userId) {
+      _selectionOwnerId = userId;
+      emit(const ScheduleState());
+      _persistSelectionOwner();
+    }
+    unawaited(restoreSelectedScheduleFromRemote());
+  }
+
   Future<void> restoreSelectedScheduleFromRemote() async {
     final preferences = _preferencesRepository;
     if (preferences == null) return;
-    var attempts = 0;
-    while (!preferences.hasAuthenticatedUser) {
-      attempts += 1;
-      if (isClosed || attempts > 20) return;
-      await Future<void>.delayed(_authRetryDelay);
+    final userId = preferences.currentUserId;
+    if (userId == null || isClosed) return;
+    final previous = state.selectedSchedule;
+    final generation = _userGeneration;
+    if (previous != null && _selectionOwnerId == userId) {
+      _pushSelectedSchedule(state.selectedSchedule);
+      return;
     }
-    if (state.selectedSchedule != null) return;
 
     try {
       final entry = await preferences.get(_selectedSchedulePreferenceKey);
       final value = entry?.value;
-      if (value == null || isClosed || state.selectedSchedule != null) return;
+      if (isClosed ||
+          preferences.currentUserId != userId ||
+          _activeUserId != userId ||
+          generation != _userGeneration) {
+        return;
+      }
 
-      final name = value['name'] as String?;
-      if (name == null || name.isEmpty) return;
-      final uid = value['uid'] as String?;
+      if (value == null || state.selectedSchedule != previous) {
+        _selectionOwnerId = userId;
+        _persistSelectionOwner();
+        _pushSelectedSchedule(state.selectedSchedule);
+        return;
+      }
 
-      switch (value['type']) {
-        case 'group':
-          add(
-            ScheduleRequested(
-              group: Group(name: name, uid: uid),
-            ),
-          );
-        case 'teacher':
-          add(
-            TeacherScheduleRequested(
-              teacher: Teacher(name: name, uid: uid),
-            ),
-          );
-        case 'classroom':
-          add(
-            ClassroomScheduleRequested(
-              classroom: Classroom(name: name, uid: uid),
-            ),
-          );
+      final name = value['name'];
+      final uid = value['uid'];
+      if (name is! String ||
+          name.trim().isEmpty ||
+          (uid != null && uid is! String)) {
+        return;
+      }
+      final selected = switch (value['type']) {
+        'group' => SelectedGroupSchedule(
+          group: Group(name: name, uid: uid as String?),
+          schedule: const [],
+        ),
+        'teacher' => SelectedTeacherSchedule(
+          teacher: Teacher(name: name, uid: uid as String?),
+          schedule: const [],
+        ),
+        'classroom' => SelectedClassroomSchedule(
+          classroom: Classroom(name: name, uid: uid as String?),
+          schedule: const [],
+        ),
+        _ => null,
+      };
+      if (selected != null) {
+        add(_RemoteScheduleRestored(userId, selected, previous));
       }
     } on PreferencesFailure catch (_) {}
   }
 
-  String? _lastPushedDescriptor;
+  void _persistSelectionOwner() {
+    unawaited(
+      HydratedBloc.storage.write(storageToken, toJson(state)).catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        if (!isClosed) addError(error, stackTrace);
+      }),
+    );
+  }
 
   UID _idOf(SelectedSchedule selected) => switch (selected) {
     SelectedGroupSchedule(:final group) => group.uid ?? group.name,
@@ -144,24 +221,40 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   @override
   void onChange(Change<ScheduleState> change) {
     super.onChange(change);
+    _pushSelectedSchedule(change.nextState.selectedSchedule);
+  }
 
+  void _pushSelectedSchedule(SelectedSchedule? selected) {
     final preferences = _preferencesRepository;
-    if (preferences == null || !preferences.hasAuthenticatedUser) return;
+    final userId = preferences?.currentUserId;
+    if (preferences == null ||
+        userId == null ||
+        userId != _selectionOwnerId ||
+        userId != _activeUserId) {
+      return;
+    }
 
-    final descriptor = _descriptorOf(change.nextState.selectedSchedule);
+    final descriptor = _descriptorOf(selected);
     if (descriptor == null) return;
     final encoded = jsonEncode(descriptor);
-    if (encoded == _lastPushedDescriptor) return;
-    _lastPushedDescriptor = encoded;
-
-    unawaited(
-      preferences.set(_selectedSchedulePreferenceKey, descriptor).catchError((
-        Object error,
-        StackTrace stackTrace,
-      ) {
-        addError(error, stackTrace);
-      }),
-    );
+    final generation = _userGeneration;
+    _pendingPush = _pendingPush.then((_) async {
+      if (isClosed ||
+          generation != _userGeneration ||
+          preferences.currentUserId != userId ||
+          encoded == _lastPushedDescriptor) {
+        return;
+      }
+      try {
+        await preferences.set(_selectedSchedulePreferenceKey, descriptor);
+        if (generation == _userGeneration &&
+            preferences.currentUserId == userId) {
+          _lastPushedDescriptor = encoded;
+        }
+      } on Object catch (error, stackTrace) {
+        if (!isClosed) addError(error, stackTrace);
+      }
+    });
   }
 
   Future<void> _onScheduleRequested(
@@ -170,6 +263,21 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   ) async {
     final group = event.group;
     final id = group.uid ?? group.name;
+    final makeActive = _shouldActivate(event.makeActive);
+    if (makeActive) {
+      _selectRequestedSchedule(
+        SelectedGroupSchedule(
+          group: group,
+          schedule:
+              state.groupsSchedule
+                  .where((entry) => entry.$1 == id)
+                  .firstOrNull
+                  ?.$3 ??
+              const [],
+        ),
+        emit,
+      );
+    }
     await _runLoad(emit, () async {
       final parts = (await _scheduleRepository.getSchedule(group: id)).data;
       return state.copyWith(
@@ -179,11 +287,11 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
           (id, group, parts),
         ],
         scheduleSyncedAt: _touchSync(id),
-        selectedSchedule: _shouldActivate(event.makeActive)
+        selectedSchedule: makeActive
             ? SelectedGroupSchedule(group: group, schedule: parts)
             : state.selectedSchedule,
       );
-    });
+    }, claimSelection: makeActive);
   }
 
   Future<void> _onTeacherScheduleRequested(
@@ -192,6 +300,21 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   ) async {
     final teacher = event.teacher;
     final id = teacher.uid ?? teacher.name;
+    final makeActive = _shouldActivate(event.makeActive);
+    if (makeActive) {
+      _selectRequestedSchedule(
+        SelectedTeacherSchedule(
+          teacher: teacher,
+          schedule:
+              state.teachersSchedule
+                  .where((entry) => entry.$1 == id)
+                  .firstOrNull
+                  ?.$3 ??
+              const [],
+        ),
+        emit,
+      );
+    }
     await _runLoad(emit, () async {
       final parts = (await _scheduleRepository.getTeacherSchedule(
         teacher: id,
@@ -203,11 +326,11 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
           (id, teacher, parts),
         ],
         scheduleSyncedAt: _touchSync(id),
-        selectedSchedule: _shouldActivate(event.makeActive)
+        selectedSchedule: makeActive
             ? SelectedTeacherSchedule(teacher: teacher, schedule: parts)
             : state.selectedSchedule,
       );
-    });
+    }, claimSelection: makeActive);
   }
 
   Future<void> _onClassroomScheduleRequested(
@@ -216,6 +339,21 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   ) async {
     final classroom = event.classroom;
     final id = classroom.uid ?? classroom.name;
+    final makeActive = _shouldActivate(event.makeActive);
+    if (makeActive) {
+      _selectRequestedSchedule(
+        SelectedClassroomSchedule(
+          classroom: classroom,
+          schedule:
+              state.classroomsSchedule
+                  .where((entry) => entry.$1 == id)
+                  .firstOrNull
+                  ?.$3 ??
+              const [],
+        ),
+        emit,
+      );
+    }
     await _runLoad(emit, () async {
       final parts = (await _scheduleRepository.getClassroomSchedule(
         classroom: id,
@@ -227,18 +365,32 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
           (id, classroom, parts),
         ],
         scheduleSyncedAt: _touchSync(id),
-        selectedSchedule: _shouldActivate(event.makeActive)
+        selectedSchedule: makeActive
             ? SelectedClassroomSchedule(
                 classroom: classroom,
                 schedule: parts,
               )
             : state.selectedSchedule,
       );
-    });
+    }, claimSelection: makeActive);
   }
 
   bool _shouldActivate(bool makeActive) =>
       makeActive || state.selectedSchedule == null;
+
+  void _selectRequestedSchedule(
+    SelectedSchedule selected,
+    Emitter<ScheduleState> emit,
+  ) {
+    final ownerChanged = _claimSelectionForCurrentUser();
+    emit(
+      _cacheRefreshedSchedule(selected).copyWith(
+        selectedSchedule: selected,
+        status: .loading,
+      ),
+    );
+    if (ownerChanged) _persistSelectionOwner();
+  }
 
   Map<UID, DateTime> _touchSync(UID id) => {
     ...state.scheduleSyncedAt,
@@ -247,8 +399,11 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
 
   Future<void> _runLoad(
     Emitter<ScheduleState> emit,
-    Future<ScheduleState> Function() load,
-  ) async {
+    Future<ScheduleState> Function() load, {
+    bool claimSelection = false,
+  }) async {
+    final generation = _userGeneration;
+    final selected = state.selectedSchedule;
     emit(state.copyWith(status: .loading));
     try {
       final next = (await load()).copyWith(
@@ -256,21 +411,48 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         lastSyncedAt: DateTime.now(),
         isOffline: false,
       );
+      if (generation != _userGeneration ||
+          emit.isDone ||
+          (claimSelection && state.selectedSchedule != selected)) {
+        return;
+      }
+      final ownerChanged =
+          (claimSelection || next.selectedSchedule != state.selectedSchedule) &&
+          _claimSelectionForCurrentUser();
       emit(next);
+      if (ownerChanged) _persistSelectionOwner();
       if (next.selectedSchedule case final selected?) {
         await _widgetUpdater.updateWidgetsFromSelectedSchedule(selected);
       }
     } on Exception catch (error, stackTrace) {
+      if (generation != _userGeneration ||
+          emit.isDone ||
+          (claimSelection && state.selectedSchedule != selected)) {
+        return;
+      }
       emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
     }
+  }
+
+  bool _claimSelectionForCurrentUser() {
+    final userId = _preferencesRepository?.currentUserId;
+    if (userId == null ||
+        userId != _activeUserId ||
+        userId == _selectionOwnerId) {
+      return false;
+    }
+    _selectionOwnerId = userId;
+    return true;
   }
 
   void _onScheduleSelected(
     ScheduleSelected event,
     Emitter<ScheduleState> emit,
   ) {
+    final ownerChanged = _claimSelectionForCurrentUser();
     emit(state.copyWith(selectedSchedule: event.selectedSchedule));
+    if (ownerChanged) _persistSelectionOwner();
     add(const SelectedScheduleRefreshRequested(manual: true));
   }
 
@@ -345,13 +527,20 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     SelectedScheduleRefreshRequested event,
     Emitter<ScheduleState> emit,
   ) async {
+    final generation = _userGeneration;
     final selected = state.selectedSchedule;
     if (selected == null) {
       emit(state.copyWith(status: .loaded));
       return;
     }
 
-    if (!event.manual && !await _autoRefreshAllowed()) {
+    final refreshAllowed = event.manual || await _autoRefreshAllowed();
+    if (generation != _userGeneration ||
+        state.selectedSchedule != selected ||
+        emit.isDone) {
+      return;
+    }
+    if (!refreshAllowed) {
       emit(state.copyWith(status: .loaded));
       await _updateWidgets(selected);
       return;
@@ -359,6 +548,11 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
 
     try {
       final refreshed = await _refetchSelected(selected);
+      if (generation != _userGeneration ||
+          state.selectedSchedule != selected ||
+          emit.isDone) {
+        return;
+      }
       if (refreshed == null) {
         await _updateWidgets(selected);
         return;
@@ -377,8 +571,13 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
       }
 
       await _widgetUpdater.updateWidgetsFromSelectedSchedule(refreshed);
+      if (generation != _userGeneration ||
+          state.selectedSchedule != selected ||
+          emit.isDone) {
+        return;
+      }
       emit(
-        state.copyWith(
+        _cacheRefreshedSchedule(refreshed).copyWith(
           status: .loaded,
           selectedSchedule: refreshed,
           lastSyncedAt: DateTime.now(),
@@ -387,9 +586,47 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         ),
       );
     } on Exception catch (error, stackTrace) {
+      if (generation != _userGeneration ||
+          state.selectedSchedule != selected ||
+          emit.isDone) {
+        return;
+      }
       _emitRefreshFailure(emit);
       addError(error, stackTrace);
     }
+  }
+
+  ScheduleState _cacheRefreshedSchedule(SelectedSchedule selected) {
+    final id = _idOf(selected);
+    return switch (selected) {
+      SelectedGroupSchedule(:final group, :final schedule) => state.copyWith(
+        groupsSchedule: [
+          for (final entry in state.groupsSchedule)
+            if (entry.$1 == id) (id, group, schedule) else entry,
+          if (!state.groupsSchedule.any((entry) => entry.$1 == id))
+            (id, group, schedule),
+        ],
+      ),
+      SelectedTeacherSchedule(:final teacher, :final schedule) =>
+        state.copyWith(
+          teachersSchedule: [
+            for (final entry in state.teachersSchedule)
+              if (entry.$1 == id) (id, teacher, schedule) else entry,
+            if (!state.teachersSchedule.any((entry) => entry.$1 == id))
+              (id, teacher, schedule),
+          ],
+        ),
+      SelectedClassroomSchedule(:final classroom, :final schedule) =>
+        state.copyWith(
+          classroomsSchedule: [
+            for (final entry in state.classroomsSchedule)
+              if (entry.$1 == id) (id, classroom, schedule) else entry,
+            if (!state.classroomsSchedule.any((entry) => entry.$1 == id))
+              (id, classroom, schedule),
+          ],
+        ),
+      SelectedCustomSchedule() => state,
+    };
   }
 
   Future<bool> _autoRefreshAllowed() async {
@@ -463,8 +700,20 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   }
 
   @override
-  ScheduleState fromJson(Map<String, dynamic> json) => .fromJson(json);
+  ScheduleState fromJson(Map<String, dynamic> json) {
+    _selectionOwnerId = json['selectionOwnerId'] as String?;
+    return ScheduleState.fromJson(json);
+  }
 
   @override
-  Map<String, dynamic> toJson(ScheduleState state) => state.toJson();
+  Map<String, dynamic> toJson(ScheduleState state) => {
+    ...state.toJson(),
+    'selectionOwnerId': _selectionOwnerId,
+  };
+
+  @override
+  Future<void> close() async {
+    await _authSubscription?.cancel();
+    return super.close();
+  }
 }

@@ -13,6 +13,8 @@ import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/onboarding/widgets/widgets.dart';
+import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
+import 'package:rtu_mirea_app/schedule/models/selected_schedule.dart';
 import 'package:rtu_mirea_app/tour/tour.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
@@ -38,6 +40,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   var _groupQuery = '';
   var _identityRevision = 0;
   var _identityRequired = true;
+  var _groupEdited = false;
   var _finishing = false;
 
   bool get _identityComplete =>
@@ -61,7 +64,9 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
       final repository = context.read<GamificationRepository>();
       final organizationId = context.read<UniversityConfig>().organizationId;
       await repository.ensureAcademicProfile(organizationId);
-      final overview = await repository.getProfileOverview(organizationId);
+      final overview = await repository
+          .getProfileOverview(organizationId)
+          .timeout(const Duration(seconds: 8));
       if (!mounted ||
           revision != _identityRevision ||
           context.read<AppBloc?>()?.state.user.id != userId) {
@@ -70,12 +75,50 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
       setState(() {
         _existingName = overview.academic.fullName?.trim();
         _existingHandle = overview.academic.handle?.trim();
+        if (!_groupEdited) {
+          final savedGroup = overview.academic.group?.trim();
+          final selected = context
+              .read<ScheduleBloc?>()
+              ?.state
+              .selectedSchedule;
+          _selectedGroup = switch (selected) {
+            SelectedGroupSchedule(:final group)
+                when savedGroup == null ||
+                    savedGroup.isEmpty ||
+                    group.name == savedGroup =>
+              group,
+            _ when savedGroup != null && savedGroup.isNotEmpty => Group(
+              name: savedGroup,
+            ),
+            _ => null,
+          };
+          _groupQuery = _selectedGroup?.name ?? _groupQuery;
+        }
         if (_stage == _Stage.welcome || _stage == _Stage.group) {
           _identityRequired =
               !(context.read<AppBloc?>()?.state.user.isGuest ?? false) &&
               !_identityComplete;
         }
       });
+      final group = _selectedGroup;
+      final schedule = context.read<ScheduleBloc?>();
+      if (!_groupEdited &&
+          group != null &&
+          schedule != null &&
+          schedule.state.selectedSchedule == null) {
+        schedule.add(ScheduleRequested(group: group));
+      }
+      if (_stage == _Stage.welcome &&
+          !_groupEdited &&
+          !_finishing &&
+          _identityComplete &&
+          (overview.academic.group?.trim().isNotEmpty ?? false) &&
+          userId != null &&
+          !context.read<HomeCubit>().state.settings.onboardingShown &&
+          !(context.read<AppBloc?>()?.state.user.isGuest ?? true)) {
+        context.read<HomeCubit>().closeOnboarding();
+        context.go('/feed');
+      }
     } on Exception catch (error, stackTrace) {
       log(
         'Onboarding identity preload failed',
@@ -192,8 +235,14 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
             totalSteps: _totalSteps,
             initialQuery: _groupQuery,
             initialSelected: _selectedGroup,
-            onQueryChanged: (query) => _groupQuery = query,
-            onSelected: (group) => _selectedGroup = group,
+            onQueryChanged: (query) {
+              _groupEdited = true;
+              _groupQuery = query;
+            },
+            onSelected: (group) {
+              _groupEdited = true;
+              _selectedGroup = group;
+            },
             onBack: () => _go(_Stage.welcome),
             onNext: _afterGroup,
             onSkip: () => unawaited(_finish()),

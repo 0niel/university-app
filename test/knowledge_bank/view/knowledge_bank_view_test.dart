@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
+import 'package:rtu_mirea_app/common/media_viewer/widgets/media_image_page.dart';
 import 'package:rtu_mirea_app/knowledge_bank/knowledge_bank.dart';
 import 'package:rtu_mirea_app/knowledge_bank/view/knowledge_bank_list.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -16,6 +18,10 @@ import 'package:shared_preferences_platform_interface/shared_preferences_platfor
 
 class MockKnowledgeBankCubit extends MockCubit<KnowledgeBankState>
     implements KnowledgeBankCubit {}
+
+class _MockCampusRepository extends Mock implements CampusRepository {}
+
+class _MockAppBloc extends MockBloc<AppEvent, AppState> implements AppBloc {}
 
 class _ViewPreferences extends InMemorySharedPreferencesStore {
   _ViewPreferences({this.failReads = false, this.failWrites = false})
@@ -180,6 +186,177 @@ void main() {
       cubit = MockKnowledgeBankCubit();
     });
 
+    testWidgets('sort sheet closes on the root navigator and keeps the page', (
+      tester,
+    ) async {
+      when(() => cubit.state).thenReturn(
+        const KnowledgeBankState(status: KnowledgeBankStatus.populated),
+      );
+      await tester.pumpWidget(
+        _wrap(
+          Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute<void>(
+              builder: (_) => BlocProvider<KnowledgeBankCubit>.value(
+                value: cubit,
+                child: const KnowledgeBankView(),
+              ),
+            ),
+          ),
+          reduceMotion: true,
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.bySemanticsLabel('Сортировка'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Новые'));
+      await tester.pumpAndSettle();
+      expect(find.byType(KnowledgeBankView), findsOneWidget);
+      expect(find.text('Сортировка'), findsNothing);
+      expect(find.text('Новые'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('signed-out upload does not open the file picker sheet', (
+      tester,
+    ) async {
+      final appBloc = _MockAppBloc();
+      when(() => appBloc.state).thenReturn(const AppState());
+      when(() => cubit.state).thenReturn(const KnowledgeBankState());
+      await tester.pumpWidget(
+        _wrap(
+          BlocProvider<AppBloc>.value(
+            value: appBloc,
+            child: BlocProvider<KnowledgeBankCubit>.value(
+              value: cubit,
+              child: const NinjaToastHost(child: KnowledgeBankView()),
+            ),
+          ),
+          reduceMotion: true,
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Загрузить').first);
+      await tester.pump();
+      expect(find.byType(MaterialBatchUploadSheet), findsNothing);
+      expect(
+        find.text('Войдите и попробуйте загрузить ещё раз'),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets(
+      'image thumbnail opens the signed original in the image viewer',
+      (
+        tester,
+      ) async {
+        const material = StudyMaterial(
+          id: 'image',
+          title: 'Фото доски',
+          fileName: 'board.png',
+          previewPath: 'board-preview.png',
+          mimeType: 'image/png',
+          hasFile: true,
+        );
+        final uri = Uri.parse('https://example.com/signed/board.png');
+        when(() => cubit.state).thenReturn(
+          const KnowledgeBankState(
+            status: KnowledgeBankStatus.populated,
+            materials: [material],
+            previewUrls: {
+              'board-preview.png': 'https://example.com/preview.png',
+            },
+          ),
+        );
+        when(() => cubit.materialAccess(material)).thenAnswer(
+          (_) async => const MaterialAccess(canDownload: true, price: 0),
+        );
+        when(() => cubit.materialUrl(material)).thenAnswer((_) async => uri);
+        when(() => cubit.materialOpened(material)).thenAnswer((_) async {});
+        await tester.pumpWidget(
+          _wrap(
+            BlocProvider<KnowledgeBankCubit>.value(
+              value: cubit,
+              child: const KnowledgeBankView(),
+            ),
+            reduceMotion: true,
+          ),
+        );
+        await tester.pump();
+        final hero = tester.widget<Hero>(
+          find.descendant(
+            of: find.byType(MaterialThumbnail),
+            matching: find.byType(Hero),
+          ),
+        );
+        await tester.tap(find.byType(MaterialThumbnail));
+        await tester.pump();
+        await tester.pump();
+        expect(find.byType(MediaImagePage), findsOneWidget);
+        expect(
+          tester
+              .widget<MediaViewerPage>(find.byType(MediaViewerPage))
+              .items
+              .single
+              .heroTag,
+          hero.tag,
+        );
+        expect(
+          tester.widget<MediaImagePage>(find.byType(MediaImagePage)).url,
+          uri.toString(),
+        );
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
+
+    testWidgets(
+      'search scrolls away and upload opens from the initial header',
+      (
+        tester,
+      ) async {
+        final repository = _MockCampusRepository();
+        when(() => cubit.state).thenReturn(
+          KnowledgeBankState(
+            status: KnowledgeBankStatus.populated,
+            materials: [
+              for (var i = 0; i < 30; i++)
+                StudyMaterial(id: '$i', title: 'Материал $i'),
+            ],
+          ),
+        );
+        await tester.pumpWidget(
+          _wrap(
+            RepositoryProvider<CampusRepository>.value(
+              value: repository,
+              child: BlocProvider<KnowledgeBankCubit>.value(
+                value: cubit,
+                child: const KnowledgeBankView(),
+              ),
+            ),
+            reduceMotion: true,
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('Загрузить').hitTestable(), findsOneWidget);
+        await tester.tap(find.text('Загрузить'));
+        await tester.pumpAndSettle();
+        expect(find.byType(MaterialBatchUploadSheet), findsOneWidget);
+        Navigator.of(
+          tester.element(find.byType(MaterialBatchUploadSheet)),
+        ).pop();
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AppSearchBar).hitTestable(), findsOneWidget);
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, -650));
+        await tester.pumpAndSettle();
+        expect(find.byType(AppSearchBar).hitTestable(), findsNothing);
+        expect(find.text('Материал 29'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets(
       'cold load does not expose fake zero totals',
       (tester) async {
@@ -256,7 +433,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(NinjaEmptyState),
-          matching: find.text('Залить'),
+          matching: find.text('Загрузить'),
         ),
         findsOneWidget,
       );

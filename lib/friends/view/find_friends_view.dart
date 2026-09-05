@@ -130,39 +130,43 @@ class _FindFriendsViewState extends State<FindFriendsView> {
       backgroundColor: colors.canvas,
       body: SafeArea(
         top: false,
-        child: Column(
-          children: [
-            NinjaFindFriendsHeader(
-              title: context.l10n.friendsAddTitle,
-              closeLabel: context.l10n.friendsClose,
-              onClose: () => Navigator.of(context).maybePop(),
-            ),
-            Padding(
-              padding: const .fromLTRB(
-                AppSpacing.screen,
-                24,
-                AppSpacing.screen,
-                14,
+        child: CustomScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          slivers: [
+            SliverToBoxAdapter(
+              child: NinjaFindFriendsHeader(
+                title: context.l10n.friendsAddTitle,
+                closeLabel: context.l10n.friendsClose,
+                onClose: () => Navigator.of(context).maybePop(),
               ),
-              child: Hero(
-                tag: 'find-friends-search',
-                child: Material(
-                  color: Colors.transparent,
-                  child: AppSearchField(
-                    controller: _controller,
-                    onChanged: _onQueryChanged,
-                    hintText: context.l10n.friendsSearchHint,
-                    onCanvas: true,
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const .fromLTRB(
+                  AppSpacing.screen,
+                  24,
+                  AppSpacing.screen,
+                  14,
+                ),
+                child: Hero(
+                  tag: 'find-friends-search',
+                  child: Material(
+                    color: Colors.transparent,
+                    child: AppSearchField(
+                      controller: _controller,
+                      onChanged: _onQueryChanged,
+                      hintText: context.l10n.friendsSearchHint,
+                      onCanvas: true,
+                    ),
                   ),
                 ),
               ),
             ),
-            Expanded(
-              child: BlocBuilder<FindFriendsCubit, FindFriendsState>(
-                builder: (context, state) => SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const .only(bottom: 24),
-                  child: NinjaStateSwitcher(
+            SliverPadding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+              sliver: SliverToBoxAdapter(
+                child: BlocBuilder<FindFriendsCubit, FindFriendsState>(
+                  builder: (context, state) => NinjaStateSwitcher(
                     child: state.hasQuery
                         ? NinjaFindFriendsResults(
                             key: const ValueKey('results'),

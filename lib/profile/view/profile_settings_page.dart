@@ -129,7 +129,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         else ...[
           if (_showSearch)
             SliverPersistentHeader(
-              pinned: true,
               delegate: SettingsSearchDelegate(
                 hint: l10n.search,
                 controller: _searchController,

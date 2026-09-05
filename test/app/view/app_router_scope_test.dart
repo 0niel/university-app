@@ -28,6 +28,7 @@ import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/nfc_pass.dart';
 import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
+import 'package:rtu_mirea_app/notifications/data/notification_inbox_repository.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
@@ -44,6 +45,8 @@ class _Users extends Mock implements UserRepository {}
 class _Preferences extends Mock implements PreferencesRepository {}
 
 class _Friends extends Mock implements FriendsRepository {}
+
+class _Inbox extends Mock implements NotificationInboxRepository {}
 
 class _Gamification extends Mock implements GamificationRepository {}
 
@@ -87,6 +90,7 @@ void main() {
   late _Users users;
   late _Preferences preferences;
   late _Friends friends;
+  late _Inbox inbox;
   late _Gamification gamification;
   late _LocalNotifications localNotifications;
   late _Watch watch;
@@ -112,6 +116,10 @@ void main() {
     preferences = _Preferences();
     when(() => preferences.get(any())).thenAnswer((_) async => null);
     friends = _Friends();
+    inbox = _Inbox();
+    when(() => inbox.load(any())).thenAnswer(
+      (_) async => const NotificationInboxSnapshot(items: []),
+    );
     gamification = _Gamification();
     when(
       () => gamification.ensureAcademicProfile(any()),
@@ -167,6 +175,7 @@ void main() {
       RepositoryProvider<UserRepository>.value(value: users),
       RepositoryProvider<PreferencesRepository>.value(value: preferences),
       RepositoryProvider<FriendsRepository>.value(value: friends),
+      RepositoryProvider<NotificationInboxRepository>.value(value: inbox),
       RepositoryProvider<GamificationRepository>.value(value: gamification),
       RepositoryProvider<LocalNotificationsRepository>.value(
         value: localNotifications,
@@ -359,6 +368,7 @@ void main() {
 
     app.add(const AppUserChanged(otherUser));
     await tester.pumpAndSettle();
+    await tester.pump();
     expect(tester.takeException(), isNull);
     final nextRouter = tester.widget<AppRouter>(find.byType(AppRouter)).router;
     final nextContext = tester.element(find.byType(AppRouter));
@@ -367,6 +377,9 @@ void main() {
     expect(nextRouter, isNot(same(firstRouter)));
     expect(firstView.mounted, isFalse);
     expect(firstHistory.isClosed, isTrue);
+    await tester.runAsync(
+      () => firstGeo.stream.drain<void>().timeout(const Duration(seconds: 1)),
+    );
     expect(firstGeo.isClosed, isTrue);
     expect(nextHistory.state.userId, otherUser.id);
     expect(nextHistory.state.pushes, isEmpty);

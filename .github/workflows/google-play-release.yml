@@ -1,8 +1,6 @@
 name: Google Play Internal Release
 
 on:
-  schedule:
-    - cron: '17,47 * * * *'
   workflow_run:
     workflows:
       - Beta Release
@@ -30,16 +28,16 @@ permissions:
   contents: read
 
 concurrency:
-  group: google-play-internal-${{ github.event.workflow_run.head_sha || inputs.release_tag || github.sha }}
+  group: google-play-internal
   cancel-in-progress: false
 
 jobs:
   publish:
     if: >-
-      github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'workflow_run' &&
+      (github.event.workflow_run.event == 'workflow_run' ||
+      github.event.workflow_run.event == 'workflow_dispatch') &&
       github.event.workflow_run.head_branch == 'master')
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -49,7 +47,9 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
       - name: Verify publishing configuration
         env:
@@ -83,11 +83,6 @@ jobs:
             )"
           fi
           if [[ -z "$tag" ]]; then
-            if [[ "$GITHUB_EVENT_NAME" == "schedule" ]]; then
-              printf 'No beta release matches the current revision; skipping upload\n'
-              printf 'available=false\n' >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
             printf 'Matching beta release is unavailable\n' >&2
             exit 1
           fi

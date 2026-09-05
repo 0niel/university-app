@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auth_client/auth_client.dart';
 import 'package:supabase_authentication_client/src/supabase_auth_callback_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -11,15 +13,26 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
 
   @override
   Stream<AuthenticationUser> get user {
-    return _supabaseAuth.onAuthStateChange.map((data) {
-      final session = data.session;
-
-      if (session == null) {
-        return AuthenticationUser.anonymous;
-      }
-
-      return session.user.toUser;
-    });
+    return Stream<AuthenticationUser>.multi((controller) {
+      final subscription = _supabaseAuth.onAuthStateChange.listen(
+        (data) => controller.add(
+          data.session?.user.toUser ?? AuthenticationUser.anonymous,
+        ),
+        onError: (Object error, StackTrace stackTrace) {
+          controller.add(
+            _supabaseAuth.currentSession?.user.toUser ??
+                AuthenticationUser.anonymous,
+          );
+        },
+        onDone: controller.close,
+      );
+      controller
+        ..onCancel = subscription.cancel
+        ..add(
+          _supabaseAuth.currentSession?.user.toUser ??
+              AuthenticationUser.anonymous,
+        );
+    }).distinct();
   }
 
   @override

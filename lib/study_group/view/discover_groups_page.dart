@@ -24,6 +24,7 @@ class DiscoverGroupsPage extends StatefulWidget {
 }
 
 class _DiscoverGroupsPageState extends State<DiscoverGroupsPage> {
+  final _scrollKey = GlobalKey<NestedScrollViewState>();
   late final StudyGroupsRepository _repository = context
       .read<StudyGroupsRepository>();
   final _controller = TextEditingController();
@@ -49,6 +50,10 @@ class _DiscoverGroupsPageState extends State<DiscoverGroupsPage> {
   }
 
   void _onQueryChanged(String query) {
+    final scroll = _scrollKey.currentState;
+    if (scroll?.outerController.hasClients ?? false) {
+      scroll!.outerController.jumpTo(0);
+    }
     _debounce?.cancel();
     _debounce = Timer(
       const Duration(milliseconds: 300),
@@ -122,30 +127,32 @@ class _DiscoverGroupsPageState extends State<DiscoverGroupsPage> {
       backgroundColor: colors.canvas,
       body: SafeArea(
         bottom: false,
-        child: Column(
-          spacing: 12,
-          children: [
-            CommunityPageHeader(
-              title: l10n.studyGroupDiscoverTitle,
-              subtitle: l10n.studyGroupDiscoverSubtitle,
-            ),
-            Padding(
-              padding: const .symmetric(
-                horizontal: AppSpacing.screen,
+        child: NestedScrollView(
+          key: _scrollKey,
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverToBoxAdapter(
+              child: CommunityPageHeader(
+                title: l10n.studyGroupDiscoverTitle,
+                subtitle: l10n.studyGroupDiscoverSubtitle,
               ),
-              child: NinjaInput(
-                controller: _controller,
-                onChanged: _onQueryChanged,
-                placeholder: l10n.studyGroupDiscoverSearchHint,
-                leadingIcon: AppLineIconWidget(
-                  .search,
-                  size: 17,
-                  color: colors.muted,
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const .fromLTRB(
+                  AppSpacing.screen,
+                  12,
+                  AppSpacing.screen,
+                  12,
+                ),
+                child: AppSearchBar(
+                  controller: _controller,
+                  onChanged: _onQueryChanged,
+                  hintText: l10n.studyGroupDiscoverSearchHint,
                 ),
               ),
             ),
-            Expanded(child: NinjaStateSwitcher(child: _body(context))),
           ],
+          body: NinjaStateSwitcher(child: _body(context)),
         ),
       ),
     );
@@ -185,6 +192,7 @@ class _DiscoverGroupsPageState extends State<DiscoverGroupsPage> {
     final results = List<StudyGroupSummary>.unmodifiable(_results);
     return ListView.builder(
       key: const ValueKey('results'),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const .only(bottom: 32),
       itemCount: results.length,
       itemBuilder: (context, index) {

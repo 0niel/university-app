@@ -12,6 +12,7 @@ class MaterialRow extends StatelessWidget {
     required this.onOpen,
     required this.onDownload,
     this.previewUrl,
+    this.heroTag,
     this.onLike,
     this.onLongPress,
     this.loading = false,
@@ -22,6 +23,7 @@ class MaterialRow extends StatelessWidget {
   final VoidCallback onOpen;
   final VoidCallback onDownload;
   final String? previewUrl;
+  final Object? heroTag;
   final VoidCallback? onLike;
   final VoidCallback? onLongPress;
   final bool loading;
@@ -97,6 +99,7 @@ class MaterialRow extends StatelessWidget {
                 width: 56,
                 height: 56,
                 child: MaterialThumbnail(
+                  heroTag: heroTag,
                   previewUrl: previewUrl,
                   mimeType: material.mimeType,
                   accent: accent,

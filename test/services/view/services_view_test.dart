@@ -161,6 +161,18 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('catalog search leaves the viewport when browsing services', (
+    tester,
+  ) async {
+    await tester.pumpApp(subject(), size: const Size(390, 600));
+    final search = find.byKey(const ValueKey('services-search'));
+    expect(search.hitTestable(), findsOneWidget);
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -350));
+    await tester.pumpAndSettle();
+    expect(search.hitTestable(), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('pins mini apps and first-party services before the directory', (
     tester,
   ) async {
@@ -224,9 +236,11 @@ void main() {
           .routePath,
       '/services/apps',
     );
-    final list = tester.widget<ListView>(find.byType(ListView));
+    final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
     expect(
-      list.padding!.resolve(TextDirection.ltr).bottom,
+      (list.slivers.single as SliverPadding).padding
+          .resolve(TextDirection.ltr)
+          .bottom,
       AppBottomBar.extentOf(context) + AppSpacing.screen,
     );
   });
@@ -241,7 +255,7 @@ void main() {
       ),
       size: const Size(390, 600),
     );
-    final list = tester.widget<ListView>(find.byType(ListView));
+    final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
     list.controller!.jumpTo(100);
     await tester.pump();
     expect(list.controller!.offset, greaterThan(0));

@@ -9,9 +9,14 @@ import 'package:rtu_mirea_app/discourse_post_overview/view/post_overview_html.da
 import 'package:rtu_mirea_app/discourse_post_overview/view/post_overview_metrics.dart';
 
 class PostOverviewCommentTile extends StatelessWidget {
-  const PostOverviewCommentTile({required this.comment, super.key});
+  const PostOverviewCommentTile({
+    required this.comment,
+    this.sourceUri,
+    super.key,
+  });
 
   final DiscoursePostComment comment;
+  final Uri? sourceUri;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +66,12 @@ class PostOverviewCommentTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.gap),
-            SelectionArea(child: PostOverviewHtml(data: comment.cooked)),
+            SelectionArea(
+              child: PostOverviewHtml(
+                data: comment.cooked,
+                sourceUri: sourceUri,
+              ),
+            ),
             if (comment.likeCount > 0) ...[
               const SizedBox(height: AppSpacing.sm),
               Semantics(

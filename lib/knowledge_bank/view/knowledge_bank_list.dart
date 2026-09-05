@@ -19,6 +19,7 @@ class KnowledgeBankList extends StatelessWidget {
     required this.onUpload,
     required this.onResetFilter,
     this.previewUrls = const {},
+    this.heroTagForMaterial,
     this.onLike,
     this.onLongPress,
     this.gridView = false,
@@ -38,6 +39,7 @@ class KnowledgeBankList extends StatelessWidget {
   final VoidCallback onUpload;
   final VoidCallback onResetFilter;
   final Map<String, String> previewUrls;
+  final Object? Function(StudyMaterial)? heroTagForMaterial;
   final ValueChanged<StudyMaterial>? onLike;
   final ValueChanged<StudyMaterial>? onLongPress;
   final bool gridView;
@@ -45,58 +47,21 @@ class KnowledgeBankList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaStateSwitcher(child: _body(context));
-  }
-
-  Widget _body(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
+    Widget? state;
     if (isLoading) {
-      return ListView(
-        key: const ValueKey('knowledge-loading'),
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.screen,
-          AppSpacing.sm,
-          AppSpacing.screen,
-          110,
-        ),
-        children: const [KnowledgeBankListSkeleton()],
-      );
-    }
-    if (isFailure) {
-      return ListView(
-        key: const ValueKey('knowledge-failure'),
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.screen,
-          AppSpacing.xlg,
-          AppSpacing.screen,
-          100,
-        ),
-        children: [
-          NinjaErrorState(
-            title: l10n.loadingError,
-            message: l10n.tryAgain,
-            retryLabel: l10n.retry,
-            onRetry: onRetry,
-          ).animateEmptyState(),
-        ],
-      );
-    }
-    if (materials.isEmpty) {
-      return ListView(
-        key: ValueKey(isFiltered ? 'knowledge-filtered' : 'knowledge-empty'),
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.screen,
-          AppSpacing.xxl,
-          AppSpacing.screen,
-          100,
-        ),
-        children: [
-          if (isFiltered)
-            NinjaEmptyState(
+      state = const KnowledgeBankListSkeleton();
+    } else if (isFailure) {
+      state = NinjaErrorState(
+        title: l10n.loadingError,
+        message: l10n.tryAgain,
+        retryLabel: l10n.retry,
+        onRetry: onRetry,
+      ).animateEmptyState();
+    } else if (materials.isEmpty) {
+      state = isFiltered
+          ? NinjaEmptyState(
               icon: const AppLineIconWidget(AppLineIcon.filter),
               title: l10n.searchNoResults,
               message: l10n.searchNoResultsHint,
@@ -104,87 +69,116 @@ class KnowledgeBankList extends StatelessWidget {
               onAction: onResetFilter,
               outlinedAction: true,
             ).animateEmptyState()
-          else
-            NinjaEmptyState(
+          : NinjaEmptyState(
               icon: const AppLineIconWidget(AppLineIcon.book),
               title: l10n.knowledgeEmptyTitle,
               message: l10n.knowledgeEmptySub,
               actionLabel: l10n.knowledgeUpload,
               onAction: onUpload,
-            ).animateEmptyState(),
-        ],
-      );
+            ).animateEmptyState();
     }
-    return ListView(
-      key: const ValueKey('knowledge-ready'),
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(
+    return SliverPadding(
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.screen,
         AppSpacing.zero,
         AppSpacing.screen,
-        AppSpacing.xxlg,
+        AppSpacing.xxlg + MediaQuery.paddingOf(context).bottom,
       ),
-      children: [
-        if (gridView)
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final cardWidth = (constraints.maxWidth - AppSpacing.md) / 2;
-              return Wrap(
-                spacing: AppSpacing.md,
-                runSpacing: AppSpacing.md,
-                children: [
-                  for (final material in materials)
-                    SizedBox(
-                      key: ValueKey(material.id),
-                      width: cardWidth,
-                      child: MaterialGridCard(
-                        material: material,
-                        loading: openingMaterialIds.contains(material.id),
-                        onOpen: () => onOpen(material),
-                        onDownload: () => onDownload(material),
-                        previewUrl: previewUrls[material.previewPath],
-                        onLike: onLike == null ? null : () => onLike!(material),
-                        onLongPress: onLongPress == null
-                            ? null
-                            : () => onLongPress!(material),
-                      ),
+      sliver: SliverMainAxisGroup(
+        slivers: [
+          if (state != null)
+            SliverToBoxAdapter(child: state)
+          else if (gridView)
+            SliverLayoutBuilder(
+              builder: (context, constraints) {
+                final textScale = MediaQuery.textScalerOf(context).scale(1);
+                final columns =
+                    (constraints.crossAxisExtent /
+                            (160 * textScale.clamp(1, 1.6)))
+                        .floor()
+                        .clamp(1, 4);
+                return SliverList.separated(
+                  itemCount: (materials.length / columns).ceil(),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.md),
+                  itemBuilder: (context, row) => Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var column = 0; column < columns; column++) ...[
+                        if (column > 0) const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: row * columns + column < materials.length
+                              ? _gridCard(materials[row * columns + column])
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ],
+                  ).animateListItem(index: row),
+                );
+              },
+            )
+          else
+            SliverList.separated(
+              itemCount: materials.length,
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+              itemBuilder: (context, index) {
+                final material = materials[index];
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.card),
+                  child: MaterialRow(
+                    key: ValueKey(material.id),
+                    material: material,
+                    heroTag: heroTagForMaterial?.call(material),
+                    loading: openingMaterialIds.contains(material.id),
+                    onOpen: () => onOpen(material),
+                    onDownload: () => onDownload(material),
+                    previewUrl: previewUrls[material.previewPath],
+                    onLike: onLike == null ? null : () => onLike!(material),
+                    onLongPress: onLongPress == null
+                        ? null
+                        : () => onLongPress!(material),
+                  ),
+                ).animateListItem(key: ValueKey(material.id), index: index);
+              },
+            ),
+          if (state == null && authors.isNotEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.sheetBottom),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.knowledgeTopAuthors,
+                      style: AppText.title.copyWith(color: colors.ink),
                     ),
-                ],
-              );
-            },
-          )
-        else
-          AppListGroup(
-            children: [
-              for (final material in materials)
-                MaterialRow(
-                  key: ValueKey(material.id),
-                  material: material,
-                  loading: openingMaterialIds.contains(material.id),
-                  onOpen: () => onOpen(material),
-                  onDownload: () => onDownload(material),
-                  previewUrl: previewUrls[material.previewPath],
-                  onLike: onLike == null ? null : () => onLike!(material),
-                  onLongPress: onLongPress == null
-                      ? null
-                      : () => onLongPress!(material),
+                    const SizedBox(height: AppSpacing.gap),
+                    TopAuthorsCard(authors: authors),
+                  ],
                 ),
-            ],
-          ),
-        if (authors.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sheetBottom),
-          Text(
-            l10n.knowledgeTopAuthors,
-            style: AppText.title.copyWith(color: colors.ink),
-          ),
-          const SizedBox(height: AppSpacing.gap),
-          TopAuthorsCard(authors: authors),
+              ),
+            ),
+          if (footer != null)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.screen),
+                child: footer,
+              ),
+            ),
         ],
-        if (footer != null) ...[
-          const SizedBox(height: AppSpacing.screen),
-          footer!,
-        ],
-      ],
+      ),
     );
   }
+
+  Widget _gridCard(StudyMaterial material) => MaterialGridCard(
+    key: ValueKey(material.id),
+    material: material,
+    heroTag: heroTagForMaterial?.call(material),
+    loading: openingMaterialIds.contains(material.id),
+    onOpen: () => onOpen(material),
+    onDownload: () => onDownload(material),
+    previewUrl: previewUrls[material.previewPath],
+    onLike: onLike == null ? null : () => onLike!(material),
+    onLongPress: onLongPress == null ? null : () => onLongPress!(material),
+  );
 }

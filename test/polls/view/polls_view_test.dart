@@ -266,6 +266,64 @@ void main() {
       },
     );
 
+    testWidgets('poll list builds lazily and controls scroll away', (
+      tester,
+    ) async {
+      when(
+        () => campusRepository.getPolls(
+          filter: any(named: 'filter'),
+          category: any(named: 'category'),
+          query: any(named: 'query'),
+        ),
+      ).thenAnswer(
+        (_) async => List.generate(
+          20,
+          (index) => Poll(id: 'lazy-$index', title: 'Вопрос $index'),
+        ),
+      );
+      final cubit = PollsCubit(campusRepository: campusRepository);
+      addTearDown(cubit.close);
+      await cubit.load();
+      await tester.pumpWidget(buildSubject(cubit));
+      await tester.pumpAndSettle();
+      expect(find.byType(PollCard).evaluate().length, lessThan(10));
+      expect(find.text('Вопрос 19'), findsNothing);
+      await tester.drag(
+        find.byType(CustomScrollView).first,
+        const Offset(0, -650),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(AppSearchField).hitTestable(), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('category sheet selects and clears a visible filter', (
+      tester,
+    ) async {
+      when(
+        () => campusRepository.getPolls(
+          filter: any(named: 'filter'),
+          category: any(named: 'category'),
+          query: any(named: 'query'),
+        ),
+      ).thenAnswer((_) async => []);
+      final cubit = PollsCubit(campusRepository: campusRepository);
+      addTearDown(cubit.close);
+      await cubit.load();
+      await tester.pumpWidget(buildSubject(cubit));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('polls-category')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Учёба'));
+      await tester.pumpAndSettle();
+      expect(cubit.state.category, PollCategory.academic);
+      expect(find.byKey(const Key('polls-clear-category')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('polls-clear-category')));
+      await tester.pumpAndSettle();
+      expect(cubit.state.category, isNull);
+      expect(find.byKey(const Key('polls-clear-category')), findsNothing);
+    });
+
     testWidgets('refresh errors remain visible when cached polls exist', (
       tester,
     ) async {

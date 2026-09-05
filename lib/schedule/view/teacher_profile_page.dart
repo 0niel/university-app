@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:schedule_repository/schedule_repository.dart' show Teacher;
@@ -50,6 +51,7 @@ class TeacherProfilePage extends StatefulWidget {
 }
 
 class _TeacherProfilePageState extends State<TeacherProfilePage> {
+  final _photoHeroTag = Object();
   TeacherProfile _profile = TeacherProfile.empty;
   bool _loading = true;
   bool _error = false;
@@ -196,14 +198,7 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
       children: [
         Row(
           children: [
-            AppAvatar(
-              name: widget.teacherName,
-              imageUrl: widget.teacher?.photoUrl,
-              size: 64,
-              backgroundColor: colors.surface2,
-              textStyle: AppText.sans(20, FontWeight.w700),
-              color: colors.muted,
-            ),
+            _avatar(context),
             const SizedBox(width: AppSpacing.sectionGap),
             Expanded(
               child: Column(
@@ -357,6 +352,41 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
           },
         ),
       ],
+    );
+  }
+
+  Widget _avatar(BuildContext context) {
+    final colors = context.colors;
+    final uri = Uri.tryParse(widget.teacher?.photoUrl?.trim() ?? '');
+    final valid =
+        uri != null &&
+        {'https', 'http'}.contains(uri.scheme) &&
+        uri.host.isNotEmpty;
+    final avatar = AppAvatar(
+      name: widget.teacherName,
+      imageUrl: valid ? uri.toString() : null,
+      size: 64,
+      backgroundColor: colors.surface2,
+      textStyle: AppText.sans(20, FontWeight.w700),
+      color: colors.muted,
+    );
+    if (!valid) return avatar;
+    return AppPressable(
+      semanticsLabel: context.l10n.imageViewer,
+      onTap: () => unawaited(
+        showMediaViewer(
+          context,
+          items: [
+            MediaItem(
+              url: uri.toString(),
+              kind: MediaKind.image,
+              title: widget.teacherName,
+              heroTag: _photoHeroTag,
+            ),
+          ],
+        ),
+      ),
+      child: Hero(tag: _photoHeroTag, child: avatar),
     );
   }
 

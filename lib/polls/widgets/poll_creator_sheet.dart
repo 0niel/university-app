@@ -31,6 +31,7 @@ Future<bool?> showPollCreatorSheet(
   return showAppSheet<bool>(
     context,
     title: context.l10n.pollsCreateTitle,
+    scrollable: false,
     child: PollCreatorSheet(cubit: cubit),
   );
 }
@@ -48,6 +49,7 @@ class _QuestionDraft {
       ? [TextEditingController(), TextEditingController()]
       : [];
 
+  final GlobalKey editorKey = GlobalKey();
   final TextEditingController textController;
   PollQuestionKind kind;
   bool isRequired;
@@ -110,6 +112,7 @@ class PollCreatorSheet extends StatefulWidget {
 class _PollCreatorSheetState extends State<PollCreatorSheet> {
   static const _maxQuestions = 10;
 
+  final _scrollController = ScrollController();
   final _title = TextEditingController();
   final _description = TextEditingController();
   final _questions = <_QuestionDraft>[_QuestionDraft()];
@@ -128,6 +131,7 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _title.dispose();
     _description.dispose();
     for (final question in _questions) {
@@ -162,6 +166,9 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
   void _addQuestion() {
     if (_questions.length >= _maxQuestions) return;
     setState(() => _questions.add(_QuestionDraft()));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _revealQuestion(_questions.length - 1);
+    });
   }
 
   void _removeQuestion(int index) {
@@ -232,27 +239,52 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
     _CreatorStep.preview => true,
   };
 
+  void _showStep(_CreatorStep step, {int? questionIndex}) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      _step = step;
+      _showStepError = false;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (questionIndex != null) {
+        _revealQuestion(questionIndex);
+      } else if (_scrollController.hasClients) {
+        _scrollController.jumpTo(0);
+      }
+    });
+  }
+
+  void _revealQuestion(int index) {
+    final target = _questions[index].editorKey.currentContext;
+    if (target != null) {
+      unawaited(Scrollable.ensureVisible(target));
+    }
+  }
+
   void _next() {
     if (!_canGoNext()) {
       setState(() => _showStepError = true);
+      if (_step == _CreatorStep.questions) {
+        final index = _questions.indexWhere((question) => !question.isValid);
+        if (index >= 0) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _revealQuestion(index);
+          });
+        }
+      }
       return;
     }
     if (_step == _CreatorStep.preview) {
       unawaited(_submit());
       return;
     }
-    setState(() {
-      _step = _CreatorStep.values[_step.index + 1];
-      _showStepError = false;
-    });
+    _showStep(_CreatorStep.values[_step.index + 1]);
   }
 
   void _back() {
     if (_step == _CreatorStep.basics || _saving) return;
-    setState(() {
-      _step = _CreatorStep.values[_step.index - 1];
-      _showStepError = false;
-    });
+    _showStep(_CreatorStep.values[_step.index - 1]);
   }
 
   Future<void> _pickClosesDate() async {
@@ -316,17 +348,33 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
     final colors = context.colors;
     final l10n = context.l10n;
     final totalSteps = _CreatorStep.values.length;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    final stepTitle = switch (_step) {
+      _CreatorStep.basics => l10n.pollsStepBasics,
+      _CreatorStep.questions => l10n.pollsStepQuestions,
+      _CreatorStep.settings => l10n.pollsSettings,
+      _CreatorStep.preview => l10n.pollsStepPreview,
+    };
+    final header = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppProgressBar(value: (_step.index + 1) / totalSteps),
-        const SizedBox(height: AppSpacing.xxs),
-        Text(
-          l10n.pollsStepCounter(_step.index + 1, totalSteps),
-          style: AppText.caption.copyWith(color: colors.muted),
+        Row(
+          children: [
+            Expanded(child: Text(stepTitle, style: AppText.bodyStrong)),
+            Text(
+              l10n.pollsStepCounter(_step.index + 1, totalSteps),
+              style: AppText.caption.copyWith(color: colors.muted),
+            ),
+          ],
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.sm),
+        AppProgressBar(value: (_step.index + 1) / totalSteps),
+        const SizedBox(height: AppSpacing.md),
+      ],
+    );
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
         switch (_step) {
           _CreatorStep.basics => _BasicsStep(
             titleController: _title,
@@ -381,6 +429,11 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
             questions: _questions,
             anonymous: _anonymous,
             closesAt: _closesAt,
+            onEditBasics: _saving ? null : () => _showStep(_CreatorStep.basics),
+            onEditQuestion: _saving
+                ? null
+                : (index) =>
+                      _showStep(_CreatorStep.questions, questionIndex: index),
           ),
         },
         if (_step == _CreatorStep.settings && _showStepError) ...[
@@ -390,30 +443,58 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
             tone: AppBannerTone.danger,
           ),
         ],
-        const SizedBox(height: AppSpacing.lg),
-        Row(
-          children: [
-            if (_step != _CreatorStep.basics) ...[
-              Expanded(
-                child: AppButton.secondary(
-                  label: l10n.back,
-                  onPressed: _saving ? null : _back,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-            ],
+      ],
+    );
+    final footer = Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      child: Row(
+        children: [
+          if (_step != _CreatorStep.basics) ...[
             Expanded(
-              child: AppButton.primary(
-                label: _step == _CreatorStep.preview
-                    ? l10n.pollsCreate
-                    : l10n.pollsNext,
-                loading: _saving,
-                onPressed: _saving ? null : _next,
+              child: AppButton.secondary(
+                label: l10n.back,
+                onPressed: _saving ? null : _back,
               ),
             ),
+            const SizedBox(width: AppSpacing.sm),
           ],
-        ),
-      ],
+          Expanded(
+            child: AppButton.primary(
+              label: _step == _CreatorStep.preview
+                  ? l10n.pollsCreate
+                  : l10n.pollsNext,
+              loading: _saving,
+              onPressed: _saving ? null : _next,
+            ),
+          ),
+        ],
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!constraints.hasBoundedHeight) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [header, content, footer],
+          );
+        }
+        return Column(
+          children: [
+            Expanded(
+              child: CustomScrollView(
+                controller: _scrollController,
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                slivers: [
+                  SliverToBoxAdapter(child: header),
+                  SliverToBoxAdapter(child: content),
+                ],
+              ),
+            ),
+            footer,
+          ],
+        );
+      },
     );
   }
 }
@@ -447,6 +528,7 @@ class _BasicsStep extends StatelessWidget {
           placeholder: l10n.pollsTitleHint,
           autofocus: true,
           maxLength: 200,
+          textInputAction: TextInputAction.next,
           errorText: showError && titleController.text.trim().isEmpty
               ? l10n.pollsTitleRequired
               : null,
@@ -457,6 +539,7 @@ class _BasicsStep extends StatelessWidget {
           controller: descriptionController,
           placeholder: l10n.pollsDescriptionHint,
           maxLength: 2000,
+          showCounter: false,
           minLines: 2,
           maxLines: 4,
           onChanged: (_) => onChanged(),
@@ -467,20 +550,15 @@ class _BasicsStep extends StatelessWidget {
           style: AppText.captionStrong.copyWith(color: colors.muted),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            AppChip.filter(
-              label: l10n.pollsCategoryAll,
-              selected: category == null,
-              onTap: () => onCategoryChanged(null),
-            ),
+        AppChipRow<PollCategory?>(
+          value: category,
+          onChanged: onCategoryChanged,
+          items: [
+            AppChipRowItem(value: null, label: l10n.pollsCategoryAll),
             for (final value in PollCategory.values)
-              AppChip.filter(
+              AppChipRowItem(
+                value: value,
                 label: pollCategoryLabel(l10n, value),
-                selected: category == value,
-                onTap: () => onCategoryChanged(value),
               ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:friends_repository/friends_repository.dart';
@@ -27,6 +28,104 @@ const _friend = Friend(
 
 void main() {
   group('FriendsPanel', () {
+    testWidgets('the map panel can be expanded with a desktop mouse', (
+      tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _wrap(
+          NinjaFriendsPanel(
+            controller: controller,
+            friends: const [_friend],
+            loading: false,
+            onFriendTap: (_) {},
+            onAddFriend: () {},
+          ),
+        ),
+      );
+      final listBounds = tester.getRect(find.byType(ListView));
+      await tester.dragFrom(
+        listBounds.topCenter + const Offset(0, 8),
+        const Offset(0, -180),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+
+      expect(controller.size, greaterThan(.28));
+    });
+
+    testWidgets('large student lists build only visible profiles', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          NinjaFriendsPanel(
+            friends: List.generate(
+              500,
+              (index) => _friend.copyWith(
+                userId: 'student-$index',
+                fullName: 'Student $index',
+              ),
+            ),
+            loading: false,
+            showingStudents: true,
+            onFriendTap: (_) {},
+            onAddFriend: () {},
+          ),
+        ),
+      );
+
+      expect(find.text('Student 0'), findsOneWidget);
+      expect(find.text('Student 499'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('public profiles never expose remove-friend action', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(const FriendCardSheet(friend: _friend, isFriend: false)),
+      );
+
+      expect(find.text('Виден всем студентам'), findsOneWidget);
+      expect(find.byType(FriendsPillButton), findsNothing);
+
+      await tester.pumpWidget(
+        _wrap(const FriendCardSheet(friend: _friend)),
+      );
+      expect(find.byType(FriendsPillButton), findsOneWidget);
+    });
+
+    testWidgets('student map can be explored without sharing or friends', (
+      tester,
+    ) async {
+      bool? selection;
+      await tester.pumpWidget(
+        _wrap(
+          NinjaFriendsPanel(
+            friends: const [],
+            loading: false,
+            showingStudents: true,
+            onShowStudentsChanged: (value) => selection = value,
+            onFriendTap: (_) {},
+            onAddFriend: () {},
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('Пока нет студентов на карте'), findsOneWidget);
+      expect(
+        find.textContaining('не делясь своей геопозицией'),
+        findsOneWidget,
+      );
+      tester.widget<NinjaTabs<bool>>(find.byType(NinjaTabs<bool>)).onChanged!(
+        false,
+      );
+      expect(selection, false);
+    });
+
     testWidgets('shows skeleton cards on cold load, not a spinner', (
       tester,
     ) async {

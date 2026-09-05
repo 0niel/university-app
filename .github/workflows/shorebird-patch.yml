@@ -159,7 +159,7 @@ jobs:
           subprocess.run(["git", "merge-base", "--is-ancestor", baseline, source], check=True)
           changed = set(filter(None, git("diff", "--name-only", "--no-renames", "-z", baseline, source).split("\0")))
           if changed != allowed:
-              raise SystemExit("Hotfix must change exactly the five approved Dart files")
+              raise SystemExit("Hotfix must change exactly the approved files for the selected release")
           for path in sorted(allowed):
               source_entry = git("ls-tree", source, "--", path)
               baseline_entry = git("ls-tree", baseline, "--", path)
@@ -188,19 +188,26 @@ jobs:
           git diff --exit-code
 
       - name: Analyze hotfix
+        env:
+          SOURCE_SHA: ${{ steps.inputs.outputs.source_sha }}
+          BASELINE_SHA: ${{ steps.inputs.outputs.baseline_sha }}
         run: |
-          flutter analyze --no-pub \
-            lib/di/app_scope.dart \
-            packages/user_repository/lib/src/user_repository.dart \
-            packages/gamification_repository/lib/src/gamification_repository.dart \
-            packages/user_repository/test/src/user_repository_test.dart \
-            packages/gamification_repository/test/src/gamification_repository_test.dart
+          sources="$(git diff --name-only --no-renames "$BASELINE_SHA" "$SOURCE_SHA" -- '*.dart')"
+          test -n "$sources"
+          mapfile -t dart_sources <<< "$sources"
+          flutter analyze --no-pub "${dart_sources[@]}"
+
+      - name: Test schedule and discussions
+        if: steps.inputs.outputs.release_version == '5.2.0+1004201'
+        run: flutter test --no-pub test/schedule test/top_discussions
 
       - name: Test user initialization
+        if: steps.inputs.outputs.release_version != '5.2.0+1004201'
         working-directory: packages/user_repository
         run: flutter test --no-pub test/src/user_repository_test.dart
 
       - name: Test academic profile initialization
+        if: steps.inputs.outputs.release_version != '5.2.0+1004201'
         working-directory: packages/gamification_repository
         run: dart test test/src/gamification_repository_test.dart
 

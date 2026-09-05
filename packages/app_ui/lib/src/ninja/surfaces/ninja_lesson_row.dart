@@ -40,6 +40,7 @@ class NinjaLessonRow extends StatelessWidget {
     this.progress,
     this.stateLabel,
     this.actions = const <NinjaLessonAction>[],
+    this.annotations = const <Widget>[],
     this.onTap,
     this.onLongPress,
     this.onMore,
@@ -66,6 +67,7 @@ class NinjaLessonRow extends StatelessWidget {
   final double? progress;
   final String? stateLabel;
   final List<NinjaLessonAction> actions;
+  final List<Widget> annotations;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final VoidCallback? onMore;
@@ -172,7 +174,9 @@ class NinjaLessonRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (typeLabel != null || chip != null)
+                    if (typeLabel != null ||
+                        chip != null ||
+                        annotations.isNotEmpty)
                       Wrap(
                         spacing: AppSpacing.sm,
                         runSpacing: AppSpacing.xs,
@@ -190,9 +194,12 @@ class NinjaLessonRow extends StatelessWidget {
                                 color: chipColor ?? colors.muted,
                               ),
                             ),
+                          ...annotations,
                         ],
                       ),
-                    if (typeLabel != null || chip != null)
+                    if (typeLabel != null ||
+                        chip != null ||
+                        annotations.isNotEmpty)
                       const SizedBox(height: AppSpacing.xs),
                     Text(
                       title,

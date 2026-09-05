@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/tour/tour.dart';
 
-class HomeWeekPills extends StatefulWidget {
+class HomeWeekPills extends StatelessWidget {
   const HomeWeekPills({
     required this.days,
     required this.selectedIndex,
@@ -13,6 +13,8 @@ class HomeWeekPills extends StatefulWidget {
     required this.changedDays,
     required this.onSelected,
     this.lessonColors = const [],
+    this.lessonCountForDay,
+    this.lessonColorsForDay,
     this.onWeekChanged,
     super.key,
   });
@@ -25,46 +27,8 @@ class HomeWeekPills extends StatefulWidget {
   final Set<int> changedDays;
   final ValueChanged<int> onSelected;
   final ValueChanged<int>? onWeekChanged;
-
-  @override
-  State<HomeWeekPills> createState() => _HomeWeekPillsState();
-}
-
-class _HomeWeekPillsState extends State<HomeWeekPills> {
-  double _drag = 0;
-  double _edgeDrag = 0;
-
-  bool _onScroll(ScrollNotification notification) {
-    if (notification.metrics.axis != Axis.horizontal) return false;
-    if (notification is ScrollStartNotification) _edgeDrag = 0;
-    if (notification is OverscrollNotification) {
-      _edgeDrag += notification.overscroll;
-    }
-    if (notification is ScrollUpdateNotification &&
-        notification.metrics.outOfRange) {
-      final metrics = notification.metrics;
-      final distance = metrics.pixels < metrics.minScrollExtent
-          ? metrics.pixels - metrics.minScrollExtent
-          : metrics.pixels - metrics.maxScrollExtent;
-      if (distance.abs() > _edgeDrag.abs()) _edgeDrag = distance;
-    }
-    if (notification is ScrollEndNotification && _edgeDrag.abs() >= 48) {
-      final step = _edgeDrag > 0 ? 1 : -1;
-      _edgeDrag = 0;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) widget.onWeekChanged?.call(step);
-      });
-    }
-    return false;
-  }
-
-  void _finishDrag(DragEndDetails details) {
-    final velocity = details.primaryVelocity ?? 0;
-    if (velocity.abs() < 240 && _drag.abs() < 48) return;
-    final forward = velocity.abs() >= 240 ? velocity < 0 : _drag < 0;
-    widget.onWeekChanged?.call(forward ? 1 : -1);
-    _drag = 0;
-  }
+  final int Function(DateTime)? lessonCountForDay;
+  final List<Color> Function(DateTime)? lessonColorsForDay;
 
   @override
   Widget build(BuildContext context) {
@@ -72,80 +36,74 @@ class _HomeWeekPillsState extends State<HomeWeekPills> {
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).languageCode;
     final format = DateFormat.E(locale);
-    final todayDate = DateUtils.dateOnly(widget.today);
     String? rangeLabel(int offset) {
-      if (widget.days.isEmpty) return null;
-      final start = widget.days.first.add(Duration(days: offset));
-      final end = widget.days.last.add(Duration(days: offset));
+      if (days.isEmpty) return null;
+      final start = AppWeekPager.offsetWeek(days.first, offset);
+      final end = AppWeekPager.offsetWeek(days.last, offset);
       return '${DateFormat.yMMMd(locale).format(start)} — '
           '${DateFormat.yMMMd(locale).format(end)}';
     }
 
-    int lessonCount(int index) =>
-        widget.lessonCounts.elementAtOrNull(index) ?? 0;
+    AppWeekDay day(DateTime date) {
+      final index = days.indexWhere(
+        (value) => DateUtils.isSameDay(value, date),
+      );
+      final count =
+          lessonCountForDay?.call(date) ??
+          (index < 0 ? 0 : lessonCounts.elementAtOrNull(index) ?? 0);
+      return AppWeekDay(
+        '${date.day}',
+        short: format.format(date).replaceAll('.', '').toUpperCase(),
+        isWeekend: date.weekday >= DateTime.saturday,
+        isToday: DateUtils.isSameDay(date, today),
+        semanticsLabel:
+            '${DateFormat.yMMMMd(locale).format(date)}, '
+            '${l10n.scheduleDayLessons(count)}',
+        dots:
+            lessonColorsForDay?.call(date) ??
+            (index < 0 ? null : lessonColors.elementAtOrNull(index)) ??
+            List.filled(count, colors.accent),
+      );
+    }
+
+    List<AppWeekDay> week(DateTime start) => [
+      for (var offset = 0; offset < days.length; offset++)
+        day(DateTime(start.year, start.month, start.day + offset)),
+    ];
     return AppTourAnchor(
       target: .homeDays,
       child: Semantics(
         container: true,
-        label: context.l10n.schedule,
+        label: l10n.schedule,
         value: rangeLabel(0),
-        increasedValue: widget.onWeekChanged == null ? null : rangeLabel(7),
-        decreasedValue: widget.onWeekChanged == null ? null : rangeLabel(-7),
-        onIncrease: widget.onWeekChanged == null
-            ? null
-            : () => widget.onWeekChanged!(1),
-        onDecrease: widget.onWeekChanged == null
-            ? null
-            : () => widget.onWeekChanged!(-1),
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onHorizontalDragStart: widget.onWeekChanged == null
-              ? null
-              : (_) => _drag = 0,
-          onHorizontalDragUpdate: widget.onWeekChanged == null
-              ? null
-              : (details) => _drag += details.delta.dx,
-          onHorizontalDragEnd: widget.onWeekChanged == null
-              ? null
-              : _finishDrag,
-          child: NotificationListener<ScrollNotification>(
-            onNotification: _onScroll,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 18),
-              child: AppWeekStrip(
-                padding: EdgeInsets.zero,
-                selectedIndex: widget.selectedIndex,
-                onSelected: widget.onSelected,
-                days: [
-                  for (final (index, day) in widget.days.indexed)
-                    AppWeekDay(
-                      '${day.day}',
-                      short: format
-                          .format(day)
-                          .replaceAll('.', '')
-                          .toUpperCase(),
-                      isWeekend: day.weekday >= DateTime.saturday,
-                      isToday: DateUtils.isSameDay(day, todayDate),
-                      semanticsLabel:
-                          '${DateFormat.yMMMMd(locale).format(day)}, '
-                          '${l10n.scheduleDayLessons(lessonCount(index))}',
-                      dots:
-                          widget.lessonColors.elementAtOrNull(index) ??
-                          [
-                            for (
-                              var mark = 0;
-                              mark <
-                                  (widget.lessonCounts.elementAtOrNull(index) ??
-                                      0);
-                              mark++
-                            )
-                              colors.accent,
-                          ],
-                    ),
-                ],
-              ),
-            ),
-          ),
+        increasedValue: onWeekChanged == null ? null : rangeLabel(1),
+        decreasedValue: onWeekChanged == null ? null : rangeLabel(-1),
+        onIncrease: onWeekChanged == null ? null : () => onWeekChanged!(1),
+        onDecrease: onWeekChanged == null ? null : () => onWeekChanged!(-1),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 18),
+          child: days.isEmpty || onWeekChanged == null
+              ? AppWeekStrip(
+                  padding: EdgeInsets.zero,
+                  selectedIndex: selectedIndex,
+                  onSelected: onSelected,
+                  days: days.isEmpty ? const [] : week(days.first),
+                )
+              : AppWeekPager(
+                  weekStart: days.first,
+                  selectedIndex: selectedIndex,
+                  onSelected: onSelected,
+                  daysBuilder: week,
+                  onWeekChanged: (start) {
+                    final from = DateTime.utc(
+                      days.first.year,
+                      days.first.month,
+                      days.first.day,
+                    );
+                    final to = DateTime.utc(start.year, start.month, start.day);
+                    onWeekChanged!(to.difference(from).inDays ~/ 7);
+                  },
+                ),
         ),
       ),
     );

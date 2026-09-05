@@ -18,6 +18,7 @@ class RoomPhotoGalleryBody extends StatelessWidget {
     required this.onRetry,
     required this.onOpenPhoto,
     this.onAddPhoto,
+    this.heroScope,
     this.onDeletePhoto,
     super.key,
   });
@@ -34,6 +35,7 @@ class RoomPhotoGalleryBody extends StatelessWidget {
   final VoidCallback onRetry;
   final ValueChanged<int> onOpenPhoto;
   final VoidCallback? onAddPhoto;
+  final Object? heroScope;
   final ValueChanged<RoomPhoto>? onDeletePhoto;
 
   bool get _uploading => uploadTotal > 0;
@@ -99,13 +101,19 @@ class RoomPhotoGalleryBody extends StatelessWidget {
                   onPageChanged: onIndexChanged,
                   itemBuilder: (context, photoIndex) {
                     final photo = photos[photoIndex];
-                    return RoomPhotoTile(
+                    final tile = RoomPhotoTile(
                       photo: photo,
                       onTap: () => onOpenPhoto(photoIndex),
                       onDelete: photo.isMine && onDeletePhoto != null
                           ? () => onDeletePhoto!(photo)
                           : null,
                     );
+                    final heroTag = heroScope == null
+                        ? null
+                        : (heroScope, photoIndex, photo.id);
+                    return heroTag == null
+                        ? tile
+                        : Hero(tag: heroTag, child: tile);
                   },
                 ),
                 if (photos.length > 1)

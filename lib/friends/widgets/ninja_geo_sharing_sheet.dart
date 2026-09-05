@@ -1,7 +1,9 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
+import 'package:rtu_mirea_app/friends/services/friends_location_service.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 part 'ninja_geo_settings_section.dart';
@@ -22,6 +24,16 @@ class NinjaGeoSharingSheet extends StatelessWidget {
           mainAxisSize: .min,
           crossAxisAlignment: .stretch,
           children: [
+            if (state.locationPublishFailed) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                child: NinjaBanner(
+                  tone: NinjaBannerTone.warn,
+                  title: l10n.friendsLocationPublishFailed,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
+            ],
             if (state.privacySyncFailed) ...[
               Padding(
                 padding: const .symmetric(horizontal: AppSpacing.xl),
@@ -30,9 +42,7 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                   message: l10n.friendsPrivacySyncError,
                   footnote: null,
                   primaryLabel: l10n.retry,
-                  onPrimary: state.privacyBusy
-                      ? null
-                      : () => cubit.updateGeoSettings(settings),
+                  onPrimary: state.privacyBusy ? null : cubit.retryPrivacy,
                 ),
               ),
               const SizedBox(height: AppSpacing.sectionGap),
@@ -60,7 +70,11 @@ class NinjaGeoSharingSheet extends StatelessWidget {
             const SizedBox(height: AppSpacing.contentGap),
             _NinjaGeoSettingsSection(
               title: l10n.friendsWhoSeesExact,
-              helper: hidden ? l10n.friendsVisNoneSub : null,
+              helper: switch (settings.visibility) {
+                GeoVisibility.none => l10n.friendsVisNoneSub,
+                GeoVisibility.all => l10n.friendsVisFriendsSub,
+                GeoVisibility.students => l10n.friendsVisStudentsSub,
+              },
               child: AppSegmentedControl<GeoVisibility>(
                 onCanvas: true,
                 value: settings.visibility,
@@ -73,6 +87,10 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                   AppSegmentedOption(
                     value: GeoVisibility.all,
                     label: l10n.friendsVisAll,
+                  ),
+                  AppSegmentedOption(
+                    value: GeoVisibility.students,
+                    label: l10n.friendsVisStudents,
                   ),
                   AppSegmentedOption(
                     value: GeoVisibility.none,
@@ -108,7 +126,51 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.contentGap),
+            _NinjaGeoSettingsSection(
+              title: l10n.friendsBackgroundTitle,
+              helper:
+                  !kIsWeb &&
+                      (defaultTargetPlatform == TargetPlatform.android ||
+                          defaultTargetPlatform == TargetPlatform.iOS)
+                  ? l10n.friendsBackgroundMobileSub
+                  : l10n.friendsBackgroundForegroundSub,
+              child: Text(
+                state.backgroundLocationActive
+                    ? l10n.friendsBackgroundActive
+                    : switch (state.locationStatus) {
+                        FriendsLocationStatus.locating =>
+                          l10n.friendsLocationLocating,
+                        FriendsLocationStatus.active =>
+                          l10n.friendsLocationForegroundActive,
+                        FriendsLocationStatus.serviceDisabled =>
+                          l10n.friendsLocationServiceDisabled,
+                        FriendsLocationStatus.unavailable =>
+                          l10n.friendsLocationUnsupported,
+                        FriendsLocationStatus.permissionDenied ||
+                        FriendsLocationStatus.permissionDeniedForever ||
+                        FriendsLocationStatus.failure =>
+                          l10n.friendsLocationUnavailable,
+                        FriendsLocationStatus.stopped =>
+                          l10n.friendsBackgroundInactive,
+                      },
+                style: AppText.body.copyWith(color: context.colors.ink),
+              ),
+            ),
+            if (state.locationPermissionDenied ||
+                state.locationStatus == FriendsLocationStatus.serviceDisabled ||
+                state.locationStatus == FriendsLocationStatus.failure ||
+                state.locationStatus == FriendsLocationStatus.unavailable)
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                child: AppButton.text(
+                  label: state.locationPermissionDenied
+                      ? l10n.friendsLocationRetry
+                      : l10n.retry,
+                  onPressed: cubit.retryLocation,
+                ),
+              ),
+            const SizedBox(height: AppSpacing.md),
           ],
         );
       },

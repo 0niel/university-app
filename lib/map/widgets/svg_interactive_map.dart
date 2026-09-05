@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,6 +19,7 @@ class SvgInteractiveMap extends StatefulWidget {
     required this.svgAssetPath,
     this.controller,
     this.viewportPadding = EdgeInsets.zero,
+    this.viewportPaddingListenable,
     this.onRoomTap,
     super.key,
   });
@@ -25,6 +27,7 @@ class SvgInteractiveMap extends StatefulWidget {
   final String svgAssetPath;
   final SvgInteractiveMapController? controller;
   final EdgeInsets viewportPadding;
+  final ValueListenable<EdgeInsets>? viewportPaddingListenable;
   final ValueChanged<RoomModel>? onRoomTap;
 
   @override
@@ -41,6 +44,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
   final _transformationController = TransformationController();
   late final AnimationController _zoomController;
   Animation<Matrix4>? _zoomAnimation;
+  Timer? _viewportSettled;
+  int _viewportRevision = 0;
   BoxConstraints? _lastConstraints;
   Size? _lastViewportSize;
   bool _hasInitialTransform = false;
@@ -57,6 +62,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       duration: const Duration(milliseconds: 280),
     )..addListener(_applyZoomAnimation);
     widget.controller?.attach(this);
+    widget.viewportPaddingListenable?.addListener(_viewportChanged);
   }
 
   @override
@@ -66,34 +72,70 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       oldWidget.controller?.detach(this);
       widget.controller?.attach(this);
     }
+    if (oldWidget.viewportPaddingListenable !=
+        widget.viewportPaddingListenable) {
+      oldWidget.viewportPaddingListenable?.removeListener(_viewportChanged);
+      widget.viewportPaddingListenable?.addListener(_viewportChanged);
+      _viewportChanged();
+    }
     if (oldWidget.svgAssetPath != widget.svgAssetPath) {
+      _cancelViewportRefit();
       _zoomController.stop();
       _zoomAnimation = null;
       _selectedRoomId = null;
       _hasInitialTransform = false;
       _hasFittedView = false;
-    } else if (oldWidget.viewportPadding != widget.viewportPadding) {
-      _hasFittedView = false;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        final selected = context
-            .read<MapBloc>()
-            .state
-            .rooms
-            .where((room) => room.roomId == _selectedRoomId)
-            .firstOrNull;
-        if (selected == null) {
-          fit();
-        } else {
-          focusRoom(selected);
-        }
-      });
+    } else if (widget.viewportPaddingListenable == null &&
+        oldWidget.viewportPadding != widget.viewportPadding) {
+      _viewportChanged();
+    }
+  }
+
+  void _viewportChanged() {
+    _cancelViewportRefit();
+    final revision = _viewportRevision;
+    _zoomController.stop();
+    _zoomAnimation = null;
+    void apply() {
+      if (mounted && revision == _viewportRevision) _refitViewport();
+    }
+
+    if (_reduceMotion) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => apply());
+      return;
+    }
+    _viewportSettled = Timer(
+      const Duration(milliseconds: 120),
+      apply,
+    );
+  }
+
+  void _cancelViewportRefit() {
+    _viewportRevision++;
+    _viewportSettled?.cancel();
+    _viewportSettled = null;
+  }
+
+  void _refitViewport() {
+    if (!mounted) return;
+    final selected = context
+        .read<MapBloc>()
+        .state
+        .rooms
+        .where((room) => room.roomId == _selectedRoomId)
+        .firstOrNull;
+    if (selected == null) {
+      fit();
+    } else {
+      focusRoom(selected);
     }
   }
 
   @override
   void dispose() {
     widget.controller?.detach(this);
+    widget.viewportPaddingListenable?.removeListener(_viewportChanged);
+    _cancelViewportRefit();
     _zoomController.dispose();
     _transformationController.dispose();
     super.dispose();
@@ -168,6 +210,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
                 transformationController: _transformationController,
                 onInteractionStart: (_) {
                   _zoomController.stop();
+                  _cancelViewportRefit();
                 },
                 child: RepaintBoundary(
                   child: MapFloorCanvas(
@@ -235,6 +278,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
   }
 
   void _handleDoubleTap() {
+    _cancelViewportRefit();
     final current = _transformationController.value;
     final scale = _planarScale(current);
     final nextScale = scale < _initialScale * 2.5
@@ -254,6 +298,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
   @override
   void fit() {
     if (!mounted) return;
+    _cancelViewportRefit();
     final constraints = _lastConstraints;
     final bounds = context.read<MapBloc>().state.boundingRect;
     if (constraints == null ||
@@ -291,6 +336,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
   @override
   void focusRoom(RoomModel room) {
     if (!mounted) return;
+    _cancelViewportRefit();
     final constraints = _lastConstraints;
     final rect = room.path.getBounds();
     if (constraints == null || rect.isEmpty) return;
@@ -312,6 +358,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
 
   void _zoomBy(double factor) {
     if (!mounted) return;
+    _cancelViewportRefit();
     final constraints = _lastConstraints;
     if (constraints == null) return;
     final viewport = _visibleViewport(constraints);
@@ -353,7 +400,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
   }
 
   Rect _visibleViewport(BoxConstraints constraints) {
-    final padding = widget.viewportPadding;
+    final padding =
+        widget.viewportPaddingListenable?.value ?? widget.viewportPadding;
     final width = math
         .max(constraints.maxWidth - padding.left - padding.right, 1)
         .toDouble();

@@ -7,12 +7,14 @@ class NotificationRow extends StatelessWidget {
     required this.notification,
     required this.timeLabel,
     this.onTap,
+    this.isUnread = true,
     super.key,
   });
 
   final AppNotification notification;
   final String timeLabel;
   final VoidCallback? onTap;
+  final bool isUnread;
 
   static const double tileSize = 40;
   static const double verticalPadding = 13;
@@ -52,8 +54,8 @@ class NotificationRow extends StatelessWidget {
             AppIconTile(
               size: tileSize,
               radius: AppRadius.tile,
-              background: tile,
-              child: AppDot(color: dot),
+              background: isUnread ? tile : colors.surface2,
+              child: AppDot(color: isUnread ? dot : colors.muted2),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -62,7 +64,10 @@ class NotificationRow extends StatelessWidget {
                 children: [
                   Text(
                     notification.title,
-                    style: AppText.cell.copyWith(color: colors.ink),
+                    style: AppText.cell.copyWith(
+                      color: isUnread ? colors.ink : colors.muted,
+                      fontWeight: isUnread ? FontWeight.w600 : FontWeight.w400,
+                    ),
                   ),
                   if (subtitle != null && subtitle.isNotEmpty)
                     Padding(

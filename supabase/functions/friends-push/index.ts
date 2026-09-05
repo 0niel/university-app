@@ -17,6 +17,7 @@ interface PushPayload {
   friendship_id: string;
   requester_id: string;
   addressee_id: string;
+  notification_id?: string;
 }
 
 Deno.serve(async (req: Request) => {
@@ -105,6 +106,10 @@ Deno.serve(async (req: Request) => {
               data: {
                 type: payload.event,
                 friendship_id: payload.friendship_id,
+                route: "/services/people?tab=friends",
+                ...(payload.notification_id
+                  ? { notification_id: payload.notification_id }
+                  : {}),
               },
               android: { priority: "high" },
             },

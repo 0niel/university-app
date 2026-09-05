@@ -41,4 +41,23 @@ void main() {
     expect(find.byType(HomeStoryItem), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('the same source in separate rails has independent hero tags', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      const Scaffold(
+        body: Column(
+          children: [
+            HomeStoriesRail(sources: [source]),
+            HomeStoriesRail(sources: [source]),
+          ],
+        ),
+      ),
+    );
+    final heroes = tester.widgetList<Hero>(find.byType(Hero)).toList();
+    expect(heroes, hasLength(2));
+    expect(heroes.first.tag, isNot(heroes.last.tag));
+    expect(tester.takeException(), isNull);
+  });
 }

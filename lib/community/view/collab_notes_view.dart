@@ -65,26 +65,20 @@ class CollabNotesView extends StatelessWidget {
       listener: (context, _) => _showRefreshError(context),
       builder: (context, state) => Scaffold(
         backgroundColor: context.colors.canvas,
-        body: Column(
-          children: [
-            AppInnerHeader(
-              title: context.l10n.collabNotesTitle,
-              onBack: () => Navigator.of(context).maybePop(),
-              backSemanticsLabel: context.l10n.back,
-              actions: [
-                accentHeaderAction(
-                  semanticsLabel: context.l10n.collabNotesCreateTitle,
-                  onTap: state.isCreating ? null : () => _create(context),
-                ),
-              ],
-            ),
-            Expanded(
-              child: CollabNotesBody(
-                onOpen: (note) => _open(context, note),
-                onCreate: state.isCreating ? null : () => _create(context),
+        body: CollabNotesBody(
+          header: AppInnerHeader(
+            title: context.l10n.collabNotesTitle,
+            onBack: () => Navigator.of(context).maybePop(),
+            backSemanticsLabel: context.l10n.back,
+            actions: [
+              accentHeaderAction(
+                semanticsLabel: context.l10n.collabNotesCreateTitle,
+                onTap: state.isCreating ? null : () => _create(context),
               ),
-            ),
-          ],
+            ],
+          ),
+          onOpen: (note) => _open(context, note),
+          onCreate: state.isCreating ? null : () => _create(context),
         ),
       ),
     );

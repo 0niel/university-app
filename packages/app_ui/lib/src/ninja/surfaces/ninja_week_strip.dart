@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
@@ -34,6 +36,7 @@ class NinjaWeekStrip extends StatelessWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
     this.gap = 6,
     this.scheduleStyle = false,
+    this.fitWeek = false,
   });
 
   final List<NinjaWeekDay> days;
@@ -43,6 +46,47 @@ class NinjaWeekStrip extends StatelessWidget {
   final EdgeInsets padding;
   final double gap;
   final bool scheduleStyle;
+  final bool fitWeek;
+
+  static ({int columns, double gap, double cellHeight, double height}) layout(
+    BuildContext context, {
+    required double width,
+    required List<NinjaWeekDay> days,
+    bool scheduleStyle = false,
+  }) {
+    final scaler = MediaQuery.textScalerOf(context);
+    final minimum = math.max(44, scaler.scale(16) * 2 + 12);
+    final count = math.max(1, days.length);
+    final capacity = math.max(1, ((width + 2) / (minimum + 2)).floor());
+    final rows = (count / capacity).ceil();
+    final columns = (count / rows).ceil();
+    final gap = columns <= 1
+        ? 0.0
+        : ((width - minimum * columns) / (columns - 1)).clamp(2.0, 6.0);
+    final cellWidth = (width - (columns - 1) * gap) / columns;
+    final dotColumns = math.max(1, ((cellWidth - 12 - 4 + 2) / 6).floor());
+    final maxDots =
+        days.fold(0, (value, day) => math.max(value, day.dots.length));
+    final dotRows = (maxDots / dotColumns).ceil();
+    final markHeight = dotRows == 0 ? 0 : AppSpacing.micro + dotRows * 6 - 2;
+    final cellHeight = math
+        .max(
+          AppControlSize.dayPill,
+          scaler.scale(scheduleStyle ? 10 : 10.5) * 1.3 +
+              AppSpacing.micro +
+              scaler.scale(scheduleStyle ? 15 : 16) * 1.3 +
+              AppSpacing.xsm * 2 +
+              markHeight +
+              4,
+        )
+        .ceilToDouble();
+    return (
+      columns: columns,
+      gap: gap,
+      cellHeight: cellHeight,
+      height: cellHeight * rows + gap * (rows - 1)
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +94,45 @@ class NinjaWeekStrip extends StatelessWidget {
       padding: padding,
       child: LayoutBuilder(
         builder: (context, constraints) {
+          if (fitWeek && constraints.hasBoundedWidth && days.isNotEmpty) {
+            final metrics = layout(
+              context,
+              width: constraints.maxWidth,
+              days: days,
+              scheduleStyle: scheduleStyle,
+            );
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: metrics.gap,
+              children: [
+                for (var start = 0;
+                    start < days.length;
+                    start += metrics.columns)
+                  Row(
+                    spacing: metrics.gap,
+                    children: [
+                      for (var column = 0; column < metrics.columns; column++)
+                        Expanded(
+                          child: SizedBox(
+                            height: metrics.cellHeight,
+                            child: start + column >= days.length
+                                ? null
+                                : NinjaDayPill(
+                                    day: days[start + column],
+                                    selected: start + column == selectedIndex,
+                                    dense: dense,
+                                    scheduleStyle: scheduleStyle,
+                                    onTap: onSelected == null
+                                        ? null
+                                        : () => onSelected!(start + column),
+                                  ),
+                          ),
+                        ),
+                    ],
+                  ),
+              ],
+            );
+          }
           final textWidth = MediaQuery.textScalerOf(context).scale(16) * 2 + 12;
           final cellWidth = textWidth < 44 ? 44.0 : textWidth;
           final minimum = days.length * cellWidth +

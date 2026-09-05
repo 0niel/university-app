@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/common/hydrated_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class _MockPreferences extends Mock implements SharedPreferences {}
 
 void main() {
   late SharedPreferences preferences;
@@ -27,4 +30,21 @@ void main() {
     expect(preferences.getString('ui_preferences'), 'preserve');
     expect(storage.read('theme'), isNull);
   });
+
+  test(
+    'rejected platform writes and removals are observable failures',
+    () async {
+      final rejected = _MockPreferences();
+      when(
+        () => rejected.setString(any(), any()),
+      ).thenAnswer((_) async => false);
+      when(() => rejected.remove(any())).thenAnswer((_) async => false);
+      final storage = CustomHydratedStorage(sharedPreferences: rejected);
+      await expectLater(
+        storage.write('draft', {'text': 'local'}),
+        throwsStateError,
+      );
+      await expectLater(storage.delete('draft'), throwsStateError);
+    },
+  );
 }

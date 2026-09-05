@@ -7,6 +7,7 @@ class _NinjaDiscoverGroupsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return NinjaSkeletonGroup(
       child: ListView.builder(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const .only(bottom: 32),
         itemCount: 6,
         itemBuilder: (context, index) => const Padding(

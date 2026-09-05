@@ -5,6 +5,7 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/day_timeline.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_activity_builder.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_dates.dart';
@@ -169,6 +170,13 @@ class ScheduleDayView extends StatelessWidget {
     final nextIndex = rows.indexWhere(
       (row) => row.$4.any((interval) => interval.$1.isAfter(now)),
     );
+    final currentProgress = currentIndex < 0
+        ? 0.0
+        : (now.difference(rows[currentIndex].$1).inMilliseconds /
+                  rows[currentIndex].$2
+                      .difference(rows[currentIndex].$1)
+                      .inMilliseconds)
+              .clamp(0.0, 1.0);
     final showNow =
         isSameDate(day, now) &&
         now.hour * 60 + now.minute >= 540 &&
@@ -213,13 +221,16 @@ class ScheduleDayView extends StatelessWidget {
                   minHeight: AppControlSize.touchTarget,
                   minWidth: AppControlSize.touchTarget,
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  label,
-                  style: AppText.label.copyWith(
-                    color: accent
-                        ? context.colors.accent
-                        : context.colors.muted,
+                child: Center(
+                  widthFactor: 1,
+                  heightFactor: 1,
+                  child: Text(
+                    label,
+                    style: AppText.label.copyWith(
+                      color: accent
+                          ? context.colors.accent
+                          : context.colors.muted,
+                    ),
                   ),
                 ),
               ),
@@ -246,25 +257,18 @@ class ScheduleDayView extends StatelessWidget {
                 ),
               ],
             );
-            return constraints.maxWidth < 330 ||
+            return constraints.maxWidth < 480 ||
                     MediaQuery.textScalerOf(context).scale(1) > 1.3
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [title, navigation],
                   )
-                : SizedBox(
-                    height: AppSpacing.section,
-                    child: OverflowBox(
-                      minHeight: AppControlSize.touchTarget,
-                      maxHeight: 44,
-                      child: Row(
-                        children: [
-                          Expanded(child: title),
-                          const SizedBox(width: AppSpacing.sm),
-                          navigation,
-                        ],
-                      ),
-                    ),
+                : Row(
+                    children: [
+                      Expanded(child: title),
+                      const SizedBox(width: AppSpacing.sm),
+                      Flexible(child: navigation),
+                    ],
                   );
           },
         ),
@@ -329,8 +333,20 @@ class ScheduleDayView extends StatelessWidget {
                             left: -8,
                             right: -8,
                             top: 0,
+                            bottom: 0,
                             child: IgnorePointer(
-                              child: nowLine,
+                              child: AnimatedAlign(
+                                duration: NinjaMotion.of(
+                                  context,
+                                  const Duration(milliseconds: 300),
+                                ),
+                                curve: Curves.easeOutCubic,
+                                alignment: Alignment(
+                                  0,
+                                  2 * currentProgress - 1,
+                                ),
+                                child: nowLine,
+                              ),
                             ),
                           ),
                       ],
@@ -447,44 +463,49 @@ class ScheduleTimelineLesson extends StatelessWidget {
               lesson.lessonType == LessonType.credit)
         ? LessonRowState.exam
         : LessonRowState.plain;
-    return AppLessonRow(
-      outerVerticalInset: 0,
-      scheduleStyle: true,
-      title: lesson.subject,
-      time: '${lesson.lessonBells.startTime}',
-      endTime: '${lesson.lessonBells.endTime}',
-      state: state,
-      color: lessonAccentOf(context, lesson),
-      typeLabel: lessonShortLabel(l10n, lesson.lessonType),
-      chipLabel: entry.cancelled
-          ? l10n.lessonTagCancelled
-          : status.live
-          ? l10n.lessonTagLive(status.minutesLeft)
-          : entry.moved
-          ? l10n.lessonTagMoved
-          : entry.isNext
-          ? l10n.lessonTagNext
-          : entry.isNew
-          ? l10n.lessonTagNew
-          : null,
-      chipColor: entry.cancelled
-          ? context.colors.danger
-          : entry.moved
-          ? context.colors.warn
-          : context.colors.accent,
-      meta: meta,
-      progress: status.live && !entry.cancelled ? status.progress : null,
-      inset: 0,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.fieldGap,
-        AppSpacing.lg,
-        AppSpacing.xsm,
-        AppSpacing.lg,
+    return LessonActivityBuilder(
+      lesson: lesson,
+      day: day,
+      builder: (context, annotations) => AppLessonRow(
+        annotations: annotations,
+        outerVerticalInset: 0,
+        scheduleStyle: true,
+        title: lesson.subject,
+        time: '${lesson.lessonBells.startTime}',
+        endTime: '${lesson.lessonBells.endTime}',
+        state: state,
+        color: lessonAccentOf(context, lesson),
+        typeLabel: lessonShortLabel(l10n, lesson.lessonType),
+        chipLabel: entry.cancelled
+            ? l10n.lessonTagCancelled
+            : status.live
+            ? l10n.lessonTagLive(status.minutesLeft)
+            : entry.moved
+            ? l10n.lessonTagMoved
+            : entry.isNext
+            ? l10n.lessonTagNext
+            : entry.isNew
+            ? l10n.lessonTagNew
+            : null,
+        chipColor: entry.cancelled
+            ? context.colors.danger
+            : entry.moved
+            ? context.colors.warn
+            : context.colors.accent,
+        meta: meta,
+        progress: status.live && !entry.cancelled ? status.progress : null,
+        inset: 0,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.fieldGap,
+          AppSpacing.lg,
+          AppSpacing.xsm,
+          AppSpacing.lg,
+        ),
+        onTap: () =>
+            ScheduleDetailsRoute($extra: (lesson, day)).push<void>(context),
+        onLongPress: () =>
+            showLessonActionsSheet(context, lesson: lesson, day: day),
       ),
-      onTap: () =>
-          ScheduleDetailsRoute($extra: (lesson, day)).push<void>(context),
-      onLongPress: () =>
-          showLessonActionsSheet(context, lesson: lesson, day: day),
     );
   }
 }

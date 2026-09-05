@@ -111,6 +111,7 @@ class GamificationRepository {
   }
 
   Future<void> recordActiveDay() async {
+    if (_supabase.auth.currentSession == null) return;
     await _supabase.rpc<Object?>('record_active_day');
   }
 

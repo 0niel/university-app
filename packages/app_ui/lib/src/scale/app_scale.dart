@@ -1,8 +1,10 @@
+import 'dart:ui' as ui;
+
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppScale extends StatelessWidget {
   const AppScale({required this.child, super.key});
@@ -13,10 +15,67 @@ class AppScale extends StatelessWidget {
 
   final Widget child;
 
+  static const designWidth = 390.0;
+  static const mobileMaxWidth = 650.0;
+
   static AppUiScale of(BuildContext context) => Theme.of(context).scale;
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final mobile = switch (defaultTargetPlatform) {
+      TargetPlatform.android || TargetPlatform.iOS => true,
+      _ => false,
+    };
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
+          return child;
+        }
+        final size = constraints.biggest;
+        if (size.isEmpty) return child;
+        final hasHinge = media.displayFeatures.any(
+          (feature) =>
+              feature.type == ui.DisplayFeatureType.hinge ||
+              feature.type == ui.DisplayFeatureType.fold,
+        );
+        final scale = mobile && size.shortestSide < mobileMaxWidth && !hasHinge
+            ? size.shortestSide / designWidth
+            : 1.0;
+        final layoutSize = size / scale;
+        return FittedBox(
+          alignment: Alignment.topLeft,
+          child: SizedBox.fromSize(
+            size: layoutSize,
+            child: MediaQuery(
+              data: media.copyWith(
+                size: layoutSize,
+                devicePixelRatio: media.devicePixelRatio * scale,
+                padding: media.padding / scale,
+                viewPadding: media.viewPadding / scale,
+                viewInsets: media.viewInsets / scale,
+                systemGestureInsets: media.systemGestureInsets / scale,
+                displayFeatures: [
+                  for (final feature in media.displayFeatures)
+                    ui.DisplayFeature(
+                      bounds: Rect.fromLTRB(
+                        feature.bounds.left / scale,
+                        feature.bounds.top / scale,
+                        feature.bounds.right / scale,
+                        feature.bounds.bottom / scale,
+                      ),
+                      type: feature.type,
+                      state: feature.state,
+                    ),
+                ],
+              ),
+              child: child,
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class AppUiScale {
@@ -29,23 +88,12 @@ class AppUiScale {
   });
 
   factory AppUiScale.screen() {
-    double width = 1;
-    double font = 1;
-    try {
-      final screen = ScreenUtil();
-      width = screen.scaleWidth.clamp(.9, 1.08);
-      font = screen.scaleText.clamp(.92, 1.05);
-      // flutter_screenutil exposes no public initialization state. Widgets can
-      // be rendered outside ScreenUtilInit in tests and embedded previews.
-      // ignore: avoid_catching_errors
-    } on Error catch (_) {}
-
-    return AppUiScale(
-      spacingScale: width,
-      typographyScale: font,
-      iconScale: width,
-      radiusScale: width,
-      dimensionScale: width,
+    return const AppUiScale(
+      spacingScale: 1,
+      typographyScale: 1,
+      iconScale: 1,
+      radiusScale: 1,
+      dimensionScale: 1,
     );
   }
 

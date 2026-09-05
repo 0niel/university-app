@@ -8,6 +8,8 @@ class _PreviewStep extends StatelessWidget {
     required this.questions,
     required this.anonymous,
     required this.closesAt,
+    required this.onEditBasics,
+    required this.onEditQuestion,
   });
 
   final String title;
@@ -16,6 +18,8 @@ class _PreviewStep extends StatelessWidget {
   final List<_QuestionDraft> questions;
   final bool anonymous;
   final DateTime? closesAt;
+  final VoidCallback? onEditBasics;
+  final ValueChanged<int>? onEditQuestion;
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +39,21 @@ class _PreviewStep extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
         ],
-        Text(
-          title.isEmpty ? l10n.pollsTitleHint : title,
-          style: AppText.sans(16, FontWeight.w700).copyWith(color: colors.ink),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title.isEmpty ? l10n.pollsTitleHint : title,
+                style: AppText.bodyStrong.copyWith(color: colors.ink),
+              ),
+            ),
+            AppIconButton(
+              tooltip: '${l10n.edit}: ${l10n.pollsStepBasics}',
+              icon: const AppLineIconWidget(AppLineIcon.pencil),
+              tone: AppIconButtonTone.plain,
+              onPressed: onEditBasics,
+            ),
+          ],
         ),
         if (description.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.xxs),
@@ -73,10 +89,24 @@ class _PreviewStep extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         for (final (index, question) in questions.indexed) ...[
           if (index > 0) const SizedBox(height: AppSpacing.md),
-          Text(
-            '${l10n.pollsQuestionNumber(index + 1)}. '
-            '${_questionText(question)}',
-            style: AppText.bodyStrong.copyWith(color: colors.ink),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${l10n.pollsQuestionNumber(index + 1)}. '
+                  '${_questionText(question)}',
+                  style: AppText.bodyStrong.copyWith(color: colors.ink),
+                ),
+              ),
+              AppIconButton(
+                tooltip: '${l10n.edit}: ${l10n.pollsQuestionNumber(index + 1)}',
+                icon: const AppLineIconWidget(AppLineIcon.pencil),
+                tone: AppIconButtonTone.plain,
+                onPressed: onEditQuestion == null
+                    ? null
+                    : () => onEditQuestion!(index),
+              ),
+            ],
           ),
           if (question.hasOptions)
             Padding(

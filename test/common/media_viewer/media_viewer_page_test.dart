@@ -1,9 +1,11 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/common/media_viewer/widgets/media_file_page.dart';
 import 'package:rtu_mirea_app/common/media_viewer/widgets/media_image_page.dart';
 import 'package:rtu_mirea_app/common/media_viewer/widgets/media_pdf_page.dart';
+import 'package:rtu_mirea_app/common/media_viewer/widgets/media_top_bar.dart';
 import 'package:rtu_mirea_app/common/media_viewer/widgets/media_video_page.dart';
 
 import '../../helpers/pump_app.dart';
@@ -77,5 +79,27 @@ void main() {
 
     expect(find.byType(MediaFilePage), findsOneWidget);
     expect(find.text('d.zip'), findsWidgets);
+  });
+
+  testWidgets('leaving a photo restores hidden controls for documents', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      MediaViewerPage(items: [_items.first, _items.last], initialIndex: 0),
+    );
+    await tester.pump();
+    final image = find.byType(AppZoomableImage);
+    await tester.tap(image);
+    await tester.pump(const Duration(milliseconds: 400));
+    final chromeOpacity = find.ancestor(
+      of: find.byType(MediaTopBar),
+      matching: find.byType(AnimatedOpacity),
+    );
+    expect(tester.widget<AnimatedOpacity>(chromeOpacity).opacity, 0);
+    await tester.drag(image, const Offset(-800, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(MediaFilePage), findsOneWidget);
+    expect(tester.widget<AnimatedOpacity>(chromeOpacity).opacity, 1);
   });
 }

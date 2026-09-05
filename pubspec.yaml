@@ -209,6 +209,7 @@ dependencies:
   path: ^1.0.0
   path_drawing: ^1.0.1
   path_provider: ^2.1.1
+  pdf: 3.12.0
   pdfx: ^2.11.0
   perfect_freehand: ^2.5.2+1
   permission_client:
@@ -284,7 +285,6 @@ dependency_overrides:
       url: https://github.com/Enough-Software/enough_platform_widgets.git
       ref: 38f080f758da42dd9e66d49adbba02aa28d9ff7c
   hooks: 2.0.2
-  web: ^0.5.1
 dev_dependencies:
   bloc_test: ^10.0.0
   build_runner: 2.15.1

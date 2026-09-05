@@ -9,6 +9,7 @@ class MaterialThumbnail extends StatelessWidget {
     this.iconSize = 20,
     this.borderRadius,
     this.accent,
+    this.heroTag,
     super.key,
   });
 
@@ -17,6 +18,7 @@ class MaterialThumbnail extends StatelessWidget {
   final double iconSize;
   final BorderRadius? borderRadius;
   final Color? accent;
+  final Object? heroTag;
 
   AppLineIcon get _icon {
     if (mimeType.startsWith('image/')) return AppLineIcon.image;
@@ -30,7 +32,7 @@ class MaterialThumbnail extends StatelessWidget {
     final colors = context.colors;
     final color = accent ?? colors.lecture;
     final url = previewUrl;
-    return ClipRRect(
+    final thumbnail = ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.circular(AppRadius.iconTile),
       child: SizedBox.expand(
         child: url == null || url.isEmpty
@@ -63,5 +65,7 @@ class MaterialThumbnail extends StatelessWidget {
               ),
       ),
     );
+    final tag = heroTag;
+    return tag == null ? thumbnail : Hero(tag: tag, child: thumbnail);
   }
 }

@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class CalendarWeeksHeader extends StatelessWidget {
+class CalendarWeeksHeader extends StatefulWidget {
   const CalendarWeeksHeader({
     required this.day,
     required this.pageController,
@@ -25,9 +25,26 @@ class CalendarWeeksHeader extends StatelessWidget {
   final VoidCallback? onHeaderLongPress;
 
   @override
+  State<CalendarWeeksHeader> createState() => _CalendarWeeksHeaderState();
+}
+
+class _CalendarWeeksHeaderState extends State<CalendarWeeksHeader> {
+  int? _target;
+  int _revision = 0;
+
+  @override
+  void didUpdateWidget(covariant CalendarWeeksHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pageController != widget.pageController) {
+      _revision++;
+      _target = null;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isMonthView = format == .month;
+    final isMonthView = widget.format == .month;
     return Container(
       decoration: BoxDecoration(
         color: isMonthView ? null : colors.surface,
@@ -44,7 +61,7 @@ class CalendarWeeksHeader extends StatelessWidget {
             icon: AppLineIcon.chevronL,
             colors: colors,
             label: context.l10n.previousWeek,
-            onPressed: () => _goToPreviousPage(context),
+            onPressed: () => _move(context, -1),
           ),
           Expanded(
             child: _buildHeaderTitle(context, colors, isMonthView),
@@ -53,7 +70,7 @@ class CalendarWeeksHeader extends StatelessWidget {
             icon: AppLineIcon.chevronR,
             colors: colors,
             label: context.l10n.nextWeek,
-            onPressed: () => _goToNextPage(context),
+            onPressed: () => _move(context, 1),
           ),
         ],
       ),
@@ -88,15 +105,15 @@ class CalendarWeeksHeader extends StatelessWidget {
     bool isMonthView,
   ) {
     final locale = Localizations.localeOf(context).toString();
-    final formattedMonth = DateFormat.MMM(locale).format(day);
+    final formattedMonth = DateFormat.MMM(locale).format(widget.day);
     final monthAndYear =
         '${formattedMonth[0].toUpperCase()}${formattedMonth.substring(1)} '
-        '${day.year}';
+        '${widget.day.year}';
     return AppPressable(
-      onTap: onHeaderTap,
-      onLongPress: onHeaderLongPress,
+      onTap: widget.onHeaderTap,
+      onLongPress: widget.onHeaderLongPress,
       semanticsLabel: monthAndYear,
-      semanticsButton: onHeaderTap != null,
+      semanticsButton: widget.onHeaderTap != null,
       child: ConstrainedBox(
         constraints: const BoxConstraints(
           minHeight: AppControlSize.touchTarget,
@@ -123,7 +140,7 @@ class CalendarWeeksHeader extends StatelessWidget {
                 color: colors.muted,
               ),
               Text(
-                context.l10n.studyWeekNumber(week),
+                context.l10n.studyWeekNumber(widget.week),
                 style: AppText.body.copyWith(
                   fontWeight: .w600,
                   color: colors.ink,
@@ -140,37 +157,40 @@ class CalendarWeeksHeader extends StatelessWidget {
       MediaQuery.disableAnimationsOf(context) ||
       MediaQuery.accessibleNavigationOf(context);
 
-  void _goToPreviousPage(BuildContext context) {
-    final controller = pageController;
-    if (controller == null) return;
+  void _move(BuildContext context, int delta) {
+    final controller = widget.pageController;
+    if (controller == null ||
+        !controller.hasClients ||
+        controller.positions.length != 1) {
+      return;
+    }
+    final position = controller.position;
+    if (!position.hasContentDimensions || position.viewportDimension == 0) {
+      return;
+    }
+    final extent = position.viewportDimension * controller.viewportFraction;
+    final maximum = (position.maxScrollExtent / extent).round();
+    final target =
+        ((_target ?? controller.page?.round() ?? controller.initialPage) +
+                delta)
+            .clamp(0, maximum);
+    final revision = ++_revision;
+    _target = target;
     if (_reduceMotion(context)) {
-      controller.jumpToPage(
-        (controller.page ?? controller.initialPage).round() - 1,
-      );
+      controller.jumpToPage(target);
+      _target = null;
       return;
     }
     unawaited(
-      controller.previousPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      ),
-    );
-  }
-
-  void _goToNextPage(BuildContext context) {
-    final controller = pageController;
-    if (controller == null) return;
-    if (_reduceMotion(context)) {
-      controller.jumpToPage(
-        (controller.page ?? controller.initialPage).round() + 1,
-      );
-      return;
-    }
-    unawaited(
-      controller.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      ),
+      controller
+          .animateToPage(
+            target,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+          )
+          .whenComplete(() {
+            if (mounted && revision == _revision) _target = null;
+          }),
     );
   }
 }

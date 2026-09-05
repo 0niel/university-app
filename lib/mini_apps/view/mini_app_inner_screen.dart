@@ -5,8 +5,8 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/mini_apps/cubit/mini_app_runner_cubit.dart';
 import 'package:rtu_mirea_app/mini_apps/runtime/mini_app_accent.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_runner_skeleton.dart';
+import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_content.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_scaffold.dart';
-import 'package:stac_bridge/stac_bridge.dart';
 
 class MiniAppInnerScreen extends StatefulWidget {
   const MiniAppInnerScreen({
@@ -64,7 +64,7 @@ class _MiniAppInnerScreenState extends State<MiniAppInnerScreen> {
               accentColor: accentColor,
               child: Builder(
                 builder: (themedContext) =>
-                    StacBridge.render(screen, themedContext) ??
+                    MiniAppContent.render(screen, themedContext) ??
                     _error(
                       themedContext,
                       key: const ValueKey('inner-render-error'),

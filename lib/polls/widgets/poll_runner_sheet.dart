@@ -15,6 +15,8 @@ Future<bool?> showPollRunnerSheet(
   return showAppSheet<bool>(
     context,
     title: poll.title,
+    scrollable: false,
+    maxHeightFraction: .92,
     child: PollRunnerSheet(poll: poll, cubit: cubit),
   );
 }
@@ -129,6 +131,7 @@ class _PollRunnerSheetState extends State<PollRunnerSheet> {
 
   void _back() {
     if (_step == 0 || _submitting) return;
+    FocusScope.of(context).unfocus();
     setState(() {
       _step--;
       _showError = false;
@@ -148,6 +151,7 @@ class _PollRunnerSheetState extends State<PollRunnerSheet> {
       return;
     }
     if (_step < _questions.length - 1) {
+      FocusScope.of(context).unfocus();
       setState(() {
         _step++;
         _showError = false;
@@ -196,6 +200,7 @@ class _PollRunnerSheetState extends State<PollRunnerSheet> {
       });
       return;
     }
+    FocusScope.of(context).unfocus();
     setState(() => _submitting = true);
     final l10n = context.l10n;
     final navigator = Navigator.of(context);
@@ -225,82 +230,131 @@ class _PollRunnerSheetState extends State<PollRunnerSheet> {
       );
     }
     final current = _questions[_step];
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AppProgressBar(value: (_step + 1) / total),
-        const SizedBox(height: AppSpacing.xxs),
-        Text(
-          l10n.pollsStepCounter(_step + 1, total),
-          style: AppText.caption.copyWith(color: colors.muted),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          current.text,
-          style: AppText.headline.copyWith(color: colors.ink),
-        ),
-        if (current.isRequired) ...[
-          const SizedBox(height: AppSpacing.xxs),
-          Text(
-            l10n.pollsQuestionRequired,
-            style: AppText.caption.copyWith(color: colors.muted),
-          ),
-        ],
-        const SizedBox(height: AppSpacing.md),
-        AbsorbPointer(
-          absorbing: _submitting,
-          child: _QuestionInput(
-            question: current,
-            singleValue: _singleAnswers[current.id],
-            multipleValue: _multipleAnswers[current.id] ?? const <String>{},
-            textController: _textControllers[current.id],
-            ratingValue: _ratingAnswers[current.id],
-            onSingleChanged: (value) {
-              _singleAnswers[current.id] = value;
-              setState(() {});
-              _clearError();
-            },
-            onMultipleChanged: (value) {
-              _multipleAnswers[current.id] = value;
-              setState(() {});
-              _clearError();
-            },
-            onTextChanged: _clearError,
-            onRatingChanged: (value) {
-              _ratingAnswers[current.id] = value;
-              setState(() {});
-              _clearError();
-            },
-          ),
-        ),
-        if (_showError) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            l10n.pollsRequiredError,
-            style: AppText.caption.copyWith(color: colors.danger),
-          ),
-        ],
-        const SizedBox(height: AppSpacing.lg),
-        Row(
-          children: [
-            if (_step > 0) ...[
-              Expanded(
-                child: AppButton.secondary(
-                  label: l10n.back,
-                  onPressed: _submitting ? null : _back,
+    return CustomScrollView(
+      key: ValueKey(('pollRunner_scroll', widget.poll.id, current.id)),
+      shrinkWrap: true,
+      primary: false,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppProgressBar(value: (_step + 1) / total),
+              const SizedBox(height: AppSpacing.xxs),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  AppBadge(label: l10n.pollsStepCounter(_step + 1, total)),
+                  AppBadge(
+                    label: switch (current.kind) {
+                      PollQuestionKind.single ||
+                      PollQuestionKind.quiz => l10n.pollsQuestionKindSingle,
+                      PollQuestionKind.multiple =>
+                        l10n.pollsQuestionKindMultiple,
+                      PollQuestionKind.text => l10n.pollsQuestionKindText,
+                      PollQuestionKind.rating => l10n.pollsQuestionKindRating,
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                current.text,
+                style: AppText.headline.copyWith(color: colors.ink),
+              ),
+              if (current.isRequired) ...[
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  l10n.pollsQuestionRequired,
+                  style: AppText.caption.copyWith(color: colors.muted),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.md),
+              TweenAnimationBuilder<double>(
+                key: ValueKey(('pollRunner_question', current.id)),
+                tween: Tween(begin: 0, end: 1),
+                duration:
+                    MediaQuery.disableAnimationsOf(context) ||
+                        MediaQuery.accessibleNavigationOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 180),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) => Transform.translate(
+                  offset: Offset(0, (1 - value) * 8),
+                  child: child,
+                ),
+                child: AbsorbPointer(
+                  absorbing: _submitting,
+                  child: _QuestionInput(
+                    question: current,
+                    singleValue: _singleAnswers[current.id],
+                    multipleValue:
+                        _multipleAnswers[current.id] ?? const <String>{},
+                    textController: _textControllers[current.id],
+                    ratingValue: _ratingAnswers[current.id],
+                    onSingleChanged: (value) {
+                      _singleAnswers[current.id] = value;
+                      setState(() {});
+                      _clearError();
+                    },
+                    onMultipleChanged: (value) {
+                      _multipleAnswers[current.id] = value;
+                      setState(() {});
+                      _clearError();
+                    },
+                    onTextChanged: _clearError,
+                    onRatingChanged: (value) {
+                      _ratingAnswers[current.id] = value;
+                      setState(() {});
+                      _clearError();
+                    },
+                  ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
-            ],
-            Expanded(
-              child: AppButton.primary(
-                label: _step == total - 1 ? l10n.pollsSubmit : l10n.pollsNext,
-                loading: _submitting,
-                onPressed: _submitting ? null : () => unawaited(_next()),
+              if (_showError) ...[
+                const SizedBox(height: AppSpacing.sm),
+                AppBanner(
+                  message: l10n.pollsRequiredError,
+                  tone: AppBannerTone.danger,
+                ),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              Flex(
+                direction: MediaQuery.textScalerOf(context).scale(15) > 20
+                    ? Axis.vertical
+                    : Axis.horizontal,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment:
+                    MediaQuery.textScalerOf(context).scale(15) > 20
+                    ? CrossAxisAlignment.stretch
+                    : CrossAxisAlignment.center,
+                children: [
+                  if (_step > 0) ...[
+                    Flexible(
+                      child: AppButton.secondary(
+                        label: l10n.back,
+                        onPressed: _submitting ? null : _back,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm, height: AppSpacing.sm),
+                  ],
+                  Flexible(
+                    child: AppButton.primary(
+                      label: _step == total - 1
+                          ? l10n.pollsSubmit
+                          : l10n.pollsNext,
+                      expanded: true,
+                      loading: _submitting,
+                      onPressed: _submitting ? null : () => unawaited(_next()),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

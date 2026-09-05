@@ -205,7 +205,8 @@ void main() {
     expect(
       tester
           .widget<SvgInteractiveMap>(find.byType(SvgInteractiveMap))
-          .viewportPadding
+          .viewportPaddingListenable!
+          .value
           .bottom,
       greaterThan(compactPadding),
     );
@@ -213,6 +214,91 @@ void main() {
     await tester.pump();
     expect(sheet.controller!.size, sheet.minChildSize);
     expect(find.byType(MapCanvasControls), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('sheet animation keeps the map and content trees stable', (
+    tester,
+  ) async {
+    await pumpMap(tester);
+    final map = tester.widget<SvgInteractiveMap>(
+      find.byType(SvgInteractiveMap),
+    );
+    final topBar = tester.widget<MapTopBar>(find.byType(MapTopBar));
+    final panel = tester.widget<MapFreeRoomsPanel>(
+      find.byType(MapFreeRoomsPanel),
+    );
+    final transform = tester
+        .widget<InteractiveViewer>(find.byType(InteractiveViewer))
+        .transformationController!;
+    var transformUpdates = 0;
+    transform.addListener(() => transformUpdates++);
+    await tester.tap(find.byTooltip('Развернуть список'));
+    await tester.pump();
+    for (var frame = 0; frame < 20; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(
+        tester.widget<SvgInteractiveMap>(find.byType(SvgInteractiveMap)),
+        same(map),
+      );
+      expect(tester.widget<MapTopBar>(find.byType(MapTopBar)), same(topBar));
+      expect(
+        tester.widget<MapFreeRoomsPanel>(find.byType(MapFreeRoomsPanel)),
+        same(panel),
+      );
+    }
+    expect(transformUpdates, 0);
+    expect(
+      map.viewportPaddingListenable!.value.bottom,
+      closeTo(844 * .78 + 12, .1),
+    );
+    await tester.pump(const Duration(milliseconds: 140));
+    await tester.pumpAndSettle();
+    expect(transformUpdates, greaterThan(0));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('sheet drag retains the map transform until settling', (
+    tester,
+  ) async {
+    await pumpMap(tester);
+    final sheet = tester.widget<DraggableScrollableSheet>(
+      find.byType(DraggableScrollableSheet),
+    );
+    final transform = tester
+        .widget<InteractiveViewer>(find.byType(InteractiveViewer))
+        .transformationController!;
+    final initial = transform.value.clone();
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text('Свободно сейчас')),
+    );
+    for (var frame = 0; frame < 10; frame++) {
+      await gesture.moveBy(const Offset(0, -20));
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(transform.value, initial);
+    }
+    expect(sheet.controller!.size, greaterThan(sheet.minChildSize));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 140));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('reduced-motion refit respects a newer zoom command', (
+    tester,
+  ) async {
+    final controller = SvgInteractiveMapController();
+    addTearDown(controller.dispose);
+    await pumpMap(tester, reduceMotion: true, mapController: controller);
+    final sheet = tester.widget<DraggableScrollableSheet>(
+      find.byType(DraggableScrollableSheet),
+    );
+    sheet.controller!.jumpTo(sheet.maxChildSize);
+    controller.zoomIn();
+    final zoomedScale = controller.currentScale;
+    await tester.pump();
+    expect(controller.currentScale, zoomedScale);
     expect(tester.takeException(), isNull);
   });
 
@@ -248,7 +334,12 @@ void main() {
     final sheet = tester.widget<DraggableScrollableSheet>(
       find.byType(DraggableScrollableSheet),
     );
-    expect(panel.bottomInset, 102);
+    expect(
+      panel.bottomInset,
+      AppControlSize.bottomBar +
+          NinjaBottomBar.topPadding +
+          NinjaBottomBar.bottomPadding,
+    );
     expect(sheet.initialChildSize, lessThan(.4));
     expect(
       sheet.initialChildSize * 844 - panel.bottomInset,
@@ -314,7 +405,10 @@ void main() {
     final scroll = tester.getRect(
       find.byKey(const ValueKey('map-panel-scroll')),
     );
-    expect(scroll.bottom, 844 - 102);
+    final panel = tester.widget<MapFreeRoomsPanel>(
+      find.byType(MapFreeRoomsPanel),
+    );
+    expect(scroll.bottom, 844 - panel.bottomInset);
     expect(tester.getRect(find.text('1 этаж')).bottom, lessThan(scroll.bottom));
     await tester.tap(find.byTooltip('Развернуть список'));
     await tester.pumpAndSettle();

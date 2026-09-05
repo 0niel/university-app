@@ -87,17 +87,18 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
   }
 
   Future<void> _openViewer(LessonMaterial material) async {
-    final index = _materials.indexWhere((m) => m.id == material.id);
+    final materials = List<LessonMaterial>.of(_materials);
+    final index = materials.indexWhere((m) => m.id == material.id);
     if (index < 0 || _openingId != null) return;
     setState(() => _openingId = material.id);
     try {
       final repository = context.read<ScheduleRepository>();
       final urls = await Future.wait(
-        _materials.map((m) => _urlFor(repository, m)),
+        materials.map((m) => _urlFor(repository, m)),
       );
       if (!mounted) return;
       final items = [
-        for (final (i, m) in _materials.indexed)
+        for (final (i, m) in materials.indexed)
           MediaItem(
             url: urls[i],
             kind: MediaItem.kindOf(mimeType: m.mimeType, fileName: m.fileName),

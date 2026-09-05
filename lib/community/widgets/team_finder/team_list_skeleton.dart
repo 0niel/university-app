@@ -8,6 +8,8 @@ class TeamListSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSkeletonGroup(
       child: ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(0, 8, 0, 100),
         itemCount: 3,
         itemBuilder: (itemContext, _) => Padding(

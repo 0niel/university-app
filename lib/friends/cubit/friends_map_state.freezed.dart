@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FriendsMapState {
 
- FriendsMapStatus get status; List<Friend> get friends; List<FriendRequest> get requests; double? get myLatitude; double? get myLongitude; bool get isGhost; bool get locationPermissionDenied; bool get privacySyncFailed; bool get privacyBusy; GeoSharingSettings get geoSettings; Set<String> get pendingResponseIds;
+ FriendsMapStatus get status; List<Friend> get friends; List<Friend> get students; bool get studentsLoading; bool get studentsLoadFailed; FriendsLocationStatus get locationStatus; bool get backgroundLocationActive; bool get locationPublishFailed; List<FriendRequest> get requests; double? get myLatitude; double? get myLongitude; bool get isGhost; bool get locationPermissionDenied; bool get privacySyncFailed; bool get privacyBusy; GeoSharingSettings get geoSettings; Set<String> get pendingResponseIds;
 /// Create a copy of FriendsMapState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $FriendsMapStateCopyWith<FriendsMapState> get copyWith => _$FriendsMapStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendsMapState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.friends, friends)&&const DeepCollectionEquality().equals(other.requests, requests)&&(identical(other.myLatitude, myLatitude) || other.myLatitude == myLatitude)&&(identical(other.myLongitude, myLongitude) || other.myLongitude == myLongitude)&&(identical(other.isGhost, isGhost) || other.isGhost == isGhost)&&(identical(other.locationPermissionDenied, locationPermissionDenied) || other.locationPermissionDenied == locationPermissionDenied)&&(identical(other.privacySyncFailed, privacySyncFailed) || other.privacySyncFailed == privacySyncFailed)&&(identical(other.privacyBusy, privacyBusy) || other.privacyBusy == privacyBusy)&&(identical(other.geoSettings, geoSettings) || other.geoSettings == geoSettings)&&const DeepCollectionEquality().equals(other.pendingResponseIds, pendingResponseIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendsMapState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.friends, friends)&&const DeepCollectionEquality().equals(other.students, students)&&(identical(other.studentsLoading, studentsLoading) || other.studentsLoading == studentsLoading)&&(identical(other.studentsLoadFailed, studentsLoadFailed) || other.studentsLoadFailed == studentsLoadFailed)&&(identical(other.locationStatus, locationStatus) || other.locationStatus == locationStatus)&&(identical(other.backgroundLocationActive, backgroundLocationActive) || other.backgroundLocationActive == backgroundLocationActive)&&(identical(other.locationPublishFailed, locationPublishFailed) || other.locationPublishFailed == locationPublishFailed)&&const DeepCollectionEquality().equals(other.requests, requests)&&(identical(other.myLatitude, myLatitude) || other.myLatitude == myLatitude)&&(identical(other.myLongitude, myLongitude) || other.myLongitude == myLongitude)&&(identical(other.isGhost, isGhost) || other.isGhost == isGhost)&&(identical(other.locationPermissionDenied, locationPermissionDenied) || other.locationPermissionDenied == locationPermissionDenied)&&(identical(other.privacySyncFailed, privacySyncFailed) || other.privacySyncFailed == privacySyncFailed)&&(identical(other.privacyBusy, privacyBusy) || other.privacyBusy == privacyBusy)&&(identical(other.geoSettings, geoSettings) || other.geoSettings == geoSettings)&&const DeepCollectionEquality().equals(other.pendingResponseIds, pendingResponseIds));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(friends),const DeepCollectionEquality().hash(requests),myLatitude,myLongitude,isGhost,locationPermissionDenied,privacySyncFailed,privacyBusy,geoSettings,const DeepCollectionEquality().hash(pendingResponseIds));
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(friends),const DeepCollectionEquality().hash(students),studentsLoading,studentsLoadFailed,locationStatus,backgroundLocationActive,locationPublishFailed,const DeepCollectionEquality().hash(requests),myLatitude,myLongitude,isGhost,locationPermissionDenied,privacySyncFailed,privacyBusy,geoSettings,const DeepCollectionEquality().hash(pendingResponseIds));
 
 @override
 String toString() {
-  return 'FriendsMapState(status: $status, friends: $friends, requests: $requests, myLatitude: $myLatitude, myLongitude: $myLongitude, isGhost: $isGhost, locationPermissionDenied: $locationPermissionDenied, privacySyncFailed: $privacySyncFailed, privacyBusy: $privacyBusy, geoSettings: $geoSettings, pendingResponseIds: $pendingResponseIds)';
+  return 'FriendsMapState(status: $status, friends: $friends, students: $students, studentsLoading: $studentsLoading, studentsLoadFailed: $studentsLoadFailed, locationStatus: $locationStatus, backgroundLocationActive: $backgroundLocationActive, locationPublishFailed: $locationPublishFailed, requests: $requests, myLatitude: $myLatitude, myLongitude: $myLongitude, isGhost: $isGhost, locationPermissionDenied: $locationPermissionDenied, privacySyncFailed: $privacySyncFailed, privacyBusy: $privacyBusy, geoSettings: $geoSettings, pendingResponseIds: $pendingResponseIds)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $FriendsMapStateCopyWith<$Res>  {
   factory $FriendsMapStateCopyWith(FriendsMapState value, $Res Function(FriendsMapState) _then) = _$FriendsMapStateCopyWithImpl;
 @useResult
 $Res call({
- FriendsMapStatus status, List<Friend> friends, List<FriendRequest> requests, double? myLatitude, double? myLongitude, bool isGhost, bool locationPermissionDenied, bool privacySyncFailed, bool privacyBusy, GeoSharingSettings geoSettings, Set<String> pendingResponseIds
+ FriendsMapStatus status, List<Friend> friends, List<Friend> students, bool studentsLoading, bool studentsLoadFailed, FriendsLocationStatus locationStatus, bool backgroundLocationActive, bool locationPublishFailed, List<FriendRequest> requests, double? myLatitude, double? myLongitude, bool isGhost, bool locationPermissionDenied, bool privacySyncFailed, bool privacyBusy, GeoSharingSettings geoSettings, Set<String> pendingResponseIds
 });
 
 
@@ -62,11 +62,17 @@ class _$FriendsMapStateCopyWithImpl<$Res>
 
 /// Create a copy of FriendsMapState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? friends = null,Object? requests = null,Object? myLatitude = freezed,Object? myLongitude = freezed,Object? isGhost = null,Object? locationPermissionDenied = null,Object? privacySyncFailed = null,Object? privacyBusy = null,Object? geoSettings = null,Object? pendingResponseIds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? friends = null,Object? students = null,Object? studentsLoading = null,Object? studentsLoadFailed = null,Object? locationStatus = null,Object? backgroundLocationActive = null,Object? locationPublishFailed = null,Object? requests = null,Object? myLatitude = freezed,Object? myLongitude = freezed,Object? isGhost = null,Object? locationPermissionDenied = null,Object? privacySyncFailed = null,Object? privacyBusy = null,Object? geoSettings = null,Object? pendingResponseIds = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FriendsMapStatus,friends: null == friends ? _self.friends : friends // ignore: cast_nullable_to_non_nullable
-as List<Friend>,requests: null == requests ? _self.requests : requests // ignore: cast_nullable_to_non_nullable
+as List<Friend>,students: null == students ? _self.students : students // ignore: cast_nullable_to_non_nullable
+as List<Friend>,studentsLoading: null == studentsLoading ? _self.studentsLoading : studentsLoading // ignore: cast_nullable_to_non_nullable
+as bool,studentsLoadFailed: null == studentsLoadFailed ? _self.studentsLoadFailed : studentsLoadFailed // ignore: cast_nullable_to_non_nullable
+as bool,locationStatus: null == locationStatus ? _self.locationStatus : locationStatus // ignore: cast_nullable_to_non_nullable
+as FriendsLocationStatus,backgroundLocationActive: null == backgroundLocationActive ? _self.backgroundLocationActive : backgroundLocationActive // ignore: cast_nullable_to_non_nullable
+as bool,locationPublishFailed: null == locationPublishFailed ? _self.locationPublishFailed : locationPublishFailed // ignore: cast_nullable_to_non_nullable
+as bool,requests: null == requests ? _self.requests : requests // ignore: cast_nullable_to_non_nullable
 as List<FriendRequest>,myLatitude: freezed == myLatitude ? _self.myLatitude : myLatitude // ignore: cast_nullable_to_non_nullable
 as double?,myLongitude: freezed == myLongitude ? _self.myLongitude : myLongitude // ignore: cast_nullable_to_non_nullable
 as double?,isGhost: null == isGhost ? _self.isGhost : isGhost // ignore: cast_nullable_to_non_nullable
@@ -169,10 +175,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FriendsMapStatus status,  List<Friend> friends,  List<FriendRequest> requests,  double? myLatitude,  double? myLongitude,  bool isGhost,  bool locationPermissionDenied,  bool privacySyncFailed,  bool privacyBusy,  GeoSharingSettings geoSettings,  Set<String> pendingResponseIds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FriendsMapStatus status,  List<Friend> friends,  List<Friend> students,  bool studentsLoading,  bool studentsLoadFailed,  FriendsLocationStatus locationStatus,  bool backgroundLocationActive,  bool locationPublishFailed,  List<FriendRequest> requests,  double? myLatitude,  double? myLongitude,  bool isGhost,  bool locationPermissionDenied,  bool privacySyncFailed,  bool privacyBusy,  GeoSharingSettings geoSettings,  Set<String> pendingResponseIds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FriendsMapState() when $default != null:
-return $default(_that.status,_that.friends,_that.requests,_that.myLatitude,_that.myLongitude,_that.isGhost,_that.locationPermissionDenied,_that.privacySyncFailed,_that.privacyBusy,_that.geoSettings,_that.pendingResponseIds);case _:
+return $default(_that.status,_that.friends,_that.students,_that.studentsLoading,_that.studentsLoadFailed,_that.locationStatus,_that.backgroundLocationActive,_that.locationPublishFailed,_that.requests,_that.myLatitude,_that.myLongitude,_that.isGhost,_that.locationPermissionDenied,_that.privacySyncFailed,_that.privacyBusy,_that.geoSettings,_that.pendingResponseIds);case _:
   return orElse();
 
 }
@@ -190,10 +196,10 @@ return $default(_that.status,_that.friends,_that.requests,_that.myLatitude,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FriendsMapStatus status,  List<Friend> friends,  List<FriendRequest> requests,  double? myLatitude,  double? myLongitude,  bool isGhost,  bool locationPermissionDenied,  bool privacySyncFailed,  bool privacyBusy,  GeoSharingSettings geoSettings,  Set<String> pendingResponseIds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FriendsMapStatus status,  List<Friend> friends,  List<Friend> students,  bool studentsLoading,  bool studentsLoadFailed,  FriendsLocationStatus locationStatus,  bool backgroundLocationActive,  bool locationPublishFailed,  List<FriendRequest> requests,  double? myLatitude,  double? myLongitude,  bool isGhost,  bool locationPermissionDenied,  bool privacySyncFailed,  bool privacyBusy,  GeoSharingSettings geoSettings,  Set<String> pendingResponseIds)  $default,) {final _that = this;
 switch (_that) {
 case _FriendsMapState():
-return $default(_that.status,_that.friends,_that.requests,_that.myLatitude,_that.myLongitude,_that.isGhost,_that.locationPermissionDenied,_that.privacySyncFailed,_that.privacyBusy,_that.geoSettings,_that.pendingResponseIds);case _:
+return $default(_that.status,_that.friends,_that.students,_that.studentsLoading,_that.studentsLoadFailed,_that.locationStatus,_that.backgroundLocationActive,_that.locationPublishFailed,_that.requests,_that.myLatitude,_that.myLongitude,_that.isGhost,_that.locationPermissionDenied,_that.privacySyncFailed,_that.privacyBusy,_that.geoSettings,_that.pendingResponseIds);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +216,10 @@ return $default(_that.status,_that.friends,_that.requests,_that.myLatitude,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FriendsMapStatus status,  List<Friend> friends,  List<FriendRequest> requests,  double? myLatitude,  double? myLongitude,  bool isGhost,  bool locationPermissionDenied,  bool privacySyncFailed,  bool privacyBusy,  GeoSharingSettings geoSettings,  Set<String> pendingResponseIds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FriendsMapStatus status,  List<Friend> friends,  List<Friend> students,  bool studentsLoading,  bool studentsLoadFailed,  FriendsLocationStatus locationStatus,  bool backgroundLocationActive,  bool locationPublishFailed,  List<FriendRequest> requests,  double? myLatitude,  double? myLongitude,  bool isGhost,  bool locationPermissionDenied,  bool privacySyncFailed,  bool privacyBusy,  GeoSharingSettings geoSettings,  Set<String> pendingResponseIds)?  $default,) {final _that = this;
 switch (_that) {
 case _FriendsMapState() when $default != null:
-return $default(_that.status,_that.friends,_that.requests,_that.myLatitude,_that.myLongitude,_that.isGhost,_that.locationPermissionDenied,_that.privacySyncFailed,_that.privacyBusy,_that.geoSettings,_that.pendingResponseIds);case _:
+return $default(_that.status,_that.friends,_that.students,_that.studentsLoading,_that.studentsLoadFailed,_that.locationStatus,_that.backgroundLocationActive,_that.locationPublishFailed,_that.requests,_that.myLatitude,_that.myLongitude,_that.isGhost,_that.locationPermissionDenied,_that.privacySyncFailed,_that.privacyBusy,_that.geoSettings,_that.pendingResponseIds);case _:
   return null;
 
 }
@@ -225,7 +231,7 @@ return $default(_that.status,_that.friends,_that.requests,_that.myLatitude,_that
 
 
 class _FriendsMapState extends FriendsMapState {
-  const _FriendsMapState({this.status = FriendsMapStatus.initial, final  List<Friend> friends = const <Friend>[], final  List<FriendRequest> requests = const <FriendRequest>[], this.myLatitude, this.myLongitude, this.isGhost = false, this.locationPermissionDenied = false, this.privacySyncFailed = false, this.privacyBusy = false, this.geoSettings = const GeoSharingSettings(), final  Set<String> pendingResponseIds = const <String>{}}): _friends = friends,_requests = requests,_pendingResponseIds = pendingResponseIds,super._();
+  const _FriendsMapState({this.status = FriendsMapStatus.initial, final  List<Friend> friends = const <Friend>[], final  List<Friend> students = const <Friend>[], this.studentsLoading = false, this.studentsLoadFailed = false, this.locationStatus = FriendsLocationStatus.stopped, this.backgroundLocationActive = false, this.locationPublishFailed = false, final  List<FriendRequest> requests = const <FriendRequest>[], this.myLatitude, this.myLongitude, this.isGhost = false, this.locationPermissionDenied = false, this.privacySyncFailed = false, this.privacyBusy = false, this.geoSettings = const GeoSharingSettings(), final  Set<String> pendingResponseIds = const <String>{}}): _friends = friends,_students = students,_requests = requests,_pendingResponseIds = pendingResponseIds,super._();
 
 
 @override@JsonKey() final  FriendsMapStatus status;
@@ -236,6 +242,18 @@ class _FriendsMapState extends FriendsMapState {
   return EqualUnmodifiableListView(_friends);
 }
 
+ final  List<Friend> _students;
+@override@JsonKey() List<Friend> get students {
+  if (_students is EqualUnmodifiableListView) return _students;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_students);
+}
+
+@override@JsonKey() final  bool studentsLoading;
+@override@JsonKey() final  bool studentsLoadFailed;
+@override@JsonKey() final  FriendsLocationStatus locationStatus;
+@override@JsonKey() final  bool backgroundLocationActive;
+@override@JsonKey() final  bool locationPublishFailed;
  final  List<FriendRequest> _requests;
 @override@JsonKey() List<FriendRequest> get requests {
   if (_requests is EqualUnmodifiableListView) return _requests;
@@ -268,16 +286,16 @@ _$FriendsMapStateCopyWith<_FriendsMapState> get copyWith => __$FriendsMapStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendsMapState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._friends, _friends)&&const DeepCollectionEquality().equals(other._requests, _requests)&&(identical(other.myLatitude, myLatitude) || other.myLatitude == myLatitude)&&(identical(other.myLongitude, myLongitude) || other.myLongitude == myLongitude)&&(identical(other.isGhost, isGhost) || other.isGhost == isGhost)&&(identical(other.locationPermissionDenied, locationPermissionDenied) || other.locationPermissionDenied == locationPermissionDenied)&&(identical(other.privacySyncFailed, privacySyncFailed) || other.privacySyncFailed == privacySyncFailed)&&(identical(other.privacyBusy, privacyBusy) || other.privacyBusy == privacyBusy)&&(identical(other.geoSettings, geoSettings) || other.geoSettings == geoSettings)&&const DeepCollectionEquality().equals(other._pendingResponseIds, _pendingResponseIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendsMapState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._friends, _friends)&&const DeepCollectionEquality().equals(other._students, _students)&&(identical(other.studentsLoading, studentsLoading) || other.studentsLoading == studentsLoading)&&(identical(other.studentsLoadFailed, studentsLoadFailed) || other.studentsLoadFailed == studentsLoadFailed)&&(identical(other.locationStatus, locationStatus) || other.locationStatus == locationStatus)&&(identical(other.backgroundLocationActive, backgroundLocationActive) || other.backgroundLocationActive == backgroundLocationActive)&&(identical(other.locationPublishFailed, locationPublishFailed) || other.locationPublishFailed == locationPublishFailed)&&const DeepCollectionEquality().equals(other._requests, _requests)&&(identical(other.myLatitude, myLatitude) || other.myLatitude == myLatitude)&&(identical(other.myLongitude, myLongitude) || other.myLongitude == myLongitude)&&(identical(other.isGhost, isGhost) || other.isGhost == isGhost)&&(identical(other.locationPermissionDenied, locationPermissionDenied) || other.locationPermissionDenied == locationPermissionDenied)&&(identical(other.privacySyncFailed, privacySyncFailed) || other.privacySyncFailed == privacySyncFailed)&&(identical(other.privacyBusy, privacyBusy) || other.privacyBusy == privacyBusy)&&(identical(other.geoSettings, geoSettings) || other.geoSettings == geoSettings)&&const DeepCollectionEquality().equals(other._pendingResponseIds, _pendingResponseIds));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_friends),const DeepCollectionEquality().hash(_requests),myLatitude,myLongitude,isGhost,locationPermissionDenied,privacySyncFailed,privacyBusy,geoSettings,const DeepCollectionEquality().hash(_pendingResponseIds));
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_friends),const DeepCollectionEquality().hash(_students),studentsLoading,studentsLoadFailed,locationStatus,backgroundLocationActive,locationPublishFailed,const DeepCollectionEquality().hash(_requests),myLatitude,myLongitude,isGhost,locationPermissionDenied,privacySyncFailed,privacyBusy,geoSettings,const DeepCollectionEquality().hash(_pendingResponseIds));
 
 @override
 String toString() {
-  return 'FriendsMapState(status: $status, friends: $friends, requests: $requests, myLatitude: $myLatitude, myLongitude: $myLongitude, isGhost: $isGhost, locationPermissionDenied: $locationPermissionDenied, privacySyncFailed: $privacySyncFailed, privacyBusy: $privacyBusy, geoSettings: $geoSettings, pendingResponseIds: $pendingResponseIds)';
+  return 'FriendsMapState(status: $status, friends: $friends, students: $students, studentsLoading: $studentsLoading, studentsLoadFailed: $studentsLoadFailed, locationStatus: $locationStatus, backgroundLocationActive: $backgroundLocationActive, locationPublishFailed: $locationPublishFailed, requests: $requests, myLatitude: $myLatitude, myLongitude: $myLongitude, isGhost: $isGhost, locationPermissionDenied: $locationPermissionDenied, privacySyncFailed: $privacySyncFailed, privacyBusy: $privacyBusy, geoSettings: $geoSettings, pendingResponseIds: $pendingResponseIds)';
 }
 
 
@@ -288,7 +306,7 @@ abstract mixin class _$FriendsMapStateCopyWith<$Res> implements $FriendsMapState
   factory _$FriendsMapStateCopyWith(_FriendsMapState value, $Res Function(_FriendsMapState) _then) = __$FriendsMapStateCopyWithImpl;
 @override @useResult
 $Res call({
- FriendsMapStatus status, List<Friend> friends, List<FriendRequest> requests, double? myLatitude, double? myLongitude, bool isGhost, bool locationPermissionDenied, bool privacySyncFailed, bool privacyBusy, GeoSharingSettings geoSettings, Set<String> pendingResponseIds
+ FriendsMapStatus status, List<Friend> friends, List<Friend> students, bool studentsLoading, bool studentsLoadFailed, FriendsLocationStatus locationStatus, bool backgroundLocationActive, bool locationPublishFailed, List<FriendRequest> requests, double? myLatitude, double? myLongitude, bool isGhost, bool locationPermissionDenied, bool privacySyncFailed, bool privacyBusy, GeoSharingSettings geoSettings, Set<String> pendingResponseIds
 });
 
 
@@ -305,11 +323,17 @@ class __$FriendsMapStateCopyWithImpl<$Res>
 
 /// Create a copy of FriendsMapState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? friends = null,Object? requests = null,Object? myLatitude = freezed,Object? myLongitude = freezed,Object? isGhost = null,Object? locationPermissionDenied = null,Object? privacySyncFailed = null,Object? privacyBusy = null,Object? geoSettings = null,Object? pendingResponseIds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? friends = null,Object? students = null,Object? studentsLoading = null,Object? studentsLoadFailed = null,Object? locationStatus = null,Object? backgroundLocationActive = null,Object? locationPublishFailed = null,Object? requests = null,Object? myLatitude = freezed,Object? myLongitude = freezed,Object? isGhost = null,Object? locationPermissionDenied = null,Object? privacySyncFailed = null,Object? privacyBusy = null,Object? geoSettings = null,Object? pendingResponseIds = null,}) {
   return _then(_FriendsMapState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FriendsMapStatus,friends: null == friends ? _self._friends : friends // ignore: cast_nullable_to_non_nullable
-as List<Friend>,requests: null == requests ? _self._requests : requests // ignore: cast_nullable_to_non_nullable
+as List<Friend>,students: null == students ? _self._students : students // ignore: cast_nullable_to_non_nullable
+as List<Friend>,studentsLoading: null == studentsLoading ? _self.studentsLoading : studentsLoading // ignore: cast_nullable_to_non_nullable
+as bool,studentsLoadFailed: null == studentsLoadFailed ? _self.studentsLoadFailed : studentsLoadFailed // ignore: cast_nullable_to_non_nullable
+as bool,locationStatus: null == locationStatus ? _self.locationStatus : locationStatus // ignore: cast_nullable_to_non_nullable
+as FriendsLocationStatus,backgroundLocationActive: null == backgroundLocationActive ? _self.backgroundLocationActive : backgroundLocationActive // ignore: cast_nullable_to_non_nullable
+as bool,locationPublishFailed: null == locationPublishFailed ? _self.locationPublishFailed : locationPublishFailed // ignore: cast_nullable_to_non_nullable
+as bool,requests: null == requests ? _self._requests : requests // ignore: cast_nullable_to_non_nullable
 as List<FriendRequest>,myLatitude: freezed == myLatitude ? _self.myLatitude : myLatitude // ignore: cast_nullable_to_non_nullable
 as double?,myLongitude: freezed == myLongitude ? _self.myLongitude : myLongitude // ignore: cast_nullable_to_non_nullable
 as double?,isGhost: null == isGhost ? _self.isGhost : isGhost // ignore: cast_nullable_to_non_nullable
