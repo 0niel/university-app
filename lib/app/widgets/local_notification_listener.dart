@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:local_notifications_repository/local_notifications_repository.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/navigation/deep_links.dart';
+import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 
 class LocalNotificationListener extends StatefulWidget {
@@ -73,6 +74,11 @@ class _LocalNotificationListenerState extends State<LocalNotificationListener>
       if (data is! Map<String, dynamic> || data['type'] != 'push') return;
       final state = context.read<AppBloc>().state;
       if (!state.status.isLoggedIn || data['user_id'] != state.user.id) return;
+      final notifications = context.read<NotificationsCubit?>();
+      final id = data['notification_id'];
+      if (id is String && notifications?.state.userId == state.user.id) {
+        notifications?.markRead(id);
+      }
       final route = DeepLinks.normalizeLocation(data['route'] as String?);
       if (route != null) widget.router.go(route);
     } on Object catch (_) {

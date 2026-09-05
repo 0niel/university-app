@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:promo_repository/promo_repository.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
+import 'package:rtu_mirea_app/profile/widgets/settings_sheets.dart';
+import 'package:rtu_mirea_app/profile/widgets/settings_toggle_row.dart';
 import 'package:rtu_mirea_app/promo/cubit/cubit.dart';
 import 'package:rtu_mirea_app/promo/view/promo_banner_slot.dart';
 
@@ -97,6 +99,42 @@ void main() {
     );
 
     expect(find.byType(AppPromoCard), findsNothing);
+  });
+
+  testWidgets('enabling promos keeps individual hides and pending writes', (
+    tester,
+  ) async {
+    when(() => preferences.state).thenReturn(
+      const UiPreferencesState(showPromoBanners: false),
+    );
+    when(() => dismissals.state).thenReturn(
+      PromoDismissalsState(
+        hidden: {banner.dismissKey},
+        pending: {banner.dismissKey},
+      ),
+    );
+    await tester.pumpApp(
+      wrap(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showHomeContentSheet(context),
+            child: const Text('Settings'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    final toggle = tester
+        .widgetList<SettingsToggleRow>(
+          find.byType(SettingsToggleRow),
+        )
+        .last;
+    toggle.onChanged!(true);
+    verify(() => preferences.setShowPromoBanners(value: true)).called(1);
+    verifyNever(() => dismissals.reset());
+    expect(dismissals.state.hidden, {banner.dismissKey});
+    expect(dismissals.state.pending, {banner.dismissKey});
   });
 
   testWidgets('renders nothing without promo providers', (tester) async {

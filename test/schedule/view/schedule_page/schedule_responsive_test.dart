@@ -3,7 +3,10 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rtu_mirea_app/common/hydrated_storage.dart';
+import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
@@ -12,6 +15,7 @@ import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_view.dart
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_month_view.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_week_view.dart';
 import 'package:schedule_repository/schedule_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/pump_app.dart';
 import 'schedule_test_data.dart';
@@ -139,6 +143,41 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );
+
+  testWidgets('reading a change removes the calendar banner and action dot', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    HydratedBloc.storage = CustomHydratedStorage(
+      sharedPreferences: await SharedPreferences.getInstance(),
+    );
+    final notifications = NotificationsCubit(userId: 'student');
+    addTearDown(notifications.close);
+    when(() => changes.state).thenReturn(
+      ScheduleChangesState(
+        changes: [
+          ScheduleChange(
+            id: '101',
+            kind: ScheduleChangeKind.cancel,
+            subject: 'Математика',
+            lessonDate: DateTime.now(),
+            createdAt: DateTime.now(),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpApp(
+      BlocProvider.value(value: notifications, child: subject()),
+      size: const Size(420, 900),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('изменение на этой неделе'), findsOneWidget);
+    notifications.markRead('change:101');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('изменение на этой неделе'), findsNothing);
+    expect(changes.state.changes.single.kind, ScheduleChangeKind.cancel);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets(
     'view transitions preserve selected day and disable outgoing input',

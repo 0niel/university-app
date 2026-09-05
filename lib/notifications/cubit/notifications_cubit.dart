@@ -33,7 +33,7 @@ class NotificationsState extends Equatable {
       pendingReadIds: {
         if (json['pendingReadIds'] case final List<dynamic> ids)
           for (final id in ids)
-            if (id is String && isInboxNotificationId(id)) id,
+            if (id is String && isCloudNotificationId(id)) id,
       },
     );
   }
@@ -92,9 +92,22 @@ class NotificationsCubit extends HydratedCubit<NotificationsState> {
   NotificationsCubit({String? userId, this._repository})
     : super(const NotificationsState()) {
     selectUser(userId);
+    if (state.userId != null) {
+      emit(
+        state.copyWith(
+          pendingReadIds: {
+            ...state.pendingReadIds,
+            ...state.readIds.where(isScheduleChangeNotificationId),
+          },
+        ),
+      );
+    }
   }
 
   final NotificationInboxRepository? _repository;
+
+  @override
+  String get storagePrefix => 'NotificationsCubit';
   int _revision = 0;
   Future<void>? _refreshTask;
   Future<void>? _readTask;
@@ -224,7 +237,7 @@ class NotificationsCubit extends HydratedCubit<NotificationsState> {
         readIds: _trim(next),
         pendingReadIds: _trim({
           ...state.pendingReadIds,
-          ...ids.where(isInboxNotificationId),
+          ...ids.where(isCloudNotificationId),
         }),
       ),
     );
@@ -234,6 +247,16 @@ class NotificationsCubit extends HydratedCubit<NotificationsState> {
   void selectUser(String? userId) {
     final normalized = userId == null || userId.isEmpty ? null : userId;
     if (state.userId == normalized && normalized != null) return;
+    if (state.userId == null && normalized == null) {
+      emit(
+        NotificationsState(
+          readIds: state.readIds
+              .where((id) => id.startsWith('change:'))
+              .toSet(),
+        ),
+      );
+      return;
+    }
     _revision++;
     _refreshTask = null;
     _readTask = null;
@@ -249,9 +272,17 @@ class NotificationsCubit extends HydratedCubit<NotificationsState> {
     emit(NotificationsState(userId: state.userId));
   }
 
-  Set<String> _trim(Set<String> ids) => ids.length <= maxReadIds
-      ? ids
-      : ids.skip(ids.length - maxReadIds).toSet();
+  Set<String> _trim(Set<String> ids) {
+    final otherIds = ids
+        .where((id) => !isScheduleChangeNotificationId(id))
+        .toList();
+    return {
+      ...ids.where(isScheduleChangeNotificationId),
+      ...otherIds.skip(
+        otherIds.length > maxReadIds ? otherIds.length - maxReadIds : 0,
+      ),
+    };
+  }
 
   @override
   NotificationsState? fromJson(Map<String, dynamic> json) {

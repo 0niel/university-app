@@ -26,6 +26,18 @@ void main() {
     expect(cubit.state.hasUnread(['notice']), isFalse);
   });
 
+  for (final userId in <String?>['student-a', null]) {
+    test('restores schedule read state after restart for $userId', () async {
+      final first = NotificationsCubit(userId: userId)..markRead('change:101');
+      await Future<void>.delayed(Duration.zero);
+      await first.close();
+      final restored = NotificationsCubit(userId: userId);
+      addTearDown(restored.close);
+      expect(restored.state.isRead('change:101'), isTrue);
+      expect(restored.state.isRead('change:102'), isFalse);
+    });
+  }
+
   test('bounds stored pushes and read markers', () async {
     final cubit = NotificationsCubit(userId: 'student-a');
     addTearDown(cubit.close);

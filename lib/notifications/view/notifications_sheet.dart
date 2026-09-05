@@ -15,7 +15,7 @@ import 'package:schedule_repository/schedule_repository.dart';
 
 Future<void> showNotificationsSheet(BuildContext context) async {
   final cubit = context.read<NotificationsCubit>();
-  final changes = context.read<ScheduleChangesCubit>().state.changes;
+  final changes = context.read<ScheduleChangesCubit>();
   unawaited(cubit.refresh());
   await showAppSheet<void>(
     context,
@@ -23,7 +23,10 @@ Future<void> showNotificationsSheet(BuildContext context) async {
     contentPadding: EdgeInsets.zero,
     child: BlocProvider.value(
       value: cubit,
-      child: NotificationsSheet(changes: changes),
+      child: BlocBuilder<ScheduleChangesCubit, ScheduleChangesState>(
+        bloc: changes,
+        builder: (context, state) => NotificationsSheet(changes: state.changes),
+      ),
     ),
   );
 }

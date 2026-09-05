@@ -177,6 +177,7 @@ void main() {
             as String;
     interactions.add(payload);
     verify(() => router.go('/services/discourse-post-overview/42')).called(1);
+    expect(notifications.state.isRead('push:discourse'), isTrue);
   });
 
   for (final platform in [
@@ -308,7 +309,8 @@ void main() {
         id: any(named: 'id'),
         title: 'Hello',
         body: 'Message',
-        payload: '{"type":"push","user_id":"student-a","route":"/profile"}',
+        payload:
+            '{"type":"push","user_id":"student-a","notification_id":"push:visible","route":"/profile"}',
       ),
     ).called(1);
     expect(notifications.state.pushes, hasLength(1));
@@ -331,6 +333,8 @@ void main() {
       ),
     );
     expect(notifications.state.pushes, hasLength(2));
+    expect(notifications.state.isRead('push:opened'), isTrue);
+    expect(notifications.state.isRead('push:visible'), isFalse);
   });
 
   testWidgets(
