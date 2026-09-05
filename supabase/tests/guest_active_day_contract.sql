@@ -4,8 +4,9 @@ set local lock_timeout = '3s';
 
 do $$
 declare
-  v_uid uuid;
-  v_balance integer;
+  v_uid uuid := extensions.gen_random_uuid();
+  v_org text := 'guest-activity-' || v_uid::text;
+  v_balance integer := 37;
   v_balance_after integer;
 begin
   if (select prosecdef from pg_proc
@@ -20,16 +21,15 @@ begin
     raise exception 'Guest activity privilege boundary is incorrect';
   end if;
 
-  select profile.user_id, profile.shurikens into v_uid, v_balance
-  from core.user_gamification_profiles profile
-  join core.user_academic_profiles academic on academic.user_id = profile.user_id
-    and academic.organization_id = profile.organization_id
-  join core.user_active_days activity on activity.user_id = profile.user_id
-    and activity.active_on = (now() at time zone 'UTC')::date
-  limit 1;
-  if v_uid is null then
-    raise exception 'Authenticated activity fixture is unavailable';
-  end if;
+  insert into core.organizations (id, name)
+  values (v_org, 'Guest activity contract');
+  insert into auth.users (id) values (v_uid);
+  insert into core.user_academic_profiles (
+    user_id, organization_id, full_name, academic_group
+  ) values (v_uid, v_org, 'Activity User', 'ACT-01');
+  insert into core.user_gamification_profiles (
+    user_id, organization_id, shurikens
+  ) values (v_uid, v_org, v_balance);
 
   perform set_config('request.jwt.claim.sub', '', true);
   perform set_config('request.jwt.claims', '{}', true);
@@ -44,6 +44,10 @@ begin
   exception when insufficient_privilege then null;
   end;
   execute 'reset role';
+
+  if exists (select 1 from core.user_active_days where user_id = v_uid) then
+    raise exception 'Guest recording created authenticated activity';
+  end if;
 
   execute 'set local role authenticated';
   perform public.record_active_day();
