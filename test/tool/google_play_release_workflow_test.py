@@ -48,13 +48,8 @@ class GooglePlayReleaseWorkflowTest(unittest.TestCase):
             values = output.read_text(encoding="utf-8") if output.exists() else ""
             return result, values
 
-    def test_scheduled_missing_release_skips_upload(self):
-        result, values = self.resolve("schedule")
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(values, "available=false\n")
-
-    def test_scheduled_matching_release_is_available(self):
-        result, values = self.resolve("schedule", found_tag="v5.2.0-beta.1003501")
+    def test_upstream_matching_release_is_available(self):
+        result, values = self.resolve("workflow_run", found_tag="v5.2.0-beta.1003501")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(values, "tag=v5.2.0-beta.1003501\navailable=true\n")
 
@@ -77,10 +72,19 @@ class GooglePlayReleaseWorkflowTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(values, "tag=v5.2.0-beta.1003501\navailable=true\n")
 
-    def test_api_failure_does_not_become_a_scheduled_skip(self):
-        result, values = self.resolve("schedule", api_status=42)
+    def test_api_failure_stops_release_resolution(self):
+        result, values = self.resolve("workflow_run", api_status=42)
         self.assertEqual(result.returncode, 42)
         self.assertEqual(values, "")
+
+    def test_publishing_is_event_driven_and_serialized(self):
+        self.assertNotIn("schedule:", WORKFLOW)
+        self.assertIn("group: google-play-internal\n", WORKFLOW)
+        self.assertIn("cancel-in-progress: false", WORKFLOW)
+        self.assertIn("github.event.workflow_run.conclusion == 'success'", WORKFLOW)
+        self.assertIn("github.event.workflow_run.event == 'workflow_run'", WORKFLOW)
+        self.assertIn("github.event.workflow_run.event == 'workflow_dispatch'", WORKFLOW)
+        self.assertIn("github.event.workflow_run.head_branch == 'master'", WORKFLOW)
 
     def test_upload_and_credentials_are_gated(self):
         gate = "if: ${{ steps.release.outputs.available == 'true' }}"

@@ -7,6 +7,10 @@ concurrency:
 on:
   pull_request:
     paths:
+      - ".fvmrc"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".github/workflows/flutter_package.yml"
       - "packages/storage/secure_storage/**"
       - ".github/workflows/secure_storage.yaml"
     branches:
@@ -20,5 +24,4 @@ jobs:
     uses: ./.github/workflows/flutter_package.yml
     with:
       coverage_excludes: "**/*.g.dart"
-      flutter_version: 3.44.2
       working_directory: packages/storage/secure_storage

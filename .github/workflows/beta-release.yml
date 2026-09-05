@@ -77,7 +77,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ needs.prepare.outputs.release_sha }}
-          fetch-depth: 0
           persist-credentials: false
 
       - name: Verify release configuration
@@ -203,7 +202,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/dart-symbols"
           shorebird release android \
-            --flutter-version 3.44.2 \
+            --flutter-version "$(jq -er '.flutter' .fvmrc)" \
             --artifact apk \
             --flavor production \
             --target lib/main/main_production.dart \
