@@ -39,6 +39,11 @@ void main() {
     );
   });
 
+  test('notification root opens the feed and preserves its query', () {
+    expect(DeepLinks.normalizeLocation('/'), '/feed');
+    expect(DeepLinks.normalizeLocation('/?source=push'), '/feed?source=push');
+  });
+
   test('preserves query parameters in share and app links', () {
     expect(
       DeepLinks.shareLink('/services/people?add=user-42', config: config),
