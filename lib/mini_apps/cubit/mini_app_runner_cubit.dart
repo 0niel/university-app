@@ -22,12 +22,18 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
   static const _screenEquality = DeepCollectionEquality();
 
   Timer? _refreshTimer;
+  Future<void>? _refreshFuture;
+  Future<void>? _foregroundRefresh;
+  bool _refreshSilent = false;
   var _loadId = 0;
   final _storageOwner = Object();
 
   Future<void> load() async {
+    if (isClosed) return;
+    if (state.status == .ready && state.screen != null) return refresh();
     final loadId = ++_loadId;
-    emit(state.copyWith(status: .loading));
+    _refreshTimer?.cancel();
+    emit(state.copyWith(status: .loading, refreshFailed: false));
     try {
       final app = await _repository.getApp(slug);
       if (!_isCurrent(loadId)) return;
@@ -103,6 +109,8 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
           app: app,
           screen: cachedScreen,
           fromCache: true,
+          refreshing: true,
+          refreshFailed: false,
         ),
       );
     }
@@ -118,6 +126,7 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
     } on Exception {
       if (!_isCurrent(loadId)) return;
       if (cachedScreen == null) rethrow;
+      emit(state.copyWith(refreshing: false, refreshFailed: true));
       _scheduleAutoRefresh(cachedScreen);
     }
     if (_isCurrent(loadId) && app.status == .published) {
@@ -126,16 +135,16 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
   }
 
   void _emitScreen(MiniApp app, Map<String, dynamic> screen) {
-    if (state.status == .ready &&
-        _screenEquality.equals(state.screen, screen)) {
-      return;
-    }
     emit(
       state.copyWith(
         status: .ready,
         app: app,
-        screen: screen,
+        screen: _screenEquality.equals(state.screen, screen)
+            ? state.screen
+            : screen,
         fromCache: false,
+        refreshing: false,
+        refreshFailed: false,
       ),
     );
   }
@@ -145,24 +154,74 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
     final raw = screen['refreshIntervalSeconds'];
     final seconds = raw is num ? raw.toInt() : 0;
     if (seconds <= 0) return;
-    _refreshTimer = Timer.periodic(
+    _refreshTimer = Timer(
       Duration(seconds: seconds.clamp(5, 3600)),
-      (_) => unawaited(_refresh()),
+      () => unawaited(refresh(silent: true)),
     );
   }
 
-  Future<void> _refresh() async {
+  Future<void> refresh({bool silent = false}) {
+    if (isClosed) return Future<void>.value();
+    final active = _refreshFuture;
+    if (active != null) {
+      if (!silent && !state.refreshing) {
+        emit(state.copyWith(refreshing: true, refreshFailed: false));
+      }
+      if (!silent && _refreshSilent) return _queueForegroundRefresh(active);
+      return active;
+    }
     final app = state.app;
-    if (app == null || state.status != .ready) return;
+    if (app == null || state.status != .ready || state.screen == null) {
+      return load();
+    }
+    final loadId = ++_loadId;
+    _refreshTimer?.cancel();
+    if (!silent) {
+      emit(state.copyWith(refreshing: true, refreshFailed: false));
+    }
+    _refreshSilent = silent;
+    late final Future<void> future;
+    future = _refreshScreen(app, loadId).whenComplete(() {
+      if (identical(_refreshFuture, future)) _refreshFuture = null;
+    });
+    _refreshFuture = future;
+    return future;
+  }
+
+  Future<void> _queueForegroundRefresh(Future<void> active) {
+    final queued = _foregroundRefresh;
+    if (queued != null) return queued;
     final loadId = _loadId;
+    late final Future<void> future;
+    future = active
+        .then((_) async {
+          if (_isCurrent(loadId)) await refresh();
+        })
+        .whenComplete(() {
+          if (identical(_foregroundRefresh, future)) _foregroundRefresh = null;
+        });
+    _foregroundRefresh = future;
+    return future;
+  }
+
+  Future<void> _refreshScreen(MiniApp app, int loadId) async {
     try {
       final storage = await _repository.getStorage(app.id);
       if (!_isCurrent(loadId)) return;
-      primeMiniAppStorage(storage, owner: _storageOwner);
       final screen = await _repository.fetchScreen(slug: slug);
       if (!_isCurrent(loadId)) return;
+      if (_refreshSilent && _foregroundRefresh != null) return;
+      primeMiniAppStorage(storage, owner: _storageOwner);
       _emitScreen(app, screen);
-    } on Exception catch (_) {}
+    } on Exception catch (error, stackTrace) {
+      if (!_isCurrent(loadId)) return;
+      if (_refreshSilent && _foregroundRefresh != null) return;
+      emit(state.copyWith(refreshing: false, refreshFailed: true));
+      addError(error, stackTrace);
+    } finally {
+      final screen = state.screen;
+      if (_isCurrent(loadId) && screen != null) _scheduleAutoRefresh(screen);
+    }
   }
 
   @override

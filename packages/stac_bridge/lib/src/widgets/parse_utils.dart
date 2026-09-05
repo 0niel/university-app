@@ -2,6 +2,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stac/stac.dart';
+import 'package:stac_bridge/src/actions/action_execution.dart';
 
 typedef KitModel = Map<String, dynamic>;
 
@@ -60,7 +61,7 @@ Color? colorOf(BuildContext context, KitModel model, String key) {
 VoidCallback? actionCallback(BuildContext context, Object? actionJson) {
   if (actionJson is! Map<Object?, Object?>) return null;
   final json = Map<String, Object?>.from(actionJson);
-  return () => Stac.onCallFromJson(json, context);
+  return () => runMiniAppAction(context, json);
 }
 
 VoidCallback? actionOf(

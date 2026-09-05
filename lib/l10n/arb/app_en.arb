@@ -11926,7 +11926,13 @@
   "friendsLocationRetry": "Enable location access",
   "friendsMapPeopleCount": "On the map: {count}",
   "friendsLocationUnavailable": "Location is unavailable. You can still browse students on the map.",
-  "@friendsMapPeopleCount": {"placeholders": {"count": {"type": "int"}}},
+  "@friendsMapPeopleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "friendsLocationPublishFailed": "Your latest location could not be shared. Check your connection; updates will retry automatically.",
   "friendsLocationServiceDisabled": "Location services are turned off on your device. The map remains available.",
   "friendsLocationUnsupported": "This device cannot provide your location. You can still browse the map.",

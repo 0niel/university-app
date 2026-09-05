@@ -19,7 +19,8 @@
 
 ### openPage
 
-Пушит новый экран этого же мини-аппа. Для hosted-аппов страница берётся из
+Открывает экран этого же мини-аппа. Повторное открытие текущего пути обновляет
+его на месте. Для hosted-аппов страница берётся из
 сохранённых экранов, для remote — запрашивается у твоего сервера через
 прокси.
 
@@ -48,12 +49,19 @@
 
 ### reload
 
-Перезагружает стартовый экран аппа — удобно для кнопки «Обновить» и
-ретраев в `appErrorState`.
+Обновляет текущую страницу. Содержимое, позиция прокрутки и введённые данные
+остаются на экране во время запроса. При ошибке доступна повторная попытка.
 
 ```json
 { "actionType": "reload" }
 ```
+
+`target: "root"` закрывает внутренние страницы этого мини-аппа и обновляет
+его стартовый экран. Используй это вместо цепочки из нескольких `pop`.
+
+Кнопки `appButton`, `appIconButton` и стандартные текстовые кнопки показывают
+загрузку до завершения действия и не принимают повторные нажатия. Поле
+`loadingLabel` задаёт текст кнопки во время запроса.
 
 ### confirm
 
@@ -92,6 +100,43 @@
 ```json
 { "actionType": "setState", "key": "count", "add": 5 }
 { "actionType": "setState", "key": "total", "expression": "state.price * state.qty" }
+```
+
+`values` обновляет несколько ключей одним уведомлением, `toggle: true`
+переключает булево значение:
+
+```json
+{ "actionType": "setState", "values": { "page": 1, "error": null } }
+{ "actionType": "setState", "key": "expanded", "toggle": true }
+```
+
+### tryAction
+
+Выполняет `do`, обрабатывает исключение через `onError` и всегда выполняет
+`onFinally`, пока страница открыта. В `multiAction` шаги с `sync: true`
+выполняются последовательно, с `sync: false` — параллельно; действие завершается
+после всех шагов. В списке или цикле допускается до 128 шагов, в одной цепочке — 512.
+
+```json
+{ "actionType": "tryAction",
+  "do": { "actionType": "pickImage", "source": "gallery", "saveAs": "photo" },
+  "onError": { "actionType": "showToast", "type": "error", "message": "Не удалось загрузить фото" },
+  "onFinally": { "actionType": "setState", "key": "busy", "value": false } }
+```
+
+### Локальное состояние запросов
+
+`fetch` и `networkRequest` принимают `loadingKey`, `errorKey`, `saveAs`,
+`pick`, `onResult`, `onError`, `onFinally`. Загрузка сбрасывается при любом
+исходе; успешный результат записывается до `onResult`. `networkRequest`
+сохраняет поддержку `results` с обработчиками HTTP-кодов. В `fetch` более
+поздний запрос с тем же `saveAs` отменяет применение предыдущего ответа.
+В `networkRequest` группа определяется по `saveAs`, затем по `loadingKey`;
+без них запросы независимы. `requestKey` позволяет задать отдельную группу.
+
+```json
+{ "actionType": "fetch", "path": "/api/items", "saveAs": "items",
+  "loadingKey": "itemsLoading", "errorKey": "itemsError", "pick": "items" }
 ```
 
 ### setStorage

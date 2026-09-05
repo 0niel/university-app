@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
+import 'package:stac_bridge/src/widgets/async_action_builder.dart';
 import 'package:stac_bridge/src/widgets/parse_utils.dart';
 import 'package:stac_framework/stac_framework.dart';
 
@@ -38,20 +39,26 @@ class StacAppButtonParser extends StacParser<KitModel> {
     final enabled = boolOf(model, 'enabled', fallback: true);
     final icon = iconOf(model, 'icon');
     final trailingIcon = iconOf(model, 'trailingIcon');
-    return AppButton(
-      label: stringOf(model, 'label'),
-      variant: appButtonVariantOf(stringOrNullOf(model, 'variant')),
-      size: appButtonSizeOf(stringOrNullOf(model, 'size')),
-      expanded: boolOf(model, 'expanded'),
+    return AsyncActionBuilder(
+      key: model['id'] is String ? ValueKey(model['id']) : null,
+      action: model['onPressed'] ?? model['onTap'],
+      enabled: enabled,
       loading: boolOf(model, 'loading'),
-      tooltip: stringOrNullOf(model, 'tooltip'),
-      icon: icon == null ? null : AppLineIconWidget(icon),
-      trailingIcon: trailingIcon == null
-          ? null
-          : AppLineIconWidget(trailingIcon),
-      onPressed: enabled
-          ? actionOf(context, model, const ['onPressed', 'onTap'])
-          : null,
+      builder: (context, onPressed, {required loading}) => AppButton(
+        label: loading
+            ? stringOf(model, 'loadingLabel', stringOf(model, 'label'))
+            : stringOf(model, 'label'),
+        variant: appButtonVariantOf(stringOrNullOf(model, 'variant')),
+        size: appButtonSizeOf(stringOrNullOf(model, 'size')),
+        expanded: boolOf(model, 'expanded'),
+        loading: loading,
+        tooltip: stringOrNullOf(model, 'tooltip'),
+        icon: icon == null ? null : AppLineIconWidget(icon),
+        trailingIcon: trailingIcon == null
+            ? null
+            : AppLineIconWidget(trailingIcon),
+        onPressed: onPressed,
+      ),
     );
   }
 }
@@ -70,21 +77,26 @@ class StacAppIconButtonParser extends StacParser<KitModel> {
     final icon = iconOf(model, 'icon');
     if (icon == null) return const SizedBox.shrink();
     final enabled = boolOf(model, 'enabled', fallback: true);
-    return AppIconButton(
-      icon: AppLineIconWidget(icon),
-      tooltip: stringOrNullOf(model, 'tooltip'),
-      tone: appIconButtonToneOf(
-        stringOrNullOf(model, 'tone') ?? stringOrNullOf(model, 'variant'),
+    return AsyncActionBuilder(
+      action: model['onPressed'] ?? model['onTap'],
+      enabled: enabled,
+      loading: boolOf(model, 'loading'),
+      builder: (context, onPressed, {required loading}) => AppIconButton(
+        icon: loading
+            ? const SizedBox.square(dimension: 20, child: AppSpinner(size: 20))
+            : AppLineIconWidget(icon),
+        tooltip: stringOrNullOf(model, 'tooltip'),
+        tone: appIconButtonToneOf(
+          stringOrNullOf(model, 'tone') ?? stringOrNullOf(model, 'variant'),
+        ),
+        shape: stringOf(model, 'shape') == 'circle'
+            ? AppIconButtonShape.circle
+            : AppIconButtonShape.rounded,
+        size: appIconButtonSizeOf(stringOrNullOf(model, 'size')),
+        dot: boolOf(model, 'dot'),
+        dotColor: colorOf(context, model, 'dotColor'),
+        onPressed: onPressed,
       ),
-      shape: stringOf(model, 'shape') == 'circle'
-          ? AppIconButtonShape.circle
-          : AppIconButtonShape.rounded,
-      size: appIconButtonSizeOf(stringOrNullOf(model, 'size')),
-      dot: boolOf(model, 'dot'),
-      dotColor: colorOf(context, model, 'dotColor'),
-      onPressed: enabled
-          ? actionOf(context, model, const ['onPressed', 'onTap'])
-          : null,
     );
   }
 }

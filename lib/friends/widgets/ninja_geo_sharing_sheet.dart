@@ -42,7 +42,9 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                   message: l10n.friendsPrivacySyncError,
                   footnote: null,
                   primaryLabel: l10n.retry,
-                  onPrimary: state.privacyBusy ? null : cubit.retryPrivacy,
+                  onPrimary: state.privacyBusy
+                      ? null
+                      : cubit.retryPrivacy,
                 ),
               ),
               const SizedBox(height: AppSpacing.sectionGap),
@@ -164,10 +166,10 @@ class NinjaGeoSharingSheet extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.xl),
                 child: AppButton.text(
+                  onPressed: cubit.retryLocation,
                   label: state.locationPermissionDenied
                       ? l10n.friendsLocationRetry
                       : l10n.retry,
-                  onPressed: cubit.retryLocation,
                 ),
               ),
             const SizedBox(height: AppSpacing.md),

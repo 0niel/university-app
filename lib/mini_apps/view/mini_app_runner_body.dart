@@ -9,6 +9,7 @@ import 'package:rtu_mirea_app/mini_apps/cubit/mini_app_runner_cubit.dart';
 import 'package:rtu_mirea_app/mini_apps/runtime/mini_app_accent.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_runner_skeleton.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_content.dart';
+import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_refresh_surface.dart';
 
 class MiniAppRunnerBody extends StatelessWidget {
   const MiniAppRunnerBody({
@@ -63,32 +64,16 @@ class MiniAppRunnerBody extends StatelessWidget {
           key: const ValueKey('runner-ready'),
           child: MiniAppAccentTheme(
             accentColor: state.app?.accentColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (offline)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.screen,
-                      0,
-                      AppSpacing.screen,
-                      AppSpacing.md,
-                    ),
-                    child: AppBanner(
-                      message: l10n.offlineBannerCached,
-                      tone: AppBannerTone.warn,
-                      actionLabel: l10n.retry,
-                      onAction: () => unawaited(_reload(context)),
-                    ),
-                  ),
-                Expanded(
-                  child: Builder(
-                    builder: (themedContext) =>
-                        MiniAppContent.render(screen, themedContext) ??
-                        _renderError(themedContext),
-                  ),
-                ),
-              ],
+            child: MiniAppRefreshSurface(
+              refreshing: state.refreshing,
+              failed: state.refreshFailed,
+              offline: offline,
+              onRetry: () => unawaited(_reload(context)),
+              child: Builder(
+                builder: (themedContext) =>
+                    MiniAppContent.render(screen, themedContext) ??
+                    _renderError(themedContext),
+              ),
             ),
           ),
         );

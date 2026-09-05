@@ -469,7 +469,7 @@ class MiniAppsRepository {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw const FormatException('Not authenticated');
-      final ext = _extensionOf(fileName);
+      final (ext, mimeType) = _imageFormat(bytes);
       final unique =
           '${DateTime.now().microsecondsSinceEpoch}'
           '-${Random().nextInt(0x7fffffff)}';
@@ -479,14 +479,41 @@ class MiniAppsRepository {
         path,
         bytes,
         fileOptions: FileOptions(
-          contentType: contentType ?? 'image/jpeg',
-          upsert: true,
+          contentType: mimeType,
         ),
       );
       return storage.getPublicUrl(path);
     } on Exception catch (error, stackTrace) {
       Error.throwWithStackTrace(MiniAppUploadFailure(error), stackTrace);
     }
+  }
+
+  static (String, String) _imageFormat(Uint8List bytes) {
+    if (bytes.length >= 3 &&
+        bytes[0] == 0xff &&
+        bytes[1] == 0xd8 &&
+        bytes[2] == 0xff) {
+      return ('jpg', 'image/jpeg');
+    }
+    const pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+    if (bytes.length >= pngSignature.length &&
+        Iterable<int>.generate(
+          pngSignature.length,
+        ).every((index) => bytes[index] == pngSignature[index])) {
+      return ('png', 'image/png');
+    }
+    if (bytes.length >= 12 &&
+        bytes[0] == 0x52 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x46 &&
+        bytes[8] == 0x57 &&
+        bytes[9] == 0x45 &&
+        bytes[10] == 0x42 &&
+        bytes[11] == 0x50) {
+      return ('webp', 'image/webp');
+    }
+    throw const FormatException('Choose a JPEG, PNG or WebP image');
   }
 
   /// Uploads an arbitrary captured file (the `pickFile` capability) and

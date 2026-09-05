@@ -152,6 +152,7 @@ void main() {
             app: app,
             screen: {'type': 'cached'},
             fromCache: true,
+            refreshing: true,
           ),
           MiniAppRunnerState(
             status: MiniAppRunnerStatus.ready,
@@ -186,8 +187,173 @@ void main() {
             app: app,
             screen: {'type': 'cached'},
             fromCache: true,
+            refreshing: true,
+          ),
+          MiniAppRunnerState(
+            status: MiniAppRunnerStatus.ready,
+            app: app,
+            screen: {'type': 'cached'},
+            fromCache: true,
+            refreshFailed: true,
           ),
         ],
+      );
+    });
+
+    group('refresh', () {
+      test('keeps content ready and coalesces repeated reloads', () async {
+        final cubit = buildCubit();
+        await cubit.load();
+        final response = Completer<Map<String, dynamic>>();
+        when(
+          () => repository.fetchScreen(
+            slug: any(named: 'slug'),
+            path: any(named: 'path'),
+          ),
+        ).thenAnswer((_) => response.future);
+
+        final reload = cubit.load();
+        final repeated = cubit.load();
+        await Future<void>.delayed(Duration.zero);
+
+        expect(cubit.state.status, MiniAppRunnerStatus.ready);
+        expect(cubit.state.screen, screen);
+        expect(cubit.state.refreshing, isTrue);
+        verify(() => repository.getApp('poll')).called(1);
+        verify(
+          () => repository.fetchScreen(slug: 'poll'),
+        ).called(2);
+
+        response.complete(const {'type': 'updated'});
+        await Future.wait([reload, repeated]);
+        expect(cubit.state.screen, const {'type': 'updated'});
+        expect(cubit.state.refreshing, isFalse);
+        verify(() => repository.trackLaunch('app-1')).called(1);
+        await cubit.close();
+      });
+
+      test(
+        'keeps ready content on failure and clears the error on retry',
+        () async {
+          final cubit = buildCubit();
+          await cubit.load();
+          when(
+            () => repository.fetchScreen(
+              slug: any(named: 'slug'),
+              path: any(named: 'path'),
+            ),
+          ).thenThrow(const FetchMiniAppScreenFailure('offline'));
+
+          await cubit.refresh();
+
+          expect(cubit.state.status, MiniAppRunnerStatus.ready);
+          expect(cubit.state.screen, screen);
+          expect(cubit.state.refreshing, isFalse);
+          expect(cubit.state.refreshFailed, isTrue);
+
+          when(
+            () => repository.fetchScreen(
+              slug: any(named: 'slug'),
+              path: any(named: 'path'),
+            ),
+          ).thenAnswer((_) async => screen);
+          await cubit.refresh();
+
+          expect(cubit.state.refreshFailed, isFalse);
+          await cubit.close();
+        },
+      );
+
+      test(
+        'marks an identical cached screen as fresh after verification',
+        () async {
+          when(
+            () => repository.readCachedScreen(
+              slug: any(named: 'slug'),
+              path: any(named: 'path'),
+            ),
+          ).thenAnswer((_) async => screen);
+          final cubit = buildCubit();
+
+          await cubit.load();
+
+          expect(cubit.state.fromCache, isFalse);
+          expect(cubit.state.refreshing, isFalse);
+          await cubit.close();
+        },
+      );
+
+      testWidgets('waits for automatic refresh before starting another', (
+        tester,
+      ) async {
+        const automaticScreen = {
+          'type': 'scaffold',
+          'refreshIntervalSeconds': 5,
+        };
+        when(
+          () => repository.fetchScreen(
+            slug: any(named: 'slug'),
+            path: any(named: 'path'),
+          ),
+        ).thenAnswer((_) async => automaticScreen);
+        final cubit = buildCubit();
+        await cubit.load();
+        final response = Completer<Map<String, dynamic>>();
+        when(
+          () => repository.fetchScreen(
+            slug: any(named: 'slug'),
+            path: any(named: 'path'),
+          ),
+        ).thenAnswer((_) => response.future);
+
+        await tester.pump(const Duration(seconds: 5));
+        await tester.pump(const Duration(seconds: 20));
+        verify(() => repository.fetchScreen(slug: 'poll')).called(2);
+
+        response.complete(automaticScreen);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 5));
+        verify(() => repository.fetchScreen(slug: 'poll')).called(1);
+        await cubit.close();
+      });
+
+      test(
+        'foreground reload waits for a fresh response after a stale poll',
+        () async {
+          final cubit = buildCubit();
+          await cubit.load();
+          final stale = Completer<Map<String, dynamic>>();
+          final fresh = Completer<Map<String, dynamic>>();
+          var requests = 0;
+          when(
+            () => repository.fetchScreen(
+              slug: any(named: 'slug'),
+              path: any(named: 'path'),
+            ),
+          ).thenAnswer((_) => requests++ == 0 ? stale.future : fresh.future);
+
+          final poll = cubit.refresh(silent: true);
+          await Future<void>.delayed(Duration.zero);
+          var completed = false;
+          final foreground = cubit.refresh().then((_) => completed = true);
+          final repeated = cubit.refresh();
+          expect(requests, 1);
+
+          stale.complete(const {'type': 'stale'});
+          await poll;
+          await Future<void>.delayed(Duration.zero);
+          expect(requests, 2);
+          expect(completed, isFalse);
+          expect(cubit.state.screen, screen);
+          expect(cubit.state.refreshing, isTrue);
+
+          fresh.complete(const {'type': 'fresh'});
+          await foreground;
+          await repeated;
+          expect(cubit.state.screen, const {'type': 'fresh'});
+          expect(cubit.state.refreshing, isFalse);
+          await cubit.close();
+        },
       );
     });
 

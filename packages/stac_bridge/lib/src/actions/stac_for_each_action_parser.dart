@@ -34,11 +34,16 @@ class StacForEachActionParser
           )
         : source;
     if (items is! List<Object?>) return null;
+    if (items.length > 128) throw StateError('Too many loop items');
 
     final itemVar = stringOf(model, 'itemVar', 'item');
     final indexVar = stringOf(model, 'indexVar', 'index');
     for (var i = 0; i < items.length; i++) {
-      final scoped = {...stateContext, itemVar: items[i], indexVar: i};
+      final scoped = {
+        ...flowControlStateContext(context),
+        itemVar: items[i],
+        indexVar: i,
+      };
       await dispatchFlowControlAction(
         context,
         flowControlTreeResolver.resolveNode(template, scoped),

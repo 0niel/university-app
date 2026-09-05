@@ -225,6 +225,47 @@ close, mail, arrowRight` и другие.
   "child": { "type": "text", "data": "Счёт: {{state.count}}" } }
 ```
 
+### appImagePicker
+
+Выбор фото из галереи или камеры с превью, повторным выбором, удалением
+и состояниями загрузки, отмены и ошибки. Отмена сохраняет предыдущий выбор.
+
+```json
+{ "type": "appImagePicker", "stateKey": "photo", "label": "Фото профиля",
+  "initialUrl": "https://example.org/current.jpg",
+  "allowCamera": true, "allowGallery": true, "allowRemove": true,
+  "onChanged": { "actionType": "setState", "key": "changed", "value": true } }
+```
+
+`stateKey` содержит URL нового файла. `initialUrl` показывает сохранённое фото
+и не считается новым выбором. Дополнительные ключи по умолчанию:
+`photoStatus` (`idle`, `picking`, `ready`, `error`, `removed`), `photoError`,
+`photoRemoved`. Их можно переименовать через `statusKey`, `errorKey`,
+`removedKey`. `enabled`, `loading`, `height`, `helperText` управляют видом;
+`onCancel`, `onError`, `onRemoved` обрабатывают соответствующие события.
+Удаление очищает только локальный выбор; сохранение на сервере задаётся действием.
+
+### Анимации
+
+`appAnimatedSwitcher` меняет содержимое при изменении `value`.
+`transition`: `fade`, `fadeScale`, `slideUp`, `slideDown`.
+
+```json
+{ "type": "appAnimatedSwitcher", "value": "{{state.tab}}", "duration": 220,
+  "transition": "fadeScale", "child": {
+    "type": "appText", "data": "Раздел {{state.tab}}" } }
+```
+
+`appAnimatedContainer` анимирует `width`, `height`, `padding`, `margin`,
+`color`, `radius`, `borderColor`, `borderWidth`, `alignment`.
+`appAnimatedOpacity` анимирует `opacity`; при нулевой прозрачности содержимое
+не принимает нажатия и скрывается из дерева доступности.
+
+Все три виджета принимают `duration` в миллисекундах (0–2000) и `curve`:
+`linear`, `easeIn`, `easeOut`, `easeInOut`, `easeInCubic`, `easeOutCubic`,
+`easeInOutCubic`, `fastOutSlowIn`. Системное уменьшение движения учитывается
+автоматически; `reduceMotion: true` отключает анимацию локально.
+
 ## Виджеты Stac
 
 Полный каталог стандартных виджетов с параметрами — в
