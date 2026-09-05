@@ -103,7 +103,7 @@ void main() {
   );
 
   testWidgets(
-    'current time marker stays above lesson text and has a visible line',
+    'current time marker follows the active lesson and has a visible line',
     (tester) async {
       await tester.pumpApp(
         Scaffold(
@@ -147,10 +147,17 @@ void main() {
         markerStacks.map((stack) => stack.clipBehavior),
         everyElement(Clip.none),
       );
-      final title = find.text('Программирование на Python');
+      final lesson = find.byWidgetPredicate(
+        (widget) =>
+            widget is AppLessonRow &&
+            widget.title == 'Программирование на Python',
+      );
       expect(
-        tester.getRect(marker).bottom,
-        lessThan(tester.getRect(title).top),
+        tester.getCenter(marker).dy,
+        inInclusiveRange(
+          tester.getRect(lesson).top,
+          tester.getRect(lesson).bottom,
+        ),
       );
       expect(tester.takeException(), isNull);
     },

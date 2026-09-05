@@ -22,8 +22,9 @@ class _SearchCoachOverlayState extends State<SearchCoachOverlay> {
   Rect? _anchor;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    MediaQuery.sizeOf(context);
     WidgetsBinding.instance.addPostFrameCallback((_) => _resolveAnchor());
   }
 
@@ -31,9 +32,21 @@ class _SearchCoachOverlayState extends State<SearchCoachOverlay> {
     if (!mounted) return;
     final box =
         widget.anchorKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || !box.attached) return;
-    final topLeft = box.localToGlobal(.zero);
-    setState(() => _anchor = topLeft & box.size);
+    final overlayBox = context.findRenderObject();
+    if (box == null ||
+        !box.attached ||
+        !box.hasSize ||
+        overlayBox is! RenderBox ||
+        !overlayBox.hasSize) {
+      return;
+    }
+    final anchor = Rect.fromPoints(
+      overlayBox.globalToLocal(box.localToGlobal(.zero)),
+      overlayBox.globalToLocal(
+        box.localToGlobal(box.size.bottomRight(Offset.zero)),
+      ),
+    );
+    if (anchor != _anchor) setState(() => _anchor = anchor);
   }
 
   @override

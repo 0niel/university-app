@@ -117,7 +117,8 @@ class _AppTooltipAnchorState extends State<AppTooltipAnchor> {
                       _TooltipMetrics.horizontalPadding),
         ),
       );
-    final top = box.localToGlobal(Offset.zero).dy;
+    final overlay = Overlay.of(context).context.findRenderObject();
+    final top = box.localToGlobal(Offset.zero, ancestor: overlay).dy;
     final below = top - media.padding.top <
         painter.height +
             _TooltipMetrics.verticalPadding * 2 +

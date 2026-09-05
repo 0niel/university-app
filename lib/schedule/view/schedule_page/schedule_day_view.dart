@@ -169,6 +169,13 @@ class ScheduleDayView extends StatelessWidget {
     final nextIndex = rows.indexWhere(
       (row) => row.$4.any((interval) => interval.$1.isAfter(now)),
     );
+    final currentProgress = currentIndex < 0
+        ? 0.0
+        : (now.difference(rows[currentIndex].$1).inMilliseconds /
+                  rows[currentIndex].$2
+                      .difference(rows[currentIndex].$1)
+                      .inMilliseconds)
+              .clamp(0.0, 1.0);
     final showNow =
         isSameDate(day, now) &&
         now.hour * 60 + now.minute >= 540 &&
@@ -213,13 +220,16 @@ class ScheduleDayView extends StatelessWidget {
                   minHeight: AppControlSize.touchTarget,
                   minWidth: AppControlSize.touchTarget,
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  label,
-                  style: AppText.label.copyWith(
-                    color: accent
-                        ? context.colors.accent
-                        : context.colors.muted,
+                child: Center(
+                  widthFactor: 1,
+                  heightFactor: 1,
+                  child: Text(
+                    label,
+                    style: AppText.label.copyWith(
+                      color: accent
+                          ? context.colors.accent
+                          : context.colors.muted,
+                    ),
                   ),
                 ),
               ),
@@ -246,25 +256,18 @@ class ScheduleDayView extends StatelessWidget {
                 ),
               ],
             );
-            return constraints.maxWidth < 330 ||
+            return constraints.maxWidth < 480 ||
                     MediaQuery.textScalerOf(context).scale(1) > 1.3
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [title, navigation],
                   )
-                : SizedBox(
-                    height: AppSpacing.section,
-                    child: OverflowBox(
-                      minHeight: AppControlSize.touchTarget,
-                      maxHeight: 44,
-                      child: Row(
-                        children: [
-                          Expanded(child: title),
-                          const SizedBox(width: AppSpacing.sm),
-                          navigation,
-                        ],
-                      ),
-                    ),
+                : Row(
+                    children: [
+                      Expanded(child: title),
+                      const SizedBox(width: AppSpacing.sm),
+                      Flexible(child: navigation),
+                    ],
                   );
           },
         ),
@@ -329,8 +332,20 @@ class ScheduleDayView extends StatelessWidget {
                             left: -8,
                             right: -8,
                             top: 0,
+                            bottom: 0,
                             child: IgnorePointer(
-                              child: nowLine,
+                              child: AnimatedAlign(
+                                duration: NinjaMotion.of(
+                                  context,
+                                  const Duration(milliseconds: 300),
+                                ),
+                                curve: Curves.easeOutCubic,
+                                alignment: Alignment(
+                                  0,
+                                  2 * currentProgress - 1,
+                                ),
+                                child: nowLine,
+                              ),
                             ),
                           ),
                       ],

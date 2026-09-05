@@ -43,6 +43,7 @@ Widget _app(
   GoRouter router,
   AppTourController controller, {
   TextStyle? outerTextStyle,
+  bool scaled = false,
 }) => MaterialApp.router(
   locale: const Locale('ru'),
   theme: AppTheme.lightTheme,
@@ -56,9 +57,10 @@ Widget _app(
       child: child ?? const SizedBox.shrink(),
     );
     final style = outerTextStyle;
-    return style == null
+    final content = style == null
         ? overlay
         : DefaultTextStyle(style: style, child: overlay);
+    return scaled ? AppScale(child: content) : content;
   },
 );
 
@@ -133,6 +135,48 @@ void main() {
     expect(spotlight.hole, isNotNull);
     expect(spotlight.hole!.inflate(-8), anchor);
   });
+
+  for (final width in [360.0, 430.0]) {
+    testWidgets(
+      'spotlight follows the scaled anchor at $width',
+      (
+        tester,
+      ) async {
+        tester.view
+          ..physicalSize = Size(width, 900) * 3
+          ..devicePixelRatio = 3;
+        addTearDown(() {
+          tester.view.reset();
+        });
+        await tester.pumpWidget(_app(router, controller, scaled: true));
+        await tester.pump();
+        unawaited(controller.start(_steps));
+        await _advance(tester);
+
+        final finder = find.byType(NinjaSpotlight);
+        final spotlight = tester.widget<NinjaSpotlight>(finder);
+        final hole = spotlight.hole!.deflate(_steps.first.padding);
+        final box = tester.renderObject<RenderBox>(finder);
+        final paintedHole = Rect.fromPoints(
+          box.localToGlobal(hole.topLeft),
+          box.localToGlobal(hole.bottomRight),
+        );
+        final anchor = find.text('Экран А');
+        final paintedAnchor = Rect.fromPoints(
+          tester.getTopLeft(anchor),
+          tester.getBottomRight(anchor),
+        );
+        expect(paintedHole.left, closeTo(paintedAnchor.left, .001));
+        expect(paintedHole.top, closeTo(paintedAnchor.top, .001));
+        expect(paintedHole.right, closeTo(paintedAnchor.right, .001));
+        expect(paintedHole.bottom, closeTo(paintedAnchor.bottom, .001));
+        expect(tester.takeException(), isNull);
+        controller.stop();
+        await _advance(tester);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+  }
 
   testWidgets('coach copy clears the outer fallback text decoration', (
     tester,

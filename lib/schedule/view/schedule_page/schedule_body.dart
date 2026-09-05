@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:promo_repository/promo_repository.dart';
@@ -45,14 +46,13 @@ class ScheduleBody extends StatefulWidget {
 }
 
 class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
-  late DateTime _day = dateOnly(widget.now ?? DateTime.now());
+  late DateTime _day = dateOnly(widget.now ?? clock.now());
   late ScheduleView _view = widget.initialView;
   ScheduleState? _previous;
   var _hintChecked = false;
 
   @override
-  bool get isClockTickNeeded =>
-      widget.now == null && isSameDate(_day, DateTime.now());
+  bool get isClockTickNeeded => widget.now == null;
 
   @override
   void onClockTick() => setState(() {});
@@ -153,6 +153,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
 
   @override
   Widget build(BuildContext context) {
+    final now = widget.now ?? clock.now();
     final state = context.watch<ScheduleBloc>().state;
     final preferences = context.watch<SchedulePreferencesCubit>().state;
     final display = context.watch<ScheduleDisplayCubit>().state;
@@ -173,13 +174,13 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
         (_) => _maybeShowLongPressHint(),
       );
     }
-    final showToday = !isSameDate(_day, widget.now ?? DateTime.now());
+    final showToday = !isSameDate(_day, now);
     final topInset = MediaQuery.paddingOf(context).top;
     final view = _view;
     Widget page(BuildContext context, DateTime day) => switch (view) {
       ScheduleView.day => ScheduleDayView(
         day: day,
-        now: widget.now,
+        now: now,
         schedule: schedule,
         changes: changes,
         preferences: preferences,
@@ -191,7 +192,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
       ),
       ScheduleView.week => ScheduleWeekView(
         day: day,
-        now: widget.now,
+        now: now,
         schedule: schedule,
         changes: changes,
         preferences: preferences,
@@ -201,7 +202,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
         onDay: _selectDay,
       ),
       ScheduleView.month => ScheduleMonthView(
-        now: widget.now,
+        now: now,
         day: day,
         schedule: schedule,
         preferences: preferences,
@@ -217,7 +218,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
     };
     final strip = ScheduleDayStrip(
       day: _day,
-      now: widget.now ?? DateTime.now(),
+      now: now,
       schedule: schedule,
       preferences: preferences,
       display: display,
@@ -269,7 +270,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                             ScheduleCalendarNotice(day: _day),
                             PromoBannerSlot(
                               placement: PromoPlacement.schedule,
-                              now: widget.now,
+                              now: now,
                               compact: true,
                               padding: const EdgeInsets.only(
                                 bottom: AppSpacing.sm,
@@ -358,7 +359,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                           child: ScheduleDatePager(
                             key: ValueKey(_view),
                             day: _day,
-                            anchor: widget.now ?? DateTime.now(),
+                            anchor: now,
                             view: _view,
                             onDay: (day) {
                               if (_view == view) _selectDay(day);
@@ -441,8 +442,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                               label: l10n.today,
                               backgroundColor: context.colors.surface,
                               foregroundColor: context.colors.accent,
-                              onPressed: () =>
-                                  _selectDay(widget.now ?? DateTime.now()),
+                              onPressed: () => _selectDay(now),
                             ),
                           )
                         : const SizedBox.shrink(),

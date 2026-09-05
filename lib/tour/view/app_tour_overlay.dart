@@ -118,6 +118,16 @@ class _AppTourOverlayState extends State<AppTourOverlay>
     _controller.syncHole(AppTourAnchors.rectOf(target));
   }
 
+  Rect? _localHole(Rect? hole) {
+    if (hole == null) return null;
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return Rect.fromPoints(
+      box.globalToLocal(hole.topLeft),
+      box.globalToLocal(hole.bottomRight),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final step = _controller.step;
@@ -128,7 +138,7 @@ class _AppTourOverlayState extends State<AppTourOverlay>
           Positioned.fill(
             child: _AppTourLayer(
               step: step,
-              hole: _controller.hole,
+              hole: _localHole(_controller.hole),
               pulse: _pulse,
               moving: _controller.isMoving,
               index: _controller.index,

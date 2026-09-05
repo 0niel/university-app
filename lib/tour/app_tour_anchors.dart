@@ -30,7 +30,9 @@ abstract final class AppTourAnchors {
     if (box == null) return null;
     final origin = box.localToGlobal(Offset.zero);
     if (!origin.dx.isFinite || !origin.dy.isFinite) return null;
-    return origin & box.size;
+    final bottomRight = box.localToGlobal(box.size.bottomRight(Offset.zero));
+    if (!bottomRight.dx.isFinite || !bottomRight.dy.isFinite) return null;
+    return Rect.fromPoints(origin, bottomRight);
   }
 
   static RenderBox? _boxOf(BuildContext context) {
