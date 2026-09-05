@@ -56,6 +56,40 @@ def pending_client(item_version="version-123", extra_item=False, release_type="A
     return client
 
 
+def replacement_client(
+    initial_state="WAITING_FOR_REVIEW", extra_item=False, item_version="version-123",
+    fresh_state="WAITING_FOR_REVIEW", cancelled_state="DEVELOPER_REJECTED",
+    fresh_build="old", extra_submission=False,
+):
+    old = version(state=initial_state, build_id="old")
+    responses = [{"data": [{"id": "app-123"}]}, {"data": [old]}]
+    if initial_state == "WAITING_FOR_REVIEW":
+        review = {
+            "id": "review-123",
+            "attributes": {"platform": "IOS", "state": "WAITING_FOR_REVIEW"},
+            "relationships": {"app": {"data": {"id": "app-123"}}},
+        }
+        item = {
+            "attributes": {"state": "READY_FOR_REVIEW"},
+            "relationships": {"appStoreVersion": {"data": {"id": item_version}}},
+        }
+        responses += [
+            {"data": [review, review] if extra_submission else [review]},
+            {"data": [item, item] if extra_item else [item]},
+            {"data": version(state=fresh_state, build_id=fresh_build)},
+            {"data": version(state=cancelled_state, build_id="old")},
+        ]
+    else:
+        responses.append({"data": version(state=initial_state, build_id="old")})
+    responses += [
+        {"data": [{"id": "app-123"}]},
+        {"data": [version(state="DEVELOPER_REJECTED", build_id="new")]},
+    ]
+    client = Mock()
+    client.get.side_effect = responses
+    return client
+
+
 class AppStoreSubmissionTest(unittest.TestCase):
     def test_new_version_can_be_submitted_without_replacing_distributed_version(self):
         client = client_for(version("5.2.0", "READY_FOR_DISTRIBUTION", "older"))
@@ -195,6 +229,14 @@ class AppStoreSubmissionTest(unittest.TestCase):
 
 
 class AppStoreSubmissionWorkflowTest(unittest.TestCase):
+    def test_review_replacement_is_explicit_and_passed_as_argument(self):
+        workflow = (ROOT / ".github/workflows/app-store-submit.yml").read_text(encoding="utf-8")
+        self.assertIn("replace_pending_review:", workflow)
+        self.assertIn("default: false", workflow.split("replace_pending_review:", 1)[1])
+        self.assertIn("REPLACE_PENDING_REVIEW: ${{ inputs.replace_pending_review }}", workflow)
+        self.assertIn('if [[ "$REPLACE_PENDING_REVIEW" = true ]]', workflow)
+        self.assertIn("arguments+=(--replace-pending-review)", workflow)
+
     def test_manual_protected_submission_without_rebuilding_or_uploading(self):
         workflow = (ROOT / ".github/workflows/app-store-submit.yml").read_text(encoding="utf-8")
         self.assertIn("workflow_dispatch:", workflow)
@@ -210,6 +252,119 @@ class AppStoreSubmissionWorkflowTest(unittest.TestCase):
         self.assertNotIn("--upload-app", workflow)
         self.assertNotIn("shorebird release", workflow)
         self.assertNotIn("${{ inputs.", workflow.split("    steps:", 1)[1])
+
+
+class AppStoreBuildReplacementTest(unittest.TestCase):
+    def test_opt_in_replaces_only_exact_pending_review_and_verifies_new_selection(self):
+        client = replacement_client()
+        self.assertTrue(submit.should_submit(client, "app.bundle", "5.2.1", "new", True))
+        self.assertEqual(client.patch.call_count, 2)
+        self.assertEqual(client.patch.call_args_list[0].args, (
+            "/v1/reviewSubmissions/review-123",
+            {"data": {"type": "reviewSubmissions", "id": "review-123", "attributes": {"canceled": True}}},
+        ))
+        self.assertEqual(client.patch.call_args_list[1].args, (
+            "/v1/appStoreVersions/version-123/relationships/build",
+            {"data": {"type": "builds", "id": "new"}},
+        ))
+        self.assertEqual(client.get.call_args_list[2].args[1]["filter[state]"], "WAITING_FOR_REVIEW")
+
+    def test_default_does_not_cancel_pending_old_build(self):
+        client = replacement_client()
+        with self.assertRaisesRegex(RuntimeError, "different build"):
+            submit.should_submit(client, "app.bundle", "5.2.1", "new")
+        client.patch.assert_not_called()
+
+    def test_extra_review_items_submissions_and_other_versions_prevent_cancellation(self):
+        for client in (
+            replacement_client(extra_item=True), replacement_client(extra_submission=True),
+            replacement_client(item_version="other-version"),
+        ):
+            with self.assertRaises(RuntimeError):
+                submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
+            client.patch.assert_not_called()
+
+    def test_in_review_distributed_and_unsubmitted_states_cannot_be_replaced(self):
+        for state in ("IN_REVIEW", "READY_FOR_DISTRIBUTION", "PREPARE_FOR_SUBMISSION", "READY_FOR_REVIEW"):
+            client = client_for(version(state=state, build_id="old"))
+            with self.subTest(state=state), self.assertRaisesRegex(RuntimeError, "Only a pending"):
+                submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
+            client.patch.assert_not_called()
+
+    def test_fresh_state_or_build_change_prevents_cancellation(self):
+        for client in (
+            replacement_client(fresh_state="IN_REVIEW"),
+            replacement_client(fresh_build="someone-elses-build"),
+        ):
+            with self.assertRaises(RuntimeError):
+                submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
+            client.patch.assert_not_called()
+
+    def test_failed_cancellation_does_not_change_selected_build(self):
+        client = replacement_client()
+        client.patch.side_effect = RuntimeError("HTTP 409")
+        with self.assertRaisesRegex(RuntimeError, "HTTP 409"):
+            submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
+        self.assertEqual(client.patch.call_count, 1)
+
+    def test_unexpected_post_cancel_state_does_not_change_selected_build(self):
+        client = replacement_client(cancelled_state="IN_REVIEW")
+        with self.assertRaisesRegex(RuntimeError, "unexpected state"):
+            submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
+        self.assertEqual(client.patch.call_count, 1)
+
+    def test_cancellation_timeout_does_not_change_selected_build(self):
+        client = replacement_client(cancelled_state="WAITING_FOR_REVIEW")
+        with patch.object(submit.time, "monotonic", side_effect=[0, 121]):
+            with self.assertRaisesRegex(RuntimeError, "has not completed"):
+                submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
+        self.assertEqual(client.patch.call_count, 1)
+
+    def test_explicit_retry_after_cancellation_only_changes_build(self):
+        client = replacement_client(initial_state="DEVELOPER_REJECTED")
+        self.assertTrue(submit.should_submit(client, "app.bundle", "5.2.1", "new", True))
+        client.patch.assert_called_once_with(
+            "/v1/appStoreVersions/version-123/relationships/build",
+            {"data": {"type": "builds", "id": "new"}},
+        )
+
+    @patch.object(submit.subprocess, "run")
+    @patch.object(submit, "wait_for_build")
+    def test_replacement_waits_for_valid_requested_build_before_cancellation(self, wait, run):
+        client = replacement_client()
+        wait.return_value = {
+            "build_id": "new", "build_number": "2440.1.2",
+            "marketing_version": "5.2.1", "processing_state": "PROCESSING",
+        }
+        with self.assertRaisesRegex(RuntimeError, "does not match"):
+            submit.submit_build(client, "app.bundle", "5.2.1", "2440.1.2", Path("key.p8"), True)
+        client.get.assert_not_called()
+        client.patch.assert_not_called()
+        run.assert_not_called()
+
+    @patch.object(submit.subprocess, "run")
+    @patch.object(submit, "wait_for_build")
+    def test_replaced_verified_build_is_submitted_without_stale_release_notes(self, wait, run):
+        wait.return_value = {
+            "build_id": "new", "build_number": "2440.1.2",
+            "marketing_version": "5.2.1", "processing_state": "VALID",
+        }
+        client = replacement_client()
+        result = submit.submit_build(client, "app.bundle", "5.2.1", "2440.1.2", Path("key.p8"), True)
+        self.assertEqual(result["submission_action"], "submitted")
+        self.assertEqual(run.call_args.args[0][:4], ["app-store-connect", "builds", "submit-to-app-store", "new"])
+        self.assertNotIn("--whats-new", run.call_args.args[0])
+
+    def test_patch_transport_uses_exact_authenticated_json_endpoint(self):
+        client = submit.AppStoreSubmissionClient("key-id", "issuer", Path("unused.p8"))
+        payload = {"data": {"type": "builds", "id": "new"}}
+        with patch.object(client, "token", return_value="test-token"), patch.object(submit.urllib.request, "urlopen") as send:
+            client.patch("/v1/appStoreVersions/version-123/relationships/build", payload)
+        request = send.call_args.args[0]
+        self.assertEqual(request.get_method(), "PATCH")
+        self.assertEqual(request.full_url, "https://api.appstoreconnect.apple.com/v1/appStoreVersions/version-123/relationships/build")
+        self.assertEqual(request.headers["Authorization"], "Bearer test-token")
+        self.assertEqual(submit.json.loads(request.data), payload)
 
 
 if __name__ == "__main__":

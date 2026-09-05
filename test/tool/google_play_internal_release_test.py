@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 import sys
 import unittest
@@ -42,6 +43,58 @@ class GooglePlayInternalReleaseTest(unittest.TestCase):
         )
         self.assertEqual(client.committed, ["edit-1"])
         self.assertEqual(client.deleted, [])
+        self.assertEqual(client.tracks, ["internal", "internal"])
+
+    def test_explicit_production_reuses_existing_verified_bundle(self):
+        client = FakeClient(existing_bundle=1002501)
+        result = self.module.publish_release(
+            client, b"PKbundle", "v5.2.0-beta.1002501", "production",
+        )
+        self.assertEqual(result["track"], "production")
+        self.assertEqual(client.tracks, ["production", "production"])
+        self.assertEqual(client.uploads, [])
+        self.assertEqual(client.committed, ["edit-1"])
+
+    def test_unknown_track_rejected_before_opening_edit(self):
+        client = FakeClient()
+        with self.assertRaises(ValueError):
+            self.module.publish_release(client, b"PKbundle", "release.1002501", "../../production")
+        self.assertEqual(client.edit_count, 0)
+
+    def test_uploaded_version_must_match_requested_release(self):
+        client = FakeClient()
+        with self.assertRaisesRegex(RuntimeError, "version does not match"):
+            self.module.publish_release(client, b"PKbundle", "release.1002502", "production")
+        self.assertEqual(client.updated, [])
+        self.assertEqual(client.committed, [])
+        self.assertEqual(client.deleted, ["edit-1"])
+
+    def test_bundle_promotion_requires_matching_sha256(self):
+        client = self.module.GooglePlayReleaseClient("token", "package.name")
+        for digest in (None, "wrong", hashlib.sha256(b"PKbundle").hexdigest()):
+            with self.subTest(digest=digest):
+                client.request = lambda *args: {"bundles": [{"versionCode": 1002501, "sha256": digest}]}
+                if digest == hashlib.sha256(b"PKbundle").hexdigest():
+                    self.assertEqual(client.existing_bundle_version_code("edit-1", b"PKbundle", "1002501"), 1002501)
+                else:
+                    with self.assertRaisesRegex(RuntimeError, "does not match"):
+                        client.existing_bundle_version_code("edit-1", b"PKbundle", "1002501")
+
+    def test_production_uses_exact_track_in_request_and_payload(self):
+        client = self.module.GooglePlayReleaseClient("token", "package.name")
+        with patch.object(client, "request", return_value={}) as request:
+            client.update_track("edit-1", "release", 1002501, "production")
+        self.assertEqual(request.call_args.args[:2], ("PUT", "/applications/package.name/edits/edit-1/tracks/production"))
+        payload = json.loads(request.call_args.kwargs["data"])
+        self.assertEqual(payload["track"], "production")
+        self.assertEqual(payload["releases"][0]["status"], "completed")
+
+    def test_production_idempotency_checks_only_selected_track(self):
+        client = FakeClient(existing_version_codes=["1002501"])
+        result = self.module.publish_release(client, b"PKbundle", "release.1002501", "production")
+        self.assertTrue(result["already_published"])
+        self.assertEqual(client.tracks, ["production"])
+        self.assertEqual(client.committed, [])
 
     def test_skips_release_already_present_on_internal_track(self):
         client = FakeClient(existing_version_codes=["1002501"])
@@ -205,10 +258,13 @@ class FakeClient:
         fail_update=False,
         review_in_progress=False,
         existing_version_codes=None,
+        existing_bundle=None,
     ):
         self.fail_update = fail_update
         self.review_in_progress = review_in_progress
         self.existing_version_codes = existing_version_codes or []
+        self.existing_bundle = existing_bundle
+        self.tracks = []
         self.edit_count = 0
         self.uploads = []
         self.updated = []
@@ -222,6 +278,17 @@ class FakeClient:
     def upload_bundle(self, edit_id, bundle):
         self.uploads.append(edit_id)
         return 1002501
+
+    def existing_bundle_version_code(self, edit_id, bundle, expected_version_code):
+        return self.existing_bundle
+
+    def release_version_codes(self, edit_id, release_name, expected_version_code, track):
+        self.tracks.append(track)
+        return self.internal_release_version_codes(edit_id, release_name, expected_version_code)
+
+    def update_track(self, edit_id, release_name, version_code, track):
+        self.tracks.append(track)
+        self.update_internal_track(edit_id, release_name, version_code)
 
     def internal_release_version_codes(
         self,

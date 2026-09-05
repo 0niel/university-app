@@ -12,6 +12,14 @@ on:
         description: GitHub release tag
         required: false
         default: ''
+      track:
+        description: Publication track
+        type: choice
+        required: true
+        default: internal
+        options:
+          - internal
+          - production
       update_icon_only:
         description: Update store icon without uploading a bundle
         required: false
@@ -44,6 +52,7 @@ jobs:
     environment: beta
     env:
       PACKAGE_NAME: ninja.mirea.mireaapp
+      RELEASE_TRACK: ${{ inputs.track || 'internal' }}
 
     steps:
       - name: Check out repository
@@ -160,6 +169,7 @@ jobs:
             --credentials "$RUNNER_TEMP/google-play-service-account.json" \
             --bundle "$ANDROID_BUNDLE" \
             --package-name "$PACKAGE_NAME" \
+            --track "$RELEASE_TRACK" \
             --release-name "${{ steps.release.outputs.tag }}"
 
       - name: Update Google Play store icon

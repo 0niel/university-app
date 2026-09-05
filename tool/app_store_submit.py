@@ -2,6 +2,9 @@ import argparse
 import json
 import re
 import subprocess
+import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from app_store_build_status import AppStoreConnectClient, get_release_status, wait_for_build
@@ -20,6 +23,27 @@ SUBMITTED_STATES = {
 }
 
 
+class AppStoreSubmissionClient(AppStoreConnectClient):
+    def patch(self, path: str, payload: dict) -> None:
+        request = urllib.request.Request(
+            "https://api.appstoreconnect.apple.com" + path,
+            data=json.dumps(payload, separators=(",", ":")).encode(),
+            headers={
+                "Accept": "application/json", "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.token()}",
+            },
+            method="PATCH",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=30):
+                pass
+        except urllib.error.HTTPError as error:
+            detail = error.read().decode("utf-8", errors="replace")
+            raise RuntimeError(
+                f"App Store Connect update failed with HTTP {error.code}: {detail}"
+            ) from error
+
+
 def validate_version(marketing_version: str, build_number: str) -> None:
     if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){1,2}", marketing_version):
         raise ValueError("Invalid App Store marketing version")
@@ -27,12 +51,14 @@ def validate_version(marketing_version: str, build_number: str) -> None:
         raise ValueError("Invalid App Store build number")
 
 
-def pending_review_submission(client, app_id: str, version_id: str) -> str:
+def pending_review_submission(
+    client, app_id: str, version_id: str, state: str = "READY_FOR_REVIEW",
+) -> str:
     response = client.get(
         "/v1/reviewSubmissions",
         {
             "filter[app]": app_id, "filter[platform]": "IOS",
-            "filter[state]": "READY_FOR_REVIEW", "include": "app", "limit": "200",
+            "filter[state]": state, "include": "app", "limit": "200",
         },
     )
     submissions = response.get("data", [])
@@ -46,7 +72,7 @@ def pending_review_submission(client, app_id: str, version_id: str) -> str:
         not isinstance(submission_id, str)
         or not re.fullmatch(r"[A-Za-z0-9-]+", submission_id)
         or attributes.get("platform") != "IOS"
-        or attributes.get("state") != "READY_FOR_REVIEW"
+        or attributes.get("state") != state
         or app.get("id") != app_id
     ):
         raise RuntimeError("Pending App Store review submission does not match the app")
@@ -68,7 +94,59 @@ def pending_review_submission(client, app_id: str, version_id: str) -> str:
     return submission_id
 
 
-def should_submit(client, bundle_id: str, marketing_version: str, build_id: str) -> bool | str:
+def replace_pending_build(client, app_id, version, marketing_version, build_id):
+    version_id = version.get("id")
+    if not isinstance(version_id, str) or not re.fullmatch(r"[A-Za-z0-9-]+", version_id):
+        raise RuntimeError("App Store version ID is invalid")
+    attributes = version["attributes"]
+    state = attributes.get("appVersionState") or attributes.get("appStoreState")
+    if state not in ("WAITING_FOR_REVIEW", "DEVELOPER_REJECTED"):
+        raise RuntimeError("Only a pending or withdrawn App Store review can be replaced")
+    old_build_id = version["relationships"]["build"]["data"]["id"]
+
+    def current_version():
+        current = client.get(f"/v1/appStoreVersions/{version_id}", {"include": "build"}).get("data", {})
+        attrs = current.get("attributes", {})
+        selected = current.get("relationships", {}).get("build", {}).get("data") or {}
+        if (
+            current.get("id") != version_id
+            or attrs.get("platform") != "IOS"
+            or attrs.get("versionString") != marketing_version
+            or selected.get("id") != old_build_id
+        ):
+            raise RuntimeError("App Store version changed before build replacement")
+        return attrs.get("appVersionState") or attrs.get("appStoreState")
+
+    if state == "WAITING_FOR_REVIEW":
+        submission_id = pending_review_submission(client, app_id, version_id, state)
+        if current_version() != "WAITING_FOR_REVIEW":
+            raise RuntimeError("App Store review is no longer pending")
+        client.patch(
+            f"/v1/reviewSubmissions/{submission_id}",
+            {"data": {"type": "reviewSubmissions", "id": submission_id, "attributes": {"canceled": True}}},
+        )
+        deadline = time.monotonic() + 120
+        while True:
+            current_state = current_version()
+            if current_state == "DEVELOPER_REJECTED":
+                break
+            if current_state != "WAITING_FOR_REVIEW":
+                raise RuntimeError("App Store version entered an unexpected state after cancellation")
+            if time.monotonic() >= deadline:
+                raise RuntimeError("App Store review cancellation has not completed; retry after it is withdrawn")
+            time.sleep(3)
+    elif current_version() != "DEVELOPER_REJECTED":
+        raise RuntimeError("App Store version is no longer withdrawn")
+    client.patch(
+        f"/v1/appStoreVersions/{version_id}/relationships/build",
+        {"data": {"type": "builds", "id": build_id}},
+    )
+
+
+def should_submit(
+    client, bundle_id: str, marketing_version: str, build_id: str,
+    replace_pending_review: bool = False,
+) -> bool | str:
     apps = client.get(
         "/v1/apps", {"filter[bundleId]": bundle_id, "limit": "2"}
     ).get("data", [])
@@ -105,6 +183,9 @@ def should_submit(client, bundle_id: str, marketing_version: str, build_id: str)
     state = attributes.get("appVersionState") or attributes.get("appStoreState")
     selected = version.get("relationships", {}).get("build", {}).get("data") or {}
     if selected.get("id") and selected["id"] != build_id:
+        if replace_pending_review:
+            replace_pending_build(client, apps[0]["id"], version, marketing_version, build_id)
+            return should_submit(client, bundle_id, marketing_version, build_id)
         raise RuntimeError("App Store version selects a different build")
     if state in SUBMITTED_STATES:
         if selected.get("id") != build_id:
@@ -125,7 +206,10 @@ def should_submit(client, bundle_id: str, marketing_version: str, build_id: str)
     return True
 
 
-def submit_build(client, bundle_id, marketing_version, build_number, private_key):
+def submit_build(
+    client, bundle_id, marketing_version, build_number, private_key,
+    replace_pending_review=False,
+):
     validate_version(marketing_version, build_number)
     build = wait_for_build(
         client, bundle_id, marketing_version, build_number, timeout=1200, interval=30
@@ -139,7 +223,9 @@ def submit_build(client, bundle_id, marketing_version, build_number, private_key
         or build.get("processing_state") != "VALID"
     ):
         raise RuntimeError("Verified App Store build does not match the request")
-    submission = should_submit(client, bundle_id, marketing_version, build_id)
+    submission = should_submit(
+        client, bundle_id, marketing_version, build_id, replace_pending_review,
+    )
     if isinstance(submission, str):
         subprocess.run(
             [
@@ -163,7 +249,6 @@ def submit_build(client, bundle_id, marketing_version, build_number, private_key
                 "--max-build-processing-wait", "0",
                 "--disable-jwt-cache",
                 "--private-key", f"@file:{private_key}",
-                "--whats-new", "Исправлен чёрный экран при запуске приложения на iOS.",
                 "--silent",
             ],
             check=True,
@@ -184,13 +269,15 @@ def main() -> None:
     parser.add_argument("--key-id", required=True)
     parser.add_argument("--issuer-id", required=True)
     parser.add_argument("--private-key", required=True, type=Path)
+    parser.add_argument("--replace-pending-review", action="store_true")
     arguments = parser.parse_args()
-    client = AppStoreConnectClient(
+    client = AppStoreSubmissionClient(
         arguments.key_id, arguments.issuer_id, arguments.private_key
     )
     result = submit_build(
         client, arguments.bundle_id, arguments.marketing_version,
         arguments.build_number, arguments.private_key,
+        arguments.replace_pending_review,
     )
     print(json.dumps(result, sort_keys=True))
 
