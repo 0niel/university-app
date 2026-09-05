@@ -7,6 +7,20 @@ sealed class ScheduleEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class _ScheduleUserChanged extends ScheduleEvent {
+  const _ScheduleUserChanged(this.userId);
+
+  final String? userId;
+}
+
+class _RemoteScheduleRestored extends ScheduleEvent {
+  const _RemoteScheduleRestored(this.userId, this.selected, this.previous);
+
+  final String userId;
+  final SelectedSchedule selected;
+  final SelectedSchedule? previous;
+}
+
 class ScheduleRequested extends ScheduleEvent with AnalyticsEventMixin {
   const ScheduleRequested({required this.group, this.makeActive = true});
 

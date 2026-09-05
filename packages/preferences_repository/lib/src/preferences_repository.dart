@@ -29,6 +29,11 @@ class PreferencesRepository {
   /// Whether preferences can be synced for the current session.
   bool get hasAuthenticatedUser => _auth.currentUser != null;
 
+  String? get currentUserId => _auth.currentUser?.id;
+
+  Stream<String?> get userIdChanges =>
+      _auth.onAuthStateChange.map((state) => state.session?.user.id).distinct();
+
   /// Loads every stored preference of the current user.
   Future<List<UserPreferenceEntry>> getAll() {
     return _guard(_remote.getAll, GetPreferencesFailure.new);

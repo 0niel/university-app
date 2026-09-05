@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auth_client/auth_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -29,6 +31,70 @@ void main() {
   }
 
   group('SupabaseAuthenticationClient', () {
+    test('restores the current user before another auth event', () async {
+      final auth = _MockGoTrueClient();
+      final session = _MockSession();
+      final events = StreamController<AuthState>();
+      when(() => session.user).thenReturn(user(guest: false, id: 'saved'));
+      when(() => auth.currentSession).thenReturn(session);
+      when(() => auth.onAuthStateChange).thenAnswer((_) => events.stream);
+      final client = SupabaseAuthenticationClient(supabaseAuth: auth);
+
+      expect((await client.user.first).id, 'saved');
+      await events.close();
+    });
+
+    test(
+      'keeps the session through refresh errors and observes logout',
+      () async {
+        final auth = _MockGoTrueClient();
+        final session = _MockSession();
+        final events = StreamController<AuthState>();
+        when(() => session.user).thenReturn(user(guest: false, id: 'saved'));
+        when(() => auth.currentSession).thenReturn(session);
+        when(() => auth.onAuthStateChange).thenAnswer((_) => events.stream);
+        final client = SupabaseAuthenticationClient(supabaseAuth: auth);
+        final users = <AuthenticationUser>[];
+        final errors = <Object>[];
+        final subscription = client.user.listen(users.add, onError: errors.add);
+
+        events
+          ..addError(AuthRetryableFetchException(message: 'Offline'))
+          ..add(AuthState(AuthChangeEvent.tokenRefreshed, session));
+        await Future<void>.delayed(Duration.zero);
+        expect(users.map((value) => value.id), ['saved']);
+        expect(errors, isEmpty);
+
+        when(() => auth.currentSession).thenReturn(null);
+        events.add(const AuthState(AuthChangeEvent.signedOut, null));
+        await Future<void>.delayed(Duration.zero);
+        expect(users, [
+          isA<AuthenticationUser>(),
+          AuthenticationUser.anonymous,
+        ]);
+        expect(users.first.id, 'saved');
+        await subscription.cancel();
+        await events.close();
+      },
+    );
+
+    test('a rejected session stays signed out after an auth error', () async {
+      final auth = _MockGoTrueClient();
+      final events = StreamController<AuthState>();
+      when(() => auth.onAuthStateChange).thenAnswer((_) => events.stream);
+      final client = SupabaseAuthenticationClient(supabaseAuth: auth);
+      final users = <AuthenticationUser>[];
+      final errors = <Object>[];
+      final subscription = client.user.listen(users.add, onError: errors.add);
+
+      events.addError(const AuthException('Refresh token revoked'));
+      await Future<void>.delayed(Duration.zero);
+      expect(users, [AuthenticationUser.anonymous]);
+      expect(errors, isEmpty);
+      await subscription.cancel();
+      await events.close();
+    });
+
     test('guest login preserves an existing session', () async {
       final auth = _MockGoTrueClient();
       when(() => auth.currentSession).thenReturn(_MockSession());

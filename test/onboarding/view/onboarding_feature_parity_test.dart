@@ -12,6 +12,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
+import 'package:rtu_mirea_app/home/models/app_settings.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/onboarding/view/onboarding_page.dart';
 import 'package:rtu_mirea_app/onboarding/widgets/group_results.dart';
@@ -45,7 +46,10 @@ void main() {
   late _Gamification gamification;
   late MockScheduleRepository repository;
 
-  setUpAll(() => registerFallbackValue(const AppLogoutRequested()));
+  setUpAll(() {
+    registerFallbackValue(const AppLogoutRequested());
+    registerFallbackValue(const ScheduleRequested(group: Group(name: 'group')));
+  });
   setUp(() {
     final storage = _Storage();
     when(() => storage.read(any())).thenReturn(null);
@@ -64,6 +68,15 @@ void main() {
       ),
     ).thenAnswer((_) async {});
     repository = MockScheduleRepository();
+    when(
+      () => repository.searchGroups(query: any(named: 'query')),
+    ).thenAnswer((_) async => const SearchGroupsResponse(results: []));
+    when(
+      () => repository.searchTeachers(query: any(named: 'query')),
+    ).thenAnswer((_) async => const SearchTeachersResponse(results: []));
+    when(
+      () => repository.searchClassrooms(query: any(named: 'query')),
+    ).thenAnswer((_) async => const SearchClassroomsResponse(results: []));
     when(() => app.state).thenReturn(
       const AppState(
         status: AppStatus.authenticated,
@@ -125,6 +138,129 @@ void main() {
     await tester.tap(find.byKey(const Key('onboarding_start')));
     await tester.pumpAndSettle();
   }
+
+  const savedProfile = ProfileOverview(
+    academic: AcademicProfile(
+      fullName: 'Existing Student',
+      handle: 'existing_student',
+      group: 'GROUP-01',
+    ),
+  );
+
+  testWidgets('server profile restores completed onboarding and its group', (
+    tester,
+  ) async {
+    when(
+      () => gamification.getProfileOverview(any()),
+    ).thenAnswer((_) async => savedProfile);
+    await pumpPage(tester);
+    verify(home.closeOnboarding).called(1);
+    verify(() => router.go('/feed')).called(1);
+    verify(
+      () =>
+          schedule.add(const ScheduleRequested(group: Group(name: 'GROUP-01'))),
+    ).called(1);
+    verifyNever(
+      () => gamification.setUserIdentity(
+        organizationId: any(named: 'organizationId'),
+        fullName: any(named: 'fullName'),
+        handle: any(named: 'handle'),
+      ),
+    );
+  });
+
+  testWidgets('explicit onboarding keeps saved identity and group prefilled', (
+    tester,
+  ) async {
+    when(() => home.state).thenReturn(
+      const HomeState(
+        settings: AppSettings(onboardingShown: true),
+      ),
+    );
+    when(
+      () => gamification.getProfileOverview(any()),
+    ).thenAnswer((_) async => savedProfile);
+    await openGroup(tester);
+    final groupStep = tester.widget<OnboardingGroupStep>(
+      find.byType(OnboardingGroupStep),
+    );
+    expect(groupStep.initialSelected, const Group(name: 'GROUP-01'));
+    expect(groupStep.initialQuery, 'GROUP-01');
+    expect(groupStep.totalSteps, 3);
+    verifyNever(home.closeOnboarding);
+    verifyNever(() => router.go('/feed'));
+  });
+
+  testWidgets('late profile restores untouched group step without navigating', (
+    tester,
+  ) async {
+    final pending = Completer<ProfileOverview>();
+    when(
+      () => gamification.getProfileOverview(any()),
+    ).thenAnswer((_) => pending.future);
+    await openGroup(tester);
+    pending.complete(savedProfile);
+    await tester.pumpAndSettle();
+    final field = tester.widget<AppInputField>(
+      find.byKey(const Key('onboarding_groupSearch')),
+    );
+    expect(field.controller?.text, 'GROUP-01');
+    final button = tester.widget<AppButton>(
+      find.byKey(const Key('onboarding_groupContinue')),
+    );
+    expect(button.onPressed, isNotNull);
+    verifyNever(home.closeOnboarding);
+  });
+
+  testWidgets('late profile cannot replace a group query entered by the user', (
+    tester,
+  ) async {
+    final pending = Completer<ProfileOverview>();
+    when(
+      () => gamification.getProfileOverview(any()),
+    ).thenAnswer((_) => pending.future);
+    await openGroup(tester);
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const Key('onboarding_groupSearch')),
+        matching: find.byType(EditableText),
+      ),
+      'OTHER',
+    );
+    pending.complete(savedProfile);
+    await tester.pumpAndSettle();
+    final field = tester.widget<AppInputField>(
+      find.byKey(const Key('onboarding_groupSearch')),
+    );
+    expect(field.controller?.text, 'OTHER');
+    final button = tester.widget<AppButton>(
+      find.byKey(const Key('onboarding_groupContinue')),
+    );
+    expect(button.onPressed, isNull);
+    verifyNever(home.closeOnboarding);
+  });
+
+  testWidgets(
+    'late profile cannot restore onboarding for a replacement account',
+    (tester) async {
+      final pending = Completer<ProfileOverview>();
+      when(
+        () => gamification.getProfileOverview(any()),
+      ).thenAnswer((_) => pending.future);
+      await pumpPage(tester);
+      when(() => app.state).thenReturn(
+        const AppState(
+          status: AppStatus.authenticated,
+          user: User(id: 'replacement'),
+        ),
+      );
+      pending.complete(savedProfile);
+      await tester.pumpAndSettle();
+      verifyNever(home.closeOnboarding);
+      verifyNever(() => router.go('/feed'));
+      verifyNever(() => schedule.add(any()));
+    },
+  );
 
   testWidgets('anonymous onboarding does not require an identity step', (
     tester,
