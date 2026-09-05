@@ -16,7 +16,7 @@ class FriendsMapControls extends StatelessWidget {
 
   final ValueListenable<double> panelExtent;
   final bool isGhost;
-  final VoidCallback onToggleGhost;
+  final VoidCallback? onToggleGhost;
   final VoidCallback onGeoSettings;
   final VoidCallback? onMyLocation;
 
@@ -27,7 +27,7 @@ class FriendsMapControls extends StatelessWidget {
       valueListenable: panelExtent,
       builder: (context, extent, child) {
         final height = MediaQuery.heightOf(context);
-        final bottom = (height * extent + 14).clamp(120.0, height - 250);
+        final bottom = (height * extent + 14).clamp(0.0, height);
         final visible = extent < 0.46;
         final reduceMotion =
             MediaQuery.disableAnimationsOf(context) ||

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:friends_repository/friends_repository.dart';
@@ -46,16 +48,48 @@ class GeoSharingCubit extends Cubit<GeoSharingState> {
   GeoSharingCubit({
     required PreferencesRepository preferencesRepository,
     required FriendsRepository friendsRepository,
+    FriendsMapCubit? mapCubit,
   }) : _preferences = preferencesRepository,
        _friends = friendsRepository,
-       super(const GeoSharingState());
+       _mapCubit = mapCubit,
+       super(const GeoSharingState()) {
+    _mapSubscription = mapCubit?.stream.listen(_applyMapState);
+  }
 
   final PreferencesRepository _preferences;
   final FriendsRepository _friends;
+  final FriendsMapCubit? _mapCubit;
+  StreamSubscription<FriendsMapState>? _mapSubscription;
   int _revision = 0;
+
+  void _applyMapState(FriendsMapState mapState) {
+    if (isClosed) return;
+    emit(
+      state.copyWith(
+        settings: mapState.geoSettings,
+        busy: mapState.privacyBusy,
+        failed: mapState.privacySyncFailed,
+      ),
+    );
+  }
+
+  @override
+  Future<void> close() async {
+    final closed = super.close();
+    await _mapSubscription?.cancel();
+    await closed;
+  }
 
   Future<void> load() async {
     if (state.busy || isClosed) return;
+    final mapCubit = _mapCubit;
+    if (mapCubit != null) {
+      await mapCubit.initialize();
+      if (isClosed) return;
+      _applyMapState(mapCubit.state);
+      emit(state.copyWith(loaded: true));
+      return;
+    }
     final revision = ++_revision;
     emit(state.copyWith(busy: true, failed: false));
     try {
@@ -79,6 +113,24 @@ class GeoSharingCubit extends Cubit<GeoSharingState> {
 
   Future<bool> setSharing({required bool enabled}) async {
     if (state.busy || isClosed) return false;
+    final mapCubit = _mapCubit;
+    if (mapCubit != null) {
+      final settings = mapCubit.state.geoSettings;
+      await mapCubit.updateGeoSettings(
+        settings.copyWith(
+          sharing: enabled,
+          visibility: enabled
+              ? settings.visibility == GeoVisibility.none
+                    ? GeoVisibility.all
+                    : settings.visibility
+              : GeoVisibility.none,
+          privacyForcedGhost: !enabled || settings.privacyForcedGhost,
+        ),
+      );
+      if (isClosed) return false;
+      _applyMapState(mapCubit.state);
+      return !mapCubit.state.privacySyncFailed;
+    }
     final revision = ++_revision;
     final next = state.settings.copyWith(
       sharing: enabled,

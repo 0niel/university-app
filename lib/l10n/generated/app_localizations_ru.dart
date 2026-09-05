@@ -3768,8 +3768,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get friendsShareGeo => 'Делиться геопозицией';
 
   @override
-  String get friendsShareGeoSub =>
-      'обновляется, пока открыт экран карты друзей';
+  String get friendsShareGeoSub => 'передавать геопозицию выбранной аудитории';
 
   @override
   String get friendsPrivacySyncError =>
@@ -3779,7 +3778,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get friendsGhostSub => 'временно скрыться от всех';
 
   @override
-  String get friendsWhoSeesExact => 'КТО ВИДИТ МОЮ ТОЧНУЮ ГЕО';
+  String get friendsWhoSeesExact => 'КТО ВИДИТ МОЮ ГЕОПОЗИЦИЮ';
 
   @override
   String get friendsVisAll => 'Все друзья';
@@ -3797,7 +3796,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get friendsVisNoneSub => 'тебя нет на карте';
 
   @override
-  String get friendsPrecisionHeader => 'ТОЧНОСТЬ ДЛЯ ОСТАЛЬНЫХ';
+  String get friendsPrecisionHeader => 'ТОЧНОСТЬ ГЕОПОЗИЦИИ';
 
   @override
   String get friendsPrecisionExact => 'Точно';
@@ -12277,4 +12276,80 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsShowPromoBanners => 'Партнёрские предложения';
+
+  @override
+  String get friendsStudentsTab => 'Студенты';
+
+  @override
+  String get friendsStudentsEmptyTitle => 'Пока нет студентов на карте';
+
+  @override
+  String get friendsStudentsEmptySub =>
+      'Здесь появятся студенты, которые выбрали «Всем». Смотреть карту можно, не делясь своей геопозицией.';
+
+  @override
+  String get friendsStudentsSub =>
+      'Здесь только те, кто разрешил показывать себя всем. Геопозиция может быть приблизительной.';
+
+  @override
+  String get friendsVisStudents => 'Всем';
+
+  @override
+  String get friendsVisStudentsSub =>
+      'Любой авторизованный студент увидит твой профиль и геопозицию без добавления в друзья. Ты будешь виден, пока не скроешь себя или не выключишь передачу геопозиции.';
+
+  @override
+  String get friendsVisFriendsSub =>
+      'Твою геопозицию видят только добавленные друзья. На общей карте студентов тебя не будет.';
+
+  @override
+  String get friendsPublicProfile => 'Виден всем студентам';
+
+  @override
+  String get friendsBackgroundTitle => 'Обновление геопозиции';
+
+  @override
+  String get friendsBackgroundMobileSub =>
+      'На телефоне для фонового обновления нужен доступ к геопозиции. Энергосбережение может задерживать обновления, а принудительное закрытие или перезагрузка — остановить их. Открой приложение, чтобы возобновить передачу.';
+
+  @override
+  String get friendsBackgroundForegroundSub =>
+      'На этой платформе геопозиция обновляется, пока приложение открыто и активно. После закрытия или приостановки передача прекращается.';
+
+  @override
+  String get friendsBackgroundActive => 'Фоновое обновление включено';
+
+  @override
+  String get friendsBackgroundInactive => 'Фоновое обновление не запущено';
+
+  @override
+  String get friendsLocationRetry => 'Разрешить геопозицию';
+
+  @override
+  String friendsMapPeopleCount(int count) {
+    return 'На карте: $count';
+  }
+
+  @override
+  String get friendsLocationUnavailable =>
+      'Геопозиция недоступна. Смотреть студентов на карте по-прежнему можно.';
+
+  @override
+  String get friendsLocationPublishFailed =>
+      'Не удалось передать свежую геопозицию. Проверь соединение — обновление повторится автоматически.';
+
+  @override
+  String get friendsLocationServiceDisabled =>
+      'Геолокация выключена на устройстве. Карта по-прежнему доступна.';
+
+  @override
+  String get friendsLocationUnsupported =>
+      'Устройство не может передать геопозицию. Смотреть карту по-прежнему можно.';
+
+  @override
+  String get friendsLocationLocating => 'Определяем геопозицию…';
+
+  @override
+  String get friendsLocationForegroundActive =>
+      'Обновляется в открытом приложении';
 }

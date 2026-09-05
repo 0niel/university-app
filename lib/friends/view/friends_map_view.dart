@@ -8,6 +8,7 @@ import 'package:friends_repository/friends_repository.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:rtu_mirea_app/common/widgets/app_map_tiles.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
+import 'package:rtu_mirea_app/friends/services/friends_location_service.dart';
 import 'package:rtu_mirea_app/friends/utils/friends_map_camera.dart';
 import 'package:rtu_mirea_app/friends/view/find_friends_page.dart';
 import 'package:rtu_mirea_app/friends/widgets/widgets.dart';
@@ -27,6 +28,7 @@ class _FriendsMapViewState extends State<FriendsMapView>
   final _mapController = MapController();
   final _panelController = DraggableScrollableController();
   final ValueNotifier<double> _panelExtent = ValueNotifier(0.28);
+  bool? _showStudents;
   late final TileProvider _tileProvider = AppMapTiles.createTileProvider();
   late final FriendsMapCamera _camera = FriendsMapCamera(
     _mapController,
@@ -77,13 +79,30 @@ class _FriendsMapViewState extends State<FriendsMapView>
     final hasMyLocation =
         state.hasMyLocation && myLatitude != null && myLongitude != null;
 
-    final friendsWithLocation = state.friends
-        .where((f) => f.hasLocation)
-        .toList();
+    final showingStudents = _showStudents ?? state.friends.isEmpty;
+    final people = showingStudents ? state.students : state.friends;
+    final friendsWithLocation = people.where((f) => f.hasLocation).toList();
     final loading =
-        state.status == FriendsMapStatus.loading && state.friends.isEmpty;
-    final failed =
-        state.status == FriendsMapStatus.failure && state.friends.isEmpty;
+        people.isEmpty &&
+        (state.status == FriendsMapStatus.initial ||
+            state.status == FriendsMapStatus.loading ||
+            showingStudents && state.studentsLoading);
+    final failed = showingStudents
+        ? state.studentsLoadFailed && people.isEmpty
+        : state.status == FriendsMapStatus.failure && people.isEmpty;
+    final locationMessage = state.locationPublishFailed
+        ? context.l10n.friendsLocationPublishFailed
+        : switch (state.locationStatus) {
+            FriendsLocationStatus.permissionDenied ||
+            FriendsLocationStatus.permissionDeniedForever ||
+            FriendsLocationStatus.failure =>
+              context.l10n.friendsLocationUnavailable,
+            FriendsLocationStatus.serviceDisabled =>
+              context.l10n.friendsLocationServiceDisabled,
+            FriendsLocationStatus.unavailable =>
+              context.l10n.friendsLocationUnsupported,
+            _ => null,
+          };
 
     return Scaffold(
       backgroundColor: colors.canvas,
@@ -120,11 +139,12 @@ class _FriendsMapViewState extends State<FriendsMapView>
             friendsOnMap: friendsWithLocation.length,
             requestCount: state.requests.length,
             loading: loading,
+            showingStudents: showingStudents,
             onBack: () => Navigator.of(context).maybePop(),
             onRequests: () => _showRequests(context),
             onAddFriend: () => _showAddFriend(context),
           ),
-          if (state.locationPermissionDenied)
+          if (locationMessage != null)
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -135,7 +155,9 @@ class _FriendsMapViewState extends State<FriendsMapView>
                 ),
                 child: NinjaBanner(
                   tone: NinjaBannerTone.warn,
-                  title: context.l10n.friendsGeoDenied,
+                  title: locationMessage,
+                  actionLabel: context.l10n.friendsGeoSharing,
+                  onAction: () => _showGeoSettings(context),
                 ).animateSectionEntrance(),
               ),
             ),
@@ -144,25 +166,41 @@ class _FriendsMapViewState extends State<FriendsMapView>
             isGhost: state.isGhost,
             onMyLocation: hasMyLocation
                 ? () => _focusOn(myLatitude, myLongitude)
-                : null,
-            onToggleGhost: () =>
-                context.read<FriendsMapCubit>().toggleGhostMode(),
+                : () => context.read<FriendsMapCubit>().retryLocation(),
+            onToggleGhost: state.privacyBusy
+                ? null
+                : state.geoSettings.sharing &&
+                      state.geoSettings.visibility != GeoVisibility.none
+                ? () => context.read<FriendsMapCubit>().toggleGhostMode()
+                : () => _showGeoSettings(context),
             onGeoSettings: () => _showGeoSettings(context),
           ),
           NinjaFriendsPanel(
             controller: _panelController,
-            friends: state.friends,
+            friends: people,
+            showingStudents: showingStudents,
+            onShowStudentsChanged: (value) {
+              setState(() => _showStudents = value);
+              if (value) {
+                unawaited(context.read<FriendsMapCubit>().refreshStudents());
+              }
+            },
             myLatitude: state.myLatitude,
             myLongitude: state.myLongitude,
             loading: loading,
             failed: failed,
-            onRetry: () => unawaited(context.read<FriendsMapCubit>().load()),
+            onRetry: () => unawaited(
+              showingStudents
+                  ? context.read<FriendsMapCubit>().refreshStudents()
+                  : context.read<FriendsMapCubit>().load(),
+            ),
             onFriendTap: (friend) {
               final latitude = friend.latitude;
               final longitude = friend.longitude;
               if (friend.hasLocation && latitude != null && longitude != null) {
                 _focusOn(latitude, longitude);
               }
+              unawaited(_showFriendCard(context, friend));
             },
             onAddFriend: () => _showAddFriend(context),
           ),
@@ -209,11 +247,14 @@ class _FriendsMapViewState extends State<FriendsMapView>
 
   Future<void> _showFriendCard(BuildContext context, Friend friend) async {
     final cubit = context.read<FriendsMapCubit>();
+    final isFriend = cubit.state.friends.any(
+      (item) => item.userId == friend.userId,
+    );
     final shouldRemove = await showAppSheet<bool>(
       context,
-      child: FriendCardSheet(friend: friend),
+      child: FriendCardSheet(friend: friend, isFriend: isFriend),
     );
-    if (shouldRemove != true || !context.mounted) return;
+    if (!isFriend || shouldRemove != true || !context.mounted) return;
     final removed = await cubit.removeFriend(friend.userId);
     if (context.mounted && !removed) {
       showNinjaToast(

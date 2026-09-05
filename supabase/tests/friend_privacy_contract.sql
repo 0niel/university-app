@@ -56,7 +56,7 @@ begin
   );
   if position('friend_location_preferences' in v_definition) = 0
     or position('for update;' in lower(v_definition)) = 0
-    or position('coalesce(v_is_ghost, false)' in v_definition) = 0
+    or position('if v_is_ghost then' in v_definition) = 0
     or position('is_ghost = excluded.is_ghost' in v_definition) = 0 then
     raise exception 'Location upsert can reset persisted ghost mode';
   end if;
@@ -81,7 +81,7 @@ begin
   from public.friend_locations location
   where location.user_id = v_user_id;
 
-  if v_is_ghost is distinct from true then
+  if v_is_ghost is not null then
     raise exception 'First location publish reset active ghost mode';
   end if;
 
@@ -91,7 +91,7 @@ begin
   select location.is_ghost into v_is_ghost
   from public.friend_locations location
   where location.user_id = v_user_id;
-  if v_is_ghost is distinct from true then
+  if v_is_ghost is not null then
     raise exception 'Repeated location publish reset active ghost mode';
   end if;
 
@@ -102,7 +102,7 @@ begin
   select location.is_ghost into v_is_ghost
   from public.friend_locations location
   where location.user_id = v_user_id;
-  if v_is_ghost is distinct from true then
+  if v_is_ghost is not null then
     raise exception 'Recreated location lost the durable ghost preference';
   end if;
 
@@ -127,7 +127,7 @@ begin
   select location.is_ghost into v_is_ghost
   from public.friend_locations location
   where location.user_id = v_user_id;
-  if v_is_ghost is distinct from true then
+  if v_is_ghost is not null then
     raise exception 'Location publish lost re-enabled ghost mode';
   end if;
 end;

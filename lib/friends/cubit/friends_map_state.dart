@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:friends_repository/friends_repository.dart';
+import 'package:rtu_mirea_app/friends/services/friends_location_service.dart';
 
 part 'friends_map_state.freezed.dart';
 part 'friends_map_state.g.dart';
@@ -9,6 +10,13 @@ abstract class FriendsMapState with _$FriendsMapState {
   const factory FriendsMapState({
     @Default(FriendsMapStatus.initial) FriendsMapStatus status,
     @Default(<Friend>[]) List<Friend> friends,
+    @Default(<Friend>[]) List<Friend> students,
+    @Default(false) bool studentsLoading,
+    @Default(false) bool studentsLoadFailed,
+    @Default(FriendsLocationStatus.stopped)
+    FriendsLocationStatus locationStatus,
+    @Default(false) bool backgroundLocationActive,
+    @Default(false) bool locationPublishFailed,
     @Default(<FriendRequest>[]) List<FriendRequest> requests,
     double? myLatitude,
     double? myLongitude,
@@ -28,13 +36,15 @@ abstract class FriendsMapState with _$FriendsMapState {
     return latitude != null &&
         longitude != null &&
         latitude.isFinite &&
-        longitude.isFinite;
+        longitude.isFinite &&
+        latitude.abs() <= 90 &&
+        longitude.abs() <= 180;
   }
 }
 
 enum FriendsMapStatus { initial, loading, ready, failure }
 
-enum GeoVisibility { all, none }
+enum GeoVisibility { all, students, none }
 
 enum GeoPrecision { exact, campus, city }
 
