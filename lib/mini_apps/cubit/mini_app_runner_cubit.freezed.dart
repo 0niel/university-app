@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MiniAppRunnerState {
 
- MiniAppRunnerStatus get status; MiniApp? get app; Map<String, dynamic>? get screen; bool get fromCache;
+ MiniAppRunnerStatus get status; MiniApp? get app; Map<String, dynamic>? get screen; bool get fromCache; bool get refreshing; bool get refreshFailed;
 /// Create a copy of MiniAppRunnerState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $MiniAppRunnerStateCopyWith<MiniAppRunnerState> get copyWith => _$MiniAppRunnerS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MiniAppRunnerState&&(identical(other.status, status) || other.status == status)&&(identical(other.app, app) || other.app == app)&&const DeepCollectionEquality().equals(other.screen, screen)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MiniAppRunnerState&&(identical(other.status, status) || other.status == status)&&(identical(other.app, app) || other.app == app)&&const DeepCollectionEquality().equals(other.screen, screen)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.refreshing, refreshing) || other.refreshing == refreshing)&&(identical(other.refreshFailed, refreshFailed) || other.refreshFailed == refreshFailed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,app,const DeepCollectionEquality().hash(screen),fromCache);
+int get hashCode => Object.hash(runtimeType,status,app,const DeepCollectionEquality().hash(screen),fromCache,refreshing,refreshFailed);
 
 @override
 String toString() {
-  return 'MiniAppRunnerState(status: $status, app: $app, screen: $screen, fromCache: $fromCache)';
+  return 'MiniAppRunnerState(status: $status, app: $app, screen: $screen, fromCache: $fromCache, refreshing: $refreshing, refreshFailed: $refreshFailed)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $MiniAppRunnerStateCopyWith<$Res>  {
   factory $MiniAppRunnerStateCopyWith(MiniAppRunnerState value, $Res Function(MiniAppRunnerState) _then) = _$MiniAppRunnerStateCopyWithImpl;
 @useResult
 $Res call({
- MiniAppRunnerStatus status, MiniApp? app, Map<String, dynamic>? screen, bool fromCache
+ MiniAppRunnerStatus status, MiniApp? app, Map<String, dynamic>? screen, bool fromCache, bool refreshing, bool refreshFailed
 });
 
 
@@ -62,12 +62,14 @@ class _$MiniAppRunnerStateCopyWithImpl<$Res>
 
 /// Create a copy of MiniAppRunnerState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? app = freezed,Object? screen = freezed,Object? fromCache = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? app = freezed,Object? screen = freezed,Object? fromCache = null,Object? refreshing = null,Object? refreshFailed = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as MiniAppRunnerStatus,app: freezed == app ? _self.app : app // ignore: cast_nullable_to_non_nullable
 as MiniApp?,screen: freezed == screen ? _self.screen : screen // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
+as bool,refreshing: null == refreshing ? _self.refreshing : refreshing // ignore: cast_nullable_to_non_nullable
+as bool,refreshFailed: null == refreshFailed ? _self.refreshFailed : refreshFailed // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -165,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MiniAppRunnerStatus status,  MiniApp? app,  Map<String, dynamic>? screen,  bool fromCache)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MiniAppRunnerStatus status,  MiniApp? app,  Map<String, dynamic>? screen,  bool fromCache,  bool refreshing,  bool refreshFailed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MiniAppRunnerState() when $default != null:
-return $default(_that.status,_that.app,_that.screen,_that.fromCache);case _:
+return $default(_that.status,_that.app,_that.screen,_that.fromCache,_that.refreshing,_that.refreshFailed);case _:
   return orElse();
 
 }
@@ -186,10 +188,10 @@ return $default(_that.status,_that.app,_that.screen,_that.fromCache);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MiniAppRunnerStatus status,  MiniApp? app,  Map<String, dynamic>? screen,  bool fromCache)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MiniAppRunnerStatus status,  MiniApp? app,  Map<String, dynamic>? screen,  bool fromCache,  bool refreshing,  bool refreshFailed)  $default,) {final _that = this;
 switch (_that) {
 case _MiniAppRunnerState():
-return $default(_that.status,_that.app,_that.screen,_that.fromCache);case _:
+return $default(_that.status,_that.app,_that.screen,_that.fromCache,_that.refreshing,_that.refreshFailed);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +208,10 @@ return $default(_that.status,_that.app,_that.screen,_that.fromCache);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MiniAppRunnerStatus status,  MiniApp? app,  Map<String, dynamic>? screen,  bool fromCache)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MiniAppRunnerStatus status,  MiniApp? app,  Map<String, dynamic>? screen,  bool fromCache,  bool refreshing,  bool refreshFailed)?  $default,) {final _that = this;
 switch (_that) {
 case _MiniAppRunnerState() when $default != null:
-return $default(_that.status,_that.app,_that.screen,_that.fromCache);case _:
+return $default(_that.status,_that.app,_that.screen,_that.fromCache,_that.refreshing,_that.refreshFailed);case _:
   return null;
 
 }
@@ -221,7 +223,7 @@ return $default(_that.status,_that.app,_that.screen,_that.fromCache);case _:
 
 
 class _MiniAppRunnerState implements MiniAppRunnerState {
-  const _MiniAppRunnerState({this.status = MiniAppRunnerStatus.initial, this.app, final  Map<String, dynamic>? screen, this.fromCache = false}): _screen = screen;
+  const _MiniAppRunnerState({this.status = MiniAppRunnerStatus.initial, this.app, final  Map<String, dynamic>? screen, this.fromCache = false, this.refreshing = false, this.refreshFailed = false}): _screen = screen;
 
 
 @override@JsonKey() final  MiniAppRunnerStatus status;
@@ -236,6 +238,8 @@ class _MiniAppRunnerState implements MiniAppRunnerState {
 }
 
 @override@JsonKey() final  bool fromCache;
+@override@JsonKey() final  bool refreshing;
+@override@JsonKey() final  bool refreshFailed;
 
 /// Create a copy of MiniAppRunnerState
 /// with the given fields replaced by the non-null parameter values.
@@ -247,16 +251,16 @@ _$MiniAppRunnerStateCopyWith<_MiniAppRunnerState> get copyWith => __$MiniAppRunn
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MiniAppRunnerState&&(identical(other.status, status) || other.status == status)&&(identical(other.app, app) || other.app == app)&&const DeepCollectionEquality().equals(other._screen, _screen)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MiniAppRunnerState&&(identical(other.status, status) || other.status == status)&&(identical(other.app, app) || other.app == app)&&const DeepCollectionEquality().equals(other._screen, _screen)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.refreshing, refreshing) || other.refreshing == refreshing)&&(identical(other.refreshFailed, refreshFailed) || other.refreshFailed == refreshFailed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,app,const DeepCollectionEquality().hash(_screen),fromCache);
+int get hashCode => Object.hash(runtimeType,status,app,const DeepCollectionEquality().hash(_screen),fromCache,refreshing,refreshFailed);
 
 @override
 String toString() {
-  return 'MiniAppRunnerState(status: $status, app: $app, screen: $screen, fromCache: $fromCache)';
+  return 'MiniAppRunnerState(status: $status, app: $app, screen: $screen, fromCache: $fromCache, refreshing: $refreshing, refreshFailed: $refreshFailed)';
 }
 
 
@@ -267,7 +271,7 @@ abstract mixin class _$MiniAppRunnerStateCopyWith<$Res> implements $MiniAppRunne
   factory _$MiniAppRunnerStateCopyWith(_MiniAppRunnerState value, $Res Function(_MiniAppRunnerState) _then) = __$MiniAppRunnerStateCopyWithImpl;
 @override @useResult
 $Res call({
- MiniAppRunnerStatus status, MiniApp? app, Map<String, dynamic>? screen, bool fromCache
+ MiniAppRunnerStatus status, MiniApp? app, Map<String, dynamic>? screen, bool fromCache, bool refreshing, bool refreshFailed
 });
 
 
@@ -284,12 +288,14 @@ class __$MiniAppRunnerStateCopyWithImpl<$Res>
 
 /// Create a copy of MiniAppRunnerState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? app = freezed,Object? screen = freezed,Object? fromCache = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? app = freezed,Object? screen = freezed,Object? fromCache = null,Object? refreshing = null,Object? refreshFailed = null,}) {
   return _then(_MiniAppRunnerState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as MiniAppRunnerStatus,app: freezed == app ? _self.app : app // ignore: cast_nullable_to_non_nullable
 as MiniApp?,screen: freezed == screen ? _self._screen : screen // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
+as bool,refreshing: null == refreshing ? _self.refreshing : refreshing // ignore: cast_nullable_to_non_nullable
+as bool,refreshFailed: null == refreshFailed ? _self.refreshFailed : refreshFailed // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

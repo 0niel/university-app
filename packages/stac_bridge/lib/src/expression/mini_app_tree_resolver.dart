@@ -22,11 +22,54 @@ class MiniAppTreeResolver {
     this._engine, {
     this.itemVar = 'item',
     this.indexVar = 'index',
+    this.deferActions = false,
+    this.deferWidgets = false,
   });
 
   final MiniAppExpressionEngine _engine;
   final String itemVar;
   final String indexVar;
+  final bool deferActions;
+  final bool deferWidgets;
+
+  static const _eagerWidgets = {
+    'appBar',
+    'alertDialog',
+    'elevatedButton',
+    'filledButton',
+    'outlinedButton',
+    'textButton',
+    'iconButton',
+    'floatingActionButton',
+    'circleAvatar',
+    'listTile',
+  };
+
+  static const _widgetSlots = {
+    'child',
+    'children',
+    'body',
+    'appBar',
+    'bottomNavigationBar',
+    'floatingActionButton',
+    'drawer',
+    'endDrawer',
+    'leading',
+    'trailing',
+    'title',
+    'subtitle',
+    'content',
+    'actions',
+    'header',
+    'footer',
+    'separator',
+    'background',
+    'placeholder',
+    'errorWidget',
+    'icon',
+    'prefix',
+    'suffix',
+  };
 
   static const Set<String> _forEachKeys = {
     'type',
@@ -46,8 +89,24 @@ class MiniAppTreeResolver {
   Object? resolveNode(Object? node, Map<String, Object?> context) =>
       _resolve(node, context);
 
+  Map<String, Object?> resolveAction(
+    Map<String, Object?> node,
+    Map<String, Object?> context,
+  ) => _resolveMap(node, context);
+
   Object? _resolve(Object? node, Map<String, Object?> context) {
     if (node is Map<Object?, Object?>) {
+      if (deferActions && node['actionType'] is String) {
+        if (node['actionType'] == 'appRunAction') return node;
+        return <String, Object?>{
+          'actionType': 'appRunAction',
+          'action': node,
+          'bindings': {
+            for (final entry in context.entries)
+              if (entry.key != 'state') entry.key: entry.value,
+          },
+        };
+      }
       switch (node['type']) {
         case 'appIf':
           return _resolveIf(node, context);
@@ -70,6 +129,12 @@ class MiniAppTreeResolver {
     Map<Object?, Object?> node,
     Map<String, Object?> context,
   ) {
+    if (deferWidgets && _eagerWidgets.contains(node['type'])) {
+      return MiniAppTreeResolver(
+        _engine,
+        deferActions: deferActions,
+      ).resolveAction(Map<String, Object?>.from(node), context);
+    }
     final deferredKey = _deferredKey(node);
     final out = <String, Object?>{};
     node.forEach((key, value) {
@@ -78,15 +143,56 @@ class MiniAppTreeResolver {
         out[normalizedKey] = value;
         return;
       }
+      if (deferWidgets &&
+          normalizedKey != 'appBar' &&
+          _widgetSlots.contains(normalizedKey)) {
+        final child = _deferWidget(value, context);
+        if (!identical(child, kRemoved)) out[normalizedKey] = child;
+        return;
+      }
       final resolved = _resolve(value, context);
       if (!identical(resolved, kRemoved)) out[normalizedKey] = resolved;
     });
     return out;
   }
 
+  Object? _deferWidget(Object? value, Map<String, Object?> context) {
+    if (value is Map<Object?, Object?> && value['type'] == 'appIf') {
+      return _resolveIf(value, context);
+    }
+    if (value is Map<Object?, Object?> && value['type'] == 'appSwitch') {
+      return _resolveSwitch(value, context);
+    }
+    if (value is Map<Object?, Object?> &&
+        value['type'] is String &&
+        value['actionType'] == null) {
+      return <String, Object?>{
+        'type': 'appReactiveNode',
+        'node': {
+          ...value,
+          if (value.containsKey('key')) 'key': _resolve(value['key'], context),
+        },
+        'bindings': {
+          for (final entry in context.entries)
+            if (entry.key != 'state') entry.key: entry.value,
+        },
+      };
+    }
+    if (value is List<Object?>) {
+      final children = <Object?>[];
+      for (final item in value) {
+        final child = _deferWidget(item, context);
+        if (!identical(child, kRemoved)) children.add(child);
+      }
+      return children;
+    }
+    return _resolve(value, context);
+  }
+
   String? _deferredKey(Map<Object?, Object?> node) {
     if (node['type'] == 'appStateScope') return 'child';
     if (node['actionType'] == 'forEachAction') return 'do';
+    if (node['actionType'] == 'appRunAction') return 'action';
     return null;
   }
 
@@ -108,7 +214,11 @@ class MiniAppTreeResolver {
   ) {
     final pass = isTruthy(_evalLogic(node['condition'], context));
     final branch = pass ? node['child'] : node['else'];
-    return branch == null ? kRemoved : _resolve(branch, context);
+    return branch == null
+        ? kRemoved
+        : deferWidgets
+        ? _deferWidget(branch, context)
+        : _resolve(branch, context);
   }
 
   Object _resolveForEach(
@@ -121,11 +231,14 @@ class MiniAppTreeResolver {
 
     final children = <Object?>[];
     for (var i = 0; i < items.length; i++) {
-      final resolved = _resolve(template, {
+      final scoped = {
         ...context,
         itemVar: items[i],
         indexVar: i,
-      });
+      };
+      final resolved = deferWidgets
+          ? _deferWidget(template, scoped)
+          : _resolve(template, scoped);
       if (!identical(resolved, kRemoved)) children.add(resolved);
     }
 
@@ -154,13 +267,19 @@ class MiniAppTreeResolver {
       for (final entry in cases) {
         if (entry is Map<Object?, Object?> && entry.containsKey('when')) {
           if (_literalOrExpr(entry['when'], context) == value) {
-            return _resolve(entry['child'], context);
+            return deferWidgets
+                ? _deferWidget(entry['child'], context)
+                : _resolve(entry['child'], context);
           }
         }
       }
     }
     final fallback = node['default'];
-    return fallback == null ? kRemoved : _resolve(fallback, context);
+    return fallback == null
+        ? kRemoved
+        : deferWidgets
+        ? _deferWidget(fallback, context)
+        : _resolve(fallback, context);
   }
 
   Object? _evalLogic(Object? source, Map<String, Object?> context) {

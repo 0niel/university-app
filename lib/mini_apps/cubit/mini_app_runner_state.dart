@@ -7,5 +7,7 @@ abstract class MiniAppRunnerState with _$MiniAppRunnerState {
     MiniApp? app,
     Map<String, dynamic>? screen,
     @Default(false) bool fromCache,
+    @Default(false) bool refreshing,
+    @Default(false) bool refreshFailed,
   }) = _MiniAppRunnerState;
 }

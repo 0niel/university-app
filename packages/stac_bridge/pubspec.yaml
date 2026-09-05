@@ -1,6 +1,6 @@
 name: stac_bridge
 description: Stac (BDUI) runtime bridge - app_ui widget parsers, custom actions and the secure proxy network layer for mini apps
-version: 0.1.0+1
+version: 0.2.0
 publish_to: none
 environment:
   sdk: ^3.10.0

@@ -15,6 +15,8 @@ abstract class MiniAppHost {
 
   FutureOr<void> reload();
 
+  FutureOr<void> reloadRoot() => reload();
+
   FutureOr<void> setStorage(String key, Object? value);
 
   FutureOr<Object?> fetch({
@@ -61,8 +63,13 @@ class MiniAppSession {
 
 abstract final class MiniAppSessionStack {
   static final List<MiniAppSession> _stack = [];
+  static final _sessionKey = Object();
 
-  static MiniAppSession? get current => _stack.lastOrNull;
+  static MiniAppSession? get current =>
+      Zone.current[_sessionKey] as MiniAppSession? ?? _stack.lastOrNull;
+
+  static T runWith<T>(MiniAppSession? session, T Function() action) =>
+      runZoned(action, zoneValues: {_sessionKey: session});
 
   static void push(MiniAppSession session) => _stack.add(session);
 
