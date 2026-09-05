@@ -9,6 +9,24 @@ import subprocess
 BASELINE_SHA = "892c735ac0b46f3b8f6621b1d67d12342c45cc84"
 REVIEWED_SOURCE_SHA = "0a5f375a1a312a6bb45567677852ee22242420ab"
 RELEASE_VERSION = "5.2.1+1005301"
+NAV_RELEASE_VERSION = "5.2.1+1005801"
+NAV_IOS_RELEASE_VERSION = "5.2.1+2439.14.43"
+NAV_BASELINE_SHA = "506602c5d8da2cac5a6180d26b753f415d381819"
+NAV_REVIEWED_SOURCE_SHA = "281f0761b65405ab48a69e8c3df92e63bdc101da"
+NAV_FIREBASE_SHA256 = "60de3a6074e0eb9a0b2602dda89fb8b7a6f3cc493a3f7048c65910cce8b4646d"
+NAV_RUNTIME_PATHS = {
+    "lib/app/utils/system_ui_configurator.dart",
+    "lib/app/view/app_router_view.dart",
+    "lib/app/widgets/app_router.dart",
+    "lib/app/widgets/app_system_ui_surface.dart",
+    "lib/navigation/deep_links.dart",
+    "lib/navigation/routes/routes.dart",
+}
+NAV_TEST_PATHS = {
+    "test/app/widgets/app_system_ui_surface_test.dart",
+    "test/navigation/deep_links_test.dart",
+    "test/navigation/schedule_route_payload_test.dart",
+}
 WORKFLOW_PATHS = {
     "packages/app_ui/test/src/widgets/app_horizontal_scroll_view_test.dart",
     "supabase/tests/guest_active_day_contract.sql",
@@ -78,12 +96,39 @@ def validate_dependencies(baseline, source):
     return root_before.replace(b"  pdfx:", b"  pdf: 3.12.0\n  pdfx:", 1)
 
 
-def projection(root, source_sha, workflow_sha):
+def navigation_projection(root, source_sha, workflow_sha, release_version):
+    for ancestor, descendant in ((NAV_BASELINE_SHA, NAV_REVIEWED_SOURCE_SHA), (NAV_REVIEWED_SOURCE_SHA, source_sha), (source_sha, workflow_sha)):
+        git(root, "merge-base", "--is-ancestor", ancestor, descendant)
+    support = WORKFLOW_PATHS | NAV_TEST_PATHS | {"test/tool/configure_firebase_test.py"}
+    if changed(root, NAV_REVIEWED_SOURCE_SHA, source_sha) - support:
+        raise ValueError("Runtime source differs from the explicitly reviewed snapshot")
+    delta = changed(root, NAV_BASELINE_SHA, source_sha)
+    if delta - NAV_RUNTIME_PATHS - support:
+        raise ValueError("Only the reviewed navigation runtime and support files may change")
+    after = tree(root, source_sha)
+    for path in delta:
+        if not after.get(path, "").startswith("100644 blob "):
+            raise ValueError(f"Changed paths must remain regular files: {path}")
+    digest = hashlib.sha256(json.dumps(after, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return {}, {
+        "baseline_sha": NAV_BASELINE_SHA,
+        "reviewed_source_sha": NAV_REVIEWED_SOURCE_SHA,
+        "source_sha": source_sha,
+        "release_version": release_version,
+        "projection_sha256": digest,
+    }
+
+
+def projection(root, source_sha, workflow_sha, release_version=RELEASE_VERSION):
     for value in (source_sha, workflow_sha):
         if not re.fullmatch(r"[0-9a-f]{40}", value):
             raise ValueError("A full commit SHA is required")
     if git(root, "rev-parse", "HEAD").decode().strip() != source_sha:
         raise ValueError("Checked-out commit does not match source_sha")
+    if release_version in (NAV_RELEASE_VERSION, NAV_IOS_RELEASE_VERSION):
+        return navigation_projection(root, source_sha, workflow_sha, release_version)
+    if release_version != RELEASE_VERSION:
+        raise ValueError("Unsupported runtime projection release")
     for ancestor, descendant in ((BASELINE_SHA, REVIEWED_SOURCE_SHA), (REVIEWED_SOURCE_SHA, source_sha), (source_sha, workflow_sha)):
         git(root, "merge-base", "--is-ancestor", ancestor, descendant)
     if changed(root, REVIEWED_SOURCE_SHA, source_sha) - WORKFLOW_PATHS:
@@ -128,19 +173,29 @@ def verify_worktree(root, overrides):
             raise ValueError(f"Projection drift: {path}")
 
 
+def verify_navigation_firebase(root):
+    target = root / "android/app/google-services.json"
+    if target.is_symlink() or not target.resolve().is_relative_to(root) or not target.is_file():
+        raise ValueError("Missing or invalid baseline Firebase native configuration")
+    if hashlib.sha256(target.read_bytes()).hexdigest() != NAV_FIREBASE_SHA256:
+        raise ValueError("Firebase native configuration differs from the verified release")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-sha", required=True)
     parser.add_argument("--workflow-sha", required=True)
+    parser.add_argument("--release-version", choices=(RELEASE_VERSION, NAV_RELEASE_VERSION, NAV_IOS_RELEASE_VERSION), default=RELEASE_VERSION)
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--verify-worktree", action="store_true")
+    parser.add_argument("--verify-native-firebase", action="store_true")
     parser.add_argument("--receipt", type=Path)
     parser.add_argument("--github-output", type=Path)
     parser.add_argument("--expected-projection")
     arguments = parser.parse_args()
     root = arguments.repo.resolve()
-    overrides, receipt = projection(root, arguments.source_sha, arguments.workflow_sha)
+    overrides, receipt = projection(root, arguments.source_sha, arguments.workflow_sha, arguments.release_version)
     if arguments.expected_projection and arguments.expected_projection != receipt["projection_sha256"]:
         raise ValueError("The build projection differs from the validated projection")
     if arguments.apply:
@@ -153,6 +208,10 @@ def main():
             target.write_bytes(data)
     if arguments.apply or arguments.verify_worktree:
         verify_worktree(root, overrides)
+    if arguments.verify_native_firebase:
+        if arguments.release_version != NAV_RELEASE_VERSION:
+            raise ValueError("Native Firebase reconstruction is only supported for the reviewed navigation release")
+        verify_navigation_firebase(root)
     if arguments.receipt:
         arguments.receipt.write_text(json.dumps(receipt, sort_keys=True) + "\n", encoding="utf-8")
     if arguments.github_output:
