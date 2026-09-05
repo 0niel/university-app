@@ -7,9 +7,6 @@ on:
         required: false
         type: string
         default: ""
-      flutter_version:
-        required: true
-        type: string
       min_coverage:
         required: false
         type: number
@@ -39,7 +36,7 @@ jobs:
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: stable
-          flutter-version: ${{ inputs.flutter_version }}
+          flutter-version-file: .fvmrc
           cache: true
 
       - name: Install dependencies

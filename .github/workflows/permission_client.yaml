@@ -7,6 +7,10 @@ concurrency:
 on:
   pull_request:
     paths:
+      - ".fvmrc"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".github/workflows/flutter_package.yml"
       - "packages/permission_client/**"
       - ".github/workflows/permission_client.yaml"
     branches:
@@ -19,5 +23,4 @@ jobs:
   build:
     uses: ./.github/workflows/flutter_package.yml
     with:
-      flutter_version: 3.44.2
       working_directory: packages/permission_client

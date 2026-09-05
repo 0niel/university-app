@@ -85,7 +85,7 @@ jobs:
           fi
 
       - name: Check out repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
@@ -121,8 +121,8 @@ jobs:
 
       - name: Verify source
         run: |
-          flutter analyze lib test
-          flutter test
+          flutter analyze --no-pub lib test
+          flutter test --no-pub
           python3 -m unittest discover -s test/tool -p app_store_build_status_test.py
 
       - name: Configure iOS signing
@@ -238,7 +238,7 @@ jobs:
             exit 1
           fi
           shorebird release ios \
-            --flutter-version 3.44.2 \
+            --flutter-version "$(jq -er '.flutter' .fvmrc)" \
             --export-options-plist=${{ runner.temp }}/ExportOptions.plist \
             --target lib/main/main_production.dart \
             --obfuscate \
@@ -294,7 +294,7 @@ jobs:
   publish:
     needs: release
     if: ${{ always() && (needs.release.result == 'success' || inputs.artifact_run_id != '' || inputs.verify_build_number != '' || inputs.verify_marketing_version != '' || inputs.verify_release_status) }}
-    runs-on: macos-15
+    runs-on: ${{ inputs.verify_build_number != '' && 'ubuntu-latest' || 'macos-15' }}
     timeout-minutes: 30
     environment: beta
     env:
@@ -304,7 +304,9 @@ jobs:
         shell: bash
     steps:
       - name: Check out repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
       - name: Verify publishing configuration
         env:

@@ -7,6 +7,10 @@ concurrency:
 on:
   pull_request:
     paths:
+      - ".fvmrc"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".github/workflows/flutter_package.yml"
       - "packages/rtu_mirea_schedule_api_client/**"
       - ".github/workflows/schedule_api_client.yaml"
     branches:
@@ -20,6 +24,5 @@ jobs:
     uses: ./.github/workflows/flutter_package.yml
     with:
       coverage_excludes: "**/*.g.dart"
-      flutter_version: 3.44.2
       min_coverage: 75
       working_directory: packages/rtu_mirea_schedule_api_client
