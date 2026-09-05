@@ -89,6 +89,9 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
     def test_reviewed_support_tail_is_allowed_and_has_a_distinct_receipt(self):
         _, initial = self.project()
         self.write(".github/workflows/shorebird-patch.yml", b"name: Patch\n")
+        test_path = "packages/app_ui/test/src/widgets/app_horizontal_scroll_view_test.dart"
+        self.assertEqual({path for path in MODULE.WORKFLOW_PATHS if path.startswith("packages/")}, {test_path})
+        self.write(test_path, b"void main() {}\n")
         fixtures = {
             "supabase/tests/guest_active_day_contract.sql",
             "supabase/tests/mentorship_contract.sql",
