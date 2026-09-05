@@ -1,0 +1,66 @@
+name: iOS Startup Check
+
+on:
+  pull_request:
+    paths:
+      - 'ios/**'
+      - '.fvmrc'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'tool/ios_startup_*'
+      - 'test/tool/ios_startup_check_test.py'
+      - '.github/workflows/ios-startup-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-startup-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  startup:
+    runs-on: macos-15-intel
+    timeout-minutes: 60
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify Xcode
+        run: |
+          test "$(uname -m)" = 'x86_64'
+          test -d "$DEVELOPER_DIR"
+          test "$(xcodebuild -version | head -n 1)" = 'Xcode 26.3'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: '3.44.2'
+          cache: true
+
+      - name: Install image verification dependency
+        run: |
+          python3 -m venv "$RUNNER_TEMP/startup-tools"
+          "$RUNNER_TEMP/startup-tools/bin/python" -m pip install --disable-pip-version-check 'Pillow==11.3.0'
+          printf '%s\n' "$RUNNER_TEMP/startup-tools/bin" >> "$GITHUB_PATH"
+
+      - name: Compare native startup
+        run: |
+          python3 -m unittest discover -s test/tool -p ios_startup_check_test.py
+          python3 tool/ios_startup_check.py
+
+      - name: Upload startup evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ios-startup-evidence
+          path: build/ios-startup-evidence
+          if-no-files-found: warn
+          retention-days: 14
