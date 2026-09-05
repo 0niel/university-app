@@ -35,6 +35,7 @@ class ShorebirdPatchWorkflowTest(unittest.TestCase):
             environment = {
                 **os.environ,
                 "GITHUB_ENV": output.as_posix(),
+                "GITHUB_OUTPUT": output.as_posix(),
                 "WORKFLOW_REF": "refs/heads/master",
                 "SOURCE_SHA": "a" * 40,
                 "BASELINE_SHA": "b" * 40,
@@ -55,6 +56,32 @@ class ShorebirdPatchWorkflowTest(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(output, "APP_ID=c55a7a80-2fcb-4565-833e-fb442dbe4e34\n")
+
+    def test_verified_android_runtime_release_is_available_for_patch_and_promotion(self):
+        result, output = self.bash(
+            step(PATCH, "validate", "Validate requested target")["run"],
+            PLATFORM="android", RELEASE_VERSION="5.2.1+1005301", TARGET_TRACK="staging",
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("baseline_sha=892c735ac0b46f3b8f6621b1d67d12342c45cc84", output)
+        result, output = self.bash(
+            step(PROMOTE, "promote", "Validate requested promotion")["run"],
+            PLATFORM="android", RELEASE_VERSION="5.2.1+1005301",
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("APP_ID=c55a7a80-2fcb-4565-833e-fb442dbe4e34", output)
+
+    def test_projection_uses_trusted_workflow_helper_in_both_jobs(self):
+        for job in ("validate", "patch"):
+            preparation = step(PATCH, job, "Prepare verified runtime projection")
+            self.assertIn('git show "$WORKFLOW_SHA:tool/prepare_shorebird_patch.py"', preparation["run"])
+            self.assertIn("--apply", preparation["run"])
+            self.assertIn("--verify-worktree", step(PATCH, job, "Verify locked workspace")["run"])
+        self.assertIn("--expected-projection", step(PATCH, "patch", "Prepare verified runtime projection")["run"])
+        publish = step(PATCH, "patch", "Publish staging patch")["run"]
+        self.assertNotIn("--allow-native-diffs", publish)
+        self.assertNotIn("--allow-asset-diffs", publish)
+        self.assertIn("projection_sha256", step(PROMOTE, "promote", "Verify receipt")["run"])
 
     def test_unsupported_platform_release_combinations_fail(self):
         for platform, version in (("ios", "5.2.0+1004201"), ("android", "99.0.0+1")):
@@ -90,7 +117,7 @@ class ShorebirdPatchWorkflowTest(unittest.TestCase):
         self.assertEqual(result.stdout.splitlines(), ["test", "--no-pub", "test/schedule", "test/top_discussions"])
         for name in ("Test user initialization", "Test academic profile initialization"):
             legacy = step(PATCH, "validate", name)
-            self.assertEqual(legacy["if"], "steps.inputs.outputs.release_version != '5.2.0+1004201'")
+            self.assertEqual(legacy["if"], "steps.inputs.outputs.release_version != '5.2.0+1004201' && steps.inputs.outputs.release_version != '5.2.1+1005301'")
             self.assertIn("test/src/", legacy["run"])
 
 

@@ -155,7 +155,7 @@ begin
   if jsonb_array_length(v_rows) <> 1
     or (v_rows->0->>'isIncoming')::boolean
     or v_rows->0->>'status' <> 'pending'
-    or (v_rows->0->>'price')::integer <> 20
+    or (v_rows->0->>'price')::integer <> 0
   then
     raise exception 'Outgoing mentor request contract is invalid';
   end if;
@@ -170,6 +170,25 @@ begin
     (v_requester, 'mentor-test-a', 50),
     (v_poor_requester, 'mentor-test-a', 10),
     (v_tenant_requester, 'mentor-test-a', 50);
+
+  perform set_config('request.jwt.claim.sub', v_mentor::text, true);
+  perform app_api_v1.act_on_mentor_request(v_request_id, 'accept');
+  if (select shurikens from core.user_gamification_profiles
+      where user_id = v_requester) <> 50
+    or exists (select 1 from core.mentor_requests
+      where id = v_request_id and escrowed_at is not null) then
+    raise exception 'Free mentorship acceptance reserved wallet funds';
+  end if;
+  perform set_config('request.jwt.claim.sub', v_requester::text, true);
+  perform app_api_v1.act_on_mentor_request(v_request_id, 'cancel');
+  if (select shurikens from core.user_gamification_profiles
+      where user_id = v_requester) <> 50 then
+    raise exception 'Free mentorship cancellation changed wallet funds';
+  end if;
+  v_request_id := app_api_v1.create_mentor_request(
+    'mentor-test-a', v_mentor, 'python', 'week', 'Historical paid request'
+  );
+  update core.mentor_requests set price = 20 where id = v_request_id;
 
   begin
     perform app_api_v1.act_on_mentor_request(v_request_id, 'accept');
@@ -279,6 +298,7 @@ begin
     'tomorrow',
     'May need to cancel'
   );
+  update core.mentor_requests set price = 20 where id = v_secondary_request_id;
   perform set_config('request.jwt.claim.sub', v_mentor::text, true);
   perform app_api_v1.act_on_mentor_request(
     v_secondary_request_id,
@@ -308,6 +328,7 @@ begin
     'tomorrow',
     'Completion cancellation guard'
   );
+  update core.mentor_requests set price = 20 where id = v_secondary_request_id;
   perform set_config('request.jwt.claim.sub', v_mentor::text, true);
   perform app_api_v1.act_on_mentor_request(v_secondary_request_id, 'accept');
   perform app_api_v1.act_on_mentor_request(
@@ -349,6 +370,7 @@ begin
     'week',
     'Insufficient balance'
   );
+  update core.mentor_requests set price = 20 where id = v_secondary_request_id;
   perform set_config('request.jwt.claim.sub', v_mentor::text, true);
   begin
     perform app_api_v1.act_on_mentor_request(v_secondary_request_id, 'accept');
@@ -387,6 +409,7 @@ begin
     'week',
     'Wrong-wallet guard'
   );
+  update core.mentor_requests set price = 20 where id = v_secondary_request_id;
   perform set_config('request.jwt.claim.sub', v_tenant_mentor::text, true);
   begin
     perform app_api_v1.act_on_mentor_request(v_secondary_request_id, 'accept');
