@@ -1,0 +1,129 @@
+name: App Store Submission
+
+on:
+  workflow_dispatch:
+    inputs:
+      marketing_version:
+        description: App Store marketing version
+        required: true
+        type: string
+      build_number:
+        description: Processed App Store build number
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shorebird-ios-release
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: macos-15
+    timeout-minutes: 35
+    environment: beta
+    defaults:
+      run:
+        shell: bash
+    env:
+      IOS_APP_BUNDLE_ID: pro.oniel.it.university
+      MARKETING_VERSION: ${{ inputs.marketing_version }}
+      BUILD_NUMBER: ${{ inputs.build_number }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+
+      - name: Verify submission inputs
+        run: |
+          python3 - <<'PY'
+          import os
+          import sys
+          sys.path.insert(0, "tool")
+          from app_store_submit import validate_version
+          validate_version(os.environ["MARKETING_VERSION"], os.environ["BUILD_NUMBER"])
+          PY
+          python3 -m unittest discover -s test/tool -p 'app_store_submit_test.py'
+          python3 -m unittest discover -s test/tool -p 'app_store_build_status_test.py'
+
+      - name: Install publishing tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/app-store-tools"
+          "$RUNNER_TEMP/app-store-tools/bin/python" -m pip install --disable-pip-version-check 'codemagic-cli-tools==0.69.0'
+          printf '%s\n' "$RUNNER_TEMP/app-store-tools/bin" >> "$GITHUB_PATH"
+
+      - name: Configure App Store Connect key
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
+          for name in ("APPSTORE_API_KEY_ID", "APPSTORE_API_ISSUER_ID", "APPSTORE_API_PRIVATE_KEY"):
+              if not os.environ.get(name):
+                  raise SystemExit(f"Missing App Store configuration: {name}")
+          private_key = os.environ["APPSTORE_API_PRIVATE_KEY"].strip()
+          if "BEGIN PRIVATE KEY" not in private_key:
+              private_key = base64.b64decode("".join(private_key.split()), validate=True).decode("utf-8")
+          private_key = private_key.replace("\\n", "\n")
+          if "BEGIN PRIVATE KEY" not in private_key:
+              raise SystemExit("Invalid App Store Connect private key")
+          path = Path(os.environ["RUNNER_TEMP"]) / "app-store-submit.p8"
+          path.touch(mode=0o600, exist_ok=False)
+          path.write_text(private_key.rstrip() + "\n", encoding="utf-8")
+          PY
+
+      - name: Submit verified build
+        env:
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APP_STORE_CONNECT_DISABLE_JWT_CACHE: 'true'
+        run: |
+          python3 tool/app_store_submit.py \
+            --bundle-id "$IOS_APP_BUNDLE_ID" \
+            --marketing-version "$MARKETING_VERSION" \
+            --build-number "$BUILD_NUMBER" \
+            --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
+            --private-key "$RUNNER_TEMP/app-store-submit.p8"
+
+      - name: Verify App Store submission
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+        run: |
+          python3 tool/app_store_build_status.py \
+            --bundle-id "$IOS_APP_BUNDLE_ID" \
+            --marketing-version "$MARKETING_VERSION" \
+            --build-number "$BUILD_NUMBER" \
+            --key-id "$APPSTORE_API_KEY_ID" \
+            --issuer-id "$APPSTORE_API_ISSUER_ID" \
+            --private-key "$RUNNER_TEMP/app-store-submit.p8" \
+            --release-status > "$RUNNER_TEMP/app-store-submission-status.json"
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "tool")
+          from app_store_submit import SUBMITTED_STATES
+          result = json.loads((Path(os.environ["RUNNER_TEMP"]) / "app-store-submission-status.json").read_text())
+          if result["app_version_state"] not in SUBMITTED_STATES:
+              raise SystemExit("App Store version has not entered review or distribution")
+          if result["release_type"] != "AFTER_APPROVAL":
+              raise SystemExit("App Store version is not configured for automatic release")
+          if result["phased_release_state"] not in (None, "COMPLETE"):
+              raise SystemExit("App Store version still has a phased release")
+          print(json.dumps(result, sort_keys=True))
+          PY
+
+      - name: Remove App Store Connect key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/app-store-submit.p8"
