@@ -1,8 +1,10 @@
+import datetime
 import hashlib
 import json
 import os
 import platform
 import plistlib
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -47,36 +49,66 @@ def screenshot_colors(path):
             'visible': green > 0.2 and magenta > 0.2}
 
 
+def launch_pid(output, bundle_id):
+    match = re.search(rf'^{re.escape(bundle_id)}: (\d+)\s*$', output, re.MULTILINE)
+    if not match:
+        raise RuntimeError('simctl launch did not report an application PID')
+    return int(match.group(1))
+
+
+def has_first_frame(log, pid, started_at):
+    process = re.compile(rf'\bRunner\[{pid}:[0-9a-fA-F]+\]')
+    for line in log.splitlines():
+        if MARKER not in line or not process.search(line):
+            continue
+        try:
+            timestamp = datetime.datetime.fromisoformat(line[:23])
+        except ValueError:
+            continue
+        if timestamp >= started_at:
+            return True
+    return False
+
+
+def hypothesis_reproduced(baseline, fixed):
+    before = baseline.get('launches', [])
+    after = fixed.get('launches', [])
+    return bool(before and after and 'error' not in baseline and 'error' not in fixed
+                and all(not item['visible'] for item in before)
+                and all(item['first_frame_marker'] and item['visible'] for item in after))
+
+
 def launch(device, bundle_id, folder, attempt):
     log = folder / f'launch-{attempt}.log'
-    with log.open('w', encoding='utf-8') as output:
-        process = subprocess.Popen(
-            ['xcrun', 'simctl', 'launch', '--console',
-             '--terminate-running-process', device, bundle_id],
-            stdout=output, stderr=subprocess.STDOUT, cwd=ROOT,
+    unified = folder / f'launch-{attempt}-system.log'
+    started_at = datetime.datetime.now()
+    command(
+        ['xcrun', 'simctl', 'launch', '--terminate-running-process', device, bundle_id],
+        log, timeout=30,
+    )
+    pid = launch_pid(log.read_text(encoding='utf-8', errors='replace'), bundle_id)
+    deadline = time.monotonic() + 60
+    marker = False
+    while time.monotonic() < deadline:
+        command(
+            ['xcrun', 'simctl', 'spawn', device, 'log', 'show', '--style', 'compact',
+             '--start', started_at.strftime('%Y-%m-%d %H:%M:%S'),
+             '--predicate', f'process == "Runner" AND eventMessage CONTAINS "{MARKER}"'],
+            unified, timeout=15,
         )
-        try:
-            deadline = time.monotonic() + 60
-            marker = False
-            while time.monotonic() < deadline:
-                marker = MARKER in log.read_text(encoding='utf-8', errors='replace')
-                if marker or process.poll() is not None:
-                    break
-                time.sleep(1)
-            time.sleep(3)
-            screenshot = folder / f'launch-{attempt}.png'
-            simctl('io', device, 'screenshot', str(screenshot))
-            colors = screenshot_colors(screenshot)
-            return {'first_frame_marker': marker, **colors,
-                    'passed': marker and colors['visible']}
-        finally:
-            if process.poll() is None:
-                process.terminate()
-                try:
-                    process.wait(timeout=10)
-                except subprocess.TimeoutExpired:
-                    process.kill()
-                    process.wait(timeout=10)
+        marker = has_first_frame(
+            unified.read_text(encoding='utf-8', errors='replace'), pid, started_at,
+        )
+        if marker:
+            break
+        time.sleep(2)
+    time.sleep(3)
+    screenshot = folder / f'launch-{attempt}.png'
+    simctl('io', device, 'screenshot', str(screenshot))
+    colors = screenshot_colors(screenshot)
+    return {'pid': pid, 'started_at': started_at.isoformat(),
+            'first_frame_marker': marker, **colors,
+            'passed': marker and colors['visible']}
 
 
 def variant(name, sources, device):
@@ -172,11 +204,8 @@ def main():
         simctl('bootstatus', device, '-b')
         report['baseline'] = variant('baseline', baseline, device)
         report['fixed'] = variant('fixed', fixed, device)
-        report['hypothesis_reproduced'] = (
-            'error' not in report['baseline']
-            and all(not item['first_frame_marker'] and not item['visible']
-                    for item in report['baseline']['launches'])
-            and report['fixed']['passed']
+        report['hypothesis_reproduced'] = hypothesis_reproduced(
+            report['baseline'], report['fixed'],
         )
     except Exception as error:
         report['error'] = str(error)
