@@ -123,7 +123,7 @@ class ConfigureFirebaseTest(unittest.TestCase):
         self.assertLess(ios.index('--platform ios'), ios.index('shorebird release ios'))
         patch = (ROOT / '.github/workflows/shorebird-patch.yml').read_text()
         self.assertIn('$WORKFLOW_SHA:tool/configure_firebase.py', patch)
-        self.assertIn('if [[ "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1005801 ]]; then', patch)
+        self.assertIn('if [[ "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1005801 || "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1006201 ]]; then', patch)
         self.assertIn('$BASELINE_SHA:tool/configure_firebase.py', patch)
         self.assertEqual(patch.count('--android-output android/app/google-services.json'), 1)
 
