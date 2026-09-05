@@ -165,13 +165,11 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                 state.locationStatus == FriendsLocationStatus.unavailable)
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.xl),
-                child: TextButton(
+                child: AppButton.text(
                   onPressed: cubit.retryLocation,
-                  child: Text(
-                    state.locationPermissionDenied
-                        ? l10n.friendsLocationRetry
-                        : l10n.retry,
-                  ),
+                  label: state.locationPermissionDenied
+                      ? l10n.friendsLocationRetry
+                      : l10n.retry,
                 ),
               ),
             const SizedBox(height: AppSpacing.md),
