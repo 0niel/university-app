@@ -199,7 +199,10 @@ class _ScheduleShareState extends State<_ScheduleShare> {
         files: params.files,
         fileNameOverrides: params.fileNameOverrides,
         sharePositionOrigin: box is RenderBox && box.hasSize
-            ? box.localToGlobal(Offset.zero) & box.size
+            ? Rect.fromPoints(
+                box.localToGlobal(Offset.zero),
+                box.localToGlobal(box.size.bottomRight(Offset.zero)),
+              )
             : const Rect.fromLTWH(0, 0, 1, 1),
       ),
     );

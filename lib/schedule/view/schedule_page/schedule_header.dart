@@ -72,9 +72,15 @@ class ScheduleHeader extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Flexible(
-                    child: Text(
-                      name ?? l10n.schedules,
-                      style: AppText.labelStrong.copyWith(color: colors.ink),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        name ?? l10n.schedules,
+                        maxLines: 1,
+                        softWrap: false,
+                        style: AppText.labelStrong.copyWith(color: colors.ink),
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xsm),
