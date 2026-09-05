@@ -12,8 +12,8 @@ class _MiniAppRunnerView extends StatefulWidget {
 class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
   MiniAppSession? _session;
   bool _initialPageOpened = false;
-  bool _offline = false;
-  int _probeId = 0;
+  final _innerPages =
+      <(String, MiniAppInnerScreenController, MaterialPageRoute<void>)>[];
 
   @override
   void initState() {
@@ -30,20 +30,46 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
   }
 
   Future<void> _openInnerPage(String path, String? title) async {
+    final current = _innerPages.lastWhereOrNull((entry) => entry.$3.isActive);
+    if (current != null && current.$1 == path) {
+      await current.$2.refresh();
+      return;
+    }
     final cubit = context.read<MiniAppRunnerCubit>();
     final app = cubit.state.app;
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => BlocProvider.value(
-          value: cubit,
-          child: MiniAppInnerScreen(
-            path: path,
-            title: title ?? app?.name ?? '',
-            accentColor: app?.accentColor,
-          ),
+    final controller = MiniAppInnerScreenController();
+    final route = MaterialPageRoute<void>(
+      builder: (_) => BlocProvider.value(
+        value: cubit,
+        child: MiniAppInnerScreen(
+          path: path,
+          title: title ?? app?.name ?? '',
+          accentColor: app?.accentColor,
+          controller: controller,
         ),
       ),
     );
+    final entry = (path, controller, route);
+    _innerPages.add(entry);
+    final closed = Navigator.of(context).push(route);
+    unawaited(closed.whenComplete(() => _innerPages.remove(entry)));
+    await WidgetsBinding.instance.endOfFrame;
+  }
+
+  Future<void> _reload() async {
+    final current = _innerPages.lastWhereOrNull((entry) => entry.$3.isActive);
+    if (current != null) {
+      await current.$2.refresh();
+    } else {
+      await context.read<MiniAppRunnerCubit>().load();
+    }
+  }
+
+  Future<void> _reloadRoot() async {
+    final cubit = context.read<MiniAppRunnerCubit>();
+    final routes = _innerPages.map((entry) => entry.$3).toSet();
+    Navigator.of(context).popUntil((route) => !routes.contains(route));
+    await cubit.refresh();
   }
 
   void _close() {
@@ -102,33 +128,10 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
     }
   }
 
-  Future<void> _probeConnection() async {
-    final probeId = ++_probeId;
-    var offline = false;
-    try {
-      await context.read<MiniAppsRepository>().fetchScreen(slug: widget.slug);
-    } on Exception {
-      offline = true;
-    }
-    if (!mounted || probeId != _probeId || _offline == offline) return;
-    setState(() => _offline = offline);
-  }
-
-  void _setOffline({required bool offline}) {
-    _probeId += 1;
-    if (_offline == offline) return;
-    setState(() => _offline = offline);
-  }
-
   void _onStatus(BuildContext _, MiniAppRunnerState state) {
     switch (state.status) {
       case .ready:
         _onReady();
-        if (state.fromCache) {
-          unawaited(_probeConnection());
-        } else {
-          _setOffline(offline: false);
-        }
       case .consentRequired:
         final app = state.app;
         if (app != null) unawaited(_askConsent(app));
@@ -136,7 +139,7 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
       case .loading:
       case .notFound:
       case .failure:
-        _setOffline(offline: false);
+        break;
     }
   }
 
@@ -160,7 +163,10 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
                 onTap: () => unawaited(_openMenu(app)),
               ),
           ],
-          body: MiniAppRunnerBody(state: state, offline: _offline),
+          body: MiniAppRunnerBody(
+            state: state,
+            offline: state.fromCache && state.refreshFailed,
+          ),
         );
       },
     );
@@ -197,7 +203,7 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
   void _onMenuAction(String action, MiniApp app) {
     switch (action) {
       case 'reload':
-        unawaited(context.read<MiniAppRunnerCubit>().load());
+        unawaited(_reload());
       case 'about':
         unawaited(_about(app));
       case 'report':
@@ -241,7 +247,13 @@ class _RunnerHost extends MiniAppHost {
   @override
   Future<void> reload() async {
     if (!_state.mounted) return;
-    await _state.context.read<MiniAppRunnerCubit>().load();
+    await _state._reload();
+  }
+
+  @override
+  Future<void> reloadRoot() async {
+    if (!_state.mounted) return;
+    await _state._reloadRoot();
   }
 
   @override
@@ -296,28 +308,31 @@ class _RunnerHost extends MiniAppHost {
 
   @override
   Future<String?> pickImage({required bool fromCamera}) async {
-    if (!await _ensureScope(.camera)) return null;
-    try {
-      final file = await ImagePicker().pickImage(
-        source: fromCamera ? .camera : .gallery,
-        maxWidth: 1600,
-        imageQuality: 75,
-      );
-      if (file == null || !_state.mounted) return null;
-      final cubit = _state.context.read<MiniAppRunnerCubit>();
-      final appId = cubit.state.app?.id;
-      if (appId == null) return null;
-      final bytes = await file.readAsBytes();
-      if (!_state.mounted) return null;
-      return await _state.context.read<MiniAppsRepository>().uploadImage(
-        appId: appId,
-        bytes: bytes,
-        fileName: file.name,
-        contentType: file.mimeType,
-      );
-    } on Exception {
-      return null;
+    if (!await _ensureScope(.camera)) {
+      throw const MiniAppUploadFailure('Photo access was not granted');
     }
+    final file = await ImagePicker().pickImage(
+      source: fromCamera ? .camera : .gallery,
+      maxWidth: 1600,
+      imageQuality: 75,
+    );
+    if (file == null) return null;
+    if (!_state.mounted) {
+      throw const MiniAppUploadFailure('Mini app is no longer active');
+    }
+    final cubit = _state.context.read<MiniAppRunnerCubit>();
+    final appId = cubit.state.app?.id;
+    if (appId == null) {
+      throw const MiniAppUploadFailure('Mini app is no longer active');
+    }
+    final repository = _state.context.read<MiniAppsRepository>();
+    final bytes = await file.readAsBytes();
+    return repository.uploadImage(
+      appId: appId,
+      bytes: bytes,
+      fileName: file.name,
+      contentType: file.mimeType,
+    );
   }
 
   @override

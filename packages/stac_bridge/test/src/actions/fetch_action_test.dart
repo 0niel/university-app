@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stac_bridge/src/actions/fetch_action.dart';
@@ -40,6 +42,22 @@ class FetchActionTest extends MiniAppHost {
   Future<void> reload() => .value();
   @override
   Future<void> setStorage(String key, Object? value) => .value();
+}
+
+class _DeferredHost extends FetchActionTest {
+  final requests = <Completer<Object?>>[];
+
+  @override
+  Future<Object?> fetch({
+    required String path,
+    String method = 'GET',
+    Map<String, Object?>? query,
+    Object? body,
+  }) {
+    final request = Completer<Object?>();
+    requests.add(request);
+    return request.future;
+  }
 }
 
 Future<BuildContext> _pumpScope(
@@ -200,5 +218,62 @@ void main() {
       expect(store.get('d'), isNull);
       expect(store.get('failed'), true);
     });
+  });
+
+  testWidgets('older fetch cannot overwrite data or finish newer loading', (
+    tester,
+  ) async {
+    final host = _DeferredHost();
+    final session = MiniAppSession(slug: 'demo', host: host);
+    MiniAppSessionStack.push(session);
+    addTearDown(() => MiniAppSessionStack.pop(session));
+    final store = MiniAppStateStore();
+    addTearDown(store.dispose);
+    final context = await _pumpScope(tester, store);
+    const parser = StacFetchActionParser();
+    const model = {'path': '/search', 'saveAs': 'items', 'loadingKey': 'busy'};
+    final older = parser.onCall(context, model);
+    final newer = parser.onCall(context, model);
+    host.requests.first.complete(['old']);
+    await older;
+    expect(store.get('items'), isNull);
+    expect(store.get('busy'), isTrue);
+    host.requests.last.complete(['new']);
+    await newer;
+    expect(store.get('items'), ['new']);
+    expect(store.get('busy'), isFalse);
+  });
+
+  testWidgets('thrown request clears loading and runs error then finally', (
+    tester,
+  ) async {
+    final host = _DeferredHost();
+    final session = MiniAppSession(slug: 'demo', host: host);
+    MiniAppSessionStack.push(session);
+    addTearDown(() => MiniAppSessionStack.pop(session));
+    final store = MiniAppStateStore()
+      ..seed({
+        'items': ['cached'],
+      });
+    addTearDown(store.dispose);
+    final context = await _pumpScope(tester, store);
+    final request = const StacFetchActionParser().onCall(context, const {
+      'path': '/search',
+      'saveAs': 'items',
+      'loadingKey': 'busy',
+      'errorKey': 'error',
+      'onError': {'actionType': 'setState', 'key': 'handled', 'value': true},
+      'onFinally': {
+        'actionType': 'setState',
+        'key': 'finished',
+        'expression': 'state.handled && !state.busy',
+      },
+    });
+    host.requests.single.completeError(Exception('offline'));
+    await request;
+    expect(store.get('items'), ['cached']);
+    expect(store.get('busy'), isFalse);
+    expect(store.get('error'), 'request_failed');
+    expect(store.get('finished'), isTrue);
   });
 }

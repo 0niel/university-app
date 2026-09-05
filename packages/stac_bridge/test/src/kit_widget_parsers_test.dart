@@ -55,7 +55,7 @@ void main() {
       expect(button.size, AppButtonSize.large);
       expect(button.loading, isTrue);
       expect(button.icon, isA<AppLineIconWidget>());
-      expect(button.onPressed, isNotNull);
+      expect(button.onPressed, isNull);
 
       await pumpKit(tester, const StacAppButtonParser(), {
         'label': 'Нельзя',

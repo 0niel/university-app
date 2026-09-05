@@ -6,8 +6,10 @@ import 'package:stac_bridge/src/widgets/kit/kit_calendar_parsers.dart';
 import 'package:stac_bridge/src/widgets/kit/kit_chip_parsers.dart';
 import 'package:stac_bridge/src/widgets/kit/kit_choice_parsers.dart';
 import 'package:stac_bridge/src/widgets/kit/kit_image_parser.dart';
+import 'package:stac_bridge/src/widgets/kit/kit_image_picker_parser.dart';
 import 'package:stac_bridge/src/widgets/kit/kit_input_parsers.dart';
 import 'package:stac_bridge/src/widgets/kit/kit_label_parsers.dart';
+import 'package:stac_bridge/src/widgets/kit/kit_motion_parsers.dart';
 import 'package:stac_bridge/src/widgets/kit/kit_progress_parsers.dart';
 import 'package:stac_bridge/src/widgets/kit/kit_segment_parsers.dart';
 import 'package:stac_bridge/src/widgets/kit/kit_select_parsers.dart';
@@ -26,8 +28,10 @@ export 'kit_calendar_parsers.dart';
 export 'kit_chip_parsers.dart';
 export 'kit_choice_parsers.dart';
 export 'kit_image_parser.dart';
+export 'kit_image_picker_parser.dart';
 export 'kit_input_parsers.dart';
 export 'kit_label_parsers.dart';
+export 'kit_motion_parsers.dart';
 export 'kit_progress_parsers.dart';
 export 'kit_segment_parsers.dart';
 export 'kit_select_parsers.dart';
@@ -37,6 +41,9 @@ export 'kit_text_parsers.dart';
 export 'kit_tile_parsers.dart';
 
 const List<StacParser<Object?>> kitWidgetParsers = [
+  StacAppAnimatedContainerParser(),
+  StacAppAnimatedOpacityParser(),
+  StacAppAnimatedSwitcherParser(),
   StacAppAvatarParser(),
   StacAppAvatarStackParser(),
   StacAppBadgeParser(),
@@ -58,6 +65,7 @@ const List<StacParser<Object?>> kitWidgetParsers = [
   StacAppIconButtonParser(),
   StacAppIconTileParser(),
   StacAppImageParser(),
+  StacAppImagePickerParser(),
   StacAppInputFieldParser(),
   StacAppLessonRowParser(),
   StacAppLineIconParser(),

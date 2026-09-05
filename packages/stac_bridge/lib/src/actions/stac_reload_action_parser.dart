@@ -12,5 +12,7 @@ class StacReloadActionParser implements StacActionParser<FlowActionModel> {
   FlowActionModel getModel(Map<String, dynamic> json) => .from(json);
   @override
   FutureOr<Object?> onCall(BuildContext context, FlowActionModel model) =>
-      MiniAppSessionStack.current?.host.reload();
+      model['target'] == 'root'
+      ? MiniAppSessionStack.current?.host.reloadRoot()
+      : MiniAppSessionStack.current?.host.reload();
 }

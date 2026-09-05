@@ -68,6 +68,26 @@ class _KitInputFieldState extends State<KitInputField> {
   }
 
   @override
+  void didUpdateWidget(covariant KitInputField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final fromState = stateValueOf(context, widget.model);
+    final oldInitial = stringOf(oldWidget.model, 'initialValue');
+    final newInitial = stringOf(widget.model, 'initialValue');
+    final next =
+        fromState?.toString() ??
+        (oldInitial != newInitial && _controller.text == oldInitial
+            ? newInitial
+            : _controller.text);
+    if (next != _controller.text) {
+      _controller.value = TextEditingValue(
+        text: next,
+        selection: TextSelection.collapsed(offset: next.length),
+      );
+      if (_id.isNotEmpty) _scope?.formData[_id] = next;
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -206,6 +226,18 @@ class _SearchFieldState extends State<_SearchField> {
           stateValueOf(context, widget.model)?.toString() ??
           stringOf(widget.model, 'initialValue'),
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant _SearchField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final value = stateValueOf(context, widget.model)?.toString();
+    if (value != null && value != _controller.text) {
+      _controller.value = TextEditingValue(
+        text: value,
+        selection: TextSelection.collapsed(offset: value.length),
+      );
+    }
   }
 
   @override

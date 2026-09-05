@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stac_bridge/src/actions/material_feedback_actions.dart';
 import 'package:stac_bridge/src/actions/stac_confirm_action_parser.dart';
+import 'package:stac_bridge/src/widgets/async_action_builder.dart';
 import 'package:stac_bridge/src/widgets/material/material_override_parsers.dart';
 import 'package:stac_bridge/stac_bridge.dart';
 
@@ -233,7 +234,7 @@ void main() {
       'type': 'elevatedButton',
       'child': {'type': 'text', 'data': 'Кит'},
     }, context);
-    expect(widget, isA<AppButton>());
+    expect(widget, isA<AsyncActionBuilder>());
     expect(
       Stac.fromJson({'type': 'divider'}, context),
       isA<AppDivider>(),

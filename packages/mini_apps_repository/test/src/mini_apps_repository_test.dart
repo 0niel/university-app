@@ -15,6 +15,11 @@ void main() {
   late GoTrueClient auth;
   late FunctionsClient functions;
 
+  setUpAll(() {
+    registerFallbackValue(Uint8List(0));
+    registerFallbackValue(const FileOptions());
+  });
+
   setUp(() {
     supabase = MockSupabaseClient();
     auth = MockGoTrueClient();
@@ -130,6 +135,74 @@ void main() {
 
       await expectLater(request, throwsA(isA<FetchMiniAppScreenFailure>()));
       expect(cache.values, isEmpty);
+    });
+  });
+
+  group('image upload', () {
+    late SupabaseStorageClient storage;
+    late StorageFileApi bucket;
+
+    setUp(() {
+      storage = MockSupabaseStorageClient();
+      bucket = MockStorageFileApi();
+      when(() => supabase.storage).thenReturn(storage);
+      when(() => storage.from('mini-app-uploads')).thenReturn(bucket);
+      when(
+        () => bucket.uploadBinary(
+          any(),
+          any(),
+          fileOptions: any(named: 'fileOptions'),
+        ),
+      ).thenAnswer((_) async => 'uploaded');
+      when(() => bucket.getPublicUrl(any())).thenReturn(
+        'https://example.test/photo',
+      );
+    });
+
+    for (final (extension, mime, signature) in [
+      ('jpg', 'image/jpeg', [0xff, 0xd8, 0xff, 0xe0]),
+      ('png', 'image/png', [0x89, 0x50, 0x4e, 0x47, 13, 10, 26, 10]),
+      ('webp', 'image/webp', [82, 73, 70, 70, 0, 0, 0, 0, 87, 69, 66, 80]),
+    ]) {
+      test(
+        'detects $extension from bytes instead of file metadata',
+        () async {
+          final bytes = Uint8List.fromList(signature);
+          final url = await buildRepository().uploadImage(
+            appId: 'app-1',
+            bytes: bytes,
+            fileName: 'camera-file.heic',
+            contentType: 'application/octet-stream',
+          );
+
+          final captured = verify(
+            () => bucket.uploadBinary(
+              captureAny(),
+              bytes,
+              fileOptions: captureAny(named: 'fileOptions'),
+            ),
+          ).captured;
+          expect(captured[0], startsWith('user-a/app-1/'));
+          expect(captured[0], endsWith('.$extension'));
+          final options = captured[1] as FileOptions;
+          expect(options.contentType, mime);
+          expect(options.upsert, isFalse);
+          expect(url, 'https://example.test/photo');
+        },
+      );
+    }
+
+    test('rejects unsupported bytes before starting an upload', () async {
+      await expectLater(
+        buildRepository().uploadImage(
+          appId: 'app-1',
+          bytes: Uint8List.fromList([1, 2, 3, 4]),
+          contentType: 'image/jpeg',
+        ),
+        throwsA(isA<MiniAppUploadFailure>()),
+      );
+
+      verifyNever(() => storage.from(any()));
     });
   });
 
