@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:connectivity_client/connectivity_client.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -144,8 +146,14 @@ void main() {
       build: buildBloc,
       act: (bloc) =>
           bloc.add(const ScheduleRequested(group: group, makeActive: false)),
-      verify: (bloc) =>
-          expect(bloc.state.selectedSchedule, isA<SelectedGroupSchedule>()),
+      verify: (bloc) => expect(
+        bloc.state.selectedSchedule,
+        isA<SelectedGroupSchedule>().having(
+          (selected) => selected.schedule,
+          'loaded schedule',
+          [lesson],
+        ),
+      ),
     );
 
     blocTest<ScheduleBloc, ScheduleState>(
@@ -328,8 +336,31 @@ void main() {
     late PreferencesRepository preferences;
     late ScheduleWidgetUpdater widgetUpdater;
     late Storage storage;
+    late StreamController<String?> authChanges;
+    String? currentUserId;
+
+    UserPreferenceEntry remoteGroup(String name) => UserPreferenceEntry(
+      key: 'selected_schedule',
+      value: {'type': 'group', 'name': name},
+      revision: 1,
+      updatedAt: DateTime.utc(2026),
+    );
+
+    ScheduleBloc buildBloc() => ScheduleBloc(
+      scheduleRepository: scheduleRepository,
+      preferencesRepository: preferences,
+      widgetUpdater: widgetUpdater,
+    );
+
+    Future<void> signIn(String? userId) async {
+      currentUserId = userId;
+      authChanges.add(userId);
+      await pumpEventQueue();
+    }
 
     setUp(() {
+      currentUserId = null;
+      authChanges = StreamController<String?>.broadcast();
       storage = MockStorage();
       when(() => storage.read(any())).thenReturn(null);
       when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
@@ -338,66 +369,437 @@ void main() {
       scheduleRepository = MockScheduleRepository();
       preferences = MockPreferencesRepository();
       widgetUpdater = MockScheduleWidgetUpdater();
+      when(() => preferences.currentUserId).thenAnswer((_) => currentUserId);
       when(
-        () => preferences.set(any(), any()),
-      ).thenAnswer((_) async {});
+        () => preferences.userIdChanges,
+      ).thenAnswer((_) => authChanges.stream);
+      when(() => preferences.get(any())).thenAnswer((_) async => null);
+      when(() => preferences.set(any(), any())).thenAnswer((_) async {});
+      when(
+        () => scheduleRepository.getSchedule(group: any(named: 'group')),
+      ).thenAnswer((_) async => const ScheduleResponse(data: []));
       when(
         () => widgetUpdater.updateWidgetsFromSelectedSchedule(any()),
       ).thenAnswer((_) async {});
     });
 
-    test('waits for the auth session before restoring the remote '
-        'selection on a fresh install', () async {
-      // Simulates the cold-start race: the session is not restored yet when
-      // the bloc is created, and appears a few polls later.
-      var authChecks = 0;
-      when(() => preferences.hasAuthenticatedUser).thenAnswer((_) {
-        authChecks += 1;
-        return authChecks > 2;
-      });
-      when(() => preferences.get('selected_schedule')).thenAnswer(
-        (_) async => UserPreferenceEntry(
-          key: 'selected_schedule',
-          value: const {'type': 'group', 'name': 'ИКБО-09-22'},
-          revision: 1,
-          updatedAt: DateTime(2026, 8, 13),
+    tearDown(() async {
+      await authChanges.close();
+    });
+
+    test('restores a group when login happens after startup', () async {
+      when(
+        () => preferences.get('selected_schedule'),
+      ).thenAnswer((_) async => remoteGroup('GROUP-A'));
+      final bloc = buildBloc();
+      await pumpEventQueue();
+      verifyNever(() => preferences.get(any()));
+
+      await signIn('user-a');
+
+      expect(
+        bloc.state.selectedSchedule,
+        isA<SelectedGroupSchedule>().having(
+          (s) => s.group.name,
+          'group',
+          'GROUP-A',
         ),
       );
-      when(
-        () => scheduleRepository.getSchedule(group: any(named: 'group')),
-      ).thenAnswer(
-        (_) async => const ScheduleResponse(data: []),
-      );
-
-      final bloc = ScheduleBloc(
-        scheduleRepository: scheduleRepository,
-        preferencesRepository: preferences,
-        widgetUpdater: widgetUpdater,
-        connectivityClient: MockConnectivityClient(),
-        syncPolicy: () => SyncPolicy.always,
-        authRetryDelay: Duration.zero,
-      );
-
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(bloc.state.groupsSchedule.single.$2.name, 'GROUP-A');
       verify(() => preferences.get('selected_schedule')).called(1);
+      verifyNever(() => preferences.set(any(), any()));
       await bloc.close();
     });
 
-    test('gives up quietly when the session never appears', () async {
-      when(() => preferences.hasAuthenticatedUser).thenReturn(false);
+    test('keeps the restored group when its schedule cannot load', () async {
+      currentUserId = 'user-a';
+      when(
+        () => preferences.get('selected_schedule'),
+      ).thenAnswer((_) async => remoteGroup('GROUP-A'));
+      when(
+        () => scheduleRepository.getSchedule(group: any(named: 'group')),
+      ).thenThrow(Exception('offline'));
+      final bloc = buildBloc();
+      await pumpEventQueue();
 
-      final bloc = ScheduleBloc(
-        scheduleRepository: scheduleRepository,
-        preferencesRepository: preferences,
-        widgetUpdater: widgetUpdater,
-        connectivityClient: MockConnectivityClient(),
-        syncPolicy: () => SyncPolicy.always,
-        authRetryDelay: Duration.zero,
+      expect(
+        bloc.state.selectedSchedule,
+        isA<SelectedGroupSchedule>().having(
+          (s) => s.group.name,
+          'group',
+          'GROUP-A',
+        ),
       );
-
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      verifyNever(() => preferences.get(any()));
+      expect(bloc.toJson(bloc.state)['selectionOwnerId'], 'user-a');
       await bloc.close();
+    });
+
+    test('ignores malformed remote selection values', () async {
+      currentUserId = 'user-a';
+      when(() => preferences.get('selected_schedule')).thenAnswer(
+        (_) async => UserPreferenceEntry(
+          key: 'selected_schedule',
+          value: const {'type': 'group', 'name': 42},
+          revision: 1,
+          updatedAt: DateTime.utc(2026),
+        ),
+      );
+      final bloc = buildBloc();
+      await pumpEventQueue();
+
+      expect(bloc.state.selectedSchedule, isNull);
+      verifyNever(
+        () => scheduleRepository.getSchedule(group: any(named: 'group')),
+      );
+      await bloc.close();
+    });
+
+    test('ignores a remote response from an account that signed out', () async {
+      final firstResponse = Completer<UserPreferenceEntry?>();
+      currentUserId = 'user-a';
+      when(() => preferences.get('selected_schedule')).thenAnswer(
+        (_) => currentUserId == 'user-a'
+            ? firstResponse.future
+            : Future.value(remoteGroup('GROUP-B')),
+      );
+      final bloc = buildBloc();
+      await pumpEventQueue();
+      await signIn('user-b');
+      firstResponse.complete(remoteGroup('GROUP-A'));
+      await pumpEventQueue();
+
+      expect(
+        bloc.state.selectedSchedule,
+        isA<SelectedGroupSchedule>().having(
+          (s) => s.group.name,
+          'group',
+          'GROUP-B',
+        ),
+      );
+      verifyNever(() => scheduleRepository.getSchedule(group: 'GROUP-A'));
+      await bloc.close();
+    });
+
+    test(
+      'restores local state with a stable key and backs it up on login',
+      () async {
+        const localState = ScheduleState(
+          selectedSchedule: SelectedGroupSchedule(
+            group: Group(name: 'LOCAL'),
+            schedule: [],
+          ),
+        );
+        when(() => storage.read('ScheduleBloc')).thenReturn({
+          ...localState.toJson(),
+          'selectionOwnerId': 'user-a',
+        });
+        final bloc = buildBloc();
+        await signIn('user-a');
+
+        expect(bloc.state.selectedSchedule, localState.selectedSchedule);
+        verify(() => storage.read('ScheduleBloc')).called(1);
+        verify(
+          () => preferences.set('selected_schedule', {
+            'type': 'group',
+            'name': 'LOCAL',
+            'uid': null,
+          }),
+        ).called(1);
+        verifyNever(() => preferences.get(any()));
+        await bloc.close();
+      },
+    );
+
+    test('does not upload a cached group to a different account', () async {
+      when(() => storage.read(any())).thenReturn({
+        ...const ScheduleState(
+          selectedSchedule: SelectedGroupSchedule(
+            group: Group(name: 'GROUP-A'),
+            schedule: [],
+          ),
+        ).toJson(),
+        'selectionOwnerId': 'user-a',
+      });
+      currentUserId = 'user-b';
+      when(
+        () => preferences.get('selected_schedule'),
+      ).thenAnswer((_) async => remoteGroup('GROUP-B'));
+      final bloc = buildBloc();
+      await pumpEventQueue();
+
+      expect(
+        bloc.state.selectedSchedule,
+        isA<SelectedGroupSchedule>().having(
+          (s) => s.group.name,
+          'group',
+          'GROUP-B',
+        ),
+      );
+      verifyNever(() => preferences.set(any(), any()));
+      await bloc.close();
+    });
+
+    test('retries a failed write on the next schedule refresh', () async {
+      currentUserId = 'user-a';
+      var writes = 0;
+      var offline = true;
+      when(() => preferences.set(any(), any())).thenAnswer((_) async {
+        writes += 1;
+        if (offline) throw SetPreferenceFailure(Exception('offline'));
+      });
+      final bloc = buildBloc();
+      await pumpEventQueue();
+      bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-A')));
+      await pumpEventQueue();
+      expect(writes, 2);
+
+      offline = false;
+      bloc.add(const SelectedScheduleRefreshRequested());
+      await pumpEventQueue();
+      expect(writes, 3);
+      bloc.add(const SelectedScheduleRefreshRequested());
+      await pumpEventQueue();
+      expect(writes, 3);
+      await bloc.close();
+    });
+
+    test('serializes preference writes so the final selection wins', () async {
+      currentUserId = 'user-a';
+      final firstWrite = Completer<void>();
+      final writtenGroups = <String>[];
+      when(() => preferences.set(any(), any())).thenAnswer((invocation) async {
+        final value = invocation.positionalArguments[1] as Map<String, dynamic>;
+        writtenGroups.add(value['name'] as String);
+        if (writtenGroups.length == 1) await firstWrite.future;
+      });
+      final bloc = buildBloc();
+      await pumpEventQueue();
+      bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-A')));
+      await pumpEventQueue();
+      bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-B')));
+      await pumpEventQueue();
+      expect(writtenGroups, ['GROUP-A']);
+
+      firstWrite.complete();
+      await pumpEventQueue();
+      expect(writtenGroups, ['GROUP-A', 'GROUP-B']);
+      await bloc.close();
+    });
+
+    test('ignores an old schedule load after the account changes', () async {
+      currentUserId = 'user-a';
+      final firstSchedule = Completer<ScheduleResponse>();
+      when(
+        () => scheduleRepository.getSchedule(group: 'GROUP-A'),
+      ).thenAnswer((_) => firstSchedule.future);
+      final bloc = buildBloc();
+      await pumpEventQueue();
+      bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-A')));
+      await pumpEventQueue();
+      await signIn('user-b');
+      firstSchedule.complete(const ScheduleResponse(data: []));
+      await pumpEventQueue();
+
+      expect(bloc.state.selectedSchedule, isNull);
+      verify(
+        () => preferences.set('selected_schedule', {
+          'type': 'group',
+          'name': 'GROUP-A',
+          'uid': null,
+        }),
+      ).called(1);
+      await bloc.close();
+    });
+
+    test(
+      'a pending write cannot suppress returning to the saved group',
+      () async {
+        currentUserId = 'user-a';
+        final pendingWrite = Completer<void>();
+        final writtenGroups = <String>[];
+        when(() => preferences.set(any(), any())).thenAnswer((
+          invocation,
+        ) async {
+          final value =
+              invocation.positionalArguments[1] as Map<String, dynamic>;
+          final group = value['name'] as String;
+          writtenGroups.add(group);
+          if (group == 'GROUP-B') await pendingWrite.future;
+        });
+        final bloc = buildBloc();
+        await pumpEventQueue();
+        bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-A')));
+        await pumpEventQueue();
+        bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-B')));
+        await pumpEventQueue();
+        bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-A')));
+        await pumpEventQueue();
+        pendingWrite.complete();
+        await pumpEventQueue();
+
+        expect(writtenGroups, ['GROUP-A', 'GROUP-B', 'GROUP-A']);
+        await bloc.close();
+      },
+    );
+
+    test(
+      'a restored schedule cannot overwrite a newer manual choice',
+      () async {
+        currentUserId = 'user-a';
+        final remoteSchedule = Completer<ScheduleResponse>();
+        when(
+          () => preferences.get('selected_schedule'),
+        ).thenAnswer((_) async => remoteGroup('GROUP-A'));
+        when(
+          () => scheduleRepository.getSchedule(group: 'GROUP-A'),
+        ).thenAnswer((_) => remoteSchedule.future);
+        final bloc = buildBloc();
+        await pumpEventQueue();
+        bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-B')));
+        await pumpEventQueue();
+        remoteSchedule.complete(const ScheduleResponse(data: []));
+        await pumpEventQueue();
+
+        expect(
+          bloc.state.selectedSchedule,
+          isA<SelectedGroupSchedule>().having(
+            (s) => s.group.name,
+            'group',
+            'GROUP-B',
+          ),
+        );
+        verify(
+          () => preferences.set('selected_schedule', {
+            'type': 'group',
+            'name': 'GROUP-B',
+            'uid': null,
+          }),
+        ).called(1);
+        verifyNever(
+          () => preferences.set('selected_schedule', {
+            'type': 'group',
+            'name': 'GROUP-A',
+            'uid': null,
+          }),
+        );
+        await bloc.close();
+      },
+    );
+
+    test('prefers the server group over an unowned legacy selection', () async {
+      when(() => storage.read(any())).thenReturn(
+        const ScheduleState(
+          selectedSchedule: SelectedGroupSchedule(
+            group: Group(name: 'LEGACY'),
+            schedule: [],
+          ),
+        ).toJson(),
+      );
+      currentUserId = 'user-b';
+      when(
+        () => preferences.get('selected_schedule'),
+      ).thenAnswer((_) async => remoteGroup('GROUP-B'));
+      final bloc = buildBloc();
+      await pumpEventQueue();
+
+      expect(
+        bloc.state.selectedSchedule,
+        isA<SelectedGroupSchedule>().having(
+          (s) => s.group.name,
+          'group',
+          'GROUP-B',
+        ),
+      );
+      verifyNever(() => preferences.set(any(), any()));
+      await bloc.close();
+    });
+
+    test(
+      'persists ownership even when adopting an unchanged local group',
+      () async {
+        const legacy = ScheduleState(
+          selectedSchedule: SelectedGroupSchedule(
+            group: Group(name: 'LEGACY'),
+            schedule: [],
+          ),
+        );
+        when(() => storage.read(any())).thenReturn(legacy.toJson());
+        currentUserId = 'user-a';
+        final bloc = buildBloc();
+        await pumpEventQueue();
+
+        final saved = verify(
+          () => storage.write('ScheduleBloc', captureAny<dynamic>()),
+        ).captured.cast<Map<String, dynamic>>();
+        expect(saved.last['selectionOwnerId'], 'user-a');
+        expect(bloc.state.selectedSchedule, legacy.selectedSchedule);
+        verify(() => preferences.get('selected_schedule')).called(1);
+        await bloc.close();
+      },
+    );
+
+    test(
+      'backs up a manual choice after the initial preference read fails',
+      () async {
+        currentUserId = 'user-a';
+        when(
+          () => preferences.get(any()),
+        ).thenThrow(GetPreferencesFailure(Exception('offline')));
+        final bloc = buildBloc();
+        await pumpEventQueue();
+        bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-B')));
+        await pumpEventQueue();
+
+        expect(bloc.toJson(bloc.state)['selectionOwnerId'], 'user-a');
+        verify(
+          () => preferences.set('selected_schedule', {
+            'type': 'group',
+            'name': 'GROUP-B',
+            'uid': null,
+          }),
+        ).called(1);
+        await bloc.close();
+      },
+    );
+
+    test(
+      'remembers an explicit group when the schedule service is offline',
+      () async {
+        currentUserId = 'user-a';
+        when(
+          () => scheduleRepository.getSchedule(group: 'GROUP-B'),
+        ).thenThrow(Exception('schedule unavailable'));
+        final bloc = buildBloc();
+        await pumpEventQueue();
+        bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-B')));
+        await pumpEventQueue();
+
+        expect(
+          bloc.state.selectedSchedule,
+          isA<SelectedGroupSchedule>().having(
+            (s) => s.group.name,
+            'group',
+            'GROUP-B',
+          ),
+        );
+        expect(bloc.state.groupsSchedule.single.$2.name, 'GROUP-B');
+        verify(
+          () => preferences.set('selected_schedule', {
+            'type': 'group',
+            'name': 'GROUP-B',
+            'uid': null,
+          }),
+        ).called(1);
+        await bloc.close();
+      },
+    );
+
+    test('cancels its auth listener on close', () async {
+      final bloc = buildBloc();
+      await bloc.close();
+      expect(authChanges.hasListener, isFalse);
+      await signIn('user-a');
+      verifyNever(() => preferences.get(any()));
     });
   });
 }

@@ -9,11 +9,15 @@ part 'home_cubit.g.dart';
 class HomeCubit extends HydratedCubit<HomeState> {
   HomeCubit() : super(const HomeState());
 
-  void closeOnboarding() =>
-      emit(HomeState(settings: state.settings.copyWith(onboardingShown: true)));
+  @override
+  String get storagePrefix => 'HomeCubit';
+
+  void closeOnboarding() => emit(
+    state.copyWith(settings: state.settings.copyWith(onboardingShown: true)),
+  );
 
   void resetOnboarding() => emit(
-    HomeState(settings: state.settings.copyWith(onboardingShown: false)),
+    state.copyWith(settings: state.settings.copyWith(onboardingShown: false)),
   );
 
   void dismissSearchCoach() => emit(state.copyWith(searchCoachShown: true));

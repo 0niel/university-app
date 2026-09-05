@@ -45,6 +45,7 @@ class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
   late final TextEditingController _controller;
   late final SearchBloc _searchBloc;
   Group? _selected;
+  var _edited = false;
 
   @override
   void initState() {
@@ -54,6 +55,20 @@ class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
     _searchBloc = SearchBloc(scheduleRepository: context.read());
     _controller.addListener(_onQueryChanged);
     if (_controller.text.isNotEmpty) _search();
+  }
+
+  @override
+  void didUpdateWidget(covariant OnboardingGroupStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_edited) return;
+    _selected = widget.initialSelected;
+    if (_controller.text != widget.initialQuery) {
+      _controller
+        ..removeListener(_onQueryChanged)
+        ..text = widget.initialQuery
+        ..addListener(_onQueryChanged);
+      _search();
+    }
   }
 
   @override
@@ -69,6 +84,7 @@ class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
       _searchBloc.add(SearchQueryChanged(searchQuery: _controller.text));
 
   void _onQueryChanged() {
+    _edited = true;
     widget.onQueryChanged(_controller.text);
     final selected = _selected;
     if (selected != null && selected.name != _controller.text.trim()) {
@@ -81,6 +97,7 @@ class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
   }
 
   void _select(Group group) {
+    _edited = true;
     setState(() => _selected = group);
     widget.onSelected(group);
     context.read<ScheduleBloc>().add(ScheduleRequested(group: group));
