@@ -40,7 +40,7 @@ abstract final class DeepLinks {
     if (path.endsWith('/') && path.length > 1) {
       path = path.substring(0, path.length - 1);
     }
-    if (path == '/info') path = '/feed';
+    if (path == '/' || path == '/info') path = '/feed';
     final allowed = allowedRoots.any(
       (root) => path == root || path.startsWith('$root/'),
     );

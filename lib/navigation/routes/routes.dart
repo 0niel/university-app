@@ -860,6 +860,17 @@ class GoRouterRefreshStream extends ChangeNotifier {
     _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
   }
 
+  GoRouterRefreshStream.auth(AppBloc appBloc) {
+    var status = appBloc.state.status;
+    var userId = appBloc.state.user.id;
+    _subscription = appBloc.stream.listen((state) {
+      if (state.status == status && state.user.id == userId) return;
+      status = state.status;
+      userId = state.user.id;
+      notifyListeners();
+    });
+  }
+
   late final StreamSubscription<Object?> _subscription;
 
   @override
@@ -904,6 +915,15 @@ GoRouter createRouter({
     }
 
     if (isLoggedIn && inAuthFlow) return '/feed';
+
+    if (state.uri.path == '/schedule/details' &&
+        state.extra is! (LessonSchedulePart, DateTime)) {
+      return '/schedule';
+    }
+    if (state.uri.path == '/schedule/diff' &&
+        state.extra is! (ScheduleUpdateDiff, String)) {
+      return '/schedule/changes';
+    }
 
     return null;
   },

@@ -21,7 +21,7 @@ class _AppRouterViewState extends State<AppRouterView> {
   void initState() {
     super.initState();
     final appBloc = context.read<AppBloc>();
-    _routerRefreshStream = GoRouterRefreshStream(appBloc.stream);
+    _routerRefreshStream = GoRouterRefreshStream.auth(appBloc);
     _router = createRouter(
       appBloc: appBloc,
       homeCubit: context.read(),
