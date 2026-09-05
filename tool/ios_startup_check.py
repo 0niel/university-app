@@ -4,6 +4,7 @@ import os
 import platform
 import plistlib
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 
@@ -11,7 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / 'build' / 'ios-startup-evidence'
 BASELINE = '101bfe7f4c08142d0969aec7230ad4f99b1904f3'
-NATIVE_FILES = ('ios/Runner/AppDelegate.swift', 'ios/Runner/Info.plist')
+NATIVE_FILES = ('ios/Runner/AppDelegate.swift', 'ios/Runner/Info.plist',
+                'ios/Runner/Base.lproj/Main.storyboard')
 MARKER = 'IOS_STARTUP_PROBE_FIRST_FRAME_V1'
 
 
@@ -97,8 +99,10 @@ def variant(name, sources, device):
              '-derivedDataPath', str(ROOT / 'build' / 'ios-startup-derived'),
              'CODE_SIGNING_ALLOWED=NO', 'CODE_SIGNING_REQUIRED=NO',
              'CODE_SIGN_IDENTITY=', 'PROVISIONING_PROFILE_SPECIFIER=',
+             'TENANT_APP_DISPLAY_NAME=Startup Probe',
+             'TENANT_APP_DEEP_LINK_SCHEME=startupprobe',
              'ONLY_ACTIVE_ARCH=YES', f'ARCHS={platform.machine()}', 'build'],
-            folder / 'build.log', timeout=1800,
+            folder / 'build.log', timeout=600,
         )
         for relative, data in sources.items():
             if (ROOT / relative).read_bytes() != data:
@@ -134,16 +138,32 @@ def variant(name, sources, device):
 
 
 def main():
+    global ROOT
     EVIDENCE.mkdir(parents=True, exist_ok=True)
+    repository = ROOT
+    probe = (repository / 'tool/ios_startup_probe.dart').read_bytes()
     fixed = {relative: (ROOT / relative).read_bytes() for relative in NATIVE_FILES}
     baseline = {relative: subprocess.check_output(
         ['git', 'show', f'{BASELINE}:{relative}'], cwd=ROOT,
     ) for relative in NATIVE_FILES}
     report = {'baseline_commit': BASELINE, 'scope':
-              'Full native project and plugins; isolated Dart first-frame probe; '
-              'debug simulator, not production Dart or signed device release.'}
+              'Minimal generated Flutter iOS host with exact repository AppDelegate, '
+              'Info.plist and Main storyboard, empty plugin registrant and isolated '
+              'Dart first-frame probe. Debug simulator only; no production plugins, '
+              'production Dart, Shorebird or signed device release.'}
     try:
         command(['flutter', '--version'], EVIDENCE / 'flutter-version.log')
+        generated = Path(tempfile.mkdtemp(prefix='ios-window-')) / 'startup_probe'
+        command(
+            ['flutter', 'create', '--platforms=ios', '--no-pub',
+             '--project-name', 'startup_probe', '--ios-language', 'swift', str(generated)],
+            EVIDENCE / 'create.log', timeout=180,
+        )
+        ROOT = generated
+        (ROOT / 'tool').mkdir()
+        (ROOT / 'tool/ios_startup_probe.dart').write_bytes(probe)
+        for relative, data in fixed.items():
+            (ROOT / relative).write_bytes(data)
         command(['flutter', 'pub', 'get'], EVIDENCE / 'pub-get.log', timeout=600)
         command(
             ['flutter', 'build', 'ios', '--simulator', '--debug', '--no-codesign',
@@ -183,6 +203,7 @@ def main():
     finally:
         for relative, data in fixed.items():
             (ROOT / relative).write_bytes(data)
+        ROOT = repository
         output = json.dumps(report, indent=2)
         (EVIDENCE / 'result.json').write_text(output, encoding='utf-8')
         print(output, flush=True)

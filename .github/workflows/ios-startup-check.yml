@@ -1,4 +1,4 @@
-name: iOS Startup Check
+name: iOS Window Counterfactual
 
 on:
   pull_request:
@@ -22,7 +22,7 @@ concurrency:
 jobs:
   startup:
     runs-on: macos-15-intel
-    timeout-minutes: 60
+    timeout-minutes: 20
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
