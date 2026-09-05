@@ -4,6 +4,7 @@ class _NinjaFriendCard extends StatelessWidget {
   const _NinjaFriendCard({
     required this.friend,
     required this.onTap,
+    super.key,
     this.distance,
   });
 

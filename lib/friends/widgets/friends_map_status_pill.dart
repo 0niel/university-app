@@ -8,18 +8,22 @@ class FriendsMapStatusPill extends StatelessWidget {
     required this.friendsOnMap,
     required this.loading,
     super.key,
+    this.showingStudents = false,
   });
 
   final bool isGhost;
   final int friendsOnMap;
   final bool loading;
+  final bool showingStudents;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
     final accented = !loading && !isGhost;
-    final label = isGhost
+    final label = showingStudents
+        ? l10n.friendsMapPeopleCount(friendsOnMap)
+        : isGhost
         ? l10n.friendsGhostMode
         : l10n.friendsOnMapLive(friendsOnMap);
 

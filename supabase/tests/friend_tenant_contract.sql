@@ -182,19 +182,25 @@ begin
   where location.user_id = v_a2;
   execute 'set local role authenticated';
   perform public.set_location_mood('Studying');
-  perform public.set_ghost_mode(true);
   execute 'reset role';
   if not exists (
     select 1 from public.friend_locations location
     where location.user_id = v_a2
-      and location.is_ghost
+      and not location.is_ghost
       and location.mood = 'Studying'
       and location.updated_at = v_location_updated_at
   ) then
     raise exception 'Privacy metadata changed coordinate freshness';
   end if;
   execute 'set local role authenticated';
+  perform public.set_ghost_mode(true);
+  execute 'reset role';
+  if exists (select 1 from public.friend_locations where user_id = v_a2) then
+    raise exception 'Ghost mode retained coordinates';
+  end if;
+  execute 'set local role authenticated';
   perform public.set_ghost_mode(false);
+  perform public.upsert_my_location(55.75, 37.61);
   execute 'reset role';
   if not core.are_friends(v_a1, v_a2) then
     raise exception 'Accepted same-organization friendship is unavailable';

@@ -48,6 +48,46 @@ class FriendsRepository {
     GetFriendsFailure.new,
   );
 
+  Future<List<Friend>> getMapStudents() => _guard(
+    () async {
+      final response = await _supabase.rpc<Object?>('get_map_students');
+      final students = _decodeList(
+        response,
+        'get_map_students',
+        Friend.fromJson,
+      );
+      if (students.any(
+        (student) => !student.hasLocation || student.locationUpdatedAt == null,
+      )) {
+        throw const FriendsResponseException(
+          'get_map_students contains an unavailable location',
+        );
+      }
+      return students;
+    },
+    GetMapStudentsFailure.new,
+  );
+
+  Future<bool> getLocationVisibility() => _guard(
+    () async {
+      final response = await _supabase.rpc<Object?>('get_location_visibility');
+      if (response case final bool visibleToStudents) return visibleToStudents;
+      throw const FriendsResponseException(
+        'get_location_visibility must return a boolean',
+      );
+    },
+    GetLocationVisibilityFailure.new,
+  );
+
+  Future<void> setLocationVisibility({required bool visibleToStudents}) =>
+      _guard(
+        () => _supabase.rpc<void>(
+          'set_location_visibility',
+          params: {'p_visible_to_students': visibleToStudents},
+        ),
+        SetLocationVisibilityFailure.new,
+      );
+
   Future<List<FriendRequest>> getFriendRequests() => _guard(
     () async {
       final response = await _supabase.rpc<Object?>('get_friend_requests');

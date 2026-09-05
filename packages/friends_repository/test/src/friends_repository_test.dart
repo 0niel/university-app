@@ -72,6 +72,51 @@ void main() {
     );
   });
 
+  test(
+    'decodes students without a friendship and validates locations',
+    () async {
+      final row = <String, Object?>{
+        'friendshipId': '',
+        'userId': 'student-1',
+        'fullName': 'Анна',
+        'latitude': 55.75,
+        'longitude': 37.61,
+        'locationUpdatedAt': '2026-09-05T07:00:00Z',
+      };
+      final students = await repositoryFor([row]).getMapStudents();
+      expect(students.single.friendshipId, isEmpty);
+      expect(students.single.hasLocation, isTrue);
+      for (final invalid in [
+        {...row, 'latitude': 91},
+        {...row, 'longitude': -181},
+        {...row, 'latitude': null},
+        {...row, 'isGhost': true},
+        {...row, 'locationUpdatedAt': null},
+      ]) {
+        await expectLater(
+          repositoryFor([invalid]).getMapStudents(),
+          throwsA(isA<GetMapStudentsFailure>()),
+        );
+      }
+    },
+  );
+
+  test('reads durable audience strictly and writes explicit opt-in', () async {
+    expect(await repositoryFor(false).getLocationVisibility(), isFalse);
+    expect(await repositoryFor(true).getLocationVisibility(), isTrue);
+    await expectLater(
+      repositoryFor('students').getLocationVisibility(),
+      throwsA(isA<GetLocationVisibilityFailure>()),
+    );
+    final requests = <http.Request>[];
+    final repository = repositoryFor(null, inspectRequest: requests.add);
+    await repository.setLocationVisibility(visibleToStudents: true);
+    await repository.setLocationVisibility(visibleToStudents: false);
+    expect(requests.first.url.path, endsWith('/rpc/set_location_visibility'));
+    expect(jsonDecode(requests.first.body), {'p_visible_to_students': true});
+    expect(jsonDecode(requests.last.body), {'p_visible_to_students': false});
+  });
+
   test('wraps a row missing its stable identifiers', () async {
     final repository = repositoryFor([
       {'fullName': 'Иван'},

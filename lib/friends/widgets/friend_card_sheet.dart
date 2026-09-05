@@ -1,9 +1,14 @@
 part of 'ninja_friends_panel.dart';
 
 class FriendCardSheet extends StatelessWidget {
-  const FriendCardSheet({required this.friend, super.key});
+  const FriendCardSheet({
+    required this.friend,
+    super.key,
+    this.isFriend = true,
+  });
 
   final Friend friend;
+  final bool isFriend;
 
   String? get _subtitle {
     final handle = friend.handle;
@@ -43,12 +48,19 @@ class FriendCardSheet extends StatelessWidget {
         Column(
           spacing: 10,
           children: [
-            FriendsPillButton(
-              label: l10n.friendsRemove,
-              tone: .danger,
-              expanded: true,
-              onTap: () => Navigator.of(context).pop(true),
-            ),
+            if (!isFriend)
+              Text(
+                l10n.friendsPublicProfile,
+                textAlign: TextAlign.center,
+                style: AppText.body.copyWith(color: colors.muted),
+              ),
+            if (isFriend)
+              FriendsPillButton(
+                label: l10n.friendsRemove,
+                tone: .danger,
+                expanded: true,
+                onTap: () => Navigator.of(context).pop(true),
+              ),
           ],
         ),
       ],

@@ -14,12 +14,14 @@ class FriendsMapTopBar extends StatelessWidget {
     required this.onRequests,
     required this.onAddFriend,
     super.key,
+    this.showingStudents = false,
   });
 
   final bool isGhost;
   final int friendsOnMap;
   final int requestCount;
   final bool loading;
+  final bool showingStudents;
   final VoidCallback onBack;
   final VoidCallback onRequests;
   final VoidCallback onAddFriend;
@@ -43,6 +45,7 @@ class FriendsMapTopBar extends StatelessWidget {
                 isGhost: isGhost,
                 friendsOnMap: friendsOnMap,
                 loading: loading,
+                showingStudents: showingStudents,
               ),
             ),
             Stack(

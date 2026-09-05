@@ -9,8 +9,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:permission_client/permission_client.dart';
 import 'package:preferences_repository/preferences_repository.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
+import 'package:rtu_mirea_app/friends/services/friends_location_service.dart';
 
 import 'mock_friends_repository.dart';
+
+class _LocationService extends Mock implements FriendsLocationService {}
 
 void main() {
   setUpAll(() {
@@ -88,6 +91,7 @@ void main() {
     late FriendsRepository repository;
     late PreferencesRepository preferences;
     late PermissionClient permissions;
+    late FriendsLocationService locationService;
 
     // МИРЭА, проспект Вернадского 78.
     const baseLat = 55.6699;
@@ -114,6 +118,31 @@ void main() {
       repository = MockFriendsRepository();
       preferences = MockPreferencesRepository();
       permissions = MockPermissionClient();
+      locationService = _LocationService();
+      when(
+        () => locationService.positions,
+      ).thenAnswer((_) => const Stream.empty());
+      when(
+        () => locationService.statuses,
+      ).thenAnswer((_) => const Stream.empty());
+      when(() => locationService.supportsBackground).thenReturn(false);
+      when(
+        () => locationService.start(
+          backgroundEnabled: any(named: 'backgroundEnabled'),
+          requestPermission: any(named: 'requestPermission'),
+        ),
+      ).thenAnswer((_) async {});
+      when(() => locationService.stop()).thenAnswer((_) async {});
+      when(() => locationService.dispose()).thenAnswer((_) async {});
+      when(
+        () => repository.getLocationVisibility(),
+      ).thenAnswer((_) async => false);
+      when(() => repository.getMapStudents()).thenAnswer((_) async => []);
+      when(
+        () => repository.setLocationVisibility(
+          visibleToStudents: any(named: 'visibleToStudents'),
+        ),
+      ).thenAnswer((_) async {});
       when(() => preferences.set(any(), any())).thenAnswer((_) async {});
       when(
         () => permissions.requestNearbyWifiDevices(),
@@ -133,6 +162,7 @@ void main() {
       repository: repository,
       preferencesRepository: preferences,
       permissionClient: permissions,
+      locationService: locationService,
     );
 
     test('initial state is FriendsMapState()', () {
@@ -419,7 +449,7 @@ void main() {
       );
 
       blocTest<FriendsMapCubit, FriendsMapState>(
-        'reverts isGhost when the repository throws',
+        'stays hidden when the repository cannot confirm ghost mode',
         setUp: () => when(
           () => repository.setGhostMode(ghost: any(named: 'ghost')),
         ).thenThrow(Exception('network')),
@@ -434,7 +464,11 @@ void main() {
             isGhost: true,
             privacyBusy: true,
           ),
-          FriendsMapState(geoSettings: GeoSharingSettings(sharing: true)),
+          FriendsMapState(
+            isGhost: true,
+            privacySyncFailed: true,
+            geoSettings: GeoSharingSettings(sharing: true),
+          ),
         ],
       );
 
@@ -459,6 +493,254 @@ void main() {
         verify(() => repository.setGhostMode(ghost: true)).called(1);
         verifyNever(() => repository.setGhostMode(ghost: false));
       });
+    });
+
+    group('session sharing and public map', () {
+      setUp(() {
+        when(() => repository.getGhostMode()).thenAnswer((_) async => false);
+        when(() => repository.getFriends()).thenAnswer((_) async => []);
+        when(() => repository.getFriendRequests()).thenAnswer((_) async => []);
+        when(
+          () => repository.watchLocations(),
+        ).thenAnswer((_) => const Stream.empty());
+        when(
+          () => repository.setGhostMode(ghost: any(named: 'ghost')),
+        ).thenAnswer((_) async {});
+        when(() => preferences.get(any())).thenAnswer((_) async => null);
+      });
+
+      test(
+        'legacy all stays friends and public mode round trips separately',
+        () async {
+          expect(
+            GeoSharingSettings.fromJson({
+              'sharing': true,
+              'visibility': 'all',
+            }).visibility,
+            GeoVisibility.all,
+          );
+          const public = GeoSharingSettings(
+            sharing: true,
+            visibility: .students,
+          );
+          expect(GeoSharingSettings.fromJson(public.toJson()), public);
+          final cubit = buildCubit();
+          await cubit.updateGeoSettings(public);
+          expect(cubit.state.geoSettings.visibility, GeoVisibility.students);
+          verify(
+            () => repository.setLocationVisibility(visibleToStudents: true),
+          ).called(1);
+          await cubit.close();
+        },
+      );
+
+      test(
+        'audience widening waits for pending exact publication while hidden',
+        () async {
+          final gate = Completer<void>();
+          final cubit = buildCubit();
+          await cubit.updateGeoSettings(
+            const GeoSharingSettings(sharing: true),
+          );
+          when(
+            () => repository.publishLocation(
+              latitude: any(named: 'latitude'),
+              longitude: any(named: 'longitude'),
+              accuracyM: any(named: 'accuracyM'),
+              heading: any(named: 'heading'),
+              speedMps: any(named: 'speedMps'),
+            ),
+          ).thenAnswer((_) => gate.future);
+          cubit.ingestDeviceFix(devicePosition());
+          final operation = cubit.updateGeoSettings(
+            const GeoSharingSettings(
+              sharing: true,
+              visibility: .students,
+              precision: .city,
+            ),
+          );
+          await pumpEventQueue();
+          expect(cubit.state.privacyBusy, isTrue);
+          verify(() => repository.setGhostMode(ghost: true)).called(1);
+          verifyNever(
+            () => repository.setLocationVisibility(visibleToStudents: true),
+          );
+          verifyNever(() => repository.setGhostMode(ghost: false));
+          gate.complete();
+          await operation;
+          verify(
+            () => repository.setLocationVisibility(visibleToStudents: true),
+          ).called(1);
+          verify(() => repository.setGhostMode(ghost: false)).called(1);
+          expect(cubit.state.geoSettings.precision, GeoPrecision.city);
+          await cubit.close();
+        },
+      );
+
+      test(
+        'account switch rejects cached fixes before provider disposal',
+        () async {
+          when(() => repository.currentUserId).thenReturn('first');
+          final cubit = buildCubit();
+          await cubit.updateGeoSettings(
+            const GeoSharingSettings(sharing: true),
+          );
+          when(() => repository.currentUserId).thenReturn('second');
+          cubit.ingestDeviceFix(devicePosition());
+          await pumpEventQueue();
+          expect(cubit.state.hasMyLocation, isFalse);
+          verifyNever(
+            () => repository.publishLocation(
+              latitude: any(named: 'latitude'),
+              longitude: any(named: 'longitude'),
+              accuracyM: any(named: 'accuracyM'),
+              heading: any(named: 'heading'),
+              speedMps: any(named: 'speedMps'),
+            ),
+          );
+          await cubit.close();
+        },
+      );
+
+      test('account switch interrupts a pending privacy operation', () async {
+        when(() => repository.currentUserId).thenReturn('first');
+        final gate = Completer<void>();
+        when(
+          () => preferences.set(any(), any()),
+        ).thenAnswer((_) => gate.future);
+        final cubit = buildCubit();
+        final change = cubit.updateGeoSettings(
+          const GeoSharingSettings(
+            sharing: true,
+            visibility: .students,
+            privacyForcedGhost: true,
+          ),
+        );
+        await pumpEventQueue();
+        when(() => repository.currentUserId).thenReturn('second');
+        gate.complete();
+        await change;
+        verifyNever(() => repository.setGhostMode(ghost: false));
+        await cubit.close();
+      });
+
+      test(
+        'privacy initialization can recover after temporary network failure',
+        () async {
+          var attempts = 0;
+          when(() => repository.getGhostMode()).thenAnswer((_) async {
+            if (++attempts == 1) throw Exception('offline');
+            return false;
+          });
+          final cubit = buildCubit();
+          await cubit.initialize();
+          expect(cubit.state.privacySyncFailed, isTrue);
+          await cubit.retryPrivacy();
+          expect(attempts, 2);
+          expect(cubit.state.privacySyncFailed, isFalse);
+          expect(cubit.state.geoSettings.sharing, isFalse);
+          await cubit.close();
+        },
+      );
+
+      test(
+        'explicit privacy choice runs after pending initialization',
+        () async {
+          final gate = Completer<UserPreferenceEntry?>();
+          when(() => preferences.get(any())).thenAnswer((_) => gate.future);
+          final cubit = buildCubit();
+          final initialization = cubit.initialize();
+          await pumpEventQueue();
+          final change = cubit.updateGeoSettings(
+            const GeoSharingSettings(
+              sharing: true,
+              visibility: .students,
+            ),
+          );
+          gate.complete(null);
+          await Future.wait([initialization, change]);
+          expect(cubit.state.geoSettings.visibility, GeoVisibility.students);
+          expect(cubit.state.geoSettings.sharing, isTrue);
+          expect(cubit.state.isGhost, isFalse);
+          await cubit.close();
+        },
+      );
+
+      test(
+        'closing map keeps consented background tracking '
+        'and disabling stops it',
+        () async {
+          final cubit = buildCubit();
+          await cubit.initialize();
+          await cubit.updateGeoSettings(
+            const GeoSharingSettings(sharing: true),
+          );
+          clearInteractions(locationService);
+          await cubit.setMapVisible(visible: false);
+          verify(
+            () => locationService.start(
+              backgroundEnabled: true,
+              requestPermission: false,
+            ),
+          ).called(1);
+          verifyNever(() => locationService.stop());
+          await cubit.updateGeoSettings(const GeoSharingSettings());
+          verify(() => locationService.stop()).called(1);
+          await cubit.close();
+          verify(() => locationService.dispose()).called(1);
+        },
+      );
+
+      test(
+        'public map remains available when the friends list fails',
+        () async {
+          when(
+            () => repository.getFriends(),
+          ).thenThrow(Exception('offline friends'));
+          const student = Friend(
+            friendshipId: '',
+            userId: 'other',
+            fullName: 'Student',
+            latitude: baseLat,
+            longitude: baseLng,
+          );
+          when(
+            () => repository.getMapStudents(),
+          ).thenAnswer((_) async => [student]);
+          final cubit = buildCubit();
+          await cubit.load();
+          expect(cubit.state.status, FriendsMapStatus.failure);
+          expect(cubit.state.students, [student]);
+          expect(cubit.state.studentsLoadFailed, isFalse);
+          await cubit.close();
+        },
+      );
+
+      test(
+        'public refresh failure removes previously displayed coordinates',
+        () async {
+          const student = Friend(
+            friendshipId: '',
+            userId: 'other',
+            fullName: 'Student',
+            latitude: baseLat,
+            longitude: baseLng,
+          );
+          when(
+            () => repository.getMapStudents(),
+          ).thenAnswer((_) async => [student]);
+          final cubit = buildCubit();
+          await cubit.refreshStudents();
+          expect(cubit.state.students, [student]);
+          when(
+            () => repository.getMapStudents(),
+          ).thenThrow(Exception('offline'));
+          await cubit.refreshStudents();
+          expect(cubit.state.students, isEmpty);
+          expect(cubit.state.studentsLoadFailed, isTrue);
+          await cubit.close();
+        },
+      );
     });
 
     group('removeFriend', () {

@@ -15,6 +15,18 @@ final class GetFriendsFailure extends FriendsFailure {
   const GetFriendsFailure(super.error);
 }
 
+final class GetMapStudentsFailure extends FriendsFailure {
+  const GetMapStudentsFailure(super.error);
+}
+
+final class GetLocationVisibilityFailure extends FriendsFailure {
+  const GetLocationVisibilityFailure(super.error);
+}
+
+final class SetLocationVisibilityFailure extends FriendsFailure {
+  const SetLocationVisibilityFailure(super.error);
+}
+
 final class GetFriendRequestsFailure extends FriendsFailure {
   const GetFriendRequestsFailure(super.error);
 }
