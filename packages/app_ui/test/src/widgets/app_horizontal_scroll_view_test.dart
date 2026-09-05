@@ -11,26 +11,33 @@ void main() {
       testWidgets('chip row scrolls with $kind legacy=$legacy', (tester) async {
         final controller = ScrollController();
         addTearDown(controller.dispose);
-        await tester.pumpWidget(wrapKit(SizedBox(
-          width: 240,
-          child: legacy
-              ? NinjaChipRow(
-                  controller: controller,
-                  children: [
-                    for (var index = 0; index < 8; index++)
-                      NinjaChip(label: 'Категория $index', onTap: () {}),
-                  ],
-                )
-              : AppChipRow<int>(
-                  controller: controller,
-                  value: 0,
-                  onChanged: (_) {},
-                  items: [
-                    for (var index = 0; index < 8; index++)
-                      AppChipRowItem(value: index, label: 'Категория $index'),
-                  ],
-                ),
-        )));
+        await tester.pumpWidget(
+          wrapKit(
+            SizedBox(
+              width: 240,
+              child: legacy
+                  ? NinjaChipRow(
+                      controller: controller,
+                      children: [
+                        for (var index = 0; index < 8; index++)
+                          NinjaChip(label: 'Категория $index', onTap: () {}),
+                      ],
+                    )
+                  : AppChipRow<int>(
+                      controller: controller,
+                      value: 0,
+                      onChanged: (_) {},
+                      items: [
+                        for (var index = 0; index < 8; index++)
+                          AppChipRowItem(
+                            value: index,
+                            label: 'Категория $index',
+                          ),
+                      ],
+                    ),
+            ),
+          ),
+        );
         final row = find.byType(SingleChildScrollView);
         await tester.drag(row, const Offset(-160, 0), kind: kind);
         await tester.pumpAndSettle();

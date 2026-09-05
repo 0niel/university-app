@@ -10,6 +10,7 @@ BASELINE_SHA = "892c735ac0b46f3b8f6621b1d67d12342c45cc84"
 REVIEWED_SOURCE_SHA = "0a5f375a1a312a6bb45567677852ee22242420ab"
 RELEASE_VERSION = "5.2.1+1005301"
 WORKFLOW_PATHS = {
+    "packages/app_ui/test/src/widgets/app_horizontal_scroll_view_test.dart",
     "supabase/tests/guest_active_day_contract.sql",
     "supabase/tests/mentorship_contract.sql",
     ".github/workflows/shorebird-patch.yml",
