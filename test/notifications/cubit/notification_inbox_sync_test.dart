@@ -54,6 +54,57 @@ void main() {
 
   tearDown(() async => cubit.close());
 
+  test('migrates existing account schedule reads to the cloud queue', () async {
+    await cubit.close();
+    await HydratedBloc.storage.write('NotificationsCubit', {
+      'userId': 'student-a',
+      'pushes': <dynamic>[],
+      'readIds': ['change:101'],
+    });
+    cubit = NotificationsCubit(userId: 'student-a', repository: inbox);
+    expect(cubit.state.isRead('change:101'), isTrue);
+    expect(cubit.state.pendingReadIds, contains('change:101'));
+    await cubit.refresh();
+    expect(inbox.reads.single, {'change:101'});
+    expect(cubit.state.pendingReadIds, isEmpty);
+  });
+
+  test(
+    'schedule reads survive offline restart and sync without rereading',
+    () async {
+      inbox.onRead = (_, _) async => throw StateError('offline');
+      cubit.markRead('change:101');
+      await Future<void>.delayed(Duration.zero);
+      expect(cubit.state.pendingReadIds, contains('change:101'));
+      await cubit.close();
+      cubit = NotificationsCubit(userId: 'student-a', repository: inbox);
+      expect(cubit.state.isRead('change:101'), isTrue);
+      expect(cubit.state.pendingReadIds, contains('change:101'));
+      inbox.onRead = (_, _) async {};
+      await cubit.refresh();
+      expect(inbox.reads.last, contains('change:101'));
+      expect(cubit.state.pendingReadIds, isEmpty);
+      expect(cubit.state.isRead('change:101'), isTrue);
+      expect(cubit.state.isRead('change:102'), isFalse);
+    },
+  );
+
+  test(
+    'restores schedule reads from another device '
+    'without discarding older reads',
+    () async {
+      cubit.markAllRead(List.generate(500, (index) => 'change:${index + 1}'));
+      inbox.onLoad = (_) async => const NotificationInboxSnapshot(
+        items: [],
+        readIds: {'change:501'},
+      );
+      await cubit.refresh();
+      expect(cubit.state.isRead('change:1'), isTrue);
+      expect(cubit.state.isRead('change:501'), isTrue);
+      expect(cubit.state.isRead('change:502'), isFalse);
+    },
+  );
+
   test(
     'loads service events without a push and deduplicates delivery',
     () async {

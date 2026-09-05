@@ -6,6 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
+import 'package:rtu_mirea_app/notifications/model/notification_feed.dart';
+import 'package:rtu_mirea_app/notifications/view/schedule_changes_read_scope.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
@@ -116,16 +119,19 @@ class _ChangesPageState extends State<ChangesPage> {
         onAction: () => unawaited(_loadChanges()),
       ).animateEmptyState(key: const ValueKey('changes_empty'));
     }
-    return Column(
-      key: const ValueKey('changes_list'),
-      crossAxisAlignment: .stretch,
-      children: [
-        for (final (index, change) in state.changes.indexed)
-          _ChangeTimelineRow(
-            change: change,
-            last: index == state.changes.length - 1,
-          ).animateListItem(index: index),
-      ],
+    return ScheduleChangesReadScope(
+      changes: state.changes,
+      child: Column(
+        key: const ValueKey('changes_list'),
+        crossAxisAlignment: .stretch,
+        children: [
+          for (final (index, change) in state.changes.indexed)
+            _ChangeTimelineRow(
+              change: change,
+              last: index == state.changes.length - 1,
+            ).animateListItem(index: index),
+        ],
+      ),
     );
   }
 
@@ -136,6 +142,7 @@ class _ChangesPageState extends State<ChangesPage> {
     final cubit = context.watch<ScheduleChangesCubit>();
     final selected = context.watch<ScheduleBloc>().state.selectedSchedule;
     final request = changesRequestFor(selected);
+    final notifications = context.watch<NotificationsCubit?>()?.state;
     final state = request != null && cubit.matchesTarget(request.$1, request.$2)
         ? cubit.state
         : const ScheduleChangesState();
@@ -162,7 +169,13 @@ class _ChangesPageState extends State<ChangesPage> {
                     AppHeaderAction(
                       icon: AppLineIcon.bell,
                       semanticsLabel: l10n.notifications,
-                      badge: state.changes.isNotEmpty,
+                      badge: state.changes.any(
+                        (change) =>
+                            !(notifications?.isRead(
+                                  scheduleChangeNotificationId(change),
+                                ) ??
+                                false),
+                      ),
                       onTap: _settings == null || _savingSettings
                           ? null
                           : () => unawaited(

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:promo_repository/src/client/promo_client.dart';
 import 'package:promo_repository/src/models/promo_banner.dart';
+import 'package:promo_repository/src/models/promo_dismissal.dart';
 import 'package:promo_repository/src/models/promo_enums.dart';
 import 'package:storage/storage.dart';
 import 'package:supabase/supabase.dart' show SupabaseClient;
@@ -51,6 +52,14 @@ class PromoRepository {
       return null;
     }
   }
+
+  Future<List<PromoDismissal>> getDismissals({required String userId}) =>
+      _client.getDismissals(userId);
+
+  Future<void> saveDismissal({
+    required String userId,
+    required PromoDismissal dismissal,
+  }) => _client.saveDismissal(userId, dismissal);
 
   Future<void> trackEvent({
     required String bannerId,

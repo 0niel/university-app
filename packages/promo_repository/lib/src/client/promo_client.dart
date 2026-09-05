@@ -1,4 +1,5 @@
 import 'package:promo_repository/src/models/promo_banner.dart';
+import 'package:promo_repository/src/models/promo_dismissal.dart';
 import 'package:promo_repository/src/models/promo_enums.dart';
 import 'package:supabase/supabase.dart';
 
@@ -30,6 +31,30 @@ class PromoClient {
       'p_placement': placement?.name,
     },
   );
+
+  Future<List<PromoDismissal>> getDismissals(String userId) async {
+    final response = await _supabase.rpc<List<dynamic>>(
+      'get_promo_banner_dismissals',
+      params: {'p_expected_user_id': userId},
+    );
+    return [
+      for (final row in response)
+        PromoDismissal.fromJson((row as Map).cast<String, dynamic>()),
+    ];
+  }
+
+  Future<void> saveDismissal(String userId, PromoDismissal dismissal) async {
+    await _supabase.rpc<void>(
+      'save_promo_banner_dismissal',
+      params: {
+        'p_expected_user_id': userId,
+        'p_banner_id': dismissal.bannerId,
+        'p_banner_version': dismissal.version,
+        'p_hidden': dismissal.hidden,
+        'p_snoozed_until': dismissal.snoozedUntil?.toUtc().toIso8601String(),
+      },
+    );
+  }
 
   static List<PromoBanner> parseBanners(Object? response) {
     if (response is! List<Object?>) {

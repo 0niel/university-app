@@ -197,6 +197,9 @@ class _PushHistoryListenerState extends State<PushHistoryListener>
       kind: AppNotificationKind.parse(data['kind']?.toString()),
       at: message.sentTime,
     );
+    if (!foreground && historyId != null) {
+      _notifications.markRead(historyId);
+    }
     _refresh();
     if (foreground &&
         (notification != null ||
@@ -236,6 +239,7 @@ class _PushHistoryListenerState extends State<PushHistoryListener>
         payload: jsonEncode({
           'type': 'push',
           'user_id': _userId,
+          'notification_id': identity,
           'route': route,
         }),
       );

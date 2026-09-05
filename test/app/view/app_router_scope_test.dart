@@ -15,6 +15,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:local_notifications_repository/local_notifications_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:preferences_repository/preferences_repository.dart';
+import 'package:promo_repository/promo_repository.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/app/locale/locale_cubit.dart';
 import 'package:rtu_mirea_app/app/theme/app_color_schemes.dart';
@@ -47,6 +48,8 @@ class _Preferences extends Mock implements PreferencesRepository {}
 class _Friends extends Mock implements FriendsRepository {}
 
 class _Inbox extends Mock implements NotificationInboxRepository {}
+
+class _Promos extends Mock implements PromoRepository {}
 
 class _Gamification extends Mock implements GamificationRepository {}
 
@@ -91,6 +94,7 @@ void main() {
   late _Preferences preferences;
   late _Friends friends;
   late _Inbox inbox;
+  late _Promos promos;
   late _Gamification gamification;
   late _LocalNotifications localNotifications;
   late _Watch watch;
@@ -116,6 +120,10 @@ void main() {
     preferences = _Preferences();
     when(() => preferences.get(any())).thenAnswer((_) async => null);
     friends = _Friends();
+    promos = _Promos();
+    when(
+      () => promos.getDismissals(userId: any(named: 'userId')),
+    ).thenAnswer((_) async => []);
     inbox = _Inbox();
     when(() => inbox.load(any())).thenAnswer(
       (_) async => const NotificationInboxSnapshot(items: []),
@@ -176,6 +184,7 @@ void main() {
       RepositoryProvider<PreferencesRepository>.value(value: preferences),
       RepositoryProvider<FriendsRepository>.value(value: friends),
       RepositoryProvider<NotificationInboxRepository>.value(value: inbox),
+      RepositoryProvider<PromoRepository>.value(value: promos),
       RepositoryProvider<GamificationRepository>.value(value: gamification),
       RepositoryProvider<LocalNotificationsRepository>.value(
         value: localNotifications,

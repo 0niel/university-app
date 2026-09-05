@@ -115,7 +115,6 @@ class App extends StatelessWidget {
               BlocProvider(
                 create: (_) => PromoBannersCubit(appScope.promoRepository),
               ),
-              BlocProvider(create: (_) => PromoDismissalsCubit()),
               BlocProvider(
                 create: (_) =>
                     PassSecurityCubit(localAuthClient: LocalAuthClient()),

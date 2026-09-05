@@ -7,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:promo_repository/promo_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
+import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
+import 'package:rtu_mirea_app/notifications/model/notification_feed.dart';
 import 'package:rtu_mirea_app/promo/promo.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
@@ -167,7 +169,15 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
         request != null && changesCubit.matchesTarget(request.$1, request.$2)
         ? changesCubit.state.changes
         : changesCubit.state.changes.take(0).toList();
-    final weekChanges = changesInWeek(changes, _day);
+    final notifications = context.watch<NotificationsCubit?>()?.state;
+    final unreadChanges = changes
+        .where(
+          (change) =>
+              !(notifications?.isRead(scheduleChangeNotificationId(change)) ??
+                  false),
+        )
+        .toList();
+    final weekChanges = changesInWeek(unreadChanges, _day);
     final schedule = selected?.schedule ?? [];
     if (!_hintChecked && widget.now == null && schedule.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback(
@@ -259,7 +269,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             ScheduleQuickActions(
-                              hasChanges: changes.isNotEmpty,
+                              hasChanges: unreadChanges.isNotEmpty,
                               onSearch: () => openScheduleSearch(context),
                               onChanges: () => const ScheduleChangesRoute()
                                   .push<void>(context),

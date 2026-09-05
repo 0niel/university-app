@@ -7,6 +7,7 @@ import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
 import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
 import 'package:rtu_mirea_app/notifications/data/notification_inbox_repository.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
+import 'package:rtu_mirea_app/promo/cubit/promo_dismissals_cubit.dart';
 
 class UserPreferencesScope extends StatelessWidget {
   const UserPreferencesScope({required this.child, super.key});
@@ -20,6 +21,13 @@ class UserPreferencesScope extends StatelessWidget {
       builder: (context, userId) => MultiBlocProvider(
         key: ValueKey(userId),
         providers: [
+          BlocProvider(
+            lazy: false,
+            create: (context) => PromoDismissalsCubit(
+              userId: userId,
+              repository: context.read(),
+            ),
+          ),
           BlocProvider(
             lazy: false,
             create: (context) {
