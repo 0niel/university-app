@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import stat
 import subprocess
 import tempfile
 
@@ -71,6 +72,8 @@ def classification(path, package_roots=None):
         raise ValueError(f"Dependency changes require a full release: {path}")
     if is_runtime(path, package_roots):
         return "runtime"
+    if parts[:2] == ("test", "tool"):
+        return "excluded"
     if parts[0] == "test":
         return "test"
     if parts[0] == "packages" and any(
@@ -157,6 +160,22 @@ def manifest_for(path, baseline, root):
     return manifest
 
 
+def verify_ignored_private_checkout(root, manifest):
+    if (not manifest or manifest.get("platform") != "android"
+            or not COMMIT.fullmatch(manifest.get("private_native_sha") or "")):
+        raise ValueError("Ignored private checkout requires verified Android release inputs")
+    target = root
+    for part in ("android", "private", "nfc-pass-android"):
+        target /= part
+        if (target.is_symlink() or not target.is_dir()
+                or not target.resolve().is_relative_to(root.resolve())
+                or getattr(target.lstat(), "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)):
+            raise ValueError("Unsafe private native checkout path")
+    from release_manifest import private_source
+    if private_source(root) != manifest["private_native_sha"]:
+        raise ValueError("Private native module differs from the release")
+
+
 def verify_worktree(root, entries, receipt, manifest=None, verify_native_inputs=False):
     if git(root, "rev-parse", "HEAD").decode().strip() != receipt["baseline_sha"]:
         raise ValueError("Projected checkout HEAD must remain at the release baseline")
@@ -186,6 +205,9 @@ def verify_worktree(root, entries, receipt, manifest=None, verify_native_inputs=
     if untracked - native_inputs.keys():
         raise ValueError("Unexpected untracked files in the projected workspace")
     ignored = set(filter(None, git(root, "ls-files", "--others", "--ignored", "--exclude-standard", "-z").decode().split("\0")))
+    if "android/private/nfc-pass-android/" in ignored:
+        verify_ignored_private_checkout(root, manifest)
+        ignored.remove("android/private/nfc-pass-android/")
     if any(is_runtime(path) for path in ignored):
         raise ValueError("Unexpected ignored runtime source in the projected workspace")
     for path in (untracked | ignored) & native_inputs.keys():
