@@ -129,9 +129,8 @@ class MapDataRepository {
        _supabase = supabase,
        _rpc =
            rpc ??
-           ((name, parameters) => supabase!
-               .schema('app_api_v1')
-               .rpc<Object?>(name, params: parameters)),
+           ((name, parameters) =>
+               supabase!.rpc<Object?>(name, params: parameters)),
        _cache = cache ?? PreferencesMapDataCache(),
        _http = httpClient ?? http.Client(),
        _ownsHttp = httpClient == null,

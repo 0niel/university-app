@@ -2,7 +2,7 @@
 
 The migration `20260906124603_campus_map_catalog_and_community.sql` adds a published campus catalog, floor plans, places, a routing graph, review proposals, revision history, private saved places, and observations tied to the displayed revision. It does not publish source data or grant moderator access automatically.
 
-All API functions live in `app_api_v1`. Public read functions expose only published documents. Writes require an existing, non-anonymous authenticated user; proposals and observations also require the campus organization profile. Moderator permissions come exclusively from `core.map_moderators`, managed through trusted server access. An author cannot review their own proposal.
+API implementations live in `app_api_v1`. The ten client operations are exposed through `public` security-invoker wrappers, matching the application's existing PostgREST gateway. The client and HTTP verification use this public schema; the service-only `publish_map_campus` function has no public wrapper. Public reads expose only published documents. Writes require an existing, non-anonymous authenticated user; proposals and observations also require the campus organization profile. Moderator permissions come exclusively from `core.map_moderators`, managed through trusted server access. An author cannot review their own proposal.
 
 | RPC | Parameters | Result |
 | --- | --- | --- |
