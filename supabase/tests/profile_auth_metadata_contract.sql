@@ -58,6 +58,12 @@ begin
     raise exception 'Account isolation or initial provider metadata was lost';
   end if;
 
+  update core.user_academic_profiles set full_name = 'Administrative Update'
+  where user_id = v_user_a;
+  if not (select raw_user_meta_data @> '{"display_name":"Administrative Update","full_name":"Administrative Update","name":"Administrative Update"}'::jsonb from auth.users where id = v_user_a) then
+    raise exception 'Privileged profile maintenance failed with retained caller claims';
+  end if;
+
   perform set_config('request.jwt.claim.sub', v_user_a::text, true);
   execute 'set local role authenticated';
   update core.user_academic_profiles set full_name = 'Updated Name' where user_id = v_user_a;

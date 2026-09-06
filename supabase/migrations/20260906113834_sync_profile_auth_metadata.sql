@@ -6,12 +6,8 @@ set search_path = ''
 as $$
 declare
   v_name text := nullif(btrim(new.full_name), '');
-  v_user_id uuid := (select auth.uid());
   v_identity jsonb;
 begin
-  if v_user_id is not null and v_user_id <> new.user_id then
-    raise exception 'Profile ownership mismatch' using errcode = '42501';
-  end if;
   if v_name is null and tg_op = 'INSERT' then
     return new;
   end if;
