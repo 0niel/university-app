@@ -43,33 +43,36 @@ class AppScale extends StatelessWidget {
             ? size.shortestSide / designWidth
             : 1.0;
         final layoutSize = size / scale;
-        return FittedBox(
-          alignment: Alignment.topLeft,
-          child: SizedBox.fromSize(
-            size: layoutSize,
-            child: MediaQuery(
-              data: media.copyWith(
-                size: layoutSize,
-                devicePixelRatio: media.devicePixelRatio * scale,
-                padding: media.padding / scale,
-                viewPadding: media.viewPadding / scale,
-                viewInsets: media.viewInsets / scale,
-                systemGestureInsets: media.systemGestureInsets / scale,
-                displayFeatures: [
-                  for (final feature in media.displayFeatures)
-                    ui.DisplayFeature(
-                      bounds: Rect.fromLTRB(
-                        feature.bounds.left / scale,
-                        feature.bounds.top / scale,
-                        feature.bounds.right / scale,
-                        feature.bounds.bottom / scale,
+        return SizedBox.fromSize(
+          size: size,
+          child: FittedBox(
+            alignment: Alignment.topLeft,
+            child: SizedBox.fromSize(
+              size: layoutSize,
+              child: MediaQuery(
+                data: media.copyWith(
+                  size: layoutSize,
+                  devicePixelRatio: media.devicePixelRatio * scale,
+                  padding: media.padding / scale,
+                  viewPadding: media.viewPadding / scale,
+                  viewInsets: media.viewInsets / scale,
+                  systemGestureInsets: media.systemGestureInsets / scale,
+                  displayFeatures: [
+                    for (final feature in media.displayFeatures)
+                      ui.DisplayFeature(
+                        bounds: Rect.fromLTRB(
+                          feature.bounds.left / scale,
+                          feature.bounds.top / scale,
+                          feature.bounds.right / scale,
+                          feature.bounds.bottom / scale,
+                        ),
+                        type: feature.type,
+                        state: feature.state,
                       ),
-                      type: feature.type,
-                      state: feature.state,
-                    ),
-                ],
+                  ],
+                ),
+                child: child,
               ),
-              child: child,
             ),
           ),
         );
