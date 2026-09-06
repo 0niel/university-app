@@ -4,6 +4,8 @@ part of 'map_bloc.dart';
 sealed class MapEvent with _$MapEvent {
   const factory MapEvent.initialized() = MapInitialized;
 
+  const factory MapEvent.refreshRequested() = MapRefreshRequested;
+
   const factory MapEvent.campusSelected(CampusModel campus) = CampusSelected;
 
   const factory MapEvent.floorSelected({

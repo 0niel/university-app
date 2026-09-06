@@ -89,22 +89,42 @@ class _RoomPhotoGalleryState extends State<RoomPhotoGallery> {
     final navigator = Navigator.of(context, rootNavigator: true);
     final source = await showAppSheet<ImageSource>(
       context,
-      title: l10n.roomPhotoAdd,
-      child: AppListGroup(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          AppListRow(
-            title: l10n.lessonDetailsCamera,
-            leading: const AppLineIconWidget(AppLineIcon.camera),
-            strong: true,
-            showChevron: false,
-            onTap: () => navigator.pop(ImageSource.camera),
+          Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(l10n.roomPhotoAdd, style: AppText.sectionSmall),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              const AppSheetCloseButton(),
+            ],
           ),
-          AppListRow(
-            title: l10n.lessonDetailsGallery,
-            leading: const AppLineIconWidget(AppLineIcon.image),
-            strong: true,
-            showChevron: false,
-            onTap: () => navigator.pop(ImageSource.gallery),
+          const SizedBox(height: AppSpacing.lg),
+          AppListGroup(
+            children: [
+              AppListRow(
+                title: l10n.lessonDetailsCamera,
+                titleMaxLines: null,
+                leading: const AppLineIconWidget(AppLineIcon.camera),
+                strong: true,
+                showChevron: false,
+                onTap: () => navigator.pop(ImageSource.camera),
+              ),
+              AppListRow(
+                title: l10n.lessonDetailsGallery,
+                titleMaxLines: null,
+                leading: const AppLineIconWidget(AppLineIcon.image),
+                strong: true,
+                showChevron: false,
+                onTap: () => navigator.pop(ImageSource.gallery),
+              ),
+            ],
           ),
         ],
       ),

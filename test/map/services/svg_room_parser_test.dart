@@ -7,6 +7,49 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('SvgRoomParser', () {
+    test(
+      'preserves inherited evenodd holes and unions separate room shapes',
+      () async {
+        final parser = SvgRoomParser(
+          onLoadSvg: (_) async => '''
+        <svg viewBox="0 0 100 100" fill-rule="evenodd">
+          <g data-object="ring" transform="translate(10 10)">
+            <path d="M0 0H40V40H0Z M10 10H30V30H10Z" />
+          </g>
+          <g data-object="combined">
+            <path d="M50 0H90V40H50Z M60 10H80V30H60Z" />
+            <rect x="65" y="15" width="10" height="10" />
+          </g>
+        </svg>
+      ''',
+        );
+        final (rooms, _) = await parser.parseSvg('rings.svg');
+        final ring = rooms.first.path;
+        expect(ring.fillType, PathFillType.evenOdd);
+        expect(ring.contains(const Offset(15, 15)), isTrue);
+        expect(ring.contains(const Offset(30, 30)), isFalse);
+        final combined = rooms.last.path;
+        expect(combined.contains(const Offset(55, 5)), isTrue);
+        expect(combined.contains(const Offset(62, 12)), isFalse);
+        expect(combined.contains(const Offset(70, 20)), isTrue);
+      },
+    );
+
+    test('includes transforms above a labelled room element', () async {
+      final parser = SvgRoomParser(
+        onLoadSvg: (_) async => '''
+        <svg viewBox="0 0 100 100">
+          <g transform="translate(10 20)"><g transform="scale(2)">
+            <rect data-object="room" data-name="А-101" x="1" y="2" width="3" height="4" />
+          </g></g>
+        </svg>
+      ''',
+      );
+      final (rooms, _) = await parser.parseSvg('remote.svg');
+      expect(rooms.single.name, 'А-101');
+      expect(rooms.single.path.getBounds(), const Rect.fromLTWH(12, 24, 6, 8));
+    });
+
     test('parses direct and nested room shapes', () async {
       final parser = SvgRoomParser(
         onLoadSvg: (_) async => '''

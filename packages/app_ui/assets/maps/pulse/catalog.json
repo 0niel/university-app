@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "organization_id": "mirea",
+  "campuses": [
+    {
+      "id": "v-78",
+      "title": "Вернадского 78",
+      "short_title": "В-78",
+      "revision": 2,
+      "asset": "packages/app_ui/assets/maps/pulse/campus_v-78.json",
+      "source_url": "https://pulse.mirea.ru/services/maps?campus=019f9340-d2cc-7c8a-8472-2cbcc2dd3de3",
+      "source_label": "Пульс РТУ МИРЭА",
+      "source_captured_at": "2026-09-06T15:42:04.653440+00:00",
+      "latitude": 55.669957,
+      "longitude": 37.480225,
+      "location_source": {
+        "type": "existing_application_catalog",
+        "path": "packages/rtu_mirea_schedule_api_client/lib/src/campuses.dart",
+        "sha256": "7875ca7e2edeec53572d463ee53272b8f2ae3a4d85c42f35478e14a643305f65",
+        "short_name": "В-78"
+      },
+      "source_plan_sha256": "20e8d676785c77a3cf3422edd093f704c535e945643aca753dd659d89657d600"
+    },
+    {
+      "id": "v-86",
+      "title": "Вернадского 86",
+      "short_title": "В-86",
+      "revision": 2,
+      "asset": "packages/app_ui/assets/maps/pulse/campus_v-86.json",
+      "source_url": "https://pulse.mirea.ru/services/maps?campus=01a023a4-e394-7f10-a979-16f396473e1e",
+      "source_label": "Пульс РТУ МИРЭА",
+      "source_captured_at": "2026-09-06T15:33:43.061241+00:00",
+      "latitude": 55.661445,
+      "longitude": 37.477049,
+      "location_source": {
+        "type": "existing_application_catalog",
+        "path": "packages/rtu_mirea_schedule_api_client/lib/src/campuses.dart",
+        "sha256": "7875ca7e2edeec53572d463ee53272b8f2ae3a4d85c42f35478e14a643305f65",
+        "short_name": "В-86"
+      },
+      "source_plan_sha256": "34e8c0d8e03ccacc9930799d501ea7e625f18789726ada47b6d43fe14f63fd3c"
+    },
+    {
+      "id": "s-20",
+      "title": "Стромынка 20",
+      "short_title": "С-20",
+      "revision": 2,
+      "asset": "packages/app_ui/assets/maps/pulse/campus_s-20.json",
+      "source_url": "https://pulse.mirea.ru/services/maps?campus=01a038f2-df0e-7324-9c5a-73b1766851af",
+      "source_label": "Пульс РТУ МИРЭА",
+      "source_captured_at": "2026-09-06T15:43:21.801249+00:00",
+      "latitude": 55.794259,
+      "longitude": 37.701448,
+      "location_source": {
+        "type": "existing_application_catalog",
+        "path": "packages/rtu_mirea_schedule_api_client/lib/src/campuses.dart",
+        "sha256": "7875ca7e2edeec53572d463ee53272b8f2ae3a4d85c42f35478e14a643305f65",
+        "short_name": "С-20"
+      },
+      "source_plan_sha256": "c0acb36cb8dbfc4c441f62391f7a82382191a631a0144645f4d9cf4cd7d99a36"
+    },
+    {
+      "id": "mp-1",
+      "title": "Малая Пироговская, 1",
+      "short_title": "МП-1",
+      "revision": 1,
+      "asset": "packages/app_ui/assets/maps/pulse/campus_mp-1.json",
+      "latitude": 55.731582,
+      "longitude": 37.57484,
+      "location_source": {
+        "type": "existing_application_catalog",
+        "path": "packages/rtu_mirea_schedule_api_client/lib/src/campuses.dart",
+        "sha256": "7875ca7e2edeec53572d463ee53272b8f2ae3a4d85c42f35478e14a643305f65",
+        "short_name": "МП-1"
+      },
+      "source_url": "https://github.com/0niel/university-app/tree/master/packages/app_ui/assets/maps/mp-1",
+      "source_label": "Планы University App · МП-1"
+    }
+  ]
+}

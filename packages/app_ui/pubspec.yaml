@@ -58,6 +58,7 @@ flutter:
     - assets/maps/v-78/
     - assets/maps/s-20/
     - assets/maps/mp-1/
+    - assets/maps/pulse/
     
   fonts:
     - family: Literata

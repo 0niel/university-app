@@ -19,6 +19,32 @@ class SvgRoomParser {
 
   final SvgAssetLoader onLoadSvg;
 
+  static Path? elementPath(
+    xml.XmlElement element, {
+    bool includeLines = false,
+  }) {
+    final path = includeLines && element.name.local == 'line'
+        ? (Path()
+            ..moveTo(
+              _attributeDouble(element, 'x1'),
+              _attributeDouble(element, 'y1'),
+            )
+            ..lineTo(
+              _attributeDouble(element, 'x2'),
+              _attributeDouble(element, 'y2'),
+            ))
+        : _parseShapeToPath(element);
+    if (path != null) path.fillType = _fillType(element);
+    return path;
+  }
+
+  static Matrix4 elementTransform(xml.XmlElement element) =>
+      _parseTransform(element.getAttribute('transform')) ?? Matrix4.identity();
+  static final _fillRulePattern = RegExp(
+    r'(?:^|;)\s*fill-rule\s*:\s*(evenodd|nonzero)',
+    caseSensitive: false,
+  );
+
   Future<(List<RoomModel>, ui.Rect)> parseSvg(String assetPath) async {
     final svgString = await onLoadSvg(assetPath);
     final document = xml.XmlDocument.parse(svgString);
@@ -41,12 +67,20 @@ class SvgRoomParser {
 
     for (final element in objectElements) {
       final roomId = element.getAttribute('data-object') ?? 'unknown';
-      final combinedPath = Path()..fillType = .nonZero;
+      final roomPaths = <Path>[];
       _appendShapes(
         element,
-        parentTransform: Matrix4.identity(),
-        destination: combinedPath,
+        parentTransform: _ancestorTransform(element),
+        destination: roomPaths,
       );
+      final combinedPath = roomPaths.isEmpty ? Path() : roomPaths.first;
+      for (final shape in roomPaths.skip(1)) {
+        final merged = Path.combine(PathOperation.union, combinedPath, shape);
+        combinedPath
+          ..reset()
+          ..fillType = merged.fillType
+          ..addPath(merged, Offset.zero);
+      }
 
       final bounds = combinedPath.getBounds();
       if (!bounds.isEmpty) {
@@ -57,7 +91,16 @@ class SvgRoomParser {
         globalMaxY = math.max(globalMaxY, bounds.bottom);
       }
 
-      rooms.add(RoomModel(roomId: roomId, path: combinedPath));
+      rooms.add(
+        RoomModel(
+          roomId: roomId,
+          name:
+              element.getAttribute('data-name') ??
+              element.getAttribute('data-label') ??
+              '',
+          path: combinedPath,
+        ),
+      );
     }
 
     if (rooms.isEmpty || !hasGeometry) return (rooms, parsedViewBox);
@@ -100,7 +143,7 @@ class SvgRoomParser {
   static void _appendShapes(
     xml.XmlElement element, {
     required Matrix4 parentTransform,
-    required Path destination,
+    required List<Path> destination,
   }) {
     final elementTransform = _parseTransform(element.getAttribute('transform'));
     final accumulatedTransform = elementTransform == null
@@ -108,7 +151,8 @@ class SvgRoomParser {
         : parentTransform.multiplied(elementTransform);
     final shape = _parseShapeToPath(element);
     if (shape != null) {
-      destination.addPath(shape.transform(accumulatedTransform.storage), .zero);
+      shape.fillType = _fillType(element);
+      destination.add(shape.transform(accumulatedTransform.storage));
     }
 
     for (final child in element.childElements) {
@@ -121,6 +165,33 @@ class SvgRoomParser {
         destination: destination,
       );
     }
+  }
+
+  static PathFillType _fillType(xml.XmlElement element) {
+    for (final ancestor in [
+      element,
+      ...element.ancestors.whereType<xml.XmlElement>(),
+    ]) {
+      final inline = _fillRulePattern
+          .firstMatch(ancestor.getAttribute('style') ?? '')
+          ?.group(1);
+      final rule = (inline ?? ancestor.getAttribute('fill-rule'))
+          ?.trim()
+          .toLowerCase();
+      if (rule == 'evenodd') return PathFillType.evenOdd;
+      if (rule == 'nonzero') return PathFillType.nonZero;
+    }
+    return PathFillType.nonZero;
+  }
+
+  static Matrix4 _ancestorTransform(xml.XmlElement element) {
+    var result = Matrix4.identity();
+    final ancestors = element.ancestors.whereType<xml.XmlElement>().toList();
+    for (final ancestor in ancestors.reversed) {
+      final transform = _parseTransform(ancestor.getAttribute('transform'));
+      if (transform != null) result = result.multiplied(transform);
+    }
+    return result;
   }
 
   static Path? _parseShapeToPath(xml.XmlElement element) {
@@ -147,7 +218,22 @@ class SvgRoomParser {
 
     final x = _attributeDouble(element, 'x');
     final y = _attributeDouble(element, 'y');
-    return Path()..addRect(Rect.fromLTWH(x, y, width, height));
+    final radiusX =
+        (double.tryParse(element.getAttribute('rx') ?? '') ??
+                _attributeDouble(element, 'ry'))
+            .clamp(0.0, width / 2);
+    final radiusY =
+        (double.tryParse(element.getAttribute('ry') ?? '') ??
+                _attributeDouble(element, 'rx'))
+            .clamp(0.0, height / 2);
+    final rectangle = Rect.fromLTWH(x, y, width, height);
+    if (radiusX == 0 || radiusY == 0) return Path()..addRect(rectangle);
+    return Path()..addRRect(
+      RRect.fromRectAndRadius(
+        rectangle,
+        Radius.elliptical(radiusX, radiusY),
+      ),
+    );
   }
 
   static Path? _parseCircle(xml.XmlElement element) {

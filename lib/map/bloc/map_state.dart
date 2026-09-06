@@ -11,5 +11,9 @@ abstract class MapState with _$MapState {
     @Default(<String, int>{}) Map<String, int> roomFloors,
     Rect? boundingRect,
     String? errorMessage,
+    CampusMapData? campusData,
+    @Default(false) bool isOffline,
+    String? dataWarning,
+    String? svgContent,
   }) = _MapState;
 }

@@ -1,0 +1,2108 @@
+{
+  "schema_version": 1,
+  "method": "visual_transcription_of_original_vector_paths",
+  "floors": {
+    "-1": [
+      {
+        "source_group": 0,
+        "glyph_sha256": "6a43532f13096e94d7a15c639cca6722891aeff709338d292bc6a6c99332b557",
+        "label": "А-046а"
+      },
+      {
+        "source_group": 1,
+        "glyph_sha256": "23f1d502f3d9bc746d157986820b102f06483e9d7e49af9eaed97ab676dd1a89",
+        "label": "А-045"
+      },
+      {
+        "source_group": 2,
+        "glyph_sha256": "f80c0b51ec6b71a7c0194c596939d251b1da08c9fc81b4c7cb230e285ab527cb",
+        "label": "А-044"
+      },
+      {
+        "source_group": 3,
+        "glyph_sha256": "64d0745c2fe1e26f980afc0d9c93555c1c49300ff5590baacfbf34c2aeebdcfe",
+        "label": "А-043а"
+      },
+      {
+        "source_group": 4,
+        "glyph_sha256": "f7117dcc9013aca33b7801da600c12788c9ccff7a3d2779deee219bd609242f2",
+        "label": "А-042б"
+      },
+      {
+        "source_group": 5,
+        "glyph_sha256": "8f6e1e432b5e2242c5cb79501d34c7cff217878a5c08e71d79265cf958ef1eab",
+        "label": "А-041а"
+      },
+      {
+        "source_group": 6,
+        "glyph_sha256": "5bde766ea2da55779d3bcdc7fcf039e1066e26efd88d6beeb450b626e37da43c",
+        "label": "А-040"
+      },
+      {
+        "source_group": 7,
+        "glyph_sha256": "f3e02b327964f85f6e8b206a5d8d973af059a686cf9e5d70a26aeb624ee17148",
+        "label": "А-003"
+      },
+      {
+        "source_group": 8,
+        "glyph_sha256": "50c19530c565481147d9c8011d1460a0323ebf1ae3fb925934f81c9e1484628a",
+        "label": "А-004"
+      },
+      {
+        "source_group": 9,
+        "glyph_sha256": "ebaa703f784a74ca84fedd7b18543e0a7e6acfc6125dc08add0ff348d0d65857",
+        "label": "А-030а"
+      },
+      {
+        "source_group": 10,
+        "glyph_sha256": "0cf3cb665d4f873553d78b877ebe8afb9b76c0adb9cbf0cac11737eec544802a",
+        "label": "А-030б"
+      },
+      {
+        "source_group": 11,
+        "glyph_sha256": "0eac6850fed9f13be9edca0a7146d4605fdbc850b27c7b4eb518f34464844dfb",
+        "label": "А-031"
+      },
+      {
+        "source_group": 12,
+        "glyph_sha256": "cf13f87206c677b4df6033cb9f97a0ab3275665189d4ed869b834719194fd1ed",
+        "label": "А-033"
+      },
+      {
+        "source_group": 13,
+        "glyph_sha256": "f52476fb3ccf8c64f99bfd7b13380507f94297cfd735d7f7c0b5b32e2c8686e4",
+        "label": "А-034"
+      },
+      {
+        "source_group": 14,
+        "glyph_sha256": "670ca2c238f42cc5b4e21895336bf72e18ba4a8b695a9241be3e6124a1083719",
+        "label": "А-034б"
+      },
+      {
+        "source_group": 15,
+        "glyph_sha256": "c8460166eec34927f641fd0d775f53290717fce19cdba16eb067ec71f6c19b77",
+        "label": "А-034а"
+      },
+      {
+        "source_group": 16,
+        "glyph_sha256": "fdd77ed220023b737ab878aaf58f554aff778bee4361a3742d6756ab556bd6af",
+        "label": "А-034г"
+      },
+      {
+        "source_group": 17,
+        "glyph_sha256": "72545ebc1e6e1eaea357ddcf734f361acd5505ec64a4f8a005c2edb4083dd7a6",
+        "label": "А-034в"
+      },
+      {
+        "source_group": 18,
+        "glyph_sha256": "555c7340575837657f3cf1b96b6b748fc60c79a70b8896ea2cb327dc0c6e1948",
+        "label": "А-037б"
+      },
+      {
+        "source_group": 19,
+        "glyph_sha256": "ca3c15c66385203d076ac1f7a67823bac3cb47da2a2496ce14e1d60e316db34e",
+        "label": "А-037а"
+      },
+      {
+        "source_group": 20,
+        "glyph_sha256": "c5222248b93a02157e73c5facab487c01f6a05b00abebfba37104ea1b949f1c7",
+        "label": "А-038"
+      },
+      {
+        "source_group": 21,
+        "glyph_sha256": "ee4a6defcde7798fee3b282599c00f7dfd1e4de008dd074a111fb8280e266054",
+        "label": "А-035а"
+      },
+      {
+        "source_group": 22,
+        "glyph_sha256": "b14437ad0d7585dcbe8a3114f1d33243991881fbdf386cf72539560b5bc37e00",
+        "label": "А-035"
+      },
+      {
+        "source_group": 23,
+        "glyph_sha256": "032c881983766cd17694264a968213998e05438ad64b0596bab3c9b5c930f2ec",
+        "label": "А-036"
+      },
+      {
+        "source_group": 24,
+        "glyph_sha256": "dc5c930fc4d493ea5340da3f15bb9e6f4bb5434c0d94fc69f80be174733ab12f",
+        "label": "А-039"
+      },
+      {
+        "source_group": 25,
+        "glyph_sha256": "de44bfa729e54875561ff4bb115fe5a0a6c2181dd9c0b452c7db3a6de77093e1",
+        "label": "А-032"
+      },
+      {
+        "source_group": 26,
+        "glyph_sha256": "74f862000c7966a6e9875a761ca6964619121777a837ae485423024ad4997ee7",
+        "label": "А-007"
+      },
+      {
+        "source_group": 27,
+        "glyph_sha256": "2d9c9d0d4f9aaad5c8bdd225cb81d6fa84f0e38be0d63e6a36a67fcf39a1b8a5",
+        "label": "А-012"
+      },
+      {
+        "source_group": 28,
+        "glyph_sha256": "f041bcaea871203aaa36c7a344c37f7fa7df6ce6ab2a4ae0b5e6d8c224d78385",
+        "label": "А-011"
+      },
+      {
+        "source_group": 29,
+        "glyph_sha256": "bb45c0639e0b3c2daf0f5702a24324f150f5ebd60d0ee8482b36c70562973864",
+        "label": "А-010"
+      },
+      {
+        "source_group": 30,
+        "glyph_sha256": "3818c14bd6edd2f269d2a9f21582f32ecce0105b21444c5d1d221ad86d7694c4",
+        "label": "А-006"
+      },
+      {
+        "source_group": 31,
+        "glyph_sha256": "dfcf4da447a19c66e14f0cea7058cff9f829b5ad728c4a8c3d5fc1616dc1c3dd",
+        "label": "А-005"
+      },
+      {
+        "source_group": 32,
+        "glyph_sha256": "4171ec761c4cf5265173414dd1a2f3edc80cad926fad91790ff9b044c52ca191",
+        "label": "А-008"
+      },
+      {
+        "source_group": 33,
+        "glyph_sha256": "8b2971a84ea545654309deef2b2062d817845cb546029218277394c0bd2f82a1",
+        "label": "А-009"
+      },
+      {
+        "source_group": 34,
+        "glyph_sha256": "4913a091844a8db8d43a5a2792e059c089212fe783a8276f8c52c947bd737fb7",
+        "label": "А-001"
+      },
+      {
+        "source_group": 35,
+        "glyph_sha256": "f0e84cb82f7f07fdda0ba29208d98d903d03a870214bf08f52541d3c9ac719cf",
+        "label": "А-002"
+      },
+      {
+        "source_group": 36,
+        "glyph_sha256": "45d88e5e6e3553618320fa07872cfba46e98225dce59fadb4cc176ad8e45cb57",
+        "label": "А-003а"
+      },
+      {
+        "source_group": 37,
+        "glyph_sha256": "fa1a1d3ec31c1b479f0e181b7433389f2b488dbb9aabb6b8a4e41337fd9bb754",
+        "label": "А-041"
+      },
+      {
+        "source_group": 38,
+        "glyph_sha256": "48ad6624e7c76dc3f09e521c9956c8e04cdf35b3b8e3ec1fb00c9d276f1f162f",
+        "label": "А-042а"
+      },
+      {
+        "source_group": 39,
+        "glyph_sha256": "ab8939b06172af827e099059d58a01d167974c230036300fbfb1df3a9026491e",
+        "label": "А-043"
+      },
+      {
+        "source_group": 40,
+        "glyph_sha256": "371fe2b9ce2ad6bcb0c55bc3c5a4ad9001802a7d3ca4de7a807805f757127f07",
+        "label": "А-042в"
+      },
+      {
+        "source_group": 41,
+        "glyph_sha256": "1307c0f4228934e9f255cd98df20e46e8026f9ea2eaf49ee138eba365c6ad19f",
+        "label": "А-042"
+      },
+      {
+        "source_group": 42,
+        "glyph_sha256": "ee3f0d646381e3ffad7fed49b21f134927b9eaa6ff7f4d691d999069b340c768",
+        "label": "А-046"
+      },
+      {
+        "source_group": 43,
+        "glyph_sha256": "c90efa39d109a39e8b8cb163879585702b52619578b68ecf5a63246ce240a7cf",
+        "label": "А-048"
+      },
+      {
+        "source_group": 44,
+        "glyph_sha256": "9a86ac2e1a49b422724b415aee84eddf216a273ba67aa61d461290bcd55a503f",
+        "label": "А-047"
+      },
+      {
+        "source_group": 45,
+        "glyph_sha256": "c448a40c494470e3c18d5a4f233005ed6c369cc8ae26633844faba7b6f9fa98a",
+        "label": "Б-004а"
+      },
+      {
+        "source_group": 46,
+        "glyph_sha256": "2f6a4fb4a2765b3e4c25cd60b33cfcf4187d376a6fdacbe00195530e7fdfff38",
+        "label": "Б-004г"
+      },
+      {
+        "source_group": 47,
+        "glyph_sha256": "486a248e4e7f4b52ee31bb48ece65047ac1fc8f42c9a9152fb8ccae608372dd3",
+        "label": "Б-005а"
+      },
+      {
+        "source_group": 48,
+        "glyph_sha256": "0a9503ec8de7e370d7ef14fdf9b2193a5be2cac8e808e451c6fb962743571c57",
+        "label": "Б-005б"
+      },
+      {
+        "source_group": 49,
+        "glyph_sha256": "07cc47ad8b7913ae137ca59ed4d2377d00b1527375b3b71a1564ef3008520ef7",
+        "label": "Б-006"
+      },
+      {
+        "source_group": 50,
+        "glyph_sha256": "df9a285aee86845992ed9998d556ee822eb541ee05b8b4e9c74134e8247d44ec",
+        "label": "Б-007"
+      },
+      {
+        "source_group": 51,
+        "glyph_sha256": "78d52076a767b8f1dd80180d7ed5a9a3f7f8b465cb8b497051c3c9b0d1413cac",
+        "label": "Б-007а"
+      },
+      {
+        "source_group": 52,
+        "glyph_sha256": "a874cc5f8edbc6fbc2b0e073dadc2813902f13aef23c38d2010cd5ebf063beb4",
+        "label": "Б-008а"
+      },
+      {
+        "source_group": 53,
+        "glyph_sha256": "1d434c2f09233ec1e87ee56b05c6acc88a5f2e8d18664a333d27da3f1ff395c8",
+        "label": "Б-008б"
+      },
+      {
+        "source_group": 54,
+        "glyph_sha256": "03c445d5e07ba593def8128eb05de275e2ddf38e342baf195cf20943576e6f10",
+        "label": "Б-009"
+      },
+      {
+        "source_group": 55,
+        "glyph_sha256": "7de7c930428c66d918bca0cdf52e8753b144bc49da2eede21aed7570cd6101aa",
+        "label": "Б-010"
+      },
+      {
+        "source_group": 56,
+        "glyph_sha256": "c8990817e60727f3a91867d3577ca3bf08061341b33706be29389ff434a30574",
+        "label": "Б-011"
+      },
+      {
+        "source_group": 57,
+        "glyph_sha256": "8de1513bf128435afb9c42f665441af398f4ad8aa1c0a3e9d3cfa3b3b4cd88a0",
+        "label": "Б-012"
+      },
+      {
+        "source_group": 58,
+        "glyph_sha256": "f372a3a2d8d88f496cab20b5076fe81cc729535f9731d6a170403e1cd7c81a81",
+        "label": "Б-013"
+      },
+      {
+        "source_group": 59,
+        "glyph_sha256": "78ddefa873517510c988ff16cdcd9cdf5359633732d7adf75a9b6616510b9dac",
+        "label": "Б-008"
+      },
+      {
+        "source_group": 60,
+        "glyph_sha256": "db29ae0d7ee3edb48e07c39dde0e75d1b480130ca3304f32787cca54e8b7242b",
+        "label": "Б-005"
+      },
+      {
+        "source_group": 61,
+        "glyph_sha256": "e095dd8b57492d24dc30014a18fe364d06a3f8f5c861c4fb127df4a2ff40a50e",
+        "label": "Б-004в"
+      },
+      {
+        "source_group": 62,
+        "glyph_sha256": "eee6ce1584071cdf4eb9bc71cfc2c239d6bd7b7fcdd3c09ac59fed82cbfce929",
+        "label": "А-005"
+      },
+      {
+        "source_group": 63,
+        "glyph_sha256": "3b061620261fce41463cbdf3d102ceca2e18c65340a765168a2fd3b4b97c1eff",
+        "label": "Б-003"
+      },
+      {
+        "source_group": 64,
+        "glyph_sha256": "2edf6e14cb74a9c8de2515c9f54e3a3cca9dbd1dbf753d6667ca615537d2c132",
+        "label": "Б-002"
+      },
+      {
+        "source_group": 65,
+        "glyph_sha256": "a2d11403f5309d4888e72e3299032ee8e2bb18318940f08f960f20f9f7a33c00",
+        "label": "Б-001"
+      },
+      {
+        "source_group": 66,
+        "glyph_sha256": "336d0eb5bdc4b82bedef95f0d50ab7da011459bc7a685d64012e348edec4ef26",
+        "label": "Б-004"
+      }
+    ],
+    "1": [
+      {
+        "source_group": 0,
+        "glyph_sha256": "6359c0bd35685c8693bac0fa8534932931f4c13a488661ea8d22fd90c1107515",
+        "label": "А-142а"
+      },
+      {
+        "source_group": 1,
+        "glyph_sha256": "ceb6809ddd2df4bd7dfbacc89d36a0e55582bde1ad31f3b60621fa99913525d6",
+        "label": "А-142"
+      },
+      {
+        "source_group": 2,
+        "glyph_sha256": "d1bdaf176400193e9840ed552b6a72ba3986af7eaf1e5ecb8cab6a9b5cc640a4",
+        "label": "А-141"
+      },
+      {
+        "source_group": 3,
+        "glyph_sha256": "0b695e8d5d02369ab44991713e0b30b5d8a337225554a4886e662613fab25ac3",
+        "label": "А-140"
+      },
+      {
+        "source_group": 4,
+        "glyph_sha256": "d3d3eb9cfdc0432aaafdeb0ce9f846a46254307c07252d6d587f46e3610358c1",
+        "label": "А-144"
+      },
+      {
+        "source_group": 5,
+        "glyph_sha256": "2aa230523168b21386aefb727e1b1ea95040549914929f70597ea627ab266279",
+        "label": "А-143"
+      },
+      {
+        "source_group": 6,
+        "glyph_sha256": "3fee57f73835e8d2e60c8d35cccda7e45e8900e92655defb08aa3bc2548ffa8b",
+        "label": "А-145а"
+      },
+      {
+        "source_group": 7,
+        "glyph_sha256": "0e4fc4f0196ffa8899e28fe49b216f56e9b1daff8a4821451ac6c7b19e8bcf04",
+        "label": "А-145б"
+      },
+      {
+        "source_group": 8,
+        "glyph_sha256": "8eb7dc57311af338f735380289494f53abf852b0694c3dd5acee714c0b3c2a27",
+        "label": "А-146а"
+      },
+      {
+        "source_group": 9,
+        "glyph_sha256": "521e907fb612a5d0dc6e7675ce238bae6b030349095e5f0ab29a11ccdc6f696c",
+        "label": "А-146б"
+      },
+      {
+        "source_group": 10,
+        "glyph_sha256": "6c8edd963945233d591301f2de651b9b0bd18319f6312a558318ff68f97eb65a",
+        "label": "А-146"
+      },
+      {
+        "source_group": 11,
+        "glyph_sha256": "1cea8313095d93c0c081320bbe904df995772da5da27f265183c354d10601845",
+        "label": "А-124"
+      },
+      {
+        "source_group": 12,
+        "glyph_sha256": "a83c8879febe32eea7065afb3c17f3ce06ca624ae9c5eed631af2e4a3af2376b",
+        "label": "А-125"
+      },
+      {
+        "source_group": 13,
+        "glyph_sha256": "821d547ddd0be04fd55b06244ee1248c88b802519031f45485e5426fe74575d9",
+        "label": "А-121"
+      },
+      {
+        "source_group": 14,
+        "glyph_sha256": "24aa039e6392e1900e8036bfe884627916b6624e1a79500c6d7b21636eff17c4",
+        "label": "А-121а"
+      },
+      {
+        "source_group": 15,
+        "glyph_sha256": "d644c0c111cb31edc14de2d1dd943c053af80b128443f4ce1afd2ecd6feccbda",
+        "label": "А-167"
+      },
+      {
+        "source_group": 16,
+        "glyph_sha256": "189c5b5a32a03748c52a1ea31aef4cc7c5f3c32faee86ddd10b1f013e05e9341",
+        "label": "А-166"
+      },
+      {
+        "source_group": 17,
+        "glyph_sha256": "e048ff6095991c07e36a0431a875119401bcbd4b1e923986cd8fac3c193408e4",
+        "label": "А-163"
+      },
+      {
+        "source_group": 18,
+        "glyph_sha256": "bfd8d838643ee976691f1fd6339b716c6888fc3b12657fffefdb4041f284aa63",
+        "label": "А-162"
+      },
+      {
+        "source_group": 19,
+        "glyph_sha256": "834332b88b4834e277066fb2e57c74860ed9c856ba8f66ec1fdcd36013768d7c",
+        "label": "А-164"
+      },
+      {
+        "source_group": 20,
+        "glyph_sha256": "962efa47337b7119fbb00b85ce5de89f586364272caeb7adeff574b9810841a3",
+        "label": "А-168"
+      },
+      {
+        "source_group": 21,
+        "glyph_sha256": "9389c5ed585fe0c0051d07089bc15124ece04fafe987d7f43b07c854f2730286",
+        "label": "А-167б"
+      },
+      {
+        "source_group": 22,
+        "glyph_sha256": "d987da792ffa203ad797cc176b97dcfc7ba087c30d0b0ef40a623d0d6bad58e3",
+        "label": "А-168б"
+      },
+      {
+        "source_group": 23,
+        "glyph_sha256": "6c62a86fa99f60cfb1bda452c31e3fd6a7f066177ac86d807182fb0311928862",
+        "label": "А-168а"
+      },
+      {
+        "source_group": 24,
+        "glyph_sha256": "db9106e38a730124738d8f3cc4f2e1c67c2536992dbf8b74cac7c70e6e1343a2",
+        "label": "А-165"
+      },
+      {
+        "source_group": 25,
+        "glyph_sha256": "1531474a3decf73119221a7af04bd863583ff6668b7d94caa5f1fcd225e0c3c8",
+        "label": "А-102б"
+      },
+      {
+        "source_group": 26,
+        "glyph_sha256": "df0f43c53a34bed594bc16601d48c5f1acb6135ccd7b27d82ece7e95162c57fd",
+        "label": "А-103а"
+      },
+      {
+        "source_group": 27,
+        "glyph_sha256": "d145595d402c36f93971e6bf2e584bf4f8fa826c44cda44e1c836736d6dc26db",
+        "label": "А-120а"
+      },
+      {
+        "source_group": 28,
+        "glyph_sha256": "233a516fe27c01c85605ff9c9fab2cd67d2201348fd2e56bc0e345364a284b54",
+        "label": "А-120"
+      },
+      {
+        "source_group": 29,
+        "glyph_sha256": "a52b1d4cd7fc7217f4e3e548982fa1e3ae99235f981f60285d59ea8108db34e3",
+        "label": "А-103"
+      },
+      {
+        "source_group": 30,
+        "glyph_sha256": "7451a990aa9d2431b5fee636dc3db9814fff007b4fe3bd67bc0483a4a6e57aa3",
+        "label": "А-108"
+      },
+      {
+        "source_group": 31,
+        "glyph_sha256": "5a2a8324aa52020b699a284abafaebd83e84fab1a5fa9b33988e50c1a4ebcaeb",
+        "label": "А-110"
+      },
+      {
+        "source_group": 32,
+        "glyph_sha256": "b24b3263132a4cbb486a479a773ad9eef127489836ef5bd5efc67409721ba993",
+        "label": "А-111"
+      },
+      {
+        "source_group": 33,
+        "glyph_sha256": "80f20ea62e35b4b6c503bfe067c80bc7d87879a43c4a15e5b3433bcfbc22a8e6",
+        "label": "А-112б"
+      },
+      {
+        "source_group": 34,
+        "glyph_sha256": "e0e1b1d6fd64796b4b7c0d8a4545e9eacb4af98c41c23776890073ada7b3a686",
+        "label": "А-112а"
+      },
+      {
+        "source_group": 35,
+        "glyph_sha256": "644e01eb8205b8cd17aca7e0dc5efa808dcff5fd3f994bd4fcac10ee6a7f1ffb",
+        "label": "А-102а"
+      },
+      {
+        "source_group": 36,
+        "glyph_sha256": "ce69fe600f5d124716d984db019fd1947134c6f454879e8c67d253f19fb580cb",
+        "label": "А-109"
+      },
+      {
+        "source_group": 37,
+        "glyph_sha256": "2d3a75188398f19b37ea8ba1d9566ba3f1d15e01f09bd5f0aa51c3d427eb863c",
+        "label": "А-157"
+      },
+      {
+        "source_group": 38,
+        "glyph_sha256": "60bcb7184e4ed6007fd18ebd4e004c5472da95acb6fa509a76f1a11df6208fa1",
+        "label": "А-156"
+      },
+      {
+        "source_group": 39,
+        "glyph_sha256": "3f11059b5a3366e082dfbda75bb60924fabb9d84af39fe7b833211588f7e6d01",
+        "label": "А-155"
+      },
+      {
+        "source_group": 40,
+        "glyph_sha256": "9f5f53d9aa4ed00399d7b082f7306dd95f4666d721b1cc0498a5afe652fb2cdb",
+        "label": "А-150"
+      },
+      {
+        "source_group": 41,
+        "glyph_sha256": "51c49855cb6a91d57e61b13f275fd31d3a1b5a0846a2a9897fff9b7405a2ab76",
+        "label": "А-151"
+      },
+      {
+        "source_group": 42,
+        "glyph_sha256": "467776ae877372c575ba3b3f50bd2599811c26ac9aabf236a4fdc4ccfb7fd5d4",
+        "label": "А-152"
+      },
+      {
+        "source_group": 43,
+        "glyph_sha256": "a0b267642aa571931a84b3cc0cdb14eec544194fc0f8a05f12498d36ea7231d2",
+        "label": "А-153"
+      },
+      {
+        "source_group": 44,
+        "glyph_sha256": "45a5c8b5bd3453dfbef012d1b7648353b8671a0e9c05b1c5095a2532483e3ede",
+        "label": "А-154"
+      },
+      {
+        "source_group": 45,
+        "glyph_sha256": "45075cf091675cd8104e213fc5d10f5fbb744770800a294b49afa98d25058712",
+        "label": "А-113"
+      },
+      {
+        "source_group": 46,
+        "glyph_sha256": "cbd8bd023e54292a07ec7e1f92c1d39b5cc9cbdddabdb044bb163b33dfad5349",
+        "label": "А-116"
+      },
+      {
+        "source_group": 47,
+        "glyph_sha256": "6fd602f96feeac357b55aaf659da4d8a35cb3276f54dc6cf3d89f2eafdd8d5fd",
+        "label": "А-114"
+      },
+      {
+        "source_group": 48,
+        "glyph_sha256": "ce7b14481c6069bf2076db39ae785025736901324f9383a3dc0af0d237449a89",
+        "label": "А-115а"
+      },
+      {
+        "source_group": 49,
+        "glyph_sha256": "7eb41ecae47fab748bf5d41f4e0d886d91fbe13128c18dff1865513ea1d95ea1",
+        "label": "А-115б"
+      },
+      {
+        "source_group": 50,
+        "glyph_sha256": "d7149d0de4e70186188552a8212d7b9a29e126c532a3c8f751b191f005eabc4b",
+        "label": "А-131"
+      },
+      {
+        "source_group": 51,
+        "glyph_sha256": "6cf2b95180de8f62a7e7fc031e8294946693106a6e7cbdf8744f9be6399045cd",
+        "label": "А-132"
+      },
+      {
+        "source_group": 52,
+        "glyph_sha256": "84342887971707e01da340d9059ae7cfc425ea3d86b362c23d0bdf20acc0f825",
+        "label": "А-132а"
+      },
+      {
+        "source_group": 53,
+        "glyph_sha256": "a34373d2202ec7ee9dda11a5c62b5cbe60ab19277e930c8d7cbe6ac63c5097a9",
+        "label": "А-132б"
+      },
+      {
+        "source_group": 54,
+        "glyph_sha256": "313f1146a3db894ef860a56bb7b228c07bad30651734e8bca75e903d0f0d3467",
+        "label": "А-133"
+      },
+      {
+        "source_group": 55,
+        "glyph_sha256": "4fb6e30d71956d659337b47c7594ee635bc7325c5f3283a3acc739ff617cab38",
+        "label": "А-133а"
+      },
+      {
+        "source_group": 56,
+        "glyph_sha256": "9e49a22f0a6350068b3541b74a1d0e6491b9415e7bcfd919f9d680f1dcf41aba",
+        "label": "А-135а"
+      },
+      {
+        "source_group": 57,
+        "glyph_sha256": "c9697dc452208a7f42e1122d82cc6db03b10b90824e96893b990254f13c424fa",
+        "label": "А-135"
+      },
+      {
+        "source_group": 58,
+        "glyph_sha256": "f2552a770037e86863c7ec92e815dc559a3bc0fc5bc1353f14f475532a8f0151",
+        "label": "А-136"
+      },
+      {
+        "source_group": 59,
+        "glyph_sha256": "379d344e6d2fcba7b7721db56f36e93a616166df3a5997d6492009a31045a2ca",
+        "label": "А-137"
+      },
+      {
+        "source_group": 60,
+        "glyph_sha256": "4203ff922c3dc70d56275e9be5e493530cb037e9d8e49a6f6d791c7840bf091e",
+        "label": "А-138"
+      },
+      {
+        "source_group": 61,
+        "glyph_sha256": "0ff91ead4e71016d361d946508ef6988b2a372ad76f3978063b2511cfc962e0d",
+        "label": "А-139"
+      },
+      {
+        "source_group": 62,
+        "glyph_sha256": "fae408cf0b4ed27f81fff394c8761f543c12845b4e6774f8b7d90b1ce2970ac3",
+        "label": "А-134"
+      },
+      {
+        "source_group": 63,
+        "glyph_sha256": "a2891203128c81feab6394799cd211eb78ccdcfbae60adce412b57b34b804f2a",
+        "label": "А-155а"
+      },
+      {
+        "source_group": 64,
+        "glyph_sha256": "0f7ff44f682f422bab54dad3b9278c0acc7f5c7f0eeb3bf41b926c11c5770098",
+        "label": "А-112"
+      },
+      {
+        "source_group": 65,
+        "glyph_sha256": "8ce0af514625f7befc6379974406b7baf89524a49603b4708628e84d1696e77b",
+        "label": "А-161"
+      },
+      {
+        "source_group": 66,
+        "glyph_sha256": "5b490a61a6b1f2210ef96846c68e5363271f04fe2a3cde8fa5d817d92240bf87",
+        "label": "А-160"
+      },
+      {
+        "source_group": 67,
+        "glyph_sha256": "42ac751162ffed3d4c7ae927110459944f3a110602e43943e18c4081af5ced2e",
+        "label": "А-122"
+      },
+      {
+        "source_group": 68,
+        "glyph_sha256": "91cf4ed6821d9a928d323d82c9c21fdf6839f5671c519320c6206b613b1623f4",
+        "label": "А-123"
+      },
+      {
+        "source_group": 69,
+        "glyph_sha256": "53051395a09fbb984ed15ce145a094b18a30e778da93c931bb1d188aa301bd3b",
+        "label": "А-146в"
+      },
+      {
+        "source_group": 70,
+        "glyph_sha256": "46e6fa2731316d7c59e1965e41045299ff1784811d51b1389a9cf36cfcddd3e6",
+        "label": "А-145"
+      },
+      {
+        "source_group": 71,
+        "glyph_sha256": "8de4fec99bb54fb17073402dde649a5e3f74bf434bfe44806a858e13db253fc1",
+        "label": "Б-106"
+      },
+      {
+        "source_group": 72,
+        "glyph_sha256": "18ebf7a08a2ec31c2c0ed53cb69102c6ba782d82a9160618570a8f0a54463eb0",
+        "label": "Б-107"
+      },
+      {
+        "source_group": 73,
+        "glyph_sha256": "2954af0f4419891ad6b706f1d6d1266e2da4429ff615105ffc311958ea061ed3",
+        "label": "Б-108"
+      },
+      {
+        "source_group": 74,
+        "glyph_sha256": "b38c43fec9f694bdb985659d702549fecae3db8a74738bbc7c26585f064ecd0b",
+        "label": "Б-111"
+      },
+      {
+        "source_group": 75,
+        "glyph_sha256": "04bd60e7143ab1eb93f1360d172fad36a4beb85bb4e01d72bc1ed89d17eaf3f4",
+        "label": "Б-113"
+      },
+      {
+        "source_group": 76,
+        "glyph_sha256": "76c4519aff91cd2075055d82958eb99b55cc801486a14609116e65f9a5ddde8d",
+        "label": "Б-109"
+      },
+      {
+        "source_group": 77,
+        "glyph_sha256": "ec182b108aa99c06cde4a7f5207970938ff6fad59bd05b5bb2c1f463fb199c9f",
+        "label": "Б-110"
+      },
+      {
+        "source_group": 78,
+        "glyph_sha256": "91cfef307a03c25ff57bc57c18cce27eeefc878cff982605238f4367422f845e",
+        "label": "Б-112"
+      },
+      {
+        "source_group": 79,
+        "glyph_sha256": "fa7dbec37510befdbc98900cbe3b198a2a01c1e279f92e0cae0b57f1645be478",
+        "label": "Б-114"
+      },
+      {
+        "source_group": 80,
+        "glyph_sha256": "6768e5af790decdce8e33d36c9dce6966d877b59de3e421e69f408e29baf2745",
+        "label": "Б-115"
+      },
+      {
+        "source_group": 81,
+        "glyph_sha256": "5b89fada5bef5595e37c80aff92d89be37945d5f571b293c0ccb5995f0d6ad14",
+        "label": "Б-116а"
+      },
+      {
+        "source_group": 82,
+        "glyph_sha256": "afd86ff3ac45ab2eb7912eeae64164142d92e3a6381bdb789737a1ed6e3711cc",
+        "label": "Б-116"
+      },
+      {
+        "source_group": 83,
+        "glyph_sha256": "75a690812e1ec9da60957e8327ab305be3f394c59329f406176b60aeba44ca53",
+        "label": "Б-116б"
+      },
+      {
+        "source_group": 84,
+        "glyph_sha256": "c20cd862d5290cb8364e95995d7c477e3f62a2df125f6f862856c1d2acdde240",
+        "label": "Б-105"
+      },
+      {
+        "source_group": 85,
+        "glyph_sha256": "a433a6849a21c07917532308dfed5be97ec1c1738f8f2e83f44e8da94a935d89",
+        "label": "Б-101"
+      },
+      {
+        "source_group": 86,
+        "glyph_sha256": "e4e74ca403d81c175b11b513872d4ba71900dd78ee5a74c758e9915f098ebd28",
+        "label": "Б-103"
+      },
+      {
+        "source_group": 87,
+        "glyph_sha256": "91bc9d2504fed24d97c764464a5bad14282c51041c6388c0308836e9a58f5b0b",
+        "label": "Б-102"
+      }
+    ],
+    "2": [
+      {
+        "source_group": 0,
+        "glyph_sha256": "cce5149b973349485efe9989d320669a361af6a3da2e54f4076946f1eb6dbe65",
+        "label": "А-245"
+      },
+      {
+        "source_group": 1,
+        "glyph_sha256": "7905aae0f034ca2897075324245abbce001350b29836a56e5f6e3fbf1e3b493a",
+        "label": "А-245б"
+      },
+      {
+        "source_group": 2,
+        "glyph_sha256": "87ca17a65528694d20a24ed6a8312327877ce4ec1e16c6cd48abec9c5def21ed",
+        "label": "А-245а"
+      },
+      {
+        "source_group": 3,
+        "glyph_sha256": "afdd643763f89df347fb9b42eb8eb2469c7e816d6c113b9759606ae559bee55a",
+        "label": "А-246"
+      },
+      {
+        "source_group": 4,
+        "glyph_sha256": "aa821ebc0456c5134800a9cfe599b9be49f0d8081fd2e132abb593842d58c9f2",
+        "label": "А-247"
+      },
+      {
+        "source_group": 5,
+        "glyph_sha256": "ea4212ba26918c360a0a94206e429dc9e38a9374ab99b7a705628772aa535071",
+        "label": "А-248"
+      },
+      {
+        "source_group": 6,
+        "glyph_sha256": "2961a26b0616cde3bd801de4058abb24462af1c0abcaa4802f118522ef1380fd",
+        "label": "А-249"
+      },
+      {
+        "source_group": 7,
+        "glyph_sha256": "a74c926ca37b90955fe6c14475b3a2a5d5d7291e2ca3f476d7dba2b59d623311",
+        "label": "А-222б"
+      },
+      {
+        "source_group": 8,
+        "glyph_sha256": "8556fa0e1c4e5953dc0238c89d405c8537518edd2b5629c2c70e9501870b13fe",
+        "label": "А-224"
+      },
+      {
+        "source_group": 9,
+        "glyph_sha256": "840ca9046b43c8032664bc015d061b78b1c3f0f89ec500a57a68576853cce85b",
+        "label": "А-225"
+      },
+      {
+        "source_group": 10,
+        "glyph_sha256": "56e3c00d4a151f9cf9e69590529a53f36bf66fb88a49ffd8e9344214c50ac334",
+        "label": "А-266"
+      },
+      {
+        "source_group": 11,
+        "glyph_sha256": "9f0a7fd193fabb128c669d8266764baa7d13f40657d3e04522abf9111c9ad312",
+        "label": "А-265"
+      },
+      {
+        "source_group": 12,
+        "glyph_sha256": "b488d772199f867045c199eaafb2491cd0bb65a120633583b7ceba8293710d87",
+        "label": "А-264"
+      },
+      {
+        "source_group": 13,
+        "glyph_sha256": "2e789c46a27410cf1d001f698a43ef1c20056585283ffda758a71c8dc3e72893",
+        "label": "А-263"
+      },
+      {
+        "source_group": 14,
+        "glyph_sha256": "b55cfb9482728b1d41f3189b1a52ca9c036de591514c17b4ed551bc9245e1fa1",
+        "label": "А-262"
+      },
+      {
+        "source_group": 15,
+        "glyph_sha256": "73e6425537f1ec77a9032c0fb363fba92f4275746bb8c7afde35f6c8e02bb831",
+        "label": "А-261"
+      },
+      {
+        "source_group": 16,
+        "glyph_sha256": "2d416006af386828761012b5607105027fb9b52af63b5a332f00b6e87bdddb1a",
+        "label": "А-260"
+      },
+      {
+        "source_group": 17,
+        "glyph_sha256": "b4a6e9d0beb7660dc75b6a3b3c2d629b78e5aa104cd4f75fa09848bac6e37f00",
+        "label": "А-221"
+      },
+      {
+        "source_group": 18,
+        "glyph_sha256": "50e93b582a2493f06a8d84dbda35fd0daf728862828f3f22ac4e279554295276",
+        "label": "А-220"
+      },
+      {
+        "source_group": 19,
+        "glyph_sha256": "8c4cd7d3bb46d2b68b8e810968704e59839451248cbfd4126c6c5bafbcf6aa48",
+        "label": "А-220а"
+      },
+      {
+        "source_group": 20,
+        "glyph_sha256": "e4b82589f9854a4695f270cbce09b32f198bd2ace5bae8d37d5cc4a15e995e74",
+        "label": "А-200"
+      },
+      {
+        "source_group": 21,
+        "glyph_sha256": "06ca276a57e3f87526ccaffc0c6d8ea351733918afa711dc8c5d130dd094ef40",
+        "label": "А-210"
+      },
+      {
+        "source_group": 22,
+        "glyph_sha256": "9047531166c36555dd0044d6580b2289d6ebbb854df30e78e575d31163037a45",
+        "label": "А-211"
+      },
+      {
+        "source_group": 23,
+        "glyph_sha256": "18a170a3bd5bb9ecde89caab586296d60f030eb4812a657f0f709abadb9d861c",
+        "label": "А-212"
+      },
+      {
+        "source_group": 24,
+        "glyph_sha256": "6b30e8d656247696ad231de4d7a354525864b8681d469080104a729c56d2d024",
+        "label": "А-213"
+      },
+      {
+        "source_group": 25,
+        "glyph_sha256": "ae5fc9d2c7afc82838af0b097411067c8205e3c03a17d1f5a5909a8a1e52ab4d",
+        "label": "А-214"
+      },
+      {
+        "source_group": 26,
+        "glyph_sha256": "6ef266ea7017dae28a59d5a629b7867afc2d7af355c87fac27caaf283836e9d7",
+        "label": "А-231"
+      },
+      {
+        "source_group": 27,
+        "glyph_sha256": "865296c1e3ddcf02eaafaee6f0c4afddee9e3572c9abeb3dcfe6e0cffb493eaf",
+        "label": "А-232"
+      },
+      {
+        "source_group": 28,
+        "glyph_sha256": "e98776cd671809d9f97597fa3cd021432be731dd3eea4d4307bae575fdd2476a",
+        "label": "А-233"
+      },
+      {
+        "source_group": 29,
+        "glyph_sha256": "adc6b0e34692ee5efd4bcd66db3bcc471f93038412938095f5824e3682743d65",
+        "label": "А-234"
+      },
+      {
+        "source_group": 30,
+        "glyph_sha256": "2f3ff2e9aa82a1f017745679a55cf2f880d52a50cd7cbf3734504b6638a42751",
+        "label": "А-235"
+      },
+      {
+        "source_group": 31,
+        "glyph_sha256": "509e05b5e0003a47b39b24d96df78382d6fa9de7d8276108eb69714903e7e46f",
+        "label": "А-236"
+      },
+      {
+        "source_group": 32,
+        "glyph_sha256": "55db64a6ce2f05e0fb5bfa2fdf008ded7ddd67781a7375454bb5763c322a2489",
+        "label": "А-251б"
+      },
+      {
+        "source_group": 33,
+        "glyph_sha256": "8509003135672c9454471415cde9a599e5c7f241bb2f21d7884a3e253fecca86",
+        "label": "А-251а"
+      },
+      {
+        "source_group": 34,
+        "glyph_sha256": "4d56a103abd537266eb0ed103e4c961bc0458859af4b60aa7c743732f528952d",
+        "label": "А-252"
+      },
+      {
+        "source_group": 35,
+        "glyph_sha256": "d221ae7b674e4f61be6faeeaa9cfaf9a978f7b8d14e44371978c8016eb390965",
+        "label": "А-253"
+      },
+      {
+        "source_group": 36,
+        "glyph_sha256": "f5a96e94b7988344a1b157399ec3fa7ef4b658c9de6c8c8839c4c065fb1c61a4",
+        "label": "А-255"
+      },
+      {
+        "source_group": 37,
+        "glyph_sha256": "44691edd650d57f3feb8ede16726d194328aa8f17eab95d51ec58141328fdae2",
+        "label": "А-256"
+      },
+      {
+        "source_group": 38,
+        "glyph_sha256": "c56c963f3a346ac48ed88d4857a7af126a83a08ebd22a2584d3300ea2d168283",
+        "label": "А-257"
+      },
+      {
+        "source_group": 39,
+        "glyph_sha256": "e01edbd011ae5f08e4d8a74ed83c0c0ad7c20878d9b8408a85b8ead7a52538e3",
+        "label": "А-254"
+      },
+      {
+        "source_group": 40,
+        "glyph_sha256": "aa857476491d5dc472117da6ca1faee0b80fa605d8926986f0a64f8aa5727e28",
+        "label": "Туалет"
+      },
+      {
+        "source_group": 41,
+        "glyph_sha256": "8fdb60e713dced1be3df7f4270550bc6efe28e790a1eea3f14bd00df2c875d9a",
+        "label": "А-201"
+      },
+      {
+        "source_group": 42,
+        "glyph_sha256": "eb08fadb125aaaa73e2bb9da114ec19583ece7f0d9f4d36ac58edb9d6993b380",
+        "label": "А-63"
+      },
+      {
+        "source_group": 43,
+        "glyph_sha256": "2ad336ff00317bca90fc447c99ae1271bed6fcf27d23eee4d147867dfde93e5b",
+        "label": "А-61"
+      },
+      {
+        "source_group": 44,
+        "glyph_sha256": "489aedc5d21706e300ba3a15de8c7f498b0b21a7f33b3af7aa477ffab5166cb3",
+        "label": "Туалет"
+      },
+      {
+        "source_group": 45,
+        "glyph_sha256": "03f15feb9f412afe3d4bc06c926b5a36df81af8133aa47662d0523a6bb55880e",
+        "label": "А-223"
+      },
+      {
+        "source_group": 46,
+        "glyph_sha256": "3f038f6ee2893d4486cd2928054a1ce919415008194881c61bb4aabd0d59a104",
+        "label": "А-222а"
+      },
+      {
+        "source_group": 47,
+        "glyph_sha256": "3fbf7b47fce3270ec0abddbb5ac556f1e253c055f0649944f5d85668b95c8312",
+        "label": "А-244"
+      },
+      {
+        "source_group": 48,
+        "glyph_sha256": "4a6afb074e1f07f5a3c8899bff4b449dd66450c0b089534ec1d61fd0bf89bb61",
+        "label": "А-243"
+      },
+      {
+        "source_group": 49,
+        "glyph_sha256": "847264b4809ced47d3d2e687d8077880393bdbd2ebb7f850f4442b13afd1b2b6",
+        "label": "А-242"
+      },
+      {
+        "source_group": 50,
+        "glyph_sha256": "9fd981e8e035da5649f251ee2ba297ca5cd11b3742b5f07ac28da63b55236b73",
+        "label": "А-241"
+      },
+      {
+        "source_group": 51,
+        "glyph_sha256": "f44e5df1688876b381f2c44f53aca23eaebd91f29da752c02ee0aad8738baf0c",
+        "label": "Туалет"
+      },
+      {
+        "source_group": 52,
+        "glyph_sha256": "73f7f9f55b22ee2e0fb7d96a52223c989502a0e9e71b88962d74ee307b5b327e",
+        "label": "Б-207а"
+      },
+      {
+        "source_group": 53,
+        "glyph_sha256": "904244264107a4abb672065bf8105734e7005da5fc9aa62326acad12d572612c",
+        "label": "Б-209"
+      },
+      {
+        "source_group": 54,
+        "glyph_sha256": "f5886d861b4453bb5dd47acd5056cfa9493c718eba149626cff7a4ea4315bacf",
+        "label": "Б-210"
+      },
+      {
+        "source_group": 55,
+        "glyph_sha256": "ef512f3a771ed71e52f334088d8b83191350bae05149c98fcbf3be4b6f5a37ef",
+        "label": "Б-211"
+      },
+      {
+        "source_group": 56,
+        "glyph_sha256": "714353db06afb84c07d7f4769533028ccd8e3115601489e494d2cbd194ae8006",
+        "label": "Б-212"
+      },
+      {
+        "source_group": 57,
+        "glyph_sha256": "558cfae450a3d0e743ce54eddf8e50231c9fa87d8b0bc274a2c36eac9e90ac71",
+        "label": "Б-213"
+      },
+      {
+        "source_group": 58,
+        "glyph_sha256": "baae3241f58d39afadd49bb20d30e76fc04aff80ef23e9e96614907381a8edd8",
+        "label": "Б-208"
+      },
+      {
+        "source_group": 59,
+        "glyph_sha256": "9af2e5b5fbaae2961f4e9475094a0c5498694df468fa402ff0f3090985de2465",
+        "label": "Б-207"
+      },
+      {
+        "source_group": 60,
+        "glyph_sha256": "4316682bb9ac39bfc78e82824884d0ff14343399237af3eda207ec5565852a3f",
+        "label": "Б-206"
+      },
+      {
+        "source_group": 61,
+        "glyph_sha256": "da552543d2cc37dd57670aa12c14ecfa083df22e442ceb78c15f4b0baa7ccfa6",
+        "label": "Б-206а"
+      },
+      {
+        "source_group": 62,
+        "glyph_sha256": "4d529f019fce9ac8e5b4e51c5050e24ca89137e376596490a9316fc424f0cac4",
+        "label": "Б-214а"
+      },
+      {
+        "source_group": 63,
+        "glyph_sha256": "e983bc09de01f067e0a8133ade4944a942f0ca3ab54bfecc91903faa81ab15f1",
+        "label": "Б-214б"
+      },
+      {
+        "source_group": 64,
+        "glyph_sha256": "8935fe06d553cd2670edec435055541460cc17630121caa5a853d756175d154c",
+        "label": "Б-214"
+      },
+      {
+        "source_group": 65,
+        "glyph_sha256": "977207d09ff0b1bf4c1cb5dda99e2899a6c1d2ec02df5fb96f5d2b208b5bca10",
+        "label": "Б-215"
+      },
+      {
+        "source_group": 66,
+        "glyph_sha256": "ff38a2a3dd7d5b36c80438a371bc7ef8e13f665bccd5c01bc6d97477e31d9ae1",
+        "label": "Б-204"
+      },
+      {
+        "source_group": 67,
+        "glyph_sha256": "5dbb66141f4e40189a855d222a83e122a948af6d49a69c5d181188e43616677b",
+        "label": "Б-202"
+      },
+      {
+        "source_group": 68,
+        "glyph_sha256": "b51885646c25c699cadfe18d9fdeff7123c8e33641cc1d24d0db714d1c07bce5",
+        "label": "Б-201"
+      },
+      {
+        "source_group": 69,
+        "glyph_sha256": "6adb323acdb28e57bf3eab243b3948c40ecf433489ef34cde17f1b3fa2a3ad93",
+        "label": "Б-203"
+      }
+    ],
+    "3": [
+      {
+        "source_group": 0,
+        "glyph_sha256": "20914849791bbac6f201000a3afe5f12e0999924341ec91a98e85f51041351b0",
+        "label": "А-342б"
+      },
+      {
+        "source_group": 1,
+        "glyph_sha256": "6d2c8d5d78f0351007642b175fbfe70a870b1cceb484413d9e1d1e8f08e917eb",
+        "label": "А-341б"
+      },
+      {
+        "source_group": 2,
+        "glyph_sha256": "913a0d39b0dd3d4f95d9af8cd0ec1d5280e97b1b82b242c2d1837881b437babf",
+        "label": "А-341а"
+      },
+      {
+        "source_group": 3,
+        "glyph_sha256": "4b0c78b8683080005a5e62a6df250030637c02c1f48247a15c58d092b99d496d",
+        "label": "Туалет"
+      },
+      {
+        "source_group": 4,
+        "glyph_sha256": "f0453d424f04ed13a3afa11d0ecac69cb7c9f66ee220762c054d2fe4c4031760",
+        "label": "А-341"
+      },
+      {
+        "source_group": 5,
+        "glyph_sha256": "a78b621a46a24e32488953daebfbbfe3975998fdfc7d53c319dd3d2bb636858d",
+        "label": "А-342а"
+      },
+      {
+        "source_group": 6,
+        "glyph_sha256": "ce59a34c44c108bc38be8d4beaa7e23233d2ec5d199bb681daf6d558d05f2af8",
+        "label": "А-342"
+      },
+      {
+        "source_group": 7,
+        "glyph_sha256": "eac071e6a4710f1cadfc31b1ee3c74ef37b883e9f06ba80192f559dc938bf4d4",
+        "label": "А-344б"
+      },
+      {
+        "source_group": 8,
+        "glyph_sha256": "0aeb1ba418fe34f8f428afd393d343a71c2f74d773daeb76089bf7b71af91971",
+        "label": "А-344в"
+      },
+      {
+        "source_group": 9,
+        "glyph_sha256": "4b1105330e8c37b52782b03a29d34fead0ef20546bc45a3c8959d7630205d407",
+        "label": "А-345"
+      },
+      {
+        "source_group": 10,
+        "glyph_sha256": "d66ae54c10a14a8783571e76ea231e9acffc0d8a585501333237fcc0b4765a95",
+        "label": "А-346"
+      },
+      {
+        "source_group": 11,
+        "glyph_sha256": "97d864fc9d3661077bb6ab25b98a7e1379d570376f3c3e3bfc8e09242e451048",
+        "label": "А-347"
+      },
+      {
+        "source_group": 12,
+        "glyph_sha256": "ce545a2ab4eace52336a263f2c3696b16f3e8d7607fc6cf76b024473a294884e",
+        "label": "А-323а"
+      },
+      {
+        "source_group": 13,
+        "glyph_sha256": "4f4122605f444a5fecaf69c3c87e85ddce100cce202667656ec930823eb71150",
+        "label": "А-323"
+      },
+      {
+        "source_group": 14,
+        "glyph_sha256": "53e177af88fdd2ea470c5a8372ec36d6f00cbd5ead4ea5b5158cdb005e9cc37e",
+        "label": "А-323б"
+      },
+      {
+        "source_group": 15,
+        "glyph_sha256": "a7b4472271a2418297af2ffc89f45d2a475cd88f6a934885200eefab9661d841",
+        "label": "А-322"
+      },
+      {
+        "source_group": 16,
+        "glyph_sha256": "7310aa114cd3effb261de01e8dfbd3deab4fcc6fab20220ed6eceeae18db5290",
+        "label": "А-321"
+      },
+      {
+        "source_group": 17,
+        "glyph_sha256": "dddaf77747f3db2d69a73e26bd22bae7e98719f8d5ed05ee80efb85ac30abdff",
+        "label": "А-325"
+      },
+      {
+        "source_group": 18,
+        "glyph_sha256": "c48bf57308eb8d76399ac17f4b4c13a332ccec3eb4e3fb77436ef6b0d54297b5",
+        "label": "А-326"
+      },
+      {
+        "source_group": 19,
+        "glyph_sha256": "e3528142e499c9391eb78a812bf1114d34c750bf748853de1ca73ba0c8eb673f",
+        "label": "А-327"
+      },
+      {
+        "source_group": 20,
+        "glyph_sha256": "0d2616f1e1b14c3380825d4973ff885d2118a64a825e00e0f900f663544aef60",
+        "label": "А-328"
+      },
+      {
+        "source_group": 21,
+        "glyph_sha256": "d9ca972efe0d1e9d6a698fdba55ff0a7bc0a8f3a321b8b26c33f270fe5e2b280",
+        "label": "А-328в"
+      },
+      {
+        "source_group": 22,
+        "glyph_sha256": "773a3ecca5c38b72d121bb55798fb93a914d79cde3c0499818490394dc9bdc22",
+        "label": "А-328б"
+      },
+      {
+        "source_group": 23,
+        "glyph_sha256": "cba61e87ccd7b59f417cb68dc45f0d230e524a92aeff06b87e67debc7999b3c8",
+        "label": "А-360"
+      },
+      {
+        "source_group": 24,
+        "glyph_sha256": "63b530dc0e09c1ea3e24c45e8c8a0090ad08d85556d387834a0e107d465bbab9",
+        "label": "А-301"
+      },
+      {
+        "source_group": 25,
+        "glyph_sha256": "7b4c8610b6d017eefc90edb6ea9f74ef22531a148c983632027866368989479f",
+        "label": "А-350"
+      },
+      {
+        "source_group": 26,
+        "glyph_sha256": "4bb2ace3a5cf070c6927b9da45cd48be345639ebe6d592011914d26eff6b8bc1",
+        "label": "А-351"
+      },
+      {
+        "source_group": 27,
+        "glyph_sha256": "53a694c6e1b97941868633fdc6eb4433733b5fcc93acc8a52a01e4ecd9f07826",
+        "label": "А-352"
+      },
+      {
+        "source_group": 28,
+        "glyph_sha256": "2759439226f41fa5fafbccc59bc164ec8e48a05bf27105513e1859ff87a370fe",
+        "label": "А-353"
+      },
+      {
+        "source_group": 29,
+        "glyph_sha256": "f4032579fbba72d95f1b84b5c63001292135cf911d0d60b3b7b010f358ddc965",
+        "label": "А-353а"
+      },
+      {
+        "source_group": 30,
+        "glyph_sha256": "90ddd7de867a4b79b0eb526a93443849ef2be3ba72c00630068ea07c934b10cb",
+        "label": "А-354"
+      },
+      {
+        "source_group": 31,
+        "glyph_sha256": "93f21329b127b78be06badc222e878cef952ebe513be78f0527c1ed6d15abe14",
+        "label": "А-355"
+      },
+      {
+        "source_group": 32,
+        "glyph_sha256": "a2dc6c4ce3aa071ef5992495569c9ada11c58bd8dc83694be4a6f0a34ee14caf",
+        "label": "А-356"
+      },
+      {
+        "source_group": 33,
+        "glyph_sha256": "9f9dc24f1da2c4ac21ac957aaa72304cea0748023158441c22ce0e5bf494e4de",
+        "label": "А-357"
+      },
+      {
+        "source_group": 34,
+        "glyph_sha256": "2718024c506454e26a5ad21d2135f3b1993e80b2b975e7054f3d05712d15e921",
+        "label": "А-320"
+      },
+      {
+        "source_group": 35,
+        "glyph_sha256": "191582a352b991f937029ece6b148b180a45989380e3df19b7c0a061e1d96d1b",
+        "label": "А-300б"
+      },
+      {
+        "source_group": 36,
+        "glyph_sha256": "4e0619303a335991656dc6c6fc0c9ec2cb466e3583aa38aa4fa8ce0444edda35",
+        "label": "А-300"
+      },
+      {
+        "source_group": 37,
+        "glyph_sha256": "1e16d2ad23eea11f7033fda27d2c35e5cf10e17abd3f01a24b89fa8f39024a9b",
+        "label": "А-310"
+      },
+      {
+        "source_group": 38,
+        "glyph_sha256": "caa7af83f910a52d9cbd09a5dfdc37e5c3856fe08bcd7fb85b83926545c731fd",
+        "label": "А-311"
+      },
+      {
+        "source_group": 39,
+        "glyph_sha256": "89384b0a341e22e71fc81781b320cab704d7877938cede8a1a7200ed315d9781",
+        "label": "А-312"
+      },
+      {
+        "source_group": 40,
+        "glyph_sha256": "575be7c0ef2e493c6fa6e37597850db0ba659f391ca08e5ed7dbef12b0a10e33",
+        "label": "Ка-311"
+      },
+      {
+        "source_group": 41,
+        "glyph_sha256": "0deb462c5da803cf6252b31881ad35d64e82f3057be1e37285049d771be28750",
+        "label": "Ка-312"
+      },
+      {
+        "source_group": 42,
+        "glyph_sha256": "eaa834afe38ce79999a149ce8d39dcd09e4b3f6f72d018a5cdb534e64be99a5c",
+        "label": "А-331"
+      },
+      {
+        "source_group": 43,
+        "glyph_sha256": "24fb66fdc8eacc9dab39f7d54073e35c128179ce16c47011fec5f19423f74b3f",
+        "label": "А-332а"
+      },
+      {
+        "source_group": 44,
+        "glyph_sha256": "aab1bd25df38c651b3c1923656e2c102f761b544b625814fc0ab12f1235a1cc1",
+        "label": "А-332"
+      },
+      {
+        "source_group": 45,
+        "glyph_sha256": "dfa5fb969a18737f40c7fa4cff2340f15bb9f95d0fa0f166c3ce90d3a01260b3",
+        "label": "А-333"
+      },
+      {
+        "source_group": 46,
+        "glyph_sha256": "72dda1ff8a78575b8ff80e345f78394161446d4e11330b114039b3058cc21009",
+        "label": "А-334"
+      },
+      {
+        "source_group": 47,
+        "glyph_sha256": "e172c06142bcfd536f2aa7ffb23e74d16800b22c7d50c43732d196d56b2b49c3",
+        "label": "А-335"
+      },
+      {
+        "source_group": 48,
+        "glyph_sha256": "25af2c4e8a821837b9b9c0567186d799dd2dcf7e420182425004a40030fa8c14",
+        "label": "А-336"
+      },
+      {
+        "source_group": 49,
+        "glyph_sha256": "84ec33346d9c281eb5bfa2594c9e722f4d57e7666ec359803fe8346018f70061",
+        "label": "А-337"
+      },
+      {
+        "source_group": 50,
+        "glyph_sha256": "9d65d02f3c0bf34f9a698b9e84b816fb62433bb42b4e1767cb18dd69c1b66341",
+        "label": "А-338"
+      },
+      {
+        "source_group": 51,
+        "glyph_sha256": "978f80b7272bb2e0925acdf4de4c7b2d559b2864303b9b8f1ae461ed11d38084",
+        "label": "А-339"
+      },
+      {
+        "source_group": 52,
+        "glyph_sha256": "dfc849682afde1f35a66ecb0b35ff4ae28af0871f4e0202adf38cfa80bae79fd",
+        "label": "А-328а"
+      },
+      {
+        "source_group": 53,
+        "glyph_sha256": "16aecae68b01c760fbdf3acbf27fd1815f7fc9a96e11d760e64fbc252c114256",
+        "label": "А-324"
+      },
+      {
+        "source_group": 54,
+        "glyph_sha256": "93cb1f0aad073c3b1be6bfc70ce83fe61aa266281ddae4f3a9b07b3a01a7bd8c",
+        "label": "А-344а"
+      },
+      {
+        "source_group": 55,
+        "glyph_sha256": "f030754349457ac1349651611b5c955a6b41a74efa0f41ec2e2f9d7233acf67d",
+        "label": "А-343"
+      },
+      {
+        "source_group": 56,
+        "glyph_sha256": "36e3734119a313e944de2faace256af3acee04b3c7801479798b1c7963c1a033",
+        "label": "А-344"
+      },
+      {
+        "source_group": 57,
+        "glyph_sha256": "52b5b72d08c7985278af011961068da64b9838d5f8705c0490b50be72505d56b",
+        "label": "Б-305"
+      },
+      {
+        "source_group": 58,
+        "glyph_sha256": "85a0d8e00a2037a18139ba206f0f6649b7a266d2c89c7ea2e2444ac6b8e52176",
+        "label": "Б-307"
+      },
+      {
+        "source_group": 59,
+        "glyph_sha256": "df545041580addf762a71e0e83b9fc49aff81bdb83cfb008305776b072e98840",
+        "label": "Б-308"
+      },
+      {
+        "source_group": 60,
+        "glyph_sha256": "1a0da07eb804777227934fda31fb8bfb9776145cef0d31c6d9469d93d108c414",
+        "label": "Б-310"
+      },
+      {
+        "source_group": 61,
+        "glyph_sha256": "bf25b08acb92458ce48a713e080a02d36cbf53a8aad85a010bac0d65d4349287",
+        "label": "Б-304"
+      },
+      {
+        "source_group": 62,
+        "glyph_sha256": "5fc18d91de5cfbbb5acf24ae3fdadcb3242852287b51c286cc8041fac4978a48",
+        "label": "Б-306"
+      },
+      {
+        "source_group": 63,
+        "glyph_sha256": "096f3c6a390a70acfe85ebd69fc54a995f610ad676359c779bfdf2aec2ea4d3c",
+        "label": "Б-302а"
+      },
+      {
+        "source_group": 64,
+        "glyph_sha256": "ea1b31681929b7fed22dd89b727fc767ed1f2f944505c58359cd1ebd010f4b02",
+        "label": "Б-301"
+      },
+      {
+        "source_group": 65,
+        "glyph_sha256": "c7b96fcd2009571d1b41a026db48080a35b5ded22401ed5ab6eea375f004afd1",
+        "label": "Б-309"
+      },
+      {
+        "source_group": 66,
+        "glyph_sha256": "6f2b4a07b6a7d2a4577cfcb03ff6b8cbbc57309417b0be01b101931f0f0ecde9",
+        "label": "Б-311а"
+      },
+      {
+        "source_group": 67,
+        "glyph_sha256": "7f283d3d569322ae02f61cdaf97f56c51d78d13f7d7484287f51f1d334ee584c",
+        "label": "Б-311б"
+      },
+      {
+        "source_group": 68,
+        "glyph_sha256": "e9dde4a645f787e95856d6cc5625a7acc34ac213822c775cc6fa7e000e97d2f5",
+        "label": "Б-311"
+      },
+      {
+        "source_group": 69,
+        "glyph_sha256": "8acbf8e311631f5c3b731428800372fd312fb6fbb489eeba0d9412ab758c96e5",
+        "label": "Б-312"
+      },
+      {
+        "source_group": 70,
+        "glyph_sha256": "a10d6ac21a53393bc3fb3422e32081be9d851c5d5d53b549badc36da0639a822",
+        "label": "Б-313"
+      },
+      {
+        "source_group": 71,
+        "glyph_sha256": "dc6ce8af10c3feca4fae6defe057e6ca731806211d5140b46963231168a31348",
+        "label": "Б-302"
+      }
+    ],
+    "4": [
+      {
+        "source_group": 0,
+        "glyph_sha256": "6eeb1fa2e39883d87cf0b9030dd7fe8a918da66d2764357d93b3e03fc2e09dc0",
+        "label": "А-443а"
+      },
+      {
+        "source_group": 1,
+        "glyph_sha256": "580c695639b7881439d52a41b9c0fef1b7fd25c90821c251027c008f97a8728e",
+        "label": "А-443б"
+      },
+      {
+        "source_group": 2,
+        "glyph_sha256": "61ee8e738e8b1447fa82a9d96e4f521e11ef382b19afd1e1abce200a2077a33f",
+        "label": "А-442"
+      },
+      {
+        "source_group": 3,
+        "glyph_sha256": "a5e25433cd792bb53f3145ba1f46b8aa0de22320b7851f99708d6c1567cf152f",
+        "label": "А-441в"
+      },
+      {
+        "source_group": 4,
+        "glyph_sha256": "a72f394e75a46a5ebd1724de7336941009146298a878b8a97fdfb6ba22e99faf",
+        "label": "А-441б"
+      },
+      {
+        "source_group": 5,
+        "glyph_sha256": "5661cc8fac073b32395a80ff548a1151515b6ab3d5e18dfb5bb2621628e9c7a9",
+        "label": "А-441"
+      },
+      {
+        "source_group": 6,
+        "glyph_sha256": "b0e5a20f9dfc37ba979ca37e160527f41285b77a00b4572632213dfc2cc6f9fe",
+        "label": "А-441а"
+      },
+      {
+        "source_group": 7,
+        "glyph_sha256": "ee9883269873f8eae17555f8856dc06ec373f7dd47642f6ac86557468fbe9259",
+        "label": "А-440а"
+      },
+      {
+        "source_group": 8,
+        "glyph_sha256": "14b4b1cf22c1e10ffd8be4950e732d67a3ed1a7ec3ee4eaede9de37293f9c4e0",
+        "label": "А-440"
+      },
+      {
+        "source_group": 9,
+        "glyph_sha256": "208d287697d2fc3220d5573e75b748a32b6637797896f645a83615ae60204cd6",
+        "label": "А-464б"
+      },
+      {
+        "source_group": 10,
+        "glyph_sha256": "e7b2188d35ed86d19b03929825ca9fc72a5ced01488aaf02b24225b28be84655",
+        "label": "А-464а"
+      },
+      {
+        "source_group": 11,
+        "glyph_sha256": "0a54673b3b14a710b731c156612131f5cf013a94b6e926f3218a3c5d479faef4",
+        "label": "А-464"
+      },
+      {
+        "source_group": 12,
+        "glyph_sha256": "3804f951672ed2ab5e8be010d56fb5ed5acc6b7049fb2af19faa07fca4c3151b",
+        "label": "А-463"
+      },
+      {
+        "source_group": 13,
+        "glyph_sha256": "743d64ecbd174fcc0a295f9ed92af361e9ab027d6504e8f00320fe329d73da5e",
+        "label": "А-462"
+      },
+      {
+        "source_group": 14,
+        "glyph_sha256": "959349cac8b67e5a5cabd41fdedbc662a589a07cde7cabd999416d4ff006faaa",
+        "label": "А-461"
+      },
+      {
+        "source_group": 15,
+        "glyph_sha256": "a86e6c68711978413c8128f4c64db388d571baa1df98adabc05e6d867517565f",
+        "label": "А-460"
+      },
+      {
+        "source_group": 16,
+        "glyph_sha256": "09da4046663b2e44bf09446a54dd06a51f2768e3603e85dcdad16c33fa28a124",
+        "label": "А-401"
+      },
+      {
+        "source_group": 17,
+        "glyph_sha256": "1acb8399d01ad1849b78ddc0643ad2d9703aead2d8fac16455b139cace5ad705",
+        "label": "А-451"
+      },
+      {
+        "source_group": 18,
+        "glyph_sha256": "0d641f7e7b87f14c33d1c4638c36abd547b101b57c004adf6897b3c838b113e4",
+        "label": "А-452"
+      },
+      {
+        "source_group": 19,
+        "glyph_sha256": "382c3a9e62b4cad3ff5410c5769af8eeef63e312b2dda53f1f8eb9e83d9d32e4",
+        "label": "А-453"
+      },
+      {
+        "source_group": 20,
+        "glyph_sha256": "13136277f8bbc2dae1ff939c6438464299b6536f314b9c332a136aafa09cfd83",
+        "label": "А-454"
+      },
+      {
+        "source_group": 21,
+        "glyph_sha256": "f198708d8664bf4a5925d2a5f08611e8476d701792214322a41d6fde22f4facb",
+        "label": "А-455"
+      },
+      {
+        "source_group": 22,
+        "glyph_sha256": "2e87948515b24401ce17800022ec11785c0541b5f9f3b3d188a2a51859c2ea7a",
+        "label": "А-456а"
+      },
+      {
+        "source_group": 23,
+        "glyph_sha256": "b279030a4b4d2ca7d61ed79887affb1f32243af5865c3e32d82285c9f10fdf6a",
+        "label": "А-456"
+      },
+      {
+        "source_group": 24,
+        "glyph_sha256": "5631e4e42ed384af220f2da429bd8e18021625b81a55bd816e748aff3fb5384f",
+        "label": "А-464в"
+      },
+      {
+        "source_group": 25,
+        "glyph_sha256": "03d8a5dd25c418ce4ba29c69a7987a900624438acb489772b2e2ade22b83f9bf",
+        "label": "А-440б"
+      },
+      {
+        "source_group": 26,
+        "glyph_sha256": "0a347dc70209ebf1f0e672a118f901fb0903563fc6e0168b7c7d3736e3a5da95",
+        "label": "Туалет"
+      },
+      {
+        "source_group": 27,
+        "glyph_sha256": "6bf5254d60200cd01f8acfc743fed2367decf7bff4c5a6a42f82f81d4d6c9a14",
+        "label": "А-443"
+      },
+      {
+        "source_group": 28,
+        "glyph_sha256": "f3cb1d9f4cf344a5297798be656b34b1aea6130cb27ada5e36fe14a4fbb2c3a4",
+        "label": "А-444б"
+      },
+      {
+        "source_group": 29,
+        "glyph_sha256": "146d9d890f4010ef28fd78fb1ba22191e35243de5970a6ee9efefeea7f23c46e",
+        "label": "А-444"
+      },
+      {
+        "source_group": 30,
+        "glyph_sha256": "7d600a777f7e25180b56f8d83eaa4e679e781db329dba1e271b6514fd75ab1ba",
+        "label": "А-444а"
+      },
+      {
+        "source_group": 31,
+        "glyph_sha256": "cba43aed86e5b5cd597f9688fe45546ae092370b6771c35e54da2d1b5b1a733a",
+        "label": "А-445"
+      },
+      {
+        "source_group": 32,
+        "glyph_sha256": "a5938d31b80224f2ca05d471a507ddc44ccf172456555b9107133bb249d31cf8",
+        "label": "А-445а"
+      },
+      {
+        "source_group": 33,
+        "glyph_sha256": "b2f6ddf8ebc31ec385f2c42e08a3027ceeb738c377bbab19280e852e03a66734",
+        "label": "А-446"
+      },
+      {
+        "source_group": 34,
+        "glyph_sha256": "3abff2883890615d3dc2a9c96bd848d66533b271476b1502b149085e7350e799",
+        "label": "А-447а"
+      },
+      {
+        "source_group": 35,
+        "glyph_sha256": "996d26a24cfc5d051d0317e8aef030e2a949574098605e01d1be169636fb906d",
+        "label": "А-447"
+      },
+      {
+        "source_group": 36,
+        "glyph_sha256": "7883ec34dcb70eefd33449d7bbe1067b9d132f4c0a56a5d2eceb79db043180fa",
+        "label": "А-447б"
+      },
+      {
+        "source_group": 37,
+        "glyph_sha256": "08b6347542936126a7c6e2731cf74ca3375763b00bb44596ba72dacc8d672f8f",
+        "label": "А-422а"
+      },
+      {
+        "source_group": 38,
+        "glyph_sha256": "3552d5d8a082972221a86022f3e9c2794110f950712f960ff8cf229efcfed144",
+        "label": "А-422"
+      },
+      {
+        "source_group": 39,
+        "glyph_sha256": "cbf3d7d8e03dd47be16a72cd5060f02b72eb5a46a0ba8c4c0e159e405ba01ecb",
+        "label": "А-421"
+      },
+      {
+        "source_group": 40,
+        "glyph_sha256": "696a09b4dbd48d5fb5e021af66434b89a5d6a13751f084f86a3628ac5aa215ef",
+        "label": "А-420"
+      },
+      {
+        "source_group": 41,
+        "glyph_sha256": "f80db3208498cc622bfc700ca8620008d9c07c89bdf6409661e3b20c6eca4a4b",
+        "label": "А-410"
+      },
+      {
+        "source_group": 42,
+        "glyph_sha256": "3864e88a5a40de33837e0d0598ffca85153326140df6e77381ff2d5ea2377bb3",
+        "label": "А-411"
+      },
+      {
+        "source_group": 43,
+        "glyph_sha256": "a4af5771c87f8383e3ec4ea9504d7e915367be8fa5f126db96249322a9a6ea41",
+        "label": "А-412"
+      },
+      {
+        "source_group": 44,
+        "glyph_sha256": "11c4b8a1838a1a53304fbcc4f7a94dbcbeae734731c561df394daaf04191c809",
+        "label": "А-413"
+      },
+      {
+        "source_group": 45,
+        "glyph_sha256": "b8925beca7d2b360edf395be36dd2b30a8de2284c533db0a6188fc72e5639676",
+        "label": "А-414а"
+      },
+      {
+        "source_group": 46,
+        "glyph_sha256": "2a3910bb08b3be45da5631cd389a01979238a5e7e1a2ffb089e37bcdb3153f91",
+        "label": "А-414б"
+      },
+      {
+        "source_group": 47,
+        "glyph_sha256": "392bccef695606a202388d09160cc54cb649c4b7115fab07361039552f6daf06",
+        "label": "А-414"
+      },
+      {
+        "source_group": 48,
+        "glyph_sha256": "33dde8020fe2b78c49c8997878791b36b23eee52aca15286325c04e240bbb90d",
+        "label": "А-431"
+      },
+      {
+        "source_group": 49,
+        "glyph_sha256": "b9883d96ba3cca4208b7bec3561f0fcddf97b911e5821c776585bf7def25d5c4",
+        "label": "А-432"
+      },
+      {
+        "source_group": 50,
+        "glyph_sha256": "51251064b8108fc99d0abce61f3b54af22758b8a9ddf9d5d27937f8d80e6dd4b",
+        "label": "А-433"
+      },
+      {
+        "source_group": 51,
+        "glyph_sha256": "125216803449ef8260084772877d994c11ac966d6d8629e7929731a55ce461a5",
+        "label": "А-434б"
+      },
+      {
+        "source_group": 52,
+        "glyph_sha256": "ae90efe5d44a25f4aefdfe38a08beec47f29c1b338144353ad7e99d4475fb52c",
+        "label": "А-434а"
+      },
+      {
+        "source_group": 53,
+        "glyph_sha256": "f2843afb0a330cec42a61bbf7d95e1cc1cdb3469ff1c16238d5372afe418b366",
+        "label": "А-434"
+      },
+      {
+        "source_group": 54,
+        "glyph_sha256": "bcbcdc2a4b360b1a74ba26ae45bb303d0315a6de955ae9ce4c3192dcded4453c",
+        "label": "А-434в"
+      },
+      {
+        "source_group": 55,
+        "glyph_sha256": "96f0bb66768b4f075ac819bd89eaabc6ecdbcad969099b4da410a73e2783612d",
+        "label": "А-435"
+      },
+      {
+        "source_group": 56,
+        "glyph_sha256": "c81e4a1b4f7e35b27ec81151e80aada40466777df53fccb47bb9d1378684ec8b",
+        "label": "А-436а"
+      },
+      {
+        "source_group": 57,
+        "glyph_sha256": "4988a4d5a2d15362d637e2ae2b23ddae7fc88651b44508c3060fb965f747a8a1",
+        "label": "А-436"
+      },
+      {
+        "source_group": 58,
+        "glyph_sha256": "5b5000bfadd96bc5d6ca16843ca0094b1c4ef01b0590cd7acbf990144b63a953",
+        "label": "А-437"
+      },
+      {
+        "source_group": 59,
+        "glyph_sha256": "a0754f6bb1a27597f63403cfc3c5fc1f8e57fb2f7b416729ad7e19e73714f75f",
+        "label": "А-438"
+      },
+      {
+        "source_group": 60,
+        "glyph_sha256": "1c9ec86b68ebcc13df4ff28447a672f5f2680e951673b331b23ac624037dd359",
+        "label": "А-400"
+      },
+      {
+        "source_group": 61,
+        "glyph_sha256": "2e9fbbdc7093001182af9119375bb03a1e24a8a3387b6c05a080b39bfc48a0cd",
+        "label": "Б-405"
+      },
+      {
+        "source_group": 62,
+        "glyph_sha256": "291225fd7fe1685fd52e884f083e4bd33db9dcef8ea700b69a4b83fe12b54a06",
+        "label": "Б-404"
+      },
+      {
+        "source_group": 63,
+        "glyph_sha256": "ae801b6df037693079d3cba2d682aa36de5d14017e4a15080767254f8017fa30",
+        "label": "Б-411"
+      },
+      {
+        "source_group": 64,
+        "glyph_sha256": "36758ec021fd98e42b367d02e205847d718944e71261c422f992ae04a84bee46",
+        "label": "Б-412"
+      },
+      {
+        "source_group": 65,
+        "glyph_sha256": "0360d34fae3f4b64db74d97d490e9fd2c02240d910ea68efce3bb25bd5ae34ce",
+        "label": "Б-402"
+      },
+      {
+        "source_group": 66,
+        "glyph_sha256": "f2e8854b18ee31b72f0df41d7ff4915a9b36f8eceb258d3c96fd3cb60b0aa9db",
+        "label": "Б-401"
+      },
+      {
+        "source_group": 67,
+        "glyph_sha256": "f52921a53b2321b12a3eff323cb7d2d3aa160cb60dde90398e2c1dc7c8c0d136",
+        "label": "Б-401а"
+      },
+      {
+        "source_group": 68,
+        "glyph_sha256": "847c595b26d9c318e9c44045ddd64e3fa9eb5c1f868d805ac90b60d2b48fe270",
+        "label": "Б-406"
+      },
+      {
+        "source_group": 69,
+        "glyph_sha256": "e2010713a806122c4cb9697a54c0c4f43a8422b8f4644dfd85c08602deb8c976",
+        "label": "Б-408"
+      },
+      {
+        "source_group": 70,
+        "glyph_sha256": "2f6705ed8325433e37248e0251137536c625703919ec19218c15be3d47691572",
+        "label": "Б-409а"
+      },
+      {
+        "source_group": 71,
+        "glyph_sha256": "7fbaa82c4086e33f52d8acd775186276925e510098115d6d1f3b8bd6ed1b1a99",
+        "label": "Б-410"
+      },
+      {
+        "source_group": 72,
+        "glyph_sha256": "2f2750631dd9edabf8b65ddffb5901d3bcfd1cd7f7c7332b4debd89f6eb5e2c1",
+        "label": "Б-407а"
+      },
+      {
+        "source_group": 73,
+        "glyph_sha256": "2d64e56f0a606b74270c03d36e0d9a0de978ab8dab81c52e8252e4b5386b7ae8",
+        "label": "Б-407"
+      },
+      {
+        "source_group": 74,
+        "glyph_sha256": "66d47778b425af5d150b16c6f0404f29eb2b0155319348872a9731d2d91f0126",
+        "label": "Б-409"
+      }
+    ],
+    "5": [
+      {
+        "source_group": 0,
+        "glyph_sha256": "d6e372ee7236d0f7d4e6261edacbdf7e981384699a1f5c44f33103adb401d714",
+        "label": "А-543а"
+      },
+      {
+        "source_group": 1,
+        "glyph_sha256": "2025aeef5a43a7f2eed583b2a5ce4defd5bc1ffcf2161b490b56e9099eaa8620",
+        "label": "А-543"
+      },
+      {
+        "source_group": 2,
+        "glyph_sha256": "1705be8bc1aee9aa6abbf24f93e82be75fc81ccb2a11354f326c5116c3bd9383",
+        "label": "А-544"
+      },
+      {
+        "source_group": 3,
+        "glyph_sha256": "4399d56fa8b52638bcda0d157f581c63fc6cf3a871792a440a02bab5e4d50159",
+        "label": "А-545"
+      },
+      {
+        "source_group": 4,
+        "glyph_sha256": "4c6ab19a2d447df362e9d5c44f8797786ea0ba41503ef5e812e803f1552eb791",
+        "label": "А-546"
+      },
+      {
+        "source_group": 5,
+        "glyph_sha256": "1bd5f4a6936c317fd99b9d8737d0d636c2f305ac49addfaac1a2f7eb3561ec94",
+        "label": "А-547"
+      },
+      {
+        "source_group": 6,
+        "glyph_sha256": "cfa976172e06f17c77654d435afcea438075e3ac8c5e48fb257050cf66763d01",
+        "label": "А-548"
+      },
+      {
+        "source_group": 7,
+        "glyph_sha256": "bbbfacf44af72ad964b1b7fbca62950cfb92f16221e09e55ed7f957ecbd13ca1",
+        "label": "А-521"
+      },
+      {
+        "source_group": 8,
+        "glyph_sha256": "235d66c119f2b0f45ff90184f953b8427bca0b3508d0b5459bd11467b8466f5e",
+        "label": "А-522"
+      },
+      {
+        "source_group": 9,
+        "glyph_sha256": "512d210e8464ce182e00ec6766bff31633aecf25dbd36b77b9bb2aa77c566663",
+        "label": "А-523"
+      },
+      {
+        "source_group": 10,
+        "glyph_sha256": "945b1cb0b515ebd07ec1d689f6023bc0f1235f1c6dfa770807493b73ffd8fc44",
+        "label": "А-523а"
+      },
+      {
+        "source_group": 11,
+        "glyph_sha256": "192fe19d6c06d6b18b2af6e0bb66a17ce09b160207dd1ca2f224577b84467e0d",
+        "label": "А-524а"
+      },
+      {
+        "source_group": 12,
+        "glyph_sha256": "d81365df019d67a70001fbf5b94ded581666c11a7f6c92e7553d2e794d1b92d0",
+        "label": "А-524б"
+      },
+      {
+        "source_group": 13,
+        "glyph_sha256": "e999a00244cd861d0e2156c186265458824ab5d73f7659eca95b0f9b857ab30f",
+        "label": "А-525"
+      },
+      {
+        "source_group": 14,
+        "glyph_sha256": "7e0dc273572d92773e0cb4cad6315f003e5342d75b3cd68bd1cca4d2230dcfe3",
+        "label": "А-525б"
+      },
+      {
+        "source_group": 15,
+        "glyph_sha256": "835997e0aec7a6f7eed2665e588fe5241d4378f83085b33e7e8fecbc9cde1531",
+        "label": "А-525а"
+      },
+      {
+        "source_group": 16,
+        "glyph_sha256": "fe70967f42d1e8c69d26b07ca605dd94b549c3a4ccb5a67173c7840fa32f31ea",
+        "label": "А-506"
+      },
+      {
+        "source_group": 17,
+        "glyph_sha256": "47f268c1f7a0ff923f597131141b6edb791fcf465f4069305350c4e9c66e727b",
+        "label": "А-508"
+      },
+      {
+        "source_group": 18,
+        "glyph_sha256": "5de128b408d044352d7079dc770443918e71192bbe9f6bb71c65745add0d1c22",
+        "label": "А-507"
+      },
+      {
+        "source_group": 19,
+        "glyph_sha256": "ab99d00ab8332f156fa1f8d0e724692293f4507da695a7d3ba3a161df7d829a2",
+        "label": "А-505а"
+      },
+      {
+        "source_group": 20,
+        "glyph_sha256": "cc258a243320f403c36dd62e880527ecc55e9abdbb7bea509408e0ab865e38ab",
+        "label": "А-505"
+      },
+      {
+        "source_group": 21,
+        "glyph_sha256": "ab4906b2d7b92e65cc525582472579a9c63ec787ff08b9ccaddb6f3f2af9111f",
+        "label": "А-504а"
+      },
+      {
+        "source_group": 22,
+        "glyph_sha256": "1711068f388510af4d2a0889f946d8adecf4d0220a557eb94434e07e2504758a",
+        "label": "А-504"
+      },
+      {
+        "source_group": 23,
+        "glyph_sha256": "1875ed1a18f889826ca0e1f5fe80bd54bd570418d87adfc30b874bb36263e40f",
+        "label": "А-503"
+      },
+      {
+        "source_group": 24,
+        "glyph_sha256": "90ebc005471ab8441c90ecfb387ab879f56f83c3af5e4b1ff4b39258b73ae7c1",
+        "label": "А-501"
+      },
+      {
+        "source_group": 25,
+        "glyph_sha256": "86cf0eebb5979d38630c9e2a37c4d27e8b64944ddf838dea65819e4db3dc9e41",
+        "label": "А-502"
+      },
+      {
+        "source_group": 26,
+        "glyph_sha256": "a40c3d4fe8032a8b10a9e99d51f51b69d6b1f567e268a0b1066faf5ec19250ce",
+        "label": "А-510"
+      },
+      {
+        "source_group": 27,
+        "glyph_sha256": "b244c076aae728334451b35210850ea76d6586576f3e4b421de2e9d9e94a3169",
+        "label": "А-509"
+      },
+      {
+        "source_group": 28,
+        "glyph_sha256": "374caf4b8f79950fdcad24cb5ef6fad7e0c7c74c33e8c4fd9cd5a731f49dd5f9",
+        "label": "А-524"
+      },
+      {
+        "source_group": 29,
+        "glyph_sha256": "4d90bed6b817a8fb96d1462c700f0d42e721c8e3da0c8c7093575200fa26114f",
+        "label": "А-542"
+      },
+      {
+        "source_group": 30,
+        "glyph_sha256": "3e5ed1d19c9d61c485214b80cf9dd126ec86266ec4148d8f8de6d18c00574b50",
+        "label": "А-541а"
+      },
+      {
+        "source_group": 31,
+        "glyph_sha256": "df693f57c92dc324e3c1f4c5ee09bb2784d276a885534a641e76822be18a2236",
+        "label": "А-541"
+      },
+      {
+        "source_group": 32,
+        "glyph_sha256": "eab6496ae8dd26e11080fab0d8693508ebcdb2e4df78d2028d32ca0b943d656e",
+        "label": "А-540б"
+      },
+      {
+        "source_group": 33,
+        "glyph_sha256": "86170c9c1fb2d04fc4829305cf96523df27cb1824f97c3f7b1041b2b4179a097",
+        "label": "А-540а"
+      },
+      {
+        "source_group": 34,
+        "glyph_sha256": "934afaa972af35f04f13f3c1fa755f870173ed1de4c459623a05ade059655ed7",
+        "label": "А-549"
+      },
+      {
+        "source_group": 35,
+        "glyph_sha256": "f6c9043ca32caaf0e82739b0a3d8b173d9a021513fbfd061fc0ede7fdf570da8",
+        "label": "Б-504"
+      },
+      {
+        "source_group": 36,
+        "glyph_sha256": "5bb725df95f51481c40024c9eee3f4827fe548e8665f64df16f90429eb936934",
+        "label": "Б-510"
+      },
+      {
+        "source_group": 37,
+        "glyph_sha256": "92f738c3253dfcaf31ee9ed67726e130c500707854d5d731a52616c23a29bd35",
+        "label": "Б-511"
+      },
+      {
+        "source_group": 38,
+        "glyph_sha256": "1e9e1e3deb63681ef5dd4f0f879e94996e1244fa70e18639e0a6ec2861046f7b",
+        "label": "Б-502"
+      },
+      {
+        "source_group": 39,
+        "glyph_sha256": "b168aafe3f9e459ed70ebd9c26fcf51abff70cab86cbdd54c5b0352129460cac",
+        "label": "Б-504а"
+      },
+      {
+        "source_group": 40,
+        "glyph_sha256": "df09dbe015fed5bb15e7efeac69c6092c9c80f974663d44fa75c590b53ec2138",
+        "label": "Б-501"
+      },
+      {
+        "source_group": 41,
+        "glyph_sha256": "899dbff4b4e5f70c86588db3c3ab28664c64fe16830980d9c9e7d25cdfa4b9ee",
+        "label": "Б-507"
+      },
+      {
+        "source_group": 42,
+        "glyph_sha256": "19924ccee9c3d33c9f0eb9fcfd0e70a25b2818f55b4af1f5d118ef3996420211",
+        "label": "Б-505"
+      },
+      {
+        "source_group": 43,
+        "glyph_sha256": "8b881a644994aa3ec1fc30e21f45b56c7a4909c28ae65a34bad00cf35bf6dbdb",
+        "label": "Б-506"
+      },
+      {
+        "source_group": 44,
+        "glyph_sha256": "a2325cfecc706900a58b8b78e60408804c8563ad86fd9e92d5728c02b4703beb",
+        "label": "Б-508"
+      },
+      {
+        "source_group": 45,
+        "glyph_sha256": "a6c279137859055fe174e48334e464a5af2fae7285f547106e7fe1a8619ff667",
+        "label": "Б-509"
+      }
+    ]
+  }
+}

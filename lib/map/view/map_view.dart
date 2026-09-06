@@ -5,19 +5,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/free_room_sheet.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/free_room_view_model.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
+import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
+import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/services/room_key.dart';
+import 'package:rtu_mirea_app/map/widgets/map_edit_menu.dart';
+import 'package:rtu_mirea_app/map/widgets/map_floor_alignment_page.dart';
+import 'package:rtu_mirea_app/map/widgets/map_geographic_view.dart';
+import 'package:rtu_mirea_app/map/widgets/map_place_details_sheet.dart'
+    hide mapPlaceKindLabel;
+import 'package:rtu_mirea_app/map/widgets/map_place_editor_page.dart';
+import 'package:rtu_mirea_app/map/widgets/map_places_explorer.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
+import 'package:rtu_mirea_app/map/widgets/map_saved_places_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/widgets.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MapView extends StatefulWidget {
-  const MapView({this.mapController, super.key});
+  const MapView({
+    this.mapController,
+    this.initialCampusId,
+    this.initialRoomId,
+    super.key,
+  });
 
   final SvgInteractiveMapController? mapController;
+  final String? initialCampusId;
+  final String? initialRoomId;
 
   @override
   State<MapView> createState() => _MapViewState();
@@ -31,10 +51,37 @@ class _MapViewState extends State<MapView> {
   final _query = TextEditingController();
   Timer? _clock;
   String? _pendingRoom;
+  String? _pendingPlaceId;
+  String? _routeStartRoomId;
+  IndoorRoute? _route;
+  int _routeStep = 0;
+  CampusMapData? _routeSnapshot;
+  int? _manualRefreshRevision;
+  late bool _incomingTargetPending =
+      widget.initialCampusId != null || widget.initialRoomId != null;
   double _collapsedPanelSize = .3;
   bool _panelFramePending = false;
   double _viewportHeight = 0;
   double _viewportTop = 0;
+  final GlobalKey _topOverlayKey = GlobalKey();
+  double? _measuredTopExtent;
+  bool _measurePending = false;
+
+  void _measureTopOverlay() {
+    if (_measurePending) return;
+    _measurePending = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measurePending = false;
+      if (!mounted) return;
+      final box = _topOverlayKey.currentContext?.findRenderObject();
+      if (box is RenderBox &&
+          box.hasSize &&
+          (_measuredTopExtent == null ||
+              (_measuredTopExtent! - box.size.height).abs() > .5)) {
+        setState(() => _measuredTopExtent = box.size.height);
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -52,6 +99,13 @@ class _MapViewState extends State<MapView> {
   @override
   void didUpdateWidget(MapView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialCampusId != widget.initialCampusId ||
+        oldWidget.initialRoomId != widget.initialRoomId) {
+      _incomingTargetPending = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _focusPending(context.read<MapBloc>().state);
+      });
+    }
     if (oldWidget.mapController == widget.mapController) return;
     if (oldWidget.mapController == null) _mapController.dispose();
     _mapController = widget.mapController ?? SvgInteractiveMapController();
@@ -121,7 +175,14 @@ class _MapViewState extends State<MapView> {
   }
 
   void _campus(CampusModel campus) {
+    _manualRefreshRevision = null;
     _pendingRoom = null;
+    _pendingPlaceId = null;
+    setState(() {
+      _route = null;
+      _routeSnapshot = null;
+      _routeStartRoomId = null;
+    });
     context.read<FreeRoomsCubit>().campusChanged(campus.displayName);
     context.read<MapBloc>().add(MapEvent.campusSelected(campus));
   }
@@ -155,14 +216,57 @@ class _MapViewState extends State<MapView> {
   }
 
   void _focusPending(MapState state) {
-    if (state.status != MapStatus.loaded || _pendingRoom == null) return;
+    if (state.status != MapStatus.loaded) return;
+    if (_incomingTargetPending) {
+      if (widget.initialCampusId != null &&
+          widget.initialCampusId != state.selectedCampus?.id) {
+        final target = state.availableCampuses
+            .where(
+              (campus) => campus.id == widget.initialCampusId,
+            )
+            .firstOrNull;
+        if (target != null) {
+          context.read<MapBloc>().add(MapEvent.campusSelected(target));
+          return;
+        }
+      }
+      _incomingTargetPending = false;
+      final place = state.campusData?.placeForId(widget.initialRoomId ?? '');
+      if (place != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _openPlace(place);
+        });
+      } else if (widget.initialRoomId != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          showNinjaToast(
+            context,
+            message: 'Место по ссылке не найдено в текущей версии карты.',
+          );
+        });
+      }
+    }
+    if (_route != null && !identical(state.campusData, _routeSnapshot)) {
+      setState(() {
+        _route = null;
+        _routeSnapshot = null;
+      });
+    }
+    if (_pendingRoom == null && _pendingPlaceId == null) return;
+    final pendingPlaceId = _pendingPlaceId == null
+        ? null
+        : state.campusData?.placeForId(_pendingPlaceId!)?.id ?? _pendingPlaceId;
     final room = state.rooms
         .where(
-          (room) => roomKey(room.name) == roomKey(_pendingRoom!),
+          (room) => pendingPlaceId != null
+              ? room.roomId == pendingPlaceId ||
+                    room.roomId.endsWith('__r__$pendingPlaceId')
+              : roomKey(room.name) == roomKey(_pendingRoom!),
         )
         .firstOrNull;
     if (room == null) return;
     _pendingRoom = null;
+    _pendingPlaceId = null;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _mapController.focusRoom(room);
     });
@@ -180,6 +284,11 @@ class _MapViewState extends State<MapView> {
 
   void _openMappedRoom(RoomModel room) {
     final map = context.read<MapBloc>().state;
+    final place = map.campusData?.placeForId(room.roomId);
+    if (place != null) {
+      _openPlace(place);
+      return;
+    }
     final free = context
         .read<FreeRoomsCubit>()
         .state
@@ -208,6 +317,483 @@ class _MapViewState extends State<MapView> {
       return;
     }
     unawaited(_showMappedRoom(room));
+  }
+
+  void _openPlace(MapPlaceData place) {
+    final bloc = context.read<MapBloc>();
+    final campus = bloc.state.campusData;
+    final repository = bloc.repository;
+    if (campus == null || repository == null) return;
+    _pendingPlaceId = place.id;
+    final floor = campus.floorForId(place.floorId)?.floor;
+    if (floor != null && bloc.state.selectedFloor?.id != floor.id) {
+      _floor(floor);
+    } else {
+      _focusPending(bloc.state);
+    }
+    unawaited(
+      showAppSheet<void>(
+        context,
+        child: MapPlaceDetailsSheet(
+          repository: repository,
+          campus: campus,
+          room: place,
+          onClose: () => Navigator.of(context, rootNavigator: true).pop(),
+          onRefreshMap: () {
+            Navigator.of(context, rootNavigator: true).pop();
+            setState(() {
+              _route = null;
+              _routeStartRoomId = null;
+              _routeSnapshot = null;
+            });
+            _pendingRoom = null;
+            _pendingPlaceId = place.id;
+            bloc.add(const MapEvent.refreshRequested());
+          },
+          onEditLocation: () {
+            Navigator.of(context, rootNavigator: true).pop();
+            unawaited(
+              Navigator.of(context, rootNavigator: true).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => MapPlaceEditorPage(
+                    campus: campus,
+                    repository: repository,
+                    room: place,
+                    initialFloorId: place.floorId,
+                  ),
+                ),
+              ),
+            );
+          },
+          onRouteFrom: () {
+            Navigator.of(context, rootNavigator: true).pop();
+            setState(() => _routeStartRoomId = place.id);
+            _planRoute();
+          },
+          onRouteTo: () {
+            Navigator.of(context, rootNavigator: true).pop();
+            _planRoute(destinationRoomId: place.id);
+          },
+        ),
+      ),
+    );
+  }
+
+  void _community() {
+    final bloc = context.read<MapBloc>();
+    final campus = bloc.state.campusData;
+    final repository = bloc.repository;
+    if (campus == null || repository == null) return;
+    unawaited(
+      showMapEditMenu(
+        context,
+        repository: repository,
+        campus: campus,
+        floorId: bloc.state.selectedFloor?.id,
+      ),
+    );
+  }
+
+  void _savedPlaces() {
+    final repository = context.read<MapBloc>().repository;
+    if (repository == null) return;
+    unawaited(
+      showAppSheet<void>(
+        context,
+        title: 'Сохранённые места',
+        child: MapSavedPlacesSheet(
+          repository: repository,
+          onOpen: (place) {
+            Navigator.of(context, rootNavigator: true).pop();
+            context.go(
+              Uri(
+                path: '/services/map',
+                queryParameters: {
+                  'campus': place.campusId,
+                  'room': place.roomId,
+                },
+              ).toString(),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _planRoute({String? destinationRoomId}) {
+    final campus = context.read<MapBloc>().state.campusData;
+    if (campus == null) return;
+    unawaited(
+      showAppSheet<void>(
+        context,
+        child: MapRouteSheet(
+          campus: campus,
+          onClose: () => Navigator.of(context, rootNavigator: true).pop(),
+          startRoomId: _routeStartRoomId,
+          destinationRoomId: destinationRoomId,
+          onContribute: _community,
+          onApply: (route) {
+            if (!mounted) return;
+            final current = context.read<MapBloc>().state;
+            if (current.status != MapStatus.loaded ||
+                !identical(current.campusData, campus)) {
+              showNinjaToast(
+                context,
+                message: 'Карта обновилась. Постройте маршрут заново.',
+              );
+              return;
+            }
+            setState(() {
+              _route = route;
+              _routeStep = 0;
+              _routeSnapshot = campus;
+              _routeStartRoomId = route.nodes.first.roomId;
+            });
+            _query.clear();
+            context.read<FreeRoomsCubit>().queryChanged('');
+            if (_panelController.isAttached) {
+              _panelController.jumpTo(_collapsedPanelSize);
+            }
+            _pendingRoom = null;
+            _pendingPlaceId = _routeStartRoomId;
+            final floor = campus.floorForId(route.nodes.first.floorId)?.floor;
+            if (floor != null &&
+                context.read<MapBloc>().state.selectedFloor?.id != floor.id) {
+              _floor(floor);
+            } else {
+              _focusPending(context.read<MapBloc>().state);
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  List<List<Offset>> _routeSegments(String floorId) {
+    final route = _route;
+    if (route == null) return const [];
+    return [
+      for (final segment in route.segmentsForFloor(floorId))
+        [for (final node in segment.nodes) Offset(node.x, node.y)],
+    ];
+  }
+
+  void _more() {
+    final state = context.read<MapBloc>().state;
+    void open(VoidCallback action) {
+      Navigator.of(context, rootNavigator: true).pop();
+      action();
+    }
+
+    unawaited(
+      showAppSheet<void>(
+        context,
+        title: 'Карта кампуса',
+        subtitle: state.selectedCampus?.displayName,
+        child: AppListGroup(
+          children: [
+            if (state.campusData != null) ...[
+              AppListRow(
+                title: 'На карте города',
+                subtitle: 'Здание, входы и план этажа',
+                leading: const AppIconTile(icon: AppLineIcon.map),
+                onTap: () => open(() => unawaited(_geographic())),
+              ),
+              AppListRow(
+                title: 'Сохранённые места',
+                leading: const AppIconTile(icon: AppLineIcon.bookmark),
+                onTap: () => open(_savedPlaces),
+              ),
+              AppListRow(
+                title: 'Улучшить карту',
+                subtitle: 'Места, планы, проходы и проверка правок',
+                leading: const AppIconTile(icon: AppLineIcon.pencil),
+                onTap: () => open(_community),
+              ),
+            ],
+            AppListRow(
+              title: 'Друзья на карте',
+              leading: const AppIconTile(icon: AppLineIcon.people),
+              onTap: () => open(_friends),
+            ),
+            AppListRow(
+              title: 'О плане и источнике',
+              leading: const AppIconTile(icon: AppLineIcon.info),
+              onTap: () => open(_mapInformation),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _mapInformation() {
+    final state = context.read<MapBloc>().state;
+    final campus = state.campusData;
+    final source = Uri.tryParse(campus?.sourceUrl ?? '');
+    unawaited(
+      showAppSheet<void>(
+        context,
+        title: 'О плане',
+        subtitle: state.selectedCampus?.displayName,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppCard(
+              child: Text(switch (campus?.origin) {
+                MapDataOrigin.remote =>
+                  'План загружен с сервера. '
+                      'Версия ${campus!.revision}.',
+                MapDataOrigin.cache =>
+                  'Показана сохранённая копия плана. '
+                      'Она доступна без подключения к интернету.',
+                MapDataOrigin.bundled || null =>
+                  'План входит в приложение '
+                      'и доступен без подключения к интернету.',
+              }),
+            ),
+            if (state.dataWarning != null &&
+                campus?.origin == MapDataOrigin.cache) ...[
+              const SizedBox(height: AppSpacing.md),
+              AppBanner(message: state.dataWarning!, tone: AppBannerTone.warn),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            if (campus != null) ...[
+              Text(
+                'Источник планов: ${campus.sourceLabel}',
+                style: AppText.body,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              if (source?.scheme == 'https' &&
+                  (source?.host.isNotEmpty ?? false))
+                AppButton.secondary(
+                  label: 'Открыть источник',
+                  expanded: true,
+                  onPressed: () async {
+                    try {
+                      final opened = await launchUrl(
+                        source!,
+                        mode: LaunchMode.externalApplication,
+                      );
+                      if (!opened && mounted) {
+                        showNinjaToast(
+                          context,
+                          message: 'Не удалось открыть ссылку',
+                        );
+                      }
+                    } on Object {
+                      if (!mounted) return;
+                      showNinjaToast(
+                        context,
+                        message: 'Не удалось открыть ссылку',
+                      );
+                    }
+                  },
+                ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
+            AppButton.primary(
+              label: 'Проверить обновления',
+              expanded: true,
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+                _manualRefreshRevision = campus?.revision ?? 0;
+                context.read<MapBloc>().add(const MapEvent.refreshRequested());
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _mapStateChanged(MapState state) {
+    _focusPending(state);
+    final revision = _manualRefreshRevision;
+    if (revision == null ||
+        (state.status != MapStatus.loaded &&
+            state.status != MapStatus.failure)) {
+      return;
+    }
+    _manualRefreshRevision = null;
+    final campus = state.campusData;
+    final message = state.status == MapStatus.failure
+        ? 'Не удалось проверить обновления. Попробуйте ещё раз.'
+        : switch (campus?.origin) {
+            MapDataOrigin.remote when !state.isOffline =>
+              campus!.revision > revision
+                  ? 'План обновлён'
+                  : 'У вас актуальная версия плана',
+            MapDataOrigin.cache =>
+              'Сервер недоступен. Показана сохранённая копия плана.',
+            MapDataOrigin.remote =>
+              'План этажа недоступен. Показана сохранённая копия.',
+            MapDataOrigin.bundled ||
+            null => 'Сервер недоступен. Показан встроенный план.',
+          };
+    showNinjaToast(context, message: message);
+  }
+
+  void _advanceRoute() {
+    final route = _route;
+    final state = context.read<MapBloc>().state;
+    final campus = state.campusData;
+    if (route == null ||
+        campus == null ||
+        state.status != MapStatus.loaded ||
+        !identical(campus, _routeSnapshot)) {
+      return;
+    }
+    if (_routeStep >= route.instructions.length - 1) {
+      setState(() {
+        _route = null;
+        _routeSnapshot = null;
+      });
+      return;
+    }
+    setState(() => _routeStep++);
+    final step = route.instructions[_routeStep];
+    final floor = campus
+        .floorForId(
+          step.toNode?.floorId ?? step.atNode.floorId,
+        )
+        ?.floor;
+    if (floor != null) _floor(floor);
+  }
+
+  Future<void> _geographic() async {
+    final bloc = context.read<MapBloc>();
+    final state = bloc.state;
+    final campus = state.campusData;
+    if (campus == null) return;
+    final floor = campus.floorForId(state.selectedFloor?.id ?? '');
+    FloorGeoreference? reference;
+    if (floor?.anchors.length == 3) {
+      try {
+        reference = FloorGeoreference([
+          for (final anchor in floor!.anchors)
+            FloorGeoAnchor(
+              x: anchor.x,
+              y: anchor.y,
+              latitude: anchor.latitude,
+              longitude: anchor.longitude,
+            ),
+        ]);
+      } on FormatException {
+        reference = null;
+      }
+    }
+    var center = campus.latitude == null || campus.longitude == null
+        ? null
+        : LatLng(campus.latitude!, campus.longitude!);
+    GeographicFloorPlan? plan;
+    final places = <GeographicMapPlace>[];
+    final geographicRoute = <List<LatLng>>[];
+    try {
+      if (reference != null && floor != null && state.svgContent != null) {
+        LatLng position(double x, double y) {
+          final point = reference!.pixelToGeographic(x, y);
+          return LatLng(point.latitude, point.longitude);
+        }
+
+        center ??= position(floor.width / 2, floor.height / 2);
+        plan = GeographicFloorPlan(
+          georeference: floor.georeference,
+          svg: state.svgContent!,
+          syntheticRoomIds: context.read<MapBloc>().syntheticRoomIds,
+          rooms: state.rooms,
+          places: campus.rooms
+              .where((place) => place.floorId == floor.floor.id)
+              .toList(),
+          size: Size(floor.width, floor.height),
+          topLeft: position(0, 0),
+          topRight: position(floor.width, 0),
+          bottomLeft: position(0, floor.height),
+        );
+        for (final place in campus.rooms.where(
+          (place) =>
+              place.floorId == floor.floor.id &&
+              (floor.georeference?.isReliableAt(place.x, place.y) ?? true) &&
+              mapPlaceKindLabel(place.kind) != 'Аудитория',
+        )) {
+          places.add(
+            GeographicMapPlace(
+              label: place.label,
+              position: position(place.x, place.y),
+              onTap: () {
+                Navigator.of(context, rootNavigator: true).pop();
+                _openPlace(place);
+              },
+            ),
+          );
+        }
+        for (final segment in _routeSegments(floor.floor.id)) {
+          if (segment.any(
+            (point) =>
+                !(floor.georeference?.isReliableAt(point.dx, point.dy) ?? true),
+          )) {
+            continue;
+          }
+          geographicRoute.add([
+            for (final point in segment) position(point.dx, point.dy),
+          ]);
+        }
+      }
+    } on FormatException {
+      plan = null;
+      places.clear();
+      geographicRoute.clear();
+    }
+    if (!mounted) return;
+    if (center == null) {
+      await showAppSheet<void>(
+        context,
+        title: 'Привязка к зданию',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const AppBanner(
+              message:
+                  'Координаты кампуса и привязка этажей '
+                  'пока не проверены. Их можно предложить в редакторе карты.',
+            ),
+            const SizedBox(height: 12),
+            AppButton.primary(
+              label: 'Предложить привязку',
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+                final repository = bloc.repository;
+                if (repository == null) return;
+                unawaited(
+                  Navigator.of(context, rootNavigator: true).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => MapFloorAlignmentPage(
+                        campus: campus,
+                        repository: repository,
+                        initialFloorId: floor?.floor.id,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    await Navigator.of(context, rootNavigator: true).push<void>(
+      MaterialPageRoute(
+        builder: (_) => MapGeographicView(
+          campusName: campus.campus.displayName,
+          center: center!,
+          floorPlan: plan,
+          places: places,
+          route: geographicRoute,
+        ),
+      ),
+    );
   }
 
   Future<void> _showMappedRoom(RoomModel room) async {
@@ -257,7 +843,7 @@ class _MapViewState extends State<MapView> {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: context.colors.canvas,
     body: BlocConsumer<MapBloc, MapState>(
-      listener: (_, state) => _focusPending(state),
+      listener: (_, state) => _mapStateChanged(state),
       builder: (context, state) {
         if (state.status == MapStatus.failure) {
           return MapFailureCanvas(message: state.errorMessage);
@@ -267,18 +853,27 @@ class _MapViewState extends State<MapView> {
         final interactive = state.status == MapStatus.loaded;
         return LayoutBuilder(
           builder: (context, constraints) {
-            final bottomInset = AppBottomBar.extentOf(context);
+            final bottomInset =
+                context
+                    .findAncestorWidgetOfExactType<AppBottomBarViewport>()
+                    ?.bottomInset ??
+                MediaQuery.paddingOf(context).bottom;
             final compactContentExtent =
                 MapFreeRoomsPanel.compactContentExtentOf(
                   context,
                   width: constraints.maxWidth,
                   campusName: state.selectedCampus?.displayName ?? '',
+                  discoveryMode: state.campusData != null,
                 );
             _collapsedPanelSize =
                 ((bottomInset + compactContentExtent) / constraints.maxHeight)
-                    .clamp(.22, .42);
+                    .clamp(.06, .42);
             _viewportHeight = constraints.maxHeight;
-            _viewportTop = MediaQuery.paddingOf(context).top + 166;
+            _viewportTop =
+                _measuredTopExtent ??
+                (MediaQuery.paddingOf(context).top +
+                    (_route == null ? 116 : 220));
+            _measureTopOverlay();
             final panelSize = _panelController.isAttached
                 ? _panelController.size
                 : _query.text.trim().isEmpty
@@ -292,6 +887,17 @@ class _MapViewState extends State<MapView> {
                   child: SvgInteractiveMap(
                     controller: _mapController,
                     svgAssetPath: floor.svgPath,
+                    svgContent: state.svgContent,
+                    showRoomLabels: state.campusData != null,
+                    syntheticRoomIds: state.campusData == null
+                        ? const {}
+                        : context.read<MapBloc>().syntheticRoomIds,
+                    routeSegments: _routeSegments(floor.id),
+                    places: [
+                      for (final place
+                          in state.campusData?.rooms ?? <MapPlaceData>[])
+                        if (place.floorId == floor.id) place,
+                    ],
                     onRoomTap: _openMappedRoom,
                     viewportPadding: _mapViewportPadding.value,
                     viewportPaddingListenable: _mapViewportPadding,
@@ -301,18 +907,95 @@ class _MapViewState extends State<MapView> {
                   top: 0,
                   left: 0,
                   right: 0,
-                  child: MapTopBar(
-                    controller: _query,
-                    campuses: state.availableCampuses,
-                    selectedCampus: state.selectedCampus,
-                    onQueryChanged: _queryChanged,
-                    onCampusSelected: _campus,
-                    onFriends: _friends,
+                  child: Column(
+                    key: _topOverlayKey,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      MapTopBar(
+                        compact: constraints.maxHeight < 650,
+                        controller: _query,
+                        campuses: state.availableCampuses,
+                        selectedCampus: state.selectedCampus,
+                        onQueryChanged: _queryChanged,
+                        onCampusSelected: _campus,
+                        onFriends: _friends,
+                      ),
+                      if (_route case final route?)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                          child: AppCard(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        mapRouteInstructionLabel(
+                                          route.instructions[_routeStep],
+                                          state.campusData!,
+                                        ),
+                                        style: AppText.labelStrong,
+                                      ),
+                                    ),
+                                    const SizedBox(width: AppSpacing.sm),
+                                    AppIconButton(
+                                      tooltip: 'Завершить маршрут',
+                                      shape: AppIconButtonShape.circle,
+                                      size: AppIconButtonSize.compact,
+                                      tone: AppIconButtonTone.surface,
+                                      onPressed: () => setState(() {
+                                        _route = null;
+                                        _routeSnapshot = null;
+                                      }),
+                                      icon: const AppLineIconWidget(
+                                        AppLineIcon.close,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Шаг ${_routeStep + 1} из '
+                                        '${route.instructions.length}'
+                                        ' · вручную',
+                                        style: AppText.caption,
+                                      ),
+                                    ),
+                                    const SizedBox(width: AppSpacing.sm),
+                                    AppIconButton(
+                                      tooltip: 'Следующий шаг',
+                                      shape: AppIconButtonShape.circle,
+                                      size: AppIconButtonSize.compact,
+                                      tone: AppIconButtonTone.primary,
+                                      onPressed: interactive
+                                          ? _advanceRoute
+                                          : null,
+                                      icon: const AppLineIconWidget(
+                                        AppLineIcon.arrowRight,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 AnimatedBuilder(
                   animation: _panelExtent,
                   builder: (context, child) {
+                    if (_panelController.isAttached &&
+                        _panelController.size > _collapsedPanelSize + .1) {
+                      return const SizedBox.shrink();
+                    }
                     final panelHeight =
                         constraints.maxHeight *
                         (_panelController.isAttached
@@ -324,17 +1007,71 @@ class _MapViewState extends State<MapView> {
                             AppControlSize.touchTarget * 3 +
                             AppSpacing.xsm * 2 +
                             AppSpacing.md;
-                    if (!controlsFit) return const SizedBox.shrink();
+                    if (!controlsFit &&
+                        constraints.maxHeight - panelHeight <
+                            _viewportTop + AppControlSize.touchTarget + 20) {
+                      return const SizedBox.shrink();
+                    }
                     return Positioned(
-                      right: 20,
+                      right: AppSpacing.lg,
                       bottom: panelHeight + 12,
-                      child: child!,
+                      child: controlsFit
+                          ? child!
+                          : MapCanvasControls(
+                              axis: Axis.horizontal,
+                              onZoomIn: interactive
+                                  ? _mapController.zoomIn
+                                  : null,
+                              onZoomOut: interactive
+                                  ? _mapController.zoomOut
+                                  : null,
+                              onFit: interactive ? _mapController.fit : null,
+                            ),
                     );
                   },
                   child: MapCanvasControls(
                     onZoomIn: interactive ? _mapController.zoomIn : null,
                     onZoomOut: interactive ? _mapController.zoomOut : null,
                     onFit: interactive ? _mapController.fit : null,
+                  ),
+                ),
+                AnimatedBuilder(
+                  animation: _panelExtent,
+                  builder: (context, child) {
+                    final extent = _panelController.isAttached
+                        ? _panelController.size
+                        : panelSize;
+                    if (extent > _collapsedPanelSize + .1) {
+                      return const SizedBox.shrink();
+                    }
+                    return Positioned(
+                      left: AppSpacing.lg,
+                      bottom: constraints.maxHeight * extent + AppSpacing.md,
+                      child: child!,
+                    );
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (state.campusData != null) ...[
+                        AppButton.primary(
+                          label: 'Маршрут',
+                          icon: const Icon(
+                            Icons.directions_walk_rounded,
+                            size: 20,
+                          ),
+                          onPressed: interactive ? _planRoute : null,
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                      ],
+                      AppIconButton(
+                        icon: const AppLineIconWidget(AppLineIcon.more),
+                        tooltip: 'Действия с картой',
+                        shape: AppIconButtonShape.circle,
+                        tone: AppIconButtonTone.surface,
+                        onPressed: _more,
+                      ),
+                    ],
                   ),
                 ),
                 MapFreeRoomsPanel(
@@ -344,6 +1081,22 @@ class _MapViewState extends State<MapView> {
                   bottomInset: bottomInset,
                   compactContentExtent: compactContentExtent,
                   mapState: state,
+                  discovery: state.campusData == null
+                      ? null
+                      : BlocBuilder<FreeRoomsCubit, FreeRoomsState>(
+                          buildWhen: (before, after) =>
+                              before.query != after.query,
+                          builder: (context, free) => MapPlacesExplorer(
+                            campus: state.campusData!,
+                            currentFloorId: state.selectedFloor?.id,
+                            query: free.query,
+                            onPlace: _openPlace,
+                            onCommunity: _community,
+                            onRefresh: () => context.read<MapBloc>().add(
+                              const MapEvent.refreshRequested(),
+                            ),
+                          ),
+                        ),
                   onRoomTap: _openRoom,
                   onFloor: _floor,
                   onToggle: _togglePanel,
@@ -355,7 +1108,7 @@ class _MapViewState extends State<MapView> {
                 ),
                 if (!interactive)
                   Positioned(
-                    top: MediaQuery.paddingOf(context).top + 160,
+                    top: _viewportTop + AppSpacing.sm,
                     left: 20,
                     child: const MapLoadingPill(),
                   ),

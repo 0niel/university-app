@@ -9,8 +9,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
+import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
+import 'package:rtu_mirea_app/map/services/map_place_anchor.dart';
+import 'package:rtu_mirea_app/map/services/map_place_landmarks.dart';
 import 'package:rtu_mirea_app/map/widgets/map_floor_canvas.dart';
+import 'package:rtu_mirea_app/map/widgets/map_places_explorer.dart';
 import 'package:rtu_mirea_app/map/widgets/map_room_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/svg_interactive_map_controller.dart';
 
@@ -21,6 +25,11 @@ class SvgInteractiveMap extends StatefulWidget {
     this.viewportPadding = EdgeInsets.zero,
     this.viewportPaddingListenable,
     this.onRoomTap,
+    this.svgContent,
+    this.routeSegments = const [],
+    this.places = const [],
+    this.showRoomLabels = false,
+    this.syntheticRoomIds = const {},
     super.key,
   });
 
@@ -29,6 +38,11 @@ class SvgInteractiveMap extends StatefulWidget {
   final EdgeInsets viewportPadding;
   final ValueListenable<EdgeInsets>? viewportPaddingListenable;
   final ValueChanged<RoomModel>? onRoomTap;
+  final String? svgContent;
+  final List<List<Offset>> routeSegments;
+  final List<MapPlaceData> places;
+  final bool showRoomLabels;
+  final Set<String> syntheticRoomIds;
 
   @override
   State<SvgInteractiveMap> createState() => _SvgInteractiveMapState();
@@ -78,7 +92,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       widget.viewportPaddingListenable?.addListener(_viewportChanged);
       _viewportChanged();
     }
-    if (oldWidget.svgAssetPath != widget.svgAssetPath) {
+    if (oldWidget.svgAssetPath != widget.svgAssetPath ||
+        oldWidget.svgContent != widget.svgContent) {
       _cancelViewportRefit();
       _zoomController.stop();
       _zoomAnimation = null;
@@ -193,7 +208,11 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
           hint: l10n.mapInteractiveHint,
           child: ColoredBox(
             key: const ValueKey('map-canvas-surface'),
-            color: context.colors.surface2,
+            color: widget.showRoomLabels
+                ? context.colors.isDark
+                      ? AppColors.mapCanvasDark
+                      : AppColors.mapCanvasLight
+                : context.colors.surface2,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTapUp: interactive
@@ -218,6 +237,12 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
                     canvasSize: Size(bounds.width, bounds.height),
                     rooms: rooms,
                     selectedRoomId: _selectedRoomId,
+                    svgContent: widget.svgContent,
+                    routeSegments: widget.routeSegments,
+                    places: widget.places,
+                    transform: _transformationController,
+                    showRoomLabels: widget.showRoomLabels,
+                    syntheticRoomIds: widget.syntheticRoomIds,
                   ),
                 ),
               ),
@@ -237,6 +262,50 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     final containing = state.rooms
         .where((room) => room.path.contains(scenePosition))
         .toList();
+    if (widget.showRoomLabels) {
+      final places = {for (final place in widget.places) place.id: place};
+      final services = {
+        ...widget.syntheticRoomIds,
+        for (final place in widget.places)
+          if (mapPlaceKindLabel(place.kind) != 'Аудитория') place.id,
+      };
+      final nearby = <(RoomModel, double)>[];
+      final landmarks = {
+        for (final place in widget.places)
+          if (mapPlaceLandmarkPriority(place.kind) > 0) place.id,
+      };
+      for (final room in state.rooms.where(
+        (room) => services.contains(room.roomId),
+      )) {
+        final bounds = room.path.getBounds();
+        final location = resolveMapPlaceAnchor(
+          room.path,
+          floorSize: state.boundingRect!.size,
+          place: places[room.roomId],
+        );
+        if (location.detachedService) {
+          containing.removeWhere(
+            (candidate) => candidate.roomId == room.roomId,
+          );
+        }
+        if (!widget.syntheticRoomIds.contains(room.roomId) &&
+            !location.detachedService &&
+            !landmarks.contains(room.roomId) &&
+            math.max(bounds.width, bounds.height) * currentScale < 16) {
+          continue;
+        }
+        final anchor = location.point;
+        if (anchor == null) continue;
+        final distance = (anchor - scenePosition).distance * currentScale;
+        if (distance <= 22) nearby.add((room, distance));
+      }
+      if (nearby.isNotEmpty) {
+        nearby.sort((a, b) => a.$2.compareTo(b.$2));
+        containing
+          ..clear()
+          ..add(nearby.first.$1);
+      }
+    }
     if (containing.isEmpty) return;
     final room = containing.reduce((closest, candidate) {
       final closestDistance =
@@ -340,6 +409,14 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     final constraints = _lastConstraints;
     final rect = room.path.getBounds();
     if (constraints == null || rect.isEmpty) return;
+    final location = resolveMapPlaceAnchor(
+      room.path,
+      floorSize: context.read<MapBloc>().state.boundingRect?.size ?? Size.zero,
+      place: widget.places
+          .where((place) => place.id == room.roomId)
+          .firstOrNull,
+    );
+    final center = location.detachedService ? location.point! : rect.center;
     setState(() => _selectedRoomId = room.roomId);
     final viewport = _visibleViewport(constraints);
     final horizontalScale = viewport.width * 0.5 / rect.width;
@@ -348,8 +425,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     final scale = math
         .min(horizontalScale, verticalScale)
         .clamp(minimum, _maxScale);
-    final x = viewport.center.dx - rect.center.dx * scale;
-    final y = viewport.top + viewport.height * .48 - rect.center.dy * scale;
+    final x = viewport.center.dx - center.dx * scale;
+    final y = viewport.top + viewport.height * .48 - center.dy * scale;
     final target = Matrix4.identity()
       ..scaleByDouble(scale, scale, 1, 1)
       ..translateByDouble(x / scale, y / scale, 0, 1);

@@ -23,6 +23,7 @@ class MapFreeRoomsPanel extends StatelessWidget {
     required this.onFloor,
     required this.onToggle,
     required this.onMappedRoomTap,
+    this.discovery,
     super.key,
   });
 
@@ -36,16 +37,45 @@ class MapFreeRoomsPanel extends StatelessWidget {
   final ValueChanged<FloorModel> onFloor;
   final VoidCallback onToggle;
   final ValueChanged<RoomModel> onMappedRoomTap;
+  final Widget? discovery;
+
+  Future<void> _chooseFloor(BuildContext context) => showAppSheet<void>(
+    context,
+    title: 'Этажи',
+    subtitle: mapState.selectedCampus?.displayName,
+    child: AppListGroup(
+      children: [
+        if (discovery == null)
+          AppListRow(
+            title: 'Свободные на всех этажах',
+            leading: const AppIconTile(icon: AppLineIcon.grid),
+            onTap: () {
+              context.read<FreeRoomsCubit>().floorChanged(null);
+              Navigator.of(context, rootNavigator: true).pop();
+            },
+          ),
+        for (final floor in mapState.selectedCampus?.floors ?? <FloorModel>[])
+          AppListRow(
+            title: context.l10n.mapFloorNumber(floor.number),
+            leading: const AppIconTile(icon: AppLineIcon.map),
+            trailing: mapState.selectedFloor?.id == floor.id
+                ? const AppLineIconWidget(AppLineIcon.check)
+                : null,
+            onTap: () {
+              Navigator.of(context, rootNavigator: true).pop();
+              onFloor(floor);
+            },
+          ),
+      ],
+    ),
+  );
 
   static double compactContentExtentOf(
     BuildContext context, {
     required double width,
     required String campusName,
+    bool discoveryMode = false,
   }) {
-    final labelWidth = math.max<double>(
-      1,
-      width - 40 - AppControlSize.touchTarget,
-    );
     double height(String text, TextStyle style, double maxWidth) {
       final painter = TextPainter(
         text: TextSpan(text: text, style: style),
@@ -58,23 +88,11 @@ class MapFreeRoomsPanel extends StatelessWidget {
       return result;
     }
 
-    final l10n = context.l10n;
-    final labels =
-        height(l10n.freeRoomsNowTitle, AppText.sectionLarge, labelWidth) +
-        5 +
-        height(
-          '$campusName · ${l10n.freeRoomsSubtitle}',
-          AppText.subtext,
-          labelWidth,
-        );
     final floor = math.max(
       AppControlSize.touchTarget,
-      height(l10n.all, AppText.chipStrong, double.infinity) + 18,
+      height('1 этаж', AppText.chipStrong, double.infinity) + 18,
     );
-    return math.max(
-      156,
-      28 + math.max(AppControlSize.touchTarget, labels) + 14 + floor + 14,
-    );
+    return 20 + floor + 12;
   }
 
   @override
@@ -127,40 +145,34 @@ class MapFreeRoomsPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 14),
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colors.muted2,
-                  borderRadius: BorderRadius.circular(AppRadius.xxs),
-                ),
+            child: Container(
+              width: 32,
+              height: 4,
+              margin: const EdgeInsets.only(top: 8, bottom: 8),
+              decoration: BoxDecoration(
+                color: colors.muted2,
+                borderRadius: BorderRadius.circular(AppRadius.full),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.fromLTRB(16, 0, 12, 12),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.freeRoomsNowTitle,
-                        style: AppText.sectionLarge.copyWith(color: colors.ink),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        '${campus?.displayName ?? ''} · '
-                        '${l10n.freeRoomsSubtitle}',
-                        style: AppText.subtext.copyWith(color: colors.muted),
-                      ),
-                    ],
+                  child: Text(
+                    'Места',
+                    style: AppText.labelStrong,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                if (mapState.selectedFloor != null)
+                  AppChip.filter(
+                    label: l10n.mapFloorNumber(mapState.selectedFloor!.number),
+                    onTap: () => _chooseFloor(context),
+                  ),
+                const SizedBox(width: AppSpacing.sm),
                 AnimatedBuilder(
                   animation: controller,
                   builder: (context, _) {
@@ -191,36 +203,14 @@ class MapFreeRoomsPanel extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                _FloorChip(
-                  label: l10n.all,
-                  selected: state.floor == null,
-                  onTap: () =>
-                      context.read<FreeRoomsCubit>().floorChanged(null),
-                ),
-                for (final floor in campus?.floors ?? <FloorModel>[]) ...[
-                  const SizedBox(width: 6),
-                  _FloorChip(
-                    label: l10n.mapFloorNumber(floor.number),
-                    selected: state.floor == floor.number,
-                    onTap: () => onFloor(floor),
-                  ),
-                ],
-              ],
-            ),
-          ),
         ],
       ),
     );
     final rooms = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (mappedRooms.isNotEmpty) ...[
+        ?discovery,
+        if (mappedRooms.isNotEmpty && discovery == null) ...[
           AppListGroup(
             children: [
               for (final room in mappedRooms)
@@ -233,6 +223,13 @@ class MapFreeRoomsPanel extends StatelessWidget {
           ),
           const SizedBox(height: 14),
         ],
+        Text(l10n.freeRoomsNowTitle, style: AppText.sectionLarge),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          '${campus?.displayName ?? ''} · ${l10n.freeRoomsSubtitle}',
+          style: AppText.subtext.copyWith(color: colors.muted),
+        ),
+        const SizedBox(height: 12),
         FreeRoomsList(
           state: filtered,
           roomFloors: mapState.roomFloors,
@@ -311,27 +308,6 @@ class MapFreeRoomsPanel extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _FloorChip extends StatelessWidget {
-  const _FloorChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppFilterChip(
-      label: label,
-      isSelected: selected,
-      onTap: onTap,
     );
   }
 }

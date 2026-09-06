@@ -75,11 +75,18 @@ class RoomPhotoGalleryBody extends StatelessWidget {
           if (_uploading)
             RoomPhotoUploadProgress(done: uploadDone, total: uploadTotal)
           else
-            AppButton.secondary(
-              label: context.l10n.roomPhotoAdd,
-              icon: const AppLineIconWidget(AppLineIcon.plus),
-              expanded: true,
-              onPressed: onAddPhoto,
+            AppListGroup(
+              color: context.colors.surface2,
+              children: [
+                AppListRow(
+                  title: context.l10n.roomPhotoAdd,
+                  titleMaxLines: null,
+                  leading: const AppLineIconWidget(AppLineIcon.plus),
+                  strong: true,
+                  showChevron: false,
+                  onTap: onAddPhoto,
+                ),
+              ],
             ),
         ],
       );

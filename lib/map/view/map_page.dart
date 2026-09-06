@@ -3,20 +3,27 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
 import 'package:rtu_mirea_app/map/config/campuses_config.dart';
+import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/services/services.dart';
 import 'package:rtu_mirea_app/map/view/map_view.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MapPage extends StatefulWidget {
-  const MapPage({super.key});
+  const MapPage({this.initialCampusId, this.initialRoomId, super.key});
+
+  final String? initialCampusId;
+  final String? initialRoomId;
 
   @override
   State<MapPage> createState() => _MapPageState();
 }
 
 class _MapPageState extends State<MapPage> {
+  MapDataRepository? _repository;
   @override
   void initState() {
     super.initState();
@@ -32,6 +39,7 @@ class _MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
+    _repository?.dispose();
     unawaited(
       SystemChrome.setPreferredOrientations([
         .portraitUp,
@@ -50,11 +58,19 @@ class _MapPageState extends State<MapPage> {
         return cubit;
       },
       child: BlocProvider(
-        create: (_) => MapBloc(
+        create: (context) => MapBloc(
           availableCampuses: CampusesConfig.campuses,
           objectsService: ObjectsService(),
+          repository: _repository ??= MapDataRepository(
+            supabase: Supabase.instance.client,
+            organizationId: context.read<UniversityConfig>().organizationId,
+            bundledCatalogAsset: MapDataRepository.pulseCatalogAsset,
+          ),
         )..add(const MapEvent.initialized()),
-        child: const MapView(),
+        child: MapView(
+          initialCampusId: widget.initialCampusId,
+          initialRoomId: widget.initialRoomId,
+        ),
       ),
     );
   }
