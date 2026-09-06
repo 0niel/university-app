@@ -18,8 +18,19 @@ void main() {
 
   testWidgets('offers light, dark and system modes', (tester) async {
     final selections = <AdaptiveThemeMode>[];
+    var current = AdaptiveThemeMode.light;
     await tester.pumpWidget(
-      wrap(OnboardingThemeCard(onChanged: selections.add)),
+      wrap(
+        StatefulBuilder(
+          builder: (context, setState) => OnboardingThemeCard(
+            mode: current,
+            onChanged: (mode) {
+              selections.add(mode);
+              setState(() => current = mode);
+            },
+          ),
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -28,9 +39,12 @@ void main() {
     expect(find.text('Авто'), findsOneWidget);
 
     await tester.tap(find.text('Тёмная'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Авто'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Авто'));
     await tester.pumpAndSettle();
 
-    expect(selections, [AdaptiveThemeMode.dark]);
+    expect(selections, [AdaptiveThemeMode.dark, AdaptiveThemeMode.system]);
   });
 }

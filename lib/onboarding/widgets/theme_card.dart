@@ -5,8 +5,9 @@ import 'package:rtu_mirea_app/app/theme/theme_mode_label.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class OnboardingThemeCard extends StatelessWidget {
-  const OnboardingThemeCard({super.key, this.onChanged});
+  const OnboardingThemeCard({super.key, this.mode, this.onChanged});
 
+  final AdaptiveThemeMode? mode;
   final ValueChanged<AdaptiveThemeMode>? onChanged;
 
   @override
@@ -14,7 +15,7 @@ class OnboardingThemeCard extends StatelessWidget {
     final l10n = context.l10n;
     final colors = context.colors;
     final manager = AdaptiveTheme.maybeOf(context);
-    final current = manager?.mode ?? AdaptiveThemeMode.system;
+    final current = mode ?? manager?.mode ?? AdaptiveThemeMode.system;
     final onModeSelected = onChanged ?? manager?.setThemeMode;
     return AppCard(
       child: Column(
