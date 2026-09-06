@@ -4,6 +4,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() {
   Future<void> pumpScale(
@@ -197,4 +198,53 @@ void main() {
       variant: TargetPlatformVariant({platform}),
     );
   }
+
+  testWidgets(
+    'fills the production foldable viewport after resizing',
+    (tester) async {
+      const viewportKey = ValueKey('foldable-viewport');
+      const actionKey = ValueKey('edge-action');
+      var taps = 0;
+      tester.view
+        ..physicalSize = const Size(555, 877) * 3
+        ..devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        SentryScreenshotWidget(
+          child: MaterialApp(
+            builder: (context, child) => AppScale(child: child!),
+            home: Scaffold(
+              key: viewportKey,
+              body: Align(
+                alignment: Alignment.bottomRight,
+                child: TextButton(
+                  key: actionKey,
+                  onPressed: () => taps++,
+                  child: const Text('Action'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      for (final size in [
+        const Size(555, 877),
+        const Size(877, 555),
+        const Size(800, 1200),
+        const Size(1200, 800),
+        const Size(555, 877),
+      ]) {
+        tester.view.physicalSize = size * 3;
+        await tester.pumpAndSettle();
+        final viewport = find.byKey(viewportKey);
+        expect(tester.getTopLeft(viewport), Offset.zero);
+        expect(tester.getBottomRight(viewport).dx, closeTo(size.width, .001));
+        expect(tester.getBottomRight(viewport).dy, closeTo(size.height, .001));
+        await tester.tap(find.byKey(actionKey));
+        expect(tester.takeException(), isNull);
+      }
+      expect(taps, 5);
+    },
+    variant: const TargetPlatformVariant({TargetPlatform.android}),
+  );
 }
