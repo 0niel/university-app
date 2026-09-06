@@ -1,6 +1,5 @@
 name: Shorebird Staging Patch
-
-on:
+'on':
   workflow_dispatch:
     inputs:
       source_sha:
@@ -12,291 +11,209 @@ on:
         required: true
         type: choice
         options:
-          - android
-          - ios
+        - android
+        - ios
       release_version:
-        description: Existing release version
+        description: Registered release version
         required: true
-        type: choice
-        options:
-          - 5.2.1+1006601
-          - 5.2.1+2439.17.57
-          - 5.2.1+1006201
-          - 5.2.1+2439.15.54
-          - 5.2.1+1005801
-          - 5.2.1+2439.14.43
-          - 5.2.1+1005301
-          - 5.2.0+1004201
-          - 5.2.0+1002401
-          - 5.2.0+1002601
-          - 5.2.0+2435.13.10
-          - 5.2.0+1001301
-          - 5.2.0+1001601
-          - 5.1.0+1000201
+        type: string
       target_track:
         description: Patch destination
         required: true
         type: choice
         default: staging
         options:
-          - staging
-
+        - staging
 permissions:
+  actions: read
+  attestations: read
   contents: read
-
 concurrency:
   group: shorebird-patch-${{ inputs.platform }}-${{ inputs.release_version }}
   cancel-in-progress: false
-
 jobs:
   validate:
+    environment: beta
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
       SOURCE_SHA: ${{ inputs.source_sha }}
+      PLATFORM: ${{ inputs.platform }}
       RELEASE_VERSION: ${{ inputs.release_version }}
       WORKFLOW_SHA: ${{ github.workflow_sha }}
+      PATCH_WORKSPACE: ${{ github.workspace }}/build-projection
     defaults:
       run:
         shell: bash
     outputs:
-      source_sha: ${{ steps.inputs.outputs.source_sha }}
-      platform: ${{ steps.inputs.outputs.platform }}
-      release_version: ${{ steps.inputs.outputs.release_version }}
-      app_id: ${{ steps.inputs.outputs.app_id }}
-      baseline_sha: ${{ steps.inputs.outputs.baseline_sha }}
+      source_sha: ${{ inputs.source_sha }}
+      platform: ${{ inputs.platform }}
+      release_version: ${{ steps.release.outputs.release_version }}
+      app_id: ${{ steps.release.outputs.app_id }}
+      baseline_sha: ${{ steps.release.outputs.baseline_sha }}
+      flutter_version: ${{ steps.release.outputs.flutter_version }}
+      manifest_sha256: ${{ steps.release.outputs.manifest_sha256 }}
       projection_sha256: ${{ steps.projection.outputs.projection_sha256 }}
     steps:
-      - name: Validate requested target
-        id: inputs
-        env:
-          SOURCE_SHA: ${{ inputs.source_sha }}
-          PLATFORM: ${{ inputs.platform }}
-          RELEASE_VERSION: ${{ inputs.release_version }}
-          TARGET_TRACK: ${{ inputs.target_track }}
-          WORKFLOW_REF: ${{ github.ref }}
-        run: |
-          test "$WORKFLOW_REF" = refs/heads/master
-          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test "$TARGET_TRACK" = staging
-          case "$PLATFORM:$RELEASE_VERSION" in
-            android:5.2.1+1006601)
-              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
-              baseline_sha=9369a9bc8f3bac521c1efb10942f76a4696ca279
-              ;;
-            ios:5.2.1+2439.17.57)
-              app_id=21c47e68-a64f-49c1-af6e-4a406dfe266f
-              baseline_sha=9369a9bc8f3bac521c1efb10942f76a4696ca279
-              ;;
-            android:5.2.1+1006201)
-              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
-              baseline_sha=781b2ff4a14c9888331eb61b156a2cb0c7e4515b
-              ;;
-            ios:5.2.1+2439.15.54)
-              app_id=21c47e68-a64f-49c1-af6e-4a406dfe266f
-              baseline_sha=ee51aeee41bf3c48925c6a524e9e9e90c40b0dd1
-              ;;
-            android:5.2.1+1005801)
-              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
-              baseline_sha=506602c5d8da2cac5a6180d26b753f415d381819
-              ;;
-            android:5.2.1+1005301)
-              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
-              baseline_sha=892c735ac0b46f3b8f6621b1d67d12342c45cc84
-              ;;
-            android:5.2.0+1004201)
-              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
-              baseline_sha=6fe7e47beaa7f2a4114023a2b4744cfc1da17657
-              ;;
-            android:5.2.0+1002401|android:5.2.0+1002601)
-              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
-              baseline_sha=4aa0e01a5a9fc58cfc83288610b3c4f88943ef72
-              ;;
-            android:5.2.0+1001301|android:5.2.0+1001601)
-              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
-              baseline_sha=fb553b61a88a8436426c90ed23b363e913c49e29
-              ;;
-            android:5.1.0+1000201)
-              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
-              baseline_sha=ede172361da6c4bdc6d6afc3ba508aadd44d5e8e
-              ;;
-            ios:5.2.1+2439.14.43)
-              app_id=21c47e68-a64f-49c1-af6e-4a406dfe266f
-              baseline_sha=506602c5d8da2cac5a6180d26b753f415d381819
-              ;;
-            ios:5.2.0+2435.13.10)
-              app_id=21c47e68-a64f-49c1-af6e-4a406dfe266f
-              baseline_sha=4aa0e01a5a9fc58cfc83288610b3c4f88943ef72
-              ;;
-            *)
-              printf 'Unsupported platform and release combination\n' >&2
-              exit 1
-              ;;
-          esac
-          {
-            printf 'source_sha=%s\n' "$SOURCE_SHA"
-            printf 'platform=%s\n' "$PLATFORM"
-            printf 'release_version=%s\n' "$RELEASE_VERSION"
-            printf 'app_id=%s\n' "$app_id"
-            printf 'baseline_sha=%s\n' "$baseline_sha"
-          } >> "$GITHUB_OUTPUT"
+    - name: Validate requested target
+      env:
+        WORKFLOW_REF: ${{ github.ref }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        TARGET_TRACK: ${{ inputs.target_track }}
+      run: |
+        test "$WORKFLOW_REF" = "refs/heads/$DEFAULT_BRANCH"
+        [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+        [[ "$PLATFORM" = android || "$PLATFORM" = ios ]]
+        [[ "$RELEASE_VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]{0,127}$ ]]
+        test "$TARGET_TRACK" = staging
+    - name: Check out trusted release tools
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ github.workflow_sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Verify approved source
+      env:
+        GH_TOKEN: ${{ github.token }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      run: |
+        git merge-base --is-ancestor "$SOURCE_SHA" "$WORKFLOW_SHA"
+        gh api "repos/$GITHUB_REPOSITORY/actions/workflows/main.yml/runs?head_sha=$SOURCE_SHA&event=push&status=success&per_page=100" > "$RUNNER_TEMP/source-ci.json"
+        python3 - <<'PY'
+        import json
+        import os
+        from pathlib import Path
 
-      - name: Check out hotfix
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: ${{ steps.inputs.outputs.source_sha }}
-          fetch-depth: 0
-          persist-credentials: false
+        runs = json.loads((Path(os.environ["RUNNER_TEMP"]) / "source-ci.json").read_text())["workflow_runs"]
+        expected = {
+            "head_sha": os.environ["SOURCE_SHA"],
+            "head_branch": os.environ["DEFAULT_BRANCH"],
+            "event": "push",
+            "path": ".github/workflows/main.yml",
+            "status": "completed",
+            "conclusion": "success",
+        }
+        verified = [run for run in runs if all(run.get(key) == value for key, value in expected.items())
+            and run.get("head_repository", {}).get("full_name") == os.environ["GITHUB_REPOSITORY"]]
+        if not verified:
+            raise SystemExit("The exact source must pass CI on the default branch")
+        PY
+    - name: Resolve registered release
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        python3 tool/release_manifest.py resolve \
+          --platform "$PLATFORM" --release-version "$RELEASE_VERSION" \
+          --output "$RUNNER_TEMP/release-manifest.json" --github-output "$GITHUB_OUTPUT"
+    - name: Check out requested source
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ inputs.source_sha }}
+        fetch-depth: 0
+        path: source
+        persist-credentials: false
+    - name: Prepare verified runtime projection
+      id: projection
+      env:
+        BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
+      run: |
+        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" \
+          --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
+          --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
+          --receipt "$RUNNER_TEMP/shorebird-projection.json" \
+          --github-output "$GITHUB_OUTPUT"
+    - name: Restore registered dependency lock
+      if: env.PLATFORM == 'ios'
+      run: |
+        python3 - <<'PY'
+        import hashlib
+        import json
+        import os
+        from pathlib import Path
 
-      - name: Verify hotfix boundary
-        if: steps.inputs.outputs.release_version != '5.2.1+1005301' && steps.inputs.outputs.release_version != '5.2.1+1005801' && steps.inputs.outputs.release_version != '5.2.1+2439.14.43' && steps.inputs.outputs.release_version != '5.2.1+1006201' && steps.inputs.outputs.release_version != '5.2.1+2439.15.54' && steps.inputs.outputs.release_version != '5.2.1+1006601' && steps.inputs.outputs.release_version != '5.2.1+2439.17.57'
-        env:
-          SOURCE_SHA: ${{ steps.inputs.outputs.source_sha }}
-          BASELINE_SHA: ${{ steps.inputs.outputs.baseline_sha }}
-          RELEASE_VERSION: ${{ steps.inputs.outputs.release_version }}
-        run: |
-          python3 - <<'PY'
-          import os
-          import subprocess
+        root = Path(os.environ["RUNNER_TEMP"])
+        manifest = json.loads((root / "release-manifest.json").read_text())
+        digest = manifest["build_inputs"].get("ios/Podfile.lock")
+        if digest:
+            data = (root / "Podfile.lock").read_bytes()
+            if hashlib.sha256(data).hexdigest() != digest:
+                raise SystemExit("Registered dependency lock digest mismatch")
+            (Path(os.environ["PATCH_WORKSPACE"]) / "ios/Podfile.lock").write_bytes(data)
+        PY
+    - name: Set up Flutter
+      uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+      with:
+        channel: stable
+        flutter-version: ${{ steps.release.outputs.flutter_version }}
+        cache: true
+    - name: Install pinned Shorebird
+      run: |
+        shorebird_dir="$RUNNER_TEMP/shorebird-sdk"
+        shorebird_revision=5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb
+        mkdir "$shorebird_dir"
+        git -C "$shorebird_dir" init
+        git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
+        git -C "$shorebird_dir" fetch --depth 1 origin "$shorebird_revision"
+        git -C "$shorebird_dir" checkout --detach FETCH_HEAD
+        test "$(git -C "$shorebird_dir" rev-parse HEAD)" = "$shorebird_revision"
+        printf '%s\n' "$shorebird_dir/bin" >> "$GITHUB_PATH"
+    - name: Verify live registered release
+      env:
+        SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      run: |
+        python3 tool/release_manifest.py verify-live --manifest "$RUNNER_TEMP/release-manifest.json"
+    - name: Resolve locked workspace
+      working-directory: ${{ env.PATCH_WORKSPACE }}
+      run: flutter pub get --enforce-lockfile --no-example
+    - name: Verify projected workspace
+      env:
+        BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
+      run: |
+        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" \
+          --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
+          --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
+          --receipt "$RUNNER_TEMP/shorebird-projection.json" --verify-worktree
+    - name: Analyze hotfix
+      run: |
+        python3 - <<'PY'
+        import json
+        import os
+        from pathlib import Path
+        import subprocess
 
-          baseline = os.environ["BASELINE_SHA"]
-          source = os.environ["SOURCE_SHA"]
-          legacy_allowed = {
-              "lib/di/app_scope.dart",
-              "packages/user_repository/lib/src/user_repository.dart",
-              "packages/gamification_repository/lib/src/gamification_repository.dart",
-              "packages/user_repository/test/src/user_repository_test.dart",
-              "packages/gamification_repository/test/src/gamification_repository_test.dart",
-          }
-          current_allowed = {
-              ".github/workflows/shorebird-patch.yml",
-              "lib/home/view/home_dashboard_content.dart",
-              "lib/schedule/view/schedule_details_page/helpers.dart",
-              "lib/schedule/view/schedule_details_page/reactions_section.dart",
-              "lib/schedule/view/schedule_details_page/subject_hero.dart",
-              "lib/schedule/view/schedule_page/day_timeline.dart",
-              "lib/schedule/view/schedule_page/lesson_text.dart",
-              "lib/schedule/view/schedule_page/schedule_body.dart",
-              "lib/schedule/view/schedule_page/schedule_day_view.dart",
-              "lib/schedule/view/schedule_page/schedule_header.dart",
-              "lib/schedule/view/schedule_page/schedule_week_view.dart",
-              "lib/top_discussions/view/discourse_topic_utils.dart",
-              "lib/top_discussions/view/topic_news_card.dart",
-              "test/schedule/view/schedule_details_page/lesson_progress_card_test.dart",
-              "test/schedule/view/schedule_details_page/lesson_reaction_picker_test.dart",
-              "test/schedule/view/schedule_page/lesson_meta_test.dart",
-              "test/schedule/view/schedule_page/schedule_reference_geometry_test.dart",
-              "test/schedule/view/schedule_page/schedule_responsive_test.dart",
-              "test/schedule/view/schedule_page/schedule_timeline_lesson_test.dart",
-              "test/top_discussions/view/discourse_topic_utils_test.dart",
-          }
-          allowed = current_allowed if os.environ["RELEASE_VERSION"] == "5.2.0+1004201" else legacy_allowed
-          added = {"test/top_discussions/view/discourse_topic_utils_test.dart"} if allowed is current_allowed else set()
-          def git(*args):
-              return subprocess.check_output(["git", *args]).decode().strip()
+        receipt = json.loads((Path(os.environ["RUNNER_TEMP"]) / "shorebird-projection.json").read_text())
+        paths = sorted(path for path in receipt["runtime_paths"] + receipt["test_paths"]
+            if path.endswith(".dart") and Path(path).is_file())
+        if paths:
+            subprocess.run(["flutter", "analyze", "--no-pub", *paths], check=True)
+        PY
+      working-directory: ${{ env.PATCH_WORKSPACE }}
+    - name: Test changed runtime
+      run: |
+        python3 - <<'PY'
+        import os
+        import json
+        from pathlib import Path
+        import subprocess
 
-          if git("rev-parse", "HEAD") != source:
-              raise SystemExit("Checked-out commit does not match source_sha")
-          subprocess.run(["git", "merge-base", "--is-ancestor", baseline, source], check=True)
-          changed = set(filter(None, git("diff", "--name-only", "--no-renames", "-z", baseline, source).split("\0")))
-          if changed != allowed:
-              raise SystemExit("Hotfix must change exactly the approved files for the selected release")
-          for path in sorted(allowed):
-              source_entry = git("ls-tree", source, "--", path)
-              baseline_entry = git("ls-tree", baseline, "--", path)
-              if not source_entry.startswith("100644 blob "):
-                  raise SystemExit("Hotfix paths must remain regular source files")
-              if path in added:
-                  if baseline_entry:
-                      raise SystemExit("Added hotfix paths must not exist in the baseline")
-              elif not baseline_entry.startswith("100644 blob "):
-                  raise SystemExit("Hotfix paths must remain regular source files")
-          subprocess.run(["git", "diff", "--check", baseline, source], check=True)
-          PY
-
-      - name: Prepare verified runtime projection
-        id: projection
-        if: inputs.release_version == '5.2.1+1005301' || inputs.release_version == '5.2.1+1005801' || inputs.release_version == '5.2.1+2439.14.43' || inputs.release_version == '5.2.1+1006201' || inputs.release_version == '5.2.1+2439.15.54' || inputs.release_version == '5.2.1+1006601' || inputs.release_version == '5.2.1+2439.17.57'
-        run: |
-          git show "$WORKFLOW_SHA:tool/prepare_shorebird_patch.py" > "$RUNNER_TEMP/prepare_shorebird_patch.py"
-          python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
-            --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --release-version "$RELEASE_VERSION" \
-            --apply --receipt "$RUNNER_TEMP/shorebird-projection.json" \
-            --github-output "$GITHUB_OUTPUT"
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          channel: stable
-          flutter-version: 3.44.2
-          cache: true
-
-      - name: Resolve locked workspace
-        run: flutter pub get --enforce-lockfile --no-example
-
-      - name: Verify locked workspace
-        run: |
-          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 || "$RELEASE_VERSION" = 5.2.1+1005801 || "$RELEASE_VERSION" = 5.2.1+2439.14.43 || "$RELEASE_VERSION" = 5.2.1+1006201 || "$RELEASE_VERSION" = 5.2.1+2439.15.54 || "$RELEASE_VERSION" = 5.2.1+1006601 || "$RELEASE_VERSION" = 5.2.1+2439.17.57 ]]; then
-            python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
-              --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --release-version "$RELEASE_VERSION" --verify-worktree
-          else
-            git diff --exit-code
-          fi
-
-      - name: Analyze hotfix
-        env:
-          SOURCE_SHA: ${{ steps.inputs.outputs.source_sha }}
-          BASELINE_SHA: ${{ steps.inputs.outputs.baseline_sha }}
-        run: |
-          sources="$(git diff --name-only --no-renames --diff-filter=ACMR "$BASELINE_SHA" "$SOURCE_SHA" -- '*.dart')"
-          test -n "$sources"
-          mapfile -t dart_sources <<< "$sources"
-          flutter analyze --no-pub "${dart_sources[@]}"
-
-      - name: Test schedule and discussions
-        if: steps.inputs.outputs.release_version == '5.2.0+1004201'
-        run: flutter test --no-pub test/schedule test/top_discussions
-
-      - name: Test user initialization
-        if: steps.inputs.outputs.release_version != '5.2.0+1004201' && steps.inputs.outputs.release_version != '5.2.1+1005301' && steps.inputs.outputs.release_version != '5.2.1+1005801' && steps.inputs.outputs.release_version != '5.2.1+2439.14.43' && steps.inputs.outputs.release_version != '5.2.1+1006201' && steps.inputs.outputs.release_version != '5.2.1+2439.15.54' && steps.inputs.outputs.release_version != '5.2.1+1006601' && steps.inputs.outputs.release_version != '5.2.1+2439.17.57'
-        working-directory: packages/user_repository
-        run: flutter test --no-pub test/src/user_repository_test.dart
-
-      - name: Test academic profile initialization
-        if: steps.inputs.outputs.release_version != '5.2.0+1004201' && steps.inputs.outputs.release_version != '5.2.1+1005301' && steps.inputs.outputs.release_version != '5.2.1+1005801' && steps.inputs.outputs.release_version != '5.2.1+2439.14.43' && steps.inputs.outputs.release_version != '5.2.1+1006201' && steps.inputs.outputs.release_version != '5.2.1+2439.15.54' && steps.inputs.outputs.release_version != '5.2.1+1006601' && steps.inputs.outputs.release_version != '5.2.1+2439.17.57'
-        working-directory: packages/gamification_repository
-        run: dart test test/src/gamification_repository_test.dart
-
-      - name: Test reviewed runtime changes
-        if: steps.inputs.outputs.release_version == '5.2.1+1005301' || steps.inputs.outputs.release_version == '5.2.1+1005801' || steps.inputs.outputs.release_version == '5.2.1+2439.14.43' || steps.inputs.outputs.release_version == '5.2.1+1006201' || steps.inputs.outputs.release_version == '5.2.1+2439.15.54' || steps.inputs.outputs.release_version == '5.2.1+1006601' || steps.inputs.outputs.release_version == '5.2.1+2439.17.57'
-        env:
-          BASELINE_SHA: ${{ steps.inputs.outputs.baseline_sha }}
-        run: |
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-          import subprocess
-
-          paths = subprocess.check_output([
-              "git", "diff", "--name-only", "--no-renames", "--diff-filter=ACMR", os.environ["BASELINE_SHA"], os.environ["SOURCE_SHA"],
-          ]).decode().splitlines()
-          groups = {}
-          for path in paths:
-              if not path.endswith("_test.dart"):
-                  continue
-              if path.startswith("test/"):
-                  groups.setdefault(".", []).append(path)
-              elif path.startswith("packages/") and "/test/" in path:
-                  package, relative = path.split("/test/", 1)
-                  groups.setdefault(package, []).append("test/" + relative)
-          if not groups.get("."):
-              raise SystemExit("The reviewed runtime must include regression tests")
-          for package, tests in sorted(groups.items()):
-              flutter = "sdk: flutter" in (Path(package) / "pubspec.yaml").read_text()
-              command = ["flutter", "test", "--no-pub"] if flutter else ["dart", "test"]
-              subprocess.run([*command, "--concurrency=2", *sorted(tests)], cwd=package, check=True)
-          PY
-
+        receipt = json.loads((Path(os.environ["RUNNER_TEMP"]) / "shorebird-projection.json").read_text())
+        paths = [path for path in receipt["test_paths"] if Path(path).is_file()]
+        groups = {}
+        for path in paths:
+            if not path.endswith("_test.dart"):
+                continue
+            if path.startswith("test/"):
+                groups.setdefault(".", []).append(path)
+            elif path.startswith("packages/") and "/test/" in path:
+                package, relative = path.split("/test/", 1)
+                groups.setdefault(package, []).append("test/" + relative)
+        for package, tests in sorted(groups.items()):
+            flutter = "sdk: flutter" in (Path(package) / "pubspec.yaml").read_text()
+            command = ["flutter", "test", "--no-pub"] if flutter else ["dart", "test"]
+            subprocess.run([*command, "--concurrency=2", *sorted(tests)], cwd=package, check=True)
+        PY
+      working-directory: ${{ env.PATCH_WORKSPACE }}
   patch:
     needs: validate
     runs-on: ${{ needs.validate.outputs.platform == 'ios' && 'macos-15' || 'ubuntu-latest' }}
@@ -306,7 +223,7 @@ jobs:
       run:
         shell: bash
     env:
-      CI: "true"
+      CI: 'true'
       WORKFLOW_SHA: ${{ github.workflow_sha }}
       PLATFORM: ${{ needs.validate.outputs.platform }}
       RELEASE_VERSION: ${{ needs.validate.outputs.release_version }}
@@ -316,509 +233,548 @@ jobs:
       APPLE_TEAM_ID: J935XAGDUL
       IOS_APP_BUNDLE_ID: pro.oniel.it.university
       IOS_WIDGET_BUNDLE_ID: pro.oniel.it.university.homewidget
+      PATCH_WORKSPACE: ${{ github.workspace }}/build-projection
+      MANIFEST_SHA256: ${{ needs.validate.outputs.manifest_sha256 }}
+      PROJECTION_SHA256: ${{ needs.validate.outputs.projection_sha256 }}
     steps:
-      - name: Check out verified hotfix
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: ${{ needs.validate.outputs.source_sha }}
-          fetch-depth: 0
-          persist-credentials: false
+    - name: Check out trusted release tools
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ github.workflow_sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Resolve registered release
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        python3 tool/release_manifest.py resolve \
+          --platform "$PLATFORM" --release-version "$RELEASE_VERSION" \
+          --output "$RUNNER_TEMP/release-manifest.json" --github-output "$GITHUB_OUTPUT"
+        python3 - <<'PY'
+        import hashlib
+        import os
+        from pathlib import Path
 
-      - name: Prepare verified runtime projection
-        id: projection
-        if: inputs.release_version == '5.2.1+1005301' || inputs.release_version == '5.2.1+1005801' || inputs.release_version == '5.2.1+2439.14.43' || inputs.release_version == '5.2.1+1006201' || inputs.release_version == '5.2.1+2439.15.54' || inputs.release_version == '5.2.1+1006601' || inputs.release_version == '5.2.1+2439.17.57'
-        run: |
-          git show "$WORKFLOW_SHA:tool/prepare_shorebird_patch.py" > "$RUNNER_TEMP/prepare_shorebird_patch.py"
-          python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
-            --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --release-version "$RELEASE_VERSION" \
-            --expected-projection "${{ needs.validate.outputs.projection_sha256 }}" \
-            --apply --receipt "$RUNNER_TEMP/shorebird-projection.json" \
-            --github-output "$GITHUB_OUTPUT"
+        path = Path(os.environ["RUNNER_TEMP"]) / "release-manifest.json"
+        if hashlib.sha256(path.read_bytes()).hexdigest() != os.environ["MANIFEST_SHA256"]:
+            raise SystemExit("The registered manifest changed after validation")
+        PY
+    - name: Check out requested source
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ inputs.source_sha }}
+        fetch-depth: 0
+        path: source
+        persist-credentials: false
+    - name: Prepare verified runtime projection
+      id: projection
+      env:
+        BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
+      run: |
+        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" \
+          --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
+          --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
+          --receipt "$RUNNER_TEMP/shorebird-projection.json" \
+          --expected-projection "$PROJECTION_SHA256" --github-output "$GITHUB_OUTPUT"
+    - name: Restore registered dependency lock
+      if: env.PLATFORM == 'ios'
+      run: |
+        python3 - <<'PY'
+        import hashlib
+        import json
+        import os
+        from pathlib import Path
 
-      - name: Verify patch configuration
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-          UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
-          FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-        run: |
-          for name in SHOREBIRD_TOKEN UNIVERSITY_CONFIG_JSON FIREBASE_CONFIG_JSON SUPABASE_URL SUPABASE_PUBLISHABLE_KEY; do
-            if [[ -z "${!name:-}" ]]; then
-              printf 'Missing beta patch configuration: %s\n' "$name" >&2
-              exit 1
-            fi
-          done
-          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
-
-      - name: Check out private NFC module
-        if: needs.validate.outputs.platform == 'android'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: 0niel/university-app-nfc-private
-          ref: 6226b9b4c3f2ed2c4a0727ae062f8a5239e5aba5
-          ssh-key: ${{ secrets.NFC_MODULE_DEPLOY_KEY }}
-          path: android/private/nfc-pass-android
-          persist-credentials: false
-
-      - name: Set up Java
-        if: needs.validate.outputs.platform == 'android'
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: gradle
-
-      - name: Select Xcode
-        if: needs.validate.outputs.platform == 'ios'
-        run: |
-          test -d /Applications/Xcode_26.3.app/Contents/Developer
-          printf 'DEVELOPER_DIR=/Applications/Xcode_26.3.app/Contents/Developer\n' >> "$GITHUB_ENV"
-          test "$(/Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcodebuild -version | head -n 1)" = "Xcode 26.3"
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          channel: stable
-          flutter-version: 3.44.2
-          cache: true
-
-      - name: Install pinned Shorebird
-        run: |
-          shorebird_dir="$RUNNER_TEMP/shorebird-sdk"
-          shorebird_revision=5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb
-          mkdir "$shorebird_dir"
-          git -C "$shorebird_dir" init
-          git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
-          git -C "$shorebird_dir" fetch --depth 1 origin "$shorebird_revision"
-          git -C "$shorebird_dir" checkout --detach FETCH_HEAD
-          test "$(git -C "$shorebird_dir" rev-parse HEAD)" = "$shorebird_revision"
-          printf '%s\n' "$shorebird_dir/bin" >> "$GITHUB_PATH"
-
-      - name: Enforce strict iOS native diff rejection
-        if: needs.validate.outputs.platform == 'ios'
-        run: |
-          python3 - <<'PY'
-          import os
-          import subprocess
-          from pathlib import Path
-
-          root = Path(os.environ["RUNNER_TEMP"]) / "shorebird-sdk"
-          relative = "packages/shorebird_cli/lib/src/commands/patch/apple_patcher_mixin.dart"
-          path = root / relative
-          original = subprocess.check_output(["git", "-C", str(root), "show", f"HEAD:{relative}"]).decode()
-          before = "confirmNativeChanges: false,"
-          after = "confirmNativeChanges: true,"
-          if original.count(before) != 1 or path.read_text() != original:
-              raise SystemExit("Unexpected pinned native diff guard")
-          expected = original.replace(before, after, 1)
-          path.write_text(expected)
-          changed = subprocess.check_output(["git", "-C", str(root), "diff", "--name-only"]).decode().splitlines()
-          if changed != [relative] or path.read_text() != expected:
-              raise SystemExit("Unexpected Shorebird safety overlay")
-          stat = subprocess.check_output(["git", "-C", str(root), "diff", "--numstat"]).decode().strip()
-          if stat != f"1\t1\t{relative}":
-              raise SystemExit("Native diff guard must be the only CLI change")
-          subprocess.run(["git", "-C", str(root), "diff", "--check"], check=True)
-          PY
-
-      - name: Resolve locked workspace
-        run: flutter pub get --enforce-lockfile --no-example
-
-      - name: Verify locked workspace
-        run: |
-          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 || "$RELEASE_VERSION" = 5.2.1+1005801 || "$RELEASE_VERSION" = 5.2.1+2439.14.43 || "$RELEASE_VERSION" = 5.2.1+1006201 || "$RELEASE_VERSION" = 5.2.1+2439.15.54 || "$RELEASE_VERSION" = 5.2.1+1006601 || "$RELEASE_VERSION" = 5.2.1+2439.17.57 ]]; then
-            python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
-              --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --release-version "$RELEASE_VERSION" --verify-worktree
-          else
-            git diff --exit-code
+        root = Path(os.environ["RUNNER_TEMP"])
+        manifest = json.loads((root / "release-manifest.json").read_text())
+        digest = manifest["build_inputs"].get("ios/Podfile.lock")
+        if digest:
+            data = (root / "Podfile.lock").read_bytes()
+            if hashlib.sha256(data).hexdigest() != digest:
+                raise SystemExit("Registered dependency lock digest mismatch")
+            (Path(os.environ["PATCH_WORKSPACE"]) / "ios/Podfile.lock").write_bytes(data)
+        PY
+    - name: Verify patch configuration
+      env:
+        SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
+        FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
+        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+        SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+      run: |
+        for name in SHOREBIRD_TOKEN UNIVERSITY_CONFIG_JSON FIREBASE_CONFIG_JSON SUPABASE_URL SUPABASE_PUBLISHABLE_KEY; do
+          if [[ -z "${!name:-}" ]]; then
+            printf 'Missing beta patch configuration: %s\n' "$name" >&2
+            exit 1
           fi
+        done
+        test "$(git -C source rev-parse HEAD)" = "$SOURCE_SHA"
+    - name: Check out private NFC module
+      if: env.PLATFORM == 'android' && steps.release.outputs.private_native_sha != ''
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        repository: 0niel/university-app-nfc-private
+        ref: ${{ steps.release.outputs.private_native_sha }}
+        ssh-key: ${{ secrets.NFC_MODULE_DEPLOY_KEY }}
+        path: build-projection/android/private/nfc-pass-android
+        persist-credentials: false
+    - name: Set up Java
+      if: needs.validate.outputs.platform == 'android'
+      uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+      with:
+        distribution: temurin
+        java-version: '17'
+        cache: gradle
+    - name: Select Xcode
+      if: needs.validate.outputs.platform == 'ios'
+      run: |
+        test -d /Applications/Xcode_26.3.app/Contents/Developer
+        printf 'DEVELOPER_DIR=/Applications/Xcode_26.3.app/Contents/Developer\n' >> "$GITHUB_ENV"
+        test "$(/Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcodebuild -version | head -n 1)" = "Xcode 26.3"
+    - name: Set up Flutter
+      uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+      with:
+        channel: stable
+        flutter-version: ${{ steps.release.outputs.flutter_version }}
+        cache: true
+    - name: Install pinned Shorebird
+      run: |
+        shorebird_dir="$RUNNER_TEMP/shorebird-sdk"
+        shorebird_revision=5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb
+        mkdir "$shorebird_dir"
+        git -C "$shorebird_dir" init
+        git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
+        git -C "$shorebird_dir" fetch --depth 1 origin "$shorebird_revision"
+        git -C "$shorebird_dir" checkout --detach FETCH_HEAD
+        test "$(git -C "$shorebird_dir" rev-parse HEAD)" = "$shorebird_revision"
+        printf '%s\n' "$shorebird_dir/bin" >> "$GITHUB_PATH"
+    - name: Enforce strict iOS native diff rejection
+      if: needs.validate.outputs.platform == 'ios'
+      run: |
+        python3 - <<'PY'
+        import os
+        import subprocess
+        from pathlib import Path
 
-      - name: Configure Android signing
-        if: needs.validate.outputs.platform == 'android'
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          python3 - <<'PY'
-          import base64
-          import os
-          from pathlib import Path
+        root = Path(os.environ["RUNNER_TEMP"]) / "shorebird-sdk"
+        relative = "packages/shorebird_cli/lib/src/commands/patch/apple_patcher_mixin.dart"
+        path = root / relative
+        original = subprocess.check_output(["git", "-C", str(root), "show", f"HEAD:{relative}"]).decode()
+        before = "confirmNativeChanges: false,"
+        after = "confirmNativeChanges: true,"
+        if original.count(before) != 1 or path.read_text() != original:
+            raise SystemExit("Unexpected pinned native diff guard")
+        expected = original.replace(before, after, 1)
+        path.write_text(expected)
+        changed = subprocess.check_output(["git", "-C", str(root), "diff", "--name-only"]).decode().splitlines()
+        if changed != [relative] or path.read_text() != expected:
+            raise SystemExit("Unexpected Shorebird safety overlay")
+        stat = subprocess.check_output(["git", "-C", str(root), "diff", "--numstat"]).decode().strip()
+        if stat != f"1\t1\t{relative}":
+            raise SystemExit("Native diff guard must be the only CLI change")
+        subprocess.run(["git", "-C", str(root), "diff", "--check"], check=True)
+        PY
+    - name: Verify live registered release
+      env:
+        SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      run: |
+        python3 tool/release_manifest.py verify-live --manifest "$RUNNER_TEMP/release-manifest.json"
+    - name: Resolve locked workspace
+      working-directory: ${{ env.PATCH_WORKSPACE }}
+      run: flutter pub get --enforce-lockfile --no-example
+    - name: Verify projected workspace
+      env:
+        BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
+      run: |
+        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" \
+          --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
+          --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
+          --receipt "$RUNNER_TEMP/shorebird-projection.json" --verify-worktree --expected-projection "$PROJECTION_SHA256"
+    - name: Configure Android signing
+      if: needs.validate.outputs.platform == 'android'
+      env:
+        ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      run: |
+        python3 - <<'PY'
+        import base64
+        import os
+        from pathlib import Path
 
-          names = ["ANDROID_KEYSTORE_BASE64", "ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD"]
-          if any(not os.environ.get(name) for name in names):
-              raise SystemExit("Android signing configuration is incomplete")
-          Path("android/app/release.jks").write_bytes(base64.b64decode(os.environ["ANDROID_KEYSTORE_BASE64"], validate=True))
-          Path("android/key.properties").write_text("\n".join((
-              f"storePassword={os.environ['ANDROID_KEYSTORE_PASSWORD']}",
-              f"keyPassword={os.environ['ANDROID_KEY_PASSWORD']}",
-              f"keyAlias={os.environ['ANDROID_KEY_ALIAS']}",
-              "storeFile=release.jks",
-          )) + "\n")
-          PY
-
-      - name: Configure iOS signing
-        if: needs.validate.outputs.platform == 'ios'
-        env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-          BUILD_WIDGET_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_WIDGET_PROVISION_PROFILE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-        run: |
-          for name in BUILD_CERTIFICATE_BASE64 BUILD_PROVISION_PROFILE_BASE64 BUILD_WIDGET_PROVISION_PROFILE_BASE64 P12_PASSWORD KEYCHAIN_PASSWORD; do
-            if [[ -z "${!name:-}" ]]; then
-              printf 'Missing iOS signing configuration: %s\n' "$name" >&2
-              exit 1
-            fi
-          done
-          keychain_path="$RUNNER_TEMP/patch-signing.keychain-db"
-          profiles_directory="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$profiles_directory"
-          python3 - <<'PY'
-          import base64
-          import os
-          from pathlib import Path
-
-          root = Path(os.environ["RUNNER_TEMP"])
-          for name, filename in (
-              ("BUILD_CERTIFICATE_BASE64", "patch_certificate.p12"),
-              ("BUILD_PROVISION_PROFILE_BASE64", "patch-app.mobileprovision"),
-              ("BUILD_WIDGET_PROVISION_PROFILE_BASE64", "patch-widget.mobileprovision"),
-          ):
-              (root / filename).write_bytes(base64.b64decode(os.environ[name].strip(), validate=True))
-          PY
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
-          security set-keychain-settings -lut 21600 "$keychain_path"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
-          security import "$RUNNER_TEMP/patch_certificate.p12" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$keychain_path"
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$keychain_path"
-          security list-keychain -d user -s "$keychain_path"
-          security find-identity -v -p codesigning "$keychain_path" | grep -q 'Apple Distribution'
-          security cms -D -i "$RUNNER_TEMP/patch-app.mobileprovision" > "$RUNNER_TEMP/patch-app-profile.plist"
-          security cms -D -i "$RUNNER_TEMP/patch-widget.mobileprovision" > "$RUNNER_TEMP/patch-widget-profile.plist"
-          python3 - <<'PY'
-          import datetime
-          import os
-          import plistlib
-          from pathlib import Path
-
-          root = Path(os.environ["RUNNER_TEMP"])
-          team = os.environ["APPLE_TEAM_ID"]
-          profiles = {}
-          for filename, bundle_id in (
-              ("patch-app-profile.plist", os.environ["IOS_APP_BUNDLE_ID"]),
-              ("patch-widget-profile.plist", os.environ["IOS_WIDGET_BUNDLE_ID"]),
-          ):
-              with (root / filename).open("rb") as source:
-                  profile = plistlib.load(source)
-              expiration = profile["ExpirationDate"].replace(tzinfo=datetime.timezone.utc)
-              if expiration <= datetime.datetime.now(datetime.timezone.utc):
-                  raise SystemExit("Provisioning profile has expired")
-              if team not in profile.get("TeamIdentifier", []):
-                  raise SystemExit("Provisioning profile team mismatch")
-              if profile["Entitlements"]["application-identifier"] != f"{team}.{bundle_id}":
-                  raise SystemExit("Provisioning profile bundle mismatch")
-              if bundle_id == os.environ["IOS_APP_BUNDLE_ID"] and profile["Entitlements"].get("aps-environment") != "production":
-                  raise SystemExit("App provisioning profile requires production push notifications")
-              profiles[bundle_id] = profile["Name"]
-          with (root / "PatchExportOptions.plist").open("wb") as target:
-              plistlib.dump({
-                  "manageAppVersionAndBuildNumber": False,
-                  "method": "app-store",
-                  "provisioningProfiles": profiles,
-                  "signingCertificate": "Apple Distribution",
-                  "signingStyle": "manual",
-                  "teamID": team,
-              }, target)
-          PY
-          cp "$RUNNER_TEMP/patch-app.mobileprovision" "$profiles_directory/patch-app.mobileprovision"
-          cp "$RUNNER_TEMP/patch-widget.mobileprovision" "$profiles_directory/patch-widget.mobileprovision"
-
-      - name: Configure release parameters
-        env:
-          UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
-          FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
-        run: |
-          printf '%s\n' "$UNIVERSITY_CONFIG_JSON" > "$RUNNER_TEMP/university.json"
-          printf '%s\n' "$FIREBASE_CONFIG_JSON" > "$RUNNER_TEMP/firebase.json"
-          firebase_verify_args=()
-          firebase_args=(--config "$RUNNER_TEMP/firebase.json" --platform "$PLATFORM")
-          if [[ "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1005801 || "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1006201 || "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1006601 ]]; then
-            git show "$BASELINE_SHA:tool/configure_firebase.py" > "$RUNNER_TEMP/configure_firebase.py"
-            firebase_args+=(--android-output android/app/google-services.json)
-            firebase_verify_args+=(--verify-native-firebase)
-          else
-            git show "$WORKFLOW_SHA:tool/configure_firebase.py" > "$RUNNER_TEMP/configure_firebase.py"
+        names = ["ANDROID_KEYSTORE_BASE64", "ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD"]
+        if any(not os.environ.get(name) for name in names):
+            raise SystemExit("Android signing configuration is incomplete")
+        Path("android/app/release.jks").write_bytes(base64.b64decode(os.environ["ANDROID_KEYSTORE_BASE64"], validate=True))
+        Path("android/key.properties").write_text("\n".join((
+            f"storePassword={os.environ['ANDROID_KEYSTORE_PASSWORD']}",
+            f"keyPassword={os.environ['ANDROID_KEY_PASSWORD']}",
+            f"keyAlias={os.environ['ANDROID_KEY_ALIAS']}",
+            "storeFile=release.jks",
+        )) + "\n")
+        PY
+      working-directory: ${{ env.PATCH_WORKSPACE }}
+    - name: Configure iOS signing
+      if: needs.validate.outputs.platform == 'ios'
+      env:
+        BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+        BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+        BUILD_WIDGET_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_WIDGET_PROVISION_PROFILE_BASE64 }}
+        P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      run: |
+        for name in BUILD_CERTIFICATE_BASE64 BUILD_PROVISION_PROFILE_BASE64 BUILD_WIDGET_PROVISION_PROFILE_BASE64 P12_PASSWORD KEYCHAIN_PASSWORD; do
+          if [[ -z "${!name:-}" ]]; then
+            printf 'Missing iOS signing configuration: %s\n' "$name" >&2
+            exit 1
           fi
-          python3 "$RUNNER_TEMP/configure_firebase.py" "${firebase_args[@]}"
-          dart run tool/configure_university.dart --config "$RUNNER_TEMP/university.json"
-          if [[ "$RELEASE_VERSION" = 5.2.1+1005301 || "$RELEASE_VERSION" = 5.2.1+1005801 || "$RELEASE_VERSION" = 5.2.1+2439.14.43 || "$RELEASE_VERSION" = 5.2.1+1006201 || "$RELEASE_VERSION" = 5.2.1+2439.15.54 || "$RELEASE_VERSION" = 5.2.1+1006601 || "$RELEASE_VERSION" = 5.2.1+2439.17.57 ]]; then
-            python3 "$RUNNER_TEMP/prepare_shorebird_patch.py" \
-              --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" --release-version "$RELEASE_VERSION" --verify-worktree "${firebase_verify_args[@]}"
-          else
-            git diff --exit-code -- android ios assets pubspec.yaml pubspec.lock .fvmrc shorebird.yaml
-          fi
-          python3 - <<'PY'
-          import os
-          import re
-          from pathlib import Path
+        done
+        keychain_path="$RUNNER_TEMP/patch-signing.keychain-db"
+        profiles_directory="$HOME/Library/MobileDevice/Provisioning Profiles"
+        mkdir -p "$profiles_directory"
+        python3 - <<'PY'
+        import base64
+        import os
+        from pathlib import Path
 
-          content = Path("shorebird.yaml").read_text()
-          pattern = r"^  production:\s*(\S+)\s*$" if os.environ["PLATFORM"] == "android" else r"^app_id:\s*(\S+)\s*$"
-          if re.findall(pattern, content, re.MULTILINE) != [os.environ["APP_ID"]]:
-              raise SystemExit("Shorebird app ID does not match the selected base")
-          PY
+        root = Path(os.environ["RUNNER_TEMP"])
+        for name, filename in (
+            ("BUILD_CERTIFICATE_BASE64", "patch_certificate.p12"),
+            ("BUILD_PROVISION_PROFILE_BASE64", "patch-app.mobileprovision"),
+            ("BUILD_WIDGET_PROVISION_PROFILE_BASE64", "patch-widget.mobileprovision"),
+        ):
+            (root / filename).write_bytes(base64.b64decode(os.environ[name].strip(), validate=True))
+        PY
+        security create-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+        security set-keychain-settings -lut 21600 "$keychain_path"
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+        security import "$RUNNER_TEMP/patch_certificate.p12" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$keychain_path"
+        security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$keychain_path"
+        security list-keychain -d user -s "$keychain_path"
+        security find-identity -v -p codesigning "$keychain_path" | grep -q 'Apple Distribution'
+        security cms -D -i "$RUNNER_TEMP/patch-app.mobileprovision" > "$RUNNER_TEMP/patch-app-profile.plist"
+        security cms -D -i "$RUNNER_TEMP/patch-widget.mobileprovision" > "$RUNNER_TEMP/patch-widget-profile.plist"
+        python3 - <<'PY'
+        import datetime
+        import os
+        import plistlib
+        from pathlib import Path
 
-      - name: Record existing patches
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: |
-          shorebird patches list \
-            --release-version "$RELEASE_VERSION" \
-            --app-id "$APP_ID" \
-            --json < /dev/null > "$RUNNER_TEMP/patches-before.json"
+        root = Path(os.environ["RUNNER_TEMP"])
+        team = os.environ["APPLE_TEAM_ID"]
+        profiles = {}
+        for filename, bundle_id in (
+            ("patch-app-profile.plist", os.environ["IOS_APP_BUNDLE_ID"]),
+            ("patch-widget-profile.plist", os.environ["IOS_WIDGET_BUNDLE_ID"]),
+        ):
+            with (root / filename).open("rb") as source:
+                profile = plistlib.load(source)
+            expiration = profile["ExpirationDate"].replace(tzinfo=datetime.timezone.utc)
+            if expiration <= datetime.datetime.now(datetime.timezone.utc):
+                raise SystemExit("Provisioning profile has expired")
+            if team not in profile.get("TeamIdentifier", []):
+                raise SystemExit("Provisioning profile team mismatch")
+            if profile["Entitlements"]["application-identifier"] != f"{team}.{bundle_id}":
+                raise SystemExit("Provisioning profile bundle mismatch")
+            if bundle_id == os.environ["IOS_APP_BUNDLE_ID"] and profile["Entitlements"].get("aps-environment") != "production":
+                raise SystemExit("App provisioning profile requires production push notifications")
+            profiles[bundle_id] = profile["Name"]
+        with (root / "PatchExportOptions.plist").open("wb") as target:
+            plistlib.dump({
+                "manageAppVersionAndBuildNumber": False,
+                "method": "app-store",
+                "provisioningProfiles": profiles,
+                "signingCertificate": "Apple Distribution",
+                "signingStyle": "manual",
+                "teamID": team,
+            }, target)
+        PY
+        cp "$RUNNER_TEMP/patch-app.mobileprovision" "$profiles_directory/patch-app.mobileprovision"
+        cp "$RUNNER_TEMP/patch-widget.mobileprovision" "$profiles_directory/patch-widget.mobileprovision"
+    - name: Configure release parameters
+      env:
+        UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
+        FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
+      run: |
+        printf '%s\n' "$UNIVERSITY_CONFIG_JSON" > "$RUNNER_TEMP/university.json"
+        printf '%s\n' "$FIREBASE_CONFIG_JSON" > "$RUNNER_TEMP/firebase.json"
+        firebase_args=(--config "$RUNNER_TEMP/firebase.json" --platform "$PLATFORM")
+        if [[ "$PLATFORM" = android ]]; then
+          firebase_args+=(--android-output android/app/google-services.json)
+        fi
+        python3 tool/configure_firebase.py "${firebase_args[@]}"
+        dart run tool/configure_university.dart --config "$RUNNER_TEMP/university.json"
+        python3 "$GITHUB_WORKSPACE/tool/release_manifest.py" verify-inputs \
+          --manifest "$RUNNER_TEMP/release-manifest.json" --repo "$PATCH_WORKSPACE"
+        python3 - <<'PY'
+        import os
+        import re
+        from pathlib import Path
 
-      - name: Publish staging patch
-        id: staging_patch
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-          ORG_GRADLE_PROJECT_requirePrivateNfcModule: "true"
-        run: |
-          args=(
-            patch "$PLATFORM"
-            --release-version "$RELEASE_VERSION"
-            --track staging
-            --target lib/main/main_production.dart
-            --no-confirm
-          )
-          if [[ "$PLATFORM" = android ]]; then
-            args+=(--flavor production)
-          else
-            args+=(--export-options-plist "$RUNNER_TEMP/PatchExportOptions.plist")
-            args+=(--build-number "${RELEASE_VERSION#*+}")
-          fi
-          shorebird "${args[@]}" -- \
-            --dart-define-from-file="$RUNNER_TEMP/university.json" \
-            --dart-define-from-file="$RUNNER_TEMP/firebase.json" \
-            --dart-define="SUPABASE_URL=$SUPABASE_URL" \
-            --dart-define="SUPABASE_PUBLISHABLE_KEY=$SUPABASE_PUBLISHABLE_KEY" < /dev/null
+        content = Path("shorebird.yaml").read_text()
+        pattern = r"^  production:\s*(\S+)\s*$" if os.environ["PLATFORM"] == "android" else r"^app_id:\s*(\S+)\s*$"
+        if re.findall(pattern, content, re.MULTILINE) != [os.environ["APP_ID"]]:
+            raise SystemExit("Shorebird app ID does not match the selected base")
+        PY
+      working-directory: ${{ env.PATCH_WORKSPACE }}
+    - name: Verify projected workspace
+      env:
+        BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
+      run: |
+        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" \
+          --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
+          --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
+          --receipt "$RUNNER_TEMP/shorebird-projection.json" --verify-worktree --expected-projection "$PROJECTION_SHA256"
+    - name: Record existing patches
+      env:
+        SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      run: |
+        shorebird patches list \
+          --release-version "$RELEASE_VERSION" \
+          --app-id "$APP_ID" \
+          --json < /dev/null > "$RUNNER_TEMP/patches-before.json"
+    - name: Publish staging patch
+      id: staging_patch
+      env:
+        SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+        SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        ORG_GRADLE_PROJECT_requirePrivateNfcModule: 'true'
+      run: |
+        args=(
+          patch "$PLATFORM"
+          --release-version "$RELEASE_VERSION"
+          --track staging
+          --target lib/main/main_production.dart
+          --no-confirm
+        )
+        if [[ "$PLATFORM" = android ]]; then
+          args+=(--flavor production)
+        else
+          args+=(--export-options-plist "$RUNNER_TEMP/PatchExportOptions.plist")
+          args+=(--build-number "${RELEASE_VERSION#*+}")
+        fi
+        shorebird "${args[@]}" -- \
+          --dart-define-from-file="$RUNNER_TEMP/university.json" \
+          --dart-define-from-file="$RUNNER_TEMP/firebase.json" \
+          --dart-define="SUPABASE_URL=$SUPABASE_URL" \
+          --dart-define="SUPABASE_PUBLISHABLE_KEY=$SUPABASE_PUBLISHABLE_KEY" < /dev/null
+      working-directory: ${{ env.PATCH_WORKSPACE }}
+    - name: Collect iOS Runner diagnostics
+      id: runner_diagnostics
+      if: ${{ failure() && needs.validate.outputs.platform == 'ios' && steps.staging_patch.outcome == 'failure'
+        }}
+      run: |
+        python3 - <<'PY'
+        import hashlib
+        import json
+        import os
+        import stat
+        import subprocess
+        from pathlib import Path
 
-      - name: Collect iOS Runner diagnostics
-        id: runner_diagnostics
-        if: ${{ failure() && needs.validate.outputs.platform == 'ios' && steps.staging_patch.outcome == 'failure' }}
-        run: |
-          python3 - <<'PY'
-          import hashlib
-          import json
-          import os
-          import stat
-          import subprocess
-          from pathlib import Path
+        MAX_RUNNER_BYTES = 64 * 1024 * 1024
+        MAX_TOTAL_BYTES = 256 * 1024 * 1024
+        MAX_TOOL_BYTES = 32 * 1024 * 1024
+        RUNNER_SUFFIX = Path("Products/Applications/Runner.app/Runner")
 
-          MAX_RUNNER_BYTES = 64 * 1024 * 1024
-          MAX_TOTAL_BYTES = 256 * 1024 * 1024
-          MAX_TOOL_BYTES = 32 * 1024 * 1024
-          RUNNER_SUFFIX = Path("Products/Applications/Runner.app/Runner")
+        def validate_runner(root, candidate):
+            relative = candidate.relative_to(root)
+            if not relative.parts or any(part in (".", "..") for part in relative.parts):
+                raise ValueError("Runner path is outside its allowed root")
+            current = root
+            for part in relative.parts:
+                current /= part
+                if current.is_symlink():
+                    raise ValueError("Runner paths must not contain symlinks")
+            if candidate.resolve(strict=True) != candidate:
+                raise ValueError("Runner path is not canonical")
+            metadata = candidate.stat()
+            if not stat.S_ISREG(metadata.st_mode) or not 0 < metadata.st_size <= MAX_RUNNER_BYTES:
+                raise ValueError("Runner is not a bounded regular file")
+            return metadata.st_size
 
-          def validate_runner(root, candidate):
-              relative = candidate.relative_to(root)
-              if not relative.parts or any(part in (".", "..") for part in relative.parts):
-                  raise ValueError("Runner path is outside its allowed root")
-              current = root
-              for part in relative.parts:
-                  current /= part
-                  if current.is_symlink():
-                      raise ValueError("Runner paths must not contain symlinks")
-              if candidate.resolve(strict=True) != candidate:
-                  raise ValueError("Runner path is not canonical")
-              metadata = candidate.stat()
-              if not stat.S_ISREG(metadata.st_mode) or not 0 < metadata.st_size <= MAX_RUNNER_BYTES:
-                  raise ValueError("Runner is not a bounded regular file")
-              return metadata.st_size
+        def find_runners(temp_root, workspace):
+            temporary = sorted(temp_root.glob(f"*/{RUNNER_SUFFIX.as_posix()}"))
+            if len(temporary) > 3:
+                raise ValueError("Too many temporary Runner candidates")
+            candidates = [
+                (f"temporary-{index:02}", temp_root, path)
+                for index, path in enumerate(temporary, 1)
+            ]
+            candidates.append((
+                "workspace-archive",
+                workspace,
+                workspace / "build/ios/archive/Runner.xcarchive" / RUNNER_SUFFIX,
+            ))
+            sizes = [validate_runner(root, path) for _, root, path in candidates]
+            if sum(sizes) > MAX_TOTAL_BYTES:
+                raise ValueError("Runner diagnostics exceed the total size limit")
+            return candidates
 
-          def find_runners(temp_root, workspace):
-              temporary = sorted(temp_root.glob(f"*/{RUNNER_SUFFIX.as_posix()}"))
-              if len(temporary) > 3:
-                  raise ValueError("Too many temporary Runner candidates")
-              candidates = [
-                  (f"temporary-{index:02}", temp_root, path)
-                  for index, path in enumerate(temporary, 1)
-              ]
-              candidates.append((
-                  "workspace-archive",
-                  workspace,
-                  workspace / "build/ios/archive/Runner.xcarchive" / RUNNER_SUFFIX,
-              ))
-              sizes = [validate_runner(root, path) for _, root, path in candidates]
-              if sum(sizes) > MAX_TOTAL_BYTES:
-                  raise ValueError("Runner diagnostics exceed the total size limit")
-              return candidates
+        def limit_tool_output():
+            import resource
+            resource.setrlimit(resource.RLIMIT_FSIZE, (MAX_TOOL_BYTES, MAX_TOOL_BYTES))
 
-          def limit_tool_output():
-              import resource
-              resource.setrlimit(resource.RLIMIT_FSIZE, (MAX_TOOL_BYTES, MAX_TOOL_BYTES))
+        def inspect_runner(runner):
+            results = {}
+            commands = {
+                "load-commands": ["/usr/bin/otool", "-l"],
+                "disassembly": ["/usr/bin/otool", "-tV"],
+                "symbols": ["/usr/bin/nm", "-n"],
+            }
+            for name, command in commands.items():
+                output = runner.parent / f"{name}.txt"
+                result = {"timed_out": False, "exit_code": None}
+                with output.open("xb") as stream:
+                    try:
+                        process = subprocess.run(
+                            [*command, str(runner)],
+                            stdout=stream,
+                            stderr=subprocess.STDOUT,
+                            timeout=30,
+                            check=False,
+                            preexec_fn=limit_tool_output,
+                        )
+                        result["exit_code"] = process.returncode
+                    except subprocess.TimeoutExpired:
+                        result["timed_out"] = True
+                result["bytes"] = output.stat().st_size
+                result["size_limit_reached"] = result["bytes"] >= MAX_TOOL_BYTES
+                if result["bytes"] > MAX_TOOL_BYTES:
+                    raise ValueError("Diagnostic tool exceeded the output size limit")
+                results[name] = result
+            return results
 
-          def inspect_runner(runner):
-              results = {}
-              commands = {
-                  "load-commands": ["/usr/bin/otool", "-l"],
-                  "disassembly": ["/usr/bin/otool", "-tV"],
-                  "symbols": ["/usr/bin/nm", "-n"],
-              }
-              for name, command in commands.items():
-                  output = runner.parent / f"{name}.txt"
-                  result = {"timed_out": False, "exit_code": None}
-                  with output.open("xb") as stream:
-                      try:
-                          process = subprocess.run(
-                              [*command, str(runner)],
-                              stdout=stream,
-                              stderr=subprocess.STDOUT,
-                              timeout=30,
-                              check=False,
-                              preexec_fn=limit_tool_output,
-                          )
-                          result["exit_code"] = process.returncode
-                      except subprocess.TimeoutExpired:
-                          result["timed_out"] = True
-                  result["bytes"] = output.stat().st_size
-                  result["size_limit_reached"] = result["bytes"] >= MAX_TOOL_BYTES
-                  if result["bytes"] > MAX_TOOL_BYTES:
-                      raise ValueError("Diagnostic tool exceeded the output size limit")
-                  results[name] = result
-              return results
+        def collect_runners(temp_root, workspace, output):
+            candidates = find_runners(temp_root, workspace)
+            output.mkdir()
+            records = []
+            for label, root, source in candidates:
+                expected_size = validate_runner(root, source)
+                descriptor = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
+                with os.fdopen(descriptor, "rb") as stream:
+                    metadata = os.fstat(stream.fileno())
+                    if not stat.S_ISREG(metadata.st_mode) or metadata.st_size != expected_size:
+                        raise ValueError("Runner changed before capture")
+                    content = stream.read(MAX_RUNNER_BYTES + 1)
+                if len(content) != expected_size:
+                    raise ValueError("Runner changed during capture")
+                if content[:4] not in (
+                    b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf",
+                    b"\xca\xfe\xba\xbe", b"\xbe\xba\xfe\xca",
+                    b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca",
+                ):
+                    raise ValueError("Runner is not a Mach-O executable")
+                destination = output / label / "Runner"
+                destination.parent.mkdir()
+                with destination.open("xb") as stream:
+                    stream.write(content)
+                records.append({
+                    "label": label,
+                    "source_relative": source.relative_to(root).as_posix(),
+                    "bytes": len(content),
+                    "sha256": hashlib.sha256(content).hexdigest(),
+                    "inspection": inspect_runner(destination),
+                })
+            (output / "manifest.json").write_text(
+                json.dumps({"runners": records}, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
 
-          def collect_runners(temp_root, workspace, output):
-              candidates = find_runners(temp_root, workspace)
-              output.mkdir()
-              records = []
-              for label, root, source in candidates:
-                  expected_size = validate_runner(root, source)
-                  descriptor = os.open(source, os.O_RDONLY | os.O_NOFOLLOW)
-                  with os.fdopen(descriptor, "rb") as stream:
-                      metadata = os.fstat(stream.fileno())
-                      if not stat.S_ISREG(metadata.st_mode) or metadata.st_size != expected_size:
-                          raise ValueError("Runner changed before capture")
-                      content = stream.read(MAX_RUNNER_BYTES + 1)
-                  if len(content) != expected_size:
-                      raise ValueError("Runner changed during capture")
-                  if content[:4] not in (
-                      b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf",
-                      b"\xca\xfe\xba\xbe", b"\xbe\xba\xfe\xca",
-                      b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca",
-                  ):
-                      raise ValueError("Runner is not a Mach-O executable")
-                  destination = output / label / "Runner"
-                  destination.parent.mkdir()
-                  with destination.open("xb") as stream:
-                      stream.write(content)
-                  records.append({
-                      "label": label,
-                      "source_relative": source.relative_to(root).as_posix(),
-                      "bytes": len(content),
-                      "sha256": hashlib.sha256(content).hexdigest(),
-                      "inspection": inspect_runner(destination),
-                  })
-              (output / "manifest.json").write_text(
-                  json.dumps({"runners": records}, indent=2, sort_keys=True) + "\n",
-                  encoding="utf-8",
-              )
+        def main():
+            temp_root = Path(os.environ.get("TMPDIR", "/tmp")).resolve(strict=True)
+            workspace = Path(os.environ["PATCH_WORKSPACE"]).resolve(strict=True)
+            output_root = Path(os.environ["RUNNER_TEMP"]).resolve(strict=True)
+            collect_runners(temp_root, workspace, output_root / "ios-runner-diagnostics")
 
-          def main():
-              temp_root = Path(os.environ.get("TMPDIR", "/tmp")).resolve(strict=True)
-              workspace = Path(os.environ["GITHUB_WORKSPACE"]).resolve(strict=True)
-              output_root = Path(os.environ["RUNNER_TEMP"]).resolve(strict=True)
-              collect_runners(temp_root, workspace, output_root / "ios-runner-diagnostics")
+        if __name__ == "__main__":
+            main()
+        PY
+    - name: Save iOS Runner diagnostics
+      if: ${{ failure() && needs.validate.outputs.platform == 'ios' && steps.staging_patch.outcome == 'failure'
+        && steps.runner_diagnostics.outcome == 'success' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: ios-runner-diagnostics-${{ github.run_id }}
+        path: ${{ runner.temp }}/ios-runner-diagnostics
+        if-no-files-found: error
+        retention-days: 1
+    - name: Verify staging metadata
+      env:
+        SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      run: |
+        shorebird patches list \
+          --release-version "$RELEASE_VERSION" \
+          --app-id "$APP_ID" \
+          --json < /dev/null > "$RUNNER_TEMP/patches-after.json"
+        python3 - <<'PY'
+        import json
+        import os
+        from pathlib import Path
 
-          if __name__ == "__main__":
-              main()
-          PY
+        root = Path(os.environ["RUNNER_TEMP"])
+        def read_patches(filename):
+            result = json.loads((root / filename).read_text())
+            if result["status"] != "success":
+                raise SystemExit("Unable to verify release patches")
+            return result["data"]["patches"]
 
-      - name: Save iOS Runner diagnostics
-        if: ${{ failure() && needs.validate.outputs.platform == 'ios' && steps.staging_patch.outcome == 'failure' && steps.runner_diagnostics.outcome == 'success' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: ios-runner-diagnostics-${{ github.run_id }}
-          path: ${{ runner.temp }}/ios-runner-diagnostics
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Verify staging metadata
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: |
-          shorebird patches list \
-            --release-version "$RELEASE_VERSION" \
-            --app-id "$APP_ID" \
-            --json < /dev/null > "$RUNNER_TEMP/patches-after.json"
-          python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          root = Path(os.environ["RUNNER_TEMP"])
-          def read_patches(filename):
-              result = json.loads((root / filename).read_text())
-              if result["status"] != "success":
-                  raise SystemExit("Unable to verify release patches")
-              return result["data"]["patches"]
-
-          existing_ids = {patch["id"] for patch in read_patches("patches-before.json")}
-          created = [patch for patch in read_patches("patches-after.json") if patch["id"] not in existing_ids]
-          if len(created) != 1:
-              raise SystemExit("Expected exactly one new patch")
-          patch = created[0]
-          if patch["channel"] != "staging" or patch["is_rolled_back"] or not patch["artifacts"]:
-              raise SystemExit("The new patch is not active on staging")
-          if any(item["platform"] != os.environ["PLATFORM"] or item["patch_id"] != patch["id"] for item in patch["artifacts"]):
-              raise SystemExit("Patch artifacts do not match the selected platform")
-          receipt = {
-              "source_sha": os.environ["SOURCE_SHA"],
-              "app_id": os.environ["APP_ID"],
-              "platform": os.environ["PLATFORM"],
-              "release_version": os.environ["RELEASE_VERSION"],
-              "patch_id": patch["id"],
-              "patch_number": patch["number"],
-              "track": patch["channel"],
-              "staging_run_id": os.environ["GITHUB_RUN_ID"],
-          }
-          if os.environ["RELEASE_VERSION"] in ("5.2.1+1005301", "5.2.1+1005801", "5.2.1+2439.14.43", "5.2.1+1006201", "5.2.1+2439.15.54", "5.2.1+1006601", "5.2.1+2439.17.57"):
-              projection = json.loads((root / "shorebird-projection.json").read_text())
-              if projection["source_sha"] != receipt["source_sha"] or projection["release_version"] != receipt["release_version"]:
-                  raise SystemExit("Projection receipt identity mismatch")
-              receipt.update({key: projection[key] for key in ("baseline_sha", "reviewed_source_sha", "projection_sha256")})
-          print(json.dumps(receipt, sort_keys=True))
-          receipt["artifacts"] = sorted(
-              [{key: item[key] for key in ("arch", "platform", "hash", "size", "patch_id")} for item in patch["artifacts"]],
-              key=lambda item: item["arch"],
-          )
-          (root / "shorebird-patch-receipt.json").write_text(json.dumps(receipt, sort_keys=True) + "\n")
-          PY
-
-      - name: Save staging receipt
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: shorebird-patch-${{ inputs.platform }}-${{ inputs.release_version }}
-          path: ${{ runner.temp }}/shorebird-patch-receipt.json
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Remove signing material
-        if: always()
-        run: |
-          if [[ "$PLATFORM" = ios ]]; then
-            security delete-keychain "$RUNNER_TEMP/patch-signing.keychain-db" || true
-            rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/patch-app.mobileprovision"
-            rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/patch-widget.mobileprovision"
-          fi
-          rm -f android/key.properties android/app/release.jks
-          rm -f "$RUNNER_TEMP/patch_certificate.p12" "$RUNNER_TEMP/patch-app.mobileprovision"
-          rm -f "$RUNNER_TEMP/patch-widget.mobileprovision" "$RUNNER_TEMP/patch-app-profile.plist"
-          rm -f "$RUNNER_TEMP/patch-widget-profile.plist" "$RUNNER_TEMP/PatchExportOptions.plist"
-          rm -f "$RUNNER_TEMP/university.json" "$RUNNER_TEMP/firebase.json"
-          rm -f "$RUNNER_TEMP/patches-before.json" "$RUNNER_TEMP/patches-after.json"
+        existing_ids = {patch["id"] for patch in read_patches("patches-before.json")}
+        created = [patch for patch in read_patches("patches-after.json") if patch["id"] not in existing_ids]
+        if len(created) != 1:
+            raise SystemExit("Expected exactly one new patch")
+        patch = created[0]
+        if patch["channel"] != "staging" or patch["is_rolled_back"] or not patch["artifacts"]:
+            raise SystemExit("The new patch is not active on staging")
+        if any(item["platform"] != os.environ["PLATFORM"] or item["patch_id"] != patch["id"] for item in patch["artifacts"]):
+            raise SystemExit("Patch artifacts do not match the selected platform")
+        receipt = {
+            "source_sha": os.environ["SOURCE_SHA"],
+            "app_id": os.environ["APP_ID"],
+            "platform": os.environ["PLATFORM"],
+            "release_version": os.environ["RELEASE_VERSION"],
+            "patch_id": patch["id"],
+            "patch_number": patch["number"],
+            "track": patch["channel"],
+            "staging_run_id": os.environ["GITHUB_RUN_ID"],
+        }
+        projection = json.loads((root / "shorebird-projection.json").read_text())
+        if projection["source_sha"] != receipt["source_sha"] or projection["baseline_sha"] != os.environ["BASELINE_SHA"]:
+            raise SystemExit("Projection receipt identity mismatch")
+        if projection["projection_sha256"] != os.environ["PROJECTION_SHA256"]:
+            raise SystemExit("Built projection differs from validated projection")
+        receipt.update({key: projection[key] for key in ("baseline_sha", "source_tree_sha", "projected_tree_sha", "projection_sha256")})
+        receipt["manifest_sha256"] = os.environ["MANIFEST_SHA256"]
+        receipt["workflow_sha"] = os.environ["WORKFLOW_SHA"]
+        receipt["staging_run_attempt"] = int(os.environ["GITHUB_RUN_ATTEMPT"])
+        print(json.dumps(receipt, sort_keys=True))
+        receipt["artifacts"] = sorted(
+            [{key: item[key] for key in ("arch", "platform", "hash", "size", "patch_id")} for item in patch["artifacts"]],
+            key=lambda item: item["arch"],
+        )
+        (root / "shorebird-patch-receipt.json").write_text(json.dumps(receipt, sort_keys=True) + "\n")
+        PY
+    - name: Save staging receipt
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: shorebird-patch-${{ inputs.platform }}-${{ inputs.release_version }}
+        path: ${{ runner.temp }}/shorebird-patch-receipt.json
+        if-no-files-found: error
+        retention-days: 7
+    - name: Remove signing material
+      if: always()
+      run: |
+        if [[ "$PLATFORM" = ios ]]; then
+          security delete-keychain "$RUNNER_TEMP/patch-signing.keychain-db" || true
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/patch-app.mobileprovision"
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/patch-widget.mobileprovision"
+        fi
+        rm -f "$PATCH_WORKSPACE/android/key.properties" "$PATCH_WORKSPACE/android/app/release.jks"
+        rm -f "$RUNNER_TEMP/patch_certificate.p12" "$RUNNER_TEMP/patch-app.mobileprovision"
+        rm -f "$RUNNER_TEMP/patch-widget.mobileprovision" "$RUNNER_TEMP/patch-app-profile.plist"
+        rm -f "$RUNNER_TEMP/patch-widget-profile.plist" "$RUNNER_TEMP/PatchExportOptions.plist"
+        rm -f "$RUNNER_TEMP/university.json" "$RUNNER_TEMP/firebase.json"
+        rm -f "$RUNNER_TEMP/patches-before.json" "$RUNNER_TEMP/patches-after.json"

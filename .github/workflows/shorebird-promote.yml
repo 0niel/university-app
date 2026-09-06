@@ -1,6 +1,5 @@
 name: Shorebird Patch Promotion
-
-on:
+'on':
   workflow_dispatch:
     inputs:
       staging_run_id:
@@ -16,40 +15,23 @@ on:
         required: true
         type: choice
         options:
-          - android
-          - ios
+        - android
+        - ios
       release_version:
-        description: Existing release version
+        description: Registered release version
         required: true
-        type: choice
-        options:
-          - 5.2.1+1006601
-          - 5.2.1+2439.17.57
-          - 5.2.1+1006201
-          - 5.2.1+2439.15.54
-          - 5.2.1+1005801
-          - 5.2.1+2439.14.43
-          - 5.2.1+1005301
-          - 5.2.0+1004201
-          - 5.2.0+1002401
-          - 5.2.0+1002601
-          - 5.2.0+2435.13.10
-          - 5.2.0+1001301
-          - 5.2.0+1001601
-          - 5.1.0+1000201
+        type: string
       patch_number:
         description: Verified staging patch number
         required: true
         type: string
-
 permissions:
   actions: read
+  attestations: read
   contents: read
-
 concurrency:
   group: shorebird-patch-${{ inputs.platform }}-${{ inputs.release_version }}
   cancel-in-progress: false
-
 jobs:
   promote:
     runs-on: ubuntu-latest
@@ -59,238 +41,258 @@ jobs:
       run:
         shell: bash
     env:
-      CI: "true"
+      CI: 'true'
       STAGING_RUN_ID: ${{ inputs.staging_run_id }}
       SOURCE_SHA: ${{ inputs.source_sha }}
       PLATFORM: ${{ inputs.platform }}
       RELEASE_VERSION: ${{ inputs.release_version }}
       PATCH_NUMBER: ${{ inputs.patch_number }}
+      WORKFLOW_SHA: ${{ github.workflow_sha }}
     steps:
-      - name: Validate requested promotion
-        env:
-          WORKFLOW_REF: ${{ github.ref }}
-        run: |
-          test "$WORKFLOW_REF" = refs/heads/master
-          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          [[ "$STAGING_RUN_ID" =~ ^[1-9][0-9]*$ ]]
-          [[ "$PATCH_NUMBER" =~ ^[1-9][0-9]*$ ]]
-          case "$PLATFORM:$RELEASE_VERSION" in
-            android:5.2.1+1006601|android:5.2.1+1006201|android:5.2.1+1005801|android:5.2.1+1005301|android:5.2.0+1004201|android:5.2.0+1002401|android:5.2.0+1002601|android:5.2.0+1001301|android:5.2.0+1001601|android:5.1.0+1000201)
-              app_id=c55a7a80-2fcb-4565-833e-fb442dbe4e34
-              ;;
-            ios:5.2.1+2439.17.57|ios:5.2.1+2439.15.54|ios:5.2.1+2439.14.43|ios:5.2.0+2435.13.10)
-              app_id=21c47e68-a64f-49c1-af6e-4a406dfe266f
-              ;;
-            *)
-              printf 'Unsupported platform and release combination\n' >&2
-              exit 1
-              ;;
-          esac
-          printf 'APP_ID=%s\n' "$app_id" >> "$GITHUB_ENV"
+    - name: Validate requested promotion
+      env:
+        WORKFLOW_REF: ${{ github.ref }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      run: |
+        test "$WORKFLOW_REF" = "refs/heads/$DEFAULT_BRANCH"
+        [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+        [[ "$PLATFORM" = android || "$PLATFORM" = ios ]]
+        [[ "$RELEASE_VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]{0,127}$ ]]
+        [[ "$STAGING_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+        [[ "$PATCH_NUMBER" =~ ^[1-9][0-9]*$ ]]
+    - name: Check out trusted release tools
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ github.workflow_sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Verify approved source
+      env:
+        GH_TOKEN: ${{ github.token }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      run: |
+        git merge-base --is-ancestor "$SOURCE_SHA" "$WORKFLOW_SHA"
+        gh api "repos/$GITHUB_REPOSITORY/actions/workflows/main.yml/runs?head_sha=$SOURCE_SHA&event=push&status=success&per_page=100" > "$RUNNER_TEMP/source-ci.json"
+        python3 - <<'PY'
+        import json
+        import os
+        from pathlib import Path
 
-      - name: Verify staging workflow
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$STAGING_RUN_ID" > "$RUNNER_TEMP/staging-run.json"
-          python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
+        runs = json.loads((Path(os.environ["RUNNER_TEMP"]) / "source-ci.json").read_text())["workflow_runs"]
+        expected = {
+            "head_sha": os.environ["SOURCE_SHA"],
+            "head_branch": os.environ["DEFAULT_BRANCH"],
+            "event": "push",
+            "path": ".github/workflows/main.yml",
+            "status": "completed",
+            "conclusion": "success",
+        }
+        verified = [run for run in runs if all(run.get(key) == value for key, value in expected.items())
+            and run.get("head_repository", {}).get("full_name") == os.environ["GITHUB_REPOSITORY"]]
+        if not verified:
+            raise SystemExit("The exact source must pass CI on the default branch")
+        PY
+    - name: Resolve registered release
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        python3 tool/release_manifest.py resolve \
+          --platform "$PLATFORM" --release-version "$RELEASE_VERSION" \
+          --output "$RUNNER_TEMP/release-manifest.json" --github-output "$GITHUB_OUTPUT"
+        python3 - <<'PY'
+        import json
+        import os
+        from pathlib import Path
 
-          run = json.loads((Path(os.environ["RUNNER_TEMP"]) / "staging-run.json").read_text())
-          expected = {
-              "path": ".github/workflows/shorebird-patch.yml",
-              "head_branch": "master",
-              "event": "workflow_dispatch",
-              "conclusion": "success",
-              "status": "completed",
-          }
-          if any(run.get(key) != value for key, value in expected.items()):
-              raise SystemExit("The staging workflow has not completed successfully")
-          if str(run["id"]) != os.environ["STAGING_RUN_ID"] or run["repository"]["full_name"] != os.environ["GITHUB_REPOSITORY"]:
-              raise SystemExit("Staging run identity mismatch")
-          PY
+        outputs = dict(line.split("=", 1) for line in Path(os.environ["GITHUB_OUTPUT"]).read_text().splitlines() if "=" in line)
+        with Path(os.environ["GITHUB_ENV"]).open("a") as stream:
+            for key in ("app_id", "baseline_sha", "manifest_sha256"):
+                stream.write(f"{key.upper()}={outputs[key]}\n")
+        PY
+    - name: Verify staging workflow
+      env:
+        GH_TOKEN: ${{ github.token }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      run: |
+        gh api "repos/$GITHUB_REPOSITORY/actions/runs/$STAGING_RUN_ID" > "$RUNNER_TEMP/staging-run.json"
+        python3 - <<'PY'
+        import json
+        import os
+        from pathlib import Path
 
-      - name: Download staging receipt
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
-        with:
-          name: shorebird-patch-${{ inputs.platform }}-${{ inputs.release_version }}
-          path: ${{ runner.temp }}/promotion-receipt
-          github-token: ${{ github.token }}
-          run-id: ${{ inputs.staging_run_id }}
+        run = json.loads((Path(os.environ["RUNNER_TEMP"]) / "staging-run.json").read_text())
+        expected = {
+            "path": ".github/workflows/shorebird-patch.yml",
+            "head_branch": os.environ["DEFAULT_BRANCH"],
+            "event": "workflow_dispatch",
+            "conclusion": "success",
+            "status": "completed",
+        }
+        if any(run.get(key) != value for key, value in expected.items()):
+            raise SystemExit("The staging workflow has not completed successfully")
+        if str(run["id"]) != os.environ["STAGING_RUN_ID"] or run["repository"]["full_name"] != os.environ["GITHUB_REPOSITORY"]:
+            raise SystemExit("Staging run identity mismatch")
+        PY
+    - name: Download staging receipt
+      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+      with:
+        name: shorebird-patch-${{ inputs.platform }}-${{ inputs.release_version }}
+        path: ${{ runner.temp }}/promotion-receipt
+        github-token: ${{ github.token }}
+        run-id: ${{ inputs.staging_run_id }}
+    - name: Verify receipt
+      run: |
+        python3 - <<'PY'
+        import json
+        import os
+        import subprocess
+        from pathlib import Path
 
-      - name: Verify receipt
-        run: |
-          python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
+        root = Path(os.environ["RUNNER_TEMP"]) / "promotion-receipt"
+        receipt_path = root / "shorebird-patch-receipt.json"
+        if sorted(root.iterdir()) != [receipt_path] or receipt_path.is_symlink():
+            raise SystemExit("Unexpected staging receipt contents")
+        receipt = json.loads(receipt_path.read_text())
+        expected = {
+            "source_sha": os.environ["SOURCE_SHA"],
+            "app_id": os.environ["APP_ID"],
+            "platform": os.environ["PLATFORM"],
+            "release_version": os.environ["RELEASE_VERSION"],
+            "patch_number": int(os.environ["PATCH_NUMBER"]),
+            "staging_run_id": os.environ["STAGING_RUN_ID"],
+            "track": "staging",
+        }
+        if any(receipt.get(key) != value for key, value in expected.items()):
+            raise SystemExit("The staging receipt does not match the requested promotion")
+        if receipt.get("baseline_sha") != os.environ["BASELINE_SHA"] or receipt.get("manifest_sha256") != os.environ["MANIFEST_SHA256"]:
+            raise SystemExit("The staging receipt does not match the registered release manifest")
+        for key, size in (("projection_sha256", 64), ("manifest_sha256", 64), ("source_tree_sha", 40), ("projected_tree_sha", 40), ("workflow_sha", 40)):
+            value = receipt.get(key, "")
+            if not isinstance(value, str) or len(value) != size or any(c not in "0123456789abcdef" for c in value):
+                raise SystemExit(f"The staging receipt has invalid {key}")
+        source_tree = subprocess.check_output(["git", "rev-parse", os.environ["SOURCE_SHA"] + "^{tree}"], text=True).strip()
+        if receipt["source_tree_sha"] != source_tree:
+            raise SystemExit("Staging receipt source tree mismatch")
+        run = json.loads((Path(os.environ["RUNNER_TEMP"]) / "staging-run.json").read_text())
+        if receipt["workflow_sha"] != run["head_sha"] or receipt.get("staging_run_attempt") != run["run_attempt"]:
+            raise SystemExit("Staging receipt workflow identity mismatch")
+        if not isinstance(receipt.get("patch_id"), int) or receipt["patch_id"] < 1 or not receipt.get("artifacts"):
+            raise SystemExit("The staging receipt has no valid patch artifacts")
+        print(json.dumps(expected, sort_keys=True))
+        PY
+    - name: Set up Flutter
+      uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+      with:
+        channel: stable
+        flutter-version: ${{ steps.release.outputs.flutter_version }}
+        cache: true
+    - name: Install pinned Shorebird
+      run: |
+        shorebird_dir="$RUNNER_TEMP/shorebird-sdk"
+        shorebird_revision=5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb
+        mkdir "$shorebird_dir"
+        git -C "$shorebird_dir" init
+        git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
+        git -C "$shorebird_dir" fetch --depth 1 origin "$shorebird_revision"
+        git -C "$shorebird_dir" checkout --detach FETCH_HEAD
+        test "$(git -C "$shorebird_dir" rev-parse HEAD)" = "$shorebird_revision"
+        printf '%s\n' "$shorebird_dir/bin" >> "$GITHUB_PATH"
+    - name: Verify live registered release
+      env:
+        SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      run: |
+        python3 tool/release_manifest.py verify-live --manifest "$RUNNER_TEMP/release-manifest.json"
+    - name: Verify live staging patch
+      id: live
+      env:
+        SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      run: |
+        test -n "$SHOREBIRD_TOKEN"
+        shorebird patches list \
+          --release-version "$RELEASE_VERSION" \
+          --app-id "$APP_ID" \
+          --json < /dev/null > "$RUNNER_TEMP/live-staging.json"
+        python3 - <<'PY'
+        import json
+        import os
+        from pathlib import Path
 
-          root = Path(os.environ["RUNNER_TEMP"]) / "promotion-receipt"
-          receipt_path = root / "shorebird-patch-receipt.json"
-          if sorted(root.iterdir()) != [receipt_path] or receipt_path.is_symlink():
-              raise SystemExit("Unexpected staging receipt contents")
-          receipt = json.loads(receipt_path.read_text())
-          expected = {
-              "source_sha": os.environ["SOURCE_SHA"],
-              "app_id": os.environ["APP_ID"],
-              "platform": os.environ["PLATFORM"],
-              "release_version": os.environ["RELEASE_VERSION"],
-              "patch_number": int(os.environ["PATCH_NUMBER"]),
-              "staging_run_id": os.environ["STAGING_RUN_ID"],
-              "track": "staging",
-          }
-          if any(receipt.get(key) != value for key, value in expected.items()):
-              raise SystemExit("The staging receipt does not match the requested promotion")
-          projections = {
-              "5.2.1+1005301": ("892c735ac0b46f3b8f6621b1d67d12342c45cc84", "0a5f375a1a312a6bb45567677852ee22242420ab"),
-              "5.2.1+2439.14.43": ("506602c5d8da2cac5a6180d26b753f415d381819", "281f0761b65405ab48a69e8c3df92e63bdc101da"),
-              "5.2.1+1005801": ("506602c5d8da2cac5a6180d26b753f415d381819", "281f0761b65405ab48a69e8c3df92e63bdc101da"),
-          }
-          read_state_reviewed = "d958d00217238a815931d879ed8abc684a8c7cc3"
-          read_state_baselines = {
-              "5.2.1+1005801": "506602c5d8da2cac5a6180d26b753f415d381819",
-              "5.2.1+2439.14.43": "506602c5d8da2cac5a6180d26b753f415d381819",
-              "5.2.1+1006201": "781b2ff4a14c9888331eb61b156a2cb0c7e4515b",
-              "5.2.1+2439.15.54": "ee51aeee41bf3c48925c6a524e9e9e90c40b0dd1",
-          }
-          version = os.environ["RELEASE_VERSION"]
-          if version in read_state_baselines and (receipt.get("reviewed_source_sha") == read_state_reviewed or version not in projections):
-              projections[version] = (read_state_baselines[version], read_state_reviewed)
-          mobile_reviewed = "7fe813c357996dec0c4fbd95b245644b81824326"
-          mobile_baselines = {
-              "5.2.1+1005801": "506602c5d8da2cac5a6180d26b753f415d381819",
-              "5.2.1+2439.14.43": "506602c5d8da2cac5a6180d26b753f415d381819",
-              "5.2.1+1006201": "781b2ff4a14c9888331eb61b156a2cb0c7e4515b",
-              "5.2.1+2439.15.54": "ee51aeee41bf3c48925c6a524e9e9e90c40b0dd1",
-              "5.2.1+1006601": "9369a9bc8f3bac521c1efb10942f76a4696ca279",
-              "5.2.1+2439.17.57": "9369a9bc8f3bac521c1efb10942f76a4696ca279"
-          }
-          if version in mobile_baselines and (receipt.get("reviewed_source_sha") == mobile_reviewed or version not in projections):
-              projections[version] = (mobile_baselines[version], mobile_reviewed)
-          if os.environ["RELEASE_VERSION"] in projections:
-              baseline, reviewed = projections[os.environ["RELEASE_VERSION"]]
-              if receipt.get("baseline_sha") != baseline or receipt.get("reviewed_source_sha") != reviewed:
-                  raise SystemExit("The staging receipt does not match the reviewed runtime projection")
-              digest = receipt.get("projection_sha256", "")
-              if len(digest) != 64 or any(character not in "0123456789abcdef" for character in digest):
-                  raise SystemExit("The staging receipt has no valid projection digest")
-          if not isinstance(receipt.get("patch_id"), int) or receipt["patch_id"] < 1 or not receipt.get("artifacts"):
-              raise SystemExit("The staging receipt has no valid patch artifacts")
-          print(json.dumps(expected, sort_keys=True))
-          PY
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          channel: stable
-          flutter-version: 3.44.2
-          cache: true
-
-      - name: Install pinned Shorebird
-        run: |
-          shorebird_dir="$RUNNER_TEMP/shorebird-sdk"
-          shorebird_revision=5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb
-          mkdir "$shorebird_dir"
-          git -C "$shorebird_dir" init
-          git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
-          git -C "$shorebird_dir" fetch --depth 1 origin "$shorebird_revision"
-          git -C "$shorebird_dir" checkout --detach FETCH_HEAD
-          test "$(git -C "$shorebird_dir" rev-parse HEAD)" = "$shorebird_revision"
-          printf '%s\n' "$shorebird_dir/bin" >> "$GITHUB_PATH"
-
-      - name: Verify live staging patch
-        id: live
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: |
-          test -n "$SHOREBIRD_TOKEN"
-          shorebird patches list \
-            --release-version "$RELEASE_VERSION" \
+        root = Path(os.environ["RUNNER_TEMP"])
+        receipt = json.loads((root / "promotion-receipt/shorebird-patch-receipt.json").read_text())
+        result = json.loads((root / "live-staging.json").read_text())
+        if result["status"] != "success":
+            raise SystemExit("Unable to verify the live staging patch")
+        matches = [patch for patch in result["data"]["patches"] if patch["number"] == int(os.environ["PATCH_NUMBER"])]
+        if len(matches) != 1:
+            raise SystemExit("The requested patch does not exist uniquely")
+        patch = matches[0]
+        if patch["id"] != receipt["patch_id"] or patch["channel"] not in ("staging", "stable") or patch["is_rolled_back"]:
+            raise SystemExit("The requested patch is not the verified staging patch")
+        artifacts = sorted(
+            [{key: item[key] for key in ("arch", "platform", "hash", "size", "patch_id")} for item in patch["artifacts"]],
+            key=lambda item: item["arch"],
+        )
+        if not artifacts or artifacts != receipt["artifacts"]:
+            raise SystemExit("Live artifacts differ from the staging receipt")
+        if any(item["platform"] != os.environ["PLATFORM"] or item["patch_id"] != patch["id"] for item in artifacts):
+            raise SystemExit("Patch artifacts do not match the selected platform")
+        with Path(os.environ["GITHUB_OUTPUT"]).open("a") as output:
+            output.write(f"track={patch['channel']}\n")
+        PY
+    - name: Promote verified patch
+      env:
+        SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        CURRENT_TRACK: ${{ steps.live.outputs.track }}
+      run: |
+        if [[ "$CURRENT_TRACK" = staging ]]; then
+          shorebird patches set-track \
+            --release "$RELEASE_VERSION" \
+            --patch "$PATCH_NUMBER" \
+            --track stable \
             --app-id "$APP_ID" \
-            --json < /dev/null > "$RUNNER_TEMP/live-staging.json"
-          python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
+            --json < /dev/null > "$RUNNER_TEMP/promotion-result.json"
+        else
+          test "$CURRENT_TRACK" = stable
+        fi
+        shorebird patches list \
+          --release-version "$RELEASE_VERSION" \
+          --app-id "$APP_ID" \
+          --json < /dev/null > "$RUNNER_TEMP/live-stable.json"
+        python3 - <<'PY'
+        import json
+        import os
+        from pathlib import Path
 
-          root = Path(os.environ["RUNNER_TEMP"])
-          receipt = json.loads((root / "promotion-receipt/shorebird-patch-receipt.json").read_text())
-          result = json.loads((root / "live-staging.json").read_text())
-          if result["status"] != "success":
-              raise SystemExit("Unable to verify the live staging patch")
-          matches = [patch for patch in result["data"]["patches"] if patch["number"] == int(os.environ["PATCH_NUMBER"])]
-          if len(matches) != 1:
-              raise SystemExit("The requested patch does not exist uniquely")
-          patch = matches[0]
-          if patch["id"] != receipt["patch_id"] or patch["channel"] not in ("staging", "stable") or patch["is_rolled_back"]:
-              raise SystemExit("The requested patch is not the verified staging patch")
-          artifacts = sorted(
-              [{key: item[key] for key in ("arch", "platform", "hash", "size", "patch_id")} for item in patch["artifacts"]],
-              key=lambda item: item["arch"],
-          )
-          if not artifacts or artifacts != receipt["artifacts"]:
-              raise SystemExit("Live artifacts differ from the staging receipt")
-          if any(item["platform"] != os.environ["PLATFORM"] or item["patch_id"] != patch["id"] for item in artifacts):
-              raise SystemExit("Patch artifacts do not match the selected platform")
-          with Path(os.environ["GITHUB_OUTPUT"]).open("a") as output:
-              output.write(f"track={patch['channel']}\n")
-          PY
-
-      - name: Promote verified patch
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-          CURRENT_TRACK: ${{ steps.live.outputs.track }}
-        run: |
-          if [[ "$CURRENT_TRACK" = staging ]]; then
-            shorebird patches set-track \
-              --release "$RELEASE_VERSION" \
-              --patch "$PATCH_NUMBER" \
-              --track stable \
-              --app-id "$APP_ID" \
-              --json < /dev/null > "$RUNNER_TEMP/promotion-result.json"
-          else
-            test "$CURRENT_TRACK" = stable
-          fi
-          shorebird patches list \
-            --release-version "$RELEASE_VERSION" \
-            --app-id "$APP_ID" \
-            --json < /dev/null > "$RUNNER_TEMP/live-stable.json"
-          python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          root = Path(os.environ["RUNNER_TEMP"])
-          receipt = json.loads((root / "promotion-receipt/shorebird-patch-receipt.json").read_text())
-          expected = {
-              "release_version": os.environ["RELEASE_VERSION"],
-              "patch_number": int(os.environ["PATCH_NUMBER"]),
-              "track": "stable",
-          }
-          if os.environ["CURRENT_TRACK"] == "staging":
-              result = json.loads((root / "promotion-result.json").read_text())
-              if result["status"] != "success" or result["data"] != expected:
-                  raise SystemExit("Patch promotion was not confirmed")
-          live = json.loads((root / "live-stable.json").read_text())
-          if live["status"] != "success":
-              raise SystemExit("Unable to verify the stable patch")
-          matches = [patch for patch in live["data"]["patches"] if patch["id"] == receipt["patch_id"]]
-          if len(matches) != 1:
-              raise SystemExit("The promoted patch does not exist uniquely")
-          patch = matches[0]
-          artifacts = sorted(
-              [{key: item[key] for key in ("arch", "platform", "hash", "size", "patch_id")} for item in patch["artifacts"]],
-              key=lambda item: item["arch"],
-          )
-          if patch["number"] != expected["patch_number"] or patch["channel"] != "stable" or patch["is_rolled_back"] or artifacts != receipt["artifacts"]:
-              raise SystemExit("The live stable patch does not match the staging receipt")
-          print(json.dumps({
-              **expected,
-              "source_sha": receipt["source_sha"],
-              "app_id": receipt["app_id"],
-              "platform": receipt["platform"],
-              "patch_id": receipt["patch_id"],
-          }, sort_keys=True))
-          PY
+        root = Path(os.environ["RUNNER_TEMP"])
+        receipt = json.loads((root / "promotion-receipt/shorebird-patch-receipt.json").read_text())
+        expected = {
+            "release_version": os.environ["RELEASE_VERSION"],
+            "patch_number": int(os.environ["PATCH_NUMBER"]),
+            "track": "stable",
+        }
+        if os.environ["CURRENT_TRACK"] == "staging":
+            result = json.loads((root / "promotion-result.json").read_text())
+            if result["status"] != "success" or result["data"] != expected:
+                raise SystemExit("Patch promotion was not confirmed")
+        live = json.loads((root / "live-stable.json").read_text())
+        if live["status"] != "success":
+            raise SystemExit("Unable to verify the stable patch")
+        matches = [patch for patch in live["data"]["patches"] if patch["id"] == receipt["patch_id"]]
+        if len(matches) != 1:
+            raise SystemExit("The promoted patch does not exist uniquely")
+        patch = matches[0]
+        artifacts = sorted(
+            [{key: item[key] for key in ("arch", "platform", "hash", "size", "patch_id")} for item in patch["artifacts"]],
+            key=lambda item: item["arch"],
+        )
+        if patch["number"] != expected["patch_number"] or patch["channel"] != "stable" or patch["is_rolled_back"] or artifacts != receipt["artifacts"]:
+            raise SystemExit("The live stable patch does not match the staging receipt")
+        print(json.dumps({
+            **expected,
+            "source_sha": receipt["source_sha"],
+            "app_id": receipt["app_id"],
+            "platform": receipt["platform"],
+            "patch_id": receipt["patch_id"],
+        }, sort_keys=True))
+        PY

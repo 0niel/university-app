@@ -248,6 +248,25 @@ jobs:
             tool/release_symbols_public.pem
           (cd dist && shasum -a 256 ./* > SHA256SUMS)
 
+      - name: Check out release tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-tools
+          persist-credentials: false
+
+      - name: Record Android release manifest
+        env:
+          RELEASE_SHA: ${{ needs.prepare.outputs.release_sha }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.release_version }}
+        run: |
+          python3 .release-tools/tool/release_manifest.py create \
+            --platform android \
+            --release-version "$RELEASE_VERSION" \
+            --source-sha "$RELEASE_SHA" \
+            --artifact-dir dist \
+            --output dist/release-manifest.json
+
       - name: Upload Android artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -277,6 +296,12 @@ jobs:
       id-token: write
 
     steps:
+      - name: Check out release tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+
       - name: Download artifacts
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
@@ -287,6 +312,19 @@ jobs:
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
         with:
           subject-path: dist/*
+
+      - name: Attest release manifest
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a
+        with:
+          subject-path: dist/release-manifest.json
+
+      - name: Publish release manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 tool/release_manifest.py publish \
+            --manifest dist/release-manifest.json \
+            --artifacts-dir dist
 
       - name: Publish GitHub prerelease
         env:

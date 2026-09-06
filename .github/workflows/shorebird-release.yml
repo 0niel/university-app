@@ -38,6 +38,10 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 60
     environment: beta
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     defaults:
       run:
         shell: bash
@@ -269,15 +273,88 @@ jobs:
             -out build/release-symbols/ios-release-symbols.cms \
             tool/release_symbols_public.pem
 
+      - name: Collect iOS release artifacts
+        id: artifacts
+        run: |
+          python3 - <<'PY'
+          import os
+          import plistlib
+          import re
+          import shutil
+          import zipfile
+          from pathlib import Path
+
+          candidates = list(Path("build/ios/ipa").glob("*.ipa"))
+          if len(candidates) != 1:
+              raise SystemExit("Exactly one signed iOS artifact is required")
+          ipa = candidates[0]
+          with zipfile.ZipFile(ipa) as archive:
+              metadata_paths = [name for name in archive.namelist() if re.fullmatch(r"Payload/[^/]+\.app/Info\.plist", name)]
+              if len(metadata_paths) != 1:
+                  raise SystemExit("Exactly one application metadata file is required")
+              metadata = plistlib.loads(archive.read(metadata_paths[0]))
+          if metadata.get("CFBundleIdentifier") != os.environ["IOS_APP_BUNDLE_ID"]:
+              raise SystemExit("Unexpected iOS application identifier")
+          marketing_version = metadata.get("CFBundleShortVersionString", "")
+          build_number = metadata.get("CFBundleVersion", "")
+          if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){1,2}", marketing_version):
+              raise SystemExit("Invalid iOS marketing version")
+          if not re.fullmatch(r"[0-9]{1,4}(?:\.[0-9]{1,2}){0,2}", build_number):
+              raise SystemExit("Invalid iOS build number")
+          pod_lock = Path("ios/Podfile.lock")
+          if not pod_lock.is_file() or not pod_lock.stat().st_size:
+              raise SystemExit("Resolved iOS Podfile.lock is required")
+          symbols = Path("build/release-symbols/ios-release-symbols.cms")
+          if not symbols.is_file() or not symbols.stat().st_size:
+              raise SystemExit("Encrypted iOS release symbols are required")
+          destination = Path("dist")
+          destination.mkdir(exist_ok=True)
+          shutil.copy2(ipa, destination / ipa.name)
+          shutil.copy2(symbols, destination / symbols.name)
+          shutil.copy2(pod_lock, destination / "Podfile.lock")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"release_version={marketing_version}+{build_number}\n")
+          PY
+
+      - name: Record iOS release manifest
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          RELEASE_VERSION: ${{ steps.artifacts.outputs.release_version }}
+        run: |
+          python3 tool/release_manifest.py create \
+            --platform ios \
+            --release-version "$RELEASE_VERSION" \
+            --source-sha "$(git rev-parse HEAD)" \
+            --artifact-dir dist \
+            --output dist/release-manifest.json
+
+      - name: Attest iOS artifacts
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a
+        with:
+          subject-path: |
+            dist/*.ipa
+            dist/*.cms
+
+      - name: Attest release manifest
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a
+        with:
+          subject-path: dist/release-manifest.json
+
       - name: Upload iOS artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: ios-shorebird-release
-          path: |
-            build/ios/ipa/*.ipa
-            build/release-symbols/*.cms
+          path: dist/
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish release manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 tool/release_manifest.py publish \
+            --manifest dist/release-manifest.json \
+            --artifacts-dir dist
 
       - name: Remove signing and configuration material
         if: always()
