@@ -413,7 +413,7 @@ void main() {
   for (final fromLink in [false, true]) {
     testWidgets(
       fromLink
-          ? 'platform link survives account restoration with a saved startup screen'
+          ? 'platform link survives account restoration and startup preference'
           : 'restored account opens its saved screen and push still wins',
       (
         tester,
