@@ -236,7 +236,7 @@ jobs:
       APPLE_TEAM_ID: J935XAGDUL
       IOS_APP_BUNDLE_ID: pro.oniel.it.university
       IOS_WIDGET_BUNDLE_ID: pro.oniel.it.university.homewidget
-      PATCH_WORKSPACE: ${{ github.workspace }}/build-projection
+      PATCH_WORKSPACE: ${{ github.workspace }}
       MANIFEST_SHA256: ${{ needs.validate.outputs.manifest_sha256 }}
       PROJECTION_SHA256: ${{ needs.validate.outputs.projection_sha256 }}
     steps:
@@ -245,13 +245,72 @@ jobs:
       with:
         ref: ${{ github.workflow_sha }}
         fetch-depth: 0
+        path: release-tools
         persist-credentials: false
+    - name: Check out requested source
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ inputs.source_sha }}
+        fetch-depth: 0
+        path: source
+        persist-credentials: false
+    - name: Isolate build verification inputs
+      env:
+        RELEASE_TOOLS: ${{ runner.temp }}/shorebird-release-tools
+        SOURCE_WORKSPACE: ${{ runner.temp }}/shorebird-source
+      run: |
+        python3 - <<'PY'
+        import os
+        import re
+        import shutil
+        import subprocess
+        from pathlib import Path
+
+        workspace = Path(os.environ["GITHUB_WORKSPACE"])
+        temporary = Path(os.environ["RUNNER_TEMP"])
+        if workspace.is_symlink() or temporary.is_symlink():
+            raise SystemExit("Build directories must not be symlinks")
+        workspace = workspace.resolve(strict=True)
+        temporary = temporary.resolve(strict=True)
+        if temporary == workspace or temporary.is_relative_to(workspace):
+            raise SystemExit("Verification inputs must be outside the original build root")
+        if {path.name for path in workspace.iterdir()} != {"release-tools", "source"}:
+            raise SystemExit("Original build root contains unexpected files")
+        locations = (
+            (workspace / "release-tools", Path(os.environ["RELEASE_TOOLS"]), "shorebird-release-tools", os.environ["WORKFLOW_SHA"]),
+            (workspace / "source", Path(os.environ["SOURCE_WORKSPACE"]), "shorebird-source", os.environ["SOURCE_SHA"]),
+        )
+        for checkout, destination, name, revision in locations:
+            if (checkout.is_symlink() or not checkout.is_dir() or checkout.resolve() != checkout
+                    or destination.is_symlink() or destination.exists()
+                    or destination.absolute() != temporary / name):
+                raise SystemExit("Unsafe verification checkout location")
+            if not re.fullmatch(r"[0-9a-f]{40}", revision):
+                raise SystemExit("Verification checkout requires a full commit SHA")
+            def git(*arguments):
+                return subprocess.check_output(["git", "-C", str(checkout), *arguments], text=True).strip()
+            if Path(git("rev-parse", "--show-toplevel")).resolve() != checkout:
+                raise SystemExit("Verification checkout is not an independent repository")
+            if git("rev-parse", "HEAD") != revision or git("status", "--porcelain", "--untracked-files=all"):
+                raise SystemExit("Verification checkout differs from its approved commit")
+        for checkout, destination, _, _ in locations:
+            shutil.move(checkout, destination)
+        if any(workspace.iterdir()):
+            raise SystemExit("Original build root must be empty before projection")
+        with Path(os.environ["GITHUB_ENV"]).open("a") as output:
+            for variable in ("RELEASE_TOOLS", "SOURCE_WORKSPACE"):
+                value = os.environ[variable]
+                if "\n" in value or "\r" in value:
+                    raise SystemExit("Verification checkout path cannot contain line breaks")
+                output.write(f"{variable}={value}\n")
+        PY
     - name: Resolve registered release
       id: release
+      working-directory: ${{ env.RELEASE_TOOLS }}
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        python3 tool/release_manifest.py resolve \
+        python3 "$RELEASE_TOOLS/tool/release_manifest.py" resolve \
           --platform "$PLATFORM" --release-version "$RELEASE_VERSION" \
           --output "$RUNNER_TEMP/release-manifest.json" --github-output "$GITHUB_OUTPUT"
         python3 - <<'PY'
@@ -263,20 +322,13 @@ jobs:
         if hashlib.sha256(path.read_bytes()).hexdigest() != os.environ["MANIFEST_SHA256"]:
             raise SystemExit("The registered manifest changed after validation")
         PY
-    - name: Check out requested source
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      with:
-        ref: ${{ inputs.source_sha }}
-        fetch-depth: 0
-        path: source
-        persist-credentials: false
     - name: Prepare verified runtime projection
       id: projection
       env:
         BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
       run: |
-        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" \
-          --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
+        python3 "$RELEASE_TOOLS/tool/prepare_shorebird_patch.py" \
+          --repo "$SOURCE_WORKSPACE" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
           --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
           --receipt "$RUNNER_TEMP/shorebird-projection.json" \
           --expected-projection "$PROJECTION_SHA256" --github-output "$GITHUB_OUTPUT"
@@ -312,7 +364,7 @@ jobs:
             exit 1
           fi
         done
-        test "$(git -C source rev-parse HEAD)" = "$SOURCE_SHA"
+        test "$(git -C "$SOURCE_WORKSPACE" rev-parse HEAD)" = "$SOURCE_SHA"
     - name: Check out private NFC module
       if: env.PLATFORM == 'android' && steps.release.outputs.private_native_sha != ''
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -320,7 +372,7 @@ jobs:
         repository: 0niel/university-app-nfc-private
         ref: ${{ steps.release.outputs.private_native_sha }}
         ssh-key: ${{ secrets.NFC_MODULE_DEPLOY_KEY }}
-        path: build-projection/android/private/nfc-pass-android
+        path: android/private/nfc-pass-android
         persist-credentials: false
     - name: Set up Java
       if: needs.validate.outputs.platform == 'android'
@@ -379,10 +431,11 @@ jobs:
         subprocess.run(["git", "-C", str(root), "diff", "--check"], check=True)
         PY
     - name: Verify live registered release
+      working-directory: ${{ env.RELEASE_TOOLS }}
       env:
         SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
       run: |
-        python3 tool/release_manifest.py verify-live --manifest "$RUNNER_TEMP/release-manifest.json"
+        python3 "$RELEASE_TOOLS/tool/release_manifest.py" verify-live --manifest "$RUNNER_TEMP/release-manifest.json"
     - name: Resolve locked workspace
       working-directory: ${{ env.PATCH_WORKSPACE }}
       run: flutter pub get --enforce-lockfile --no-example
@@ -390,8 +443,8 @@ jobs:
       env:
         BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
       run: |
-        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" \
-          --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
+        python3 "$RELEASE_TOOLS/tool/prepare_shorebird_patch.py" \
+          --repo "$SOURCE_WORKSPACE" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
           --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
           --receipt "$RUNNER_TEMP/shorebird-projection.json" --verify-worktree --expected-projection "$PROJECTION_SHA256"
     - name: Configure Android signing
@@ -509,7 +562,7 @@ jobs:
         fi
         python3 tool/configure_firebase.py "${firebase_args[@]}"
         dart run tool/configure_university.dart --config "$RUNNER_TEMP/university.json"
-        python3 "$GITHUB_WORKSPACE/tool/release_manifest.py" verify-inputs \
+        python3 "$RELEASE_TOOLS/tool/release_manifest.py" verify-inputs \
           --manifest "$RUNNER_TEMP/release-manifest.json" --repo "$PATCH_WORKSPACE"
         python3 - <<'PY'
         import os
@@ -526,8 +579,8 @@ jobs:
       env:
         BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
       run: |
-        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" \
-          --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
+        python3 "$RELEASE_TOOLS/tool/prepare_shorebird_patch.py" \
+          --repo "$SOURCE_WORKSPACE" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
           --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
           --receipt "$RUNNER_TEMP/shorebird-projection.json" --verify-worktree --expected-projection "$PROJECTION_SHA256"
     - name: Record existing patches

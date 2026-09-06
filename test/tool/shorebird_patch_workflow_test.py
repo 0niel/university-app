@@ -1,4 +1,5 @@
 import contextlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -127,17 +128,151 @@ class ShorebirdPatchWorkflowTest(unittest.TestCase):
             self.assertEqual(PATCH['jobs'][job]['environment'], 'beta')
             steps = PATCH['jobs'][job]['steps']
             names = [s['name'] for s in steps]
-            self.assertIn('release_manifest.py resolve', step(PATCH, job, 'Resolve registered release')['run'])
-            self.assertIn('release_manifest.py verify-live', step(PATCH, job, 'Verify live registered release')['run'])
+            manifest_tool = 'tool/release_manifest.py' if job == 'validate' else '"$RELEASE_TOOLS/tool/release_manifest.py"'
+            self.assertIn(f'{manifest_tool} resolve', step(PATCH, job, 'Resolve registered release')['run'])
+            self.assertIn(f'{manifest_tool} verify-live', step(PATCH, job, 'Verify live registered release')['run'])
             self.assertLess(names.index('Install pinned Shorebird'), names.index('Verify live registered release'))
             self.assertEqual(step(PATCH, job, 'Set up Flutter')['with']['flutter-version'], '${{ steps.release.outputs.flutter_version }}')
             self.assertIn('--enforce-lockfile', step(PATCH, job, 'Resolve locked workspace')['run'])
             preparation = step(PATCH, job, 'Prepare verified runtime projection')['run']
-            self.assertIn('$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py', preparation)
-            self.assertIn('--repo "$GITHUB_WORKSPACE/source"', preparation)
+            tools = '$GITHUB_WORKSPACE' if job == 'validate' else '$RELEASE_TOOLS'
+            source = '$GITHUB_WORKSPACE/source' if job == 'validate' else '$SOURCE_WORKSPACE'
+            self.assertIn(f'{tools}/tool/prepare_shorebird_patch.py', preparation)
+            self.assertIn(f'--repo "{source}"', preparation)
             self.assertIn('--manifest "$RUNNER_TEMP/release-manifest.json"', preparation)
             self.assertEqual(step(PATCH, job, 'Check out requested source')['with']['path'], 'source')
         self.assertIn('--expected-projection "$PROJECTION_SHA256"', step(PATCH, 'patch', 'Prepare verified runtime projection')['run'])
+
+    def test_native_patch_build_preserves_producer_root_and_isolates_verifiers(self):
+        job = PATCH['jobs']['patch']
+        self.assertEqual(job['env']['PATCH_WORKSPACE'], '${{ github.workspace }}')
+        isolation = step(PATCH, 'patch', 'Isolate build verification inputs')
+        self.assertEqual(isolation['env']['RELEASE_TOOLS'], '${{ runner.temp }}/shorebird-release-tools')
+        self.assertEqual(isolation['env']['SOURCE_WORKSPACE'], '${{ runner.temp }}/shorebird-source')
+        names = [item['name'] for item in job['steps']]
+        for name, revision, location in (
+            ('Check out trusted release tools', '${{ github.workflow_sha }}', 'release-tools'),
+            ('Check out requested source', '${{ inputs.source_sha }}', 'source'),
+        ):
+            checkout = step(PATCH, 'patch', name)['with']
+            self.assertEqual(checkout['ref'], revision)
+            self.assertEqual(checkout['path'], location)
+            self.assertEqual(checkout['fetch-depth'], 0)
+            self.assertFalse(checkout['persist-credentials'])
+            self.assertLess(names.index(name), names.index('Isolate build verification inputs'))
+        self.assertLess(names.index('Isolate build verification inputs'), names.index('Resolve registered release'))
+        self.assertLess(names.index('Resolve registered release'), names.index('Prepare verified runtime projection'))
+        for name in ('Resolve registered release', 'Verify live registered release'):
+            self.assertEqual(step(PATCH, 'patch', name)['working-directory'], '${{ env.RELEASE_TOOLS }}')
+        for item in job['steps']:
+            command = item.get('run', '')
+            self.assertNotIn('$GITHUB_WORKSPACE/tool/', command)
+            self.assertNotIn('$GITHUB_WORKSPACE/source', command)
+            self.assertNotIn('build-projection', str(item))
+            if item['name'] in ('Prepare verified runtime projection', 'Verify projected workspace'):
+                self.assertIn('"$RELEASE_TOOLS/tool/prepare_shorebird_patch.py"', command)
+                self.assertIn('--repo "$SOURCE_WORKSPACE"', command)
+                self.assertIn('--output "$PATCH_WORKSPACE"', command)
+                self.assertIn('--expected-projection "$PROJECTION_SHA256"', command)
+        self.assertIn('git -C "$SOURCE_WORKSPACE" rev-parse HEAD', step(PATCH, 'patch', 'Verify patch configuration')['run'])
+        self.assertEqual(step(PATCH, 'patch', 'Check out private NFC module')['with']['path'], 'android/private/nfc-pass-android')
+        self.assertEqual(step(PATCH, 'patch', 'Publish staging patch')['working-directory'], '${{ env.PATCH_WORKSPACE }}')
+
+    def build_layout(self, root):
+        workspace, temporary = root / 'workspace', root / 'runner-temp'
+        workspace.mkdir(parents=True)
+        temporary.mkdir()
+        environment = {**os.environ, 'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': os.devnull}
+
+        def git(directory, *args):
+            return subprocess.check_output(['git', '-C', str(directory), *args], env=environment, text=True).strip()
+
+        revisions = {}
+        for name in ('release-tools', 'source'):
+            checkout = workspace / name
+            checkout.mkdir()
+            git(checkout, 'init', '-q')
+            (checkout / 'lib').mkdir()
+            (checkout / 'lib/main.dart').write_text('const value = 1;\n')
+            (checkout / 'pubspec.yaml').write_text('name: example\nversion: 9.8.7+654321\n')
+            (checkout / 'tool').mkdir()
+            (checkout / 'tool/marker.py').write_text('trusted tooling\n')
+            git(checkout, 'add', '.')
+            git(checkout, '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'Fixture')
+            revisions[name] = git(checkout, 'rev-parse', 'HEAD')
+        baseline = revisions['source']
+        (workspace / 'source/lib/main.dart').write_text('const value = 2;\n')
+        git(workspace / 'source', 'add', '.')
+        git(workspace / 'source', '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'Source')
+        revisions['source'] = git(workspace / 'source', 'rev-parse', 'HEAD')
+        values = {
+            'GITHUB_WORKSPACE': str(workspace), 'PATCH_WORKSPACE': str(workspace),
+            'RUNNER_TEMP': str(temporary), 'RELEASE_TOOLS': str(temporary / 'shorebird-release-tools'),
+            'SOURCE_WORKSPACE': str(temporary / 'shorebird-source'),
+            'SOURCE_SHA': revisions['source'], 'WORKFLOW_SHA': revisions['release-tools'],
+            'GITHUB_ENV': str(temporary / 'github-env'),
+        }
+        return workspace, temporary, values, baseline
+
+    def isolate_inputs(self, values):
+        item = step(PATCH, 'patch', 'Isolate build verification inputs')
+        with patch.dict(os.environ, values):
+            exec(compile(python_body(item), '<workflow>', 'exec'), {})
+
+    def test_isolated_inputs_materialize_the_same_projection_at_original_build_root(self):
+        workspace, temporary, values, baseline = self.build_layout(self.root)
+        spec = importlib.util.spec_from_file_location('build_root_projection', ROOT / 'tool/prepare_shorebird_patch.py')
+        projection = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(projection)
+        _, expected = projection.projection(workspace / 'source', baseline, values['SOURCE_SHA'])
+        self.isolate_inputs(values)
+        self.assertTrue(workspace.is_dir())
+        self.assertEqual(list(workspace.iterdir()), [])
+        self.assertEqual(Path(values['GITHUB_ENV']).read_text(),
+            f"RELEASE_TOOLS={values['RELEASE_TOOLS']}\nSOURCE_WORKSPACE={values['SOURCE_WORKSPACE']}\n")
+        self.assertEqual((temporary / 'shorebird-release-tools/tool/marker.py').read_text(), 'trusted tooling\n')
+        source = Path(values['SOURCE_WORKSPACE'])
+        entries, receipt = projection.projection(source, baseline, values['SOURCE_SHA'])
+        self.assertEqual(receipt, expected)
+        projection.materialize(source, workspace, entries, receipt)
+        projection.verify_worktree(workspace, entries, receipt)
+        self.assertEqual((workspace / 'lib/main.dart').read_text(), 'const value = 2;\n')
+        self.assertFalse((workspace / 'source').exists())
+        self.assertFalse((workspace / 'release-tools').exists())
+
+    def test_input_isolation_rejects_unapproved_or_dirty_checkouts_before_moving(self):
+        for change in ('wrong-source', 'wrong-tools', 'dirty-source', 'untracked-tools'):
+            with self.subTest(change=change), tempfile.TemporaryDirectory(dir=self.root) as directory:
+                workspace, _, values, _ = self.build_layout(Path(directory))
+                if change == 'wrong-source':
+                    values['SOURCE_SHA'] = '0' * 40
+                elif change == 'wrong-tools':
+                    values['WORKFLOW_SHA'] = '0' * 40
+                elif change == 'dirty-source':
+                    (workspace / 'source/lib/main.dart').write_text('injected\n')
+                else:
+                    (workspace / 'release-tools/untracked.py').write_text('injected\n')
+                with self.assertRaises(SystemExit):
+                    self.isolate_inputs(values)
+                self.assertTrue((workspace / 'source/.git').is_dir())
+                self.assertTrue((workspace / 'release-tools/.git').is_dir())
+
+    def test_input_isolation_rejects_unsafe_destinations_and_root_leftovers(self):
+        for change in ('inside-workspace', 'existing-target', 'outside-temp', 'leftover'):
+            with self.subTest(change=change), tempfile.TemporaryDirectory(dir=self.root) as directory:
+                workspace, temporary, values, _ = self.build_layout(Path(directory))
+                if change == 'inside-workspace':
+                    values['RUNNER_TEMP'] = str(workspace)
+                elif change == 'existing-target':
+                    (temporary / 'shorebird-source').mkdir()
+                elif change == 'outside-temp':
+                    values['SOURCE_WORKSPACE'] = str(Path(directory) / 'outside')
+                else:
+                    (workspace / 'unexpected.txt').write_text('keep\n')
+                with self.assertRaises(SystemExit):
+                    self.isolate_inputs(values)
+                self.assertTrue((workspace / 'source/.git').is_dir())
+                self.assertTrue((workspace / 'release-tools/.git').is_dir())
 
     def test_build_rejects_registry_replacement_after_validation(self):
         self.write('release-manifest.json', {'changed': True})
