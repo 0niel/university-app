@@ -17,11 +17,16 @@ class _MockUserResponse extends Mock implements UserResponse {}
 void main() {
   setUpAll(() => registerFallbackValue(UserAttributes()));
 
-  User user({bool guest = true, String id = 'guest', String? email}) {
+  User user({
+    bool guest = true,
+    String id = 'guest',
+    String? email,
+    Map<String, dynamic> metadata = const {},
+  }) {
     return User(
       id: id,
       appMetadata: const {},
-      userMetadata: const {},
+      userMetadata: metadata,
       aud: 'authenticated',
       createdAt: '2026-09-02T10:00:00Z',
       isAnonymous: guest,
@@ -31,6 +36,81 @@ void main() {
   }
 
   group('SupabaseAuthenticationClient', () {
+    for (final (metadata, expectedName, expectedPhoto) in [
+      (
+        <String, dynamic>{
+          'name': '  Canonical Name  ',
+          'display_name': 'Other Name',
+          'full_name': 'Provider Name',
+          'avatar_url': ' https://example.com/avatar.png ',
+        },
+        'Canonical Name',
+        'https://example.com/avatar.png',
+      ),
+      (
+        <String, dynamic>{
+          'name': 42,
+          'display_name': ' Display Name ',
+          'avatar_url': 'javascript:alert(1)',
+          'picture': 'https://example.com/picture.png',
+        },
+        'Display Name',
+        'https://example.com/picture.png',
+      ),
+      (
+        <String, dynamic>{
+          'name': '',
+          'display_name': '   ',
+          'full_name': ' Full Name ',
+          'avatar_url': {'url': 'https://example.com/avatar.png'},
+          'picture': '/relative/image.png',
+        },
+        'Full Name',
+        null,
+      ),
+      (<String, dynamic>{'full_name': false, 'picture': 7}, null, null),
+    ]) {
+      test('maps identity metadata safely: $expectedName', () async {
+        final auth = _MockGoTrueClient();
+        final session = _MockSession();
+        final events = StreamController<AuthState>();
+        when(() => session.user).thenReturn(
+          user(guest: false, metadata: metadata),
+        );
+        when(() => auth.currentSession).thenReturn(session);
+        when(() => auth.onAuthStateChange).thenAnswer((_) => events.stream);
+        final client = SupabaseAuthenticationClient(supabaseAuth: auth);
+
+        final identity = await client.user.first;
+        expect(identity.name, expectedName);
+        expect(identity.photo, expectedPhoto);
+        await events.close();
+      });
+    }
+
+    test('emits refreshed profile metadata for the same account', () async {
+      final auth = _MockGoTrueClient();
+      final session = _MockSession();
+      final events = StreamController<AuthState>();
+      when(() => session.user).thenReturn(user(guest: false));
+      when(() => auth.currentSession).thenReturn(session);
+      when(() => auth.onAuthStateChange).thenAnswer((_) => events.stream);
+      final client = SupabaseAuthenticationClient(supabaseAuth: auth);
+      final users = <AuthenticationUser>[];
+      final subscription = client.user.listen(users.add);
+      await Future<void>.delayed(Duration.zero);
+
+      when(() => session.user).thenReturn(
+        user(guest: false, metadata: {'full_name': 'Updated Name'}),
+      );
+      events.add(AuthState(AuthChangeEvent.tokenRefreshed, session));
+      await Future<void>.delayed(Duration.zero);
+      expect(users.map((value) => value.name), [null, 'Updated Name']);
+
+      await subscription.cancel();
+      await events.close();
+    });
+
     test('restores the current user before another auth event', () async {
       final auth = _MockGoTrueClient();
       final session = _MockSession();
