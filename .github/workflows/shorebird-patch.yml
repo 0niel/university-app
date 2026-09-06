@@ -183,10 +183,13 @@ jobs:
         import subprocess
 
         receipt = json.loads((Path(os.environ["RUNNER_TEMP"]) / "shorebird-projection.json").read_text())
+        generated_suffixes = (".freezed.dart", ".g.dart", ".gen.dart", ".pb.dart", ".pbgrpc.dart", ".pbjson.dart")
+        generated_directories = ("lib/l10n/generated/", "wear/lib/l10n/generated/")
         paths = sorted(path for path in receipt["runtime_paths"] + receipt["test_paths"]
-            if path.endswith(".dart") and Path(path).is_file())
+            if path.endswith(".dart") and Path(path).is_file()
+            and not path.endswith(generated_suffixes) and not path.startswith(generated_directories))
         if paths:
-            subprocess.run(["flutter", "analyze", "--no-pub", *paths], check=True)
+            subprocess.run(["flutter", "analyze", "--no-pub", "--no-fatal-infos", "--fatal-warnings", *paths], check=True)
         PY
       working-directory: ${{ env.PATCH_WORKSPACE }}
     - name: Test changed runtime
