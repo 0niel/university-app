@@ -1,3 +1,4 @@
+import contextlib
 import json
 import os
 from pathlib import Path
@@ -195,6 +196,25 @@ class ShorebirdPatchWorkflowTest(unittest.TestCase):
             with patch('subprocess.run') as run:
                 self.execute(step(PATCH, 'validate', name))
                 run.assert_not_called()
+
+    def test_projected_analysis_preserves_ci_severity_and_generated_exclusions(self):
+        handwritten = ['lib/schedule/change.dart', 'packages/schedule/lib/src/change.dart', 'test/change_test.dart']
+        generated = ['packages/schedule/lib/src/change' + suffix for suffix in
+                     ('.freezed.dart', '.g.dart', '.gen.dart', '.pb.dart', '.pbgrpc.dart', '.pbjson.dart')]
+        generated += ['lib/l10n/generated/app_localizations.dart', 'wear/lib/l10n/generated/app_localizations.dart']
+        self.write('shorebird-projection.json', {'runtime_paths': handwritten[:2] + generated, 'test_paths': handwritten[2:]})
+        for name in handwritten + generated:
+            path = self.root / 'projection' / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text('', encoding='utf-8')
+        with contextlib.chdir(self.root / 'projection'), patch('subprocess.run') as run:
+            self.execute(step(PATCH, 'validate', 'Analyze hotfix'))
+            run.assert_called_once_with([
+                'flutter', 'analyze', '--no-pub', '--no-fatal-infos', '--fatal-warnings', *sorted(handwritten),
+            ], check=True)
+        with contextlib.chdir(self.root / 'projection'), patch('subprocess.run', side_effect=subprocess.CalledProcessError(1, ['flutter', 'analyze'])):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.execute(step(PATCH, 'validate', 'Analyze hotfix'))
 
     def test_receipt_accepts_future_version_with_verified_provenance(self):
         self.receipt()
