@@ -15,6 +15,7 @@ import 'package:rtu_mirea_app/friends/cubit/friends_list_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/navigation/tab_reselect_notifier.dart';
+import 'package:rtu_mirea_app/nfc_pass/nfc_pass_availability.dart';
 import 'package:rtu_mirea_app/profile/cubit/profile_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/profile_extras_cubit.dart';
 import 'package:rtu_mirea_app/profile/utils/supported_quest.dart';

@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/tab_reselect_notifier.dart';
+import 'package:rtu_mirea_app/nfc_pass/nfc_pass_availability.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/search/view/search_sheet.dart';
 import 'package:rtu_mirea_app/services/cubit/cubit.dart';
@@ -186,6 +187,7 @@ class _ServicesViewState extends State<ServicesView> {
                   onToggleFavorite: _toggleFavorite,
                 ),
                 if (section.key == ServicesDirectory.sectionFirstParty &&
+                    NfcPassAvailability.isSupported &&
                     config.isEnabled(.nfcPass)) ...[
                   const SizedBox(height: AppSpacing.sectionGap),
                   const ServicesNfcCard(),
