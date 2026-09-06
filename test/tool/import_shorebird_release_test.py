@@ -1,5 +1,6 @@
 import hashlib
 import copy
+from contextlib import redirect_stderr, redirect_stdout
 import importlib.util
 import io
 import json
@@ -272,7 +273,7 @@ class ReleaseImporterTest(unittest.TestCase):
             with patch.object(MODULE, "aapt_path", return_value="aapt"), patch.object(MODULE, "command", return_value=subprocess.CompletedProcess([], 0, stdout=output)), self.assertRaises(ValueError):
                 MODULE.binary_identity(self.root / "app.apk", "android")
 
-    def import_fixture(self, *, corrupt=False, live_mutation=None, schema=False, automatic=False):
+    def import_fixture(self, *, corrupt=False, live_mutation=None, schema=False, automatic=False, report=None):
         platform = "android" if automatic else "ios"
         data = zip_bytes([("release.apk", b"original APK")]) if automatic else zip_bytes([("release.ipa", ipa_bytes())])
         artifact = self.artifact(data, platform)
@@ -304,7 +305,7 @@ class ReleaseImporterTest(unittest.TestCase):
             return subprocess.CompletedProcess(arguments, 0)
 
         with patch.dict(sys.modules, {"release_manifest": helper}), patch.dict(os.environ, {"GITHUB_REPOSITORY": REPOSITORY, "GITHUB_SHA": "b" * 40, "GITHUB_RUN_ID": "999", "GITHUB_RUN_ATTEMPT": "2"}), patch.object(MODULE, "api", return_value=automatic_origin() if automatic else origin()), patch.object(MODULE, "find_artifact", return_value=artifact), patch.object(MODULE, "command", side_effect=command), patch.object(MODULE, "binary_identity", return_value=live["version"] if not live_mutation else "5.2.1+2439.17.57"):
-            manifest = MODULE.import_release(repo=self.root, repository=REPOSITORY, run_id=123, platform=platform, output_dir=self.root / "registry")
+            manifest = MODULE.import_release(repo=self.root, repository=REPOSITORY, run_id=123, platform=platform, output_dir=self.root / "registry", report=report)
         return manifest, built
 
     def test_import_preserves_origin_and_explicitly_marks_missing_prepared_inputs(self):
@@ -334,8 +335,9 @@ class ReleaseImporterTest(unittest.TestCase):
         self.assertEqual(manifest["artifacts"], [{"name": "application.ipa", "sha256": MODULE.digest(binary), "size": binary.stat().st_size}])
 
     def test_automatic_import_requires_all_evidence_and_keeps_missing_inputs_explicit(self):
+        stages = []
         with patch.object(MODULE, "verify_apk_attestation", return_value={"sha256": "d" * 64}) as attest, patch.object(MODULE, "verify_automatic_checkouts", return_value=[{"id": 10}]) as checkout, patch.object(MODULE, "verify_source_ci", return_value={"run_id": 98}) as ci:
-            manifest, _ = self.import_fixture(automatic=True, schema=True)
+            manifest, _ = self.import_fixture(automatic=True, schema=True, report=stages.append)
         self.assertEqual(attest.call_count, 1)
         self.assertEqual(checkout.call_count, 1)
         self.assertEqual(ci.call_count, 1)
@@ -348,6 +350,59 @@ class ReleaseImporterTest(unittest.TestCase):
         self.assertEqual(manifest["private_native_sha"], "e" * 40)
         self.assertEqual(manifest["evidence"]["missing_prepared_inputs"],
             ["android/app/google-services.json", "android/tenant.properties"])
+        self.assertEqual(stages, ["release origin", "source ancestry", "artifact metadata", "output directory",
+            "artifact download", "artifact digest", "binary extraction", "binary identity", "APK attestation",
+            "producer checkouts", "source CI", "application identity", "live Shorebird release",
+            "manifest construction", "manifest validation and write"])
+
+    def test_command_diagnostics_never_include_raw_provider_output_or_arguments(self):
+        secret = "private-token-and-provider-payload"
+        for stderr, expected in (
+            (f"HTTP 403 {secret}", "authentication or permissions"),
+            (f"rate limit {secret}", "rate limit"),
+            (f"TLS timeout {secret}", "network or provider availability"),
+            (f"unknown flag {secret}", "unsupported command interface"),
+            (f"failed to verify {secret}", "attestation verification"),
+            (secret, "command failure"),
+        ):
+            result = subprocess.CompletedProcess([], 17, stdout=secret.encode(), stderr=stderr.encode())
+            with patch.object(MODULE.subprocess, "run", return_value=result), self.assertRaises(MODULE.RegistrationError) as error:
+                MODULE.command(["gh", "api", secret], stdout=subprocess.PIPE)
+            self.assertIn(f"exit 17; {expected}", str(error.exception))
+            self.assertNotIn(secret, str(error.exception))
+        with patch.object(MODULE.subprocess, "run", return_value=result), self.assertRaises(MODULE.RegistrationError) as error:
+            MODULE.command([f"/private/{secret}", secret], stdout=subprocess.PIPE)
+        self.assertIn("binary inspector", str(error.exception))
+        self.assertNotIn(secret, str(error.exception))
+
+    def test_cli_reports_stage_and_redacts_external_exception_messages(self):
+        secret = "private-token-and-provider-payload"
+        failures = [ValueError(secret), OSError(secret), KeyError(secret),
+            subprocess.CalledProcessError(1, ["shorebird", secret], output=secret, stderr=secret)]
+        for failure in failures:
+            def importer(**kwargs):
+                kwargs["report"]("live Shorebird release")
+                raise failure
+
+            output, errors = io.StringIO(), io.StringIO()
+            with patch.object(sys, "argv", ["importer", "--run-id", "123", "--platform", "android", "--output-dir", str(self.root)]), patch.dict(os.environ, {"GITHUB_REPOSITORY": REPOSITORY}), patch.object(MODULE, "import_release", side_effect=importer), redirect_stdout(output), redirect_stderr(errors), self.assertRaises(SystemExit) as exit:
+                MODULE.main()
+            self.assertEqual(exit.exception.code, 1)
+            self.assertIn("Checking live Shorebird release", errors.getvalue())
+            self.assertIn("failed at live Shorebird release", errors.getvalue())
+            self.assertIn(type(failure).__name__, errors.getvalue())
+            self.assertNotIn(secret, errors.getvalue())
+            self.assertEqual(output.getvalue(), "")
+
+    def test_cli_preserves_typed_static_guard_reason(self):
+        def importer(**kwargs):
+            kwargs["report"]("artifact digest")
+            raise MODULE.RegistrationError("Downloaded archive differs from its immutable artifact digest")
+
+        errors = io.StringIO()
+        with patch.object(sys, "argv", ["importer", "--run-id", "123", "--platform", "android", "--output-dir", str(self.root)]), patch.dict(os.environ, {"GITHUB_REPOSITORY": REPOSITORY}), patch.object(MODULE, "import_release", side_effect=importer), redirect_stderr(errors), self.assertRaises(SystemExit):
+            MODULE.main()
+        self.assertIn("failed at artifact digest: Downloaded archive differs from its immutable artifact digest", errors.getvalue())
 
     def test_automatic_import_stops_before_manifest_when_signature_is_invalid(self):
         with patch.object(MODULE, "verify_apk_attestation", side_effect=ValueError("bad signature")), patch.object(MODULE, "verify_automatic_checkouts") as checkout, self.assertRaisesRegex(ValueError, "bad signature"):
