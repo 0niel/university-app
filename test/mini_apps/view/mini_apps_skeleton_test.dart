@@ -138,8 +138,7 @@ void main() {
       expect(sortAction, findsOneWidget);
       expect(tester.getRect(sortAction).height, greaterThanOrEqualTo(44));
 
-      expect(tester.getRect(sortAction).width, lessThanOrEqualTo(48));
-      expect(find.byType(NinjaIconButton), findsWidgets);
+      expect(find.text('Популярные'), findsOneWidget);
 
       await tester.tap(sortAction);
       await tester.pumpAndSettle();
@@ -150,7 +149,7 @@ void main() {
       verify(() => cubit.sortChanged(MiniAppSort.top)).called(1);
     });
 
-    testWidgets('renders recent apps with the shared service tile', (
+    testWidgets('renders recent apps with compact shared cards', (
       tester,
     ) async {
       const app = MiniApp(
@@ -176,7 +175,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(AppServiceTile), findsOneWidget);
+      expect(find.byKey(const ValueKey('recent-recent')), findsOneWidget);
       expect(find.text('Недавний апп'), findsWidgets);
       expect(tester.takeException(), isNull);
     });

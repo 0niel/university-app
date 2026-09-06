@@ -10,7 +10,7 @@ class _CatalogSectionLabelSkeleton extends StatelessWidget {
     return Padding(
       padding: const .fromLTRB(
         AppSpacing.screen,
-        28,
+        AppSpacing.lg,
         AppSpacing.screen,
         10,
       ),

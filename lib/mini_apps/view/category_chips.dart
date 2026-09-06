@@ -11,7 +11,7 @@ class _CategoryChips extends StatelessWidget {
     return ClipRect(
       child: NinjaChipRow(
         key: const ValueKey('mini-apps-categories'),
-        padding: const EdgeInsets.only(left: AppSpacing.screen),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
         children: [
           for (final value in <MiniAppCategory?>[
             null,

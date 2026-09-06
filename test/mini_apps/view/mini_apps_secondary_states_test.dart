@@ -276,7 +276,9 @@ void main() {
       tester
           .getRect(find.text('Сбросить фильтр'))
           .overlaps(
-            tester.getRect(find.byType(AppFab)),
+            tester.getRect(
+              find.byKey(const ValueKey('mini-apps-create-button')),
+            ),
           ),
       isFalse,
     );
@@ -305,7 +307,13 @@ void main() {
     await tester.ensureVisible(retry);
     await tester.pump();
     expect(
-      tester.getRect(retry).overlaps(tester.getRect(find.byType(AppFab))),
+      tester
+          .getRect(retry)
+          .overlaps(
+            tester.getRect(
+              find.byKey(const ValueKey('mini-apps-create-button')),
+            ),
+          ),
       isFalse,
     );
     await tester.tap(retry);

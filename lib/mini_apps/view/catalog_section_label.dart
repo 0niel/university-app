@@ -10,13 +10,19 @@ class _CatalogSectionLabel extends StatelessWidget {
     return Padding(
       padding: const .fromLTRB(
         AppSpacing.screen,
-        28,
+        AppSpacing.lg,
         AppSpacing.screen,
         10,
       ),
-      child: Text(
-        title,
-        style: AppText.title.copyWith(color: context.colors.ink),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Semantics(
+          header: true,
+          child: Text(
+            title,
+            style: AppText.title.copyWith(color: context.colors.ink),
+          ),
+        ),
       ),
     );
   }

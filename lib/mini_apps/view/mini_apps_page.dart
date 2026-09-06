@@ -12,7 +12,6 @@ import 'package:rtu_mirea_app/mini_apps/widgets/widgets.dart';
 
 part 'mini_apps_view.dart';
 part 'mini_apps_app_bar.dart';
-part 'mini_apps_hero.dart';
 part 'mini_apps_search_field.dart';
 part 'mini_apps_sort_button.dart';
 part 'mini_apps_sort_sheet.dart';

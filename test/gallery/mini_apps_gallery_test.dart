@@ -39,6 +39,20 @@ void main() {
         when(() => catalog.state).thenReturn(
           const MiniAppsCatalogState(
             status: .populated,
+            recents: [
+              MiniApp(
+                id: 'rooms',
+                slug: 'rooms',
+                name: 'Свободная аудитория для подготовки к экзаменам',
+                iconEmoji: '🚪',
+              ),
+              MiniApp(
+                id: 'study',
+                slug: 'study',
+                name: 'Учимся вместе',
+                iconEmoji: '📚',
+              ),
+            ],
             apps: [
               MiniApp(
                 id: 'rooms',
