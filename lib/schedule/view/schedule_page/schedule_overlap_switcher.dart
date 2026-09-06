@@ -26,6 +26,28 @@ class ScheduleOverlapSwitcher extends StatefulWidget {
 
 class _ScheduleOverlapSwitcherState extends State<ScheduleOverlapSwitcher> {
   late int _index = widget.initialIndex;
+  double _dragDistance = 0;
+
+  @override
+  void didUpdateWidget(covariant ScheduleOverlapSwitcher oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.children.isEmpty) {
+      _index = 0;
+      return;
+    }
+    final previous = oldWidget.labels.elementAtOrNull(_index);
+    if (previous != null && widget.labels.elementAtOrNull(_index) == previous) {
+      return;
+    }
+    final retained = previous == null ? -1 : widget.labels.indexOf(previous);
+    _index = retained >= 0
+        ? retained
+        : widget.initialIndex.clamp(0, widget.children.length - 1);
+  }
+
+  void _select(int index) {
+    setState(() => _index = index % widget.children.length);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,87 +58,119 @@ class _ScheduleOverlapSwitcherState extends State<ScheduleOverlapSwitcher> {
     final label = context.l10n.scheduleSimultaneousLessons(
       widget.children.length,
     );
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        border: Border.all(color: widget.colors[index], width: 1.5),
-        borderRadius: BorderRadius.circular(
-          widget.compact ? AppRadius.sm : AppRadius.card,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AppPressable(
-            key: const ValueKey('schedule-overlap-next'),
-            semanticsLabel:
-                '$label, ${index + 1}/${widget.children.length}, '
-                '${widget.labels[next]}',
-            onTap: () => setState(() => _index = next),
-            child: Container(
-              constraints: const BoxConstraints(
-                minHeight: AppControlSize.touchTarget,
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: widget.compact ? AppSpacing.xs : AppSpacing.md,
-                vertical: AppSpacing.xsm,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (!widget.compact) ...[
-                        Expanded(
-                          child: Text(
-                            label,
-                            style: AppText.captionSmall.copyWith(
-                              color: context.colors.muted,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                      ],
-                      Flexible(
+    final duration = NinjaMotion.of(context);
+    final radius = widget.compact ? AppRadius.sm : AppRadius.card;
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final content = KeyedSubtree(
+      key: ValueKey('${widget.labels[index]}-$index'),
+      child: widget.children[index],
+    );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: AppCard(
+        key: const ValueKey('schedule-overlap-card'),
+        padding: EdgeInsets.zero,
+        radius: radius,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppPressable(
+              key: const ValueKey('schedule-overlap-next'),
+              semanticsLabel:
+                  '$label, ${index + 1}/${widget.children.length}, '
+                  '${widget.labels[next]}',
+              onTap: () => _select(next),
+              child: Container(
+                constraints: const BoxConstraints(
+                  minHeight: AppControlSize.touchTarget,
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: widget.compact ? AppSpacing.xs : AppSpacing.lg,
+                  vertical: AppSpacing.xs,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (!widget.compact) ...[
+                      Expanded(
                         child: Text(
-                          '${index + 1}/${widget.children.length}',
-                          style: AppText.sans(10, FontWeight.w700).copyWith(
-                            color: widget.colors[index],
+                          label,
+                          style: AppText.captionSmall.copyWith(
+                            color: context.colors.muted,
                           ),
                         ),
                       ),
-                      AppLineIconWidget(
-                        AppLineIcon.chevronR,
-                        size: 12,
-                        color: widget.colors[index],
+                      const SizedBox(width: AppSpacing.sm),
+                    ],
+                    Flexible(
+                      flex: widget.compact ? 1 : 0,
+                      child: Text(
+                        '${index + 1}/${widget.children.length}',
+                        style: AppText.sans(
+                          widget.compact ? 10 : 12,
+                          FontWeight.w700,
+                        ).copyWith(color: context.colors.accent),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: AppSpacing.xs,
-                    runSpacing: AppSpacing.xxs,
-                    children: [
-                      for (var i = 0; i < widget.colors.length; i++)
-                        Container(
-                          key: ValueKey('schedule-overlap-marker-$i'),
-                          width: i == index ? 12 : 4,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: widget.colors[i],
-                            borderRadius: BorderRadius.circular(AppRadius.xxs),
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(width: AppSpacing.xxs),
+                    AppLineIconWidget(
+                      rtl ? AppLineIcon.chevronL : AppLineIcon.chevronR,
+                      size: 12,
+                      color: context.colors.accent,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          widget.children[index],
-        ],
+            Container(height: 1, color: context.colors.line),
+            GestureDetector(
+              key: const ValueKey('schedule-overlap-content'),
+              behavior: HitTestBehavior.opaque,
+              onHorizontalDragStart: (_) => _dragDistance = 0,
+              onHorizontalDragUpdate: (details) =>
+                  _dragDistance += details.primaryDelta ?? 0,
+              onHorizontalDragEnd: (details) {
+                final velocity = details.primaryVelocity ?? 0;
+                if (_dragDistance.abs() < 36 && velocity.abs() < 250) return;
+                final direction = _dragDistance.abs() >= 36
+                    ? _dragDistance
+                    : velocity;
+                final forward = rtl ? direction > 0 : direction < 0;
+                _select(index + (forward ? 1 : -1));
+              },
+              child: duration == Duration.zero
+                  ? content
+                  : AnimatedSize(
+                      duration: duration,
+                      curve: NinjaMotion.enter,
+                      alignment: Alignment.topCenter,
+                      child: AnimatedSwitcher(
+                        duration: duration,
+                        switchInCurve: NinjaMotion.enter,
+                        switchOutCurve: NinjaMotion.exit,
+                        layoutBuilder: (current, previous) => Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            for (final child in previous)
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                top: 0,
+                                child: IgnorePointer(
+                                  child: ExcludeSemantics(child: child),
+                                ),
+                              ),
+                            ?current,
+                          ],
+                        ),
+                        child: content,
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

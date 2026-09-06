@@ -9,6 +9,7 @@ import 'package:local_auth_client/local_auth_client.dart';
 import 'package:rtu_mirea_app/app/locale/locale_cubit.dart';
 import 'package:rtu_mirea_app/data/datasources/home_screen_widget_service.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
@@ -147,6 +148,42 @@ Future<void> showSyncPolicySheet(
             onTap: () {
               onSelected(policy);
               Navigator.of(context).pop();
+            },
+          ),
+      ],
+    ),
+  );
+}
+
+String startupScreenLabel(AppLocalizations l10n, StartupScreen screen) =>
+    switch (screen) {
+      .home => l10n.navHome,
+      .schedule => l10n.schedule,
+      .map => l10n.navMap,
+      .services => l10n.navServices,
+      .profile => l10n.navProfile,
+    };
+
+Future<void> showStartupScreenSheet(BuildContext context) {
+  final l10n = context.l10n;
+  final cubit = context.read<StartupScreenCubit>();
+  return showAppSheet<void>(
+    context,
+    title: l10n.settingsStartupScreen,
+    subtitle: l10n.settingsStartupScreenSubtitle,
+    contentPadding: .zero,
+    child: Column(
+      mainAxisSize: .min,
+      crossAxisAlignment: .stretch,
+      children: [
+        for (final screen in StartupScreen.values)
+          _SelectRow(
+            label: startupScreenLabel(l10n, screen),
+            value: screen,
+            groupValue: cubit.state,
+            onTap: () {
+              if (!cubit.isClosed) cubit.select(screen);
+              Navigator.of(context, rootNavigator: true).pop();
             },
           ),
       ],

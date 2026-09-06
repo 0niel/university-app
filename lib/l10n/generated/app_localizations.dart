@@ -12836,6 +12836,18 @@ abstract class AppLocalizations {
   /// **'Unlock'**
   String get passUnlock;
 
+  /// No description provided for @settingsStartupScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Startup screen'**
+  String get settingsStartupScreen;
+
+  /// No description provided for @settingsStartupScreenSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the screen to open when the app starts. Notifications and links still open their content.'**
+  String get settingsStartupScreenSubtitle;
+
   /// No description provided for @settingsHomeContentTitle.
   ///
   /// In en, this message translates to:

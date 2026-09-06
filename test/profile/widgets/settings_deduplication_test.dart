@@ -9,6 +9,7 @@ import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/app/locale/locale_cubit.dart';
 import 'package:rtu_mirea_app/app/theme/cubit/theme_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/utils/settings_search_filter.dart';
@@ -88,6 +89,7 @@ void main() {
               BlocProvider<ScheduleDisplayCubit>.value(value: schedule),
               BlocProvider<UiPreferencesCubit>.value(value: ui),
               BlocProvider<FavoriteServicesCubit>.value(value: favorites),
+              BlocProvider(create: (_) => StartupScreenCubit(userId: 'test')),
             ],
             child: const Column(
               children: [

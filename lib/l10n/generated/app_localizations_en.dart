@@ -7256,6 +7256,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passUnlock => 'Unlock';
 
   @override
+  String get settingsStartupScreen => 'Startup screen';
+
+  @override
+  String get settingsStartupScreenSubtitle =>
+      'Choose the screen to open when the app starts. Notifications and links still open their content.';
+
+  @override
   String get settingsHomeContentTitle => 'What\'s on home';
 
   @override

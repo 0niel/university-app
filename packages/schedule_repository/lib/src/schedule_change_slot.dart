@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:schedule/schedule.dart' show normalizeTeacherName;
 
 part 'schedule_change_slot.freezed.dart';
 part 'schedule_change_slot.g.dart';
@@ -19,7 +20,7 @@ abstract class ScheduleChangeSlot with _$ScheduleChangeSlot {
         'start': _hoursAndMinutes(json['start']),
         'end': _hoursAndMinutes(json['end']),
         'rooms': _names(json['rooms']),
-        'teachers': _names(json['teachers']),
+        'teachers': _names(json['teachers']).map(normalizeTeacherName).toList(),
       });
 
   bool get isEmpty =>
