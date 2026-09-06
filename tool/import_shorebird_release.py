@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 import hashlib
 import json
 import os
@@ -44,18 +45,145 @@ def verify_run(run, repository, run_id, platform):
         "id": run_id,
         "path": WORKFLOWS[platform],
         "head_branch": "master",
-        "event": "workflow_dispatch",
         "status": "completed",
         "conclusion": "success",
     }
-    if any(run.get(key) != value for key, value in expected.items()):
-        raise ValueError("The origin must be a successful manual full release on master")
+    events = ("workflow_dispatch", "workflow_run") if platform == "android" else ("workflow_dispatch",)
+    if any(run.get(key) != value for key, value in expected.items()) or run.get("event") not in events:
+        raise ValueError("The origin must be a successful trusted full release on master")
     if any(run.get(key, {}).get("full_name") != repository for key in ("repository", "head_repository")):
         raise ValueError("Release repository identity mismatch")
     if not isinstance(run.get("head_sha"), str) or not re.fullmatch(r"[0-9a-f]{40}", run["head_sha"]):
         raise ValueError("Release source SHA is invalid")
     positive_id(run.get("run_attempt"))
     return run["head_sha"]
+
+
+def verify_apk_attestation(binary, repository, run):
+    source = run["head_sha"]
+    repository_uri = f"https://github.com/{repository}"
+    workflow_uri = f"{repository_uri}/{WORKFLOWS['android']}@refs/heads/master"
+    invocation = f"{repository_uri}/actions/runs/{run['id']}/attempts/{run['run_attempt']}"
+    result = command([
+        "gh", "attestation", "verify", str(binary), "--repo", repository,
+        "--signer-workflow", f"{repository}/{WORKFLOWS['android']}",
+        "--source-ref", "refs/heads/master",
+        "--source-digest", source, "--signer-digest", source,
+        "--deny-self-hosted-runners", "--format", "json",
+    ], stdout=subprocess.PIPE)
+    verified = json.loads(result.stdout)
+    if not isinstance(verified, list) or not verified:
+        raise ValueError("No verified APK provenance")
+    expected = {
+        "issuer": "https://token.actions.githubusercontent.com",
+        "subjectAlternativeName": workflow_uri,
+        "buildSignerURI": workflow_uri, "buildSignerDigest": source,
+        "buildConfigURI": workflow_uri, "buildConfigDigest": source,
+        "sourceRepositoryURI": repository_uri, "sourceRepositoryDigest": source,
+        "sourceRepositoryRef": "refs/heads/master",
+        "sourceRepositoryIdentifier": str(positive_id(run["repository"]["id"])),
+        "sourceRepositoryOwnerIdentifier": str(positive_id(run["repository"]["owner"]["id"])),
+        "runnerEnvironment": "github-hosted", "buildTrigger": "workflow_run",
+        "runInvocationURI": invocation,
+    }
+    binary_digest = digest(binary)
+    matches = []
+    for item in verified:
+        if not isinstance(item, dict):
+            raise ValueError("Invalid APK verification result")
+        verification = item.get("verificationResult", {})
+        certificate = verification.get("signature", {}).get("certificate", {})
+        if any(certificate.get(key) != value for key, value in expected.items()):
+            continue
+        statement = verification.get("statement", {})
+        definition = statement.get("predicate", {}).get("buildDefinition", {})
+        details = statement.get("predicate", {}).get("runDetails", {})
+        subjects = statement.get("subject", [])
+        if (
+            statement.get("_type") != "https://in-toto.io/Statement/v1"
+            or statement.get("predicateType") != "https://slsa.dev/provenance/v1"
+            or definition.get("buildType") != "https://actions.github.io/buildtypes/workflow/v1"
+            or definition.get("externalParameters", {}).get("workflow") != {
+                "repository": repository_uri, "path": WORKFLOWS["android"], "ref": "refs/heads/master",
+            }
+            or definition.get("internalParameters", {}).get("github", {}).get("event_name") != "workflow_run"
+            or definition.get("resolvedDependencies") != [{
+                "uri": f"git+{repository_uri}@refs/heads/master", "digest": {"gitCommit": source},
+            }]
+            or details.get("builder", {}).get("id") != workflow_uri
+            or details.get("metadata", {}).get("invocationId") != invocation
+            or not isinstance(subjects, list)
+            or len([subject for subject in subjects if isinstance(subject, dict)
+                and subject.get("digest") == {"sha256": binary_digest}
+                and isinstance(subject.get("name"), str) and subject["name"].endswith(".apk")]) != 1
+        ):
+            raise ValueError("APK statement differs from its verified producer identity")
+        matches.append(statement)
+    if len(matches) != 1:
+        raise ValueError("APK provenance does not uniquely match the exact producer attempt")
+    return {"sha256": binary_digest, "invocation_uri": invocation}
+
+
+def paginated(path, field):
+    entries = []
+    separator = "&" if "?" in path else "?"
+    for page in range(1, 11):
+        batch = api(f"{path}{separator}per_page=100&page={page}")[field]
+        entries.extend(batch)
+        if len(batch) < 100:
+            return entries
+    raise ValueError("Release evidence listing exceeds its bounded limit")
+
+
+def verify_automatic_checkouts(repository, run):
+    jobs = paginated(f"repos/{repository}/actions/runs/{run['id']}/attempts/{run['run_attempt']}/jobs", "jobs")
+    checked = []
+    for name in ("prepare", "Android beta"):
+        candidates = [job for job in jobs if job.get("name") == name]
+        if len(candidates) != 1:
+            raise ValueError("Automatic release checkout job is missing or ambiguous")
+        job = candidates[0]
+        expected = {"run_id": run["id"], "run_attempt": run["run_attempt"], "head_sha": run["head_sha"], "conclusion": "success"}
+        steps = [step for step in job.get("steps", []) if step.get("name") == "Check out repository"]
+        if any(job.get(key) != value for key, value in expected.items()) or len(steps) != 1 or steps[0].get("conclusion") != "success":
+            raise ValueError("Automatic release checkout job differs from the producer attempt")
+        job_id = positive_id(job.get("id"))
+        output = command([
+            "gh", "run", "view", str(run["id"]), "--repo", repository,
+            "--attempt", str(run["run_attempt"]), "--job", str(job_id), "--log",
+        ], stdout=subprocess.PIPE).stdout.decode("utf-8")
+        lines = []
+        for line in output.splitlines():
+            fields = line.split("\t", 2)
+            if len(fields) == 3 and fields[:2] == [name, "Check out repository"]:
+                lines.append(fields[2].partition(" ")[2])
+        refs = [match[1] for line in lines if (match := re.fullmatch(r"\s+ref: ([0-9a-f]{40})", line))]
+        heads = [lines[index + 1] for index, line in enumerate(lines[:-1])
+            if re.fullmatch(r"\[command\](?:[^\s]*/)?git log -1 --format=%H", line)]
+        if refs != [run["head_sha"]] or heads != [run["head_sha"]]:
+            raise ValueError("Actual automatic release checkout differs from the attested source")
+        checked.append({"id": job_id, "name": name, "source_sha": run["head_sha"]})
+    return checked
+
+
+def verify_source_ci(repository, run):
+    candidates = paginated(
+        f"repos/{repository}/actions/workflows/main.yml/runs?head_sha={run['head_sha']}&event=push&status=success", "workflow_runs",
+    )
+    matches = []
+    expected = {"path": ".github/workflows/main.yml", "head_sha": run["head_sha"],
+        "head_branch": "master", "event": "push", "status": "completed", "conclusion": "success"}
+    release_created = datetime.fromisoformat(run["created_at"])
+    for candidate in candidates:
+        if any(candidate.get(key) != value for key, value in expected.items()):
+            continue
+        if any(candidate.get(key, {}).get("full_name") != repository for key in ("repository", "head_repository")):
+            continue
+        if datetime.fromisoformat(candidate["updated_at"]) <= release_created:
+            matches.append(candidate)
+    if len(matches) != 1:
+        raise ValueError("Automatic release has no unique successful protected-branch source CI")
+    return {"run_id": positive_id(matches[0]["id"]), "run_attempt": positive_id(matches[0]["run_attempt"])}
 
 
 def find_artifact(repository, run, platform):
@@ -190,6 +318,11 @@ def import_release(*, repo, repository, run_id, platform, output_dir):
     version = binary_identity(binary, platform)
     if platform == "android" and artifact["name"] != "android-beta-" + version:
         raise ValueError("Artifact name differs from the actual APK version")
+    automatic = None
+    if run["event"] == "workflow_run":
+        automatic = verify_apk_attestation(binary, repository, run)
+        automatic["checkout_jobs"] = verify_automatic_checkouts(repository, run)
+        automatic["source_ci"] = verify_source_ci(repository, run)
     app_id = release_manifest.read_app_id(repo, source, platform)
     live = release_manifest.load_shorebird_release(app_id, version)
     if live.get("app_id") != app_id or live.get("version") != version or live.get("platform_statuses", {}).get(platform) != "active":
@@ -210,6 +343,8 @@ def import_release(*, repo, repository, run_id, platform, output_dir):
     }
     if platform == "android":
         evidence["private_native_provenance"] = "producer-workflow-pin"
+    if automatic is not None:
+        evidence["automatic_provenance"] = automatic
     manifest = release_manifest.build_manifest(
         repo=repo, platform=platform, release_version=version, source_sha=source,
         artifact_dir=output_dir, evidence=evidence, live_release=live,
