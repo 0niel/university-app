@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ScheduleChangeSlot {
 
- String? get start; String? get end; List<String> get rooms; List<String> get teachers;
+ String? get start; String? get end; String? get subject; String? get lessonType; int? get lessonNumber; List<DateTime> get dates; List<String> get rooms; List<String> get teachers;
 /// Create a copy of ScheduleChangeSlot
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ScheduleChangeSlotCopyWith<ScheduleChangeSlot> get copyWith => _$ScheduleChange
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScheduleChangeSlot&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&const DeepCollectionEquality().equals(other.rooms, rooms)&&const DeepCollectionEquality().equals(other.teachers, teachers));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScheduleChangeSlot&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&(identical(other.subject, subject) || other.subject == subject)&&(identical(other.lessonType, lessonType) || other.lessonType == lessonType)&&(identical(other.lessonNumber, lessonNumber) || other.lessonNumber == lessonNumber)&&const DeepCollectionEquality().equals(other.dates, dates)&&const DeepCollectionEquality().equals(other.rooms, rooms)&&const DeepCollectionEquality().equals(other.teachers, teachers));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,start,end,const DeepCollectionEquality().hash(rooms),const DeepCollectionEquality().hash(teachers));
+int get hashCode => Object.hash(runtimeType,start,end,subject,lessonType,lessonNumber,const DeepCollectionEquality().hash(dates),const DeepCollectionEquality().hash(rooms),const DeepCollectionEquality().hash(teachers));
 
 @override
 String toString() {
-  return 'ScheduleChangeSlot(start: $start, end: $end, rooms: $rooms, teachers: $teachers)';
+  return 'ScheduleChangeSlot(start: $start, end: $end, subject: $subject, lessonType: $lessonType, lessonNumber: $lessonNumber, dates: $dates, rooms: $rooms, teachers: $teachers)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ScheduleChangeSlotCopyWith<$Res>  {
   factory $ScheduleChangeSlotCopyWith(ScheduleChangeSlot value, $Res Function(ScheduleChangeSlot) _then) = _$ScheduleChangeSlotCopyWithImpl;
 @useResult
 $Res call({
- String? start, String? end, List<String> rooms, List<String> teachers
+ String? start, String? end, String? subject, String? lessonType, int? lessonNumber, List<DateTime> dates, List<String> rooms, List<String> teachers
 });
 
 
@@ -65,11 +65,15 @@ class _$ScheduleChangeSlotCopyWithImpl<$Res>
 
 /// Create a copy of ScheduleChangeSlot
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? start = freezed,Object? end = freezed,Object? rooms = null,Object? teachers = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? start = freezed,Object? end = freezed,Object? subject = freezed,Object? lessonType = freezed,Object? lessonNumber = freezed,Object? dates = null,Object? rooms = null,Object? teachers = null,}) {
   return _then(_self.copyWith(
 start: freezed == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
 as String?,end: freezed == end ? _self.end : end // ignore: cast_nullable_to_non_nullable
-as String?,rooms: null == rooms ? _self.rooms : rooms // ignore: cast_nullable_to_non_nullable
+as String?,subject: freezed == subject ? _self.subject : subject // ignore: cast_nullable_to_non_nullable
+as String?,lessonType: freezed == lessonType ? _self.lessonType : lessonType // ignore: cast_nullable_to_non_nullable
+as String?,lessonNumber: freezed == lessonNumber ? _self.lessonNumber : lessonNumber // ignore: cast_nullable_to_non_nullable
+as int?,dates: null == dates ? _self.dates : dates // ignore: cast_nullable_to_non_nullable
+as List<DateTime>,rooms: null == rooms ? _self.rooms : rooms // ignore: cast_nullable_to_non_nullable
 as List<String>,teachers: null == teachers ? _self.teachers : teachers // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));
@@ -156,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? start,  String? end,  List<String> rooms,  List<String> teachers)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? start,  String? end,  String? subject,  String? lessonType,  int? lessonNumber,  List<DateTime> dates,  List<String> rooms,  List<String> teachers)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ScheduleChangeSlot() when $default != null:
-return $default(_that.start,_that.end,_that.rooms,_that.teachers);case _:
+return $default(_that.start,_that.end,_that.subject,_that.lessonType,_that.lessonNumber,_that.dates,_that.rooms,_that.teachers);case _:
   return orElse();
 
 }
@@ -177,10 +181,10 @@ return $default(_that.start,_that.end,_that.rooms,_that.teachers);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? start,  String? end,  List<String> rooms,  List<String> teachers)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? start,  String? end,  String? subject,  String? lessonType,  int? lessonNumber,  List<DateTime> dates,  List<String> rooms,  List<String> teachers)  $default,) {final _that = this;
 switch (_that) {
 case _ScheduleChangeSlot():
-return $default(_that.start,_that.end,_that.rooms,_that.teachers);case _:
+return $default(_that.start,_that.end,_that.subject,_that.lessonType,_that.lessonNumber,_that.dates,_that.rooms,_that.teachers);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +201,10 @@ return $default(_that.start,_that.end,_that.rooms,_that.teachers);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? start,  String? end,  List<String> rooms,  List<String> teachers)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? start,  String? end,  String? subject,  String? lessonType,  int? lessonNumber,  List<DateTime> dates,  List<String> rooms,  List<String> teachers)?  $default,) {final _that = this;
 switch (_that) {
 case _ScheduleChangeSlot() when $default != null:
-return $default(_that.start,_that.end,_that.rooms,_that.teachers);case _:
+return $default(_that.start,_that.end,_that.subject,_that.lessonType,_that.lessonNumber,_that.dates,_that.rooms,_that.teachers);case _:
   return null;
 
 }
@@ -212,11 +216,21 @@ return $default(_that.start,_that.end,_that.rooms,_that.teachers);case _:
 @JsonSerializable()
 
 class _ScheduleChangeSlot extends ScheduleChangeSlot {
-  const _ScheduleChangeSlot({this.start, this.end, final  List<String> rooms = const [], final  List<String> teachers = const []}): _rooms = rooms,_teachers = teachers,super._();
+  const _ScheduleChangeSlot({this.start, this.end, this.subject, this.lessonType, this.lessonNumber, final  List<DateTime> dates = const [], final  List<String> rooms = const [], final  List<String> teachers = const []}): _dates = dates,_rooms = rooms,_teachers = teachers,super._();
   factory _ScheduleChangeSlot.fromJson(Map<String, dynamic> json) => _$ScheduleChangeSlotFromJson(json);
 
 @override final  String? start;
 @override final  String? end;
+@override final  String? subject;
+@override final  String? lessonType;
+@override final  int? lessonNumber;
+ final  List<DateTime> _dates;
+@override@JsonKey() List<DateTime> get dates {
+  if (_dates is EqualUnmodifiableListView) return _dates;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_dates);
+}
+
  final  List<String> _rooms;
 @override@JsonKey() List<String> get rooms {
   if (_rooms is EqualUnmodifiableListView) return _rooms;
@@ -245,16 +259,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScheduleChangeSlot&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&const DeepCollectionEquality().equals(other._rooms, _rooms)&&const DeepCollectionEquality().equals(other._teachers, _teachers));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScheduleChangeSlot&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&(identical(other.subject, subject) || other.subject == subject)&&(identical(other.lessonType, lessonType) || other.lessonType == lessonType)&&(identical(other.lessonNumber, lessonNumber) || other.lessonNumber == lessonNumber)&&const DeepCollectionEquality().equals(other._dates, _dates)&&const DeepCollectionEquality().equals(other._rooms, _rooms)&&const DeepCollectionEquality().equals(other._teachers, _teachers));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,start,end,const DeepCollectionEquality().hash(_rooms),const DeepCollectionEquality().hash(_teachers));
+int get hashCode => Object.hash(runtimeType,start,end,subject,lessonType,lessonNumber,const DeepCollectionEquality().hash(_dates),const DeepCollectionEquality().hash(_rooms),const DeepCollectionEquality().hash(_teachers));
 
 @override
 String toString() {
-  return 'ScheduleChangeSlot(start: $start, end: $end, rooms: $rooms, teachers: $teachers)';
+  return 'ScheduleChangeSlot(start: $start, end: $end, subject: $subject, lessonType: $lessonType, lessonNumber: $lessonNumber, dates: $dates, rooms: $rooms, teachers: $teachers)';
 }
 
 
@@ -265,7 +279,7 @@ abstract mixin class _$ScheduleChangeSlotCopyWith<$Res> implements $ScheduleChan
   factory _$ScheduleChangeSlotCopyWith(_ScheduleChangeSlot value, $Res Function(_ScheduleChangeSlot) _then) = __$ScheduleChangeSlotCopyWithImpl;
 @override @useResult
 $Res call({
- String? start, String? end, List<String> rooms, List<String> teachers
+ String? start, String? end, String? subject, String? lessonType, int? lessonNumber, List<DateTime> dates, List<String> rooms, List<String> teachers
 });
 
 
@@ -282,11 +296,15 @@ class __$ScheduleChangeSlotCopyWithImpl<$Res>
 
 /// Create a copy of ScheduleChangeSlot
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? start = freezed,Object? end = freezed,Object? rooms = null,Object? teachers = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? start = freezed,Object? end = freezed,Object? subject = freezed,Object? lessonType = freezed,Object? lessonNumber = freezed,Object? dates = null,Object? rooms = null,Object? teachers = null,}) {
   return _then(_ScheduleChangeSlot(
 start: freezed == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
 as String?,end: freezed == end ? _self.end : end // ignore: cast_nullable_to_non_nullable
-as String?,rooms: null == rooms ? _self._rooms : rooms // ignore: cast_nullable_to_non_nullable
+as String?,subject: freezed == subject ? _self.subject : subject // ignore: cast_nullable_to_non_nullable
+as String?,lessonType: freezed == lessonType ? _self.lessonType : lessonType // ignore: cast_nullable_to_non_nullable
+as String?,lessonNumber: freezed == lessonNumber ? _self.lessonNumber : lessonNumber // ignore: cast_nullable_to_non_nullable
+as int?,dates: null == dates ? _self._dates : dates // ignore: cast_nullable_to_non_nullable
+as List<DateTime>,rooms: null == rooms ? _self._rooms : rooms // ignore: cast_nullable_to_non_nullable
 as List<String>,teachers: null == teachers ? _self._teachers : teachers // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));

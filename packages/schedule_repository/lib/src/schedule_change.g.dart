@@ -56,4 +56,5 @@ const _$ScheduleChangeKindEnumMap = {
   ScheduleChangeKind.move: 'move',
   ScheduleChangeKind.room: 'room',
   ScheduleChangeKind.teacher: 'teacher',
+  ScheduleChangeKind.update: 'update',
 };

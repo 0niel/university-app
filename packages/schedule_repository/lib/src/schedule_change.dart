@@ -22,7 +22,8 @@ abstract class ScheduleChange with _$ScheduleChange {
       _$ScheduleChangeFromJson({
         'id': json['id'].toString(),
         'kind': ScheduleChangeKind.fromWireValue(
-          (json['changeKind'] ?? json['change_kind'] ?? '').toString(),
+          (json['changeKind'] ?? json['change_kind'] ?? json['kind'] ?? '')
+              .toString(),
         ).wireValue,
         'subject': (json['subject'] ?? '').toString(),
         'lessonDate': _localDateTime(json['lessonDate'] ?? json['lesson_date']),
@@ -48,6 +49,7 @@ int? _nullableInteger(Object? value) => switch (value) {
 };
 
 Map<String, dynamic> _map(Object? value) {
+  if (value is ScheduleChangeSlot) return value.toJson();
   if (value is! Map) return const {};
   return value.map((key, item) => MapEntry(key.toString(), item));
 }

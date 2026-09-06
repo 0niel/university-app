@@ -1,14 +1,13 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
 import 'package:rtu_mirea_app/notifications/model/notification_feed.dart';
 import 'package:rtu_mirea_app/notifications/view/schedule_changes_read_scope.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
-import 'package:schedule_repository/schedule_repository.dart';
+import 'package:rtu_mirea_app/schedule/widgets/schedule_change_card.dart';
 
 Future<void> showScheduleChangesSheet(
   BuildContext context, {
@@ -56,42 +55,11 @@ class _Changes extends StatelessWidget {
               subtitle: l10n.changesEmptySubtitle,
             )
           else
-            AppListGroup(
-              children: [
-                for (final change in changes)
-                  AppListRow(
-                    title: change.subject,
-                    strong: true,
-                    leading: AppBadge(
-                      label: _label(l10n, change.kind),
-                      tone: switch (change.kind) {
-                        ScheduleChangeKind.cancel => AppBadgeTone.exam,
-                        ScheduleChangeKind.add => AppBadgeTone.lecture,
-                        ScheduleChangeKind.teacher => AppBadgeTone.accent,
-                        _ => AppBadgeTone.warn,
-                      },
-                    ),
-                    subtitle: [
-                      DateFormat(
-                        'E d MMM',
-                        Localizations.localeOf(context).toString(),
-                      ).format(change.lessonDate),
-                      if (change.newValue.start != null) change.newValue.start!,
-                      if (change.kind == ScheduleChangeKind.teacher)
-                        [
-                          change.oldValue.teachers.join(', '),
-                          change.newValue.teachers.join(', '),
-                        ].join(' → ')
-                      else if (change.oldValue.rooms.isNotEmpty ||
-                          change.newValue.rooms.isNotEmpty)
-                        [
-                          change.oldValue.rooms.join(', '),
-                          change.newValue.rooms.join(', '),
-                        ].join(' → '),
-                    ].join(' · '),
-                  ),
-              ],
-            ),
+            for (final change in changes)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.gap),
+                child: ScheduleChangeCard(change: change),
+              ),
           const SizedBox(height: AppSpacing.sectionGap),
           AppButton.primary(
             label: l10n.scheduleChangesAck,
@@ -108,13 +76,4 @@ class _Changes extends StatelessWidget {
       ),
     );
   }
-
-  String _label(AppLocalizations l10n, ScheduleChangeKind kind) =>
-      switch (kind) {
-        ScheduleChangeKind.cancel => l10n.scheduleChangeTagCancelled,
-        ScheduleChangeKind.add => l10n.scheduleChangeTagNew,
-        ScheduleChangeKind.teacher => l10n.scheduleChangeTagTeacher,
-        ScheduleChangeKind.room => l10n.scheduleChangeTagRoom,
-        ScheduleChangeKind.move => l10n.scheduleChangeTagMoved,
-      };
 }

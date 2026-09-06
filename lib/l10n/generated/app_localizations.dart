@@ -21427,6 +21427,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Updates while the app is active'**
   String get friendsLocationForegroundActive;
+
+  /// No description provided for @changesAlertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change notifications'**
+  String get changesAlertsTitle;
+
+  /// No description provided for @scheduleChangeUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson updated'**
+  String get scheduleChangeUpdated;
+
+  /// No description provided for @scheduleChangeBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before'**
+  String get scheduleChangeBefore;
+
+  /// No description provided for @scheduleChangeAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get scheduleChangeAfter;
+
+  /// No description provided for @scheduleChangeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get scheduleChangeUnavailable;
+
+  /// No description provided for @scheduleChangeDetailsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Change details are unavailable'**
+  String get scheduleChangeDetailsUnavailable;
+
+  /// No description provided for @scheduleChangeSubjectUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled lesson'**
+  String get scheduleChangeSubjectUnavailable;
+
+  /// No description provided for @scheduleChangeDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Lesson date'**
+  String get scheduleChangeDate;
+
+  /// No description provided for @scheduleChangeSubjectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get scheduleChangeSubjectLabel;
+
+  /// No description provided for @scheduleChangeRenamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject renamed'**
+  String get scheduleChangeRenamed;
+
+  /// No description provided for @scheduleChangeDetectedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected {time}'**
+  String scheduleChangeDetectedAt(String time);
 }
 
 class _AppLocalizationsDelegate

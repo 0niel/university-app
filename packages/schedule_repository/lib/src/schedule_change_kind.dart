@@ -6,7 +6,8 @@ enum ScheduleChangeKind {
   cancel('cancel'),
   move('move'),
   room('room'),
-  teacher('teacher');
+  teacher('teacher'),
+  update('update');
 
   const ScheduleChangeKind(this.wireValue);
 
@@ -15,7 +16,7 @@ enum ScheduleChangeKind {
   static ScheduleChangeKind fromWireValue(String value) {
     return ScheduleChangeKind.values.firstWhere(
       (kind) => kind.wireValue == value,
-      orElse: () => ScheduleChangeKind.move,
+      orElse: () => ScheduleChangeKind.update,
     );
   }
 }

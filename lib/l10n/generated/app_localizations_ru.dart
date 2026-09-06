@@ -12515,4 +12515,40 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get friendsLocationForegroundActive =>
       'Обновляется в открытом приложении';
+
+  @override
+  String get changesAlertsTitle => 'Уведомления об изменениях';
+
+  @override
+  String get scheduleChangeUpdated => 'Изменение занятия';
+
+  @override
+  String get scheduleChangeBefore => 'Было';
+
+  @override
+  String get scheduleChangeAfter => 'Стало';
+
+  @override
+  String get scheduleChangeUnavailable => 'Не указано';
+
+  @override
+  String get scheduleChangeDetailsUnavailable =>
+      'Подробности изменения недоступны';
+
+  @override
+  String get scheduleChangeSubjectUnavailable => 'Занятие без названия';
+
+  @override
+  String get scheduleChangeDate => 'Дата занятия';
+
+  @override
+  String get scheduleChangeSubjectLabel => 'Предмет';
+
+  @override
+  String get scheduleChangeRenamed => 'Изменено название';
+
+  @override
+  String scheduleChangeDetectedAt(String time) {
+    return 'Обнаружено $time';
+  }
 }

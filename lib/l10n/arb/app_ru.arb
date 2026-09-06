@@ -4904,5 +4904,17 @@
   "friendsLocationServiceDisabled": "Геолокация выключена на устройстве. Карта по-прежнему доступна.",
   "friendsLocationUnsupported": "Устройство не может передать геопозицию. Смотреть карту по-прежнему можно.",
   "friendsLocationLocating": "Определяем геопозицию…",
-  "friendsLocationForegroundActive": "Обновляется в открытом приложении"
+  "friendsLocationForegroundActive": "Обновляется в открытом приложении",
+  "changesAlertsTitle": "Уведомления об изменениях",
+  "scheduleChangeUpdated": "Изменение занятия",
+  "scheduleChangeBefore": "Было",
+  "scheduleChangeAfter": "Стало",
+  "scheduleChangeUnavailable": "Не указано",
+  "scheduleChangeDetailsUnavailable": "Подробности изменения недоступны",
+  "scheduleChangeSubjectUnavailable": "Занятие без названия",
+  "scheduleChangeDate": "Дата занятия",
+  "scheduleChangeSubjectLabel": "Предмет",
+  "scheduleChangeRenamed": "Изменено название",
+  "scheduleChangeDetectedAt": "Обнаружено {time}",
+  "@scheduleChangeDetectedAt": {"placeholders": {"time": {"type": "String"}}}
 }
