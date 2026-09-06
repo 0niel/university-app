@@ -44,7 +44,9 @@ class GooglePlayReleaseWorkflowTest(unittest.TestCase):
             }
             result = subprocess.run(
                 [bash, "--noprofile", "--norc", "-e", "-o", "pipefail", "-c",
-                 'gh() { printf "%s\\n" "$TEST_FOUND_TAG"; return "$TEST_API_STATUS"; }\n'
+                 'python3() { test "$1" = tool/resolve_android_release.py && '
+                 'test "$2" = --source-sha && test "$3" = "$RELEASE_SHA" || return 99; '
+                 'printf "%s\\n" "$TEST_FOUND_TAG"; return "$TEST_API_STATUS"; }\n'
                  + script],
                 env=environment,
                 capture_output=True,
@@ -103,7 +105,7 @@ class GooglePlayReleaseWorkflowTest(unittest.TestCase):
         )
 
     def test_lookup_remains_bound_to_source_revision(self):
-        self.assertIn('.target_commitish == \\\"$RELEASE_SHA\\\"',
+        self.assertIn('tool/resolve_android_release.py --source-sha "$RELEASE_SHA"',
                       step("Resolve beta release"))
 
 

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xml/xml.dart';
+import 'package:yaml/yaml.dart';
 
 void main() {
   test('keeps voice input optional without filtering Android devices', () {
@@ -104,7 +105,40 @@ void main() {
       hasLength(2),
     );
     expect(workflow, contains('openssl smime -encrypt'));
-    expect(workflow, contains('build/release-symbols/*.cms'));
+    final jobs = (loadYaml(workflow) as YamlMap)['jobs'] as YamlMap;
+    final release = jobs['release'] as YamlMap;
+    final releaseSteps = release['steps'] as YamlList;
+    YamlMap releaseStep(String name) =>
+        releaseSteps.cast<YamlMap>().singleWhere(
+          (step) => step['name'] == name,
+        );
+    final encrypt = releaseStep('Encrypt release symbols');
+    final collect = releaseStep('Collect iOS release artifacts');
+    final upload = releaseStep('Upload iOS artifact');
+    expect(
+      encrypt['run'],
+      contains('-out build/release-symbols/ios-release-symbols.cms'),
+    );
+    expect(
+      collect['run'],
+      contains(
+        'symbols = Path("build/release-symbols/ios-release-symbols.cms")',
+      ),
+    );
+    expect(collect['run'], contains('destination = Path("dist")'));
+    expect(
+      collect['run'],
+      contains('shutil.copy2(symbols, destination / symbols.name)'),
+    );
+    expect((upload['with'] as YamlMap)['path'], 'dist/');
+    expect(
+      releaseSteps.indexOf(encrypt),
+      lessThan(releaseSteps.indexOf(collect)),
+    );
+    expect(
+      releaseSteps.indexOf(collect),
+      lessThan(releaseSteps.indexOf(upload)),
+    );
     expect(File('tool/release_symbols_public.pem').existsSync(), isTrue);
     expect(File('tool/decrypt_release_symbols.ps1').existsSync(), isTrue);
     expect(gitignore, contains('!tool/release_symbols_public.pem'));

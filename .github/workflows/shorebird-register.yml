@@ -1,0 +1,92 @@
+name: Register Shorebird Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful original full release run
+        required: true
+        type: string
+      platform:
+        description: Original release platform
+        required: true
+        type: choice
+        options:
+          - android
+          - ios
+
+permissions:
+  actions: read
+  contents: write
+  attestations: write
+  id-token: write
+
+concurrency:
+  group: shorebird-register-${{ inputs.platform }}-${{ inputs.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: beta
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Validate registration request
+        env:
+          WORKFLOW_REF: ${{ github.ref }}
+          RUN_ID: ${{ inputs.run_id }}
+        run: |
+          test "$WORKFLOW_REF" = refs/heads/master
+          [[ "$RUN_ID" =~ ^[1-9][0-9]*$ ]]
+
+      - name: Check out registry tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - name: Install pinned Shorebird
+        run: |
+          shorebird_dir="$RUNNER_TEMP/shorebird-sdk"
+          shorebird_revision=5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb
+          mkdir "$shorebird_dir"
+          git -C "$shorebird_dir" init
+          git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
+          git -C "$shorebird_dir" fetch --depth 1 origin "$shorebird_revision"
+          git -C "$shorebird_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$shorebird_dir" rev-parse HEAD)" = "$shorebird_revision"
+          printf '%s\n' "$shorebird_dir/bin" >> "$GITHUB_PATH"
+
+      - name: Verify and import original release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          RUN_ID: ${{ inputs.run_id }}
+          PLATFORM: ${{ inputs.platform }}
+        run: |
+          python3 tool/import_shorebird_release.py \
+            --run-id "$RUN_ID" --platform "$PLATFORM" \
+            --output-dir "$RUNNER_TEMP/registry"
+
+      - name: Attest release manifest
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a
+        with:
+          subject-path: ${{ runner.temp }}/registry/release-manifest.json
+
+      - name: Publish release manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 tool/release_manifest.py publish \
+            --manifest "$RUNNER_TEMP/registry/release-manifest.json" \
+            --artifacts-dir "$RUNNER_TEMP/registry"

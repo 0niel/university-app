@@ -1,9 +1,12 @@
 import hashlib
 import importlib.util
+import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
+import types
 import unittest
 from unittest.mock import patch
 
@@ -18,288 +21,296 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
-        self.root = Path(temporary.name)
+        self.directory = Path(temporary.name)
+        self.root = self.directory / "source"
+        self.root.mkdir()
+        self.output = self.directory / "projected"
         self.git("init", "-q")
         self.git("config", "user.name", "Test")
         self.git("config", "user.email", "test@example.invalid")
         self.git("config", "core.autocrlf", "false")
-        self.write("pubspec.yaml", b"name: example\nversion: 5.2.1+154\ndependencies:\n  pdfx: ^2.11.0\n")
-        self.lock = b'packages:\n  existing:\n    version: "1.0.0"\nsdks:\n  dart: ">=3.12.0"\n'
-        self.write("pubspec.lock", self.lock)
-        self.manifest = b"<manifest>\n    <queries>\n    </queries>\n</manifest>\n"
-        self.write(MODULE.MANIFEST, self.manifest)
-        self.write("assets/font.ttf", b"original asset")
-        self.write("lib/main.dart", b"void main() {}\n")
+        for path, data in {
+            "pubspec.yaml": b"name: example\nversion: 92.17.6+8675309\n",
+            "pubspec.lock": b"packages: {}\n",
+            "android/app/build.gradle": b"baseline native\n",
+            "android/app/google-services.json": b"baseline config\n",
+            "assets/font.ttf": b"baseline asset",
+            "lib/main.dart": b"void main() {}\n",
+            "lib/remove.dart": b"const removed = true;\n",
+            "packages/nested/client/pubspec.yaml": b"name: nested_client\n",
+            "packages/nested/client/lib/client.dart": b"class Client {}\n",
+            "test/main_test.dart": b"void main() {}\n",
+            "tool/generator.py": b"print('baseline generator')\n",
+            ".github/workflows/test.yml": b"name: baseline\n",
+            ".gitignore": b"/build/\n/.dart_tool/\n/lib/ignored.dart\n",
+        }.items():
+            self.write(path, data)
         self.baseline = self.commit()
-        self.write(MODULE.MANIFEST, self.manifest.replace(b"    </queries>", MODULE.PROCESS_TEXT + b"    </queries>"))
-        pubspec = (self.root / "pubspec.yaml").read_bytes()
-        self.write("pubspec.yaml", pubspec.replace(b"  pdfx:", b"  pdf: 3.12.0\n  pdfx:"))
-        additions = "".join(
-            f'  {name}:\n    dependency: transitive\n    description:\n      name: {name}\n      sha256: "{digest}"\n      url: "https://pub.dev"\n    source: hosted\n    version: "{version}"\n'
-            for name, (version, digest) in MODULE.DART_PACKAGES.items()
-        )
-        self.write("pubspec.lock", self.lock.replace(b"sdks:", additions.encode() + b"sdks:"))
-        self.write("lib/main.dart", b"void main() { print('reviewed'); }\n")
-        self.reviewed = self.commit()
-        self.pin("BASELINE_SHA", self.baseline)
-        self.pin("REVIEWED_SOURCE_SHA", self.reviewed)
+        self.write("lib/main.dart", b"void main() { print('new'); }\n")
+        self.source = self.commit()
 
-    def pin(self, name, value):
-        context = patch.object(MODULE, name, value)
-        context.start()
-        self.addCleanup(context.stop)
-
-    def git(self, *arguments):
+    def git(self, *args, input=None):
         return subprocess.check_output(
-            ["git", "-C", str(self.root), *arguments],
-            stderr=subprocess.PIPE, timeout=15,
+            ["git", "-C", str(self.root), *args], input=input,
+            stderr=subprocess.PIPE,
             env={**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull},
         ).decode().strip()
 
-    def write(self, path, value):
+    def write(self, path, data):
         target = self.root / path
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(value)
+        target.write_bytes(data)
 
     def commit(self):
-        self.git("add", ".")
+        self.git("add", "-A")
         self.git("commit", "-qm", "Fixture")
         return self.git("rev-parse", "HEAD")
 
-    def project(self, source=None):
-        revision = source or self.git("rev-parse", "HEAD")
-        return MODULE.projection(self.root, revision, revision)
+    def project(self):
+        return MODULE.projection(self.root, self.baseline, self.source)
 
-    def test_projection_restores_native_and_keeps_reviewed_dart_and_pdf(self):
-        overrides, receipt = self.project()
-        self.assertEqual(overrides[MODULE.MANIFEST], self.manifest)
-        self.assertIn(b"  pdf: 3.12.0\n", overrides["pubspec.yaml"])
-        for path, value in overrides.items():
-            self.write(path, value)
-        MODULE.verify_worktree(self.root, overrides)
-        self.assertIn(b"reviewed", (self.root / "lib/main.dart").read_bytes())
-        self.assertEqual(len(receipt["projection_sha256"]), 64)
-        self.assertEqual(receipt["reviewed_source_sha"], self.reviewed)
+    def materialize(self):
+        entries, receipt = self.project()
+        MODULE.materialize(self.root, self.output, entries, receipt)
+        return entries, receipt
 
-    def test_arbitrary_runtime_tail_is_rejected(self):
-        self.write("lib/unreviewed.dart", b"void change() {}\n")
-        self.commit()
-        with self.assertRaisesRegex(ValueError, "explicitly reviewed snapshot"):
+    def test_future_arbitrary_release_projects_without_version_or_sha_pins(self):
+        entries, receipt = self.materialize()
+        self.assertEqual((self.output / "lib/main.dart").read_bytes(), b"void main() { print('new'); }\n")
+        self.assertEqual((self.output / "pubspec.yaml").read_bytes(), (self.root / "pubspec.yaml").read_bytes())
+        self.assertEqual(MODULE.git(self.output, "rev-parse", "HEAD").decode().strip(), self.baseline)
+        self.assertEqual(MODULE.git(self.output, "write-tree").decode().strip(), receipt["projected_tree_sha"])
+        self.assertEqual(receipt["runtime_paths"], ["lib/main.dart"])
+        self.assertEqual(receipt["source_tree_sha"], self.git("rev-parse", f"{self.source}^{{tree}}"))
+        expected = hashlib.sha256(json.dumps(entries, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        self.assertEqual(receipt["projection_sha256"], expected)
+
+    def test_new_dart_arb_nested_package_and_test_files_are_projected(self):
+        paths = ["lib/feature/new.dart", "lib/l10n/arb/app_new.arb",
+                 "packages/nested/client/lib/new.dart", "test/feature/new_test.dart",
+                 "packages/nested/client/test/client_test.dart", "test/goldens/new.png"]
+        for path in paths:
+            self.write(path, b"fixture\n")
+        self.source = self.commit()
+        entries, _ = self.materialize()
+        for path in paths:
+            self.assertIn(path, entries)
+            self.assertEqual((self.output / path).read_bytes(), b"fixture\n")
+
+    def test_runtime_and_test_deletions_are_materialized(self):
+        for path in ["lib/remove.dart", "test/main_test.dart"]:
+            (self.root / path).unlink()
+        self.source = self.commit()
+        entries, _ = self.materialize()
+        for path in ["lib/remove.dart", "test/main_test.dart"]:
+            self.assertNotIn(path, entries)
+            self.assertFalse((self.output / path).exists())
+
+    def test_support_changes_are_excluded_and_baseline_generators_remain(self):
+        _, before = self.project()
+        for path in ["tool/generator.py", ".github/workflows/test.yml", "supabase/migrations/new.sql", "docs/new.md", "README.md"]:
+            self.write(path, b"new support\n")
+        self.source = self.commit()
+        _, receipt = self.materialize()
+        self.assertEqual(receipt["projection_sha256"], before["projection_sha256"])
+        self.assertEqual((self.output / "tool/generator.py").read_bytes(), b"print('baseline generator')\n")
+        self.assertFalse((self.output / "supabase/migrations/new.sql").exists())
+        self.assertEqual(len(receipt["excluded_paths"]), 5)
+
+    def test_support_deletion_keeps_baseline_file(self):
+        (self.root / "tool/generator.py").unlink()
+        self.source = self.commit()
+        self.materialize()
+        self.assertTrue((self.output / "tool/generator.py").exists())
+
+    def test_each_protected_path_is_rejected(self):
+        for path in ["pubspec.yaml", "pubspec.lock", "packages/nested/client/pubspec.yaml",
+                     "android/app/build.gradle", "ios/Runner/Info.plist", "web/index.html",
+                     "assets/new.png", "packages/nested/client/assets/new.png", ".fvmrc",
+                     "shorebird.yaml", "l10n.yaml", "lib/new.json", "unknown/file.dart",
+                     "packages/nested/client/android/lib/native.dart", "packages/nested/client/android/test/Native.java", "test/pubspec.yaml"]:
+            with self.subTest(path=path):
+                self.git("reset", "--hard", self.source)
+                self.write(path, b"changed\n")
+                changed = self.commit()
+                with self.assertRaisesRegex(ValueError, "full release"):
+                    MODULE.projection(self.root, self.baseline, changed)
+        self.git("reset", "--hard", self.source)
+
+    def test_dependency_version_only_change_is_not_normalized(self):
+        self.write("pubspec.yaml", b"name: example\nversion: 93.0.0+9999999\n")
+        self.source = self.commit()
+        with self.assertRaisesRegex(ValueError, "Dependency changes"):
             self.project()
 
-    def test_reviewed_support_tail_is_allowed_and_has_a_distinct_receipt(self):
-        _, initial = self.project()
-        self.write(".github/workflows/shorebird-patch.yml", b"name: Patch\n")
-        test_path = "packages/app_ui/test/src/widgets/app_horizontal_scroll_view_test.dart"
-        self.assertEqual({path for path in MODULE.WORKFLOW_PATHS if path.startswith("packages/")}, {test_path})
-        self.write(test_path, b"void main() {}\n")
-        fixtures = {
-            "supabase/tests/guest_active_day_contract.sql",
-            "supabase/tests/mentorship_contract.sql",
-        }
-        self.assertEqual({path for path in MODULE.WORKFLOW_PATHS if path.startswith("supabase/")}, fixtures)
-        for path in fixtures:
-            self.write(path, b"select 1;\n")
-        source = self.commit()
-        _, updated = self.project(source)
-        self.assertNotEqual(initial["projection_sha256"], updated["projection_sha256"])
-        self.assertEqual(updated["source_sha"], source)
-
-    def test_new_asset_in_reviewed_commit_is_still_rejected(self):
-        self.write("assets/new-font.ttf", b"new asset")
-        self.pin("REVIEWED_SOURCE_SHA", self.commit())
-        with self.assertRaisesRegex(ValueError, "bundled assets"):
+    def test_unknown_package_root_requires_full_release(self):
+        self.write("packages/unknown/lib/new.dart", b"new\n")
+        self.source = self.commit()
+        with self.assertRaisesRegex(ValueError, "full release"):
             self.project()
 
-    def test_other_native_manifest_changes_are_not_hidden(self):
-        path = self.root / MODULE.MANIFEST
-        self.write(MODULE.MANIFEST, path.read_bytes().replace(b"<manifest>", b'<manifest package="changed">'))
-        self.pin("REVIEWED_SOURCE_SHA", self.commit())
-        with self.assertRaisesRegex(ValueError, "only reviewed manifest change"):
+    def test_deleted_protected_file_is_rejected(self):
+        (self.root / "assets/font.ttf").unlink()
+        self.source = self.commit()
+        with self.assertRaisesRegex(ValueError, "full release"):
             self.project()
 
-    def test_existing_dependency_upgrade_is_rejected(self):
-        path = self.root / "pubspec.lock"
-        self.write("pubspec.lock", path.read_bytes().replace(b'"1.0.0"', b'"2.0.0"'))
-        self.pin("REVIEWED_SOURCE_SHA", self.commit())
-        with self.assertRaisesRegex(ValueError, "locked dependencies"):
+    def test_unrelated_history_is_rejected(self):
+        self.git("checkout", "--orphan", "other")
+        self.git("rm", "-rf", ".")
+        self.write("lib/main.dart", b"other\n")
+        self.source = self.commit()
+        with self.assertRaisesRegex(ValueError, "ancestor"):
             self.project()
 
-    def test_package_native_resource_is_rejected_even_if_reviewed(self):
-        self.write("packages/example/android/build.gradle", b"native configuration")
-        self.pin("REVIEWED_SOURCE_SHA", self.commit())
-        with self.assertRaisesRegex(ValueError, "bundled assets"):
+    def test_short_sha_and_revision_expressions_are_rejected(self):
+        for revision in ["HEAD", self.source[:12], f"{self.source}~1", "-" * 40]:
+            with self.subTest(revision=revision), self.assertRaisesRegex(ValueError, "full commit"):
+                MODULE.projection(self.root, self.baseline, revision)
+
+    def test_changed_file_mode_is_rejected(self):
+        self.git("update-index", "--chmod=+x", "lib/main.dart")
+        self.git("commit", "-qm", "Mode")
+        self.source = self.git("rev-parse", "HEAD")
+        with self.assertRaisesRegex(ValueError, "mode changes"):
             self.project()
 
-    def test_post_projection_runtime_drift_is_rejected(self):
-        overrides, _ = self.project()
-        for path, value in overrides.items():
-            self.write(path, value)
-        self.write("lib/main.dart", b"void main() { print('drift'); }\n")
-        with self.assertRaisesRegex(ValueError, "Unexpected tracked changes"):
-            MODULE.verify_worktree(self.root, overrides)
+    def test_symlink_and_gitlink_sources_are_rejected_without_following(self):
+        original = self.source
+        for mode, path, identity in [
+            ("120000", "lib/link.dart", self.git("hash-object", "-w", "--stdin", input=b"../../outside")),
+            ("160000", "packages/submodule", self.baseline),
+        ]:
+            with self.subTest(mode=mode):
+                self.git("reset", "--hard", original)
+                self.git("update-index", "--add", "--cacheinfo", mode, identity, path)
+                self.git("commit", "-qm", "Special file")
+                self.source = self.git("rev-parse", "HEAD")
+                with self.assertRaisesRegex(ValueError, "Symlinks, gitlinks"):
+                    self.project()
 
-    def test_untracked_source_injection_is_rejected(self):
-        overrides, _ = self.project()
-        for path, value in overrides.items():
-            self.write(path, value)
-        self.write("lib/extra.dart", b"void extra() {}\n")
+    def test_unchanged_baseline_symlink_is_also_rejected(self):
+        identity = self.git("hash-object", "-w", "--stdin", input=b"../../outside")
+        self.git("update-index", "--add", "--cacheinfo", "120000", identity, "docs/link")
+        self.git("commit", "-qm", "Link baseline")
+        self.baseline = self.git("rev-parse", "HEAD")
+        self.source = self.baseline
+        with self.assertRaisesRegex(ValueError, "Symlinks, gitlinks"):
+            self.project()
+
+    def test_worktree_injection_and_tracked_drift_are_rejected(self):
+        entries, receipt = self.materialize()
+        target = self.output / "lib/main.dart"
+        expected = target.read_bytes()
+        target.write_bytes(b"injected\n")
+        with self.assertRaisesRegex(ValueError, "Projection drift"):
+            MODULE.verify_worktree(self.output, entries, receipt)
+        target.write_bytes(expected)
+        (self.output / "unexpected.dart").write_bytes(b"injected\n")
         with self.assertRaisesRegex(ValueError, "Unexpected untracked"):
-            MODULE.verify_worktree(self.root, overrides)
+            MODULE.verify_worktree(self.output, entries, receipt)
 
-    def test_requested_source_must_match_the_checkout(self):
-        with self.assertRaisesRegex(ValueError, "Checked-out commit"):
-            self.project(self.baseline)
+    def test_ignored_runtime_injection_is_rejected(self):
+        entries, receipt = self.materialize()
+        (self.output / "lib/ignored.dart").write_bytes(b"injected\n")
+        with self.assertRaisesRegex(ValueError, "ignored runtime"):
+            MODULE.verify_worktree(self.output, entries, receipt)
 
+    def test_staged_changes_are_rejected(self):
+        entries, receipt = self.materialize()
+        (self.output / "lib/main.dart").write_bytes(b"injected\n")
+        MODULE.git(self.output, "add", "lib/main.dart")
+        with self.assertRaisesRegex(ValueError, "index differs"):
+            MODULE.verify_worktree(self.output, entries, receipt)
 
-class NavigationFirebaseTest(unittest.TestCase):
-    def setUp(self):
-        temporary = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary.cleanup)
-        self.root = Path(temporary.name).resolve()
-        self.target = self.root / "android/app/google-services.json"
-        self.target.parent.mkdir(parents=True)
-        self.config = b'{"project_info":{"project_id":"fixture"}}\n'
-        context = patch.object(MODULE, "NAV_FIREBASE_SHA256", hashlib.sha256(self.config).hexdigest())
-        context.start()
-        self.addCleanup(context.stop)
+    def test_output_cannot_replace_source_or_nonempty_directory(self):
+        entries, receipt = self.project()
+        for output in [self.root, self.root / "projection"]:
+            with self.assertRaisesRegex(ValueError, "separate directory"):
+                MODULE.materialize(self.root, output, entries, receipt)
+        self.output.mkdir()
+        (self.output / "keep.txt").write_text("keep")
+        with self.assertRaisesRegex(ValueError, "must be empty"):
+            MODULE.materialize(self.root, self.output, entries, receipt)
+        self.assertEqual((self.output / "keep.txt").read_text(), "keep")
 
-    def test_exact_released_native_bytes_are_required(self):
-        self.target.write_bytes(self.config)
-        MODULE.verify_navigation_firebase(self.root)
-        self.target.write_bytes(self.config.replace(b"\n", b"\r\n"))
-        with self.assertRaisesRegex(ValueError, "differs from the verified release"):
-            MODULE.verify_navigation_firebase(self.root)
+    def test_manifest_must_match_baseline_and_verify_native_inputs(self):
+        calls = []
+        manifest = {"source_sha": self.baseline, "source_tree": self.git("rev-parse", f"{self.baseline}^{{tree}}"), "platform": "android", "app_id": "example-app", "build_inputs": {"android/app/google-services.json": hashlib.sha256(b"prepared\n").hexdigest()}}
+        def verify(root, value):
+            calls.append(root)
+            for path, digest in value["build_inputs"].items():
+                if hashlib.sha256((root / path).read_bytes()).hexdigest() != digest:
+                    raise ValueError("Native fingerprint mismatch")
+        module = types.SimpleNamespace(load_manifest=lambda _: manifest, read_app_id=lambda *_: "example-app", verify_native_config=verify)
+        with patch.dict(sys.modules, {"release_manifest": module}):
+            self.assertEqual(MODULE.manifest_for(Path("manifest.json"), self.baseline, self.root), manifest)
+            with self.assertRaisesRegex(ValueError, "does not match"):
+                MODULE.manifest_for(Path("manifest.json"), self.source, self.root)
+            with patch.dict(manifest, {"source_tree": "0" * 40}), self.assertRaisesRegex(ValueError, "tree does not match"):
+                MODULE.manifest_for(Path("manifest.json"), self.baseline, self.root)
+            with patch.dict(manifest, {"app_id": "other-app"}), self.assertRaisesRegex(ValueError, "app identity"):
+                MODULE.manifest_for(Path("manifest.json"), self.baseline, self.root)
+            entries, receipt = self.materialize()
+            target = self.output / "android/app/google-services.json"
+            MODULE.verify_worktree(self.output, entries, receipt, manifest)
+            self.assertEqual(calls, [])
+            target.write_bytes(b"prepared\n")
+            MODULE.verify_worktree(self.output, entries, receipt, manifest, verify_native_inputs=True)
+            self.assertEqual(calls, [self.output])
+            target.write_bytes(b"wrong config\n")
+            with self.assertRaisesRegex(ValueError, "fingerprint mismatch"):
+                MODULE.verify_worktree(self.output, entries, receipt, manifest)
 
-    def test_missing_file_and_symlink_are_rejected(self):
-        with self.assertRaisesRegex(ValueError, "Missing or invalid"):
-            MODULE.verify_navigation_firebase(self.root)
-        self.target.write_bytes(self.config)
-        with patch.object(Path, "is_symlink", return_value=True):
-            with self.assertRaisesRegex(ValueError, "Missing or invalid"):
-                MODULE.verify_navigation_firebase(self.root)
+    def test_manifest_cannot_override_projected_dart(self):
+        entries, receipt = self.materialize()
+        (self.output / "lib/main.dart").write_bytes(b"other\n")
+        with self.assertRaisesRegex(ValueError, "Projection drift"):
+            MODULE.verify_worktree(self.output, entries, receipt, {"build_inputs": {"lib/main.dart": "ignored"}})
 
+    def test_projection_uses_commit_objects_not_ambient_checkout(self):
+        self.git("checkout", "--detach", self.baseline)
+        self.write("lib/main.dart", b"ambient dirty content")
+        _, receipt = self.materialize()
+        self.assertEqual(receipt["source_sha"], self.source)
+        self.assertEqual((self.output / "lib/main.dart").read_bytes(), b"void main() { print('new'); }\n")
 
-class NavigationProjectionTest(unittest.TestCase):
-    git = PrepareShorebirdPatchTest.git
-    write = PrepareShorebirdPatchTest.write
-    commit = PrepareShorebirdPatchTest.commit
-    pin = PrepareShorebirdPatchTest.pin
+    def test_unsafe_paths_are_rejected(self):
+        for path in ["/tmp/file.dart", "lib/../file.dart", "lib/.git/config", "lib\\file.dart", "C:/file.dart", "lib//file.dart", "lib/file\n.dart"]:
+            with self.subTest(path=path), self.assertRaisesRegex(ValueError, "Unsafe repository path"):
+                MODULE.classification(path)
 
-    def setUp(self):
-        PrepareShorebirdPatchTest.setUp(self)
-        self.pin("NAV_BASELINE_SHA", self.reviewed)
-        for path in MODULE.NAV_RUNTIME_PATHS:
-            self.write(path, b"void reviewedNavigation() {}\n")
-        for path in MODULE.NAV_TEST_PATHS:
-            self.write(path, b"void main() {}\n")
-        self.pin("NAV_REVIEWED_SOURCE_SHA", self.commit())
+    def test_generated_inputs_are_optional_before_preparation_but_validated_when_present(self):
+        entries, receipt = self.materialize()
+        manifest = {"build_inputs": {"android/app/generated.json": hashlib.sha256(b"prepared").hexdigest()}}
+        MODULE.verify_worktree(self.output, entries, receipt, manifest)
+        target = self.output / "android/app/generated.json"
+        target.write_bytes(b"prepared")
+        MODULE.verify_worktree(self.output, entries, receipt, manifest)
+        target.write_bytes(b"other")
+        with self.assertRaisesRegex(ValueError, "fingerprint mismatch"):
+            MODULE.verify_worktree(self.output, entries, receipt, manifest)
 
-    def project(self):
-        source = self.git("rev-parse", "HEAD")
-        return MODULE.projection(self.root, source, source, MODULE.NAV_RELEASE_VERSION)
-
-    def test_navigation_keeps_baseline_native_dependencies_and_assets_without_overlays(self):
-        overrides, receipt = self.project()
-        self.assertEqual(overrides, {})
-        self.assertEqual(receipt["baseline_sha"], self.reviewed)
-        self.assertEqual(receipt["release_version"], "5.2.1+1005801")
-        MODULE.verify_worktree(self.root, overrides)
-        for path in (MODULE.MANIFEST, "pubspec.yaml", "pubspec.lock", "assets/font.ttf"):
-            self.assertEqual(MODULE.blob(self.root, self.reviewed, path), (self.root / path).read_bytes())
-
-    def test_even_reviewed_native_assets_and_dependency_changes_are_rejected(self):
-        reviewed = self.git("rev-parse", "HEAD")
-        for path in (MODULE.MANIFEST, "pubspec.yaml", "pubspec.lock", "assets/new.ttf", "lib/unreviewed.dart"):
-            with self.subTest(path=path):
-                self.git("reset", "--hard", reviewed)
-                self.write(path, b"unapproved change\n")
-                self.pin("NAV_REVIEWED_SOURCE_SHA", self.commit())
-                with self.assertRaisesRegex(ValueError, "Only the reviewed navigation"):
-                    self.project()
-
-    def test_ios_uses_the_same_unchanged_native_projection(self):
-        source = self.git("rev-parse", "HEAD")
-        overrides, receipt = MODULE.projection(self.root, source, source, MODULE.NAV_IOS_RELEASE_VERSION)
-        self.assertEqual(overrides, {})
-        self.assertEqual(receipt["release_version"], "5.2.1+2439.14.43")
-        self.assertEqual(receipt["projection_sha256"], self.project()[1]["projection_sha256"])
-        self.assertFalse((self.root / "android/app/google-services.json").exists())
-        self.write("ios/Runner/Info.plist", b"changed native configuration")
-        source = self.commit()
-        self.pin("NAV_REVIEWED_SOURCE_SHA", source)
-        with self.assertRaisesRegex(ValueError, "Only the reviewed navigation"):
-            MODULE.projection(self.root, source, source, MODULE.NAV_IOS_RELEASE_VERSION)
-
-    def test_runtime_tail_cannot_change_even_approved_files_after_review(self):
-        self.write(sorted(MODULE.NAV_RUNTIME_PATHS)[0], b"void unreviewedTail() {}\n")
-        self.commit()
-        with self.assertRaisesRegex(ValueError, "explicitly reviewed snapshot"):
-            self.project()
-
-    def test_workflow_tail_has_distinct_receipt_and_runtime_drift_still_fails(self):
-        _, original = self.project()
-        self.write(".github/workflows/shorebird-patch.yml", b"name: Patch\n")
-        self.commit()
-        overrides, updated = self.project()
-        self.assertNotEqual(original["projection_sha256"], updated["projection_sha256"])
-        self.write(sorted(MODULE.NAV_RUNTIME_PATHS)[0], b"void drift() {}\n")
-        with self.assertRaisesRegex(ValueError, "Unexpected tracked changes"):
-            MODULE.verify_worktree(self.root, overrides)
-
-
-class ReadStateProjectionTest(unittest.TestCase):
-    git = PrepareShorebirdPatchTest.git
-    write = PrepareShorebirdPatchTest.write
-    commit = PrepareShorebirdPatchTest.commit
-    pin = PrepareShorebirdPatchTest.pin
-
-    def setUp(self):
-        NavigationProjectionTest.setUp(self)
-        baseline = self.git("rev-parse", "HEAD")
-        self.pin("READ_STATE_BASELINES", {version: baseline for version in MODULE.READ_STATE_BASELINES})
-        for path in MODULE.READ_STATE_RUNTIME_PATHS | MODULE.READ_STATE_SUPPORT_PATHS:
-            self.write(path, b"reviewed read state\n")
-        self.pin("READ_STATE_REVIEWED_SHA", self.commit())
-
-    def project(self):
-        source = self.git("rev-parse", "HEAD")
-        return MODULE.projection(self.root, source, source, "5.2.1+1006201")
-
-    def test_all_current_releases_keep_native_files_identical(self):
-        source = self.git("rev-parse", "HEAD")
-        for version, baseline in MODULE.READ_STATE_BASELINES.items():
-            with self.subTest(version=version):
-                overrides, receipt = MODULE.projection(self.root, source, source, version)
-                self.assertEqual(overrides, {})
-                self.assertEqual(receipt["baseline_sha"], baseline)
-                self.assertEqual(receipt["reviewed_source_sha"], MODULE.READ_STATE_REVIEWED_SHA)
-                self.assertEqual(receipt["release_version"], version)
-                MODULE.verify_worktree(self.root, overrides)
-                for path in (MODULE.MANIFEST, "pubspec.yaml", "pubspec.lock", "assets/font.ttf"):
-                    self.assertEqual(MODULE.blob(self.root, baseline, path), (self.root / path).read_bytes())
-
-    def test_read_state_snapshot_rejects_even_reviewed_native_or_dependency_changes(self):
-        for path in (MODULE.MANIFEST, "pubspec.yaml", "pubspec.lock", "assets/font.ttf", "packages/promo_repository/android/build.gradle"):
-            with self.subTest(path=path):
-                previous = self.git("rev-parse", "HEAD")
-                self.write(path, b"unreviewed native change\n")
-                self.pin("READ_STATE_REVIEWED_SHA", self.commit())
-                with self.assertRaisesRegex(ValueError, "Only the reviewed read-state"):
-                    self.project()
-                self.git("reset", "--hard", previous)
-
-    def test_migration_cannot_change_after_review(self):
-        path = next(path for path in MODULE.READ_STATE_SUPPORT_PATHS if path.startswith("supabase/migrations/"))
-        self.write(path, b"changed migration\n")
-        self.commit()
-        with self.assertRaisesRegex(ValueError, "explicitly reviewed read-state"):
-            self.project()
-
-    def test_policy_only_tail_is_supported(self):
-        self.write("tool/prepare_shorebird_patch.py", b"policy support\n")
-        self.commit()
-        self.project()
+    def test_cli_receipt_and_verification_contract(self):
+        receipt = self.directory / "receipt.json"
+        github_output = self.directory / "github-output"
+        arguments = [sys.executable, str(ROOT / "tool/prepare_shorebird_patch.py"),
+                     "--repo", str(self.root), "--baseline", self.baseline, "--source", self.source,
+                     "--output", str(self.output), "--receipt", str(receipt)]
+        result = subprocess.run([*arguments, "--github-output", str(github_output)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertEqual(json.loads(receipt.read_text()), data)
+        self.assertIn(f"projection_sha256={data['projection_sha256']}", github_output.read_text())
+        verified = subprocess.run([*arguments, "--verify-worktree", "--expected-projection", data["projection_sha256"]], capture_output=True, text=True)
+        self.assertEqual(verified.returncode, 0, verified.stderr)
+        failed = subprocess.run([*arguments, "--verify-worktree", "--expected-projection", "0" * 64], capture_output=True, text=True)
+        self.assertNotEqual(failed.returncode, 0)
+        data["source_sha"] = "0" * 40
+        receipt.write_text(json.dumps(data))
+        failed = subprocess.run([*arguments, "--verify-worktree"], capture_output=True, text=True)
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertIn("receipt identity mismatch", failed.stderr)
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ import re
 import tempfile
 import textwrap
 import unittest
+import yaml
 from unittest.mock import patch
 
 
@@ -37,8 +38,10 @@ class ConfigureFirebaseTest(unittest.TestCase):
     def test_ios_workflows_require_production_push_on_app_profile_only(self):
         for workflow in ('shorebird-release.yml', 'shorebird-patch.yml'):
             content = (ROOT / '.github/workflows' / workflow).read_text()
-            blocks = re.findall(r"          python3 - <<'PY'\n(.*?)          PY", content, re.S)
-            block = next(textwrap.dedent(item) for item in blocks if 'App provisioning profile requires production push notifications' in item)
+            workflow_data = yaml.safe_load(content)
+            scripts = [step.get('run', '') for job in workflow_data['jobs'].values() for step in job.get('steps', [])]
+            blocks = [block for script in scripts for block in re.findall(r"python3 - <<'PY'\n(.*?)\nPY", script, re.S)]
+            block = next(item for item in blocks if 'App provisioning profile requires production push notifications' in item)
             for push in (None, 'development', 'production'):
                 with self.subTest(workflow=workflow, push=push), tempfile.TemporaryDirectory() as directory:
                     environment = {'RUNNER_TEMP': directory, 'APPLE_TEAM_ID': 'FIXTURE',
@@ -122,9 +125,9 @@ class ConfigureFirebaseTest(unittest.TestCase):
         ios = (ROOT / '.github/workflows/shorebird-release.yml').read_text()
         self.assertLess(ios.index('--platform ios'), ios.index('shorebird release ios'))
         patch = (ROOT / '.github/workflows/shorebird-patch.yml').read_text()
-        self.assertIn('$WORKFLOW_SHA:tool/configure_firebase.py', patch)
-        self.assertIn('if [[ "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1005801 || "$PLATFORM:$RELEASE_VERSION" = android:5.2.1+1006201 ]]; then', patch)
-        self.assertIn('$BASELINE_SHA:tool/configure_firebase.py', patch)
+        self.assertIn('python3 tool/configure_firebase.py', patch)
+        self.assertIn('release_manifest.py" verify-inputs', patch)
+        self.assertNotIn('$WORKFLOW_SHA:tool/configure_firebase.py', patch)
         self.assertEqual(patch.count('--android-output android/app/google-services.json'), 1)
 
 

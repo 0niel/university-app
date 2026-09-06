@@ -1,242 +1,255 @@
-import ast
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import yaml
 
-
 ROOT = Path(__file__).resolve().parents[2]
-PATCH = yaml.safe_load((ROOT / ".github/workflows/shorebird-patch.yml").read_text(encoding="utf-8"))
-PROMOTE = yaml.safe_load((ROOT / ".github/workflows/shorebird-promote.yml").read_text(encoding="utf-8"))
+PATCH = yaml.safe_load((ROOT / '.github/workflows/shorebird-patch.yml').read_text(encoding='utf-8'))
+PROMOTE = yaml.safe_load((ROOT / '.github/workflows/shorebird-promote.yml').read_text(encoding='utf-8'))
 
 
 def step(workflow, job, name):
-    return next(item for item in workflow["jobs"][job]["steps"] if item["name"] == name)
+    return next(item for item in workflow['jobs'][job]['steps'] if item['name'] == name)
 
 
-def approved_paths(name):
-    source = step(PATCH, "validate", "Verify hotfix boundary")["run"]
-    tree = ast.parse(source.split("python3 - <<'PY'\n", 1)[1].rsplit("\nPY", 1)[0])
-    return next(ast.literal_eval(node.value) for node in tree.body
-                if isinstance(node, ast.Assign) and any(
-                    isinstance(target, ast.Name) and target.id == name for target in node.targets))
+def python_body(item):
+    return item['run'].split("python3 - <<'PY'\n", 1)[1].split('\nPY', 1)[0]
 
 
 class ShorebirdPatchWorkflowTest(unittest.TestCase):
-    def bash(self, script, **values):
-        bash = os.environ.get("TEST_BASH") or shutil.which("bash")
-        self.assertIsNotNone(bash, "Bash is required to test patch workflows")
-        with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / "output"
-            environment = {
-                **os.environ,
-                "GITHUB_ENV": output.as_posix(),
-                "GITHUB_OUTPUT": output.as_posix(),
-                "WORKFLOW_REF": "refs/heads/master",
-                "SOURCE_SHA": "a" * 40,
-                "BASELINE_SHA": "b" * 40,
-                "STAGING_RUN_ID": "123",
-                "PATCH_NUMBER": "2",
-                **values,
-            }
-            result = subprocess.run(
-                [bash, "--noprofile", "--norc", "-e", "-o", "pipefail", "-c", script],
-                env=environment, capture_output=True, text=True, timeout=30,
-            )
-            return result, output.read_text() if output.exists() else ""
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        self.environment = {
+            'RUNNER_TEMP': str(self.root), 'SOURCE_SHA': 'a' * 40,
+            'BASELINE_SHA': 'b' * 40, 'WORKFLOW_SHA': 'c' * 40,
+            'MANIFEST_SHA256': 'd' * 64, 'APP_ID': 'future-app',
+            'PLATFORM': 'android', 'RELEASE_VERSION': '8.7.6+987654',
+            'STAGING_RUN_ID': '123', 'PATCH_NUMBER': '2',
+            'DEFAULT_BRANCH': 'master', 'GITHUB_REPOSITORY': 'owner/app',
+            'WORKFLOW_REF': 'refs/heads/master', 'TARGET_TRACK': 'staging',
+            'GITHUB_OUTPUT': str(self.root / 'github-output'),
+            'PATCH_WORKSPACE': str(self.root / 'projection'),
+        }
 
-    def test_latest_android_release_can_be_promoted(self):
-        result, output = self.bash(
-            step(PROMOTE, "promote", "Validate requested promotion")["run"],
-            PLATFORM="android", RELEASE_VERSION="5.2.0+1004201",
+    def execute(self, item, values=None, check_output=None):
+        environment = {**self.environment, **(values or {})}
+        with patch.dict(os.environ, environment), patch('subprocess.check_output', return_value=check_output or 'e' * 40):
+            exec(compile(python_body(item), '<workflow>', 'exec'), {})
+
+    def bash(self, item, **values):
+        executable = os.environ.get('TEST_BASH') or shutil.which('bash')
+        self.assertIsNotNone(executable, 'Bash is required to verify workflow validation')
+        return subprocess.run(
+            [executable, '--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', item['run']],
+            env={**os.environ, **self.environment, **values}, capture_output=True, text=True, timeout=20,
         )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(output, "APP_ID=c55a7a80-2fcb-4565-833e-fb442dbe4e34\n")
 
-    def test_verified_android_runtime_release_is_available_for_patch_and_promotion(self):
-        result, output = self.bash(
-            step(PATCH, "validate", "Validate requested target")["run"],
-            PLATFORM="android", RELEASE_VERSION="5.2.1+1005301", TARGET_TRACK="staging",
-        )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("baseline_sha=892c735ac0b46f3b8f6621b1d67d12342c45cc84", output)
-        result, output = self.bash(
-            step(PROMOTE, "promote", "Validate requested promotion")["run"],
-            PLATFORM="android", RELEASE_VERSION="5.2.1+1005301",
-        )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("APP_ID=c55a7a80-2fcb-4565-833e-fb442dbe4e34", output)
+    def write(self, path, value):
+        target = self.root / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(value), encoding='utf-8')
 
-    def test_projection_uses_trusted_workflow_helper_in_both_jobs(self):
-        for job in ("validate", "patch"):
-            preparation = step(PATCH, job, "Prepare verified runtime projection")
-            self.assertIn('git show "$WORKFLOW_SHA:tool/prepare_shorebird_patch.py"', preparation["run"])
-            self.assertIn("--apply", preparation["run"])
-            self.assertIn('5.2.1+1005801', preparation['if'])
-            self.assertIn('5.2.1+2439.14.43', preparation['if'])
-            self.assertIn('--release-version "$RELEASE_VERSION"', preparation['run'])
-            self.assertIn("--verify-worktree", step(PATCH, job, "Verify locked workspace")["run"])
-        self.assertIn("--expected-projection", step(PATCH, "patch", "Prepare verified runtime projection")["run"])
-        publish = step(PATCH, "patch", "Publish staging patch")["run"]
-        self.assertNotIn("--allow-native-diffs", publish)
-        self.assertNotIn("--allow-asset-diffs", publish)
-        self.assertIn("projection_sha256", step(PROMOTE, "promote", "Verify receipt")["run"])
+    def ci(self, **changes):
+        run = {
+            'head_sha': self.environment['SOURCE_SHA'], 'head_branch': 'master',
+            'event': 'push', 'path': '.github/workflows/main.yml',
+            'status': 'completed', 'conclusion': 'success',
+            'head_repository': {'full_name': 'owner/app'}, **changes,
+        }
+        self.write('source-ci.json', {'workflow_runs': [run]})
 
-    def test_unsupported_platform_release_combinations_fail(self):
-        for platform, version in (("ios", "5.2.0+1004201"), ("ios", "5.2.1+1005801"), ("android", "5.2.1+2439.14.43"), ("android", "99.0.0+1")):
-            with self.subTest(platform=platform, version=version):
-                result, output = self.bash(
-                    step(PROMOTE, "promote", "Validate requested promotion")["run"],
-                    PLATFORM=platform, RELEASE_VERSION=version,
-                )
-                self.assertNotEqual(result.returncode, 0)
-                self.assertIn("Unsupported platform and release combination", result.stderr)
-                self.assertEqual(output, "")
+    def receipt(self, **changes):
+        receipt = {
+            'source_sha': 'a' * 40, 'baseline_sha': 'b' * 40, 'workflow_sha': 'c' * 40,
+            'manifest_sha256': 'd' * 64, 'source_tree_sha': 'e' * 40,
+            'projected_tree_sha': 'f' * 40, 'projection_sha256': '1' * 64,
+            'app_id': 'future-app', 'platform': 'android', 'release_version': '8.7.6+987654',
+            'patch_number': 2, 'patch_id': 44, 'staging_run_id': '123', 'staging_run_attempt': 3,
+            'track': 'staging', 'artifacts': [{'arch': 'aarch64', 'platform': 'android', 'hash': 'digest', 'size': 10, 'patch_id': 44}],
+            **changes,
+        }
+        self.write('promotion-receipt/shorebird-patch-receipt.json', receipt)
+        self.write('staging-run.json', {'head_sha': 'c' * 40, 'run_attempt': 3})
+        return receipt
 
-    def test_analysis_covers_the_verified_dart_files_for_each_boundary(self):
-        script = step(PATCH, "validate", "Analyze hotfix")["run"]
-        mocks = 'git() { printf "%s\\n" "$TEST_SOURCES"; }; flutter() { printf "%s\\n" "$@"; };\n'
-        for boundary in ("current_allowed", "legacy_allowed"):
-            paths = sorted(path for path in approved_paths(boundary) if path.endswith(".dart"))
-            result, _ = self.bash(mocks + script, TEST_SOURCES="\n".join(paths))
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertEqual(result.stdout.splitlines(), ["analyze", "--no-pub", *paths])
+    def test_arbitrary_registered_versions_need_no_workflow_edit(self):
+        for workflow, job, name in ((PATCH, 'validate', 'Validate requested target'), (PROMOTE, 'promote', 'Validate requested promotion')):
+            self.assertEqual(workflow.get('on', workflow.get(True))['workflow_dispatch']['inputs']['release_version']['type'], 'string')
+            self.assertNotIn('options', workflow.get('on', workflow.get(True))['workflow_dispatch']['inputs']['release_version'])
+            for platform in ('android', 'ios'):
+                result = self.bash(step(workflow, job, name), PLATFORM=platform)
+                self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_failed_diff_cannot_run_an_unscoped_analysis(self):
-        script = step(PATCH, "validate", "Analyze hotfix")["run"]
-        result, _ = self.bash('git() { return 42; }; flutter() { echo unexpected; };\n' + script)
-        self.assertEqual(result.returncode, 42)
-        self.assertEqual(result.stdout, "")
+    def test_untrusted_dispatch_inputs_are_rejected(self):
+        for workflow, job, name in ((PATCH, 'validate', 'Validate requested target'), (PROMOTE, 'promote', 'Validate requested promotion')):
+            for values in ({'SOURCE_SHA': 'master'}, {'PLATFORM': 'web'}, {'WORKFLOW_REF': 'refs/heads/feature'}, {'RELEASE_VERSION': '../bad'}, {'RELEASE_VERSION': 'x; echo bad'}):
+                with self.subTest(values=values, job=job):
+                    self.assertNotEqual(self.bash(step(workflow, job, name), **values).returncode, 0)
+        self.assertNotEqual(self.bash(step(PATCH, 'validate', 'Validate requested target'), TARGET_TRACK='stable').returncode, 0)
+        for values in ({'STAGING_RUN_ID': '0'}, {'PATCH_NUMBER': '-1'}):
+            self.assertNotEqual(self.bash(step(PROMOTE, 'promote', 'Validate requested promotion'), **values).returncode, 0)
 
-    def test_latest_tests_cover_schedule_and_discussions_and_keep_legacy_separate(self):
-        current = step(PATCH, "validate", "Test schedule and discussions")
-        self.assertEqual(current["if"], "steps.inputs.outputs.release_version == '5.2.0+1004201'")
-        result, _ = self.bash('flutter() { printf "%s\\n" "$@"; };\n' + current["run"])
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.splitlines(), ["test", "--no-pub", "test/schedule", "test/top_discussions"])
-        for name in ("Test user initialization", "Test academic profile initialization"):
-            legacy = step(PATCH, "validate", name)
-            self.assertEqual(legacy["if"], "steps.inputs.outputs.release_version != '5.2.0+1004201' && steps.inputs.outputs.release_version != '5.2.1+1005301' && steps.inputs.outputs.release_version != '5.2.1+1005801' && steps.inputs.outputs.release_version != '5.2.1+2439.14.43' && steps.inputs.outputs.release_version != '5.2.1+1006201' && steps.inputs.outputs.release_version != '5.2.1+2439.15.54'")
-            self.assertIn("test/src/", legacy["run"])
+    def test_ci_requires_exact_successful_default_branch_source(self):
+        for workflow, job in ((PATCH, 'validate'), (PROMOTE, 'promote')):
+            item = step(workflow, job, 'Verify approved source')
+            self.ci()
+            self.execute(item)
+            for change in ({'head_sha': '0' * 40}, {'head_branch': 'feature'}, {'event': 'pull_request'}, {'path': '.github/workflows/other.yml'}, {'status': 'in_progress'}, {'conclusion': 'failure'}, {'head_repository': {'full_name': 'fork/app'}}):
+                self.ci(**change)
+                with self.subTest(change=change), self.assertRaises(SystemExit):
+                    self.execute(item)
+            self.assertLess(item['run'].index('git merge-base --is-ancestor'), item['run'].index('gh api'))
 
-    def test_new_android_baseline_is_available_for_patch_and_promotion(self):
-        for workflow, job, name in (
-            (PATCH, 'validate', 'Validate requested target'),
-            (PROMOTE, 'promote', 'Validate requested promotion'),
-        ):
-            result, output = self.bash(step(workflow, job, name)['run'],
-                PLATFORM='android', RELEASE_VERSION='5.2.1+1005801', TARGET_TRACK='staging')
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertIn('c55a7a80-2fcb-4565-833e-fb442dbe4e34', output)
-            if workflow is PATCH:
-                self.assertIn('baseline_sha=506602c5d8da2cac5a6180d26b753f415d381819', output)
+    def test_missing_ci_is_not_accepted(self):
+        self.write('source-ci.json', {'workflow_runs': []})
+        with self.assertRaises(SystemExit):
+            self.execute(step(PATCH, 'validate', 'Verify approved source'))
 
-    def test_new_ios_baseline_is_available_for_patch_and_promotion(self):
-        for workflow, job, name in (
-            (PATCH, 'validate', 'Validate requested target'),
-            (PROMOTE, 'promote', 'Validate requested promotion'),
-        ):
-            result, output = self.bash(step(workflow, job, name)['run'],
-                PLATFORM='ios', RELEASE_VERSION='5.2.1+2439.14.43', TARGET_TRACK='staging')
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertIn('21c47e68-a64f-49c1-af6e-4a406dfe266f', output)
-            if workflow is PATCH:
-                self.assertIn('baseline_sha=506602c5d8da2cac5a6180d26b753f415d381819', output)
+    def test_source_gate_precedes_release_resolution(self):
+        for workflow, job in ((PATCH, 'validate'), (PROMOTE, 'promote')):
+            names = [s['name'] for s in workflow['jobs'][job]['steps']]
+            self.assertLess(names.index('Verify approved source'), names.index('Resolve registered release'))
+            checkout = step(workflow, job, 'Check out trusted release tools')
+            self.assertEqual(checkout['with']['ref'], '${{ github.workflow_sha }}')
+            self.assertFalse(checkout['with']['persist-credentials'])
 
-    def test_only_new_android_base_reconstructs_google_services_from_pinned_generator(self):
-        script = step(PATCH, 'patch', 'Configure release parameters')['run'].split("python3 - <<'PY'", 1)[0]
-        mocks = 'git() { printf "%s\\n" "$*" >> "$GITHUB_OUTPUT"; }; python3() { printf "%s\\n" "$*" >> "$GITHUB_OUTPUT"; }; dart() { :; };\n'
-        with tempfile.TemporaryDirectory() as temporary:
-            for platform, version in (('android', '5.2.1+1006201'), ('ios', '5.2.1+2439.15.54'), ('android', '5.2.1+1005801'), ('android', '5.2.1+1005301'), ('android', '5.2.0+1004201'), ('ios', '5.2.0+2435.13.10'), ('ios', '5.2.1+2439.14.43')):
-                with self.subTest(platform=platform, version=version):
-                    result, output = self.bash(mocks + script, PLATFORM=platform, RELEASE_VERSION=version,
-                        RUNNER_TEMP=Path(temporary).as_posix(), WORKFLOW_SHA='c' * 40,
-                        UNIVERSITY_CONFIG_JSON='{}', FIREBASE_CONFIG_JSON='{}')
-                    self.assertEqual(result.returncode, 0, result.stderr)
-                    new_base = version in ('5.2.1+1005801', '5.2.1+1006201')
-                    self.assertEqual('--android-output android/app/google-services.json' in output, new_base)
-                    self.assertEqual('--verify-native-firebase' in output, new_base)
-                    self.assertIn(('b' if new_base else 'c') * 40 + ':tool/configure_firebase.py', output)
+    def test_both_patch_jobs_use_registered_manifest_and_dynamic_sdk(self):
+        for job in ('validate', 'patch'):
+            self.assertEqual(PATCH['jobs'][job]['environment'], 'beta')
+            steps = PATCH['jobs'][job]['steps']
+            names = [s['name'] for s in steps]
+            self.assertIn('release_manifest.py resolve', step(PATCH, job, 'Resolve registered release')['run'])
+            self.assertIn('release_manifest.py verify-live', step(PATCH, job, 'Verify live registered release')['run'])
+            self.assertLess(names.index('Install pinned Shorebird'), names.index('Verify live registered release'))
+            self.assertEqual(step(PATCH, job, 'Set up Flutter')['with']['flutter-version'], '${{ steps.release.outputs.flutter_version }}')
+            self.assertIn('--enforce-lockfile', step(PATCH, job, 'Resolve locked workspace')['run'])
+            preparation = step(PATCH, job, 'Prepare verified runtime projection')['run']
+            self.assertIn('$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py', preparation)
+            self.assertIn('--repo "$GITHUB_WORKSPACE/source"', preparation)
+            self.assertIn('--manifest "$RUNNER_TEMP/release-manifest.json"', preparation)
+            self.assertEqual(step(PATCH, job, 'Check out requested source')['with']['path'], 'source')
+        self.assertIn('--expected-projection "$PROJECTION_SHA256"', step(PATCH, 'patch', 'Prepare verified runtime projection')['run'])
 
-    def test_new_release_promotion_rejects_wrong_projection_identity(self):
-        script = step(PROMOTE, 'promote', 'Verify receipt')['run'].split("python3 - <<'PY'\n", 1)[1].rsplit('\nPY', 1)[0]
-        projections = next(ast.literal_eval(node.value) for node in ast.parse(script).body
-            if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'projections' for target in node.targets))
-        baseline, reviewed = projections['5.2.1+1005801']
-        self.assertEqual(projections['5.2.1+2439.14.43'], (baseline, reviewed))
-        tool_tree = ast.parse((ROOT / 'tool/prepare_shorebird_patch.py').read_text())
-        tool_pins = {node.targets[0].id: ast.literal_eval(node.value) for node in tool_tree.body
-            if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name)
-            and node.targets[0].id in ('NAV_BASELINE_SHA', 'NAV_REVIEWED_SOURCE_SHA')}
-        self.assertEqual((baseline, reviewed), (tool_pins['NAV_BASELINE_SHA'], tool_pins['NAV_REVIEWED_SOURCE_SHA']))
-        receipt = dict(source_sha='a' * 40, app_id='app', platform='android', release_version='5.2.1+1005801',
-            patch_number=1, staging_run_id='123', track='staging', patch_id=1, artifacts=[{'hash': 'artifact'}],
-            baseline_sha=baseline, reviewed_source_sha=reviewed, projection_sha256='b' * 64)
-        with tempfile.TemporaryDirectory() as temporary:
-            directory = Path(temporary) / 'promotion-receipt'
-            directory.mkdir()
-            for mutation in ({}, {'baseline_sha': 'c' * 40}, {'reviewed_source_sha': 'c' * 40}, {'projection_sha256': 'invalid'}):
-                with self.subTest(mutation=mutation):
-                    (directory / 'shorebird-patch-receipt.json').write_text(json.dumps({**receipt, **mutation}))
-                    result = subprocess.run([sys.executable, '-c', script], env={**os.environ,
-                        'RUNNER_TEMP': temporary, 'SOURCE_SHA': 'a' * 40, 'APP_ID': 'app', 'PLATFORM': 'android',
-                        'RELEASE_VERSION': '5.2.1+1005801', 'PATCH_NUMBER': '1', 'STAGING_RUN_ID': '123'},
-                        capture_output=True, text=True, timeout=15)
-                    self.assertEqual(result.returncode == 0, not mutation, result.stderr)
+    def test_build_rejects_registry_replacement_after_validation(self):
+        self.write('release-manifest.json', {'changed': True})
+        with self.assertRaises(SystemExit):
+            self.execute(step(PATCH, 'patch', 'Resolve registered release'))
+
+    def test_restore_registered_dependency_lock_checks_digest(self):
+        import hashlib
+        data = b'PODS: []\n'
+        self.write('release-manifest.json', {'build_inputs': {'ios/Podfile.lock': hashlib.sha256(data).hexdigest()}})
+        (self.root / 'Podfile.lock').write_bytes(data)
+        (self.root / 'projection/ios').mkdir(parents=True)
+        item = step(PATCH, 'patch', 'Restore registered dependency lock')
+        self.execute(item)
+        self.assertEqual((self.root / 'projection/ios/Podfile.lock').read_bytes(), data)
+        (self.root / 'Podfile.lock').write_bytes(b'changed')
+        with self.assertRaises(SystemExit):
+            self.execute(item)
+
+    def test_legacy_lock_absence_is_explicitly_supported(self):
+        self.write('release-manifest.json', {'build_inputs': {}})
+        self.execute(step(PATCH, 'patch', 'Restore registered dependency lock'))
+        self.assertFalse((self.root / 'projection/ios/Podfile.lock').exists())
+
+    def test_native_generators_come_from_projected_baseline(self):
+        configure = step(PATCH, 'patch', 'Configure release parameters')
+        self.assertEqual(configure['working-directory'], '${{ env.PATCH_WORKSPACE }}')
+        self.assertIn('python3 tool/configure_firebase.py', configure['run'])
+        self.assertIn('dart run tool/configure_university.dart', configure['run'])
+        self.assertIn('release_manifest.py" verify-inputs', configure['run'])
+        self.assertNotIn('git show', configure['run'])
+        nfc = step(PATCH, 'patch', 'Check out private NFC module')
+        self.assertEqual(nfc['with']['ref'], '${{ steps.release.outputs.private_native_sha }}')
+
+    def test_native_and_asset_guards_are_never_bypassed(self):
+        publish = step(PATCH, 'patch', 'Publish staging patch')['run']
+        self.assertNotIn('--allow-native', publish)
+        self.assertNotIn('--allow-asset', publish)
+        self.assertIn('--track staging', publish)
+        guard = step(PATCH, 'patch', 'Enforce strict iOS native diff rejection')['run']
+        self.assertIn('confirmNativeChanges: true,', guard)
+        self.assertIn('original.count(before) != 1', guard)
+        self.assertIn('stat != f"1\\t1\\t{relative}"', guard)
+        self.assertIn('fetch --depth 1 origin "$shorebird_revision"', step(PATCH, 'patch', 'Install pinned Shorebird')['run'])
+
+    def test_only_existing_projected_runtime_and_tests_are_validated(self):
+        self.write('shorebird-projection.json', {'runtime_paths': ['lib/deleted.dart'], 'test_paths': ['test/deleted_test.dart'], 'excluded_paths': ['tool/excluded.dart']})
+        for name in ('Analyze hotfix', 'Test changed runtime'):
+            with patch('subprocess.run') as run:
+                self.execute(step(PATCH, 'validate', name))
+                run.assert_not_called()
+
+    def test_translation_only_patch_uses_successful_source_ci(self):
+        self.write('shorebird-projection.json', {'runtime_paths': ['lib/l10n/app_ru.arb'], 'test_paths': []})
+        for name in ('Analyze hotfix', 'Test changed runtime'):
+            with patch('subprocess.run') as run:
+                self.execute(step(PATCH, 'validate', name))
+                run.assert_not_called()
+
+    def test_receipt_accepts_future_version_with_verified_provenance(self):
+        self.receipt()
+        self.execute(step(PROMOTE, 'promote', 'Verify receipt'))
+
+    def test_receipt_rejects_wrong_provenance(self):
+        for change in ({'source_sha': '0' * 40}, {'baseline_sha': '0' * 40}, {'manifest_sha256': '0' * 64}, {'source_tree_sha': '0' * 40}, {'workflow_sha': '0' * 40}, {'staging_run_attempt': 2}, {'projection_sha256': ''}, {'platform': 'ios'}, {'patch_number': 3}, {'track': 'stable'}, {'artifacts': []}):
+            self.receipt(**change)
+            with self.subTest(change=change), self.assertRaises(SystemExit):
+                self.execute(step(PROMOTE, 'promote', 'Verify receipt'))
+
+    def test_receipt_rejects_extra_files(self):
+        self.receipt()
+        self.write('promotion-receipt/unexpected.json', {})
+        with self.assertRaises(SystemExit):
+            self.execute(step(PROMOTE, 'promote', 'Verify receipt'))
+
+    def test_staging_run_must_have_trusted_workflow_identity(self):
+        run = {'path': '.github/workflows/shorebird-patch.yml', 'head_branch': 'master', 'event': 'workflow_dispatch', 'conclusion': 'success', 'status': 'completed', 'id': 123, 'repository': {'full_name': 'owner/app'}}
+        item = step(PROMOTE, 'promote', 'Verify staging workflow')
+        self.write('staging-run.json', run)
+        self.execute(item)
+        for change in ({'path': '.github/workflows/other.yml'}, {'event': 'pull_request'}, {'conclusion': 'failure'}, {'id': 124}, {'repository': {'full_name': 'fork/app'}}):
+            self.write('staging-run.json', {**run, **change})
+            with self.assertRaises(SystemExit):
+                self.execute(item)
+
+    def test_live_artifacts_must_match_receipt(self):
+        receipt = self.receipt()
+        live = {'id': 44, 'number': 2, 'channel': 'staging', 'is_rolled_back': False, 'artifacts': receipt['artifacts']}
+        self.write('live-staging.json', {'status': 'success', 'data': {'patches': [live]}})
+        item = step(PROMOTE, 'promote', 'Verify live staging patch')
+        self.execute(item)
+        for change in ({'is_rolled_back': True}, {'id': 45}, {'channel': 'beta'}, {'artifacts': []}):
+            self.write('live-staging.json', {'status': 'success', 'data': {'patches': [{**live, **change}]}})
+            with self.assertRaises(SystemExit):
+                self.execute(item)
+
+    def test_stable_verification_checks_unchanged_artifacts(self):
+        receipt = self.receipt()
+        live = {'id': 44, 'number': 2, 'channel': 'stable', 'is_rolled_back': False, 'artifacts': receipt['artifacts']}
+        self.write('live-stable.json', {'status': 'success', 'data': {'patches': [live]}})
+        item = step(PROMOTE, 'promote', 'Promote verified patch')
+        self.execute(item, {'CURRENT_TRACK': 'stable'})
+        live['artifacts'] = []
+        self.write('live-stable.json', {'status': 'success', 'data': {'patches': [live]}})
+        with self.assertRaises(SystemExit):
+            self.execute(item, {'CURRENT_TRACK': 'stable'})
+
+    def test_cleanup_does_not_depend_on_successful_projection_creation(self):
+        cleanup = step(PATCH, 'patch', 'Remove signing material')
+        self.assertNotIn('working-directory', cleanup)
+        self.assertEqual(cleanup['if'], 'always()')
+        self.assertIn('$PATCH_WORKSPACE/android/key.properties', cleanup['run'])
 
 
-    def test_latest_read_state_releases_are_available_with_exact_baselines(self):
-        targets = (
-            ("android", "5.2.1+1006201", "781b2ff4a14c9888331eb61b156a2cb0c7e4515b"),
-            ("ios", "5.2.1+2439.15.54", "ee51aeee41bf3c48925c6a524e9e9e90c40b0dd1"),
-        )
-        for platform, version, baseline in targets:
-            with self.subTest(version=version):
-                for workflow, job, name in ((PATCH, "validate", "Validate requested target"), (PROMOTE, "promote", "Validate requested promotion")):
-                    result, output = self.bash(step(workflow, job, name)["run"], PLATFORM=platform, RELEASE_VERSION=version, TARGET_TRACK="staging")
-                    self.assertEqual(result.returncode, 0, result.stderr)
-                    if workflow is PATCH:
-                        self.assertIn("baseline_sha=" + baseline, output)
-                for job in ("validate", "patch"):
-                    self.assertIn(version, step(PATCH, job, "Prepare verified runtime projection")["if"])
-                    self.assertIn(version, step(PATCH, job, "Verify locked workspace")["run"])
-                self.assertIn(version, step(PATCH, "validate", "Test reviewed runtime changes")["if"])
-                result, _ = self.bash(step(PATCH, "validate", "Validate requested target")["run"], PLATFORM="ios" if platform == "android" else "android", RELEASE_VERSION=version, TARGET_TRACK="staging")
-                self.assertNotEqual(result.returncode, 0)
-
-    def test_read_state_promotion_checks_pinned_runtime_and_baseline(self):
-        script = step(PROMOTE, 'promote', 'Verify receipt')['run'].split("python3 - <<'PY'\n", 1)[1].rsplit('\nPY', 1)[0]
-        assignments = {node.targets[0].id: ast.literal_eval(node.value) for node in ast.parse(script).body
-            if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name)
-            and node.targets[0].id in ('read_state_reviewed', 'read_state_baselines')}
-        tool_tree = ast.parse((ROOT / 'tool/prepare_shorebird_patch.py').read_text())
-        tool_pins = {node.targets[0].id: ast.literal_eval(node.value) for node in tool_tree.body
-            if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name)
-            and node.targets[0].id in ('READ_STATE_BASELINES', 'READ_STATE_REVIEWED_SHA')}
-        self.assertEqual(assignments['read_state_reviewed'], tool_pins['READ_STATE_REVIEWED_SHA'])
-        self.assertEqual(assignments['read_state_baselines'], tool_pins['READ_STATE_BASELINES'])
-        with tempfile.TemporaryDirectory() as temporary:
-            directory = Path(temporary) / 'promotion-receipt'
-            directory.mkdir()
-            for version, baseline in tool_pins['READ_STATE_BASELINES'].items():
-                receipt = dict(source_sha='a' * 40, app_id='app', platform='android', release_version=version,
-                    patch_number=1, staging_run_id='123', track='staging', patch_id=1, artifacts=[{'hash': 'artifact'}],
-                    baseline_sha=baseline, reviewed_source_sha=tool_pins['READ_STATE_REVIEWED_SHA'], projection_sha256='b' * 64)
-                for mutation in ({}, {'baseline_sha': 'c' * 40}, {'reviewed_source_sha': 'c' * 40}, {'projection_sha256': 'invalid'}):
-                    with self.subTest(version=version, mutation=mutation):
-                        (directory / 'shorebird-patch-receipt.json').write_text(json.dumps({**receipt, **mutation}))
-                        result = subprocess.run([sys.executable, '-c', script], env={**os.environ,
-                            'RUNNER_TEMP': temporary, 'SOURCE_SHA': 'a' * 40, 'APP_ID': 'app', 'PLATFORM': 'android',
-                            'RELEASE_VERSION': version, 'PATCH_NUMBER': '1', 'STAGING_RUN_ID': '123'},
-                            capture_output=True, text=True, timeout=15)
-                        self.assertEqual(result.returncode == 0, not mutation, result.stderr)
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
