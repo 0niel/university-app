@@ -19,7 +19,9 @@ class ICalParser {
     try {
       ICalCustomFieldsRegistry.register();
 
-      _calendar = ICalendar.fromString(_data);
+      _calendar = ICalendar.fromString(
+        _data.replaceAll(RegExp(r'\r?\n[ \t]'), ''),
+      );
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(
         InvalidICalendarDataException(error: error),

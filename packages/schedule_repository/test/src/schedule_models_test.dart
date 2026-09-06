@@ -26,6 +26,19 @@ void main() {
   });
 
   group('ScheduleChange', () {
+    test(
+      'repairs historic teacher names without changing classroom labels',
+      () {
+        final slot = ScheduleChangeSlot.fromJson({
+          'teachers': ['Овчинникова МарияАндреевна', 'Иванов И.И.'],
+          'rooms': ['ЛабА', 'А-325'],
+        });
+
+        expect(slot.teachers, ['Овчинникова Мария Андреевна', 'Иванов И.И.']);
+        expect(slot.rooms, ['ЛабА', 'А-325']);
+      },
+    );
+
     test('accepts snake-case rows and trims PostgreSQL time values', () {
       final change = ScheduleChange.fromJson({
         'id': 'change-1',

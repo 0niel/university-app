@@ -6506,6 +6506,8 @@
   "@passLockReason": {},
   "passUnlock": "Unlock",
   "@passUnlock": {},
+  "settingsStartupScreen": "Startup screen",
+  "settingsStartupScreenSubtitle": "Choose the screen to open when the app starts. Notifications and links still open their content.",
   "settingsHomeContentTitle": "What's on home",
   "@settingsHomeContentTitle": {},
   "settingsHomeContentSubtitle": "Show or hide home sections.",

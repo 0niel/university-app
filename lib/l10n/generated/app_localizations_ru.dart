@@ -7383,6 +7383,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get passUnlock => 'Разблокировать';
 
   @override
+  String get settingsStartupScreen => 'Экран при запуске';
+
+  @override
+  String get settingsStartupScreenSubtitle =>
+      'Какой раздел открывать при следующем запуске приложения. Уведомления и ссылки открывают своё содержимое.';
+
+  @override
   String get settingsHomeContentTitle => 'Что на главной';
 
   @override

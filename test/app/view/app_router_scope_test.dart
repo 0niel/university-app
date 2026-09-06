@@ -31,6 +31,7 @@ import 'package:rtu_mirea_app/nfc_pass/nfc_pass.dart';
 import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
 import 'package:rtu_mirea_app/notifications/data/notification_inbox_repository.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
+import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
@@ -64,6 +65,18 @@ class _Schedule extends MockBloc<ScheduleEvent, ScheduleState>
 
 class _Pass extends MockCubit<NfcPassState> implements NfcPassCubit {}
 
+class _ScheduleChanges extends MockCubit<ScheduleChangesState>
+    implements ScheduleChangesCubit {}
+
+class _SchedulePreferences extends MockCubit<SchedulePreferencesState>
+    implements SchedulePreferencesCubit {}
+
+class _ScheduleComparison extends MockCubit<ScheduleComparisonState>
+    implements ScheduleComparisonCubit {}
+
+class _Activities extends MockCubit<UserActivitiesState>
+    implements UserActivitiesCubit {}
+
 final class _AsyncPreferences extends SharedPreferencesAsyncPlatform {
   final _values = <String, String>{};
 
@@ -87,6 +100,7 @@ final class _AsyncPreferences extends SharedPreferencesAsyncPlatform {
 }
 
 void main() {
+  registerFallbackValue(DateTime(2026));
   const user = User(id: 'student-a', isNewUser: false);
   const otherUser = User(id: 'student-b', isNewUser: false);
   late AppBloc app;
@@ -100,6 +114,10 @@ void main() {
   late _Watch watch;
   late _Schedule schedule;
   late _Pass pass;
+  late _ScheduleChanges changes;
+  late _SchedulePreferences schedulePreferences;
+  late _ScheduleComparison comparison;
+  late _Activities activities;
   late ScheduleDisplayCubit display;
   late LessonRemindersCubit reminders;
   late ThemeCubit theme;
@@ -108,11 +126,22 @@ void main() {
   late UiPreferencesCubit ui;
   SharedPreferencesAsyncPlatform? previousAsyncPreferences;
 
-  void initialize() {
+  void initialize({
+    User initialUser = user,
+    Map<String, String> startupScreens = const {},
+  }) {
     previousAsyncPreferences = SharedPreferencesAsyncPlatform.instance;
     SharedPreferencesAsyncPlatform.instance = _AsyncPreferences();
     final storage = _Storage();
-    when(() => storage.read(any())).thenReturn(null);
+    when(() => storage.read(any())).thenAnswer((call) {
+      final key = call.positionalArguments.first as String;
+      const prefix = 'StartupScreenCubit';
+      if (key.startsWith(prefix)) {
+        final screen = startupScreens[key.substring(prefix.length)];
+        if (screen != null) return <String, dynamic>{'screen': screen};
+      }
+      return null;
+    });
     when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
     HydratedBloc.storage = storage;
     users = _Users();
@@ -130,6 +159,9 @@ void main() {
     );
     gamification = _Gamification();
     when(
+      gamification.getSettings,
+    ).thenAnswer((_) async => const UserSettings());
+    when(
       () => gamification.ensureAcademicProfile(any()),
     ).thenAnswer((_) async {});
     when(() => gamification.getProfileOverview(any())).thenThrow(
@@ -145,12 +177,28 @@ void main() {
     when(() => watch.state).thenReturn(const WatchConnectivityState());
     schedule = _Schedule();
     when(() => schedule.state).thenReturn(const ScheduleState());
+    changes = _ScheduleChanges();
+    schedulePreferences = _SchedulePreferences();
+    comparison = _ScheduleComparison();
+    activities = _Activities();
+    when(() => changes.state).thenReturn(const ScheduleChangesState());
+    when(
+      () => schedulePreferences.state,
+    ).thenReturn(const SchedulePreferencesState());
+    when(() => comparison.state).thenReturn(const ScheduleComparisonState());
+    when(() => activities.state).thenReturn(const UserActivitiesState());
+    when(
+      () => activities.load(
+        from: any(named: 'from'),
+        to: any(named: 'to'),
+      ),
+    ).thenAnswer((_) async {});
     pass = _Pass();
     when(() => pass.state).thenReturn(const NfcPassState());
     app = AppBloc(
       firebaseMessaging: null,
       userRepository: users,
-      user: user,
+      user: initialUser,
     );
     display = ScheduleDisplayCubit();
     reminders = LessonRemindersCubit();
@@ -172,6 +220,10 @@ void main() {
       watch.close(),
       schedule.close(),
       pass.close(),
+      changes.close(),
+      schedulePreferences.close(),
+      comparison.close(),
+      activities.close(),
     ]);
     debugDefaultTargetPlatformOverride = null;
     SharedPreferencesAsyncPlatform.instance = previousAsyncPreferences;
@@ -202,6 +254,12 @@ void main() {
         BlocProvider<WatchConnectivityCubit>.value(value: watch),
         BlocProvider<ScheduleBloc>.value(value: schedule),
         BlocProvider<NfcPassCubit>.value(value: pass),
+        BlocProvider<ScheduleChangesCubit>.value(value: changes),
+        BlocProvider<SchedulePreferencesCubit>.value(
+          value: schedulePreferences,
+        ),
+        BlocProvider<ScheduleComparisonCubit>.value(value: comparison),
+        BlocProvider<UserActivitiesCubit>.value(value: activities),
       ],
       child: UserPreferencesScope(child: child),
     ),
@@ -351,6 +409,55 @@ void main() {
     expectPalette(AppColors.dark.withAccent(AppAccent.violet));
     expect(tester.takeException(), isNull);
   });
+
+  for (final fromLink in [false, true]) {
+    testWidgets(
+      fromLink
+          ? 'platform link survives account restoration with a saved startup screen'
+          : 'restored account opens its saved screen and push still wins',
+      (
+        tester,
+      ) async {
+        if (fromLink) {
+          tester.platformDispatcher.defaultRouteNameTestValue =
+              '/schedule/changes';
+          addTearDown(tester.platformDispatcher.clearDefaultRouteNameTestValue);
+        }
+        initialize(
+          initialUser: User.anonymous,
+          startupScreens: {user.id: StartupScreen.schedule.name},
+        );
+        home.closeOnboarding();
+        addTearDown(() => tester.pumpWidget(const SizedBox()));
+        await tester.pumpWidget(shell(const AppRouterView()));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        app.add(const AppUserChanged(user));
+        await tester.pumpAndSettle();
+        final router = tester.widget<AppRouter>(find.byType(AppRouter)).router;
+        expect(
+          router.routeInformationProvider.value.uri.path,
+          fromLink ? '/schedule/changes' : '/schedule',
+        );
+        expect(tester.takeException(), isNull);
+        app.add(
+          InteractedMessageReceived(
+            const RemoteMessage(
+              messageId: 'startup-choice',
+              data: {'route': '/schedule/changes'},
+            ),
+            userId: user.id,
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          router.routeInformationProvider.value.uri.path,
+          '/schedule/changes',
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('account changes recreate the router and user cubits only', (
     tester,

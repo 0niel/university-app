@@ -39,6 +39,7 @@ class SettingsSearchFilter {
 
   bool get showHome => _matches([
     l10n.settingsHomeAndWidgets,
+    l10n.settingsStartupScreen,
     l10n.settingsAppTour,
     l10n.settingsHomeContent,
     l10n.settingsQuickServices,

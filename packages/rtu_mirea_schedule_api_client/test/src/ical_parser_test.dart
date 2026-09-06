@@ -5,6 +5,52 @@ import 'package:test/test.dart';
 
 void main() {
   group('ICalParser', () {
+    for (final newline in ['\r\n', '\n']) {
+      for (final continuation in [' ', '\t']) {
+        final ending = newline.length == 2 ? 'CRLF' : 'LF';
+        final prefix = continuation == ' ' ? 'space' : 'tab';
+        test(
+          'unfolds metadata without losing spaces ($ending/$prefix)',
+          () {
+            final calendar = [
+              'BEGIN:VCALENDAR',
+              'PRODID:-//Schedule metadata regression//EN',
+              'VERSION:2.0',
+              'BEGIN:VEVENT',
+              'DTSTART:20260909T142000',
+              'DTEND:20260909T155000',
+              'UID:folded-teacher',
+              'X-META-DISCIPLINE:Русский язык и ',
+              '$continuationкультура речи',
+              'X-META-TEACHER;ID=512:Овчинникова Мария ',
+              '$continuationАндреевна',
+              'X-META-TEACHER;ID=513:Петрова Ан',
+              '$continuationна-Мария И. И.',
+              'X-META-TEACHER;ID=514:McDonald',
+              '$continuation Anna',
+              'END:VEVENT',
+              'END:VCALENDAR',
+            ].join(newline);
+            final lesson =
+                ICalParser.fromString(calendar).parse().single
+                    as LessonSchedulePart;
+
+            expect(lesson.subject, 'Русский язык и культура речи');
+            expect(lesson.teachers.map((teacher) => teacher.name), [
+              'Овчинникова Мария Андреевна',
+              'Петрова Анна-Мария И. И.',
+              'McDonald Anna',
+            ]);
+            expect(lesson.teachers.map((teacher) => teacher.uid), [
+              '512',
+              '513',
+              '514',
+            ]);
+          },
+        );
+      }
+    }
+
     late ICalParser iCalParser;
 
     setUp(() {

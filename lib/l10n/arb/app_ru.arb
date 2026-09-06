@@ -3465,6 +3465,8 @@
   "passLockSubtitle": "Подтвердите, что это вы, чтобы показать пропуск.",
   "passLockReason": "Подтвердите, что это вы, чтобы открыть пропуск",
   "passUnlock": "Разблокировать",
+  "settingsStartupScreen": "Экран при запуске",
+  "settingsStartupScreenSubtitle": "Какой раздел открывать при следующем запуске приложения. Уведомления и ссылки открывают своё содержимое.",
   "settingsHomeContentTitle": "Что на главной",
   "settingsHomeContentSubtitle": "Показывайте или скрывайте блоки на главной.",
   "homeSectionSmartChips": "Быстрые действия",

@@ -15,6 +15,19 @@ abstract class Teacher with _$Teacher {
     String? department,
   }) = _Teacher;
 
-  factory Teacher.fromJson(Map<String, dynamic> json) =>
-      _$TeacherFromJson(json);
+  factory Teacher.fromJson(Map<String, dynamic> json) => _$TeacherFromJson({
+    ...json,
+    if (json['name'] case final String name) 'name': normalizeTeacherName(name),
+  });
 }
+
+final _joinedCyrillicNameParts = RegExp('([а-яё])([А-ЯЁ])');
+final _teacherNameWhitespace = RegExp(r'\s+');
+
+String normalizeTeacherName(String name) => name
+    .replaceAllMapped(
+      _joinedCyrillicNameParts,
+      (match) => '${match[1]} ${match[2]}',
+    )
+    .replaceAll(_teacherNameWhitespace, ' ')
+    .trim();

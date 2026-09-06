@@ -5,6 +5,7 @@ import 'package:friends_repository/friends_repository.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,6 +41,12 @@ class ProfileTestEnvironment {
   Widget wrap({required Widget child}) =>
       RepositoryProvider<FriendsRepository>.value(
         value: friends,
-        child: BlocProvider<ScheduleBloc>.value(value: schedule, child: child),
+        child: BlocProvider<ScheduleBloc>.value(
+          value: schedule,
+          child: BlocProvider(
+            create: (_) => StartupScreenCubit(userId: 'profile-test'),
+            child: child,
+          ),
+        ),
       );
 }

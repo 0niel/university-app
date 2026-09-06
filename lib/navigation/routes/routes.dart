@@ -35,6 +35,7 @@ import 'package:rtu_mirea_app/nfc_pass/nfc_pass.dart';
 import 'package:rtu_mirea_app/onboarding/view/onboarding_page.dart';
 import 'package:rtu_mirea_app/people/people.dart';
 import 'package:rtu_mirea_app/polls/polls.dart';
+import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
 import 'package:rtu_mirea_app/profile/profile.dart';
 import 'package:rtu_mirea_app/promo/promo.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
@@ -884,9 +885,10 @@ GoRouter createRouter({
   Listenable? refreshListenable,
   AppBloc? appBloc,
   HomeCubit? homeCubit,
+  StartupScreen startupScreen = StartupScreen.home,
 }) => _routerInstance = GoRouter(
   routes: Routes.all,
-  initialLocation: '/feed',
+  initialLocation: startupScreen.location,
   debugLogDiagnostics: kDebugMode,
   refreshListenable: refreshListenable,
   onException: (_, state, router) => router.go('/feed'),
@@ -914,7 +916,7 @@ GoRouter createRouter({
       return '/onboarding';
     }
 
-    if (isLoggedIn && inAuthFlow) return '/feed';
+    if (isLoggedIn && inAuthFlow) return startupScreen.location;
 
     if (state.uri.path == '/schedule/details' &&
         state.extra is! (LessonSchedulePart, DateTime)) {

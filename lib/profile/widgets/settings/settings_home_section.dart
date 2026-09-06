@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_section.dart';
@@ -27,6 +28,15 @@ class SettingsHomeSection extends StatelessWidget {
     return SettingsSection(
       label: l10n.settingsHomeAndWidgets,
       children: [
+        SettingsRow(
+          title: l10n.settingsStartupScreen,
+          lineIcon: AppLineIcon.home,
+          value: startupScreenLabel(
+            l10n,
+            context.watch<StartupScreenCubit>().state,
+          ),
+          onTap: () => showStartupScreenSheet(context),
+        ),
         SettingsRow(
           title: l10n.settingsAppTour,
           lineIcon: AppLineIcon.spark,

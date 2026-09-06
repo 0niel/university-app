@@ -21,6 +21,41 @@ void main() {
   });
 
   group('Group and Teacher', () {
+    test(
+      'repairs cached Cyrillic names while preserving identity and metadata',
+      () {
+        final teacher = Teacher.fromJson({
+          'name': '  Овчинникова\u00a0МарияАндреевна\t',
+          'uid': '512',
+          'email': 'teacher@example.edu',
+          'photo_url': 'https://example.edu/teacher.png',
+        });
+
+        expect(teacher.name, 'Овчинникова Мария Андреевна');
+        expect(teacher.uid, '512');
+        expect(teacher.email, 'teacher@example.edu');
+        expect(teacher.photoUrl, 'https://example.edu/teacher.png');
+        expect(Teacher.fromJson(teacher.toJson()), teacher);
+      },
+    );
+
+    test('preserves hyphenated names, initials and Latin capitalization', () {
+      for (final name in [
+        'Петрова Анна-Мария Ильинична',
+        'Салтыков-Щедрин М. Е.',
+        'Иванов И.И.',
+        'McDonald Anna',
+        "O'Connor Jean-Luc",
+        'de Vries Willem',
+      ]) {
+        expect(Teacher.fromJson({'name': name}).name, name);
+      }
+      expect(
+        Teacher.fromJson({'name': 'СемёновПётрИльич'}).name,
+        'Семёнов Пётр Ильич',
+      );
+    });
+
     test('provide generated JSON, copyWith and value equality', () {
       const group = Group(name: 'IU7-31B', uid: 'group-1');
       const teacher = Teacher(name: 'Ada Lovelace', email: 'ada@example.edu');
