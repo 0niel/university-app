@@ -144,6 +144,7 @@ void main() {
     expect(find.text('Тема'), findsOneWidget);
     expect(find.text('Светлая'), findsOneWidget);
     expect(find.text('Тёмная'), findsOneWidget);
+    expect(find.text('Авто'), findsOneWidget);
     expect(find.text('Готово'), findsOneWidget);
     expect(find.bySemanticsLabel('Шаг 3 из 3'), findsOneWidget);
     expect(switchValue(tester, 'onboarding_togglePush'), isFalse);

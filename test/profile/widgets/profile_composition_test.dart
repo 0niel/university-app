@@ -48,11 +48,12 @@ void main() {
   testWidgets('theme previews remain usable at 200 percent text', (
     tester,
   ) async {
+    AdaptiveThemeMode? selected;
     await tester.pumpWidget(
       wrap(
         SettingsThemeRow(
           mode: AdaptiveThemeMode.system,
-          onChanged: (_) {},
+          onChanged: (mode) => selected = mode,
         ),
         textScale: 2,
       ),
@@ -60,12 +61,34 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Тема'), findsOneWidget);
+    expect(find.text('Светлая'), findsOneWidget);
+    expect(find.text('Тёмная'), findsOneWidget);
+    expect(find.text('Авто'), findsOneWidget);
+    await tester.tap(find.text('Светлая'));
+    await tester.pumpAndSettle();
+    expect(selected, AdaptiveThemeMode.light);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('theme row offers system mode alongside light and dark', (
+    tester,
+  ) async {
+    final selections = <AdaptiveThemeMode>[];
+    await tester.pumpWidget(
+      wrap(
+        SettingsThemeRow(
+          mode: AdaptiveThemeMode.dark,
+          onChanged: selections.add,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Тёмная'));
     await tester.tap(find.text('Авто'));
     await tester.pumpAndSettle();
-    expect(find.text('Светлая'), findsWidgets);
-    expect(find.text('Тёмная'), findsWidgets);
-    expect(find.text('Авто'), findsWidgets);
-    expect(tester.takeException(), isNull);
+
+    expect(selections, [AdaptiveThemeMode.system]);
   });
 
   testWidgets('setting row wraps long content without overflow', (
