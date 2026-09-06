@@ -86,10 +86,7 @@ jobs:
             printf 'A release tag is required for a manual bundle upload\n' >&2
             exit 1
           else
-            tag="$(
-              gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-                --jq "[.[] | select(.prerelease and .target_commitish == \"$RELEASE_SHA\")][0].tag_name // empty"
-            )"
+            tag="$(python3 tool/resolve_android_release.py --source-sha "$RELEASE_SHA")"
           fi
           if [[ -z "$tag" ]]; then
             printf 'Matching beta release is unavailable\n' >&2
