@@ -26,7 +26,7 @@ class Response(io.BytesIO):
 
 
 class ApiTransportTest(unittest.TestCase):
-    def test_post_uses_public_header_and_explicit_api_schema(self):
+    def test_post_uses_public_key_and_public_gateway(self):
         calls = []
 
         def opener(request, timeout):
@@ -42,7 +42,8 @@ class ApiTransportTest(unittest.TestCase):
         self.assertEqual(json.loads(request.data), {'p_organization_id': 'mirea'})
         self.assertEqual(request.get_header('Apikey'), ENVIRONMENT['SUPABASE_PUBLISHABLE_KEY'])
         self.assertIsNone(request.get_header('Authorization'))
-        self.assertEqual(request.get_header('Content-profile'), 'app_api_v1')
+        self.assertEqual(request.get_header('Content-profile'), 'public')
+        self.assertEqual(request.get_header('Accept-profile'), 'public')
         self.assertEqual(timeout, CHECK.SOCKET_TIMEOUT)
 
     def test_mutation_and_redirect_are_never_followed(self):

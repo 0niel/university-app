@@ -144,7 +144,7 @@ def read_rpc(url, key, name, parameters, *, opener=None, clock=time.monotonic):
         data=json.dumps(parameters, separators=(',', ':')).encode('utf-8'),
         headers={'apikey': key, 'Content-Type': 'application/json',
                  'Accept': 'application/json', 'Accept-Encoding': 'identity',
-                 'Content-Profile': 'app_api_v1', 'Accept-Profile': 'app_api_v1'},
+                 'Content-Profile': 'public', 'Accept-Profile': 'public'},
     )
     open_request = opener or urllib.request.build_opener(NoRedirect()).open
     deadline = clock() + RESPONSE_TIMEOUT

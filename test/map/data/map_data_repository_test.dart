@@ -51,6 +51,58 @@ Map<String, Object?> _sourceCampus(int generation, {int revision = 2}) => {
 void main() {
   group('MapDataRepository', () {
     test(
+      'real client reads the catalog through the public RPC gateway',
+      () async {
+        final requests = <http.Request>[];
+        final client = MockClient((request) async {
+          requests.add(request);
+          if (request.headers['Content-Profile'] != 'public') {
+            return http.Response(
+              '{"code":"PGRST106","message":"Schema is not exposed"}',
+              406,
+              headers: {'content-type': 'application/json'},
+              request: request,
+            );
+          }
+          return http.Response(
+            jsonEncode({
+              'campuses': [
+                {'id': 'v-78', 'title': 'Вернадского, 78', 'revision': 2},
+              ],
+            }),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+            request: request,
+          );
+        });
+        final supabase = SupabaseClient(
+          'https://project.example',
+          'sb_publishable_test',
+          httpClient: client,
+        );
+        final repository = MapDataRepository(
+          organizationId: 'mirea',
+          supabase: supabase,
+          cache: _MemoryCache(),
+        );
+        addTearDown(repository.dispose);
+        addTearDown(supabase.dispose);
+        addTearDown(client.close);
+
+        final catalog = await repository.loadCatalog();
+
+        expect(catalog.origin, MapDataOrigin.remote);
+        expect(catalog.entries.single.id, 'v-78');
+        expect(requests, hasLength(1));
+        expect(requests.single.method, 'POST');
+        expect(requests.single.url.path, '/rest/v1/rpc/get_map_catalog');
+        expect(jsonDecode(requests.single.body), {
+          'p_organization_id': 'mirea',
+        });
+      },
+    );
+
+    test(
       'native place IDs resolve legacy links and unambiguous source IDs',
       () async {
         final repository = MapDataRepository(
