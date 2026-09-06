@@ -290,8 +290,31 @@ extension on User {
     return AuthenticationUser(
       id: id,
       email: (email?.trim().isEmpty ?? true) ? null : email!.trim(),
+      name: _metadataText(['name', 'display_name', 'full_name']),
+      photo: _avatarUrl,
       isNewUser: createdAt == lastSignInAt,
       isGuest: isAnonymous,
     );
+  }
+
+  String? _metadataText(List<String> keys) {
+    for (final key in keys) {
+      final value = userMetadata?[key];
+      if (value is String && value.trim().isNotEmpty) return value.trim();
+    }
+    return null;
+  }
+
+  String? get _avatarUrl {
+    for (final key in ['avatar_url', 'picture']) {
+      final value = _metadataText([key]);
+      final uri = value == null ? null : Uri.tryParse(value);
+      if (uri != null &&
+          (uri.scheme == 'https' || uri.scheme == 'http') &&
+          uri.host.isNotEmpty) {
+        return value;
+      }
+    }
+    return null;
   }
 }
