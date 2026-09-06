@@ -189,6 +189,7 @@ def checkout_log_lines(output, step):
 def verify_automatic_checkouts(repository, run):
     jobs = paginated(f"repos/{repository}/actions/runs/{run['id']}/attempts/{run['run_attempt']}/jobs", "jobs")
     checked = []
+    log_options = None
     for name in ("prepare", "Android beta"):
         candidates = [job for job in jobs if job.get("name") == name]
         if len(candidates) != 1:
@@ -199,8 +200,11 @@ def verify_automatic_checkouts(repository, run):
         if any(job.get(key) != value for key, value in expected.items()) or len(steps) != 1 or steps[0].get("conclusion") != "success":
             raise RegistrationError("Automatic release checkout job differs from the producer attempt")
         job_id = positive_id(job.get("id"))
+        if log_options is None:
+            help_text = command(["gh", "api", "--help"], stdout=subprocess.PIPE).stdout
+            log_options = ["--allow-escape-sequences"] if b"--allow-escape-sequences" in help_text else []
         output = command([
-            "gh", "api", f"repos/{repository}/actions/jobs/{job_id}/logs",
+            "gh", "api", f"repos/{repository}/actions/jobs/{job_id}/logs", *log_options,
         ], stdout=subprocess.PIPE).stdout
         lines = checkout_log_lines(output, steps[0])
         refs = [match[1] for line in lines if (match := re.fullmatch(r"\s+ref: ([0-9a-f]{40})", line))]

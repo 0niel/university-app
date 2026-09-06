@@ -163,6 +163,8 @@ class ReleaseImporterTest(unittest.TestCase):
             for index, name in enumerate(("prepare", "Android beta"), 10)]
 
         def logs(arguments, **kwargs):
+            if arguments == ["gh", "api", "--help"]:
+                return subprocess.CompletedProcess(arguments, 0, b"FLAGS\n  --allow-escape-sequences  Output raw responses\n")
             prefix = "2026-09-06T11:00:00.9999999Z "
             output = "\n".join(prefix + line for line in (f"##[group]Run actions/checkout@{'c' * 40}", f"  ref: {source}",
                 "[command]/usr/bin/git log -1 --format=%H", source))
@@ -176,10 +178,12 @@ class ReleaseImporterTest(unittest.TestCase):
             evidence = MODULE.verify_automatic_checkouts(REPOSITORY, automatic_origin())
         self.assertEqual([entry["id"] for entry in evidence], [10, 11])
         self.assertIn("/attempts/1/jobs?", requests.call_args.args[0])
-        self.assertEqual(execute.call_count, 2)
-        self.assertEqual([call.args[0] for call in execute.call_args_list], [
-            ["gh", "api", f"repos/{REPOSITORY}/actions/jobs/{job_id}/logs"] for job_id in (10, 11)
+        self.assertEqual(execute.call_count, 3)
+        self.assertEqual(execute.call_args_list[0].args[0], ["gh", "api", "--help"])
+        self.assertEqual([call.args[0] for call in execute.call_args_list[1:]], [
+            ["gh", "api", f"repos/{REPOSITORY}/actions/jobs/{job_id}/logs", "--allow-escape-sequences"] for job_id in (10, 11)
         ])
+        self.assertTrue(all(call.kwargs["stdout"] is subprocess.PIPE for call in execute.call_args_list))
         for mutation in ({"run_attempt": 2}, {"run_id": 124}, {"head_sha": "b" * 40},
             {"conclusion": "failure"}, {"steps": []}):
             changed = [{**jobs[0], **mutation}, jobs[1]]
@@ -191,6 +195,21 @@ class ReleaseImporterTest(unittest.TestCase):
         jobs, logs = self.checkout_fixture("b" * 40)
         with patch.object(MODULE, "api", return_value={"jobs": jobs}), patch.object(MODULE, "command", side_effect=logs), self.assertRaisesRegex(ValueError, "checkout differs"):
             MODULE.verify_automatic_checkouts(REPOSITORY, automatic_origin())
+
+    def test_raw_log_reader_supports_cli_without_escape_sequence_flag(self):
+        jobs, logs = self.checkout_fixture()
+
+        def older_cli(arguments, **kwargs):
+            if arguments == ["gh", "api", "--help"]:
+                return subprocess.CompletedProcess(arguments, 0, b"FLAGS\n  --paginate\n")
+            return logs(arguments, **kwargs)
+
+        with patch.object(MODULE, "api", return_value={"jobs": jobs}), patch.object(MODULE, "command", side_effect=older_cli) as execute:
+            self.assertEqual(len(MODULE.verify_automatic_checkouts(REPOSITORY, automatic_origin())), 2)
+        self.assertEqual([call.args[0] for call in execute.call_args_list[1:]], [
+            ["gh", "api", f"repos/{REPOSITORY}/actions/jobs/{job_id}/logs"] for job_id in (10, 11)
+        ])
+        self.assertTrue(all(call.kwargs["stdout"] is subprocess.PIPE for call in execute.call_args_list))
 
     def test_raw_checkout_logs_ignore_adjacent_native_checkout_in_the_same_second(self):
         step = {"started_at": "2026-09-06T12:24:04Z", "completed_at": "2026-09-06T12:24:07Z"}
