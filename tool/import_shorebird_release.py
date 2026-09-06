@@ -1,5 +1,5 @@
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 import hashlib
 import json
 import os
@@ -153,6 +153,39 @@ def paginated(path, field):
     raise RegistrationError("Release evidence listing exceeds its bounded limit")
 
 
+def checkout_log_lines(output, step):
+    def timestamp(value):
+        if not isinstance(value, str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z", value):
+            raise RegistrationError("Checkout evidence has an invalid timestamp")
+        return datetime.fromisoformat(value)
+
+    started = timestamp(step.get("started_at"))
+    completed = timestamp(step.get("completed_at"))
+    if completed < started:
+        raise RegistrationError("Checkout evidence has an invalid step interval")
+    end = completed + timedelta(seconds=1)
+    lines = []
+    in_checkout = False
+    for line in output.decode("utf-8-sig").splitlines():
+        date, separator, message = line.partition(" ")
+        if not separator:
+            continue
+        observed = timestamp(date)
+        if not started <= observed < end:
+            continue
+        if message.startswith("##[group]Run "):
+            if in_checkout:
+                break
+            if not re.fullmatch(r"##\[group\]Run actions/checkout@[0-9a-f]{40}", message):
+                raise RegistrationError("Checkout interval starts with an unexpected action")
+            in_checkout = True
+        elif in_checkout:
+            lines.append(message)
+    if not in_checkout:
+        raise RegistrationError("Checkout action is missing from its recorded step interval")
+    return lines
+
+
 def verify_automatic_checkouts(repository, run):
     jobs = paginated(f"repos/{repository}/actions/runs/{run['id']}/attempts/{run['run_attempt']}/jobs", "jobs")
     checked = []
@@ -167,14 +200,9 @@ def verify_automatic_checkouts(repository, run):
             raise RegistrationError("Automatic release checkout job differs from the producer attempt")
         job_id = positive_id(job.get("id"))
         output = command([
-            "gh", "run", "view", str(run["id"]), "--repo", repository,
-            "--attempt", str(run["run_attempt"]), "--job", str(job_id), "--log",
-        ], stdout=subprocess.PIPE).stdout.decode("utf-8")
-        lines = []
-        for line in output.splitlines():
-            fields = line.split("\t", 2)
-            if len(fields) == 3 and fields[:2] == [name, "Check out repository"]:
-                lines.append(fields[2].partition(" ")[2])
+            "gh", "api", f"repos/{repository}/actions/jobs/{job_id}/logs",
+        ], stdout=subprocess.PIPE).stdout
+        lines = checkout_log_lines(output, steps[0])
         refs = [match[1] for line in lines if (match := re.fullmatch(r"\s+ref: ([0-9a-f]{40})", line))]
         heads = [lines[index + 1] for index, line in enumerate(lines[:-1])
             if re.fullmatch(r"\[command\](?:[^\s]*/)?git log -1 --format=%H", line)]

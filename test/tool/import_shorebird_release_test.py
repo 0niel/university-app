@@ -158,13 +158,13 @@ class ReleaseImporterTest(unittest.TestCase):
 
     def checkout_fixture(self, source=SOURCE):
         jobs = [{"id": index, "name": name, "run_id": 123, "run_attempt": 1, "head_sha": SOURCE,
-            "conclusion": "success", "steps": [{"name": "Check out repository", "conclusion": "success"}]}
+            "conclusion": "success", "steps": [{"name": "Check out repository", "conclusion": "success",
+                "started_at": "2026-09-06T11:00:00Z", "completed_at": "2026-09-06T11:00:01Z"}]}
             for index, name in enumerate(("prepare", "Android beta"), 10)]
 
         def logs(arguments, **kwargs):
-            name = jobs[int(arguments[arguments.index("--job") + 1]) - 10]["name"]
-            prefix = f"{name}\tCheck out repository\t2026-09-06T11:00:00Z "
-            output = "\n".join(prefix + line for line in (f"  ref: {source}",
+            prefix = "2026-09-06T11:00:00.9999999Z "
+            output = "\n".join(prefix + line for line in (f"##[group]Run actions/checkout@{'c' * 40}", f"  ref: {source}",
                 "[command]/usr/bin/git log -1 --format=%H", source))
             return subprocess.CompletedProcess(arguments, 0, output.encode())
 
@@ -177,6 +177,9 @@ class ReleaseImporterTest(unittest.TestCase):
         self.assertEqual([entry["id"] for entry in evidence], [10, 11])
         self.assertIn("/attempts/1/jobs?", requests.call_args.args[0])
         self.assertEqual(execute.call_count, 2)
+        self.assertEqual([call.args[0] for call in execute.call_args_list], [
+            ["gh", "api", f"repos/{REPOSITORY}/actions/jobs/{job_id}/logs"] for job_id in (10, 11)
+        ])
         for mutation in ({"run_attempt": 2}, {"run_id": 124}, {"head_sha": "b" * 40},
             {"conclusion": "failure"}, {"steps": []}):
             changed = [{**jobs[0], **mutation}, jobs[1]]
@@ -188,6 +191,49 @@ class ReleaseImporterTest(unittest.TestCase):
         jobs, logs = self.checkout_fixture("b" * 40)
         with patch.object(MODULE, "api", return_value={"jobs": jobs}), patch.object(MODULE, "command", side_effect=logs), self.assertRaisesRegex(ValueError, "checkout differs"):
             MODULE.verify_automatic_checkouts(REPOSITORY, automatic_origin())
+
+    def test_raw_checkout_logs_ignore_adjacent_native_checkout_in_the_same_second(self):
+        step = {"started_at": "2026-09-06T12:24:04Z", "completed_at": "2026-09-06T12:24:07Z"}
+        entries = [
+            ("03.9999999", "[command]/usr/bin/git log -1 --format=%H"),
+            ("03.9999999", "b" * 40),
+            ("04.8364730", f"##[group]Run actions/checkout@{'c' * 40}"),
+            ("04.8365565", f"  ref: {SOURCE}"),
+            ("04.9365565", "##[endgroup]"),
+            ("05.0000000", "##[group]Getting Git version info"),
+            ("07.7937431", "[command]/usr/bin/git log -1 --format=%H"),
+            ("07.7962843", SOURCE),
+            ("07.9367373", f"##[group]Run actions/checkout@{'c' * 40}"),
+            ("07.9368310", f"  ref: {'d' * 40}"),
+            ("09.0143245", "[command]/usr/bin/git log -1 --format=%H"),
+            ("09.0150000", "d" * 40),
+        ]
+        output = "\ufeff" + "\r\n".join(f"2026-09-06T12:24:{date}Z {message}" for date, message in entries)
+        lines = MODULE.checkout_log_lines(output.encode(), step)
+        self.assertIn(SOURCE, lines)
+        self.assertNotIn("b" * 40, lines)
+        self.assertNotIn(f"  ref: {'d' * 40}", lines)
+        self.assertNotIn("d" * 40, lines)
+
+    def test_raw_checkout_proof_requires_the_action_and_source_inside_the_api_step(self):
+        jobs, logs = self.checkout_fixture()
+        original = logs([]).stdout
+        mutations = [
+            original.replace(b"actions/checkout@", b"actions/other@"),
+            original.replace(b"11:00:00.9999999", b"11:00:02.0000000"),
+            original.replace(b"[command]/usr/bin/git log -1 --format=%H", b"unrelated output"),
+            original.replace(SOURCE.encode(), b"b" * 40),
+            original + b"\n2026-09-06T11:00:01.1000000Z   ref: " + SOURCE.encode(),
+            original + b"\n2026-09-06T11:00:01.1000000Z [command]/usr/bin/git log -1 --format=%H\n2026-09-06T11:00:01.2000000Z " + SOURCE.encode(),
+            original.replace(b"11:00:00.9999999Z [command]", b"11:00:02.0000000Z [command]"),
+        ]
+        for output in mutations:
+            with patch.object(MODULE, "api", return_value={"jobs": jobs}), patch.object(MODULE, "command", return_value=subprocess.CompletedProcess([], 0, output)), self.assertRaises(ValueError):
+                MODULE.verify_automatic_checkouts(REPOSITORY, automatic_origin())
+        for mutation in ({"started_at": None}, {"completed_at": "2026-09-06T10:59:59Z"}):
+            step = {**jobs[0]["steps"][0], **mutation}
+            with self.assertRaises(ValueError):
+                MODULE.checkout_log_lines(original, step)
 
     def test_source_ci_requires_successful_master_push_before_release(self):
         ci = {**origin(), "id": 98, "path": ".github/workflows/main.yml", "event": "push",
