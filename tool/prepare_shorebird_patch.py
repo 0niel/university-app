@@ -71,6 +71,85 @@ READ_STATE_SUPPORT_PATHS = {
     'test/promo/view/promo_banner_slot_test.dart',
     'test/schedule/view/schedule_page/schedule_responsive_test.dart',
 }
+MOBILE_REVIEWED_SHA = "7fe813c357996dec0c4fbd95b245644b81824326"
+MOBILE_BASELINES = {
+    "5.2.1+1005801": "506602c5d8da2cac5a6180d26b753f415d381819",
+    "5.2.1+2439.14.43": "506602c5d8da2cac5a6180d26b753f415d381819",
+    "5.2.1+1006201": "781b2ff4a14c9888331eb61b156a2cb0c7e4515b",
+    "5.2.1+2439.15.54": "ee51aeee41bf3c48925c6a524e9e9e90c40b0dd1",
+    "5.2.1+1006601": "9369a9bc8f3bac521c1efb10942f76a4696ca279",
+    "5.2.1+2439.17.57": "9369a9bc8f3bac521c1efb10942f76a4696ca279"
+}
+MOBILE_RUNTIME_PATHS = {
+    "lib/app/view/app_router_view.dart",
+    "lib/app/widgets/user_preferences_scope.dart",
+    "lib/l10n/arb/app_en.arb",
+    "lib/l10n/arb/app_ru.arb",
+    "lib/l10n/generated/app_localizations.dart",
+    "lib/l10n/generated/app_localizations_en.dart",
+    "lib/l10n/generated/app_localizations_ru.dart",
+    "lib/mini_apps/view/catalog_body.dart",
+    "lib/mini_apps/view/catalog_section_label.dart",
+    "lib/mini_apps/view/catalog_section_label_skeleton.dart",
+    "lib/mini_apps/view/catalog_skeleton.dart",
+    "lib/mini_apps/view/category_chips.dart",
+    "lib/mini_apps/view/mini_apps_app_bar.dart",
+    "lib/mini_apps/view/mini_apps_hero.dart",
+    "lib/mini_apps/view/mini_apps_page.dart",
+    "lib/mini_apps/view/mini_apps_sort_button.dart",
+    "lib/mini_apps/view/mini_apps_view.dart",
+    "lib/mini_apps/view/recent_mini_apps.dart",
+    "lib/mini_apps/widgets/mini_app_card_info.dart",
+    "lib/mini_apps/widgets/mini_app_status_pill.dart",
+    "lib/navigation/routes/routes.dart",
+    "lib/nfc_pass/nfc_pass_availability.dart",
+    "lib/profile/cubit/startup_screen_cubit.dart",
+    "lib/profile/utils/settings_search_filter.dart",
+    "lib/profile/view/profile_content.dart",
+    "lib/profile/view/profile_page.dart",
+    "lib/profile/view/profile_settings_page.dart",
+    "lib/profile/widgets/settings/settings_home_section.dart",
+    "lib/profile/widgets/settings/settings_privacy_section.dart",
+    "lib/profile/widgets/settings_sheets.dart",
+    "lib/schedule/view/schedule_page/schedule_overlap_switcher.dart",
+    "lib/schedule/view/schedule_page/schedule_week_view.dart",
+    "lib/services/data/services_directory.dart",
+    "lib/services/view/services_view.dart",
+    "packages/app_ui/lib/src/scale/app_scale.dart",
+    "packages/auth_client/supabase_authentication_client/lib/src/supabase_authentication_client.dart",
+    "packages/rtu_mirea_schedule_api_client/lib/src/ical_parser.dart",
+    "packages/schedule/lib/src/lessons_schedule/teacher.dart",
+    "packages/schedule_repository/lib/src/schedule_change_slot.dart",
+}
+MOBILE_REMOVED_PATHS = {
+    "lib/mini_apps/view/mini_apps_hero.dart",
+}
+MOBILE_SUPPORT_PATHS = {
+    "packages/auth_client/supabase_authentication_client/test/src/supabase_authentication_client_test.dart",
+    "packages/rtu_mirea_schedule_api_client/test/src/ical_parser_test.dart",
+    "packages/schedule/test/src/lessons_schedule/core_models_test.dart",
+    "packages/schedule_repository/test/src/schedule_models_test.dart",
+    "supabase/migrations/20260906113834_sync_profile_auth_metadata.sql",
+    "supabase/tests/profile_auth_metadata_contract.sql",
+    "test/app/view/app_router_scope_test.dart",
+    "test/app/widgets/app_scale_test.dart",
+    "test/app/widgets/production_home_viewport_test.dart",
+    "test/gallery/goldens/mini_apps_catalog_dark.png",
+    "test/gallery/goldens/mini_apps_catalog_light.png",
+    "test/gallery/mini_apps_gallery_test.dart",
+    "test/mini_apps/view/mini_apps_catalog_layout_test.dart",
+    "test/mini_apps/view/mini_apps_secondary_states_test.dart",
+    "test/mini_apps/view/mini_apps_skeleton_test.dart",
+    "test/navigation/startup_screen_route_test.dart",
+    "test/nfc_pass/nfc_pass_visibility_test.dart",
+    "test/profile/cubit/startup_screen_cubit_test.dart",
+    "test/profile/helpers/profile_test_environment.dart",
+    "test/profile/widgets/settings_deduplication_test.dart",
+    "test/profile/widgets/startup_screen_sheet_test.dart",
+    "test/schedule/view/schedule_page/schedule_overlap_switcher_test.dart",
+    "test/schedule/view/schedule_page/schedule_week_legend_palette_test.dart",
+    "test/services/view/services_view_test.dart",
+}
 WORKFLOW_PATHS = {
     "packages/app_ui/test/src/widgets/app_horizontal_scroll_view_test.dart",
     "supabase/tests/guest_active_day_contract.sql",
@@ -187,12 +266,44 @@ def read_state_projection(root, source_sha, workflow_sha, release_version):
     }
 
 
+def mobile_projection(root, source_sha, workflow_sha, release_version):
+    baseline = MOBILE_BASELINES[release_version]
+    for ancestor, descendant in ((baseline, MOBILE_REVIEWED_SHA), (MOBILE_REVIEWED_SHA, source_sha), (source_sha, workflow_sha)):
+        git(root, "merge-base", "--is-ancestor", ancestor, descendant)
+    if changed(root, MOBILE_REVIEWED_SHA, source_sha) - WORKFLOW_PATHS:
+        raise ValueError("Runtime source differs from the explicitly reviewed mobile snapshot")
+    support = WORKFLOW_PATHS | NAV_TEST_PATHS | READ_STATE_SUPPORT_PATHS | MOBILE_SUPPORT_PATHS | {"test/tool/configure_firebase_test.py"}
+    delta = changed(root, baseline, source_sha)
+    if delta - NAV_RUNTIME_PATHS - READ_STATE_RUNTIME_PATHS - MOBILE_RUNTIME_PATHS - support:
+        raise ValueError("Only the reviewed mobile runtime and support files may change")
+    before = tree(root, baseline)
+    after = tree(root, source_sha)
+    for path in delta:
+        if path in MOBILE_REMOVED_PATHS:
+            if path in after or not before.get(path, "").startswith("100644 blob "):
+                raise ValueError(f"Reviewed removal must delete a regular baseline file: {path}")
+        elif not after.get(path, "").startswith("100644 blob "):
+            raise ValueError(f"Changed paths must remain regular files: {path}")
+    digest = hashlib.sha256(json.dumps(after, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return {}, {
+        "baseline_sha": baseline,
+        "reviewed_source_sha": MOBILE_REVIEWED_SHA,
+        "source_sha": source_sha,
+        "release_version": release_version,
+        "projection_sha256": digest,
+    }
+
+
 def projection(root, source_sha, workflow_sha, release_version=RELEASE_VERSION):
     for value in (source_sha, workflow_sha):
         if not re.fullmatch(r"[0-9a-f]{40}", value):
             raise ValueError("A full commit SHA is required")
     if git(root, "rev-parse", "HEAD").decode().strip() != source_sha:
         raise ValueError("Checked-out commit does not match source_sha")
+    if release_version in MOBILE_BASELINES:
+        reviewed = subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor", MOBILE_REVIEWED_SHA, source_sha], capture_output=True)
+        if reviewed.returncode == 0 or release_version not in READ_STATE_BASELINES:
+            return mobile_projection(root, source_sha, workflow_sha, release_version)
     if release_version in READ_STATE_BASELINES:
         reviewed = subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor", READ_STATE_REVIEWED_SHA, source_sha], capture_output=True)
         if reviewed.returncode == 0 or release_version not in (NAV_RELEASE_VERSION, NAV_IOS_RELEASE_VERSION):
@@ -257,7 +368,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-sha", required=True)
     parser.add_argument("--workflow-sha", required=True)
-    parser.add_argument("--release-version", choices=(RELEASE_VERSION, *READ_STATE_BASELINES), default=RELEASE_VERSION)
+    parser.add_argument("--release-version", choices=(RELEASE_VERSION, *MOBILE_BASELINES), default=RELEASE_VERSION)
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--verify-worktree", action="store_true")
@@ -281,7 +392,7 @@ def main():
     if arguments.apply or arguments.verify_worktree:
         verify_worktree(root, overrides)
     if arguments.verify_native_firebase:
-        if arguments.release_version not in (NAV_RELEASE_VERSION, "5.2.1+1006201"):
+        if arguments.release_version not in (NAV_RELEASE_VERSION, "5.2.1+1006201", "5.2.1+1006601"):
             raise ValueError("Native Firebase reconstruction is only supported for the reviewed Android releases")
         verify_navigation_firebase(root)
     if arguments.receipt:

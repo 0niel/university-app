@@ -302,5 +302,82 @@ class ReadStateProjectionTest(unittest.TestCase):
         self.project()
 
 
+class MobileProjectionTest(unittest.TestCase):
+    git = PrepareShorebirdPatchTest.git
+    write = PrepareShorebirdPatchTest.write
+    commit = PrepareShorebirdPatchTest.commit
+    pin = PrepareShorebirdPatchTest.pin
+
+    def setUp(self):
+        ReadStateProjectionTest.setUp(self)
+        for path in MODULE.MOBILE_REMOVED_PATHS:
+            self.write(path, b"old mobile runtime\n")
+        baseline = self.commit()
+        self.pin("MOBILE_BASELINES", {version: baseline for version in MODULE.MOBILE_BASELINES})
+        for path in MODULE.MOBILE_RUNTIME_PATHS | MODULE.MOBILE_SUPPORT_PATHS:
+            if path in MODULE.MOBILE_REMOVED_PATHS:
+                (self.root / path).unlink()
+            else:
+                self.write(path, b"reviewed mobile changes\n")
+        self.pin("MOBILE_REVIEWED_SHA", self.commit())
+
+    def project(self, version="5.2.1+1006601"):
+        source = self.git("rev-parse", "HEAD")
+        return MODULE.projection(self.root, source, source, version)
+
+    def test_all_six_bases_preserve_native_dependencies_and_assets(self):
+        self.assertEqual(len(MODULE.MOBILE_BASELINES), 6)
+        for version, baseline in MODULE.MOBILE_BASELINES.items():
+            with self.subTest(version=version):
+                overrides, receipt = self.project(version)
+                self.assertEqual(overrides, {})
+                self.assertEqual(receipt["baseline_sha"], baseline)
+                self.assertEqual(receipt["reviewed_source_sha"], MODULE.MOBILE_REVIEWED_SHA)
+                self.assertEqual(receipt["release_version"], version)
+                MODULE.verify_worktree(self.root, overrides)
+                for path in (MODULE.MANIFEST, "pubspec.yaml", "pubspec.lock", "assets/font.ttf"):
+                    self.assertEqual(MODULE.blob(self.root, baseline, path), (self.root / path).read_bytes())
+                for path in MODULE.MOBILE_REMOVED_PATHS:
+                    self.assertFalse((self.root / path).exists())
+
+    def test_even_reviewed_native_and_dependency_drift_is_rejected(self):
+        for path in (MODULE.MANIFEST, "pubspec.yaml", "pubspec.lock", "assets/font.ttf", "packages/app_ui/android/build.gradle"):
+            with self.subTest(path=path):
+                previous = self.git("rev-parse", "HEAD")
+                self.write(path, b"native drift\n")
+                self.pin("MOBILE_REVIEWED_SHA", self.commit())
+                with self.assertRaisesRegex(ValueError, "Only the reviewed mobile"):
+                    self.project()
+                self.git("reset", "--hard", previous)
+
+    def test_only_explicit_dart_removal_is_supported(self):
+        path = "lib/app/view/app_router_view.dart"
+        (self.root / path).unlink()
+        self.pin("MOBILE_REVIEWED_SHA", self.commit())
+        with self.assertRaisesRegex(ValueError, "regular files"):
+            self.project()
+
+    def test_removed_hero_cannot_be_reintroduced(self):
+        self.write(next(iter(MODULE.MOBILE_REMOVED_PATHS)), b"restored hero\n")
+        self.pin("MOBILE_REVIEWED_SHA", self.commit())
+        with self.assertRaisesRegex(ValueError, "Reviewed removal"):
+            self.project()
+
+    def test_migration_or_runtime_tail_cannot_change_after_review(self):
+        for path in ("lib/app/view/app_router_view.dart", "supabase/migrations/20260906113834_sync_profile_auth_metadata.sql"):
+            with self.subTest(path=path):
+                previous = self.git("rev-parse", "HEAD")
+                self.write(path, b"unreviewed tail\n")
+                self.commit()
+                with self.assertRaisesRegex(ValueError, "explicitly reviewed mobile"):
+                    self.project()
+                self.git("reset", "--hard", previous)
+
+    def test_policy_only_tail_remains_allowed(self):
+        self.write("tool/prepare_shorebird_patch.py", b"policy only\n")
+        self.commit()
+        self.project()
+
+
 if __name__ == "__main__":
     unittest.main()
