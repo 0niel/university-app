@@ -2,11 +2,13 @@ part of 'mini_apps_page.dart';
 
 class _MiniAppsAppBar extends StatelessWidget {
   const _MiniAppsAppBar({
+    required this.count,
     required this.isModerator,
     required this.isSearching,
     required this.onSearchToggled,
   });
 
+  final int count;
   final bool isModerator;
   final bool isSearching;
   final VoidCallback onSearchToggled;
@@ -16,6 +18,7 @@ class _MiniAppsAppBar extends StatelessWidget {
     final l10n = context.l10n;
     return AppInnerHeader(
       title: l10n.miniAppsTitle,
+      subtitle: l10n.miniAppsSubtitle(count),
       onBack: Navigator.of(context).canPop()
           ? () => Navigator.of(context).maybePop()
           : null,

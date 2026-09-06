@@ -2,7 +2,7 @@ part of 'mini_apps_page.dart';
 
 abstract final class _CatalogLayout {
   static double bottomInset(BuildContext context) =>
-      ninjaBottomInset(context) + AppControlSize.fab + AppSpacing.xxlg;
+      ninjaBottomInset(context) + AppSpacing.xxlg;
 
   static EdgeInsets statePadding(BuildContext context) => EdgeInsets.fromLTRB(
     AppSpacing.screen,
@@ -77,6 +77,7 @@ class _CatalogBody extends StatelessWidget {
               state.category == null)
             SliverToBoxAdapter(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _CatalogSectionLabel(title: l10n.miniAppsRecents),
                   _RecentMiniApps(apps: state.recents, onOpen: onOpen),
@@ -92,7 +93,14 @@ class _CatalogBody extends StatelessWidget {
             SliverToBoxAdapter(
               child: _CatalogSectionLabel(title: l10n.miniAppsCatalogSection),
             ),
-          ],
+          ] else if (state.recents.isNotEmpty &&
+              state.query.isEmpty &&
+              state.category == null)
+            SliverToBoxAdapter(
+              child: _CatalogSectionLabel(title: l10n.miniAppsCatalogSection),
+            ),
+          if (state.recents.isEmpty && state.myApps.isEmpty)
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
           _cards(state.apps),
           if (state.apps.isEmpty)
             SliverPadding(

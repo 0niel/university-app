@@ -7,11 +7,11 @@ class _MiniAppsSortButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => NinjaIconButton(
+  Widget build(BuildContext context) => AppButton.text(
     key: const ValueKey('mini-apps-sort-button'),
+    label: label,
     icon: const AppLineIconWidget(.filter, size: AppIconSize.md),
     tooltip: '${context.l10n.miniAppsSortTitle}: $label',
-    shape: AppIconButtonShape.circle,
     onPressed: onPressed,
   );
 }

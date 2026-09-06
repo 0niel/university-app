@@ -74,11 +74,6 @@ class _MiniAppsViewState extends State<MiniAppsView> {
         : const SizedBox.shrink();
     return Scaffold(
       backgroundColor: colors.canvas,
-      floatingActionButton: AppFab(
-        icon: AppLineIcon.plus,
-        tooltip: l10n.miniAppsCreate,
-        onPressed: () => context.go('/services/apps/submit'),
-      ),
       body: SafeArea(
         bottom: false,
         top: false,
@@ -93,20 +88,34 @@ class _MiniAppsViewState extends State<MiniAppsView> {
             slivers: [
               SliverToBoxAdapter(
                 child: _MiniAppsAppBar(
+                  count: state.apps.length,
                   isModerator: state.isModerator,
                   isSearching: state.isSearching,
                   onSearchToggled: _toggleSearch,
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.screen,
-                  AppSpacing.lg,
-                  AppSpacing.screen,
-                  AppSpacing.lg,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screen,
+                  vertical: AppSpacing.md,
                 ),
                 sliver: SliverToBoxAdapter(
-                  child: _MiniAppsHero(count: state.apps.length),
+                  child: Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      _MiniAppsSortButton(
+                        label: _miniAppSortLabel(l10n, state.sort),
+                        onPressed: () => unawaited(_openSort()),
+                      ),
+                      NinjaButton.tonal(
+                        key: const ValueKey('mini-apps-create-button'),
+                        label: l10n.miniAppsCreate,
+                        icon: const AppLineIconWidget(AppLineIcon.plus),
+                        onPressed: () => context.go('/services/apps/submit'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SliverToBoxAdapter(
@@ -120,24 +129,7 @@ class _MiniAppsViewState extends State<MiniAppsView> {
                       ),
               ),
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                  child: Row(
-                    children: [
-                      Expanded(child: _CategoryChips(category: state.category)),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: AppSpacing.sm,
-                          right: AppSpacing.screen,
-                        ),
-                        child: _MiniAppsSortButton(
-                          label: _miniAppSortLabel(l10n, state.sort),
-                          onPressed: () => unawaited(_openSort()),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                child: _CategoryChips(category: state.category),
               ),
               _CatalogBody(
                 state: state,

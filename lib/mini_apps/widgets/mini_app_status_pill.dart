@@ -11,12 +11,11 @@ class MiniAppStatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tone = switch (status) {
-      MiniAppStatus.rejected ||
-      MiniAppStatus.suspended => NinjaBadgeTone.dangerOutline,
+      MiniAppStatus.rejected || MiniAppStatus.suspended => AppBadgeTone.exam,
       MiniAppStatus.published ||
       MiniAppStatus.pendingReview ||
-      MiniAppStatus.draft => NinjaBadgeTone.ink,
+      MiniAppStatus.draft => AppBadgeTone.ink,
     };
-    return NinjaBadge(miniAppStatusLabel(context, status), tone: tone);
+    return AppBadge(label: miniAppStatusLabel(context, status), tone: tone);
   }
 }

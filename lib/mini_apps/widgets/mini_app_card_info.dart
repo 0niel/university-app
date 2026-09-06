@@ -32,15 +32,11 @@ class MiniAppCardInfo extends StatelessWidget {
             Flexible(
               child: Text(
                 app.name,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: .ellipsis,
                 style: AppText.headline.copyWith(color: colors.ink),
               ),
             ),
-            if (showStatus) ...[
-              const SizedBox(width: AppSpacing.sm),
-              MiniAppStatusPill(status: app.status),
-            ],
           ],
         ),
         if (app.description.isNotEmpty) ...[
@@ -51,6 +47,10 @@ class MiniAppCardInfo extends StatelessWidget {
             overflow: .ellipsis,
             style: AppText.subtext.copyWith(color: colors.muted),
           ),
+        ],
+        if (showStatus) ...[
+          const SizedBox(height: AppSpacing.sm),
+          MiniAppStatusPill(status: app.status),
         ],
       ],
     );

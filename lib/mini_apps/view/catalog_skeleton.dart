@@ -5,8 +5,6 @@ class _CatalogSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final tile = textScale >= 1.6 ? 58.0 : 52.0;
     return NinjaSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
       child: Padding(
@@ -15,7 +13,7 @@ class _CatalogSkeleton extends StatelessWidget {
           children: [
             const _CatalogSectionLabelSkeleton(width: 132),
             SizedBox(
-              height: textScale >= 1.6 ? 138 : 102,
+              height: _RecentMiniApps.height(context),
               child: ListView.separated(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.screen,
@@ -24,24 +22,11 @@ class _CatalogSkeleton extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: 5,
                 separatorBuilder: (_, _) =>
-                    const SizedBox(width: AppSpacing.lg),
-                itemBuilder: (_, _) => SizedBox(
-                  width: textScale >= 1.6 ? 108 : 76,
-                  child: Column(
-                    children: [
-                      NinjaSkeleton(
-                        width: tile,
-                        height: tile,
-                        radius: AppRadius.field,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      const NinjaSkeleton(
-                        width: 52,
-                        height: 10,
-                        radius: AppRadius.skeletonThin,
-                      ),
-                    ],
-                  ),
+                    const SizedBox(width: AppSpacing.sm),
+                itemBuilder: (_, _) => const NinjaSkeleton(
+                  width: 260,
+                  height: 80,
+                  radius: AppRadius.field,
                 ),
               ),
             ),
