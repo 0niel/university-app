@@ -91,7 +91,6 @@ List<MapLabelCandidate> placeMapLabels(
 Offset? mapInteriorLabelAnchor(Path path) {
   final bounds = path.getBounds();
   if (!_validBounds(bounds)) return null;
-  if (path.contains(bounds.center)) return bounds.center;
 
   final metrics = path.computeMetrics(forceClosed: true).take(32).toList();
   final segments = <_BoundarySegment>[];
@@ -121,8 +120,11 @@ Offset? mapInteriorLabelAnchor(Path path) {
     if (contourBounds != null) contourCenters.add(contourBounds.center);
   }
 
+  if (segments.isEmpty) return null;
+
+  final tolerance = math.max(bounds.width, bounds.height) * 1e-7;
   Offset? best;
-  var bestClearance = -1.0;
+  var bestClearance = tolerance * tolerance;
   void consider(Offset point) {
     if (!path.contains(point)) return;
     final edgeDistance = math.min(
@@ -139,6 +141,9 @@ Offset? mapInteriorLabelAnchor(Path path) {
       bestClearance = clearance;
     }
   }
+
+  consider(bounds.center);
+  if (best != null) return best;
 
   contourCenters.forEach(consider);
   const divisions = 17;

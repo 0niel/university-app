@@ -117,6 +117,35 @@ void main() {
   });
 
   group('mapInteriorLabelAnchor', () {
+    test('rejects line boundaries reported as filled by the backend', () {
+      for (final includeCenter in [true, false]) {
+        expect(
+          mapInteriorLabelAnchor(
+            _BoundaryInclusiveLine(includeCenter: includeCenter),
+          ),
+          isNull,
+        );
+      }
+    });
+
+    test('rejects reversed, closed and translated zero-area contours', () {
+      for (final origin in [Offset.zero, const Offset(10000, -20000)]) {
+        for (final reversed in [false, true]) {
+          for (final closed in [false, true]) {
+            final first =
+                origin + (reversed ? const Offset(100, 73) : Offset.zero);
+            final last =
+                origin + (reversed ? Offset.zero : const Offset(100, 73));
+            final path = Path()
+              ..moveTo(first.dx, first.dy)
+              ..lineTo(last.dx, last.dy);
+            if (closed) path.close();
+            expect(mapInteriorLabelAnchor(path), isNull);
+          }
+        }
+      }
+    });
+
     test('uses the bounding center when the room contains it', () {
       final path = Path()..addRect(const Rect.fromLTWH(10, 20, 80, 60));
       expect(mapInteriorLabelAnchor(path), const Offset(50, 50));
@@ -197,6 +226,29 @@ void main() {
       );
     });
   });
+}
+
+class _BoundaryInclusiveLine extends Fake implements Path {
+  _BoundaryInclusiveLine({required this.includeCenter});
+
+  final bool includeCenter;
+  final _line = Path()
+    ..moveTo(0, 0)
+    ..lineTo(100, 100);
+
+  @override
+  Rect getBounds() => _line.getBounds();
+
+  @override
+  PathMetrics computeMetrics({bool forceClosed = false}) =>
+      _line.computeMetrics(forceClosed: forceClosed);
+
+  @override
+  bool contains(Offset point) =>
+      point.dx == point.dy &&
+      point.dx >= 0 &&
+      point.dx <= 100 &&
+      (includeCenter || point != const Offset(50, 50));
 }
 
 MapLabelCandidate _label(
