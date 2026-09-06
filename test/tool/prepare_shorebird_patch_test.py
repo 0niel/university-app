@@ -40,6 +40,8 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
             "packages/nested/client/pubspec.yaml": b"name: nested_client\n",
             "packages/nested/client/lib/client.dart": b"class Client {}\n",
             "test/main_test.dart": b"void main() {}\n",
+            "test/tool/configuration_test.dart": b"baseline tool contract\n",
+            "test/tool/removed_check.py": b"baseline tool check\n",
             "tool/generator.py": b"print('baseline generator')\n",
             ".github/workflows/test.yml": b"name: baseline\n",
             ".gitignore": b"/build/\n/.dart_tool/\n/lib/ignored.dart\n",
@@ -122,6 +124,35 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
         self.source = self.commit()
         self.materialize()
         self.assertTrue((self.output / "tool/generator.py").exists())
+
+    def test_tool_tests_remain_at_baseline_and_leave_runtime_test_receipt(self):
+        runtime_tests = ["test/feature/screen_test.dart", "packages/nested/client/test/client_test.dart",
+                         "test/toolbox/runtime_test.dart"]
+        for path in runtime_tests:
+            self.write(path, b"new runtime test\n")
+        self.source = self.commit()
+        _, before = self.project()
+        self.write("test/tool/configuration_test.dart", b"new tool contract\n")
+        (self.root / "test/tool/removed_check.py").unlink()
+        new_tool_tests = ["test/tool/new_contract_test.dart", "test/tool/new_policy_test.py"]
+        for path in new_tool_tests:
+            self.write(path, b"new tooling test\n")
+        self.source = self.commit()
+        entries, receipt = self.materialize()
+        self.assertEqual(receipt["projection_sha256"], before["projection_sha256"])
+        self.assertEqual(receipt["projected_tree_sha"], before["projected_tree_sha"])
+        self.assertEqual(receipt["test_paths"], sorted(runtime_tests))
+        self.assertEqual(receipt["runtime_paths"], ["lib/main.dart"])
+        self.assertEqual(set(receipt["excluded_paths"]), {
+            "test/tool/configuration_test.dart", "test/tool/removed_check.py", *new_tool_tests,
+        })
+        self.assertEqual((self.output / "test/tool/configuration_test.dart").read_bytes(), b"baseline tool contract\n")
+        self.assertEqual((self.output / "test/tool/removed_check.py").read_bytes(), b"baseline tool check\n")
+        for path in new_tool_tests:
+            self.assertNotIn(path, entries)
+            self.assertFalse((self.output / path).exists())
+        for path in runtime_tests:
+            self.assertEqual((self.output / path).read_bytes(), b"new runtime test\n")
 
     def test_each_protected_path_is_rejected(self):
         for path in ["pubspec.yaml", "pubspec.lock", "packages/nested/client/pubspec.yaml",
@@ -215,6 +246,66 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
         (self.output / "lib/ignored.dart").write_bytes(b"injected\n")
         with self.assertRaisesRegex(ValueError, "ignored runtime"):
             MODULE.verify_worktree(self.output, entries, receipt)
+
+    def private_checkout(self):
+        self.write(".gitignore", (self.root / ".gitignore").read_bytes() + b"/android/private/\n/other-private/\n")
+        self.baseline = self.commit()
+        self.source = self.baseline
+        entries, receipt = self.materialize()
+        private = self.output / "android/private/nfc-pass-android"
+        private.mkdir(parents=True)
+        env = {**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull}
+        MODULE.git(private, "init", "-q", env=env)
+        (private / "Native.kt").write_bytes(b"class Native\n")
+        MODULE.git(private, "add", "Native.kt", env=env)
+        MODULE.git(private, "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "Fixture", env=env)
+        manifest = {"platform": "android", "private_native_sha": MODULE.git(private, "rev-parse", "HEAD").decode().strip(), "build_inputs": {}}
+        spec = importlib.util.spec_from_file_location("release_manifest", ROOT / "tool/release_manifest.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        replacement = patch.dict(sys.modules, {"release_manifest": module})
+        replacement.start()
+        self.addCleanup(replacement.stop)
+        return private, entries, receipt, manifest
+
+    def test_pinned_clean_ignored_native_repository_is_verified_before_exemption(self):
+        private, entries, receipt, manifest = self.private_checkout()
+        ignored = MODULE.git(self.output, "ls-files", "--others", "--ignored", "--exclude-standard", "-z").decode().split("\0")
+        self.assertIn("android/private/nfc-pass-android/", ignored)
+        MODULE.verify_worktree(self.output, entries, receipt, manifest)
+        MODULE.verify_worktree(self.output, entries, receipt, manifest, verify_native_inputs=True)
+        for provided in (None, {**manifest, "platform": "ios"}, {**manifest, "private_native_sha": None},
+                         {**manifest, "private_native_sha": "0" * 40}):
+            with self.subTest(manifest=provided), self.assertRaises(ValueError):
+                MODULE.verify_worktree(self.output, entries, receipt, provided)
+        self.assertTrue(private.is_dir())
+
+    def test_ignored_native_repository_rejects_dirty_and_untracked_content(self):
+        private, entries, receipt, manifest = self.private_checkout()
+        target = private / "Native.kt"
+        target.write_bytes(b"changed native source\n")
+        with self.assertRaisesRegex(ValueError, "unrecorded changes"):
+            MODULE.verify_worktree(self.output, entries, receipt, manifest)
+        target.write_bytes(b"class Native\n")
+        (private / "Untracked.kt").write_bytes(b"untracked native source\n")
+        with self.assertRaisesRegex(ValueError, "unrecorded changes"):
+            MODULE.verify_worktree(self.output, entries, receipt, manifest)
+
+    def test_ignored_native_checkout_rejects_symlink_ancestors(self):
+        private, _, _, manifest = self.private_checkout()
+        original = Path.is_symlink
+        for ancestor in (self.output / "android", private.parent, private):
+            with self.subTest(ancestor=ancestor), patch.object(Path, "is_symlink", lambda path: path == ancestor or original(path)), self.assertRaisesRegex(ValueError, "Unsafe private"):
+                MODULE.verify_ignored_private_checkout(self.output, manifest)
+
+    def test_other_ignored_nested_repository_is_not_exempted(self):
+        _, entries, receipt, manifest = self.private_checkout()
+        other = self.output / "other-private"
+        other.mkdir()
+        MODULE.git(other, "init", "-q")
+        (other / "source.dart").write_bytes(b"untrusted\n")
+        with self.assertRaisesRegex(ValueError, "Unsafe repository path"):
+            MODULE.verify_worktree(self.output, entries, receipt, manifest)
 
     def test_staged_changes_are_rejected(self):
         entries, receipt = self.materialize()
