@@ -4,18 +4,13 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart' hide TimeOfDay;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
-import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
-import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
-import 'package:rtu_mirea_app/notifications/model/notification_feed.dart';
 import 'package:rtu_mirea_app/notifications/view/schedule_changes_read_scope.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
-import 'package:rtu_mirea_app/schedule/widgets/schedule_metrics.dart';
-import 'package:schedule_repository/schedule_repository.dart';
+import 'package:rtu_mirea_app/schedule/widgets/schedule_change_card.dart';
 
-part 'widgets/change_timeline_row.dart';
 part 'widgets/changes_skeleton.dart';
 part 'widgets/change_timeline_row_skeleton.dart';
 part 'widgets/subscribe_banner.dart';
@@ -119,20 +114,7 @@ class _ChangesPageState extends State<ChangesPage> {
         onAction: () => unawaited(_loadChanges()),
       ).animateEmptyState(key: const ValueKey('changes_empty'));
     }
-    return ScheduleChangesReadScope(
-      changes: state.changes,
-      child: Column(
-        key: const ValueKey('changes_list'),
-        crossAxisAlignment: .stretch,
-        children: [
-          for (final (index, change) in state.changes.indexed)
-            _ChangeTimelineRow(
-              change: change,
-              last: index == state.changes.length - 1,
-            ).animateListItem(index: index),
-        ],
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   @override
@@ -142,7 +124,6 @@ class _ChangesPageState extends State<ChangesPage> {
     final cubit = context.watch<ScheduleChangesCubit>();
     final selected = context.watch<ScheduleBloc>().state.selectedSchedule;
     final request = changesRequestFor(selected);
-    final notifications = context.watch<NotificationsCubit?>()?.state;
     final state = request != null && cubit.matchesTarget(request.$1, request.$2)
         ? cubit.state
         : const ScheduleChangesState();
@@ -156,71 +137,89 @@ class _ChangesPageState extends State<ChangesPage> {
         child: RefreshIndicator(
           color: colors.ink,
           onRefresh: _loadChanges,
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics(),
-            ),
-            slivers: [
-              SliverToBoxAdapter(
-                child: AppInnerHeader(
-                  title: l10n.changesTitle,
-                  onBack: () => Navigator.of(context).maybePop(),
-                  actions: [
-                    AppHeaderAction(
-                      icon: AppLineIcon.bell,
-                      semanticsLabel: l10n.notifications,
-                      badge: state.changes.any(
-                        (change) =>
-                            !(notifications?.isRead(
-                                  scheduleChangeNotificationId(change),
-                                ) ??
-                                false),
-                      ),
-                      onTap: _settings == null || _savingSettings
-                          ? null
-                          : () => unawaited(
-                              _toggleAlerts(
-                                !(_settings?.scheduleChangeAlerts ?? true),
-                              ),
-                            ),
+          child: ScheduleChangesReadScope(
+            changes: state.changes,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => AppInnerHeader(
+                      title: l10n.changesTitle,
+                      titleStyle:
+                          constraints.maxWidth < 360 &&
+                              MediaQuery.textScalerOf(context).scale(14) > 20
+                          ? AppText.headline
+                          : null,
+                      onBack: () => Navigator.of(context).maybePop(),
                     ),
-                  ],
-                ),
-              ),
-              SliverSafeArea(
-                top: false,
-                sliver: SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.screen,
-                    AppSpacing.xsm,
-                    AppSpacing.screen,
-                    AppSpacing.xxl,
-                  ),
-                  sliver: SliverList.list(
-                    children: [
-                      if (_settingsError)
-                        AppBanner(
-                          tone: AppBannerTone.warn,
-                          message: l10n.loadingError,
-                          actionLabel: l10n.retry,
-                          onAction: () => unawaited(_loadSettings()),
-                        )
-                      else if (_settings == null)
-                        const AppSkeletonRow()
-                      else
-                        _SubscribeBanner(
-                          enabled: _settings!.scheduleChangeAlerts,
-                          onChanged: _savingSettings
-                              ? null
-                              : (value) => unawaited(_toggleAlerts(value)),
-                        ),
-                      const SizedBox(height: AppSpacing.sheetBottom),
-                      AppStateSwitcher(child: _buildChanges(context, state)),
-                    ],
                   ),
                 ),
-              ),
-            ],
+                SliverSafeArea(
+                  top: false,
+                  bottom: false,
+                  sliver: SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.screen,
+                      AppSpacing.xsm,
+                      AppSpacing.screen,
+                      AppSpacing.md,
+                    ),
+                    sliver: SliverList.list(
+                      children: [
+                        if (_settingsError)
+                          AppBanner(
+                            tone: AppBannerTone.warn,
+                            message: l10n.loadingError,
+                            actionLabel: l10n.retry,
+                            onAction: () => unawaited(_loadSettings()),
+                          )
+                        else if (_settings == null)
+                          const AppSkeletonRow()
+                        else
+                          _SubscribeBanner(
+                            enabled: _settings!.scheduleChangeAlerts,
+                            onChanged: _savingSettings
+                                ? null
+                                : (value) => unawaited(_toggleAlerts(value)),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverSafeArea(
+                  top: false,
+                  sliver: SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.screen,
+                      0,
+                      AppSpacing.screen,
+                      AppSpacing.xxl,
+                    ),
+                    sliver: state.changes.isEmpty
+                        ? SliverToBoxAdapter(
+                            child: AppStateSwitcher(
+                              child: _buildChanges(context, state),
+                            ),
+                          )
+                        : SliverList.builder(
+                            key: const ValueKey('changes_list'),
+                            itemCount: state.changes.length,
+                            itemBuilder: (context, index) => Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppSpacing.gap,
+                              ),
+                              child: ScheduleChangeCard(
+                                change: state.changes[index],
+                              ),
+                            ).animateListItem(index: index),
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -14,7 +14,6 @@ class _ChangeTimelineRowSkeleton extends StatelessWidget {
           crossAxisAlignment: .start,
           spacing: AppSpacing.md,
           children: [
-            AppSkeleton.avatar(),
             Expanded(
               child: Column(
                 crossAxisAlignment: .start,

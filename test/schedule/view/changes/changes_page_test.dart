@@ -12,6 +12,7 @@ import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/view/changes/changes_page.dart';
+import 'package:rtu_mirea_app/schedule/widgets/schedule_change_card.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 class MockScheduleBloc extends MockBloc<ScheduleEvent, ScheduleState>
@@ -58,8 +59,15 @@ void main() {
       ).thenAnswer((_) async => const UserSettings());
     });
 
-    Widget buildSubject() {
+    Widget buildSubject({double textScale = 1, double bottomInset = 0}) {
       return MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale),
+            padding: EdgeInsets.only(bottom: bottomInset),
+          ),
+          child: child!,
+        ),
         theme: AppTheme.darkTheme,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -170,6 +178,63 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('Другой предмет'), findsNothing);
       verify(changesCubit.clear).called(1);
+    });
+
+    testWidgets('builds long histories lazily and scrolls controls away', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(320, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      when(() => changesCubit.state).thenReturn(
+        ScheduleChangesState(
+          changes: List.generate(
+            60,
+            (index) => ScheduleChange(
+              id: '$index',
+              kind: ScheduleChangeKind.room,
+              subject: 'Предмет $index',
+              lessonDate: DateTime(2026, 9, 11),
+              createdAt: DateTime(2026, 9, 6),
+              oldValue: const ScheduleChangeSlot(
+                start: '12:40',
+                end: '14:10',
+                rooms: ['А-101'],
+              ),
+              newValue: const ScheduleChangeSlot(
+                start: '12:40',
+                end: '14:10',
+                rooms: ['Б-202'],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpWidget(buildSubject(textScale: 2, bottomInset: 24));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(ScheduleChangeCard).evaluate().length, lessThan(10));
+      expect(find.byType(AppHeaderAction), findsNothing);
+      final scrollable = find.descendant(
+        of: find.byType(CustomScrollView),
+        matching: find.byType(Scrollable),
+      );
+      await tester.scrollUntilVisible(
+        find.text('Предмет 59'),
+        700,
+        scrollable: scrollable,
+        maxScrolls: 80,
+      );
+      await tester.pumpAndSettle();
+      final lastCard = find.ancestor(
+        of: find.text('Предмет 59'),
+        matching: find.byType(ScheduleChangeCard),
+      );
+      final position = Scrollable.of(tester.element(lastCard)).position;
+      position.jumpTo(position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(lastCard).dy, lessThanOrEqualTo(900 - 24));
+      expect(find.byType(AppSwitch).hitTestable(), findsNothing);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('unknown alert settings never render an enabled toggle', (

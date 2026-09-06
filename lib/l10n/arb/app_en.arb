@@ -11939,5 +11939,17 @@
   "friendsLocationServiceDisabled": "Location services are turned off on your device. The map remains available.",
   "friendsLocationUnsupported": "This device cannot provide your location. You can still browse the map.",
   "friendsLocationLocating": "Finding your location…",
-  "friendsLocationForegroundActive": "Updates while the app is active"
+  "friendsLocationForegroundActive": "Updates while the app is active",
+  "changesAlertsTitle": "Change notifications",
+  "scheduleChangeUpdated": "Lesson updated",
+  "scheduleChangeBefore": "Before",
+  "scheduleChangeAfter": "After",
+  "scheduleChangeUnavailable": "Not specified",
+  "scheduleChangeDetailsUnavailable": "Change details are unavailable",
+  "scheduleChangeSubjectUnavailable": "Untitled lesson",
+  "scheduleChangeDate": "Lesson date",
+  "scheduleChangeSubjectLabel": "Subject",
+  "scheduleChangeRenamed": "Subject renamed",
+  "scheduleChangeDetectedAt": "Detected {time}",
+  "@scheduleChangeDetectedAt": {"placeholders": {"time": {"type": "String"}}}
 }

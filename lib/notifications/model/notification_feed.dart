@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/notifications/model/app_notification.dart';
+import 'package:rtu_mirea_app/schedule/widgets/schedule_change_presentation.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 String scheduleChangeNotificationId(ScheduleChange change) =>
@@ -12,7 +13,8 @@ AppNotificationKind scheduleChangeKindOf(ScheduleChangeKind kind) =>
       ScheduleChangeKind.add => AppNotificationKind.lecture,
       ScheduleChangeKind.move ||
       ScheduleChangeKind.room ||
-      ScheduleChangeKind.teacher => AppNotificationKind.warn,
+      ScheduleChangeKind.teacher ||
+      ScheduleChangeKind.update => AppNotificationKind.warn,
     };
 
 List<AppNotification> buildNotificationFeed({
@@ -21,63 +23,25 @@ List<AppNotification> buildNotificationFeed({
   required List<ScheduleChange> changes,
   DateTime? now,
 }) {
-  final today = now ?? DateTime.now();
   return [
     ...pushes,
-    for (final change in changes)
-      AppNotification(
-        id: scheduleChangeNotificationId(change),
-        kind: scheduleChangeKindOf(change.kind),
-        title: _changeTitle(l10n, change),
-        subtitle: _changeSubtitle(l10n, change, today),
-        route: '/schedule',
-        createdAt: change.createdAt,
-      ),
+    for (final change in changes) _scheduleNotification(l10n, change),
   ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 }
 
-String _changeTitle(AppLocalizations l10n, ScheduleChange change) =>
-    switch (change.kind) {
-      ScheduleChangeKind.move => l10n.notifChangeMoved(change.subject),
-      ScheduleChangeKind.cancel => l10n.notifChangeCancelled(change.subject),
-      ScheduleChangeKind.add => l10n.notifChangeAdded(change.subject),
-      ScheduleChangeKind.room => l10n.notifChangeRoom(change.subject),
-      ScheduleChangeKind.teacher => l10n.notifChangeTeacher(change.subject),
-    };
-
-String _changeSubtitle(
+AppNotification _scheduleNotification(
   AppLocalizations l10n,
   ScheduleChange change,
-  DateTime now,
 ) {
-  final start = change.newValue.start ?? change.oldValue.start;
-  final when = [
-    _dayLabel(l10n, change.lessonDate, now),
-    ?start,
-  ].join(', ');
-  final detail = switch (change.kind) {
-    ScheduleChangeKind.move => _insteadOf(l10n, change.oldValue.start),
-    ScheduleChangeKind.room => [
-      change.newValue.rooms.join(', '),
-      _insteadOf(l10n, change.oldValue.rooms.join(', ')),
-    ].where((part) => part.isNotEmpty).join(' · '),
-    ScheduleChangeKind.teacher => change.newValue.teachers.join(', '),
-    ScheduleChangeKind.add => change.newValue.rooms.join(', '),
-    ScheduleChangeKind.cancel => '',
-  };
-  return [when, detail].where((part) => part.isNotEmpty).join(' · ');
-}
-
-String _insteadOf(AppLocalizations l10n, String? value) =>
-    value == null || value.isEmpty ? '' : l10n.notifChangeInsteadOf(value);
-
-String _dayLabel(AppLocalizations l10n, DateTime date, DateTime now) {
-  final day = DateTime(date.year, date.month, date.day);
-  final today = DateTime(now.year, now.month, now.day);
-  final delta = day.difference(today).inDays;
-  if (delta == 0) return l10n.today;
-  if (delta == 1) return l10n.pickerTomorrow;
-  return DateFormat('d MMM', l10n.localeName).format(date);
+  final presentation = ScheduleChangePresentation.fromChange(change, l10n);
+  return AppNotification(
+    id: scheduleChangeNotificationId(change),
+    kind: scheduleChangeKindOf(presentation.effectiveKind),
+    title: '${presentation.subject} · ${presentation.title}',
+    subtitle: presentation.summary,
+    route: '/schedule',
+    createdAt: change.createdAt,
+  );
 }
 
 String notificationAgeLabel(

@@ -12321,4 +12321,40 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get friendsLocationForegroundActive =>
       'Updates while the app is active';
+
+  @override
+  String get changesAlertsTitle => 'Change notifications';
+
+  @override
+  String get scheduleChangeUpdated => 'Lesson updated';
+
+  @override
+  String get scheduleChangeBefore => 'Before';
+
+  @override
+  String get scheduleChangeAfter => 'After';
+
+  @override
+  String get scheduleChangeUnavailable => 'Not specified';
+
+  @override
+  String get scheduleChangeDetailsUnavailable =>
+      'Change details are unavailable';
+
+  @override
+  String get scheduleChangeSubjectUnavailable => 'Untitled lesson';
+
+  @override
+  String get scheduleChangeDate => 'Lesson date';
+
+  @override
+  String get scheduleChangeSubjectLabel => 'Subject';
+
+  @override
+  String get scheduleChangeRenamed => 'Subject renamed';
+
+  @override
+  String scheduleChangeDetectedAt(String time) {
+    return 'Detected $time';
+  }
 }
