@@ -12,6 +12,7 @@ class AppListRow extends StatelessWidget {
     super.key,
     this.leading,
     this.subtitle,
+    this.titleMaxLines = 1,
     this.meta,
     this.trailing,
     this.isFirst = false,
@@ -26,6 +27,7 @@ class AppListRow extends StatelessWidget {
   final Widget? leading;
   final String title;
   final String? subtitle;
+  final int? titleMaxLines;
   final String? meta;
   final Widget? trailing;
   final bool isFirst;
@@ -79,8 +81,10 @@ class AppListRow extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: titleMaxLines,
+                      overflow: titleMaxLines == null
+                          ? TextOverflow.clip
+                          : TextOverflow.ellipsis,
                       style: (strong ? AppText.bodyStrong : AppText.body)
                           .copyWith(color: titleColor),
                     ),

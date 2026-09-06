@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -13,6 +11,7 @@ class MapTopBar extends StatelessWidget {
     required this.onQueryChanged,
     required this.onCampusSelected,
     required this.onFriends,
+    this.compact = false,
     super.key,
   });
 
@@ -22,50 +21,63 @@ class MapTopBar extends StatelessWidget {
   final ValueChanged<String> onQueryChanged;
   final ValueChanged<CampusModel> onCampusSelected;
   final VoidCallback onFriends;
+  final bool compact;
+
+  Future<void> _chooseCampus(BuildContext context) => showAppSheet<void>(
+    context,
+    title: 'Кампусы',
+    child: AppListGroup(
+      children: [
+        for (final campus in campuses)
+          AppListRow(
+            title: campus.displayName,
+            leading: const AppIconTile(icon: AppLineIcon.school),
+            trailing: campus.id == selectedCampus?.id
+                ? const AppLineIconWidget(AppLineIcon.check)
+                : null,
+            onTap: () {
+              Navigator.of(context, rootNavigator: true).pop();
+              if (campus.id != selectedCampus?.id) onCampusSelected(campus);
+            },
+          ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Padding(
-      padding: EdgeInsets.only(
-        top: math.max(56, MediaQuery.paddingOf(context).top + 12),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        MediaQuery.paddingOf(context).top + AppSpacing.sm,
+        AppSpacing.lg,
+        0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-            child: AppSearchField(
-              controller: controller,
-              hintText: l10n.mapSearchPlaceholder,
-              onCanvas: true,
-              onChanged: onQueryChanged,
-              onClear: () => onQueryChanged(''),
-              trailing: AppIconButton(
-                icon: const AppLineIconWidget(AppLineIcon.people, size: 18),
-                shape: AppIconButtonShape.circle,
-                size: AppIconButtonSize.small,
-                tone: AppIconButtonTone.primary,
-                tooltip: l10n.mapFriendsToggle,
-                onPressed: onFriends,
-              ),
-            ),
+          AppSearchField(
+            controller: controller,
+            hintText: l10n.mapSearchPlaceholder,
+            onCanvas: true,
+            trailingIcon: AppLineIcon.people,
+            onTrailingTap: onFriends,
+            trailingSemanticLabel: l10n.mapFriendsToggle,
+            onChanged: onQueryChanged,
+            onClear: () => onQueryChanged(''),
           ),
-          const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-            child: Row(
-              children: [
-                for (var index = 0; index < campuses.length; index++) ...[
-                  if (index > 0) const SizedBox(width: 6),
-                  AppChip.filter(
-                    label: campuses[index].displayName,
-                    selected: selectedCampus?.id == campuses[index].id,
-                    onTap: () => onCampusSelected(campuses[index]),
-                  ),
-                ],
-              ],
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: AppButton.secondary(
+              label: selectedCampus?.displayName ?? 'Кампус',
+              trailingIcon: const AppLineIconWidget(
+                AppLineIcon.chevronD,
+                size: 16,
+              ),
+              size: AppButtonSize.small,
+              onPressed: campuses.isEmpty ? null : () => _chooseCampus(context),
             ),
           ),
         ],

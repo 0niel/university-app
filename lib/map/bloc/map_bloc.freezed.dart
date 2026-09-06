@@ -55,11 +55,12 @@ extension MapEventPatterns on MapEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( MapInitialized value)?  initialized,TResult Function( CampusSelected value)?  campusSelected,TResult Function( FloorSelected value)?  floorSelected,TResult Function( RoomTapped value)?  roomTapped,TResult Function( CampusIndexRequested value)?  campusIndexRequested,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( MapInitialized value)?  initialized,TResult Function( MapRefreshRequested value)?  refreshRequested,TResult Function( CampusSelected value)?  campusSelected,TResult Function( FloorSelected value)?  floorSelected,TResult Function( RoomTapped value)?  roomTapped,TResult Function( CampusIndexRequested value)?  campusIndexRequested,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case MapInitialized() when initialized != null:
-return initialized(_that);case CampusSelected() when campusSelected != null:
+return initialized(_that);case MapRefreshRequested() when refreshRequested != null:
+return refreshRequested(_that);case CampusSelected() when campusSelected != null:
 return campusSelected(_that);case FloorSelected() when floorSelected != null:
 return floorSelected(_that);case RoomTapped() when roomTapped != null:
 return roomTapped(_that);case CampusIndexRequested() when campusIndexRequested != null:
@@ -81,11 +82,12 @@ return campusIndexRequested(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( MapInitialized value)  initialized,required TResult Function( CampusSelected value)  campusSelected,required TResult Function( FloorSelected value)  floorSelected,required TResult Function( RoomTapped value)  roomTapped,required TResult Function( CampusIndexRequested value)  campusIndexRequested,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( MapInitialized value)  initialized,required TResult Function( MapRefreshRequested value)  refreshRequested,required TResult Function( CampusSelected value)  campusSelected,required TResult Function( FloorSelected value)  floorSelected,required TResult Function( RoomTapped value)  roomTapped,required TResult Function( CampusIndexRequested value)  campusIndexRequested,}){
 final _that = this;
 switch (_that) {
 case MapInitialized():
-return initialized(_that);case CampusSelected():
+return initialized(_that);case MapRefreshRequested():
+return refreshRequested(_that);case CampusSelected():
 return campusSelected(_that);case FloorSelected():
 return floorSelected(_that);case RoomTapped():
 return roomTapped(_that);case CampusIndexRequested():
@@ -103,11 +105,12 @@ return campusIndexRequested(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( MapInitialized value)?  initialized,TResult? Function( CampusSelected value)?  campusSelected,TResult? Function( FloorSelected value)?  floorSelected,TResult? Function( RoomTapped value)?  roomTapped,TResult? Function( CampusIndexRequested value)?  campusIndexRequested,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( MapInitialized value)?  initialized,TResult? Function( MapRefreshRequested value)?  refreshRequested,TResult? Function( CampusSelected value)?  campusSelected,TResult? Function( FloorSelected value)?  floorSelected,TResult? Function( RoomTapped value)?  roomTapped,TResult? Function( CampusIndexRequested value)?  campusIndexRequested,}){
 final _that = this;
 switch (_that) {
 case MapInitialized() when initialized != null:
-return initialized(_that);case CampusSelected() when campusSelected != null:
+return initialized(_that);case MapRefreshRequested() when refreshRequested != null:
+return refreshRequested(_that);case CampusSelected() when campusSelected != null:
 return campusSelected(_that);case FloorSelected() when floorSelected != null:
 return floorSelected(_that);case RoomTapped() when roomTapped != null:
 return roomTapped(_that);case CampusIndexRequested() when campusIndexRequested != null:
@@ -128,10 +131,11 @@ return campusIndexRequested(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initialized,TResult Function( CampusModel campus)?  campusSelected,TResult Function( FloorModel floor,  CampusModel campus)?  floorSelected,TResult Function( String roomId)?  roomTapped,TResult Function( CampusModel campus)?  campusIndexRequested,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initialized,TResult Function()?  refreshRequested,TResult Function( CampusModel campus)?  campusSelected,TResult Function( FloorModel floor,  CampusModel campus)?  floorSelected,TResult Function( String roomId)?  roomTapped,TResult Function( CampusModel campus)?  campusIndexRequested,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case MapInitialized() when initialized != null:
-return initialized();case CampusSelected() when campusSelected != null:
+return initialized();case MapRefreshRequested() when refreshRequested != null:
+return refreshRequested();case CampusSelected() when campusSelected != null:
 return campusSelected(_that.campus);case FloorSelected() when floorSelected != null:
 return floorSelected(_that.floor,_that.campus);case RoomTapped() when roomTapped != null:
 return roomTapped(_that.roomId);case CampusIndexRequested() when campusIndexRequested != null:
@@ -153,10 +157,11 @@ return campusIndexRequested(_that.campus);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initialized,required TResult Function( CampusModel campus)  campusSelected,required TResult Function( FloorModel floor,  CampusModel campus)  floorSelected,required TResult Function( String roomId)  roomTapped,required TResult Function( CampusModel campus)  campusIndexRequested,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initialized,required TResult Function()  refreshRequested,required TResult Function( CampusModel campus)  campusSelected,required TResult Function( FloorModel floor,  CampusModel campus)  floorSelected,required TResult Function( String roomId)  roomTapped,required TResult Function( CampusModel campus)  campusIndexRequested,}) {final _that = this;
 switch (_that) {
 case MapInitialized():
-return initialized();case CampusSelected():
+return initialized();case MapRefreshRequested():
+return refreshRequested();case CampusSelected():
 return campusSelected(_that.campus);case FloorSelected():
 return floorSelected(_that.floor,_that.campus);case RoomTapped():
 return roomTapped(_that.roomId);case CampusIndexRequested():
@@ -174,10 +179,11 @@ return campusIndexRequested(_that.campus);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initialized,TResult? Function( CampusModel campus)?  campusSelected,TResult? Function( FloorModel floor,  CampusModel campus)?  floorSelected,TResult? Function( String roomId)?  roomTapped,TResult? Function( CampusModel campus)?  campusIndexRequested,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initialized,TResult? Function()?  refreshRequested,TResult? Function( CampusModel campus)?  campusSelected,TResult? Function( FloorModel floor,  CampusModel campus)?  floorSelected,TResult? Function( String roomId)?  roomTapped,TResult? Function( CampusModel campus)?  campusIndexRequested,}) {final _that = this;
 switch (_that) {
 case MapInitialized() when initialized != null:
-return initialized();case CampusSelected() when campusSelected != null:
+return initialized();case MapRefreshRequested() when refreshRequested != null:
+return refreshRequested();case CampusSelected() when campusSelected != null:
 return campusSelected(_that.campus);case FloorSelected() when floorSelected != null:
 return floorSelected(_that.floor,_that.campus);case RoomTapped() when roomTapped != null:
 return roomTapped(_that.roomId);case CampusIndexRequested() when campusIndexRequested != null:
@@ -213,6 +219,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'MapEvent.initialized()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class MapRefreshRequested implements MapEvent {
+  const MapRefreshRequested();
+
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapRefreshRequested);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MapEvent.refreshRequested()';
 }
 
 
@@ -526,7 +564,7 @@ $CampusModelCopyWith<$Res> get campus {
 /// @nodoc
 mixin _$MapState {
 
- MapStatus get status; List<CampusModel> get availableCampuses; CampusModel? get selectedCampus; FloorModel? get selectedFloor; List<RoomModel> get rooms; Map<String, int> get roomFloors; Rect? get boundingRect; String? get errorMessage;
+ MapStatus get status; List<CampusModel> get availableCampuses; CampusModel? get selectedCampus; FloorModel? get selectedFloor; List<RoomModel> get rooms; Map<String, int> get roomFloors; Rect? get boundingRect; String? get errorMessage; CampusMapData? get campusData; bool get isOffline; String? get dataWarning; String? get svgContent;
 /// Create a copy of MapState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -537,16 +575,16 @@ $MapStateCopyWith<MapState> get copyWith => _$MapStateCopyWithImpl<MapState>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.availableCampuses, availableCampuses)&&(identical(other.selectedCampus, selectedCampus) || other.selectedCampus == selectedCampus)&&(identical(other.selectedFloor, selectedFloor) || other.selectedFloor == selectedFloor)&&const DeepCollectionEquality().equals(other.rooms, rooms)&&const DeepCollectionEquality().equals(other.roomFloors, roomFloors)&&(identical(other.boundingRect, boundingRect) || other.boundingRect == boundingRect)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.availableCampuses, availableCampuses)&&(identical(other.selectedCampus, selectedCampus) || other.selectedCampus == selectedCampus)&&(identical(other.selectedFloor, selectedFloor) || other.selectedFloor == selectedFloor)&&const DeepCollectionEquality().equals(other.rooms, rooms)&&const DeepCollectionEquality().equals(other.roomFloors, roomFloors)&&(identical(other.boundingRect, boundingRect) || other.boundingRect == boundingRect)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.campusData, campusData) || other.campusData == campusData)&&(identical(other.isOffline, isOffline) || other.isOffline == isOffline)&&(identical(other.dataWarning, dataWarning) || other.dataWarning == dataWarning)&&(identical(other.svgContent, svgContent) || other.svgContent == svgContent));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(availableCampuses),selectedCampus,selectedFloor,const DeepCollectionEquality().hash(rooms),const DeepCollectionEquality().hash(roomFloors),boundingRect,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(availableCampuses),selectedCampus,selectedFloor,const DeepCollectionEquality().hash(rooms),const DeepCollectionEquality().hash(roomFloors),boundingRect,errorMessage,campusData,isOffline,dataWarning,svgContent);
 
 @override
 String toString() {
-  return 'MapState(status: $status, availableCampuses: $availableCampuses, selectedCampus: $selectedCampus, selectedFloor: $selectedFloor, rooms: $rooms, roomFloors: $roomFloors, boundingRect: $boundingRect, errorMessage: $errorMessage)';
+  return 'MapState(status: $status, availableCampuses: $availableCampuses, selectedCampus: $selectedCampus, selectedFloor: $selectedFloor, rooms: $rooms, roomFloors: $roomFloors, boundingRect: $boundingRect, errorMessage: $errorMessage, campusData: $campusData, isOffline: $isOffline, dataWarning: $dataWarning, svgContent: $svgContent)';
 }
 
 
@@ -557,7 +595,7 @@ abstract mixin class $MapStateCopyWith<$Res>  {
   factory $MapStateCopyWith(MapState value, $Res Function(MapState) _then) = _$MapStateCopyWithImpl;
 @useResult
 $Res call({
- MapStatus status, List<CampusModel> availableCampuses, CampusModel? selectedCampus, FloorModel? selectedFloor, List<RoomModel> rooms, Map<String, int> roomFloors, Rect? boundingRect, String? errorMessage
+ MapStatus status, List<CampusModel> availableCampuses, CampusModel? selectedCampus, FloorModel? selectedFloor, List<RoomModel> rooms, Map<String, int> roomFloors, Rect? boundingRect, String? errorMessage, CampusMapData? campusData, bool isOffline, String? dataWarning, String? svgContent
 });
 
 
@@ -574,7 +612,7 @@ class _$MapStateCopyWithImpl<$Res>
 
 /// Create a copy of MapState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? availableCampuses = null,Object? selectedCampus = freezed,Object? selectedFloor = freezed,Object? rooms = null,Object? roomFloors = null,Object? boundingRect = freezed,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? availableCampuses = null,Object? selectedCampus = freezed,Object? selectedFloor = freezed,Object? rooms = null,Object? roomFloors = null,Object? boundingRect = freezed,Object? errorMessage = freezed,Object? campusData = freezed,Object? isOffline = null,Object? dataWarning = freezed,Object? svgContent = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as MapStatus,availableCampuses: null == availableCampuses ? _self.availableCampuses : availableCampuses // ignore: cast_nullable_to_non_nullable
@@ -584,6 +622,10 @@ as FloorModel?,rooms: null == rooms ? _self.rooms : rooms // ignore: cast_nullab
 as List<RoomModel>,roomFloors: null == roomFloors ? _self.roomFloors : roomFloors // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,boundingRect: freezed == boundingRect ? _self.boundingRect : boundingRect // ignore: cast_nullable_to_non_nullable
 as Rect?,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String?,campusData: freezed == campusData ? _self.campusData : campusData // ignore: cast_nullable_to_non_nullable
+as CampusMapData?,isOffline: null == isOffline ? _self.isOffline : isOffline // ignore: cast_nullable_to_non_nullable
+as bool,dataWarning: freezed == dataWarning ? _self.dataWarning : dataWarning // ignore: cast_nullable_to_non_nullable
+as String?,svgContent: freezed == svgContent ? _self.svgContent : svgContent // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -693,10 +735,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MapStatus status,  List<CampusModel> availableCampuses,  CampusModel? selectedCampus,  FloorModel? selectedFloor,  List<RoomModel> rooms,  Map<String, int> roomFloors,  Rect? boundingRect,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MapStatus status,  List<CampusModel> availableCampuses,  CampusModel? selectedCampus,  FloorModel? selectedFloor,  List<RoomModel> rooms,  Map<String, int> roomFloors,  Rect? boundingRect,  String? errorMessage,  CampusMapData? campusData,  bool isOffline,  String? dataWarning,  String? svgContent)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MapState() when $default != null:
-return $default(_that.status,_that.availableCampuses,_that.selectedCampus,_that.selectedFloor,_that.rooms,_that.roomFloors,_that.boundingRect,_that.errorMessage);case _:
+return $default(_that.status,_that.availableCampuses,_that.selectedCampus,_that.selectedFloor,_that.rooms,_that.roomFloors,_that.boundingRect,_that.errorMessage,_that.campusData,_that.isOffline,_that.dataWarning,_that.svgContent);case _:
   return orElse();
 
 }
@@ -714,10 +756,10 @@ return $default(_that.status,_that.availableCampuses,_that.selectedCampus,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MapStatus status,  List<CampusModel> availableCampuses,  CampusModel? selectedCampus,  FloorModel? selectedFloor,  List<RoomModel> rooms,  Map<String, int> roomFloors,  Rect? boundingRect,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MapStatus status,  List<CampusModel> availableCampuses,  CampusModel? selectedCampus,  FloorModel? selectedFloor,  List<RoomModel> rooms,  Map<String, int> roomFloors,  Rect? boundingRect,  String? errorMessage,  CampusMapData? campusData,  bool isOffline,  String? dataWarning,  String? svgContent)  $default,) {final _that = this;
 switch (_that) {
 case _MapState():
-return $default(_that.status,_that.availableCampuses,_that.selectedCampus,_that.selectedFloor,_that.rooms,_that.roomFloors,_that.boundingRect,_that.errorMessage);case _:
+return $default(_that.status,_that.availableCampuses,_that.selectedCampus,_that.selectedFloor,_that.rooms,_that.roomFloors,_that.boundingRect,_that.errorMessage,_that.campusData,_that.isOffline,_that.dataWarning,_that.svgContent);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -734,10 +776,10 @@ return $default(_that.status,_that.availableCampuses,_that.selectedCampus,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MapStatus status,  List<CampusModel> availableCampuses,  CampusModel? selectedCampus,  FloorModel? selectedFloor,  List<RoomModel> rooms,  Map<String, int> roomFloors,  Rect? boundingRect,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MapStatus status,  List<CampusModel> availableCampuses,  CampusModel? selectedCampus,  FloorModel? selectedFloor,  List<RoomModel> rooms,  Map<String, int> roomFloors,  Rect? boundingRect,  String? errorMessage,  CampusMapData? campusData,  bool isOffline,  String? dataWarning,  String? svgContent)?  $default,) {final _that = this;
 switch (_that) {
 case _MapState() when $default != null:
-return $default(_that.status,_that.availableCampuses,_that.selectedCampus,_that.selectedFloor,_that.rooms,_that.roomFloors,_that.boundingRect,_that.errorMessage);case _:
+return $default(_that.status,_that.availableCampuses,_that.selectedCampus,_that.selectedFloor,_that.rooms,_that.roomFloors,_that.boundingRect,_that.errorMessage,_that.campusData,_that.isOffline,_that.dataWarning,_that.svgContent);case _:
   return null;
 
 }
@@ -749,7 +791,7 @@ return $default(_that.status,_that.availableCampuses,_that.selectedCampus,_that.
 
 
 class _MapState implements MapState {
-  const _MapState({this.status = MapStatus.initial, final  List<CampusModel> availableCampuses = const <CampusModel>[], this.selectedCampus, this.selectedFloor, final  List<RoomModel> rooms = const <RoomModel>[], final  Map<String, int> roomFloors = const <String, int>{}, this.boundingRect, this.errorMessage}): _availableCampuses = availableCampuses,_rooms = rooms,_roomFloors = roomFloors;
+  const _MapState({this.status = MapStatus.initial, final  List<CampusModel> availableCampuses = const <CampusModel>[], this.selectedCampus, this.selectedFloor, final  List<RoomModel> rooms = const <RoomModel>[], final  Map<String, int> roomFloors = const <String, int>{}, this.boundingRect, this.errorMessage, this.campusData, this.isOffline = false, this.dataWarning, this.svgContent}): _availableCampuses = availableCampuses,_rooms = rooms,_roomFloors = roomFloors;
 
 
 @override@JsonKey() final  MapStatus status;
@@ -778,6 +820,10 @@ class _MapState implements MapState {
 
 @override final  Rect? boundingRect;
 @override final  String? errorMessage;
+@override final  CampusMapData? campusData;
+@override@JsonKey() final  bool isOffline;
+@override final  String? dataWarning;
+@override final  String? svgContent;
 
 /// Create a copy of MapState
 /// with the given fields replaced by the non-null parameter values.
@@ -789,16 +835,16 @@ _$MapStateCopyWith<_MapState> get copyWith => __$MapStateCopyWithImpl<_MapState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._availableCampuses, _availableCampuses)&&(identical(other.selectedCampus, selectedCampus) || other.selectedCampus == selectedCampus)&&(identical(other.selectedFloor, selectedFloor) || other.selectedFloor == selectedFloor)&&const DeepCollectionEquality().equals(other._rooms, _rooms)&&const DeepCollectionEquality().equals(other._roomFloors, _roomFloors)&&(identical(other.boundingRect, boundingRect) || other.boundingRect == boundingRect)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._availableCampuses, _availableCampuses)&&(identical(other.selectedCampus, selectedCampus) || other.selectedCampus == selectedCampus)&&(identical(other.selectedFloor, selectedFloor) || other.selectedFloor == selectedFloor)&&const DeepCollectionEquality().equals(other._rooms, _rooms)&&const DeepCollectionEquality().equals(other._roomFloors, _roomFloors)&&(identical(other.boundingRect, boundingRect) || other.boundingRect == boundingRect)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.campusData, campusData) || other.campusData == campusData)&&(identical(other.isOffline, isOffline) || other.isOffline == isOffline)&&(identical(other.dataWarning, dataWarning) || other.dataWarning == dataWarning)&&(identical(other.svgContent, svgContent) || other.svgContent == svgContent));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_availableCampuses),selectedCampus,selectedFloor,const DeepCollectionEquality().hash(_rooms),const DeepCollectionEquality().hash(_roomFloors),boundingRect,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_availableCampuses),selectedCampus,selectedFloor,const DeepCollectionEquality().hash(_rooms),const DeepCollectionEquality().hash(_roomFloors),boundingRect,errorMessage,campusData,isOffline,dataWarning,svgContent);
 
 @override
 String toString() {
-  return 'MapState(status: $status, availableCampuses: $availableCampuses, selectedCampus: $selectedCampus, selectedFloor: $selectedFloor, rooms: $rooms, roomFloors: $roomFloors, boundingRect: $boundingRect, errorMessage: $errorMessage)';
+  return 'MapState(status: $status, availableCampuses: $availableCampuses, selectedCampus: $selectedCampus, selectedFloor: $selectedFloor, rooms: $rooms, roomFloors: $roomFloors, boundingRect: $boundingRect, errorMessage: $errorMessage, campusData: $campusData, isOffline: $isOffline, dataWarning: $dataWarning, svgContent: $svgContent)';
 }
 
 
@@ -809,7 +855,7 @@ abstract mixin class _$MapStateCopyWith<$Res> implements $MapStateCopyWith<$Res>
   factory _$MapStateCopyWith(_MapState value, $Res Function(_MapState) _then) = __$MapStateCopyWithImpl;
 @override @useResult
 $Res call({
- MapStatus status, List<CampusModel> availableCampuses, CampusModel? selectedCampus, FloorModel? selectedFloor, List<RoomModel> rooms, Map<String, int> roomFloors, Rect? boundingRect, String? errorMessage
+ MapStatus status, List<CampusModel> availableCampuses, CampusModel? selectedCampus, FloorModel? selectedFloor, List<RoomModel> rooms, Map<String, int> roomFloors, Rect? boundingRect, String? errorMessage, CampusMapData? campusData, bool isOffline, String? dataWarning, String? svgContent
 });
 
 
@@ -826,7 +872,7 @@ class __$MapStateCopyWithImpl<$Res>
 
 /// Create a copy of MapState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? availableCampuses = null,Object? selectedCampus = freezed,Object? selectedFloor = freezed,Object? rooms = null,Object? roomFloors = null,Object? boundingRect = freezed,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? availableCampuses = null,Object? selectedCampus = freezed,Object? selectedFloor = freezed,Object? rooms = null,Object? roomFloors = null,Object? boundingRect = freezed,Object? errorMessage = freezed,Object? campusData = freezed,Object? isOffline = null,Object? dataWarning = freezed,Object? svgContent = freezed,}) {
   return _then(_MapState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as MapStatus,availableCampuses: null == availableCampuses ? _self._availableCampuses : availableCampuses // ignore: cast_nullable_to_non_nullable
@@ -836,6 +882,10 @@ as FloorModel?,rooms: null == rooms ? _self._rooms : rooms // ignore: cast_nulla
 as List<RoomModel>,roomFloors: null == roomFloors ? _self._roomFloors : roomFloors // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,boundingRect: freezed == boundingRect ? _self.boundingRect : boundingRect // ignore: cast_nullable_to_non_nullable
 as Rect?,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String?,campusData: freezed == campusData ? _self.campusData : campusData // ignore: cast_nullable_to_non_nullable
+as CampusMapData?,isOffline: null == isOffline ? _self.isOffline : isOffline // ignore: cast_nullable_to_non_nullable
+as bool,dataWarning: freezed == dataWarning ? _self.dataWarning : dataWarning // ignore: cast_nullable_to_non_nullable
+as String?,svgContent: freezed == svgContent ? _self.svgContent : svgContent // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

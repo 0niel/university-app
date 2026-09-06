@@ -138,7 +138,7 @@ void main() {
           if (!largeText) {
             expect(
               tester.getRect(find.byType(AppSearchField)),
-              const Rect.fromLTWH(20, 56, 350, 50),
+              const Rect.fromLTWH(16, 8, 358, 50),
             );
           }
           final listViewport = find.byKey(const ValueKey('map-panel-scroll'));
@@ -151,7 +151,7 @@ void main() {
           final sheet = tester.widget<DraggableScrollableSheet>(
             find.byType(DraggableScrollableSheet),
           );
-          expect(navigation.height, largeText ? 148 : 102);
+          expect(navigation.height, largeText ? 130 : 84);
           expect(panel.bottomInset, navigation.height);
           expect(tester.getRect(listViewport).bottom, navigation.top);
           expect(sheet.initialChildSize, lessThanOrEqualTo(.42));

@@ -94,6 +94,7 @@ void main() {
     bool reduceMotion = false,
     bool reloading = false,
     bool navigationViewport = false,
+    String? dataWarning,
     List<RoomModel>? rooms,
   }) async {
     addTearDown(() => tester.pumpWidget(const SizedBox.shrink()));
@@ -120,6 +121,7 @@ void main() {
                   ),
                 ],
             boundingRect: const Rect.fromLTWH(0, 0, 600, 400),
+            dataWarning: dataWarning,
           )
         : const MapState();
     when(() => bloc.state).thenReturn(state);
@@ -154,7 +156,8 @@ void main() {
       find.byType(SvgInteractiveMap),
     );
     expect(map.viewportPadding.top, greaterThan(52));
-    expect(map.viewportPadding.bottom, greaterThan(120));
+    expect(map.viewportPadding.bottom, greaterThan(60));
+    expect(map.viewportPadding.bottom, lessThan(120));
     expect(find.byType(DraggableScrollableSheet), findsOneWidget);
     expect(find.byType(AppInnerHeader), findsNothing);
     expect(find.byType(Divider), findsNothing);
@@ -181,6 +184,140 @@ void main() {
     final search = tester.getRect(find.text('Аудитория, кафедра, столовая'));
     expect(search.center.dy, lessThan(size.height * .2));
   });
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets('friends action inside search works at 320px and $scale text', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      try {
+        await pumpMap(
+          tester,
+          size: const Size(320, 568),
+          textScaler: TextScaler.linear(scale),
+        );
+        final search = find.byType(AppSearchField);
+        final friends = find.descendant(
+          of: search,
+          matching: find.bySemanticsLabel('Друзья на карте'),
+        );
+        expect(friends, findsOneWidget);
+        expect(
+          tester.getRect(search).contains(tester.getCenter(friends)),
+          isTrue,
+        );
+        await tester.enterText(search, 'А-101');
+        await tester.pumpAndSettle();
+        expect(friends, findsNothing);
+        final clearLabel = MaterialLocalizations.of(
+          tester.element(search),
+        ).deleteButtonTooltip;
+        await tester.tap(
+          find.descendant(
+            of: search,
+            matching: find.bySemanticsLabel(clearLabel),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(friends, findsOneWidget);
+        await tester.tap(friends);
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('Позиции внутри здания и этажи неизвестны.'),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(AppButton, 'Друзья на карте'),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      } finally {
+        semantics.dispose();
+      }
+    });
+  }
+
+  testWidgets('uses one campus selector and preserves every campus choice', (
+    tester,
+  ) async {
+    await pumpMap(tester);
+    expect(find.text('С-20'), findsNothing);
+    expect(find.text('МП-1'), findsNothing);
+    await tester.tap(find.widgetWithText(AppButton, 'В-78'));
+    await tester.pumpAndSettle();
+    expect(find.text('Кампусы'), findsOneWidget);
+    await tester.tap(find.text('С-20'));
+    await tester.pumpAndSettle();
+    verify(() => bloc.add(MapEvent.campusSelected(campuses[1]))).called(1);
+  });
+
+  testWidgets('standalone map reserves no phantom navigation bar', (
+    tester,
+  ) async {
+    await pumpMap(tester);
+    final panel = tester.widget<MapFreeRoomsPanel>(
+      find.byType(MapFreeRoomsPanel),
+    );
+    expect(panel.bottomInset, 0);
+    expect(panel.compactContentExtent, lessThan(100));
+    final bounds = tester.getRect(
+      find.byKey(const ValueKey('map-panel-surface')),
+    );
+    expect(bounds.height, closeTo(panel.compactContentExtent, 1));
+  });
+
+  testWidgets(
+    'manual refresh reports fallback once without a permanent banner',
+    (
+      tester,
+    ) async {
+      final states = StreamController<MapState>.broadcast();
+      addTearDown(states.close);
+      whenListen(bloc, states.stream, initialState: const MapState());
+      await pumpMap(tester);
+      final initial = bloc.state;
+      await tester.tap(find.byTooltip('Действия с картой'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('О плане и источнике'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Проверить обновления'));
+      await tester.pumpAndSettle();
+      states.add(initial.copyWith(status: MapStatus.loading));
+      await tester.pump();
+      states.add(initial.copyWith(isOffline: true));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Сервер недоступен. Показан встроенный план.'),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      states.add(initial.copyWith(roomFloors: {'101': 1}));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Сервер недоступен. Показан встроенный план.'),
+        findsNothing,
+      );
+      expect(find.text('Сохранённый план · обновить'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'bundled fallback does not nag and refresh remains in plan information',
+    (tester) async {
+      await pumpMap(tester, dataWarning: 'Нет связи с каталогом');
+      expect(find.text('Сохранённый план · обновить'), findsNothing);
+      expect(find.text('Нет связи с каталогом'), findsNothing);
+      await tester.tap(find.byTooltip('Действия с картой'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('О плане и источнике'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('План входит в приложение'), findsOneWidget);
+      await tester.tap(find.text('Проверить обновления'));
+      await tester.pumpAndSettle();
+      verify(() => bloc.add(const MapEvent.refreshRequested())).called(1);
+    },
+  );
 
   testWidgets('starts compact and collapses back after expansion', (
     tester,
@@ -270,7 +407,7 @@ void main() {
         .transformationController!;
     final initial = transform.value.clone();
     final gesture = await tester.startGesture(
-      tester.getCenter(find.text('Свободно сейчас')),
+      tester.getCenter(find.text('Места')),
     );
     for (var frame = 0; frame < 10; frame++) {
       await gesture.moveBy(const Offset(0, -20));
@@ -357,7 +494,7 @@ void main() {
     );
     sheet.controller!.jumpTo(sheet.maxChildSize);
     await tester.pumpAndSettle();
-    await tester.drag(find.text('Свободно сейчас'), const Offset(0, 420));
+    await tester.drag(find.text('Места'), const Offset(0, 420));
     await tester.pumpAndSettle();
     expect(sheet.controller!.size, moreOrLessEquals(sheet.minChildSize));
     expect(tester.takeException(), isNull);
@@ -423,7 +560,10 @@ void main() {
     tester,
   ) async {
     await pumpMap(tester);
-
+    expect(find.text('Места'), findsOneWidget);
+    expect(find.text('Свободно сейчас'), findsNothing);
+    await tester.tap(find.byTooltip('Развернуть список'));
+    await tester.pumpAndSettle();
     expect(find.text('Свободно сейчас'), findsOneWidget);
     expect(find.textContaining('по живому расписанию'), findsOneWidget);
     expect(find.byType(MapFreeRoomsPanel), findsOneWidget);
@@ -475,6 +615,8 @@ void main() {
     await tester.pump();
     expect(tester.takeException(), isNull);
 
+    await tester.tap(find.widgetWithText(AppChip, '1 этаж'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('2 этаж'));
     await tester.pump();
 
@@ -706,7 +848,7 @@ void main() {
     );
     sheet.controller!.jumpTo(.78);
     await tester.pumpAndSettle();
-    final title = find.text('Свободно сейчас');
+    final title = find.text('Места');
     final headerPosition = tester.getTopLeft(title);
     final list = find.ancestor(
       of: find.byKey(const ValueKey('free-rooms-list')),

@@ -15,6 +15,7 @@ export 'app_dashed_border.dart';
 export 'app_deadline_card.dart';
 export 'app_density_bar.dart';
 export 'app_dialog.dart';
+export 'app_disclosure.dart';
 export 'app_divider.dart';
 export 'app_empty_state.dart';
 export 'app_error_state.dart';

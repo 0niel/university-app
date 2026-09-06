@@ -493,7 +493,10 @@ class MapRoute extends GoRouteData with $MapRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const MapPage();
+    return MapPage(
+      initialCampusId: state.uri.queryParameters['campus'],
+      initialRoomId: state.uri.queryParameters['room'],
+    );
   }
 }
 
