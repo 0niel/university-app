@@ -201,9 +201,7 @@ void main() {
 
   testWidgets(
     'fills the production foldable viewport after resizing',
-    (
-      tester,
-    ) async {
+    (tester) async {
       const viewportKey = ValueKey('foldable-viewport');
       const actionKey = ValueKey('edge-action');
       var taps = 0;
@@ -247,6 +245,6 @@ void main() {
       }
       expect(taps, 5);
     },
-    variant: TargetPlatformVariant({TargetPlatform.android}),
+    variant: const TargetPlatformVariant({TargetPlatform.android}),
   );
 }
