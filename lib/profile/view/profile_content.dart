@@ -197,14 +197,15 @@ class _ProfileBodyState extends State<_ProfileBody> {
                     : null,
                 onTap: () => const FriendsRoute().push<void>(context),
               ),
-              ProfileLinkRow(
-                icon: AppLineIcon.contactless,
-                title: l10n.profileStudentCard,
-                meta: cardNumber == null || cardNumber.isEmpty
-                    ? null
-                    : l10n.profileCardNumber(cardNumber),
-                onTap: () => const NfcPassRoute().push<void>(context),
-              ),
+              if (NfcPassAvailability.isSupported)
+                ProfileLinkRow(
+                  icon: AppLineIcon.contactless,
+                  title: l10n.profileStudentCard,
+                  meta: cardNumber == null || cardNumber.isEmpty
+                      ? null
+                      : l10n.profileCardNumber(cardNumber),
+                  onTap: () => const NfcPassRoute().push<void>(context),
+                ),
               ProfileLinkRow(
                 icon: AppLineIcon.tune,
                 title: l10n.settingsTitle,

@@ -2,6 +2,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/nfc_pass/nfc_pass_availability.dart';
 import 'package:rtu_mirea_app/services/config/catalog_service_mapper.dart';
 import 'package:rtu_mirea_app/services/models/service_entry.dart';
 import 'package:rtu_mirea_app/services/models/service_model.dart';
@@ -68,7 +69,7 @@ abstract final class ServicesDirectory {
         tone: colors.lecture,
         routePath: '/services/free-rooms',
       ),
-      if (config.isEnabled(.nfcPass))
+      if (NfcPassAvailability.isSupported && config.isEnabled(.nfcPass))
         _entry(
           context,
           title: l10n.serviceNfcTitle,

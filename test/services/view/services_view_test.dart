@@ -65,16 +65,31 @@ void main() {
     when(() => schedule.state).thenReturn(const ScheduleState());
   });
 
-  Widget subject() => RepositoryProvider.value(
-    value: config,
-    child: MultiBlocProvider(
-      providers: [
-        BlocProvider<ServiceCatalogCubit>.value(value: catalog),
-        BlocProvider<FavoriteServicesCubit>.value(value: favorites),
-        BlocProvider<ScheduleBloc>.value(value: schedule),
-      ],
-      child: const ServicesView(),
-    ),
+  Widget subject({UniversityConfig deployment = config}) =>
+      RepositoryProvider.value(
+        value: deployment,
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<ServiceCatalogCubit>.value(value: catalog),
+            BlocProvider<FavoriteServicesCubit>.value(value: favorites),
+            BlocProvider<ScheduleBloc>.value(value: schedule),
+          ],
+          child: const ServicesView(),
+        ),
+      );
+
+  testWidgets(
+    'iOS never initializes the featured pass card',
+    (tester) async {
+      await tester.pumpApp(
+        subject(deployment: UniversityConfig.current),
+        size: const Size(400, 2000),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('services-nfc-card')), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets(

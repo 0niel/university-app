@@ -7,6 +7,7 @@ import 'package:gamification_repository/gamification_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_hce_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/pass_security_cubit.dart';
+import 'package:rtu_mirea_app/nfc_pass/nfc_pass_availability.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_section.dart';
@@ -26,8 +27,12 @@ class SettingsPrivacySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final pass = context.watch<PassSecurityCubit>().state;
-    final nfcHce = context.watch<NfcHceCubit>().state;
+    final pass = NfcPassAvailability.isSupported
+        ? context.watch<PassSecurityCubit>().state
+        : null;
+    final nfcHce = NfcPassAvailability.isSupported
+        ? context.watch<NfcHceCubit>().state
+        : null;
     final geo = context.watch<GeoSharingCubit>();
     return SettingsSection(
       label: l10n.settingsPrivacy,
@@ -65,18 +70,20 @@ class SettingsPrivacySection extends StatelessWidget {
           onChanged: (value) =>
               onChanged(settings.copyWith(anonymousReactions: value)),
         ),
-        SettingsToggleRow(
-          label: l10n.settingsBiometricsPass,
-          lineIcon: AppLineIcon.fingerprint,
-          sub: pass.available
-              ? biometricLabel(l10n, pass.kind)
-              : l10n.biometricUnavailable,
-          value: pass.enabled,
-          onChanged: pass.available
-              ? (value) => unawaited(_toggleBiometric(context, enabled: value))
-              : null,
-        ),
-        if (nfcHce.available)
+        if (pass != null)
+          SettingsToggleRow(
+            label: l10n.settingsBiometricsPass,
+            lineIcon: AppLineIcon.fingerprint,
+            sub: pass.available
+                ? biometricLabel(l10n, pass.kind)
+                : l10n.biometricUnavailable,
+            value: pass.enabled,
+            onChanged: pass.available
+                ? (value) =>
+                      unawaited(_toggleBiometric(context, enabled: value))
+                : null,
+          ),
+        if (nfcHce != null && nfcHce.available)
           SettingsToggleRow(
             label: l10n.settingsNfcEmulation,
             lineIcon: AppLineIcon.contactless,

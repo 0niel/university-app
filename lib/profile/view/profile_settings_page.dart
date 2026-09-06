@@ -11,6 +11,7 @@ import 'package:rtu_mirea_app/common/utils/app_cache.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_hce_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/pass_security_cubit.dart';
+import 'package:rtu_mirea_app/nfc_pass/nfc_pass_availability.dart';
 import 'package:rtu_mirea_app/profile/cubit/profile_cubit.dart';
 import 'package:rtu_mirea_app/profile/profile_layout.dart';
 import 'package:rtu_mirea_app/profile/utils/settings_search_filter.dart';
@@ -42,8 +43,10 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   @override
   void initState() {
     super.initState();
-    unawaited(context.read<PassSecurityCubit>().refreshCapability());
-    unawaited(context.read<NfcHceCubit>().refresh());
+    if (NfcPassAvailability.isSupported) {
+      unawaited(context.read<PassSecurityCubit>().refreshCapability());
+      unawaited(context.read<NfcHceCubit>().refresh());
+    }
     unawaited(_loadCacheSize());
     unawaited(_loadVersion());
   }

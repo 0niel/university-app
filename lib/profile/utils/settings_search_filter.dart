@@ -1,4 +1,5 @@
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/nfc_pass/nfc_pass_availability.dart';
 
 class SettingsSearchFilter {
   SettingsSearchFilter({required String query, required this.l10n})
@@ -26,8 +27,10 @@ class SettingsSearchFilter {
     l10n.settingsPrivacy,
     l10n.settingsWhoSeesProfile,
     l10n.settingsAnonymousReactions,
-    l10n.settingsBiometricsPass,
-    l10n.settingsNfcEmulation,
+    if (NfcPassAvailability.isSupported) ...[
+      l10n.settingsBiometricsPass,
+      l10n.settingsNfcEmulation,
+    ],
   ]);
 
   bool get showSchedule => _matches([

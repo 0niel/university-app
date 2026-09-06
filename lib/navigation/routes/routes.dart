@@ -32,6 +32,7 @@ import 'package:rtu_mirea_app/navigation/deep_links.dart';
 import 'package:rtu_mirea_app/navigation/view/navigation_branch_container.dart';
 import 'package:rtu_mirea_app/navigation/view/scaffold_navigation_shell.dart';
 import 'package:rtu_mirea_app/nfc_pass/nfc_pass.dart';
+import 'package:rtu_mirea_app/nfc_pass/nfc_pass_availability.dart';
 import 'package:rtu_mirea_app/onboarding/view/onboarding_page.dart';
 import 'package:rtu_mirea_app/people/people.dart';
 import 'package:rtu_mirea_app/polls/polls.dart';
@@ -478,7 +479,8 @@ class NfcPassRoute extends GoRouteData with $NfcPassRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    if (!context.read<UniversityConfig>().isEnabled(.nfcPass)) {
+    if (!NfcPassAvailability.isSupported ||
+        !context.read<UniversityConfig>().isEnabled(.nfcPass)) {
       return const ServicesPage();
     }
     return const NfcPassPage();
@@ -917,6 +919,10 @@ GoRouter createRouter({
     }
 
     if (isLoggedIn && inAuthFlow) return startupScreen.location;
+
+    if (!NfcPassAvailability.isSupported && state.uri.path == '/services/nfc') {
+      return '/services';
+    }
 
     if (state.uri.path == '/schedule/details' &&
         state.extra is! (LessonSchedulePart, DateTime)) {
