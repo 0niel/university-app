@@ -1,4 +1,5 @@
 import hashlib
+import copy
 import importlib.util
 import io
 import json
@@ -27,6 +28,42 @@ def origin(platform="ios"):
     return dict(id=123, path=MODULE.WORKFLOWS[platform], head_branch="master", event="workflow_dispatch",
         status="completed", conclusion="success", repository={"full_name": REPOSITORY},
         head_repository={"full_name": REPOSITORY}, head_sha=SOURCE, run_attempt=1)
+
+
+def automatic_origin():
+    return {**origin("android"), "event": "workflow_run", "created_at": "2026-09-06T12:00:00Z",
+        "repository": {"full_name": REPOSITORY, "id": 456, "owner": {"id": 789}}}
+
+
+def apk_provenance(binary_digest):
+    uri = f"https://github.com/{REPOSITORY}"
+    workflow = f"{uri}/{MODULE.WORKFLOWS['android']}@refs/heads/master"
+    invocation = f"{uri}/actions/runs/123/attempts/1"
+    certificate = {
+        "issuer": "https://token.actions.githubusercontent.com", "subjectAlternativeName": workflow,
+        "buildSignerURI": workflow, "buildSignerDigest": SOURCE,
+        "buildConfigURI": workflow, "buildConfigDigest": SOURCE,
+        "sourceRepositoryURI": uri, "sourceRepositoryDigest": SOURCE,
+        "sourceRepositoryRef": "refs/heads/master", "sourceRepositoryIdentifier": "456",
+        "sourceRepositoryOwnerIdentifier": "789", "runnerEnvironment": "github-hosted",
+        "buildTrigger": "workflow_run", "runInvocationURI": invocation,
+    }
+    statement = {
+        "_type": "https://in-toto.io/Statement/v1", "predicateType": "https://slsa.dev/provenance/v1",
+        "subject": [{"name": "release.apk", "digest": {"sha256": binary_digest}},
+            {"name": "release.aab", "digest": {"sha256": "b" * 64}}],
+        "predicate": {
+            "buildDefinition": {
+                "buildType": "https://actions.github.io/buildtypes/workflow/v1",
+                "externalParameters": {"workflow": {"repository": uri,
+                    "path": MODULE.WORKFLOWS["android"], "ref": "refs/heads/master"}},
+                "internalParameters": {"github": {"event_name": "workflow_run"}},
+                "resolvedDependencies": [{"uri": f"git+{uri}@refs/heads/master", "digest": {"gitCommit": SOURCE}}],
+            },
+            "runDetails": {"builder": {"id": workflow}, "metadata": {"invocationId": invocation}},
+        },
+    }
+    return [{"verificationResult": {"signature": {"certificate": certificate}, "statement": statement}}]
 
 
 def zip_bytes(entries):
@@ -68,6 +105,102 @@ class ReleaseImporterTest(unittest.TestCase):
         for mutation in mutations:
             with self.subTest(mutation=mutation), self.assertRaises(ValueError):
                 MODULE.verify_run({**origin(), **mutation}, REPOSITORY, 123, "ios")
+
+    def test_automatic_origin_is_only_eligible_for_the_android_producer(self):
+        self.assertEqual(MODULE.verify_run(automatic_origin(), REPOSITORY, 123, "android"), SOURCE)
+        for mutation in ({"path": MODULE.WORKFLOWS["ios"]}, {"event": "pull_request"},
+            {"head_branch": "feature"}, {"conclusion": "failure"}, {"head_repository": {"full_name": "fork/repo"}}):
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                MODULE.verify_run({**automatic_origin(), **mutation}, REPOSITORY, 123, "android")
+
+    def test_apk_signature_is_checked_before_matching_exact_certificate_identity(self):
+        binary = self.root / "application.apk"
+        binary.write_bytes(b"original APK")
+        provenance = apk_provenance(MODULE.digest(binary))
+        with patch.object(MODULE, "command", return_value=subprocess.CompletedProcess([], 0, json.dumps(provenance).encode())) as execute:
+            evidence = MODULE.verify_apk_attestation(binary, REPOSITORY, automatic_origin())
+        self.assertEqual(evidence["sha256"], MODULE.digest(binary))
+        self.assertTrue(evidence["invocation_uri"].endswith("/123/attempts/1"))
+        arguments = execute.call_args.args[0]
+        self.assertEqual(arguments[:4], ["gh", "attestation", "verify", str(binary)])
+        for flag, value in (("--source-digest", SOURCE), ("--signer-digest", SOURCE),
+            ("--source-ref", "refs/heads/master"), ("--repo", REPOSITORY)):
+            self.assertEqual(arguments[arguments.index(flag) + 1], value)
+        self.assertIn("--deny-self-hosted-runners", arguments)
+        for key in provenance[0]["verificationResult"]["signature"]["certificate"]:
+            changed = copy.deepcopy(provenance)
+            changed[0]["verificationResult"]["signature"]["certificate"][key] = "wrong"
+            with self.subTest(certificate_field=key), patch.object(MODULE, "command", return_value=subprocess.CompletedProcess([], 0, json.dumps(changed).encode())), self.assertRaises(ValueError):
+                MODULE.verify_apk_attestation(binary, REPOSITORY, automatic_origin())
+        with patch.object(MODULE, "command", side_effect=ValueError("signature verification failed")), self.assertRaisesRegex(ValueError, "signature verification"):
+            MODULE.verify_apk_attestation(binary, REPOSITORY, automatic_origin())
+
+    def test_apk_statement_rejects_replayed_attempt_and_wrong_source_or_binary(self):
+        binary = self.root / "application.apk"
+        binary.write_bytes(b"APK")
+        provenance = apk_provenance(MODULE.digest(binary))
+        mutations = [
+            lambda value: value.update(predicateType="other"),
+            lambda value: value["subject"][0]["digest"].update(sha256="0" * 64),
+            lambda value: value["predicate"]["buildDefinition"]["resolvedDependencies"][0]["digest"].update(gitCommit="b" * 40),
+            lambda value: value["predicate"]["buildDefinition"]["externalParameters"]["workflow"].update(ref="refs/pull/1/merge"),
+            lambda value: value["predicate"]["runDetails"]["metadata"].update(invocationId=f"https://github.com/{REPOSITORY}/actions/runs/123/attempts/2"),
+        ]
+        for mutate in mutations:
+            changed = copy.deepcopy(provenance)
+            mutate(changed[0]["verificationResult"]["statement"])
+            with patch.object(MODULE, "command", return_value=subprocess.CompletedProcess([], 0, json.dumps(changed).encode())), self.assertRaises(ValueError):
+                MODULE.verify_apk_attestation(binary, REPOSITORY, automatic_origin())
+        for changed in ([], provenance * 2, {"verificationResult": provenance[0]}):
+            with patch.object(MODULE, "command", return_value=subprocess.CompletedProcess([], 0, json.dumps(changed).encode())), self.assertRaises(ValueError):
+                MODULE.verify_apk_attestation(binary, REPOSITORY, automatic_origin())
+
+    def checkout_fixture(self, source=SOURCE):
+        jobs = [{"id": index, "name": name, "run_id": 123, "run_attempt": 1, "head_sha": SOURCE,
+            "conclusion": "success", "steps": [{"name": "Check out repository", "conclusion": "success"}]}
+            for index, name in enumerate(("prepare", "Android beta"), 10)]
+
+        def logs(arguments, **kwargs):
+            name = jobs[int(arguments[arguments.index("--job") + 1]) - 10]["name"]
+            prefix = f"{name}\tCheck out repository\t2026-09-06T11:00:00Z "
+            output = "\n".join(prefix + line for line in (f"  ref: {source}",
+                "[command]/usr/bin/git log -1 --format=%H", source))
+            return subprocess.CompletedProcess(arguments, 0, output.encode())
+
+        return jobs, logs
+
+    def test_actual_checkout_must_match_in_both_exact_attempt_jobs(self):
+        jobs, logs = self.checkout_fixture()
+        with patch.object(MODULE, "api", return_value={"jobs": jobs}) as requests, patch.object(MODULE, "command", side_effect=logs) as execute:
+            evidence = MODULE.verify_automatic_checkouts(REPOSITORY, automatic_origin())
+        self.assertEqual([entry["id"] for entry in evidence], [10, 11])
+        self.assertIn("/attempts/1/jobs?", requests.call_args.args[0])
+        self.assertEqual(execute.call_count, 2)
+        for mutation in ({"run_attempt": 2}, {"run_id": 124}, {"head_sha": "b" * 40},
+            {"conclusion": "failure"}, {"steps": []}):
+            changed = [{**jobs[0], **mutation}, jobs[1]]
+            with patch.object(MODULE, "api", return_value={"jobs": changed}), self.assertRaises(ValueError):
+                MODULE.verify_automatic_checkouts(REPOSITORY, automatic_origin())
+        for changed in (jobs[:1], jobs + [jobs[0]]):
+            with patch.object(MODULE, "api", return_value={"jobs": changed}), self.assertRaises(ValueError):
+                MODULE.verify_automatic_checkouts(REPOSITORY, automatic_origin())
+        jobs, logs = self.checkout_fixture("b" * 40)
+        with patch.object(MODULE, "api", return_value={"jobs": jobs}), patch.object(MODULE, "command", side_effect=logs), self.assertRaisesRegex(ValueError, "checkout differs"):
+            MODULE.verify_automatic_checkouts(REPOSITORY, automatic_origin())
+
+    def test_source_ci_requires_successful_master_push_before_release(self):
+        ci = {**origin(), "id": 98, "path": ".github/workflows/main.yml", "event": "push",
+            "updated_at": "2026-09-06T11:59:59Z"}
+        with patch.object(MODULE, "api", return_value={"workflow_runs": [ci]}):
+            self.assertEqual(MODULE.verify_source_ci(REPOSITORY, automatic_origin()), {"run_id": 98, "run_attempt": 1})
+        for mutation in ({"path": ".github/workflows/other.yml"}, {"event": "pull_request"},
+            {"head_sha": "b" * 40}, {"head_branch": "feature"}, {"conclusion": "failure"},
+            {"head_repository": {"full_name": "fork/repo"}}, {"updated_at": "2026-09-06T12:00:01Z"}):
+            with self.subTest(mutation=mutation), patch.object(MODULE, "api", return_value={"workflow_runs": [{**ci, **mutation}]}), self.assertRaises(ValueError):
+                MODULE.verify_source_ci(REPOSITORY, automatic_origin())
+        for candidates in ([], [ci, ci]):
+            with patch.object(MODULE, "api", return_value={"workflow_runs": candidates}), self.assertRaises(ValueError):
+                MODULE.verify_source_ci(REPOSITORY, automatic_origin())
 
     def test_artifact_requires_unique_immutable_matching_origin(self):
         artifact = self.artifact()
@@ -139,11 +272,12 @@ class ReleaseImporterTest(unittest.TestCase):
             with patch.object(MODULE, "aapt_path", return_value="aapt"), patch.object(MODULE, "command", return_value=subprocess.CompletedProcess([], 0, stdout=output)), self.assertRaises(ValueError):
                 MODULE.binary_identity(self.root / "app.apk", "android")
 
-    def import_fixture(self, *, corrupt=False, live_mutation=None, schema=False):
-        data = zip_bytes([("release.ipa", ipa_bytes())])
-        artifact = self.artifact(data)
+    def import_fixture(self, *, corrupt=False, live_mutation=None, schema=False, automatic=False):
+        platform = "android" if automatic else "ios"
+        data = zip_bytes([("release.apk", b"original APK")]) if automatic else zip_bytes([("release.ipa", ipa_bytes())])
+        artifact = self.artifact(data, platform)
         app_id = "21c47e68-a64f-49c1-af6e-4a406dfe266f"
-        live = {"id": 789, "app_id": app_id, "version": "5.2.1+2439.17.57", "platform_statuses": {"ios": "active"}, "flutter_version": "3.44.2", "flutter_revision": "d" * 40, **(live_mutation or {})}
+        live = {"id": 789, "app_id": app_id, "version": "5.2.1+1006601" if automatic else "5.2.1+2439.17.57", "platform_statuses": {platform: "active"}, "flutter_version": "3.44.2", "flutter_revision": "d" * 40, **(live_mutation or {})}
         built = {}
 
         def build_manifest(**values):
@@ -151,7 +285,7 @@ class ReleaseImporterTest(unittest.TestCase):
             return {"source_sha": values["source_sha"], "evidence": values["evidence"], "build_inputs": {}}
 
         helper = types.SimpleNamespace(
-            GENERATED={"ios": ("ios/Tenant.xcconfig", "ios/Podfile.lock")},
+            GENERATED={"ios": ("ios/Tenant.xcconfig", "ios/Podfile.lock"), "android": ("android/app/google-services.json", "android/tenant.properties")},
             read_app_id=lambda *args: app_id, load_shorebird_release=lambda *args: live,
             build_manifest=build_manifest, write_manifest=lambda path, manifest: path.write_text(json.dumps(manifest)),
         )
@@ -162,14 +296,15 @@ class ReleaseImporterTest(unittest.TestCase):
             helper.read_app_id = lambda *args: app_id
             helper.load_shorebird_release = lambda *args: live
             helper.git = lambda *args: "c" * 40
+            helper.read_private_native_ref = lambda *args: "e" * 40
 
         def command(arguments, **kwargs):
             if arguments[0] == "gh":
                 kwargs["stdout"].write(b"corrupt" if corrupt else data)
             return subprocess.CompletedProcess(arguments, 0)
 
-        with patch.dict(sys.modules, {"release_manifest": helper}), patch.dict(os.environ, {"GITHUB_REPOSITORY": REPOSITORY, "GITHUB_SHA": "b" * 40, "GITHUB_RUN_ID": "999", "GITHUB_RUN_ATTEMPT": "2"}), patch.object(MODULE, "api", return_value=origin()), patch.object(MODULE, "find_artifact", return_value=artifact), patch.object(MODULE, "command", side_effect=command):
-            manifest = MODULE.import_release(repo=self.root, repository=REPOSITORY, run_id=123, platform="ios", output_dir=self.root / "registry")
+        with patch.dict(sys.modules, {"release_manifest": helper}), patch.dict(os.environ, {"GITHUB_REPOSITORY": REPOSITORY, "GITHUB_SHA": "b" * 40, "GITHUB_RUN_ID": "999", "GITHUB_RUN_ATTEMPT": "2"}), patch.object(MODULE, "api", return_value=automatic_origin() if automatic else origin()), patch.object(MODULE, "find_artifact", return_value=artifact), patch.object(MODULE, "command", side_effect=command), patch.object(MODULE, "binary_identity", return_value=live["version"] if not live_mutation else "5.2.1+2439.17.57"):
+            manifest = MODULE.import_release(repo=self.root, repository=REPOSITORY, run_id=123, platform=platform, output_dir=self.root / "registry")
         return manifest, built
 
     def test_import_preserves_origin_and_explicitly_marks_missing_prepared_inputs(self):
@@ -197,6 +332,28 @@ class ReleaseImporterTest(unittest.TestCase):
         self.assertIsNone(manifest["private_native_sha"])
         binary = self.root / "registry/application.ipa"
         self.assertEqual(manifest["artifacts"], [{"name": "application.ipa", "sha256": MODULE.digest(binary), "size": binary.stat().st_size}])
+
+    def test_automatic_import_requires_all_evidence_and_keeps_missing_inputs_explicit(self):
+        with patch.object(MODULE, "verify_apk_attestation", return_value={"sha256": "d" * 64}) as attest, patch.object(MODULE, "verify_automatic_checkouts", return_value=[{"id": 10}]) as checkout, patch.object(MODULE, "verify_source_ci", return_value={"run_id": 98}) as ci:
+            manifest, _ = self.import_fixture(automatic=True, schema=True)
+        self.assertEqual(attest.call_count, 1)
+        self.assertEqual(checkout.call_count, 1)
+        self.assertEqual(ci.call_count, 1)
+        self.assertEqual(manifest["source_sha"], SOURCE)
+        self.assertEqual(manifest["evidence"]["automatic_provenance"], {
+            "sha256": "d" * 64, "checkout_jobs": [{"id": 10}], "source_ci": {"run_id": 98},
+        })
+        self.assertEqual(manifest["build_inputs"], {})
+        self.assertEqual(manifest["configuration_inputs"], {})
+        self.assertEqual(manifest["private_native_sha"], "e" * 40)
+        self.assertEqual(manifest["evidence"]["missing_prepared_inputs"],
+            ["android/app/google-services.json", "android/tenant.properties"])
+
+    def test_automatic_import_stops_before_manifest_when_signature_is_invalid(self):
+        with patch.object(MODULE, "verify_apk_attestation", side_effect=ValueError("bad signature")), patch.object(MODULE, "verify_automatic_checkouts") as checkout, self.assertRaisesRegex(ValueError, "bad signature"):
+            self.import_fixture(automatic=True)
+        checkout.assert_not_called()
+        self.assertFalse((self.root / "registry/release-manifest.json").exists())
 
     def test_downloaded_archive_digest_must_match_api(self):
         with self.assertRaisesRegex(ValueError, "immutable artifact digest"):

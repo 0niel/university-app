@@ -13,9 +13,13 @@ not published. Registry assets are write-once; conflicting replacements fail.
 For an existing release without a manifest, run **Register Shorebird Release** on
 the default branch with its successful original full-release run ID and platform.
 The importer checks the immutable Actions archive digest, reads the version from
-the APK or IPA, and matches it against Shorebird. Historical imports currently
-require a manual full-release run, because `workflow_run` can build a different
-commit from the release workflow's own head. Expired artifacts require recovery
+the APK or IPA, and matches it against Shorebird. Automatic Android imports also
+require cryptographically verified APK provenance for the exact producer, source,
+protected branch, GitHub-hosted runner, and run attempt. Both preparation and build
+checkout logs must match that source, with successful master push CI completed
+before the release started. A different build checkout, missing logs, or ambiguous
+evidence prevents import. iOS historical imports require a manual full-release
+run. Expired artifacts require recovery
 of independently verifiable original evidence or a new native release.
 
 Historical manifests explicitly list unavailable prepared inputs. An Android
