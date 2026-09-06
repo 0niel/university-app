@@ -19,6 +19,7 @@ import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_marks.dar
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_overlap_switcher.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_time_slots.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/sheets.dart';
+import 'package:rtu_mirea_app/schedule/widgets/lesson_card.dart';
 import 'package:rtu_mirea_app/schedule/widgets/schedule_metrics.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
@@ -326,9 +327,15 @@ class ScheduleWeekView extends StatelessWidget {
             runSpacing: AppSpacing.sm,
             children: [
               for (final item in [
-                (l10n.lecture, context.colors.lecture),
-                (l10n.practice, context.colors.practice),
-                (l10n.lessonTypeLabName, context.colors.lab),
+                (l10n.lecture, LessonCard.getColorByTypeFor(context, .lecture)),
+                (
+                  l10n.practice,
+                  LessonCard.getColorByTypeFor(context, .practice),
+                ),
+                (
+                  l10n.lessonTypeLabName,
+                  LessonCard.getColorByTypeFor(context, .laboratoryWork),
+                ),
                 (l10n.scheduleChangeTagCancelled, context.colors.exam),
                 (l10n.scheduleLegendAddOwn, null),
               ])
