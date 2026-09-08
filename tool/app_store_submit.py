@@ -100,8 +100,8 @@ def replace_pending_build(client, app_id, version, marketing_version, build_id):
         raise RuntimeError("App Store version ID is invalid")
     attributes = version["attributes"]
     state = attributes.get("appVersionState") or attributes.get("appStoreState")
-    if state not in ("WAITING_FOR_REVIEW", "DEVELOPER_REJECTED"):
-        raise RuntimeError("Only a pending or withdrawn App Store review can be replaced")
+    if state not in ("WAITING_FOR_REVIEW", "DEVELOPER_REJECTED", "REJECTED", "METADATA_REJECTED"):
+        raise RuntimeError("Only a pending, withdrawn or rejected App Store review can be replaced")
     old_build_id = version["relationships"]["build"]["data"]["id"]
 
     def current_version():
@@ -135,8 +135,8 @@ def replace_pending_build(client, app_id, version, marketing_version, build_id):
             if time.monotonic() >= deadline:
                 raise RuntimeError("App Store review cancellation has not completed; retry after it is withdrawn")
             time.sleep(3)
-    elif current_version() != "DEVELOPER_REJECTED":
-        raise RuntimeError("App Store version is no longer withdrawn")
+    elif current_version() != state:
+        raise RuntimeError("App Store version state changed before build replacement")
     client.patch(
         f"/v1/appStoreVersions/{version_id}/relationships/build",
         {"data": {"type": "builds", "id": build_id}},

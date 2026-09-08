@@ -13,6 +13,32 @@ import 'mock_friends_map_cubit.dart';
 void main() {
   setUpAll(() => registerFallbackValue(const GeoSharingSettings()));
 
+  testWidgets(
+    'iOS explains that sharing only updates in the foreground',
+    (
+      tester,
+    ) async {
+      final cubit = MockFriendsMapCubit();
+      addTearDown(cubit.close);
+      when(() => cubit.state).thenReturn(
+        const FriendsMapState(
+          locationStatus: FriendsLocationStatus.active,
+          geoSettings: GeoSharingSettings(sharing: true),
+        ),
+      );
+
+      await tester.pumpWidget(_app(cubit));
+
+      expect(
+        find.textContaining('пока приложение открыто и активно'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('для фонового обновления'), findsNothing);
+      expect(find.text('Фоновое обновление включено'), findsNothing);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
   testWidgets('permanently denied permission offers explicit retry', (
     tester,
   ) async {

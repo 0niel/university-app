@@ -34,6 +34,23 @@ class ScreenshotColorsTest(unittest.TestCase):
         draw.rectangle((0, 0, 299, 40), fill='black')
         self.assertTrue(self.classify(image)['visible'])
 
+    def test_iphone_pro_max_shrink_wrapped_viewport_fails(self):
+        image = Image.new('RGB', (430, 932))
+        draw = ImageDraw.Draw(image)
+        draw.rectangle((0, 0, 194, 844), fill='#00c853')
+        draw.rectangle((195, 0, 389, 844), fill='#ff00ff')
+        result = self.classify(image)
+        self.assertGreater(result['green_fraction'], 0.2)
+        self.assertGreater(result['magenta_fraction'], 0.2)
+        self.assertFalse(result['visible'])
+
+    def test_bottom_only_gutter_fails(self):
+        image = Image.new('RGB', (430, 932), '#00c853')
+        draw = ImageDraw.Draw(image)
+        draw.rectangle((215, 0, 429, 931), fill='#ff00ff')
+        draw.rectangle((0, 845, 429, 931), fill='black')
+        self.assertFalse(self.classify(image)['visible'])
+
 
 class FirstFrameLogTest(unittest.TestCase):
     def setUp(self):

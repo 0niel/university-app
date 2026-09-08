@@ -45,8 +45,16 @@ def screenshot_colors(path):
                 for r, g, b in pixels) / len(pixels)
     magenta = sum(abs(r - 255) < 12 and g < 12 and abs(b - 255) < 12
                   for r, g, b in pixels) / len(pixels)
+    def colored(x, y):
+        r, g, b = pixels[y * 100 + x]
+        return ((r < 12 and abs(g - 200) < 12 and abs(b - 83) < 12)
+                or (abs(r - 255) < 12 and g < 12 and abs(b - 255) < 12))
+
+    right = sum(colored(96, y) for y in range(15, 85)) / 70
+    bottom = sum(colored(x, 95) for x in range(15, 85)) / 70
     return {'green_fraction': green, 'magenta_fraction': magenta,
-            'visible': green > 0.2 and magenta > 0.2}
+            'right_edge_fraction': right, 'bottom_edge_fraction': bottom,
+            'visible': green > 0.2 and magenta > 0.2 and right > 0.95 and bottom > 0.95}
 
 
 def launch_pid(output, bundle_id):

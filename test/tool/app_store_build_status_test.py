@@ -213,6 +213,59 @@ class AppStoreBuildStatusTest(unittest.TestCase):
                 else:
                     status.assert_not_called()
 
+    def test_review_diagnostics_expose_only_ids_states_and_platform(self):
+        client = self.review_client()
+        result = self.module.get_review_submissions(client, "bundle-id")
+        self.assertEqual(result, [{
+            "id": "review-id", "state": "UNRESOLVED_ISSUES", "platform": "IOS",
+            "items": [{"id": "item-id", "state": "REJECTED", "app_store_version_id": "store-version-id"}],
+        }])
+        self.assertEqual(client.queries[1][1]["filter[app]"], "app-id")
+        self.assertEqual(client.queries[1][1]["filter[platform]"], "IOS")
+
+    def review_client(self):
+        return RecordingClient({
+            "/v1/apps": {"data": [{"id": "app-id"}]},
+            "/v1/reviewSubmissions": {"data": [{
+                "id": "review-id",
+                "attributes": {"state": "UNRESOLVED_ISSUES", "platform": "IOS", "notes": "private note"},
+                "relationships": {"app": {"data": {"id": "app-id"}}},
+            }]},
+            "/v1/reviewSubmissions/review-id/items": {"data": [{
+                "id": "item-id", "attributes": {"state": "REJECTED", "notes": "private feedback"},
+                "relationships": {"appStoreVersion": {"data": {"id": "store-version-id"}}},
+            }], "included": [{"attributes": {"reviewNotes": "private data"}}]},
+        })
+
+    def test_review_diagnostics_reject_pagination_or_mismatched_app(self):
+        for path in ("/v1/reviewSubmissions", "/v1/reviewSubmissions/review-id/items"):
+            client = self.review_client()
+            client.responses[path]["links"] = {"next": "more"}
+            with self.subTest(path=path), self.assertRaisesRegex(RuntimeError, "incomplete"):
+                self.module.get_review_submissions(client, "bundle-id")
+        client = self.review_client()
+        client.responses["/v1/reviewSubmissions"]["data"][0]["relationships"]["app"]["data"]["id"] = "other-app"
+        with self.assertRaisesRegex(RuntimeError, "do not match"):
+            self.module.get_review_submissions(client, "bundle-id")
+        self.assertEqual(len(client.queries), 2)
+
+    def test_review_diagnostics_run_only_for_explicit_rejected_release_status(self):
+        argv = ["status", "--bundle-id", "bundle-id", "--build-number", "123",
+                "--marketing-version", "5.2.0", "--key-id", "key-id",
+                "--issuer-id", "issuer-id", "--private-key", "unused.p8"]
+        for enabled, state in ((False, "REJECTED"), (True, "IN_REVIEW"), (True, "REJECTED"), (True, "METADATA_REJECTED")):
+            with self.subTest(enabled=enabled, state=state), \
+                 patch("sys.argv", argv + (["--release-status"] if enabled else [])), \
+                 patch.object(self.module, "wait_for_build", return_value={"build_id": "verified-build"}), \
+                 patch.object(self.module, "get_release_status", return_value={"app_version_state": state}), \
+                 patch.object(self.module, "get_review_submissions", return_value=[]) as diagnostics, \
+                 patch("builtins.print"):
+                self.module.main()
+                if enabled and state in ("REJECTED", "METADATA_REJECTED"):
+                    self.assertEqual(diagnostics.call_args.args[1], "bundle-id")
+                else:
+                    diagnostics.assert_not_called()
+
 
 class RecordingClient:
     def __init__(self, responses):

@@ -1,6 +1,7 @@
 import argparse
 import base64
 import json
+import re
 import subprocess
 import time
 import urllib.error
@@ -244,6 +245,55 @@ def get_release_status(
     }
 
 
+def get_review_submissions(client: AppStoreConnectClient, bundle_id: str) -> list[dict]:
+    apps = client.get(
+        "/v1/apps", {"filter[bundleId]": bundle_id, "limit": "2"}
+    ).get("data", [])
+    if len(apps) != 1:
+        raise RuntimeError("App Store app is unavailable for review diagnostics")
+    app_id = apps[0]["id"]
+    response = client.get("/v1/reviewSubmissions", {
+        "filter[app]": app_id,
+        "filter[platform]": "IOS",
+        "filter[state]": "UNRESOLVED_ISSUES,READY_FOR_REVIEW,WAITING_FOR_REVIEW,IN_REVIEW",
+        "include": "app",
+        "limit": "200",
+    })
+    if response.get("links", {}).get("next"):
+        raise RuntimeError("App Store review diagnostics list is incomplete")
+    result = []
+    for submission in response.get("data", []):
+        submission_id = submission.get("id")
+        attributes = submission.get("attributes", {})
+        app = submission.get("relationships", {}).get("app", {}).get("data") or {}
+        if (
+            not isinstance(submission_id, str)
+            or not re.fullmatch(r"[A-Za-z0-9-]+", submission_id)
+            or attributes.get("platform") != "IOS"
+            or app.get("id") != app_id
+        ):
+            raise RuntimeError("App Store review diagnostics do not match the app")
+        items = client.get(
+            f"/v1/reviewSubmissions/{submission_id}/items",
+            {"include": "appStoreVersion", "limit": "200"},
+        )
+        if items.get("links", {}).get("next"):
+            raise RuntimeError("App Store review item diagnostics list is incomplete")
+        result.append({
+            "id": submission_id,
+            "state": attributes.get("state"),
+            "platform": attributes.get("platform"),
+            "items": [{
+                "id": item.get("id"),
+                "state": item.get("attributes", {}).get("state"),
+                "app_store_version_id": (
+                    item.get("relationships", {}).get("appStoreVersion", {}).get("data") or {}
+                ).get("id"),
+            } for item in items.get("data", [])],
+        })
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--bundle-id", required=True)
@@ -278,6 +328,8 @@ def main() -> None:
             arguments.marketing_version,
             result["build_id"],
         ))
+        if result.get("app_version_state") in ("REJECTED", "METADATA_REJECTED"):
+            result["review_submissions"] = get_review_submissions(client, arguments.bundle_id)
     print(json.dumps(result, sort_keys=True))
 
 

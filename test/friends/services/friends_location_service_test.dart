@@ -316,7 +316,7 @@ void main() {
     },
   );
 
-  test('Apple background indicator requires explicit sharing', () {
+  test('Apple sharing never enables background location', () {
     final foreground =
         friendsMapLocationSettings(
               TargetPlatform.iOS,
@@ -332,11 +332,59 @@ void main() {
             as AppleSettings;
     expect(foreground.allowBackgroundLocationUpdates, isFalse);
     expect(foreground.showBackgroundLocationIndicator, isFalse);
-    expect(background.allowBackgroundLocationUpdates, isTrue);
-    expect(background.showBackgroundLocationIndicator, isTrue);
+    expect(background.allowBackgroundLocationUpdates, isFalse);
+    expect(background.showBackgroundLocationIndicator, isFalse);
     expect(background.distanceFilter, 0);
     expect(background.pauseLocationUpdatesAutomatically, isFalse);
   });
+
+  for (final lifecycle in [
+    AppLifecycleState.paused,
+    AppLifecycleState.hidden,
+    AppLifecycleState.detached,
+  ]) {
+    test(
+      'iOS sharing stops when $lifecycle and resumes without prompting',
+      () async {
+        await service.dispose();
+        service = FriendsLocationService(
+          geolocator: geolocator,
+          platform: TargetPlatform.iOS,
+        );
+        final received = <Position>[];
+        final subscription = service.positions.listen(received.add);
+        final initialTimestamp = DateTime.now();
+        await service.start(backgroundEnabled: true);
+        geolocator.positions.add(_position(timestamp: initialTimestamp));
+        await Future<void>.delayed(Duration.zero);
+        expect(received, hasLength(1));
+        expect(service.supportsBackground, isFalse);
+
+        service.didChangeAppLifecycleState(lifecycle);
+        await Future<void>.delayed(Duration.zero);
+        geolocator.positions.add(_position());
+        await Future<void>.delayed(Duration.zero);
+        expect(received, hasLength(1));
+        expect(geolocator.positions.hasListener, isFalse);
+        expect(service.status, FriendsLocationStatus.stopped);
+        await service.start(backgroundEnabled: true, requestPermission: false);
+        expect(geolocator.streams, 1);
+
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        await Future<void>.delayed(Duration.zero);
+        expect(geolocator.streams, 2);
+        expect(geolocator.requests, 0);
+        geolocator.positions.add(
+          _position(
+            timestamp: initialTimestamp.add(const Duration(seconds: 1)),
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        expect(received, hasLength(2));
+        await subscription.cancel();
+      },
+    );
+  }
 
   test(
     'Apple sharing does not create an uncancellable one-time request',

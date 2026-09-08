@@ -56,6 +56,9 @@ post_install do |installer|
         '$(inherited)',
         'PERMISSION_NOTIFICATIONS=1'
       ]
+      if target.name == 'geolocator_apple'
+        build_configuration.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'BYPASS_PERMISSION_LOCATION_ALWAYS=1'
+      end
     end
   end
 end
