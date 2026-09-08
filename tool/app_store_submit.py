@@ -71,7 +71,7 @@ def pending_review_submission(
         )
     submissions = response.get("data", [])
     selected_items = None
-    if len(submissions) > 1 and ignore_empty_drafts and not response.get("links", {}).get("next"):
+    if submissions and ignore_empty_drafts and not response.get("links", {}).get("next"):
         nonempty = []
         for candidate in submissions:
             candidate_id = candidate.get("id")
@@ -91,6 +91,8 @@ def pending_review_submission(
                 raise RuntimeError("Pending App Store draft items are incomplete")
             if candidate_items.get("data"):
                 nonempty.append((candidate, candidate_items))
+        if not nonempty and allow_missing:
+            return None
         if len(nonempty) != 1:
             raise RuntimeError("Pending App Store review submission is unavailable or ambiguous")
         candidate, selected_items = nonempty[0]
@@ -138,7 +140,12 @@ def resolve_rejected_review(client, app_id, version, bundle_id, marketing_versio
         allow_missing=(version["attributes"].get("appVersionState") or version["attributes"].get("appStoreState")) == "PREPARE_FOR_SUBMISSION",
     )
     if review is None:
-        return True
+        review = pending_review_submission(
+            client, app_id, version_id, "READY_FOR_REVIEW",
+            include_item=True, allow_missing=True, ignore_empty_drafts=True,
+        )
+        if review is None:
+            return True
     submission_id, item = review
     item_id = item.get("id")
     if not isinstance(item_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]+={0,2}", item_id):

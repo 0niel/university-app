@@ -342,6 +342,7 @@ class AppStoreRejectedSubmissionTest(unittest.TestCase):
         for item_state, version_state, submission_state in (
             ("REJECTED", "PREPARE_FOR_SUBMISSION", "UNRESOLVED_ISSUES"),
             ("READY_FOR_REVIEW", "PREPARE_FOR_SUBMISSION", "UNRESOLVED_ISSUES"),
+            ("READY_FOR_REVIEW", "PREPARE_FOR_SUBMISSION", "READY_FOR_REVIEW"),
             ("READY_FOR_REVIEW", "READY_FOR_REVIEW", "UNRESOLVED_ISSUES"),
             ("READY_FOR_REVIEW", "READY_FOR_REVIEW", "READY_FOR_REVIEW"),
         ):
@@ -371,11 +372,13 @@ class AppStoreRejectedSubmissionTest(unittest.TestCase):
             run.assert_not_called()
 
     def test_prepare_without_previous_rejection_uses_normal_submission(self):
-        client, run = rejected_client("new", version_state="PREPARE_FOR_SUBMISSION"), Mock()
-        client.state["submission_state"] = "COMPLETE"
-        self.submit(client, run)
-        client.patch.assert_not_called()
-        self.assertEqual(run.call_args.args[0][1:4], ["builds", "submit-to-app-store", "new"])
+        for empty_draft in (False, True):
+            with self.subTest(empty_draft=empty_draft):
+                client, run = rejected_client("new", version_state="PREPARE_FOR_SUBMISSION"), Mock()
+                client.state.update(submission_state="COMPLETE", empty_draft=empty_draft)
+                self.submit(client, run)
+                client.patch.assert_not_called()
+                self.assertEqual(run.call_args.args[0][1:4], ["builds", "submit-to-app-store", "new"])
 
     def test_ambiguous_other_or_incomplete_review_never_resolves_or_confirms(self):
         cases = ({"extra_items": True}, {"extra_submissions": True}, {"pagination": "items"},
