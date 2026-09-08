@@ -16,8 +16,7 @@ jobs:
   sync:
     if: >-
       vars.SCHEDULE_INGEST_URL != '' &&
-      vars.SCHEDULE_ORGANIZATION_ID == 'mirea' &&
-      vars.SCHEDULE_SOURCE_BASE_URL != ''
+      vars.SCHEDULE_ORGANIZATION_ID == 'mirea'
     runs-on: windows-latest
     timeout-minutes: 45
 
@@ -48,11 +47,18 @@ jobs:
           SCHEDULE_SOURCE_BASE_URL: ${{ vars.SCHEDULE_SOURCE_BASE_URL }}
         shell: pwsh
         run: |
+          $selectionJson = & dart run bin/select_schedule_source.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $selection = $selectionJson | ConvertFrom-Json -ErrorAction Stop
+          if (-not $selection.uses_relay) {
+            Remove-Item Env:SCHEDULE_SOURCE_AUTHORIZATION -ErrorAction SilentlyContinue
+          }
+          Write-Host "Schedule source: $($selection.base_url) relay=$($selection.uses_relay)"
           $arguments = @(
             'run',
             'bin/sync_mirea_schedule.dart',
             '--schedule-base-url',
-            $env:SCHEDULE_SOURCE_BASE_URL,
+            $selection.base_url,
             '--fetch-concurrency',
             '12',
             '--batch-size',

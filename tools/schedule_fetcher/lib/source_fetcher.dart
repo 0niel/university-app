@@ -9,6 +9,117 @@ typedef RetryDelay = Future<void> Function(Duration duration);
 typedef RetryLog = void Function(String message);
 typedef UtcClock = DateTime Function();
 
+final officialScheduleUri = Uri.https('schedule-of.mirea.ru');
+
+class ScheduleSourceSelection {
+  const ScheduleSourceSelection({
+    required this.baseUrl,
+    required this.usesRelay,
+  });
+
+  final Uri baseUrl;
+  final bool usesRelay;
+}
+
+Future<ScheduleSourceSelection> selectScheduleSource({
+  required http.Client httpClient,
+  Uri? relayBaseUrl,
+  String? relayAuthorization,
+  Duration timeout = const Duration(seconds: 10),
+}) async {
+  Future<void> probe(Uri baseUrl, String? authorization) async {
+    if (baseUrl.scheme != 'https' ||
+        baseUrl.host.isEmpty ||
+        baseUrl.port != 443 ||
+        baseUrl.userInfo.isNotEmpty ||
+        baseUrl.hasQuery ||
+        baseUrl.hasFragment ||
+        (baseUrl.path.isNotEmpty && baseUrl.path != '/')) {
+      throw const FormatException('Invalid schedule source origin');
+    }
+
+    Future<http.Response> get(Uri uri, String accept) async {
+      final request = http.Request('GET', uri)..followRedirects = false;
+      request.headers[HttpHeaders.acceptHeader] = accept;
+      if (authorization != null && authorization.isNotEmpty) {
+        request.headers[HttpHeaders.authorizationHeader] = authorization;
+      }
+      final response = await httpClient
+          .send(request)
+          .then(http.Response.fromStream)
+          .timeout(timeout);
+      if (response.statusCode != HttpStatus.ok) {
+        throw FormatException('Schedule probe returned ${response.statusCode}');
+      }
+      return response;
+    }
+
+    final search = await get(
+      baseUrl.resolve('/schedule/api/search'),
+      'application/json',
+    );
+    final decoded = jsonDecode(search.body);
+    final data = decoded is Map<String, Object?> ? decoded['data'] : null;
+    if (data is! List<Object?> || data.isEmpty) {
+      throw const FormatException('Schedule probe has no targets');
+    }
+    Uri? calendar;
+    for (final target in data) {
+      if (target is! Map<String, Object?>) continue;
+      final link = target['iCalLink'];
+      if (link is! String || link.isEmpty) continue;
+      final uri = Uri.tryParse(link);
+      if (uri == null ||
+          uri.scheme != 'https' ||
+          uri.port != 443 ||
+          uri.userInfo.isNotEmpty ||
+          uri.hasFragment ||
+          (uri.host != baseUrl.host && uri.host != officialScheduleUri.host) ||
+          !uri.path.startsWith('/schedule/api/ical/')) {
+        throw const FormatException(
+          'Schedule probe has an invalid calendar URL',
+        );
+      }
+      calendar = baseUrl.replace(path: uri.path, query: uri.query);
+      break;
+    }
+    if (calendar == null) {
+      throw const FormatException('Schedule probe has no calendar feed');
+    }
+    final response = await get(calendar, 'text/calendar');
+    final content = response.body.replaceFirst(RegExp(r'^\uFEFF'), '').trim();
+    if (!RegExp(r'^BEGIN:VCALENDAR\r?\n').hasMatch(content) ||
+        !RegExp(r'^VERSION:2\.0\r?$', multiLine: true).hasMatch(content) ||
+        !RegExp(r'\r?\nEND:VCALENDAR$').hasMatch(content)) {
+      throw const FormatException(
+        'Schedule probe returned an invalid calendar',
+      );
+    }
+  }
+
+  try {
+    await probe(officialScheduleUri, null);
+    return ScheduleSourceSelection(
+      baseUrl: officialScheduleUri,
+      usesRelay: false,
+    );
+  } on Exception {
+    if (relayBaseUrl == null || relayBaseUrl.host == officialScheduleUri.host) {
+      throw StateError(
+        'Official schedule source is unavailable; no relay configured',
+      );
+    }
+  }
+  try {
+    await probe(relayBaseUrl, relayAuthorization);
+    return ScheduleSourceSelection(baseUrl: relayBaseUrl, usesRelay: true);
+  } on Exception {
+    throw StateError(
+      'Neither official schedule source nor relay passed health checks',
+    );
+  }
+}
+
 class RetryingSourceClient {
   RetryingSourceClient({
     required this.httpClient,
@@ -50,17 +161,21 @@ class RetryingSourceClient {
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       http.Response? response;
       try {
+        final useAuthorization =
+            authorization != null &&
+            authorization!.isNotEmpty &&
+            uri.host != officialScheduleUri.host;
+        final request = http.Request('GET', uri)
+          ..followRedirects = !useAuthorization
+          ..headers.addAll({
+            HttpHeaders.acceptHeader: accept,
+            if (useAuthorization)
+              HttpHeaders.authorizationHeader: authorization!,
+            HttpHeaders.userAgentHeader: 'university-app-schedule-fetcher/0.1',
+          });
         response = await httpClient
-            .get(
-              uri,
-              headers: {
-                HttpHeaders.acceptHeader: accept,
-                if (authorization != null && authorization!.isNotEmpty)
-                  HttpHeaders.authorizationHeader: authorization!,
-                HttpHeaders.userAgentHeader:
-                    'university-app-schedule-fetcher/0.1',
-              },
-            )
+            .send(request)
+            .then(http.Response.fromStream)
             .timeout(timeout);
         if (!isRetryableHttpStatus(response.statusCode) ||
             attempt == maxAttempts) {
