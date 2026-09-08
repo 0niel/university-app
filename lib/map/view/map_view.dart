@@ -157,7 +157,8 @@ class _MapViewState extends State<MapView> {
       _viewportTop + AppSpacing.md,
       AppSpacing.lg + AppControlSize.touchTarget + AppSpacing.xlg,
       _viewportHeight * panelSize +
-          (panelSize <= _collapsedPanelSize + .1
+          (panelSize <= _collapsedPanelSize + .1 &&
+                  !(_route != null && _viewportHeight < 600)
               ? AppControlSize.touchTarget + AppSpacing.md + AppSpacing.xlg
               : AppSpacing.md),
     );
@@ -710,6 +711,19 @@ class _MapViewState extends State<MapView> {
 
   void _retreatRoute() => _moveRouteStep(-1);
 
+  void _selectRouteStep(int index) {
+    final route = _route;
+    if (route == null || index < 0 || index >= route.instructions.length) {
+      return;
+    }
+    if (index == _routeStep &&
+        context.read<MapBloc>().state.selectedFloor?.id ==
+            route.instructions[index].atNode.floorId) {
+      return;
+    }
+    _moveRouteStep(index - _routeStep);
+  }
+
   void _moveRouteStep(int delta) {
     final route = _route;
     final state = context.read<MapBloc>().state;
@@ -1128,6 +1142,8 @@ class _MapViewState extends State<MapView> {
                     children: [
                       MapTopBar(
                         compact: constraints.maxHeight < 650,
+                        showCampusSelector:
+                            _route == null || constraints.maxHeight >= 600,
                         controller: _query,
                         campuses: state.availableCampuses,
                         selectedCampus: state.selectedCampus,
@@ -1144,6 +1160,18 @@ class _MapViewState extends State<MapView> {
                             stepIndex: _routeStep,
                             onNext: interactive ? _advanceRoute : null,
                             onPrevious: interactive ? _retreatRoute : null,
+                            onStepSelected: interactive
+                                ? (index) {
+                                    if (!identical(_route, route) ||
+                                        !identical(
+                                          _routeSnapshot,
+                                          state.campusData,
+                                        )) {
+                                      return;
+                                    }
+                                    _selectRouteStep(index);
+                                  }
+                                : null,
                             onClose: () => setState(() {
                               _route = null;
                               _discardNavigationFocus();
@@ -1214,7 +1242,8 @@ class _MapViewState extends State<MapView> {
                     final extent = _panelController.isAttached
                         ? _panelController.size
                         : panelSize;
-                    if (extent > _collapsedPanelSize + .1) {
+                    if (extent > _collapsedPanelSize + .1 ||
+                        (_route != null && constraints.maxHeight < 600)) {
                       return const SizedBox.shrink();
                     }
                     return Positioned(

@@ -1,7 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
 
+import 'package:app_ui/app_ui.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -13,8 +18,10 @@ import 'package:rtu_mirea_app/map/services/objects_service.dart';
 import 'package:rtu_mirea_app/map/view/map_view.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_guidance.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
+import 'package:rtu_mirea_app/map/widgets/svg_interactive_map.dart';
 import 'package:rtu_mirea_app/map/widgets/svg_interactive_map_controller.dart';
 
+import '../../gallery/gallery_fonts.dart';
 import '../../helpers/pump_app.dart';
 
 class _CampusRepository extends Mock implements CampusRepository {}
@@ -101,7 +108,11 @@ class _Harness {
   bool online = false;
   bool updated = false;
 
-  Future<void> mount(WidgetTester tester) async {
+  Future<void> mount(
+    WidgetTester tester, {
+    Size size = const Size(390, 844),
+    TextScaler textScaler = TextScaler.noScaling,
+  }) async {
     repository = MapDataRepository(
       organizationId: 'mirea',
       cache: _NoCache(),
@@ -159,9 +170,13 @@ class _Harness {
           BlocProvider<MapBloc>.value(value: map),
           BlocProvider<FreeRoomsCubit>.value(value: free),
         ],
-        child: MapView(mapController: controller),
+        child: RepaintBoundary(
+          key: const ValueKey('route-timeline-preview'),
+          child: MapView(mapController: controller),
+        ),
       ),
-      size: const Size(390, 844),
+      size: size,
+      textScaler: textScaler,
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Маршрут'));
@@ -202,6 +217,366 @@ class _Harness {
 }
 
 void main() {
+  testWidgets(
+    'timeline previews while dragging and commits the final floor once',
+    (tester) async {
+      final harness = _Harness();
+      await harness.mount(tester);
+      final slider = tester.getRect(find.byType(AppSlider));
+      final gesture = await tester.startGesture(
+        Offset(slider.left + 2, slider.center.dy),
+      );
+      await gesture.moveTo(Offset(slider.right - 2, slider.center.dy));
+      await tester.pump();
+      expect(harness.guidance(tester).stepIndex, 0);
+      expect(harness.map.state.selectedFloor!.id, 'floor-1');
+      expect(harness.controller.focuses, isEmpty);
+      expect(find.text('Конец маршрута'), findsOneWidget);
+      await tester.runAsync(() async {
+        final loaded = harness.map.stream.firstWhere(
+          (state) =>
+              state.status == .loaded && state.selectedFloor?.id == 'floor-2',
+        );
+        await gesture.up();
+        await loaded.timeout(const Duration(seconds: 10));
+      });
+      await tester.pumpAndSettle();
+      expect(
+        harness.guidance(tester).stepIndex,
+        harness.route.instructions.length - 1,
+      );
+      expect(harness.controller.focuses, [
+        [const Offset(15, 75)],
+      ]);
+      expect(
+        tester.widget<AppSlider>(find.byType(AppSlider)).value,
+        harness.route.instructions.length.toDouble(),
+      );
+    },
+  );
+
+  testWidgets('tap without a preview rebuild commits the touched step', (
+    tester,
+  ) async {
+    final harness = _Harness();
+    await harness.mount(tester);
+    final count = harness.route.instructions.length;
+    final stair = harness.route.instructions.indexWhere(
+      (step) => step.maneuver == IndoorManeuver.stairs,
+    );
+    final slider = tester.getRect(find.byType(AppSlider));
+    await tester.tapAt(
+      Offset(
+        slider.left + slider.width * stair / (count - 1),
+        slider.center.dy,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(harness.guidance(tester).stepIndex, stair);
+    expect(harness.controller.focuses, [
+      [const Offset(75, 15)],
+    ]);
+    harness.guidance(tester).onStepSelected!(stair);
+    await tester.pumpAndSettle();
+    expect(harness.controller.focuses, hasLength(1));
+  });
+
+  testWidgets(
+    'cancelled scrubbing restores the committed thumb without moving the map',
+    (tester) async {
+      final harness = _Harness();
+      await harness.mount(tester);
+      final slider = tester.getRect(find.byType(AppSlider));
+      final gesture = await tester.startGesture(
+        Offset(slider.left + 2, slider.center.dy),
+      );
+      await gesture.moveTo(Offset(slider.right - 2, slider.center.dy));
+      await tester.pump();
+      await gesture.cancel();
+      await tester.pumpAndSettle();
+      expect(tester.widget<AppSlider>(find.byType(AppSlider)).value, 1);
+      expect(harness.controller.focuses, isEmpty);
+      expect(harness.guidance(tester).stepIndex, 0);
+    },
+  );
+
+  testWidgets('scrubbing away and back before a frame does not move the map', (
+    tester,
+  ) async {
+    final harness = _Harness();
+    await harness.mount(tester);
+    final slider = tester.getRect(find.byType(AppSlider));
+    final start = Offset(slider.left + 2, slider.center.dy);
+    final gesture = await tester.startGesture(start);
+    await gesture.moveTo(Offset(slider.right - 2, slider.center.dy));
+    await gesture.moveTo(start);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(harness.guidance(tester).stepIndex, 0);
+    expect(harness.controller.focuses, isEmpty);
+    expect(tester.widget<AppSlider>(find.byType(AppSlider)).value, 1);
+  });
+
+  testWidgets(
+    'rapid keyboard selections use the latest step before a frame',
+    (tester) async {
+      final harness = _Harness();
+      await harness.mount(tester);
+      final slider = tester.getRect(find.byType(AppSlider));
+      await tester.tapAt(Offset(slider.left + 2, slider.center.dy));
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.sendKeyEvent(LogicalKeyboardKey.home);
+      await tester.pumpAndSettle();
+      expect(harness.guidance(tester).stepIndex, 0);
+      harness.controller.focuses.clear();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(harness.guidance(tester).stepIndex, 2);
+      expect(harness.controller.focuses, [
+        [const Offset(75, 15)],
+      ]);
+      expect(tester.widget<AppSlider>(find.byType(AppSlider)).value, 3);
+    },
+  );
+
+  testWidgets(
+    'selected milestone restores its floor after manually changing floors',
+    (tester) async {
+      final harness = _Harness();
+      await harness.mount(tester);
+      await tester.runAsync(() async {
+        final loaded = harness.map.stream.firstWhere(
+          (state) =>
+              state.status == .loaded && state.selectedFloor?.id == 'floor-2',
+        );
+        harness.map.add(
+          MapEvent.floorSelected(
+            campus: harness.map.state.selectedCampus!,
+            floor: harness.map.state.campusData!.floorForId('floor-2')!.floor,
+          ),
+        );
+        await loaded.timeout(const Duration(seconds: 10));
+      });
+      await tester.pumpAndSettle();
+      expect(harness.guidance(tester).stepIndex, 0);
+      final loaded = harness.map.stream.firstWhere(
+        (state) =>
+            state.status == .loaded && state.selectedFloor?.id == 'floor-1',
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(MapRouteGuidance),
+          matching: find.widgetWithText(AppChip, 'Старт'),
+        ),
+      );
+      await tester.runAsync(() => loaded.timeout(const Duration(seconds: 10)));
+      await tester.pumpAndSettle();
+      expect(harness.map.state.selectedFloor!.id, 'floor-1');
+      expect(harness.guidance(tester).stepIndex, 0);
+      expect(harness.controller.focuses, [
+        [const Offset(15, 15)],
+      ]);
+    },
+  );
+
+  testWidgets(
+    'keyboard steps and rapid jumps keep only the latest focus',
+    (tester) async {
+      final harness = _Harness();
+      await harness.mount(tester);
+      final slider = tester.getRect(find.byType(AppSlider));
+      await tester.tapAt(Offset(slider.left + 2, slider.center.dy));
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      final stair = harness.guidance(tester).stepIndex;
+      expect(stair, greaterThan(0));
+      harness.controller.focuses.clear();
+      final selected = harness.guidance(tester).onStepSelected!;
+      selected(0);
+      selected(stair);
+      await tester.pumpAndSettle();
+      final step = harness.route.instructions[stair];
+      expect(harness.controller.focuses, [
+        [
+          Offset(step.atNode.x, step.atNode.y),
+          if (step.toNode case final next?
+              when next.floorId == step.atNode.floorId)
+            Offset(next.x, next.y),
+        ],
+      ]);
+      selected(0);
+      harness.guidance(tester).onClose();
+      await tester.pumpAndSettle();
+      expect(harness.controller.focuses, hasLength(1));
+      selected(stair);
+      await tester.pumpAndSettle();
+      expect(find.byType(MapRouteGuidance), findsNothing);
+    },
+  );
+
+  testWidgets('snapshot replacement cancels a scrub before pointer release', (
+    tester,
+  ) async {
+    final harness = _Harness();
+    await harness.mount(tester);
+    final selected = harness.guidance(tester).onStepSelected!;
+    final slider = tester.getRect(find.byType(AppSlider));
+    final gesture = await tester.startGesture(
+      Offset(slider.left + 2, slider.center.dy),
+    );
+    await gesture.moveTo(Offset(slider.right - 2, slider.center.dy));
+    await tester.pump();
+    harness
+      ..online = true
+      ..updated = true;
+    await tester.runAsync(() async {
+      final refreshed = harness.map.stream.firstWhere(
+        (state) =>
+            state.status == .loaded &&
+            state.campusData?.origin.name == 'remote',
+      );
+      harness.map.add(const MapEvent.refreshRequested());
+      await refreshed.timeout(const Duration(seconds: 10));
+    });
+    await tester.pumpAndSettle();
+    await gesture.up();
+    selected(harness.route.instructions.length - 1);
+    await tester.pumpAndSettle();
+    expect(find.byType(MapRouteGuidance), findsNothing);
+    expect(harness.controller.focuses, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'screen reader visits every step even on routes over 100 instructions',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      try {
+        final harness = _Harness();
+        await harness.mount(tester);
+        final graph = IndoorNavigationGraph.fromJson({
+          'nodes': [
+            for (var i = 0; i < 130; i++)
+              {
+                'id': 'n$i',
+                'floor_id': 'floor-1',
+                'x': (i ~/ 2) * 10,
+                'y': ((i + 1) ~/ 2) * 10,
+              },
+          ],
+          'edges': [
+            for (var i = 0; i < 129; i++)
+              {
+                'id': 'e$i',
+                'from_node_id': 'n$i',
+                'to_node_id': 'n${i + 1}',
+                'distance_meters': 10,
+              },
+          ],
+        });
+        final route = IndoorRoutePlanner(
+          graph,
+        ).findRoute(startNodeId: 'n0', destinationNodeId: 'n129').route!;
+        expect(route.instructions.length, greaterThan(100));
+        var index = 99;
+        await tester.pumpApp(
+          StatefulBuilder(
+            builder: (context, update) => Scaffold(
+              body: MapRouteGuidance(
+                campus: harness.map.state.campusData!,
+                route: route,
+                stepIndex: index,
+                onClose: () {},
+                onStepSelected: (step) => update(() => index = step),
+              ),
+            ),
+          ),
+        );
+        expect(
+          tester.widget<AppSlider>(find.byType(AppSlider)).divisions,
+          isNull,
+        );
+        tester.semantics.increase(
+          find.semantics.byValue('100 из ${route.instructions.length}'),
+        );
+        await tester.pump();
+        expect(index, 100);
+        tester.semantics.decrease(
+          find.semantics.byValue('101 из ${route.instructions.length}'),
+        );
+        await tester.pump();
+        expect(index, 99);
+      } finally {
+        semantics.dispose();
+      }
+    },
+  );
+
+  for (final size in [const Size(390, 844), const Size(320, 420)]) {
+    testWidgets('timeline leaves visible map at $size with large text', (
+      tester,
+    ) async {
+      const previews = bool.fromEnvironment('MAP_TIMELINE_PREVIEWS');
+      await loadGalleryFonts();
+      if (previews) {
+        final icons = FontLoader('MaterialIcons')
+          ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
+        await icons.load();
+      }
+      final harness = _Harness();
+      await harness.mount(
+        tester,
+        size: size,
+        textScaler: TextScaler.linear(size.height < 600 ? 2 : 1),
+      );
+      if (size.height < 600) {
+        harness.guidance(tester).onStepSelected!(
+          harness.route.instructions.indexWhere(
+            (step) => step.maneuver == IndoorManeuver.stairs,
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .renderObject<RenderParagraph>(find.text('Лестница'))
+              .didExceedMaxLines,
+          isFalse,
+        );
+      }
+      final guide = tester.getRect(find.byType(MapRouteGuidance));
+      final map = tester.widget<SvgInteractiveMap>(
+        find.byType(SvgInteractiveMap),
+      );
+      final padding = map.viewportPaddingListenable!.value;
+      expect(guide.bottom, lessThan(size.height - padding.bottom - 32));
+      expect(
+        tester.getRect(find.byTooltip('Завершить маршрут')).bottom,
+        lessThan(size.height),
+      );
+      expect(tester.takeException(), isNull);
+      if (previews) {
+        final boundary = tester.renderObject<RenderRepaintBoundary>(
+          find.byKey(const ValueKey('route-timeline-preview')),
+        );
+        final image = (await tester.runAsync(boundary.toImage))!;
+        final bytes = (await tester.runAsync(
+          () => image.toByteData(format: ui.ImageByteFormat.png),
+        ))!;
+        await tester.runAsync(() async {
+          final file = File(
+            'output/campus-map/previews/route-timeline-${size.width.toInt()}x${size.height.toInt()}.png',
+          );
+          await file.parent.create(recursive: true);
+          await file.writeAsBytes(bytes.buffer.asUint8List());
+        });
+        image.dispose();
+      }
+    });
+  }
+
   testWidgets(
     'stairs stay on departure floor until advancing and back restores it',
     (tester) async {

@@ -12,6 +12,7 @@ class MapTopBar extends StatelessWidget {
     required this.onCampusSelected,
     required this.onFriends,
     this.compact = false,
+    this.showCampusSelector = true,
     super.key,
   });
 
@@ -22,6 +23,7 @@ class MapTopBar extends StatelessWidget {
   final ValueChanged<CampusModel> onCampusSelected;
   final VoidCallback onFriends;
   final bool compact;
+  final bool showCampusSelector;
 
   Future<void> _chooseCampus(BuildContext context) => showAppSheet<void>(
     context,
@@ -67,19 +69,23 @@ class MapTopBar extends StatelessWidget {
             onChanged: onQueryChanged,
             onClear: () => onQueryChanged(''),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: AppButton.secondary(
-              label: selectedCampus?.displayName ?? 'Кампус',
-              trailingIcon: const AppLineIconWidget(
-                AppLineIcon.chevronD,
-                size: 16,
+          if (showCampusSelector) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: AppButton.secondary(
+                label: selectedCampus?.displayName ?? 'Кампус',
+                trailingIcon: const AppLineIconWidget(
+                  AppLineIcon.chevronD,
+                  size: 16,
+                ),
+                size: AppButtonSize.small,
+                onPressed: campuses.isEmpty
+                    ? null
+                    : () => _chooseCampus(context),
               ),
-              size: AppButtonSize.small,
-              onPressed: campuses.isEmpty ? null : () => _chooseCampus(context),
             ),
-          ),
+          ],
         ],
       ),
     );
