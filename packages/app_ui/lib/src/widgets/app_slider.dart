@@ -39,6 +39,9 @@ class AppSlider extends StatefulWidget {
 
 class _AppSliderState extends State<AppSlider> {
   bool _dragging = false;
+  double? _gestureValue;
+  int? _pointer;
+  bool _gestureCancelled = false;
 
   bool get _interactive => widget.enabled && widget.onChanged != null;
 
@@ -70,7 +73,21 @@ class _AppSliderState extends State<AppSlider> {
     if (width <= 0) return;
     final fraction = (dx / width).clamp(0.0, 1.0);
     final value = _valueFromFraction(fraction);
-    if (value != widget.value) widget.onChanged?.call(value);
+    final previous = _gestureValue ?? widget.value;
+    _gestureValue = value;
+    if (value != previous) widget.onChanged?.call(value);
+  }
+
+  void _finishGesture() {
+    final value = _gestureValue ?? widget.value;
+    _gestureValue = null;
+    if (_dragging) setState(() => _dragging = false);
+    if (_interactive && !_gestureCancelled) widget.onChangeEnd?.call(value);
+  }
+
+  void _cancelGesture() {
+    _gestureValue = null;
+    if (_dragging) setState(() => _dragging = false);
   }
 
   void _step(int direction) {
@@ -127,77 +144,100 @@ class _AppSliderState extends State<AppSlider> {
                   maxLeft,
                 );
                 final trackTop = hasLabel ? _labelReserve : 0.0;
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapDown: interactive
-                      ? (details) =>
-                          _updateFromDx(details.localPosition.dx, width)
-                      : null,
-                  onTapUp: interactive
-                      ? (_) => widget.onChangeEnd?.call(widget.value)
-                      : null,
-                  onHorizontalDragStart: interactive
-                      ? (details) {
-                          setState(() => _dragging = true);
-                          _updateFromDx(details.localPosition.dx, width);
-                        }
-                      : null,
-                  onHorizontalDragUpdate: interactive
-                      ? (details) =>
-                          _updateFromDx(details.localPosition.dx, width)
-                      : null,
-                  onHorizontalDragEnd: interactive
-                      ? (_) {
-                          setState(() => _dragging = false);
-                          widget.onChangeEnd?.call(widget.value);
-                        }
-                      : null,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        top: trackTop,
-                        height: AppControlSize.touchTarget,
-                        child: Center(
-                          child: CustomPaint(
-                            size: Size(width, _trackHeight),
-                            painter: _SliderTrackPainter(
-                              fraction: fraction,
-                              divisions: widget.divisions,
-                              trackColor: colors.surface2,
-                              activeColor: colors.accent,
-                              tickColor: colors.muted2,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: thumbLeft,
-                        top: trackTop +
-                            (AppControlSize.touchTarget - _thumbSize) / 2,
-                        child: _Thumb(
-                          color: colors.surface,
-                          ringColor: colors.accent,
-                        ),
-                      ),
-                      if (hasLabel)
+                return Listener(
+                  onPointerDown: (event) {
+                    if (_pointer != null) return;
+                    _pointer = event.pointer;
+                    _gestureCancelled = false;
+                  },
+                  onPointerUp: (event) {
+                    if (_pointer == event.pointer) _pointer = null;
+                  },
+                  onPointerCancel: (event) {
+                    if (_pointer != event.pointer) return;
+                    _pointer = null;
+                    _gestureCancelled = true;
+                    _cancelGesture();
+                  },
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapDown: interactive
+                        ? (details) {
+                            _gestureValue = null;
+                            _updateFromDx(details.localPosition.dx, width);
+                          }
+                        : null,
+                    onTapUp: interactive
+                        ? (details) {
+                            _updateFromDx(details.localPosition.dx, width);
+                            _finishGesture();
+                          }
+                        : null,
+                    onTapCancel: interactive
+                        ? () {
+                            if (!_dragging) _gestureValue = null;
+                          }
+                        : null,
+                    onHorizontalDragStart: interactive
+                        ? (details) {
+                            setState(() => _dragging = true);
+                            _updateFromDx(details.localPosition.dx, width);
+                          }
+                        : null,
+                    onHorizontalDragUpdate: interactive
+                        ? (details) =>
+                            _updateFromDx(details.localPosition.dx, width)
+                        : null,
+                    onHorizontalDragEnd:
+                        interactive ? (_) => _finishGesture() : null,
+                    onHorizontalDragCancel: interactive ? _cancelGesture : null,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
                         Positioned(
-                          left: thumbLeft + _thumbSize / 2,
-                          top: 0,
-                          child: FractionalTranslation(
-                            translation: const Offset(-0.5, 0),
-                            child: AnimatedOpacity(
-                              duration: reduceMotion
-                                  ? Duration.zero
-                                  : const Duration(milliseconds: 120),
-                              opacity: _dragging ? 1 : 0,
-                              child: _LabelBubble(text: label),
+                          left: 0,
+                          right: 0,
+                          top: trackTop,
+                          height: AppControlSize.touchTarget,
+                          child: Center(
+                            child: CustomPaint(
+                              size: Size(width, _trackHeight),
+                              painter: _SliderTrackPainter(
+                                fraction: fraction,
+                                divisions: widget.divisions,
+                                trackColor: colors.surface2,
+                                activeColor: colors.accent,
+                                tickColor: colors.muted2,
+                              ),
                             ),
                           ),
                         ),
-                    ],
+                        Positioned(
+                          left: thumbLeft,
+                          top: trackTop +
+                              (AppControlSize.touchTarget - _thumbSize) / 2,
+                          child: _Thumb(
+                            color: colors.surface,
+                            ringColor: colors.accent,
+                          ),
+                        ),
+                        if (hasLabel)
+                          Positioned(
+                            left: thumbLeft + _thumbSize / 2,
+                            top: 0,
+                            child: FractionalTranslation(
+                              translation: const Offset(-0.5, 0),
+                              child: AnimatedOpacity(
+                                duration: reduceMotion
+                                    ? Duration.zero
+                                    : const Duration(milliseconds: 120),
+                                opacity: _dragging ? 1 : 0,
+                                child: _LabelBubble(text: label),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 );
               },

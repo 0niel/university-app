@@ -62,6 +62,98 @@ void main() {
     expect(received, 0.75);
   });
 
+  testWidgets('tap commits its value before the parent rebuilds',
+      (tester) async {
+    final changes = <double>[];
+    final commits = <double>[];
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 200,
+          child: AppSlider(
+            value: 0,
+            divisions: 4,
+            onChanged: changes.add,
+            onChangeEnd: commits.add,
+          ),
+        ),
+      ),
+    );
+    final rect = tester.getRect(find.byType(AppSlider));
+    await tester.tapAt(Offset(rect.left + rect.width * .75, rect.center.dy));
+    expect(changes, [.75]);
+    expect(commits, [.75]);
+  });
+
+  testWidgets('returning to the initial value in one frame commits the return',
+      (
+    tester,
+  ) async {
+    final changes = <double>[];
+    final commits = <double>[];
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 200,
+          child: AppSlider(
+            value: 0,
+            divisions: 4,
+            onChanged: changes.add,
+            onChangeEnd: commits.add,
+          ),
+        ),
+      ),
+    );
+    final rect = tester.getRect(find.byType(AppSlider));
+    final start = Offset(rect.left + 2, rect.center.dy);
+    final gesture = await tester.startGesture(start);
+    await gesture.moveTo(Offset(rect.right - 2, rect.center.dy));
+    await gesture.moveTo(start);
+    await gesture.up();
+    expect(changes, contains(1));
+    expect(changes.last, 0);
+    expect(commits, [0]);
+  });
+
+  testWidgets('cancelled drag clears its label and does not commit', (
+    tester,
+  ) async {
+    final commits = <double>[];
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 200,
+          child: AppSlider(
+            value: 0,
+            label: 'Preview',
+            divisions: 4,
+            onChanged: (_) {},
+            onChangeEnd: commits.add,
+          ),
+        ),
+      ),
+    );
+    final rect = tester.getRect(find.byType(AppSlider));
+    final gesture = await tester.startGesture(
+      Offset(rect.left + 2, rect.center.dy),
+    );
+    await gesture.moveTo(Offset(rect.right - 2, rect.center.dy));
+    await tester.pump();
+    expect(
+      tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
+      1,
+    );
+    await gesture.cancel();
+    await tester.pump();
+    expect(
+      tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
+      0,
+    );
+    expect(commits, isEmpty);
+    await tester.tapAt(Offset(rect.left + rect.width * .5, rect.center.dy));
+    expect(commits, [.5]);
+  });
+
   testWidgets('disabled slider ignores drags and dims to 40%', (
     tester,
   ) async {
