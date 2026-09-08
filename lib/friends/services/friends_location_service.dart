@@ -54,8 +54,7 @@ class FriendsLocationService with WidgetsBindingObserver {
   Stream<Position> get positions => _positions.stream;
   Stream<FriendsLocationStatus> get statuses => _statuses.stream;
   FriendsLocationStatus get status => _status;
-  bool get supportsBackground =>
-      !_isWeb && (_platform == .android || _platform == .iOS);
+  bool get supportsBackground => !_isWeb && _platform == .android;
 
   Future<void> start({
     required bool backgroundEnabled,
@@ -284,7 +283,9 @@ class FriendsLocationService with WidgetsBindingObserver {
     } else if (state == .paused || state == .hidden || state == .detached) {
       _foreground = false;
       _retryTimer?.cancel();
-      if (_isWeb || (!_backgroundEnabled && supportsBackground)) {
+      if (_isWeb ||
+          _platform == .iOS ||
+          (!_backgroundEnabled && supportsBackground)) {
         ++_generation;
         _heartbeatTimer?.cancel();
         unawaited(_positionSubscription?.cancel());
@@ -348,8 +349,7 @@ LocationSettings friendsMapLocationSettings(
     .iOS || .macOS => AppleSettings(
       accuracy: .high,
       activityType: .otherNavigation,
-      allowBackgroundLocationUpdates: backgroundEnabled && platform == .iOS,
-      showBackgroundLocationIndicator: backgroundEnabled && platform == .iOS,
+      allowBackgroundLocationUpdates: false,
     ),
     .fuchsia || .linux || .windows => const LocationSettings(
       accuracy: .high,

@@ -1,11 +1,13 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    const Directionality(
-      textDirection: TextDirection.ltr,
-      child: Stack(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      builder: (context, child) => AppScale(child: child!),
+      home: const Stack(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,

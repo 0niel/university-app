@@ -4,6 +4,33 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:xml/xml.dart';
 
 void main() {
+  test('iOS location sharing requires only foreground authorization', () {
+    final plist = XmlDocument.parse(
+      File('ios/Runner/Info.plist').readAsStringSync(),
+    );
+    final root = plist.rootElement.getElement('dict')!;
+    final backgroundModes = plistValue(
+      root,
+      'UIBackgroundModes',
+    ).findElements('string').map((mode) => mode.innerText);
+    expect(backgroundModes, isNot(contains('location')));
+    expect(backgroundModes, contains('remote-notification'));
+    expect(
+      plistValue(root, 'NSLocationWhenInUseUsageDescription').innerText,
+      isNotEmpty,
+    );
+    final keys = root.findElements('key').map((key) => key.innerText);
+    expect(keys, isNot(contains('NSLocationAlwaysUsageDescription')));
+    expect(
+      keys,
+      isNot(contains('NSLocationAlwaysAndWhenInUseUsageDescription')),
+    );
+    expect(
+      File('ios/Podfile').readAsStringSync(),
+      contains('BYPASS_PERMISSION_LOCATION_ALWAYS=1'),
+    );
+  });
+
   test('iOS launches a single Flutter scene from the main storyboard', () {
     final plist = XmlDocument.parse(
       File('ios/Runner/Info.plist').readAsStringSync(),

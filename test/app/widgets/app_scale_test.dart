@@ -200,6 +200,75 @@ void main() {
   }
 
   testWidgets(
+    'iOS production viewport fills iPhone and iPad '
+    'with keyboard and safe areas',
+    (tester) async {
+      const viewportKey = ValueKey('ios-viewport');
+      const safeAreaKey = ValueKey('ios-safe-area');
+      const actionKey = ValueKey('ios-edge-action');
+      var taps = 0;
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      for (final (size, top, bottom, keyboard) in [
+        (const Size(430, 932), 59.0, 34.0, 0.0),
+        (const Size(430, 932), 59.0, 34.0, 336.0),
+        (const Size(932, 430), 0.0, 21.0, 0.0),
+        (const Size(440, 956), 62.0, 34.0, 0.0),
+        (const Size(834, 1210), 24.0, 20.0, 0.0),
+        (const Size(834, 1210), 24.0, 20.0, 380.0),
+        (const Size(430, 932), 59.0, 34.0, 0.0),
+      ]) {
+        tester.view
+          ..physicalSize = size * 3
+          ..viewPadding = FakeViewPadding(top: top * 3, bottom: bottom * 3)
+          ..padding = FakeViewPadding(
+            top: top * 3,
+            bottom: keyboard == 0 ? bottom * 3 : 0,
+          )
+          ..viewInsets = FakeViewPadding(bottom: keyboard * 3);
+        await tester.pumpWidget(
+          SentryScreenshotWidget(
+            child: MaterialApp(
+              builder: (context, child) => AppScale(child: child!),
+              home: Scaffold(
+                key: viewportKey,
+                body: SafeArea(
+                  child: SizedBox.expand(
+                    key: safeAreaKey,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: TextButton(
+                        key: actionKey,
+                        onPressed: () => taps++,
+                        child: const Text('Action'),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final viewport = find.byKey(viewportKey);
+        final safeArea = find.byKey(safeAreaKey);
+        expect(tester.getTopLeft(viewport), Offset.zero);
+        expect(tester.getBottomRight(viewport).dx, closeTo(size.width, .001));
+        expect(tester.getBottomRight(viewport).dy, closeTo(size.height, .001));
+        expect(tester.getTopLeft(safeArea).dy, closeTo(top, .001));
+        expect(
+          tester.getBottomRight(safeArea).dy,
+          closeTo(size.height - (keyboard == 0 ? bottom : keyboard), .001),
+        );
+        await tester.tap(find.byKey(actionKey));
+        expect(tester.takeException(), isNull);
+      }
+      expect(taps, 7);
+    },
+    variant: const TargetPlatformVariant({TargetPlatform.iOS}),
+  );
+
+  testWidgets(
     'fills the production foldable viewport after resizing',
     (tester) async {
       const viewportKey = ValueKey('foldable-viewport');

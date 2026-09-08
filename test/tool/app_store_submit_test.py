@@ -58,7 +58,7 @@ def pending_client(item_version="version-123", extra_item=False, release_type="A
 
 def replacement_client(
     initial_state="WAITING_FOR_REVIEW", extra_item=False, item_version="version-123",
-    fresh_state="WAITING_FOR_REVIEW", cancelled_state="DEVELOPER_REJECTED",
+    fresh_state=None, cancelled_state="DEVELOPER_REJECTED",
     fresh_build="old", extra_submission=False,
 ):
     old = version(state=initial_state, build_id="old")
@@ -76,11 +76,11 @@ def replacement_client(
         responses += [
             {"data": [review, review] if extra_submission else [review]},
             {"data": [item, item] if extra_item else [item]},
-            {"data": version(state=fresh_state, build_id=fresh_build)},
+            {"data": version(state=fresh_state or initial_state, build_id=fresh_build)},
             {"data": version(state=cancelled_state, build_id="old")},
         ]
     else:
-        responses.append({"data": version(state=initial_state, build_id="old")})
+        responses.append({"data": version(state=fresh_state or initial_state, build_id=fresh_build)})
     responses += [
         {"data": [{"id": "app-123"}]},
         {"data": [version(state="DEVELOPER_REJECTED", build_id="new")]},
@@ -327,6 +327,66 @@ class AppStoreBuildReplacementTest(unittest.TestCase):
             "/v1/appStoreVersions/version-123/relationships/build",
             {"data": {"type": "builds", "id": "new"}},
         )
+
+    def test_rejected_build_replacement_changes_only_the_build_without_cancelling_review(self):
+        for state in ("REJECTED", "METADATA_REJECTED"):
+            with self.subTest(state=state):
+                client = replacement_client(initial_state=state)
+                self.assertTrue(submit.should_submit(client, "app.bundle", "5.2.1", "new", True))
+                client.patch.assert_called_once_with(
+                    "/v1/appStoreVersions/version-123/relationships/build",
+                    {"data": {"type": "builds", "id": "new"}},
+                )
+                self.assertFalse(any("reviewSubmissions" in call.args[0] for call in client.get.call_args_list))
+
+    def test_rejected_build_replacement_requires_explicit_opt_in(self):
+        for state in ("REJECTED", "METADATA_REJECTED"):
+            with self.subTest(state=state):
+                client = replacement_client(initial_state=state)
+                with self.assertRaisesRegex(RuntimeError, "different build"):
+                    submit.should_submit(client, "app.bundle", "5.2.1", "new")
+                client.patch.assert_not_called()
+
+    def test_rejected_state_or_build_race_prevents_replacement(self):
+        for state in ("REJECTED", "METADATA_REJECTED"):
+            for changes in (
+                {"fresh_state": "IN_REVIEW"},
+                {"fresh_state": "WAITING_FOR_REVIEW"},
+                {"fresh_state": "DEVELOPER_REJECTED"},
+                {"fresh_build": "someone-elses-build"},
+            ):
+                with self.subTest(state=state, changes=changes):
+                    client = replacement_client(initial_state=state, **changes)
+                    with self.assertRaisesRegex(RuntimeError, "changed before build replacement"):
+                        submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
+                    client.patch.assert_not_called()
+
+    def test_rejected_version_or_platform_race_prevents_replacement(self):
+        for changes in ({"platform": "MAC_OS"}, {"versionString": "5.3.0"}):
+            fresh = version(state="REJECTED", build_id="old")
+            fresh["attributes"].update(changes)
+            client = Mock()
+            client.get.side_effect = [
+                {"data": [{"id": "app-123"}]},
+                {"data": [version(state="REJECTED", build_id="old")]},
+                {"data": fresh},
+            ]
+            with self.subTest(changes=changes), self.assertRaisesRegex(RuntimeError, "changed before build replacement"):
+                submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
+            client.patch.assert_not_called()
+
+    def test_rejected_replacement_rechecks_selected_build_before_submission(self):
+        client = Mock()
+        client.get.side_effect = [
+            {"data": [{"id": "app-123"}]},
+            {"data": [version(state="REJECTED", build_id="old")]},
+            {"data": version(state="REJECTED", build_id="old")},
+            {"data": [{"id": "app-123"}]},
+            {"data": [version(state="REJECTED", build_id="someone-elses-build")]},
+        ]
+        with self.assertRaisesRegex(RuntimeError, "different build"):
+            submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
+        self.assertEqual(client.patch.call_count, 1)
 
     @patch.object(submit.subprocess, "run")
     @patch.object(submit, "wait_for_build")

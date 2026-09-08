@@ -42,9 +42,7 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                   message: l10n.friendsPrivacySyncError,
                   footnote: null,
                   primaryLabel: l10n.retry,
-                  onPrimary: state.privacyBusy
-                      ? null
-                      : cubit.retryPrivacy,
+                  onPrimary: state.privacyBusy ? null : cubit.retryPrivacy,
                 ),
               ),
               const SizedBox(height: AppSpacing.sectionGap),
@@ -131,10 +129,7 @@ class NinjaGeoSharingSheet extends StatelessWidget {
             const SizedBox(height: AppSpacing.contentGap),
             _NinjaGeoSettingsSection(
               title: l10n.friendsBackgroundTitle,
-              helper:
-                  !kIsWeb &&
-                      (defaultTargetPlatform == TargetPlatform.android ||
-                          defaultTargetPlatform == TargetPlatform.iOS)
+              helper: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
                   ? l10n.friendsBackgroundMobileSub
                   : l10n.friendsBackgroundForegroundSub,
               child: Text(
