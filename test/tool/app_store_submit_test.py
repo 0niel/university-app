@@ -80,6 +80,17 @@ def replacement_client(
             {"data": version(state=cancelled_state, build_id="old")},
         ]
     else:
+        if initial_state in ("REJECTED", "METADATA_REJECTED"):
+            responses += [
+                {"data": [{
+                    "id": "review-123", "attributes": {"platform": "IOS", "state": "UNRESOLVED_ISSUES"},
+                    "relationships": {"app": {"data": {"id": "app-123"}}},
+                }]},
+                {"data": [{
+                    "id": "item-123", "attributes": {"state": "REJECTED"},
+                    "relationships": {"appStoreVersion": {"data": {"id": "version-123"}}},
+                }]},
+            ]
         responses.append({"data": version(state=fresh_state or initial_state, build_id=fresh_build)})
     responses += [
         {"data": [{"id": "app-123"}]},
@@ -87,6 +98,55 @@ def replacement_client(
     ]
     client = Mock()
     client.get.side_effect = responses
+    return client
+
+
+def rejected_client(build_id="old", item_state="REJECTED", version_state="REJECTED"):
+    client = Mock()
+    state = {
+        "build": build_id, "item_state": item_state, "version_state": version_state,
+        "submission_state": "UNRESOLVED_ISSUES", "item_id": "cmV2aWV3LWl0ZW0=",
+        "item_version": "version-123", "app": "app-123", "extra_items": False,
+        "extra_submissions": False, "pagination": None, "resolve_error": False,
+    }
+    client.state = state
+
+    def get(path, query):
+        if path == "/v1/apps":
+            return {"data": [{"id": "app-123"}]}
+        if path == "/v1/apps/app-123/appStoreVersions":
+            return {"data": [version(state=state["version_state"], build_id=state["build"])]}
+        if path == "/v1/appStoreVersions/version-123":
+            return {"data": version(state=state["version_state"], build_id=state["build"])}
+        if path == "/v1/reviewSubmissions":
+            review = {
+                "id": "review-123", "attributes": {"platform": "IOS", "state": state["submission_state"]},
+                "relationships": {"app": {"data": {"id": state["app"]}}},
+            }
+            return {"data": [review] * (2 if state["extra_submissions"] else 1),
+                    "links": {"next": "more" if state["pagination"] == "submissions" else None}}
+        if path == "/v1/reviewSubmissions/review-123/items":
+            item = {
+                "id": state["item_id"], "attributes": {"state": state["item_state"]},
+                "relationships": {"appStoreVersion": {"data": {"id": state["item_version"]}}},
+            }
+            return {"data": [item] * (2 if state["extra_items"] else 1),
+                    "links": {"next": "more" if state["pagination"] == "items" else None}}
+        raise AssertionError(path)
+
+    def update(path, payload):
+        if path == "/v1/appStoreVersions/version-123/relationships/build":
+            state["build"] = payload["data"]["id"]
+        elif path.startswith("/v1/reviewSubmissionItems/"):
+            if state["resolve_error"]:
+                raise RuntimeError("HTTP 409")
+            state["item_state"] = "READY_FOR_REVIEW"
+            state["version_state"] = "READY_FOR_REVIEW"
+        else:
+            raise AssertionError(path)
+
+    client.get.side_effect = get
+    client.patch.side_effect = update
     return client
 
 
@@ -228,6 +288,104 @@ class AppStoreSubmissionTest(unittest.TestCase):
         run.assert_not_called()
 
 
+class AppStoreRejectedSubmissionTest(unittest.TestCase):
+    def submit(self, client, run):
+        build = {"build_id": "new", "build_number": "2442.10.0",
+                 "marketing_version": "5.2.1", "processing_state": "VALID"}
+        with patch.object(submit, "wait_for_build", return_value=build), \
+             patch.object(submit.subprocess, "run", run):
+            return submit.submit_build(client, "app.bundle", "5.2.1", "2442.10.0", Path("key.p8"), True)
+
+    def test_rejected_build_resolves_exact_existing_item_and_confirms_existing_submission(self):
+        client, run = rejected_client(), Mock()
+        result = self.submit(client, run)
+        self.assertEqual(result["submission_action"], "resumed")
+        self.assertEqual(client.patch.call_args_list[0].args, (
+            "/v1/appStoreVersions/version-123/relationships/build",
+            {"data": {"type": "builds", "id": "new"}},
+        ))
+        self.assertEqual(client.patch.call_args_list[1].args, (
+            "/v1/reviewSubmissionItems/cmV2aWV3LWl0ZW0%3D",
+            {"data": {"type": "reviewSubmissionItems", "id": "cmV2aWV3LWl0ZW0=", "attributes": {"resolved": True}}},
+        ))
+        self.assertEqual(client.patch.call_count, 2)
+        self.assertEqual(run.call_args.args[0][:4], ["app-store-connect", "review-submissions", "confirm", "review-123"])
+        self.assertNotIn("submit-to-app-store", run.call_args.args[0])
+
+    def test_retry_after_build_replacement_does_not_replace_build_again(self):
+        client, run = rejected_client(build_id="new"), Mock()
+        self.submit(client, run)
+        self.assertEqual(client.patch.call_count, 1)
+        self.assertIn("reviewSubmissionItems", client.patch.call_args.args[0])
+        run.assert_called_once()
+
+    def test_retry_after_resolution_confirms_without_duplicate_item_mutation(self):
+        for version_state in ("REJECTED", "READY_FOR_REVIEW"):
+            with self.subTest(version_state=version_state):
+                client, run = rejected_client("new", "READY_FOR_REVIEW", version_state), Mock()
+                self.submit(client, run)
+                client.patch.assert_not_called()
+                self.assertEqual(run.call_args.args[0][1:4], ["review-submissions", "confirm", "review-123"])
+
+    def test_ambiguous_other_or_incomplete_review_never_resolves_or_confirms(self):
+        cases = ({"extra_items": True}, {"extra_submissions": True}, {"pagination": "items"},
+                 {"pagination": "submissions"}, {"item_version": "other"}, {"app": "other"},
+                 {"submission_state": "IN_REVIEW"}, {"item_state": "ACCEPTED"}, {"item_id": "../other"})
+        for build_id in ("old", "new"):
+            for changes in cases:
+                with self.subTest(build_id=build_id, changes=changes):
+                    client, run = rejected_client(build_id), Mock()
+                    client.state.update(changes)
+                    with self.assertRaises(RuntimeError):
+                        self.submit(client, run)
+                    client.patch.assert_not_called()
+                    run.assert_not_called()
+
+    def test_fresh_build_or_state_change_prevents_resolving_item(self):
+        for changes in ({"build": "other"}, {"version_state": "IN_REVIEW"}, {"item_id": "other-item"}):
+            with self.subTest(changes=changes):
+                client, run = rejected_client("new"), Mock()
+                get = client.get.side_effect
+                def changing_get(path, query):
+                    response = get(path, query)
+                    if path.endswith("/items"):
+                        client.state.update(changes)
+                    return response
+                client.get.side_effect = changing_get
+                with self.assertRaises(RuntimeError):
+                    self.submit(client, run)
+                client.patch.assert_not_called()
+                run.assert_not_called()
+
+    def test_failed_resolution_never_confirms_submission(self):
+        client, run = rejected_client("new"), Mock()
+        client.state["resolve_error"] = True
+        with self.assertRaisesRegex(RuntimeError, "HTTP 409"):
+            self.submit(client, run)
+        self.assertEqual(client.patch.call_count, 1)
+        run.assert_not_called()
+
+    def test_resolution_timeout_preserves_retry_and_never_confirms(self):
+        client, run = rejected_client("new"), Mock()
+        client.patch.side_effect = None
+        with patch.object(submit.time, "monotonic", side_effect=[0, 121]), \
+             self.assertRaisesRegex(RuntimeError, "has not become ready"):
+            self.submit(client, run)
+        self.assertEqual(client.patch.call_count, 1)
+        run.assert_not_called()
+
+    def test_post_resolution_build_change_prevents_confirmation(self):
+        client, run = rejected_client("new"), Mock()
+        update = client.patch.side_effect
+        def changing_update(path, payload):
+            update(path, payload)
+            client.state["build"] = "other"
+        client.patch.side_effect = changing_update
+        with self.assertRaisesRegex(RuntimeError, "does not select"):
+            self.submit(client, run)
+        run.assert_not_called()
+
+
 class AppStoreSubmissionWorkflowTest(unittest.TestCase):
     def test_review_replacement_is_explicit_and_passed_as_argument(self):
         workflow = (ROOT / ".github/workflows/app-store-submit.yml").read_text(encoding="utf-8")
@@ -337,7 +495,7 @@ class AppStoreBuildReplacementTest(unittest.TestCase):
                     "/v1/appStoreVersions/version-123/relationships/build",
                     {"data": {"type": "builds", "id": "new"}},
                 )
-                self.assertFalse(any("reviewSubmissions" in call.args[0] for call in client.get.call_args_list))
+                self.assertTrue(any("reviewSubmissions" in call.args[0] for call in client.get.call_args_list))
 
     def test_rejected_build_replacement_requires_explicit_opt_in(self):
         for state in ("REJECTED", "METADATA_REJECTED"):
@@ -365,25 +523,20 @@ class AppStoreBuildReplacementTest(unittest.TestCase):
         for changes in ({"platform": "MAC_OS"}, {"versionString": "5.3.0"}):
             fresh = version(state="REJECTED", build_id="old")
             fresh["attributes"].update(changes)
-            client = Mock()
-            client.get.side_effect = [
-                {"data": [{"id": "app-123"}]},
-                {"data": [version(state="REJECTED", build_id="old")]},
-                {"data": fresh},
-            ]
+            client = rejected_client()
+            get = client.get.side_effect
+            def changed_version(path, query):
+                return {"data": fresh} if path == "/v1/appStoreVersions/version-123" else get(path, query)
+            client.get.side_effect = changed_version
             with self.subTest(changes=changes), self.assertRaisesRegex(RuntimeError, "changed before build replacement"):
                 submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
             client.patch.assert_not_called()
 
     def test_rejected_replacement_rechecks_selected_build_before_submission(self):
-        client = Mock()
-        client.get.side_effect = [
-            {"data": [{"id": "app-123"}]},
-            {"data": [version(state="REJECTED", build_id="old")]},
-            {"data": version(state="REJECTED", build_id="old")},
-            {"data": [{"id": "app-123"}]},
-            {"data": [version(state="REJECTED", build_id="someone-elses-build")]},
-        ]
+        client = rejected_client()
+        def competing_update(path, payload):
+            client.state["build"] = "someone-elses-build"
+        client.patch.side_effect = competing_update
         with self.assertRaisesRegex(RuntimeError, "different build"):
             submit.should_submit(client, "app.bundle", "5.2.1", "new", True)
         self.assertEqual(client.patch.call_count, 1)
