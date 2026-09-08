@@ -43,6 +43,9 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
             "test/tool/configuration_test.dart": b"baseline tool contract\n",
             "test/tool/removed_check.py": b"baseline tool check\n",
             "tool/generator.py": b"print('baseline generator')\n",
+            "tools/schedule_fetcher/pubspec.yaml": b"name: schedule_fetcher\n",
+            "tools/schedule_fetcher/lib/source_fetcher.dart": b"baseline fetcher\n",
+            "tools/schedule_fetcher/bin/legacy.dart": b"baseline helper\n",
             ".github/workflows/test.yml": b"name: baseline\n",
             ".gitignore": b"/build/\n/.dart_tool/\n/lib/ignored.dart\n",
         }.items():
@@ -160,6 +163,45 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
                      "assets/new.png", "packages/nested/client/assets/new.png", ".fvmrc",
                      "shorebird.yaml", "l10n.yaml", "lib/new.json", "unknown/file.dart",
                      "packages/nested/client/android/lib/native.dart", "packages/nested/client/android/test/Native.java", "test/pubspec.yaml"]:
+            with self.subTest(path=path):
+                self.git("reset", "--hard", self.source)
+                self.write(path, b"changed\n")
+                changed = self.commit()
+                with self.assertRaisesRegex(ValueError, "full release"):
+                    MODULE.projection(self.root, self.baseline, changed)
+        self.git("reset", "--hard", self.source)
+
+    def test_schedule_cli_changes_keep_the_identical_baseline_projection(self):
+        _, before = self.project()
+        changed = "tools/schedule_fetcher/lib/source_fetcher.dart"
+        removed = "tools/schedule_fetcher/bin/legacy.dart"
+        added = ["tools/schedule_fetcher/bin/select_schedule_source.dart",
+                 "tools/schedule_fetcher/lib/helpers/probe.dart",
+                 "tools/schedule_fetcher/test/source_fetcher_test.dart"]
+        self.write(changed, b"new fetcher\n")
+        (self.root / removed).unlink()
+        for path in added:
+            self.write(path, b"new CLI helper\n")
+        self.source = self.commit()
+        entries, receipt = self.materialize()
+        self.assertEqual(receipt["projected_tree_sha"], before["projected_tree_sha"])
+        self.assertEqual(receipt["projection_sha256"], before["projection_sha256"])
+        self.assertEqual(receipt["runtime_paths"], ["lib/main.dart"])
+        self.assertEqual(receipt["test_paths"], [])
+        self.assertEqual(set(receipt["excluded_paths"]), {changed, removed, *added})
+        self.assertEqual((self.output / changed).read_bytes(), b"baseline fetcher\n")
+        self.assertEqual((self.output / removed).read_bytes(), b"baseline helper\n")
+        for path in added:
+            self.assertNotIn(path, entries)
+            self.assertFalse((self.output / path).exists())
+
+    def test_schedule_cli_exclusion_does_not_allow_other_tools_or_protected_files(self):
+        for path in ["tools/other/lib/source.dart", "tools/schedule_fetcher/unknown.dart",
+                     "tools/schedule_fetcher/bin/source.json", "tools/schedule_fetcher/assets/new.dart",
+                     "tools/schedule_fetcher/lib/assets/new.dart", "tools/schedule_fetcher/lib/android/native.dart",
+                     "tools/schedule_fetcher/test/native/entry.dart", "tools/schedule_fetcher/pubspec.yaml",
+                     "tools/schedule_fetcher/pubspec.lock", "tools/schedule_fetcher/lib/pubspec.yaml",
+                     "tools/schedule_fetcher/test/fixture.lock"]:
             with self.subTest(path=path):
                 self.git("reset", "--hard", self.source)
                 self.write(path, b"changed\n")

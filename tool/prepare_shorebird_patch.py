@@ -72,6 +72,10 @@ def classification(path, package_roots=None):
         raise ValueError(f"Dependency changes require a full release: {path}")
     if is_runtime(path, package_roots):
         return "runtime"
+    if (len(parts) >= 4 and parts[:2] == ("tools", "schedule_fetcher")
+            and parts[2] in {"bin", "lib", "test"} and path.endswith(".dart")
+            and not set(parts[3:-1]) & (NATIVE_ROOTS | {"assets", "native"})):
+        return "excluded"
     if parts[:2] == ("test", "tool"):
         return "excluded"
     if parts[0] == "test":
