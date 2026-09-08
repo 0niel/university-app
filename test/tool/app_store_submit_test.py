@@ -46,6 +46,7 @@ def pending_client(item_version="version-123", extra_item=False, release_type="A
     client.get.side_effect = [
         {"data": [{"id": "app-123"}]}, {"data": [target]},
         {"data": [{"id": "app-123"}]}, {"data": [target]},
+        {"data": []},
         {"data": [{
             "id": "review-123",
             "attributes": {"platform": "IOS", "state": "READY_FOR_REVIEW"},
@@ -108,6 +109,7 @@ def rejected_client(build_id="old", item_state="REJECTED", version_state="REJECT
         "submission_state": "UNRESOLVED_ISSUES", "item_id": "cmV2aWV3LWl0ZW0=",
         "item_version": "version-123", "app": "app-123", "extra_items": False,
         "extra_submissions": False, "pagination": None, "resolve_error": False,
+        "empty_draft": False,
     }
     client.state = state
 
@@ -118,13 +120,21 @@ def rejected_client(build_id="old", item_state="REJECTED", version_state="REJECT
             return {"data": [version(state=state["version_state"], build_id=state["build"])]}
         if path == "/v1/appStoreVersions/version-123":
             return {"data": version(state=state["version_state"], build_id=state["build"])}
-        if path == "/v1/reviewSubmissions":
+        if path in ("/v1/reviewSubmissions", "/v1/reviewSubmissions/review-123"):
             review = {
                 "id": "review-123", "attributes": {"platform": "IOS", "state": state["submission_state"]},
                 "relationships": {"app": {"data": {"id": state["app"]}}},
             }
-            return {"data": [review] * (2 if state["extra_submissions"] else 1),
+            if path.endswith("/review-123"):
+                return {"data": review}
+            reviews = [review] * (2 if state["extra_submissions"] else 1) if state["submission_state"] in query["filter[state]"].split(",") else []
+            if state["empty_draft"] and "READY_FOR_REVIEW" in query["filter[state]"]:
+                reviews.append({"id": "empty-draft", "attributes": {"state": "READY_FOR_REVIEW", "platform": "IOS"},
+                                "relationships": {"app": {"data": {"id": "app-123"}}}})
+            return {"data": reviews,
                     "links": {"next": "more" if state["pagination"] == "submissions" else None}}
+        if path == "/v1/reviewSubmissions/empty-draft/items":
+            return {"data": []}
         if path == "/v1/reviewSubmissions/review-123/items":
             item = {
                 "id": state["item_id"], "attributes": {"state": state["item_state"]},
@@ -137,6 +147,7 @@ def rejected_client(build_id="old", item_state="REJECTED", version_state="REJECT
     def update(path, payload):
         if path == "/v1/appStoreVersions/version-123/relationships/build":
             state["build"] = payload["data"]["id"]
+            state["version_state"] = "PREPARE_FOR_SUBMISSION"
         elif path.startswith("/v1/reviewSubmissionItems/"):
             if state["resolve_error"]:
                 raise RuntimeError("HTTP 409")
@@ -326,6 +337,48 @@ class AppStoreRejectedSubmissionTest(unittest.TestCase):
                 self.submit(client, run)
                 client.patch.assert_not_called()
                 self.assertEqual(run.call_args.args[0][1:4], ["review-submissions", "confirm", "review-123"])
+
+    def test_prepare_transition_and_resolved_retries_ignore_unrelated_empty_draft(self):
+        for item_state, version_state, submission_state in (
+            ("REJECTED", "PREPARE_FOR_SUBMISSION", "UNRESOLVED_ISSUES"),
+            ("READY_FOR_REVIEW", "PREPARE_FOR_SUBMISSION", "UNRESOLVED_ISSUES"),
+            ("READY_FOR_REVIEW", "PREPARE_FOR_SUBMISSION", "READY_FOR_REVIEW"),
+            ("READY_FOR_REVIEW", "READY_FOR_REVIEW", "UNRESOLVED_ISSUES"),
+            ("READY_FOR_REVIEW", "READY_FOR_REVIEW", "READY_FOR_REVIEW"),
+        ):
+            with self.subTest(item_state=item_state, version_state=version_state, submission_state=submission_state):
+                client, run = rejected_client("new", item_state, version_state), Mock()
+                client.state.update(empty_draft=True, submission_state=submission_state)
+                self.submit(client, run)
+                self.assertEqual(client.patch.call_count, int(item_state == "REJECTED"))
+                self.assertEqual(run.call_args.args[0][1:4], ["review-submissions", "confirm", "review-123"])
+                self.assertFalse(any("empty-draft" in call.args[0] for call in client.patch.call_args_list))
+
+    def test_ready_retry_rejects_nonempty_foreign_draft_or_incomplete_draft(self):
+        for draft_items in (
+            {"data": [{"id": "foreign", "attributes": {"state": "READY_FOR_REVIEW"},
+                       "relationships": {"appStoreVersion": {"data": {"id": "other-version"}}}}]},
+            {"data": [], "links": {"next": "more"}},
+        ):
+            client, run = rejected_client("new", "READY_FOR_REVIEW", "READY_FOR_REVIEW"), Mock()
+            client.state.update(empty_draft=True, submission_state="READY_FOR_REVIEW")
+            get = client.get.side_effect
+            def draft_get(path, query):
+                return draft_items if path == "/v1/reviewSubmissions/empty-draft/items" else get(path, query)
+            client.get.side_effect = draft_get
+            with self.assertRaises(RuntimeError):
+                self.submit(client, run)
+            client.patch.assert_not_called()
+            run.assert_not_called()
+
+    def test_prepare_without_previous_rejection_uses_normal_submission(self):
+        for empty_draft in (False, True):
+            with self.subTest(empty_draft=empty_draft):
+                client, run = rejected_client("new", version_state="PREPARE_FOR_SUBMISSION"), Mock()
+                client.state.update(submission_state="COMPLETE", empty_draft=empty_draft)
+                self.submit(client, run)
+                client.patch.assert_not_called()
+                self.assertEqual(run.call_args.args[0][1:4], ["builds", "submit-to-app-store", "new"])
 
     def test_ambiguous_other_or_incomplete_review_never_resolves_or_confirms(self):
         cases = ({"extra_items": True}, {"extra_submissions": True}, {"pagination": "items"},

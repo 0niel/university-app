@@ -55,15 +55,50 @@ def validate_version(marketing_version: str, build_number: str) -> None:
 def pending_review_submission(
     client, app_id: str, version_id: str, state: str = "READY_FOR_REVIEW",
     *, item_states=("READY_FOR_REVIEW",), include_item=False,
-) -> str | tuple[str, dict]:
-    response = client.get(
-        "/v1/reviewSubmissions",
-        {
-            "filter[app]": app_id, "filter[platform]": "IOS",
-            "filter[state]": state, "include": "app", "limit": "200",
-        },
-    )
+    expected_submission_id=None, allow_missing=False, ignore_empty_drafts=False,
+) -> str | tuple[str, dict] | None:
+    if expected_submission_id:
+        response = {"data": [client.get(
+            f"/v1/reviewSubmissions/{expected_submission_id}", {"include": "app"},
+        ).get("data", {})]}
+    else:
+        response = client.get(
+            "/v1/reviewSubmissions",
+            {
+                "filter[app]": app_id, "filter[platform]": "IOS",
+                "filter[state]": state, "include": "app", "limit": "200",
+            },
+        )
     submissions = response.get("data", [])
+    selected_items = None
+    if submissions and ignore_empty_drafts and not response.get("links", {}).get("next"):
+        nonempty = []
+        for candidate in submissions:
+            candidate_id = candidate.get("id")
+            candidate_attributes = candidate.get("attributes", {})
+            candidate_app = candidate.get("relationships", {}).get("app", {}).get("data") or {}
+            if (
+                not isinstance(candidate_id, str) or not re.fullmatch(r"[A-Za-z0-9-]+", candidate_id)
+                or candidate_attributes.get("state") != "READY_FOR_REVIEW"
+                or candidate_attributes.get("platform") != "IOS" or candidate_app.get("id") != app_id
+            ):
+                raise RuntimeError("Pending App Store draft does not match the app")
+            candidate_items = client.get(
+                f"/v1/reviewSubmissions/{candidate_id}/items",
+                {"include": "appStoreVersion", "limit": "200"},
+            )
+            if candidate_items.get("links", {}).get("next"):
+                raise RuntimeError("Pending App Store draft items are incomplete")
+            if candidate_items.get("data"):
+                nonempty.append((candidate, candidate_items))
+        if not nonempty and allow_missing:
+            return None
+        if len(nonempty) != 1:
+            raise RuntimeError("Pending App Store review submission is unavailable or ambiguous")
+        candidate, selected_items = nonempty[0]
+        submissions = [candidate]
+    if not submissions and not response.get("links", {}).get("next") and allow_missing:
+        return None
     if response.get("links", {}).get("next") or len(submissions) != 1:
         raise RuntimeError("Pending App Store review submission is unavailable or ambiguous")
     submission = submissions[0]
@@ -73,12 +108,13 @@ def pending_review_submission(
     if (
         not isinstance(submission_id, str)
         or not re.fullmatch(r"[A-Za-z0-9-]+", submission_id)
+        or (expected_submission_id and submission_id != expected_submission_id)
         or attributes.get("platform") != "IOS"
         or attributes.get("state") not in state.split(",")
         or app.get("id") != app_id
     ):
         raise RuntimeError("Pending App Store review submission does not match the app")
-    response = client.get(
+    response = selected_items or client.get(
         f"/v1/reviewSubmissions/{submission_id}/items",
         {"include": "appStoreVersion", "limit": "200"},
     )
@@ -98,10 +134,19 @@ def pending_review_submission(
 
 def resolve_rejected_review(client, app_id, version, bundle_id, marketing_version, build_id):
     version_id = version["id"]
-    submission_id, item = pending_review_submission(
+    review = pending_review_submission(
         client, app_id, version_id, "UNRESOLVED_ISSUES",
         item_states=("REJECTED", "READY_FOR_REVIEW"), include_item=True,
+        allow_missing=(version["attributes"].get("appVersionState") or version["attributes"].get("appStoreState")) == "PREPARE_FOR_SUBMISSION",
     )
+    if review is None:
+        review = pending_review_submission(
+            client, app_id, version_id, "READY_FOR_REVIEW",
+            include_item=True, allow_missing=True, ignore_empty_drafts=True,
+        )
+        if review is None:
+            return True
+    submission_id, item = review
     item_id = item.get("id")
     if not isinstance(item_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]+={0,2}", item_id):
         raise RuntimeError("Rejected App Store review item ID is invalid")
@@ -110,7 +155,7 @@ def resolve_rejected_review(client, app_id, version, bundle_id, marketing_versio
         release = get_release_status(client, bundle_id, marketing_version, build_id)
         if (
             release["app_store_version_id"] != version_id
-            or release["app_version_state"] not in ("REJECTED", "METADATA_REJECTED", "READY_FOR_REVIEW")
+            or release["app_version_state"] not in ("REJECTED", "METADATA_REJECTED", "READY_FOR_REVIEW", "PREPARE_FOR_SUBMISSION")
             or release["release_type"] != "AFTER_APPROVAL"
             or release["phased_release_state"] not in (None, "COMPLETE")
         ):
@@ -120,6 +165,7 @@ def resolve_rejected_review(client, app_id, version, bundle_id, marketing_versio
         current_submission, current = pending_review_submission(
             client, app_id, version_id, "UNRESOLVED_ISSUES,READY_FOR_REVIEW",
             item_states=("REJECTED", "READY_FOR_REVIEW"), include_item=True,
+            expected_submission_id=submission_id,
         )
         if current_submission != submission_id or current.get("id") != item_id:
             raise RuntimeError("Rejected App Store review changed before resubmission")
@@ -246,7 +292,9 @@ def should_submit(
         if selected.get("id") != build_id:
             raise RuntimeError("Submitted App Store version has no matching build")
         return False
-    if state in ("REJECTED", "METADATA_REJECTED"):
+    if state in ("REJECTED", "METADATA_REJECTED") or (
+        state == "PREPARE_FOR_SUBMISSION" and selected.get("id") == build_id
+    ):
         if selected.get("id") != build_id:
             raise RuntimeError("Rejected App Store version has no matching build")
         return resolve_rejected_review(
@@ -261,8 +309,11 @@ def should_submit(
             or release["phased_release_state"] not in (None, "COMPLETE")
         ):
             raise RuntimeError("Pending App Store version has unexpected release options")
-        return pending_review_submission(
-            client, apps[0]["id"], version.get("id"), "READY_FOR_REVIEW,UNRESOLVED_ISSUES",
+        unresolved = pending_review_submission(
+            client, apps[0]["id"], version.get("id"), "UNRESOLVED_ISSUES", allow_missing=True,
+        )
+        return unresolved or pending_review_submission(
+            client, apps[0]["id"], version.get("id"), ignore_empty_drafts=True,
         )
     if state not in EDITABLE_STATES:
         raise RuntimeError(f"App Store version cannot be submitted in state {state}")
