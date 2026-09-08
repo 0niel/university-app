@@ -34,7 +34,7 @@ class _RecordingController extends SvgInteractiveMapController {
   void focusPoints(List<Offset> points) => focuses.add(List.of(points));
 }
 
-Map<String, Object?> _document() => {
+Map<String, Object?> _document({bool updated = false}) => {
   'id': 'campus',
   'short_title': 'В-78',
   'revision': 2,
@@ -60,7 +60,13 @@ Map<String, Object?> _document() => {
       {'id': 'n1', 'floor_id': 'floor-1', 'room_id': 'start', 'x': 15, 'y': 15},
       {'id': 'n2', 'floor_id': 'floor-1', 'kind': 'stairs', 'x': 75, 'y': 15},
       {'id': 'n3', 'floor_id': 'floor-2', 'kind': 'stairs', 'x': 75, 'y': 75},
-      {'id': 'n4', 'floor_id': 'floor-2', 'room_id': 'end', 'x': 15, 'y': 75},
+      {
+        'id': 'n4',
+        'floor_id': 'floor-2',
+        'room_id': 'end',
+        'x': 15,
+        'y': updated ? 65 : 75,
+      },
     ],
     'edges': [
       {
@@ -93,6 +99,7 @@ class _Harness {
   late final FreeRoomsCubit free;
   late final IndoorRoute route;
   bool online = false;
+  bool updated = false;
 
   Future<void> mount(WidgetTester tester) async {
     repository = MapDataRepository(
@@ -116,7 +123,7 @@ class _Harness {
                   {'id': 'campus', 'revision': 2},
                 ],
               }
-            : _document();
+            : _document(updated: updated);
       },
     );
     await tester.runAsync(() async {
@@ -274,7 +281,9 @@ void main() {
       await harness.mount(tester);
       final snapshot = harness.map.state.campusData;
       harness.guidance(tester).onNext!();
-      harness.online = true;
+      harness
+        ..online = true
+        ..updated = true;
       await tester.runAsync(() async {
         final refreshed = harness.map.stream.firstWhere(
           (state) =>
@@ -292,6 +301,37 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets('unchanged refresh preserves route progress and floor', (
+    tester,
+  ) async {
+    final harness = _Harness();
+    await harness.mount(tester);
+    final stairIndex = harness.route.instructions.indexWhere(
+      (instruction) => instruction.maneuver == IndoorManeuver.stairs,
+    );
+    for (var index = 0; index < stairIndex; index++) {
+      await harness.move(tester, expectedFloor: 'floor-1');
+    }
+    await harness.move(tester, expectedFloor: 'floor-2');
+    final snapshot = harness.map.state.campusData;
+    final step = harness.guidance(tester).stepIndex;
+    harness.controller.focuses.clear();
+    harness.online = true;
+    await tester.runAsync(() async {
+      final refreshed = harness.map.stream.firstWhere(
+        (state) => state.status == .loaded && !state.isOffline,
+      );
+      harness.map.add(const MapEvent.refreshRequested());
+      await refreshed.timeout(const Duration(seconds: 10));
+    });
+    await tester.pumpAndSettle();
+    expect(harness.map.state.campusData, same(snapshot));
+    expect(harness.map.state.selectedFloor!.id, 'floor-2');
+    expect(harness.guidance(tester).stepIndex, step);
+    expect(harness.controller.focuses, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('refresh discards a route focus waiting on a different floor', (
     tester,
   ) async {
@@ -304,7 +344,9 @@ void main() {
       await harness.move(tester, expectedFloor: 'floor-1');
     }
     harness.controller.focuses.clear();
-    harness.online = true;
+    harness
+      ..online = true
+      ..updated = true;
     await tester.runAsync(() async {
       final refreshed = harness.map.stream.firstWhere(
         (state) =>

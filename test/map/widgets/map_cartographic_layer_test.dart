@@ -10,6 +10,61 @@ import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
 import 'package:rtu_mirea_app/map/widgets/map_cartographic_layer.dart';
 
 void main() {
+  testWidgets('viewport panning replaces visible label hit targets', (
+    tester,
+  ) async {
+    final hitIndex = MapLabelHitIndex();
+    final transform = TransformationController();
+    addTearDown(transform.dispose);
+    final places = [
+      for (final (id, x) in [('first', 100.0), ('second', 1100.0)])
+        MapPlaceData.fromJson({
+          'id': id,
+          'floor_id': 'one',
+          'label': 'Вода',
+          'kind': 'water',
+          'x': x,
+          'y': 100,
+        }),
+    ];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: Center(
+          child: MapCartographicLayer(
+            rooms: [
+              for (final place in places)
+                RoomModel(
+                  roomId: place.id,
+                  path: Path()
+                    ..addOval(
+                      Rect.fromCircle(
+                        center: Offset(place.x, place.y),
+                        radius: 12,
+                      ),
+                    ),
+                ),
+            ],
+            places: places,
+            syntheticRoomIds: const {'first', 'second'},
+            size: const Size(1400, 300),
+            viewportSize: const Size(200, 200),
+            transform: transform,
+            hitIndex: hitIndex,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(hitIndex.bounds.keys, ['first']);
+    transform.value = Matrix4.identity()..translateByDouble(-1000, 0, 0, 1);
+    await tester.pump();
+    expect(hitIndex.bounds.keys, ['second']);
+    expect(hitIndex.hitTest(const Offset(100, 100)), isNull);
+    expect(hitIndex.hitTest(const Offset(1100, 100)), 'second');
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('hidden stairs do not steal the visible food marker hit target', (
     tester,
   ) async {

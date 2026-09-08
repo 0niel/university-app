@@ -35,7 +35,7 @@ class _Controller extends SvgInteractiveMapController {
   }
 }
 
-Map<String, Object?> _document() => {
+Map<String, Object?> _document({double stairsX = 200}) => {
   'id': 'campus',
   'short_title': 'В-78',
   'revision': 1,
@@ -68,7 +68,7 @@ Map<String, Object?> _document() => {
   ],
   'graph': {
     'nodes': [
-      {'id': 'stairs-one', 'floor_id': 'one', 'x': 200, 'y': 200},
+      {'id': 'stairs-one', 'floor_id': 'one', 'x': stairsX, 'y': 200},
       {'id': 'stairs-two', 'floor_id': 'two', 'x': 120, 'y': 200},
     ],
     'edges': [
@@ -100,15 +100,19 @@ Future<void> _waitForLandmarks(WidgetTester tester) async {
   fail('The derived staircase was not prepared');
 }
 
-Future<(MapBloc, _Controller)> _pump(WidgetTester tester) async {
+Future<(MapBloc, _Controller)> _pump(
+  WidgetTester tester, {
+  Map<String, Object?> Function()? document,
+}) async {
+  final currentDocument = document ?? _document;
   final repository = MapDataRepository(
     organizationId: 'mirea',
     cache: _NoCache(),
     rpc: (name, _) async => name == 'get_map_catalog'
         ? {
-            'campuses': [_document()],
+            'campuses': [currentDocument()],
           }
-        : _document(),
+        : currentDocument(),
   );
   late MapBloc map;
   late FreeRoomsCubit free;
@@ -135,7 +139,7 @@ Future<(MapBloc, _Controller)> _pump(WidgetTester tester) async {
     free = FreeRoomsCubit(campusRepository: campusRepository);
     final loaded = map.stream.firstWhere((state) => state.status == .loaded);
     map.add(const MapEvent.initialized());
-    await loaded;
+    await loaded.timeout(const Duration(seconds: 10));
     await free.load();
   });
   await tester.pumpApp(
@@ -158,7 +162,11 @@ Future<void> _tapStairs(WidgetTester tester) async {
   final box = tester.renderObject<RenderBox>(find.byType(MapFloorCanvas));
   final point = Offset(marker.x, marker.y);
   expect(canvas.labelHitIndex!.hitTest(point), marker.id);
-  final screenPoint = box.localToGlobal(point);
+  final screenPoint = box.localToGlobal(
+    canvas.viewportSize == null
+        ? point
+        : MatrixUtils.transformPoint(canvas.transform!.value, point),
+  );
   expect(screenPoint.dy, inInclusiveRange(180, 670));
   await tester.tapAt(screenPoint);
   await tester.pump(const Duration(milliseconds: 350));
@@ -184,7 +192,7 @@ void main() {
           (state) =>
               state.status == .loaded && state.selectedFloor?.id == 'two',
         );
-        await loaded;
+        await loaded.timeout(const Duration(seconds: 10));
       });
       await tester.pumpAndSettle();
       expect(map.state.selectedFloor?.id, 'two');
@@ -216,7 +224,7 @@ void main() {
           floor: map.state.campusData!.floorForId('two')!.floor,
         ),
       );
-      await loaded;
+      await loaded.timeout(const Duration(seconds: 10));
     });
     previous.onNavigationLandmarkTap!(marker);
     await tester.pumpAndSettle();
@@ -227,7 +235,11 @@ void main() {
   testWidgets('a sheet from an old campus snapshot cannot move the camera', (
     tester,
   ) async {
-    final (map, controller) = await _pump(tester);
+    var updated = false;
+    final (map, controller) = await _pump(
+      tester,
+      document: () => _document(stairsX: updated ? 210 : 200),
+    );
     await _tapStairs(tester);
     final target = tester.widget<AppListRow>(
       find.widgetWithText(AppListRow, '2 этаж'),
@@ -241,8 +253,9 @@ void main() {
         (state) =>
             state.status == .loaded && !identical(state.campusData, previous),
       );
+      updated = true;
       map.add(const MapEvent.refreshRequested());
-      await loaded;
+      await loaded.timeout(const Duration(seconds: 10));
     });
     target.onTap!();
     previousMap.onNavigationLandmarkTap!(

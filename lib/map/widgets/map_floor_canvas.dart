@@ -29,11 +29,13 @@ class MapFloorCanvas extends StatelessWidget {
     this.routeInstructionPoint,
     this.showRouteStart = true,
     this.showRouteDestination = true,
+    this.viewportSize,
     super.key,
   });
 
   final String svgAssetPath;
   final Size canvasSize;
+  final Size? viewportSize;
   final List<RoomModel> rooms;
   final String? selectedRoomId;
   final String? svgContent;
@@ -59,6 +61,7 @@ class MapFloorCanvas extends StatelessWidget {
             rooms: rooms,
             places: places,
             size: canvasSize,
+            viewportSize: viewportSize,
             transform: transform,
             selectedRoomId: selectedRoomId,
             navigationLandmarks: navigationLandmarks,
@@ -112,6 +115,7 @@ class MapFloorCanvas extends StatelessWidget {
             child: RepaintBoundary(
               child: MapRouteLayer(
                 size: canvasSize,
+                viewportSize: viewportSize,
                 segments: routeSegments,
                 transform: transform,
                 instructionPoint: routeInstructionPoint,

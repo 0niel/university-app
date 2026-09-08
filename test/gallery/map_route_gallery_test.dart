@@ -2,6 +2,7 @@
 library;
 
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:app_ui/app_ui.dart';
@@ -12,7 +13,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
+import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
+import 'package:rtu_mirea_app/map/services/svg_room_parser.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_guidance.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
+import 'package:rtu_mirea_app/map/widgets/map_structure_layer.dart';
+import 'package:rtu_mirea_app/map/widgets/map_volume_layer.dart';
 
 import 'gallery_fonts.dart';
 
@@ -30,6 +36,162 @@ void main() {
     final icons = FontLoader('MaterialIcons')
       ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
     await icons.load();
+  });
+
+  testWidgets('Pulse volume route with stairs and arrival', (tester) async {
+    tester.view
+      ..physicalSize = const Size(390, 844)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final repository = MapDataRepository(
+      organizationId: 'mirea',
+      cache: _Cache(),
+      bundledCatalogAsset: MapDataRepository.pulseCatalogAsset,
+      rpc: (_, _) async => throw const MapDataException('offline'),
+    );
+    addTearDown(repository.dispose);
+    final campus = (await tester.runAsync(
+      () => repository.loadCampus('v-78'),
+    ))!;
+    final start = campus.rooms.firstWhere((room) => room.label == 'А-107');
+    final destination = campus.rooms.firstWhere(
+      (room) => room.label == 'А-203',
+    );
+    final graph = IndoorNavigationGraph.fromJson(campus.graph);
+    final result = IndoorRoutePlanner(graph).findRouteBetween(
+      startNodeIds: graph.nodesForRoom(start.id).map((node) => node.id),
+      destinationNodeIds: graph
+          .nodesForRoom(destination.id)
+          .map((node) => node.id),
+    );
+    expect(result.status, IndoorRouteStatus.found);
+    final route = result.route!;
+    expect(route.floorIds, hasLength(2));
+    final stairsIndex = route.instructions.indexWhere(
+      (step) => step.maneuver == IndoorManeuver.stairs,
+    );
+    expect(stairsIndex, greaterThanOrEqualTo(0));
+    final landmarks = mapNavigationLandmarks(graph, places: campus.rooms);
+    for (final (index, floorId) in route.floorIds.indexed) {
+      final floor = campus.floorForId(floorId)!.floor;
+      final svg = await repository.loadSvg(floor.svgPath);
+      final (rooms, bounds) = await SvgRoomParser(
+        onLoadSvg: repository.loadSvg,
+      ).parseSvg(floor.svgPath);
+      final segments = [
+        for (final segment in route.segmentsForFloor(floorId))
+          [for (final node in segment.nodes) Offset(node.x, node.y)],
+      ];
+      final points = segments.expand((segment) => segment).toList();
+      var routeBounds = Rect.fromPoints(points.first, points.last);
+      for (final point in points) {
+        routeBounds = routeBounds.expandToInclude(
+          Rect.fromPoints(point, point),
+        );
+      }
+      final stepIndex = index == 0
+          ? stairsIndex
+          : route.instructions.length - 1;
+      final instruction = route.instructions[stepIndex].atNode;
+      final camera = TransformationController();
+      addTearDown(camera.dispose);
+      final boundaryKey = ValueKey('volume-route-$floorId');
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: boundaryKey,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.darkTheme,
+            locale: const Locale('ru'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Column(
+                children: [
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final viewport = constraints.biggest;
+                        final scale = math
+                            .min(
+                              (viewport.width - 100) /
+                                  math.max(routeBounds.width, 30),
+                              (viewport.height - 140) /
+                                  math.max(
+                                    routeBounds.height * math.cos(.85),
+                                    30,
+                                  ),
+                            )
+                            .clamp(.1, 10.0);
+                        camera.value = Matrix4.identity()
+                          ..translateByDouble(
+                            viewport.width / 2 - routeBounds.center.dx * scale,
+                            viewport.height / 2 - routeBounds.center.dy * scale,
+                            0,
+                            1,
+                          )
+                          ..scaleByDouble(scale, scale, 1, 1);
+                        return MapVolumeLayer(
+                          floorSize: bounds.size,
+                          viewportSize: viewport,
+                          layers: MapStructureLayers.fromSvg(svg),
+                          rooms: rooms,
+                          places: campus.rooms
+                              .where((place) => place.floorId == floorId)
+                              .toList(),
+                          navigationLandmarks: landmarks
+                              .where(
+                                (landmark) => landmark.place.floorId == floorId,
+                              )
+                              .toList(),
+                          transform: camera,
+                          routeSegments: segments,
+                          instructionPoint: Offset(
+                            instruction.x,
+                            instruction.y,
+                          ),
+                          showRouteStart: index == 0,
+                          showRouteDestination:
+                              index == route.floorIds.length - 1,
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: MapRouteGuidance(
+                      campus: campus,
+                      route: route,
+                      stepIndex: stepIndex,
+                      onClose: () {},
+                      onNext: index == 0 ? () {} : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(MapRouteGuidance), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      if (const bool.fromEnvironment('MAP_PREVIEWS')) {
+        final boundary = tester.renderObject<RenderRepaintBoundary>(
+          find.byKey(boundaryKey),
+        );
+        await tester.runAsync(() async {
+          final image = await boundary.toImage(pixelRatio: 2);
+          final png = await image.toByteData(format: ui.ImageByteFormat.png);
+          image.dispose();
+          final directory = Directory('output/campus-map/previews');
+          await directory.create(recursive: true);
+          await File(
+            '${directory.path}/route-volume-${index == 0 ? 'stairs' : 'arrival'}-dark.png',
+          ).writeAsBytes(png!.buffer.asUint8List());
+        });
+      }
+    }
   });
 
   for (final dark in [false, true]) {

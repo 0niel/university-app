@@ -26,8 +26,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
        super(const MapState()) {
     on<MapInitialized>(_onMapInitialized, transformer: droppable());
     on<MapRefreshRequested>(_onRefreshRequested, transformer: droppable());
-    on<CampusSelected>(_onCampusSelected, transformer: sequential());
-    on<FloorSelected>(_onFloorSelected, transformer: sequential());
+    on<CampusSelected>(_onCampusSelected, transformer: restartable());
+    on<FloorSelected>(_onFloorSelected, transformer: restartable());
     on<RoomTapped>(_onRoomTapped);
     on<CampusIndexRequested>(
       _onCampusIndexRequested,
@@ -85,7 +85,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       } on Exception {
         if (repository == null) rethrow;
       }
-      final catalog = await repository?.loadCatalog();
+      final cachedCatalog = await repository?.loadCachedCatalog();
+      final catalog = cachedCatalog?.entries.isNotEmpty == true
+          ? cachedCatalog
+          : await repository?.loadCatalog();
       if (revision != _selectionRevision || emit.isDone) return;
       final catalogCampuses =
           catalog?.entries.map((entry) => entry.campus).toList() ??
@@ -110,10 +113,15 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         throw const FormatException('Нет доступных планов кампусов.');
       }
       CampusMapData? campusData;
+      var cachedStartup = false;
       var warning = catalog?.warning;
       if (catalog?.entries.isNotEmpty == true) {
         try {
-          campusData = await repository!.loadCampus(campus.id, refresh: true);
+          campusData = identical(catalog, cachedCatalog)
+              ? await repository!.loadCachedCampus(campus.id)
+              : null;
+          cachedStartup = campusData != null;
+          campusData ??= await repository!.loadCampus(campus.id);
           campus = campusData.campus;
           warning = campusData.warning ?? warning;
         } on Exception {
@@ -153,6 +161,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         ),
       );
       add(MapEvent.campusIndexRequested(campus));
+      if (cachedStartup &&
+          (!repository!.isCatalogCacheFresh ||
+              !repository!.isCampusCacheFresh(campus.id))) {
+        await _revalidateCachedStartup(campusData!, emit);
+      }
     } on Exception catch (error, stackTrace) {
       if (revision != _selectionRevision || emit.isDone) return;
       emit(
@@ -161,6 +174,92 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           errorMessage: 'Ошибка инициализации карты: $error',
         ),
       );
+      addError(error, stackTrace);
+    }
+  }
+
+  Future<void> _revalidateCachedStartup(
+    CampusMapData displayed,
+    Emitter<MapState> emit,
+  ) async {
+    try {
+      final catalog = await repository!.loadCatalog();
+      if (emit.isDone || !identical(state.campusData, displayed)) return;
+      final updated = await repository!.refreshCampus(displayed.campus.id);
+      if (emit.isDone ||
+          state.status != MapStatus.loaded ||
+          !identical(state.campusData, displayed)) {
+        return;
+      }
+      final catalogCampuses = catalog.entries
+          .map((entry) => entry.campus)
+          .toList();
+      _catalogCampusIds = {for (final campus in catalogCampuses) campus.id};
+      final available = [
+        ...catalogCampuses,
+        for (final local in _availableCampuses)
+          if (!catalogCampuses.any(
+            (campus) =>
+                campus.id == local.id ||
+                campus.displayName == local.displayName,
+          ))
+            local,
+      ];
+      if (available.isEmpty) available.addAll(state.availableCampuses);
+      if (repository!.sameCampusContent(updated, displayed)) {
+        emit(
+          state.copyWith(
+            availableCampuses: [
+              for (final campus in available)
+                if (campus.id == displayed.campus.id)
+                  displayed.campus
+                else
+                  campus,
+            ],
+            isOffline:
+                updated.origin != MapDataOrigin.remote ||
+                repository!.isSvgOffline(state.selectedFloor!.svgPath),
+            dataWarning: _svgWarning(state.selectedFloor!) ?? updated.warning,
+          ),
+        );
+        return;
+      }
+      final revision = _selectionRevision;
+      final floor =
+          updated.campus.floors.firstWhereOrNull(
+            (floor) => floor.id == state.selectedFloor?.id,
+          ) ??
+          _firstFloor(updated.campus);
+      _floorCache.clear();
+      _syntheticRooms.clear();
+      final (rooms, rect) = await _parseFloor(floor, campusData: updated);
+      final svgContent = await loadSvg(floor.svgPath);
+      if (emit.isDone ||
+          revision != _selectionRevision ||
+          !identical(state.campusData, displayed)) {
+        return;
+      }
+      emit(
+        state.copyWith(
+          availableCampuses: [
+            for (final campus in available)
+              if (campus.id == updated.campus.id) updated.campus else campus,
+          ],
+          selectedCampus: updated.campus,
+          selectedFloor: floor,
+          campusData: updated,
+          rooms: rooms,
+          roomFloors: _floorsOf(rooms, floor),
+          boundingRect: rect,
+          svgContent: svgContent,
+          isOffline:
+              updated.origin != MapDataOrigin.remote ||
+              repository!.isSvgOffline(floor.svgPath),
+          dataWarning: _svgWarning(floor) ?? updated.warning,
+        ),
+      );
+      add(MapEvent.campusIndexRequested(updated.campus));
+    } on Exception catch (error, stackTrace) {
       addError(error, stackTrace);
     }
   }
@@ -177,6 +276,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     emit(state.copyWith(status: .loading));
     try {
       final campusData = await _resolveCampus(event.campus);
+      if (revision != _selectionRevision || emit.isDone) return;
       final campus =
           campusData?.campus ?? _localCampusFor(event.campus) ?? event.campus;
       final floor = _firstFloor(campus);
@@ -209,6 +309,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         ),
       );
       add(MapEvent.campusIndexRequested(campus));
+      if (campusData != null &&
+          (!repository!.isCatalogCacheFresh ||
+              !repository!.isCampusCacheFresh(campus.id))) {
+        await _revalidateCachedStartup(campusData, emit);
+      }
     } on Exception catch (error, stackTrace) {
       if (revision != _selectionRevision || emit.isDone) return;
       emit(
@@ -262,8 +367,31 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           ) ??
           available.firstOrNull ??
           selectedCampus;
-      final campusData = await repository!.refreshCampus(target.id);
+      final campusData = await repository!.refreshCampus(
+        target.id,
+        afterPending: true,
+      );
       if (revision != _selectionRevision || emit.isDone) return;
+      final displayed = state.campusData;
+      if (displayed != null &&
+          repository!.sameCampusContent(campusData, displayed)) {
+        emit(
+          state.copyWith(
+            status: .loaded,
+            availableCampuses: [
+              for (final item in available)
+                if (item.id == displayed.campus.id) displayed.campus else item,
+            ],
+            isOffline:
+                campusData.origin != MapDataOrigin.remote ||
+                repository!.isSvgOffline(state.selectedFloor!.svgPath),
+            dataWarning:
+                _svgWarning(state.selectedFloor!) ?? campusData.warning,
+            errorMessage: null,
+          ),
+        );
+        return;
+      }
       final campus = campusData.campus;
       final floor =
           campus.floors.firstWhereOrNull(
@@ -324,8 +452,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     emit(state.copyWith(status: .loading));
     try {
       final campusData = resolveCampus
-          ? await _resolveCampus(event.campus)
+          ? await _resolveCampus(event.campus, cachedFirst: changedCampus)
           : state.campusData;
+      if (revision != _selectionRevision || emit.isDone) return;
       final changedSnapshot = !identical(campusData, state.campusData);
       final campus =
           campusData?.campus ?? _localCampusFor(event.campus) ?? event.campus;
@@ -364,6 +493,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       if (changedCampus || changedSnapshot) {
         add(MapEvent.campusIndexRequested(campus));
       }
+      if (resolveCampus &&
+          campusData != null &&
+          (!repository!.isCatalogCacheFresh ||
+              !repository!.isCampusCacheFresh(campus.id))) {
+        await _revalidateCachedStartup(campusData, emit);
+      }
     } on Exception catch (error, stackTrace) {
       if (revision != _selectionRevision || emit.isDone) return;
       emit(
@@ -395,7 +530,23 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     CampusIndexRequested event,
     Emitter<MapState> emit,
   ) async {
+    if (state.selectedCampus?.id != event.campus.id) return;
+    final campusData = state.campusData;
     final index = <String, int>{...state.roomFloors};
+    if (campusData != null && campusData.rooms.isNotEmpty) {
+      final levels = {
+        for (final floor in campusData.floors)
+          floor.floor.id: floor.floor.number,
+      };
+      for (final place in campusData.rooms) {
+        final level = levels[place.floorId];
+        if (place.label.isNotEmpty && level != null) {
+          index.putIfAbsent(roomKey(place.label), () => level);
+        }
+      }
+      emit(state.copyWith(roomFloors: Map.unmodifiable(index)));
+      return;
+    }
     for (final floor in event.campus.floors) {
       if (emit.isDone) return;
       if (state.selectedCampus?.id != event.campus.id) return;
@@ -507,7 +658,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     return result;
   }
 
-  Future<CampusMapData?> _resolveCampus(CampusModel campus) async {
+  Future<CampusMapData?> _resolveCampus(
+    CampusModel campus, {
+    bool cachedFirst = true,
+  }) async {
     if (repository == null) return null;
     if (_catalogCampusIds != null &&
         !_catalogCampusIds!.contains(campus.id) &&
@@ -515,6 +669,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       return null;
     }
     try {
+      if (cachedFirst) {
+        final cached = await repository!.loadCachedCampus(campus.id);
+        if (cached != null) return cached;
+      }
       return await repository!.loadCampus(campus.id);
     } on Exception {
       if (campus.floors.isEmpty && _localCampusFor(campus) == null) rethrow;

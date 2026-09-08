@@ -145,12 +145,106 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('arrival and start instructions preserve their endpoint marker', (
+    tester,
+  ) async {
+    for (final scale in [.25, 4.0]) {
+      final transform = TransformationController(
+        Matrix4.diagonal3Values(scale, scale, 1),
+      );
+      addTearDown(transform.dispose);
+      final start = Offset(40 / scale, 80 / scale);
+      final end = Offset(200 / scale, 80 / scale);
+      final route = [
+        [start, end],
+      ];
+      final baseline = await _paint(
+        tester,
+        await _mount(tester, route, transform: transform),
+        scale: scale,
+      );
+      for (final instruction in [start, end]) {
+        final marked = await _paint(
+          tester,
+          await _mount(
+            tester,
+            route,
+            transform: transform,
+            instructionPoint: instruction,
+          ),
+          scale: scale,
+        );
+        expect(marked.bytes, baseline.bytes);
+      }
+    }
+  });
+
+  testWidgets(
+    'instruction clearance uses projected endpoint bounds at every zoom',
+    (tester) async {
+      for (final scale in [.25, 4.0]) {
+        final matrix = Matrix4.diagonal3Values(scale, scale * .5, 1);
+        final transform = TransformationController(matrix);
+        addTearDown(transform.dispose);
+        final end = Offset(120 / scale, 160 / scale);
+        final route = [
+          [Offset(40 / scale, 160 / scale), end],
+        ];
+        final baseline = await _paint(
+          tester,
+          await _mount(tester, route, transform: transform),
+          matrix: matrix,
+        );
+        for (final distance in [11.6, 11.9]) {
+          final marked = await _paint(
+            tester,
+            await _mount(
+              tester,
+              route,
+              transform: transform,
+              instructionPoint: end + Offset(0, distance / (scale * .5)),
+            ),
+            matrix: matrix,
+          );
+          expect(
+            marked.bytes,
+            distance < 11.75 ? baseline.bytes : isNot(baseline.bytes),
+          );
+        }
+      }
+    },
+  );
+
+  testWidgets(
+    'an endpoint hidden on this floor does not hide its instruction',
+    (tester) async {
+      const route = [
+        [Offset(40, 80), Offset(200, 80)],
+      ];
+      final baseline = await _paint(
+        tester,
+        await _mount(tester, route, showDestination: false),
+      );
+      final marked = await _paint(
+        tester,
+        await _mount(
+          tester,
+          route,
+          showDestination: false,
+          instructionPoint: const Offset(200, 80),
+        ),
+      );
+      expect(marked.bytes, isNot(baseline.bytes));
+    },
+  );
 }
 
 Future<CustomPainter> _mount(
   WidgetTester tester,
   List<List<Offset>> segments, {
   TransformationController? transform,
+  Offset? instructionPoint,
   bool showStart = true,
   bool showDestination = true,
 }) async {
@@ -161,6 +255,7 @@ Future<CustomPainter> _mount(
         size: const Size(240, 200),
         segments: segments,
         transform: transform,
+        instructionPoint: instructionPoint,
         showStart: showStart,
         showDestination: showDestination,
       ),
@@ -180,9 +275,15 @@ Future<_Pixels> _paint(
   WidgetTester tester,
   CustomPainter painter, {
   double scale = 1,
+  Matrix4? matrix,
 }) async {
   final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder)..scale(scale);
+  final canvas = Canvas(recorder);
+  if (matrix == null) {
+    canvas.scale(scale);
+  } else {
+    canvas.transform(matrix.storage);
+  }
   painter.paint(canvas, const Size(240, 200));
   final picture = recorder.endRecording();
   final image = (await tester.runAsync(() => picture.toImage(240, 200)))!;

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +61,8 @@ class _MapViewState extends State<MapView> {
   int _routeStep = 0;
   CampusMapData? _routeSnapshot;
   int? _manualRefreshRevision;
-  bool _tilted = false;
+  bool _is3D = false;
+  double _mapBearing = 0;
   CampusMapData? _landmarkSnapshot;
   IndoorNavigationGraph? _landmarkGraph;
   Map<String, List<MapNavigationLandmark>> _floorLandmarks = const {};
@@ -562,11 +564,19 @@ class _MapViewState extends State<MapView> {
               ),
             ],
             AppListRow(
-              title: _tilted ? 'Вид сверху' : 'Наклонить план',
+              title: _is3D ? 'Вид сверху' : 'Объёмный план',
               subtitle: 'Масштаб и выбранный участок сохранятся',
               leading: const AppIconTile(icon: AppLineIcon.map),
-              onTap: () => open(() => setState(() => _tilted = !_tilted)),
+              onTap: () => open(() => setState(() => _is3D = !_is3D)),
             ),
+            if (_is3D)
+              AppListRow(
+                title: 'Повернуть план',
+                subtitle: 'Двумя пальцами можно вращать и приближать',
+                leading: const AppIconTile(icon: AppLineIcon.refresh),
+                onTap: () =>
+                    open(() => setState(() => _mapBearing += math.pi / 4)),
+              ),
             AppListRow(
               title: 'Друзья на карте',
               leading: const AppIconTile(icon: AppLineIcon.people),
@@ -1080,7 +1090,8 @@ class _MapViewState extends State<MapView> {
                         ? const {}
                         : context.read<MapBloc>().syntheticRoomIds,
                     routeSegments: _routeSegments(floor.id),
-                    tilted: _tilted,
+                    is3D: _is3D,
+                    bearing: _mapBearing,
                     navigationLandmarks: _navigationLandmarks(
                       state.campusData,
                       floor.id,
@@ -1158,7 +1169,7 @@ class _MapViewState extends State<MapView> {
                     final controlsFit =
                         constraints.maxHeight - panelHeight >=
                         _viewportTop +
-                            AppControlSize.touchTarget * 4 +
+                            AppControlSize.touchTarget * (_is3D ? 5 : 4) +
                             AppSpacing.xsm * 2 +
                             AppSpacing.md;
                     if (!controlsFit &&
@@ -1185,9 +1196,12 @@ class _MapViewState extends State<MapView> {
                     );
                   },
                   child: MapCanvasControls(
-                    tilted: _tilted,
-                    onToggleTilt: interactive
-                        ? () => setState(() => _tilted = !_tilted)
+                    is3D: _is3D,
+                    onRotate: _is3D && interactive
+                        ? () => setState(() => _mapBearing += math.pi / 4)
+                        : null,
+                    onToggle3D: interactive
+                        ? () => setState(() => _is3D = !_is3D)
                         : null,
                     onZoomIn: interactive ? _mapController.zoomIn : null,
                     onZoomOut: interactive ? _mapController.zoomOut : null,

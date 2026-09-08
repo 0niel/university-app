@@ -11,6 +11,8 @@ import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
 import 'package:rtu_mirea_app/map/services/map_place_anchor.dart';
 import 'package:rtu_mirea_app/map/services/map_place_landmarks.dart';
 import 'package:rtu_mirea_app/map/services/map_planar_scale.dart';
+import 'package:rtu_mirea_app/map/services/map_scale_repaint.dart';
+import 'package:rtu_mirea_app/map/services/map_viewport_painter.dart';
 import 'package:rtu_mirea_app/map/widgets/map_places_explorer.dart';
 import 'package:rtu_mirea_app/map/widgets/map_structure_layer.dart';
 
@@ -25,6 +27,7 @@ class MapCartographicLayer extends StatefulWidget {
     this.syntheticRoomIds = const {},
     this.navigationLandmarks = const [],
     this.hitIndex,
+    this.viewportSize,
     super.key,
   });
 
@@ -37,6 +40,7 @@ class MapCartographicLayer extends StatefulWidget {
   final Set<String> syntheticRoomIds;
   final List<MapNavigationLandmark> navigationLandmarks;
   final MapLabelHitIndex? hitIndex;
+  final Size? viewportSize;
 
   @override
   State<MapCartographicLayer> createState() => _MapCartographicLayerState();
@@ -45,10 +49,12 @@ class MapCartographicLayer extends StatefulWidget {
 class _MapCartographicLayerState extends State<MapCartographicLayer> {
   List<_Feature> _features = [];
   double _scale = 1;
+  late final MapScaleRepaint _strokeScale;
 
   @override
   void initState() {
     super.initState();
+    _strokeScale = MapScaleRepaint(widget.transform);
     _index();
     _readScale();
     widget.transform?.addListener(_zoomChanged);
@@ -91,7 +97,7 @@ class _MapCartographicLayerState extends State<MapCartographicLayer> {
               ..addOval(
                 Rect.fromCircle(
                   center: Offset(landmark.place.x, landmark.place.y),
-                  radius: 12,
+                  radius: AppRadius.iconTile,
                 ),
               ),
           ),
@@ -125,6 +131,7 @@ class _MapCartographicLayerState extends State<MapCartographicLayer> {
   @override
   void didUpdateWidget(MapCartographicLayer oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _strokeScale.updateTransform(widget.transform);
     if (oldWidget.hitIndex != widget.hitIndex) {
       oldWidget.hitIndex?.clear();
       widget.hitIndex?.clear();
@@ -154,12 +161,21 @@ class _MapCartographicLayerState extends State<MapCartographicLayer> {
   void dispose() {
     widget.hitIndex?.clear();
     widget.transform?.removeListener(_zoomChanged);
+    _strokeScale.dispose();
     super.dispose();
   }
 
+  CustomPainter _painter(CustomPainter painter) => widget.viewportSize == null
+      ? painter
+      : MapViewportPainter(
+          painter: painter,
+          sceneSize: widget.size,
+          transform: widget.transform,
+        );
+
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
-    size: widget.size,
+    size: widget.viewportSize ?? widget.size,
     child: Stack(
       fit: StackFit.expand,
       children: [
@@ -168,14 +184,17 @@ class _MapCartographicLayerState extends State<MapCartographicLayer> {
             svg: svg,
             size: widget.size,
             transform: widget.transform,
+            viewportSize: widget.viewportSize,
           ),
         RepaintBoundary(
           child: CustomPaint(
-            painter: _RoomsPainter(
-              _features,
-              context.colors,
-              widget.selectedRoomId,
-              widget.transform,
+            painter: _painter(
+              _RoomsPainter(
+                _features,
+                context.colors,
+                widget.selectedRoomId,
+                _strokeScale,
+              ),
             ),
           ),
         ),
@@ -185,16 +204,19 @@ class _MapCartographicLayerState extends State<MapCartographicLayer> {
             size: widget.size,
             openingsOnly: true,
             transform: widget.transform,
+            viewportSize: widget.viewportSize,
           ),
         RepaintBoundary(
           child: CustomPaint(
-            painter: _LabelsPainter(
-              _features,
-              context.colors,
-              _scale,
-              widget.selectedRoomId,
-              MediaQuery.textScalerOf(context).scale(11).clamp(11, 16),
-              widget.hitIndex,
+            painter: _painter(
+              _LabelsPainter(
+                _features,
+                context.colors,
+                _scale,
+                widget.selectedRoomId,
+                MediaQuery.textScalerOf(context).scale(11).clamp(11, 16),
+                widget.hitIndex,
+              ),
             ),
           ),
         ),
@@ -263,27 +285,32 @@ class _Feature {
 }
 
 class _RoomsPainter extends CustomPainter {
-  _RoomsPainter(this.features, this.colors, this.selectedId, this.transform)
-    : super(repaint: transform);
+  _RoomsPainter(this.features, this.colors, this.selectedId, this.scale)
+    : super(repaint: scale);
   final List<_Feature> features;
   final AppColors colors;
   final String? selectedId;
-  final ValueListenable<Matrix4>? transform;
+  final ValueListenable<double> scale;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final raw = transform == null ? 1.0 : mapPlanarScale(transform!.value);
-    final scale = raw.isFinite && raw > 0 ? raw : 1.0;
+    final visible = canvas.getLocalClipBounds().inflate(2 / scale.value);
     final outline = Paint()
       ..style = PaintingStyle.stroke
       ..strokeJoin = StrokeJoin.round
-      ..strokeWidth = 1 / scale
+      ..strokeWidth = 1 / scale.value
       ..color = Color.alphaBlend(
         colors.muted2.withValues(alpha: .72),
         colors.surface,
       );
+    final roomFill = Paint();
+    final selectedOutline = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeJoin = StrokeJoin.round
+      ..strokeWidth = 1.2 / scale.value
+      ..color = colors.accent;
     for (final feature in features) {
-      if (feature.synthetic) continue;
+      if (feature.synthetic || !feature.bounds.overlaps(visible)) continue;
       final selected =
           feature.room.roomId == selectedId && !feature.detachedService;
       final fill = selected
@@ -297,16 +324,12 @@ class _RoomsPainter extends CustomPainter {
               colors.surface2,
             );
       canvas
-        ..drawPath(feature.room.path, Paint()..color = fill)
+        ..drawPath(feature.room.path, roomFill..color = fill)
         ..drawPath(feature.room.path, outline);
       if (selected) {
         canvas.drawPath(
           feature.room.path,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeJoin = StrokeJoin.round
-            ..strokeWidth = 1.2 / scale
-            ..color = colors.accent,
+          selectedOutline,
         );
       }
     }
@@ -317,7 +340,7 @@ class _RoomsPainter extends CustomPainter {
       old.features != features ||
       old.colors != colors ||
       old.selectedId != selectedId ||
-      old.transform != transform;
+      old.scale != scale;
 }
 
 class _Label {
@@ -349,6 +372,8 @@ class _LabelsPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     hitIndex?.clear();
     final hitBounds = <String, Rect>{};
+    final visible = canvas.getLocalClipBounds();
+    final labelArea = visible.inflate(200 / scale);
     final labels = <MapLabelCandidate, _Label>{};
     final candidates = <MapLabelCandidate>[];
     final overview = scale < .5;
@@ -377,7 +402,7 @@ class _LabelsPainter extends CustomPainter {
     }
     for (final feature in features) {
       final anchor = feature.anchor;
-      if (anchor == null) continue;
+      if (anchor == null || !labelArea.contains(anchor)) continue;
       final width = feature.bounds.width * scale;
       final height = feature.bounds.height * scale;
       final selected = selectedId == feature.room.roomId;
@@ -481,6 +506,13 @@ class _LabelsPainter extends CustomPainter {
     for (final candidate in accepted) {
       final label = labels[candidate]!;
       final selected = label.feature.room.roomId == selectedId;
+      if (!Rect.fromCenter(
+        center: label.anchor,
+        width: (label.size.width + 6) / scale,
+        height: (label.size.height + 6) / scale,
+      ).overlaps(visible)) {
+        continue;
+      }
       canvas
         ..save()
         ..translate(label.anchor.dx, label.anchor.dy)
@@ -532,7 +564,7 @@ class _LabelsPainter extends CustomPainter {
         if (label.feature.closed) {
           final badge = center + const Offset(8, 8);
           canvas
-            ..drawCircle(badge, 5, Paint()..color = colors.exam)
+            ..drawCircle(badge, AppRadius.xs, Paint()..color = colors.exam)
             ..drawLine(
               badge - const Offset(2.5, 0),
               badge + const Offset(2.5, 0),
@@ -555,7 +587,7 @@ class _LabelsPainter extends CustomPainter {
         target = target.expandToInclude(
           Rect.fromCircle(
             center: Offset(8, rect.top + 19 + (selected ? 4 : 0)),
-            radius: 5,
+            radius: AppRadius.xs,
           ),
         );
       }

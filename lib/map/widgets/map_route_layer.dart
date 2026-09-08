@@ -4,6 +4,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/map/services/map_planar_scale.dart';
+import 'package:rtu_mirea_app/map/services/map_viewport_painter.dart';
 
 class MapRouteLayer extends StatelessWidget {
   const MapRouteLayer({
@@ -13,10 +14,12 @@ class MapRouteLayer extends StatelessWidget {
     this.instructionPoint,
     this.showStart = true,
     this.showDestination = true,
+    this.viewportSize,
     super.key,
   });
 
   final Size size;
+  final Size? viewportSize;
   final List<List<Offset>> segments;
   final ValueListenable<Matrix4>? transform;
   final Offset? instructionPoint;
@@ -24,21 +27,30 @@ class MapRouteLayer extends StatelessWidget {
   final bool showDestination;
 
   @override
-  Widget build(BuildContext context) => IgnorePointer(
-    child: SizedBox.fromSize(
-      size: size,
-      child: CustomPaint(
-        painter: _RoutePainter(
-          segments: segments,
-          colors: context.colors,
-          transform: transform,
-          instructionPoint: instructionPoint,
-          showStart: showStart,
-          showDestination: showDestination,
+  Widget build(BuildContext context) {
+    final painter = _RoutePainter(
+      segments: segments,
+      colors: context.colors,
+      transform: transform,
+      instructionPoint: instructionPoint,
+      showStart: showStart,
+      showDestination: showDestination,
+    );
+    return IgnorePointer(
+      child: SizedBox.fromSize(
+        size: viewportSize ?? size,
+        child: CustomPaint(
+          painter: viewportSize == null
+              ? painter
+              : MapViewportPainter(
+                  painter: painter,
+                  sceneSize: size,
+                  transform: transform,
+                ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _RoutePainter extends CustomPainter {
@@ -143,7 +155,7 @@ class _RoutePainter extends CustomPainter {
       final end = parts.last.points.last;
       final marker = RRect.fromRectAndRadius(
         Rect.fromCenter(center: end, width: 19 / scale, height: 19 / scale),
-        Radius.circular(6 / scale),
+        Radius.circular(AppRadius.focusOutline / scale),
       );
       canvas
         ..drawRRect(
@@ -169,6 +181,26 @@ class _RoutePainter extends CustomPainter {
     }
     final instruction = instructionPoint;
     if (instruction != null && instruction.isFinite) {
+      final matrix = transform?.value;
+      Rect screenBounds(Offset point, double radius) {
+        final rect = Rect.fromCircle(center: point, radius: radius / scale);
+        return matrix != null && matrix.storage.every((value) => value.isFinite)
+            ? MatrixUtils.transformRect(matrix, rect)
+            : rect;
+      }
+
+      final instructionBounds = screenBounds(instruction, 8);
+      final overlapsStart =
+          showStart &&
+          instructionBounds.overlaps(
+            screenBounds(parts.first.points.first, 8).inflate(2),
+          );
+      final overlapsDestination =
+          showDestination &&
+          instructionBounds.overlaps(
+            screenBounds(parts.last.points.last, 11.5).inflate(2),
+          );
+      if (overlapsStart || overlapsDestination) return;
       canvas
         ..drawCircle(instruction, 8 / scale, Paint()..color = colors.surface)
         ..drawCircle(

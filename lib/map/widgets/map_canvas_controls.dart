@@ -7,8 +7,9 @@ class MapCanvasControls extends StatelessWidget {
     this.onZoomIn,
     this.onZoomOut,
     this.onFit,
-    this.onToggleTilt,
-    this.tilted = false,
+    this.onToggle3D,
+    this.onRotate,
+    this.is3D = false,
     this.showZoom = true,
     this.axis = Axis.vertical,
     super.key,
@@ -17,8 +18,9 @@ class MapCanvasControls extends StatelessWidget {
   final VoidCallback? onZoomIn;
   final VoidCallback? onZoomOut;
   final VoidCallback? onFit;
-  final VoidCallback? onToggleTilt;
-  final bool tilted;
+  final VoidCallback? onToggle3D;
+  final VoidCallback? onRotate;
+  final bool is3D;
   final bool showZoom;
   final Axis axis;
 
@@ -64,20 +66,33 @@ class MapCanvasControls extends StatelessWidget {
         tone: AppIconButtonTone.surface,
         onPressed: onFit,
       ),
-      if (onToggleTilt != null) ...[
+      if (onRotate != null) ...[
+        const SizedBox(height: AppSpacing.sm),
+        AppIconButton(
+          icon: const AppLineIconWidget(AppLineIcon.refresh),
+          tooltip: 'Повернуть план',
+          shape: AppIconButtonShape.circle,
+          tone: AppIconButtonTone.surface,
+          onPressed: onRotate,
+        ),
+      ],
+      if (onToggle3D != null) ...[
         SizedBox(
           height: axis == Axis.vertical ? AppSpacing.sm : 0,
           width: axis == Axis.horizontal ? AppSpacing.sm : 0,
         ),
         AppIconButton(
           icon: Text(
-            tilted ? '2D' : '3D',
-            style: AppText.caption.copyWith(fontWeight: FontWeight.w700),
+            is3D ? '2D' : '3D',
+            style: AppText.caption.copyWith(
+              fontWeight: FontWeight.w700,
+              color: is3D ? context.colors.onAccent : context.colors.ink,
+            ),
           ),
-          tooltip: tilted ? 'Вид сверху' : 'Наклонить план',
+          tooltip: is3D ? 'Вид сверху' : 'Объёмный план',
           shape: AppIconButtonShape.circle,
-          tone: tilted ? AppIconButtonTone.primary : AppIconButtonTone.surface,
-          onPressed: onToggleTilt,
+          tone: is3D ? AppIconButtonTone.primary : AppIconButtonTone.surface,
+          onPressed: onToggle3D,
         ),
       ],
     ],

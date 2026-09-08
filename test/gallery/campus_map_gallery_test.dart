@@ -192,7 +192,7 @@ void main() {
           });
         }
 
-        Future<void> toggleTilt(String title) async {
+        Future<void> toggleVolume(String title) async {
           final control = find.byTooltip(title);
           if (control.evaluate().isNotEmpty) {
             await tester.tap(control);
@@ -214,20 +214,20 @@ void main() {
         }
         expect(tester.takeException(), isNull);
         await capture('zoom');
-        await toggleTilt('Наклонить план');
+        await toggleVolume('Объёмный план');
         expect(find.byTooltip('Вид сверху'), findsOneWidget);
         expect(tester.takeException(), isNull);
-        await capture('tilted');
-        await toggleTilt('Вид сверху');
+        await capture('volume');
+        await toggleVolume('Вид сверху');
         tester.view.physicalSize = const Size(320, 568);
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         await capture('compact');
-        await toggleTilt('Наклонить план');
+        await toggleVolume('Объёмный план');
         expect(tester.takeException(), isNull);
-        await capture('compact-tilted');
-        await toggleTilt('Вид сверху');
+        await capture('compact-volume');
+        await toggleVolume('Вид сверху');
         textScale.value = const TextScaler.linear(2);
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
@@ -237,10 +237,10 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         await capture('short');
-        await toggleTilt('Наклонить план');
+        await toggleVolume('Объёмный план');
         expect(tester.takeException(), isNull);
-        await capture('short-tilted');
-        await toggleTilt('Вид сверху');
+        await capture('short-volume');
+        await toggleVolume('Вид сверху');
         tester.view.physicalSize = const Size(390, 844);
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
