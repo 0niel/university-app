@@ -21,6 +21,7 @@ import 'package:rtu_mirea_app/app/theme/cubit/theme_cubit.dart';
 import 'package:rtu_mirea_app/app/view/app_boot_placeholder.dart';
 import 'package:rtu_mirea_app/app/view/app_device_token_sync.dart';
 import 'package:rtu_mirea_app/app/view/app_router_view.dart';
+import 'package:rtu_mirea_app/app/view/app_schedule_refresh.dart';
 import 'package:rtu_mirea_app/app/widgets/user_preferences_scope.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/config/config.dart';
@@ -158,7 +159,7 @@ class App extends StatelessWidget {
                     preferencesRepository: appScope.preferencesRepository,
                     connectivityClient: ConnectivityClient(),
                     syncPolicy: () => syncPreferences.state,
-                  )..add(const SelectedScheduleRefreshRequested());
+                  );
                 },
               ),
               BlocProvider(
@@ -236,7 +237,9 @@ class App extends StatelessWidget {
             ],
             child: AppDeviceTokenSync(
               controller: tokenSyncController,
-              child: const UserPreferencesScope(child: AppRouterView()),
+              child: const AppScheduleRefresh(
+                child: UserPreferencesScope(child: AppRouterView()),
+              ),
             ),
           ),
         );

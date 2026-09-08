@@ -47,7 +47,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     );
     on<SelectedScheduleRefreshRequested>(
       _onSelectedScheduleRefreshRequested,
-      transformer: droppable(),
+      transformer: concurrent(),
     );
     on<ScheduleSelected>(_onScheduleSelected);
     on<ScheduleDeleteRequested>(_onScheduleDeleteRequested);
@@ -100,6 +100,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   String? _activeUserId;
   String? _lastPushedDescriptor;
   int _userGeneration = 0;
+  int _refreshGeneration = 0;
   Future<void> _pendingPush = Future<void>.value();
 
   void _onScheduleUserChanged(
@@ -546,9 +547,12 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
       return;
     }
 
+    final refreshGeneration = ++_refreshGeneration;
+    _pushSelectedSchedule(selected);
     try {
       final refreshed = await _refetchSelected(selected);
-      if (generation != _userGeneration ||
+      if (refreshGeneration != _refreshGeneration ||
+          generation != _userGeneration ||
           state.selectedSchedule != selected ||
           emit.isDone) {
         return;
@@ -571,7 +575,8 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
       }
 
       await _widgetUpdater.updateWidgetsFromSelectedSchedule(refreshed);
-      if (generation != _userGeneration ||
+      if (refreshGeneration != _refreshGeneration ||
+          generation != _userGeneration ||
           state.selectedSchedule != selected ||
           emit.isDone) {
         return;
@@ -586,7 +591,8 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         ),
       );
     } on Exception catch (error, stackTrace) {
-      if (generation != _userGeneration ||
+      if (refreshGeneration != _refreshGeneration ||
+          generation != _userGeneration ||
           state.selectedSchedule != selected ||
           emit.isDone) {
         return;
