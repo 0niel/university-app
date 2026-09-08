@@ -23,6 +23,14 @@ class MockConnectivityClient extends Mock implements ConnectivityClient {}
 class MockStorage extends Mock implements Storage {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(
+      const SelectedGroupSchedule(
+        group: Group(name: 'test'),
+        schedule: [],
+      ),
+    );
+  });
   group('ScheduleBloc offline handling', () {
     late ScheduleRepository scheduleRepository;
     late ScheduleWidgetUpdater widgetUpdater;
@@ -64,6 +72,86 @@ void main() {
     ScheduleBloc buildBloc() => ScheduleBloc(
       scheduleRepository: scheduleRepository,
       widgetUpdater: widgetUpdater,
+    );
+
+    test('automatic refresh replaces a hydrated partial week', () async {
+      final monday = lesson.copyWith(dates: [DateTime(2026, 9, 7)]);
+      final week = [
+        monday,
+        lesson.copyWith(dates: [DateTime(2026, 9, 8)]),
+        lesson.copyWith(dates: [DateTime(2026, 9, 9)]),
+      ];
+      when(() => storage.read('ScheduleBloc')).thenReturn(
+        ScheduleState(
+          selectedSchedule: SelectedGroupSchedule(
+            group: group,
+            schedule: [monday],
+          ),
+          groupsSchedule: [
+            (group.name, group, [monday]),
+          ],
+        ).toJson(),
+      );
+      when(
+        () => scheduleRepository.getSchedule(group: group.name),
+      ).thenAnswer((_) async => ScheduleResponse(data: week));
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+      expect(bloc.state.selectedSchedule!.schedule, [monday]);
+      final refreshed = bloc.stream.firstWhere(
+        (state) => state.selectedSchedule?.schedule.length == 3,
+      );
+      bloc.add(const SelectedScheduleRefreshRequested());
+      await refreshed.timeout(const Duration(seconds: 1));
+      expect(bloc.state.selectedSchedule!.schedule, week);
+      expect(bloc.state.groupsSchedule.single.$3, week);
+      expect(bloc.state.isOffline, isFalse);
+    });
+
+    test(
+      'switching groups during refresh loads the latest selection',
+      () async {
+        final pending = Completer<ScheduleResponse>();
+        const nextGroup = Group(name: 'ЭСМО-01-26');
+        final nextLesson = lesson.copyWith(dates: [DateTime(2026, 9, 8)]);
+        when(() => storage.read('ScheduleBloc')).thenReturn(
+          ScheduleState(selectedSchedule: cached).toJson(),
+        );
+        final requested = Completer<void>();
+        when(
+          () => scheduleRepository.getSchedule(group: group.name),
+        ).thenAnswer((_) {
+          requested.complete();
+          return pending.future;
+        });
+        when(
+          () => scheduleRepository.getSchedule(group: nextGroup.name),
+        ).thenAnswer((_) async => ScheduleResponse(data: [nextLesson]));
+        final bloc = buildBloc();
+        addTearDown(bloc.close);
+        bloc.add(const SelectedScheduleRefreshRequested());
+        await requested.future;
+        final refreshed = bloc.stream.firstWhere(
+          (state) =>
+              state.selectedSchedule?.schedule.contains(nextLesson) ?? false,
+        );
+        bloc.add(
+          const ScheduleSelected(
+            selectedSchedule: SelectedGroupSchedule(
+              group: nextGroup,
+              schedule: [],
+            ),
+          ),
+        );
+        await refreshed.timeout(const Duration(seconds: 1));
+        pending.complete(ScheduleResponse(data: [lesson]));
+        await Future<void>.delayed(Duration.zero);
+        expect(bloc.state.selectedSchedule!.name, nextGroup.name);
+        expect(bloc.state.selectedSchedule!.schedule, [nextLesson]);
+        verify(
+          () => scheduleRepository.getSchedule(group: nextGroup.name),
+        ).called(1);
+      },
     );
 
     blocTest<ScheduleBloc, ScheduleState>(
@@ -278,6 +366,78 @@ void main() {
       widgetUpdater: widgetUpdater,
       connectivityClient: connectivity,
       syncPolicy: () => policy,
+    );
+
+    for (final policy in [SyncPolicy.manualOnly, SyncPolicy.wifiOnly]) {
+      test(
+        'denied auto refresh preserves an active manual refresh: $policy',
+        () async {
+          final pending = Completer<ScheduleResponse>();
+          final requested = Completer<void>();
+          var wifi = true;
+          when(connectivity.hasWifiOrEthernet).thenAnswer((_) async => wifi);
+          when(() => storage.read('ScheduleBloc')).thenReturn(
+            ScheduleState(selectedSchedule: cached).toJson(),
+          );
+          when(
+            () => scheduleRepository.getSchedule(group: group.name),
+          ).thenAnswer((_) {
+            requested.complete();
+            return pending.future;
+          });
+          final bloc = buildBloc(policy);
+          addTearDown(bloc.close);
+          bloc.add(const SelectedScheduleRefreshRequested(manual: true));
+          await requested.future;
+          wifi = false;
+          bloc.add(const SelectedScheduleRefreshRequested());
+          await pumpEventQueue();
+          final tomorrow = lesson.copyWith(dates: [DateTime(2026, 9, 9)]);
+          final refreshed = bloc.stream.firstWhere(
+            (state) =>
+                state.selectedSchedule?.schedule.contains(tomorrow) ?? false,
+          );
+          pending.complete(ScheduleResponse(data: [lesson, tomorrow]));
+          await refreshed.timeout(const Duration(seconds: 1));
+          expect(bloc.state.selectedSchedule!.schedule, [lesson, tomorrow]);
+          verify(
+            () => scheduleRepository.getSchedule(group: group.name),
+          ).called(1);
+        },
+      );
+    }
+
+    test(
+      'a late refresh cannot replace the latest unchanged response',
+      () async {
+        final pending = Completer<ScheduleResponse>();
+        final requested = Completer<void>();
+        var requests = 0;
+        when(() => storage.read('ScheduleBloc')).thenReturn(
+          ScheduleState(selectedSchedule: cached).toJson(),
+        );
+        when(
+          () => scheduleRepository.getSchedule(group: group.name),
+        ).thenAnswer((_) {
+          if (++requests == 1) {
+            requested.complete();
+            return pending.future;
+          }
+          return Future.value(ScheduleResponse(data: [lesson]));
+        });
+        final bloc = buildBloc(SyncPolicy.always);
+        addTearDown(bloc.close);
+        bloc.add(const SelectedScheduleRefreshRequested(manual: true));
+        await requested.future;
+        bloc.add(const SelectedScheduleRefreshRequested(manual: true));
+        await pumpEventQueue();
+        expect(requests, 2);
+        pending.complete(
+          ScheduleResponse(data: [lesson.copyWith(subject: 'Outdated')]),
+        );
+        await pumpEventQueue();
+        expect(bloc.state.selectedSchedule!.schedule, [lesson]);
+      },
     );
 
     blocTest<ScheduleBloc, ScheduleState>(
