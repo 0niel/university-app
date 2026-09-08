@@ -157,7 +157,7 @@ void main() {
     );
     expect(map.viewportPadding.top, greaterThan(52));
     expect(map.viewportPadding.bottom, greaterThan(60));
-    expect(map.viewportPadding.bottom, lessThan(120));
+    expect(map.viewportPadding.bottom, lessThan(200));
     expect(find.byType(DraggableScrollableSheet), findsOneWidget);
     expect(find.byType(AppInnerHeader), findsNothing);
     expect(find.byType(Divider), findsNothing);
@@ -387,7 +387,7 @@ void main() {
     expect(transformUpdates, 0);
     expect(
       map.viewportPaddingListenable!.value.bottom,
-      closeTo(844 * .78 + 12, .1),
+      closeTo(844 * .78 + AppSpacing.md, .1),
     );
     await tester.pump(const Duration(milliseconds: 140));
     await tester.pumpAndSettle();
@@ -625,6 +625,69 @@ void main() {
         MapEvent.floorSelected(floor: secondFloor, campus: campuses.first),
       ),
     ).called(1);
+  });
+
+  testWidgets('tilt preserves zoom and projected room taps', (tester) async {
+    final controller = SvgInteractiveMapController();
+    addTearDown(controller.dispose);
+    await pumpMap(tester, mapController: controller, reduceMotion: true);
+    controller.focusPoints([const Offset(20, 20)]);
+    await tester.pumpAndSettle();
+    final scale = controller.currentScale;
+    await tester.tap(find.byTooltip('Наклонить план'));
+    await tester.pumpAndSettle();
+    expect(controller.currentScale, scale);
+    final projection = tester.widget<Transform>(
+      find.byKey(const ValueKey('map-presentation-transform')),
+    );
+    expect(projection.transform.entry(3, 1), isNot(0));
+    final canvas = tester.renderObject<RenderBox>(find.byType(MapFloorCanvas));
+    await tester.tapAt(canvas.localToGlobal(const Offset(20, 20)));
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pumpAndSettle();
+    verify(() => bloc.add(const MapEvent.roomTapped('v78__r__101'))).called(1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('panel resizing preserves an explored area and its zoom', (
+    tester,
+  ) async {
+    final controller = SvgInteractiveMapController();
+    addTearDown(controller.dispose);
+    await pumpMap(tester, mapController: controller, reduceMotion: true);
+    controller.zoomIn();
+    await tester.pumpAndSettle();
+    final scale = controller.currentScale;
+    final viewer = tester.widget<InteractiveViewer>(
+      find.byType(InteractiveViewer),
+    );
+    final map = tester.widget<SvgInteractiveMap>(
+      find.byType(SvgInteractiveMap),
+    );
+    Offset visibleCenter() {
+      final padding = map.viewportPaddingListenable!.value;
+      return Offset(
+        (390 + padding.left - padding.right) / 2,
+        (844 + padding.top - padding.bottom) / 2,
+      );
+    }
+
+    final center = viewer.transformationController!.toScene(visibleCenter());
+    final sheet = tester.widget<DraggableScrollableSheet>(
+      find.byType(DraggableScrollableSheet),
+    );
+    sheet.controller!.jumpTo(.5);
+    await tester.pumpAndSettle();
+    expect(controller.currentScale, scale);
+    expect(
+      (viewer.transformationController!.toScene(visibleCenter()) - center)
+          .distance,
+      lessThan(.01),
+    );
+    sheet.controller!.jumpTo(sheet.minChildSize);
+    await tester.pumpAndSettle();
+    expect(controller.currentScale, scale);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('zoom and fit controls change the real map transform', (

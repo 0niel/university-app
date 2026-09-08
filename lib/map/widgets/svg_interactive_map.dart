@@ -11,6 +11,8 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
+import 'package:rtu_mirea_app/map/services/map_label_hit_index.dart';
+import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
 import 'package:rtu_mirea_app/map/services/map_place_anchor.dart';
 import 'package:rtu_mirea_app/map/services/map_place_landmarks.dart';
 import 'package:rtu_mirea_app/map/widgets/map_floor_canvas.dart';
@@ -30,6 +32,12 @@ class SvgInteractiveMap extends StatefulWidget {
     this.places = const [],
     this.showRoomLabels = false,
     this.syntheticRoomIds = const {},
+    this.navigationLandmarks = const [],
+    this.onNavigationLandmarkTap,
+    this.tilted = false,
+    this.routeInstructionPoint,
+    this.showRouteStart = true,
+    this.showRouteDestination = true,
     super.key,
   });
 
@@ -43,6 +51,12 @@ class SvgInteractiveMap extends StatefulWidget {
   final List<MapPlaceData> places;
   final bool showRoomLabels;
   final Set<String> syntheticRoomIds;
+  final List<MapNavigationLandmark> navigationLandmarks;
+  final ValueChanged<MapNavigationLandmark>? onNavigationLandmarkTap;
+  final bool tilted;
+  final Offset? routeInstructionPoint;
+  final bool showRouteStart;
+  final bool showRouteDestination;
 
   @override
   State<SvgInteractiveMap> createState() => _SvgInteractiveMapState();
@@ -56,6 +70,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
   static const _zoomStep = 1.45;
 
   final _transformationController = TransformationController();
+  final _labelHitIndex = MapLabelHitIndex();
   late final AnimationController _zoomController;
   Animation<Matrix4>? _zoomAnimation;
   Timer? _viewportSettled;
@@ -67,6 +82,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
   double _initialScale = 1;
   Offset _doubleTapPosition = Offset.zero;
   String? _selectedRoomId;
+  bool _userAdjustedCamera = false;
+  Rect? _lastVisibleViewport;
 
   @override
   void initState() {
@@ -98,8 +115,11 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       _zoomController.stop();
       _zoomAnimation = null;
       _selectedRoomId = null;
+      _labelHitIndex.clear();
       _hasInitialTransform = false;
       _hasFittedView = false;
+      _userAdjustedCamera = false;
+      _lastVisibleViewport = null;
     } else if (widget.viewportPaddingListenable == null &&
         oldWidget.viewportPadding != widget.viewportPadding) {
       _viewportChanged();
@@ -133,6 +153,23 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
 
   void _refitViewport() {
     if (!mounted) return;
+    final constraints = _lastConstraints;
+    if (_userAdjustedCamera && constraints != null) {
+      final viewport = _visibleViewport(constraints);
+      final previous = _lastVisibleViewport;
+      _lastVisibleViewport = viewport;
+      if (previous != null) {
+        final delta = viewport.center - previous.center;
+        final matrix = _transformationController.value.clone();
+        matrix.setTranslationRaw(
+          matrix[12] + delta.dx,
+          matrix[13] + delta.dy,
+          0,
+        );
+        _animateTo(matrix);
+      }
+      return;
+    }
     final selected = context
         .read<MapBloc>()
         .state
@@ -213,36 +250,60 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
                       ? AppColors.mapCanvasDark
                       : AppColors.mapCanvasLight
                 : context.colors.surface2,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTapUp: interactive
-                  ? (details) => unawaited(_selectRoom(details))
-                  : null,
-              onDoubleTapDown: (details) =>
-                  _doubleTapPosition = details.localPosition,
-              onDoubleTap: _handleDoubleTap,
-              child: InteractiveViewer(
-                constrained: false,
-                boundaryMargin: const EdgeInsets.all(20000),
-                minScale: _minScale,
-                maxScale: _maxScale,
-                transformationController: _transformationController,
-                onInteractionStart: (_) {
-                  _zoomController.stop();
-                  _cancelViewportRefit();
-                },
-                child: RepaintBoundary(
-                  child: MapFloorCanvas(
-                    svgAssetPath: widget.svgAssetPath,
-                    canvasSize: Size(bounds.width, bounds.height),
-                    rooms: rooms,
-                    selectedRoomId: _selectedRoomId,
-                    svgContent: widget.svgContent,
-                    routeSegments: widget.routeSegments,
-                    places: widget.places,
-                    transform: _transformationController,
-                    showRoomLabels: widget.showRoomLabels,
-                    syntheticRoomIds: widget.syntheticRoomIds,
+            child: ClipRect(
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(end: widget.tilted ? .42 : 0),
+                duration: _reduceMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 280),
+                curve: Curves.easeOutCubic,
+                builder: (context, angle, child) => Transform(
+                  key: const ValueKey('map-presentation-transform'),
+                  alignment: Alignment.center,
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, .00055)
+                    ..rotateX(angle),
+                  child: child,
+                ),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapUp: interactive
+                      ? (details) => unawaited(_selectRoom(details))
+                      : null,
+                  onDoubleTapDown: (details) =>
+                      _doubleTapPosition = details.localPosition,
+                  onDoubleTap: _handleDoubleTap,
+                  child: InteractiveViewer(
+                    constrained: false,
+                    boundaryMargin: const EdgeInsets.all(20000),
+                    minScale: _minScale,
+                    maxScale: _maxScale,
+                    transformationController: _transformationController,
+                    onInteractionStart: (_) {
+                      _zoomController.stop();
+                      _cancelViewportRefit();
+                      _userAdjustedCamera = true;
+                      _lastVisibleViewport = _visibleViewport(constraints);
+                    },
+                    child: RepaintBoundary(
+                      child: MapFloorCanvas(
+                        svgAssetPath: widget.svgAssetPath,
+                        canvasSize: Size(bounds.width, bounds.height),
+                        rooms: rooms,
+                        selectedRoomId: _selectedRoomId,
+                        svgContent: widget.svgContent,
+                        routeSegments: widget.routeSegments,
+                        places: widget.places,
+                        transform: _transformationController,
+                        showRoomLabels: widget.showRoomLabels,
+                        syntheticRoomIds: widget.syntheticRoomIds,
+                        navigationLandmarks: widget.navigationLandmarks,
+                        labelHitIndex: _labelHitIndex,
+                        routeInstructionPoint: widget.routeInstructionPoint,
+                        showRouteStart: widget.showRouteStart,
+                        showRouteDestination: widget.showRouteDestination,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -255,14 +316,28 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
 
   Future<void> _selectRoom(TapUpDetails details) async {
     final state = context.read<MapBloc>().state;
-    if (state.status != .loaded || state.rooms.isEmpty) return;
+    if (state.status != .loaded) return;
     final floorId = state.selectedFloor?.id;
     final localPosition = details.localPosition;
     final scenePosition = _transformationController.toScene(localPosition);
+    final labelId = _labelHitIndex.hitTest(scenePosition);
+    final landmark = widget.navigationLandmarks
+        .where((item) => item.place.id == labelId)
+        .firstOrNull;
+    if (landmark != null && widget.onNavigationLandmarkTap != null) {
+      unawaited(HapticFeedback.selectionClick());
+      widget.onNavigationLandmarkTap!(landmark);
+      return;
+    }
+    if (state.rooms.isEmpty) return;
     final containing = state.rooms
         .where((room) => room.path.contains(scenePosition))
         .toList();
-    if (widget.showRoomLabels) {
+    if (labelId != null && state.rooms.any((room) => room.roomId == labelId)) {
+      containing
+        ..clear()
+        ..add(state.rooms.firstWhere((room) => room.roomId == labelId));
+    } else if (widget.showRoomLabels) {
       final places = {for (final place in widget.places) place.id: place};
       final services = {
         ...widget.syntheticRoomIds,
@@ -348,6 +423,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
 
   void _handleDoubleTap() {
     _cancelViewportRefit();
+    _userAdjustedCamera = true;
     final current = _transformationController.value;
     final scale = _planarScale(current);
     final nextScale = scale < _initialScale * 2.5
@@ -379,6 +455,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       return;
     }
     final viewport = _visibleViewport(constraints);
+    _lastVisibleViewport = viewport;
+    _userAdjustedCamera = false;
     final scale = math
         .min(viewport.width / bounds.width, viewport.height / bounds.height)
         .clamp(_minScale, _maxScale);
@@ -419,6 +497,8 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     final center = location.detachedService ? location.point! : rect.center;
     setState(() => _selectedRoomId = room.roomId);
     final viewport = _visibleViewport(constraints);
+    _lastVisibleViewport = viewport;
+    _userAdjustedCamera = false;
     final horizontalScale = viewport.width * 0.5 / rect.width;
     final verticalScale = viewport.height * 0.46 / rect.height;
     final minimum = math.min(_initialScale * 1.8, _maxScale);
@@ -433,12 +513,55 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     _animateTo(target);
   }
 
+  @override
+  void focusPoints(List<Offset> points) {
+    if (!mounted) return;
+    final constraints = _lastConstraints;
+    final floorBounds = context.read<MapBloc>().state.boundingRect;
+    final valid = points
+        .where((point) => point.dx.isFinite && point.dy.isFinite)
+        .toList();
+    if (constraints == null || floorBounds == null || valid.isEmpty) return;
+    var bounds = Rect.fromPoints(valid.first, valid.first);
+    for (final point in valid.skip(1)) {
+      bounds = bounds.expandToInclude(Rect.fromPoints(point, point));
+    }
+    final minimumExtent = math.max<double>(floorBounds.shortestSide / 12, 1);
+    bounds = Rect.fromCenter(
+      center: bounds.center,
+      width: math.max(bounds.width, minimumExtent),
+      height: math.max(bounds.height, minimumExtent),
+    );
+    final viewport = _visibleViewport(constraints);
+    final scale = math
+        .min(
+          viewport.width * .76 / bounds.width,
+          viewport.height * .76 / bounds.height,
+        )
+        .clamp(_minScale, _maxScale);
+    _cancelViewportRefit();
+    _lastVisibleViewport = viewport;
+    _userAdjustedCamera = true;
+    setState(() => _selectedRoomId = null);
+    _animateTo(
+      Matrix4.identity()
+        ..scaleByDouble(scale, scale, 1, 1)
+        ..setTranslationRaw(
+          viewport.center.dx - bounds.center.dx * scale,
+          viewport.center.dy - bounds.center.dy * scale,
+          0,
+        ),
+    );
+  }
+
   void _zoomBy(double factor) {
     if (!mounted) return;
     _cancelViewportRefit();
     final constraints = _lastConstraints;
     if (constraints == null) return;
     final viewport = _visibleViewport(constraints);
+    _lastVisibleViewport = viewport;
+    _userAdjustedCamera = true;
     final current = _transformationController.value;
     final scale = _planarScale(current);
     final minimum = math.min(

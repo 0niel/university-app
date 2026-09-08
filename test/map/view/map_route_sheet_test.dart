@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_guidance.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
 
 import '../../helpers/pump_app.dart';
@@ -283,6 +284,123 @@ void main() {
         (instruction) => instruction.maneuver == IndoorManeuver.stairs,
       );
       expect(mapRouteInstructionLabel(stairs, campus), 'По лестнице на 2 этаж');
+    },
+  );
+  test(
+    'instruction context describes ascent and descent using catalog levels',
+    () {
+      final campus = _campus();
+      final graph = IndoorNavigationGraph.fromJson(campus.graph);
+      final start = graph.nodes.firstWhere((node) => node.id == 'start');
+      final destination = graph.nodes.firstWhere(
+        (node) => node.id == 'destination',
+      );
+      expect(
+        mapRouteInstructionContext(
+          IndoorRouteInstruction(
+            maneuver: IndoorManeuver.stairs,
+            atNode: start,
+            toNode: destination,
+            distanceMeters: null,
+          ),
+          campus,
+        ),
+        '1 → 2 этаж · Подъём',
+      );
+      expect(
+        mapRouteInstructionContext(
+          IndoorRouteInstruction(
+            maneuver: IndoorManeuver.stairs,
+            atNode: destination,
+            toNode: start,
+            distanceMeters: .4,
+          ),
+          campus,
+        ),
+        '2 → 1 этаж · Спуск · <1 м',
+      );
+    },
+  );
+
+  testWidgets(
+    'guidance fits narrow large text and permits manual backtracking',
+    (tester) async {
+      final campus = _campus();
+      final route =
+          IndoorRoutePlanner(IndoorNavigationGraph.fromJson(campus.graph))
+              .findRoute(startNodeId: 'start', destinationNodeId: 'destination')
+              .route!;
+      final stairIndex = route.instructions.indexWhere(
+        (step) => step.maneuver == IndoorManeuver.stairs,
+      );
+      var previous = 0;
+      var next = 0;
+      await tester.pumpApp(
+        Scaffold(
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: MapRouteGuidance(
+                campus: campus,
+                route: route,
+                stepIndex: stairIndex,
+                onClose: () {},
+                onPrevious: () => previous++,
+                onNext: () => next++,
+              ),
+            ),
+          ),
+        ),
+        size: const Size(320, 568),
+        textScaler: const TextScaler.linear(2),
+      );
+      expect(find.byIcon(Icons.stairs_rounded), findsOneWidget);
+      expect(find.textContaining('1 → 2 этаж · Подъём'), findsOneWidget);
+      await tester.tap(find.byTooltip('Предыдущий шаг'));
+      await tester.tap(find.byTooltip('Следующий шаг'));
+      expect(previous, 1);
+      expect(next, 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'guidance describes arrival without tracking and locks during refresh',
+    (tester) async {
+      final campus = _campus();
+      final route =
+          IndoorRoutePlanner(IndoorNavigationGraph.fromJson(campus.graph))
+              .findRoute(startNodeId: 'start', destinationNodeId: 'destination')
+              .route!;
+      await tester.pumpApp(
+        Scaffold(
+          body: MapRouteGuidance(
+            campus: campus,
+            route: route,
+            stepIndex: route.instructions.length - 1,
+            onClose: () {},
+          ),
+        ),
+      );
+      expect(find.text('Конец маршрута'), findsOneWidget);
+      expect(find.text('Вы на месте'), findsNothing);
+      expect(find.text('А-201 · 2 этаж'), findsOneWidget);
+      final previous = tester.widget<AppIconButton>(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is AppIconButton && widget.tooltip == 'Предыдущий шаг',
+        ),
+      );
+      final next = tester.widget<AppIconButton>(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is AppIconButton &&
+              widget.tooltip == 'Закончить просмотр маршрута',
+        ),
+      );
+      expect(previous.onPressed, isNull);
+      expect(next.onPressed, isNull);
+      expect(tester.takeException(), isNull);
     },
   );
 }

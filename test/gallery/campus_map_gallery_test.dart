@@ -20,6 +20,7 @@ import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
 import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/services/svg_room_parser.dart';
 import 'package:rtu_mirea_app/map/view/map_view.dart';
+import 'package:rtu_mirea_app/map/widgets/map_cartographic_layer.dart';
 import 'package:rtu_mirea_app/map/widgets/map_place_details_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/map_place_editor_page.dart';
 import 'package:rtu_mirea_app/map/widgets/map_place_share_sheet.dart';
@@ -156,6 +157,22 @@ void main() {
         );
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
+        if (id != 'mp-1') {
+          final preparation = Stopwatch()..start();
+          while (tester
+              .widget<MapCartographicLayer>(find.byType(MapCartographicLayer))
+              .navigationLandmarks
+              .isEmpty) {
+            if (preparation.elapsed > const Duration(seconds: 10)) {
+              fail('Navigation landmarks did not finish preparing for $id');
+            }
+            await tester.runAsync(
+              () => Future<void>.delayed(const Duration(milliseconds: 20)),
+            );
+            await tester.pump();
+          }
+          await tester.pumpAndSettle();
+        }
         expect(tester.takeException(), isNull);
         Future<void> capture(String suffix) async {
           if (!const bool.fromEnvironment('MAP_PREVIEWS')) return;
@@ -182,11 +199,24 @@ void main() {
         }
         expect(tester.takeException(), isNull);
         await capture('zoom');
+        await tester.tap(find.byTooltip('Наклонить план'));
+        await tester.pumpAndSettle();
+        expect(find.byTooltip('Вид сверху'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await capture('tilted');
+        await tester.tap(find.byTooltip('Вид сверху'));
+        await tester.pumpAndSettle();
         tester.view.physicalSize = const Size(320, 568);
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         await capture('compact');
+        await tester.tap(find.byTooltip('Наклонить план'));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await capture('compact-tilted');
+        await tester.tap(find.byTooltip('Вид сверху'));
+        await tester.pumpAndSettle();
         textScale.value = const TextScaler.linear(2);
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);

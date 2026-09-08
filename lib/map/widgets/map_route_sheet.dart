@@ -6,40 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/services/room_key.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_presentation.dart';
 
-String mapRouteInstructionLabel(
-  IndoorRouteInstruction instruction,
-  CampusMapData campus,
-) {
-  final floor = campus
-      .floorForId(
-        instruction.toNode?.floorId ?? instruction.atNode.floorId,
-      )
-      ?.floor
-      .number;
-  final changesFloor =
-      instruction.toNode != null &&
-      instruction.toNode!.floorId != instruction.atNode.floorId;
-  final floorLabel = floor == null ? 'другой' : '$floor';
-  return switch (instruction.maneuver) {
-    IndoorManeuver.depart => 'Начните маршрут',
-    IndoorManeuver.straight => 'Продолжайте прямо',
-    IndoorManeuver.turnLeft => 'Поверните налево',
-    IndoorManeuver.turnRight => 'Поверните направо',
-    IndoorManeuver.turnBack => 'Развернитесь',
-    IndoorManeuver.stairs =>
-      changesFloor ? 'По лестнице на $floorLabel этаж' : 'Пройдите по лестнице',
-    IndoorManeuver.elevator => 'На лифте на $floorLabel этаж',
-    IndoorManeuver.ramp =>
-      changesFloor ? 'По пандусу на $floorLabel этаж' : 'Пройдите по пандусу',
-    IndoorManeuver.escalator =>
-      changesFloor
-          ? 'На эскалаторе на $floorLabel этаж'
-          : 'Пройдите по эскалатору',
-    IndoorManeuver.floorTransition => 'Перейдите на $floorLabel этаж',
-    IndoorManeuver.arrive => 'Вы на месте',
-  };
-}
+export 'package:rtu_mirea_app/map/widgets/map_route_presentation.dart';
 
 class MapRouteSheet extends StatefulWidget {
   const MapRouteSheet({
@@ -49,12 +18,14 @@ class MapRouteSheet extends StatefulWidget {
     this.onClose,
     this.startRoomId,
     this.destinationRoomId,
+    this.navigationGraph,
     super.key,
   });
 
   final CampusMapData campus;
   final String? startRoomId;
   final String? destinationRoomId;
+  final IndoorNavigationGraph? navigationGraph;
   final ValueChanged<IndoorRoute> onApply;
   final VoidCallback onContribute;
   final VoidCallback? onClose;
@@ -78,7 +49,9 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
   void initState() {
     super.initState();
     try {
-      _graph = IndoorNavigationGraph.fromJson(widget.campus.graph);
+      _graph =
+          widget.navigationGraph ??
+          IndoorNavigationGraph.fromJson(widget.campus.graph);
       _planner = IndoorRoutePlanner(_graph!);
       _fastest = _graph!.hasCompleteDuration;
       _start = _nodeForRoom(widget.startRoomId);
@@ -107,6 +80,11 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
       widget.campus.placeForId(node.roomId ?? '')?.label ??
       node.label ??
       'Точка на плане';
+
+  String? _floorLabel(IndoorNavigationNode node) {
+    final floor = widget.campus.floorForId(node.floorId);
+    return floor == null ? null : '${floor.floor.number} этаж';
+  }
 
   bool _needsNavigationReview(String? roomId) =>
       widget.campus.placeForId(roomId ?? '')?.raw['navigation_needs_review'] ==
@@ -202,6 +180,12 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
                   ? 'Выберите начало'
                   : 'Откуда: ${_label(_start!)}',
               titleMaxLines: null,
+              leading: const AppIconTile(
+                child: Icon(Icons.trip_origin_rounded, size: 20),
+              ),
+              subtitle: _start == null
+                  ? 'Где вы сейчас на плане'
+                  : _floorLabel(_start!),
               onTap: ready ? () => unawaited(_pick(start: true)) : null,
             ),
           ],
@@ -232,6 +216,12 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
                   ? 'Выберите назначение'
                   : 'Куда: ${_label(_destination!)}',
               titleMaxLines: null,
+              leading: const AppIconTile(
+                child: Icon(Icons.flag_rounded, size: 20),
+              ),
+              subtitle: _destination == null
+                  ? 'Помещение, вход или сервис'
+                  : _floorLabel(_destination!),
               onTap: ready ? () => unawaited(_pick(start: false)) : null,
             ),
           ],
@@ -326,6 +316,8 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
             ),
           ],
           const SizedBox(height: 12),
+          Text('По шагам', style: AppText.sectionSmall),
+          const SizedBox(height: 8),
           AppListGroup(
             children: [
               for (final instruction in route.instructions)
@@ -336,7 +328,7 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
                     children: [
                       AppIconTile(
                         child: Icon(
-                          _instructionIcon(instruction.maneuver),
+                          mapRouteInstructionIcon(instruction.maneuver),
                           size: 20,
                         ),
                       ),
@@ -352,19 +344,15 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
                               ),
                               style: AppText.bodyStrong,
                             ),
-                            if (instruction.distanceMeters case final distance?
-                                when distance > 0)
-                              Text(
-                                '${distance.round()} м',
-                                style: AppText.caption,
-                              )
-                            else if (instruction.maneuver ==
-                                    IndoorManeuver.depart ||
-                                instruction.maneuver == IndoorManeuver.arrive)
-                              Text(
-                                _label(instruction.atNode),
-                                style: AppText.caption,
+                            Text(
+                              mapRouteInstructionContext(
+                                instruction,
+                                widget.campus,
                               ),
+                              style: AppText.caption.copyWith(
+                                color: context.colors.muted,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -522,17 +510,3 @@ class _RouteNodePickerState extends State<_RouteNodePicker> {
     );
   }
 }
-
-IconData _instructionIcon(IndoorManeuver maneuver) => switch (maneuver) {
-  IndoorManeuver.depart => Icons.trip_origin_rounded,
-  IndoorManeuver.arrive => Icons.flag_rounded,
-  IndoorManeuver.turnLeft => Icons.turn_left_rounded,
-  IndoorManeuver.turnRight => Icons.turn_right_rounded,
-  IndoorManeuver.turnBack => Icons.u_turn_left_rounded,
-  IndoorManeuver.stairs => Icons.stairs_rounded,
-  IndoorManeuver.elevator => Icons.elevator_rounded,
-  IndoorManeuver.escalator => Icons.escalator_rounded,
-  IndoorManeuver.ramp => Icons.accessible_forward_rounded,
-  IndoorManeuver.floorTransition => Icons.swap_vert_rounded,
-  IndoorManeuver.straight => Icons.straight_rounded,
-};

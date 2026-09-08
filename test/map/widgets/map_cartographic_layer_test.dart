@@ -4,9 +4,214 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
+import 'package:rtu_mirea_app/map/navigation/indoor_navigation_graph.dart';
+import 'package:rtu_mirea_app/map/services/map_label_hit_index.dart';
+import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
 import 'package:rtu_mirea_app/map/widgets/map_cartographic_layer.dart';
 
 void main() {
+  testWidgets('hidden stairs do not steal the visible food marker hit target', (
+    tester,
+  ) async {
+    final hitIndex = MapLabelHitIndex();
+    final transform = TransformationController(
+      Matrix4.identity()..scaleByDouble(.2, .2, 1, 1),
+    );
+    addTearDown(transform.dispose);
+    final landmarks = mapNavigationLandmarks(
+      IndoorNavigationGraph(
+        nodes: const [
+          IndoorNavigationNode(
+            id: 'stairs',
+            floorId: 'one',
+            x: 100,
+            y: 100,
+            kind: 'stairs',
+          ),
+        ],
+        edges: const [],
+      ),
+    );
+    final food = MapPlaceData.fromJson({
+      'id': 'food',
+      'floor_id': 'one',
+      'label': 'Столовая',
+      'kind': 'cafeteria',
+      'x': 100,
+      'y': 100,
+    });
+    Future<void> render({required bool withFood}) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: MapCartographicLayer(
+            rooms: [
+              if (withFood)
+                RoomModel(
+                  roomId: food.id,
+                  path: Path()
+                    ..addOval(
+                      Rect.fromCircle(
+                        center: const Offset(100, 100),
+                        radius: 12,
+                      ),
+                    ),
+                ),
+            ],
+            places: [if (withFood) food],
+            syntheticRoomIds: const {'food'},
+            navigationLandmarks: landmarks,
+            size: const Size(200, 200),
+            transform: transform,
+            hitIndex: hitIndex,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    await render(withFood: true);
+    expect(hitIndex.bounds.keys, ['food']);
+    expect(hitIndex.hitTest(const Offset(100, 100)), 'food');
+    expect(hitIndex.bounds['food']!.width, greaterThan(120));
+    expect(hitIndex.hitTest(hitIndex.bounds['food']!.bottomRight), isNull);
+
+    await render(withFood: false);
+    expect(hitIndex.bounds.keys, [landmarks.single.place.id]);
+    expect(hitIndex.hitTest(const Offset(100, 100)), landmarks.single.place.id);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(hitIndex.hitTest(const Offset(100, 100)), isNull);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('graph stairs render without inventing a room polygon', (
+    tester,
+  ) async {
+    final landmarks = mapNavigationLandmarks(
+      IndoorNavigationGraph(
+        nodes: const [
+          IndoorNavigationNode(
+            id: 'stairs',
+            floorId: 'one',
+            x: 100,
+            y: 100,
+            kind: 'stairs',
+            closed: true,
+          ),
+        ],
+        edges: const [],
+      ),
+    );
+    final boundaryKey = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: RepaintBoundary(
+          key: boundaryKey,
+          child: ColoredBox(
+            color: Colors.white,
+            child: MapCartographicLayer(
+              rooms: const [],
+              places: const [],
+              size: const Size(200, 200),
+              navigationLandmarks: landmarks,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final boundary =
+        boundaryKey.currentContext!.findRenderObject()!
+            as RenderRepaintBoundary;
+    final image = (await tester.runAsync(boundary.toImage))!;
+    final bytes = (await tester.runAsync(image.toByteData))!;
+    final pixels = bytes.buffer.asUint8List();
+    var coloredPixels = 0;
+    for (var y = 80; y < 120; y++) {
+      for (var x = 80; x < 120; x++) {
+        final offset = (y * image.width + x) * 4;
+        if (pixels[offset] < 220 ||
+            pixels[offset + 1] < 220 ||
+            pixels[offset + 2] < 220) {
+          coloredPixels++;
+        }
+      }
+    }
+    final outside = (100 * image.width + 130) * 4;
+    expect(pixels.sublist(outside, outside + 3), [255, 255, 255]);
+    image.dispose();
+    expect(coloredPixels, greaterThan(20));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a service keeps its icon when its caption cannot fit', (
+    tester,
+  ) async {
+    final boundaryKey = GlobalKey();
+    final places = [
+      MapPlaceData.fromJson({
+        'id': 'entrance',
+        'floor_id': 'one',
+        'label': '',
+        'kind': 'entrance',
+        'x': 100,
+        'y': 100,
+      }),
+      MapPlaceData.fromJson({
+        'id': 'food',
+        'floor_id': 'one',
+        'label': 'Столовая университета',
+        'kind': 'cafeteria',
+        'x': 140,
+        'y': 100,
+      }),
+    ];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: RepaintBoundary(
+          key: boundaryKey,
+          child: MapCartographicLayer(
+            rooms: [
+              for (final place in places)
+                RoomModel(
+                  roomId: place.id,
+                  path: Path()..addRect(const Rect.fromLTWH(0, 0, 200, 200)),
+                ),
+            ],
+            places: places,
+            size: const Size(250, 200),
+            syntheticRoomIds: const {'entrance', 'food'},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final boundary =
+        boundaryKey.currentContext!.findRenderObject()!
+            as RenderRepaintBoundary;
+    final image = (await tester.runAsync(boundary.toImage))!;
+    final bytes = (await tester.runAsync(image.toByteData))!;
+    final pixels = bytes.buffer.asUint8List();
+    var orangePixels = 0;
+    for (var y = 85; y < 115; y++) {
+      for (var x = 125; x < 155; x++) {
+        final offset = (y * image.width + x) * 4;
+        if (pixels[offset] > 140 &&
+            pixels[offset + 1] > 60 &&
+            pixels[offset + 1] < 180 &&
+            pixels[offset + 2] < 60) {
+          orangePixels++;
+        }
+      }
+    }
+    image.dispose();
+    expect(orangePixels, greaterThan(15));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('room labels retain screen size while zooming out below one', (
     tester,
   ) async {
