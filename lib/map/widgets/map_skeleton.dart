@@ -6,24 +6,35 @@ class MapSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => NinjaSkeletonGroup(
-    child: Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.screen,
-        MediaQuery.paddingOf(context).top + AppSpacing.screenTop,
-        AppSpacing.screen,
-        AppBottomBar.extentOf(context) + AppSpacing.screen,
-      ),
-      child: const Column(
-        children: [
-          NinjaSkeleton(height: 50, radius: AppRadius.full),
-          SizedBox(height: 10),
-          NinjaSkeleton(height: 44, widthFactor: .8, radius: AppRadius.full),
-          Spacer(),
-          AppSkeletonRow(),
-          AppSkeletonRow(),
-          AppSkeletonRow(),
-        ],
-      ),
+    child: CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.screen,
+            MediaQuery.paddingOf(context).top + AppSpacing.screenTop,
+            AppSpacing.screen,
+            AppBottomBar.extentOf(context) + AppSpacing.screen,
+          ),
+          sliver: const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Column(
+              children: [
+                NinjaSkeleton(height: 50, radius: AppRadius.full),
+                SizedBox(height: AppSpacing.gap),
+                NinjaSkeleton(
+                  height: 44,
+                  widthFactor: .8,
+                  radius: AppRadius.full,
+                ),
+                Spacer(),
+                AppSkeletonRow(),
+                AppSkeletonRow(),
+                AppSkeletonRow(),
+              ],
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }

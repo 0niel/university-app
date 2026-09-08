@@ -65,7 +65,7 @@ class SvgInteractiveMap extends StatefulWidget {
 class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     with SingleTickerProviderStateMixin
     implements SvgInteractiveMapHandle {
-  static const _minScale = 0.1;
+  static const _minScale = 0.01;
   static const _maxScale = 50.0;
   static const _zoomStep = 1.45;
 

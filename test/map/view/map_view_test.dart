@@ -96,6 +96,7 @@ void main() {
     bool navigationViewport = false,
     String? dataWarning,
     List<RoomModel>? rooms,
+    Rect bounds = const Rect.fromLTWH(0, 0, 600, 400),
   }) async {
     addTearDown(() => tester.pumpWidget(const SizedBox.shrink()));
     final state = failure
@@ -120,7 +121,7 @@ void main() {
                     path: Path()..addRect(const Rect.fromLTWH(60, 0, 40, 40)),
                   ),
                 ],
-            boundingRect: const Rect.fromLTWH(0, 0, 600, 400),
+            boundingRect: bounds,
             dataWarning: dataWarning,
           )
         : const MapState();
@@ -687,6 +688,44 @@ void main() {
     sheet.controller!.jumpTo(sheet.minChildSize);
     await tester.pumpAndSettle();
     expect(controller.currentScale, scale);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tall plans fit between overlays on a short screen', (
+    tester,
+  ) async {
+    final controller = _RecordingMapController();
+    addTearDown(controller.dispose);
+    await pumpMap(
+      tester,
+      size: const Size(320, 420),
+      bounds: const Rect.fromLTWH(0, 0, 1600, 2400),
+      reduceMotion: true,
+      mapController: controller,
+    );
+    final map = tester.widget<SvgInteractiveMap>(
+      find.byType(SvgInteractiveMap),
+    );
+    final padding = map.viewportPaddingListenable!.value;
+    final viewer = tester.widget<InteractiveViewer>(
+      find.byType(InteractiveViewer),
+    );
+    final matrix = viewer.transformationController!.value;
+    expect(controller.currentScale, lessThan(.1));
+    expect(matrix[13], greaterThanOrEqualTo(padding.top - .01));
+    expect(
+      matrix[13] + 2400 * controller.currentScale!,
+      lessThanOrEqualTo(420 - padding.bottom + .01),
+    );
+    expect(
+      matrix[12] + 1600 * controller.currentScale!,
+      lessThanOrEqualTo(320 - padding.right + .01),
+    );
+    controller.zoomIn();
+    await tester.pumpAndSettle();
+    controller.fit();
+    await tester.pumpAndSettle();
+    expect(controller.currentScale, closeTo(matrix[0], .0001));
     expect(tester.takeException(), isNull);
   });
 
