@@ -3,7 +3,7 @@ int mapPlaceLandmarkPriority(String kind) => switch (kind) {
   'cafeteria' || 'cafe' || 'canteen' || 'food' => 5000,
   'medical' || 'first_aid' => 4500,
   'library' => 4000,
-  'elevator' || 'lift' => 3000,
-  'stairs' || 'staircase' => 2000,
+  'elevator' || 'lift' || 'ramp' => 5500,
+  'stairs' || 'staircase' || 'escalator' => 5400,
   _ => 0,
 };

@@ -1,14 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:rtu_mirea_app/map/data/map_data_cache.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
+import 'package:rtu_mirea_app/map/data/map_preferences_data_cache.dart'
+    if (dart.library.io) 'package:rtu_mirea_app/map/data/map_file_data_cache.dart'
+    as platform_cache;
 import 'package:rtu_mirea_app/map/models/models.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:xml/xml.dart';
+
+export 'package:rtu_mirea_app/map/data/map_data_cache.dart';
 
 typedef MapDataRpc =
     Future<Object?> Function(
@@ -57,55 +63,6 @@ bool _largeMapDocument(Map<String, Object?> json) {
       (rooms is List && rooms.length > 128);
 }
 
-int _mapUtf8Size(String value) => utf8.encode(value).length;
-
-Future<int> _mapBytes(String value) => value.length > 65536
-    ? compute(_mapUtf8Size, value)
-    : Future.value(_mapUtf8Size(value));
-
-abstract interface class MapDataCache {
-  Future<String?> read(String key);
-  Future<void> write(String key, String value);
-}
-
-class PreferencesMapDataCache implements MapDataCache {
-  static const _prefix = 'campus_map_v1:';
-  static const int _maximumBytes = 12 * 1024 * 1024;
-  static Future<void> _writeTail = Future<void>.value();
-
-  @override
-  Future<String?> read(String key) async {
-    final preferences = await SharedPreferences.getInstance();
-    return preferences.getString('$_prefix$key');
-  }
-
-  @override
-  Future<void> write(String key, String value) {
-    final operation = _writeTail.then((_) => _write(key, value));
-    _writeTail = operation.catchError((Object _) {});
-    return operation;
-  }
-
-  Future<void> _write(String key, String value) async {
-    if (await _mapBytes(value) > _maximumBytes) return;
-    final preferences = await SharedPreferences.getInstance();
-    final name = '$_prefix$key';
-    final entries = (preferences.getStringList('${_prefix}index') ?? [])
-      ..remove(name)
-      ..add(name);
-    await preferences.setString(name, value);
-    var totalBytes = 0;
-    for (final entry in entries.reversed.toList()) {
-      totalBytes += await _mapBytes(preferences.getString(entry) ?? '');
-      if (totalBytes > _maximumBytes) {
-        await preferences.remove(entry);
-        entries.remove(entry);
-      }
-    }
-    await preferences.setStringList('${_prefix}index', entries);
-  }
-}
-
 class MapDataException implements Exception {
   const MapDataException(this.message, {this.code});
 
@@ -124,6 +81,7 @@ class MapDataRepository {
     MapDataCache? cache,
     http.Client? httpClient,
     Future<String> Function(String)? assetLoader,
+    DateTime Function()? clock,
     this.bundledCatalogAsset,
   }) : assert(supabase != null || rpc != null, 'A map API client is required'),
        _supabase = supabase,
@@ -131,15 +89,18 @@ class MapDataRepository {
            rpc ??
            ((name, parameters) =>
                supabase!.rpc<Object?>(name, params: parameters)),
-       _cache = cache ?? PreferencesMapDataCache(),
+       _cache = cache ?? platform_cache.createMapDataCache(),
        _http = httpClient ?? http.Client(),
        _ownsHttp = httpClient == null,
-       _assetLoader = assetLoader ?? rootBundle.loadString;
+       _assetLoader = assetLoader ?? rootBundle.loadString,
+       _clock = clock ?? DateTime.now;
 
   static const int maximumSvgBytes = 8 * 1024 * 1024;
   static const pulseCatalogAsset =
       'packages/app_ui/assets/maps/pulse/catalog.json';
   static const _requestTimeout = Duration(seconds: 15);
+  static const _cacheFreshness = Duration(minutes: 30);
+  static const _cacheStoredAtKey = '_map_cache_stored_at';
 
   final String organizationId;
   final String? bundledCatalogAsset;
@@ -149,6 +110,8 @@ class MapDataRepository {
   final http.Client _http;
   final bool _ownsHttp;
   final Future<String> Function(String) _assetLoader;
+  final DateTime Function() _clock;
+  final _cacheStoredAt = <String, DateTime>{};
   final _svg = <String, String>{};
   final _inlineSvg = <String, String>{};
   final _remoteSvgUrls = <String, String>{};
@@ -156,10 +119,137 @@ class MapDataRepository {
   final _pendingSvg = <String, Future<String>>{};
   final _offlineSvg = <String>{};
   final _campuses = <String, CampusMapData>{};
+  final _campusContent = Expando<Map<String, Object?>>();
+  final _campusGenerations = <String, int>{};
   final _pendingCampuses = <String, Future<CampusMapData>>{};
+  final _pendingCachedCampuses = <String, Future<CampusMapData?>>{};
   final _bundledCampusAssets = <String, String>{};
+  final _bundledCampusMetadata = <String, Map<String, Object?>>{};
   final _catalogRevisions = <String, int>{};
   MapCatalogData? _bundledCatalog;
+  MapCatalogData? _catalog;
+
+  bool get isCatalogCacheFresh => _isCacheFresh('$organizationId:catalog');
+
+  bool isCampusCacheFresh(String campusId) =>
+      _isCacheFresh('$organizationId:campus:$campusId') &&
+      (_campuses[campusId]?.revision ?? -1) >=
+          (_catalogRevisions[campusId] ?? 0);
+
+  bool sameCampusContent(CampusMapData a, CampusMapData b) {
+    if (identical(a, b)) return true;
+    final before = _campusContent[a];
+    final after = _campusContent[b];
+    return before != null &&
+        after != null &&
+        const DeepCollectionEquality().equals(before, after);
+  }
+
+  bool _isCacheFresh(String key) {
+    final saved = _cacheStoredAt[key];
+    if (saved == null) return false;
+    final age = _clock().difference(saved);
+    return !age.isNegative && age <= _cacheFreshness;
+  }
+
+  Future<MapCatalogData?> loadCachedCatalog() async {
+    if (_catalog != null) return _catalog;
+    final cached = await _read('$organizationId:catalog');
+    final bundled = await _tryBundledCatalog();
+    if (_catalog != null) return _catalog;
+    if (cached != null) {
+      List<MapCatalogEntry> entries;
+      try {
+        entries = _catalogEntries(cached);
+      } on FormatException {
+        entries = const [];
+      }
+      if (entries.isNotEmpty) {
+        return _rememberCatalog(
+          MapCatalogData(
+            entries: _mergeCatalogEntries(
+              entries,
+              bundled?.entries ?? const [],
+            ),
+            origin: MapDataOrigin.cache,
+          ),
+          remoteEntries: entries,
+        );
+      }
+    }
+    if (bundled == null) return null;
+    return _rememberCatalog(
+      MapCatalogData(entries: bundled.entries, origin: MapDataOrigin.bundled),
+    );
+  }
+
+  Future<CampusMapData?> loadCachedCampus(String campusId) {
+    final memory = _campuses[campusId];
+    if (memory != null &&
+        memory.revision >= (_catalogRevisions[campusId] ?? 0)) {
+      return Future.value(memory);
+    }
+    return _pendingCachedCampuses.putIfAbsent(campusId, () async {
+      final generation = _campusGenerations[campusId] ?? 0;
+      try {
+        final cached = await _read('$organizationId:campus:$campusId');
+        await _tryBundledCatalog();
+        final metadata = _bundledCampusMetadata[campusId];
+        final preferBundle =
+            cached == null ||
+            (metadata != null && _newerBundledSource(metadata, cached));
+        Future<CampusMapData?> parse(
+          Map<String, Object?>? document,
+          MapDataOrigin origin,
+        ) async {
+          try {
+            if (document == null || _string(document['id']) != campusId) {
+              return null;
+            }
+            final complete = await _completeCampusDocument(
+              {...document, 'can_moderate': false},
+              origin,
+              allowNetwork: false,
+            );
+            return await _parseCampusDocument(
+              complete,
+              origin,
+              shouldApply: () =>
+                  generation == (_campusGenerations[campusId] ?? 0),
+            );
+          } on Exception {
+            return null;
+          }
+        }
+
+        final bundled = preferBundle
+            ? await _tryBundledCampusJson(campusId)
+            : null;
+        final result =
+            (preferBundle
+                ? await parse(bundled, MapDataOrigin.bundled)
+                : null) ??
+            await parse(cached, MapDataOrigin.cache) ??
+            (!preferBundle
+                ? await parse(
+                    await _tryBundledCampusJson(campusId),
+                    MapDataOrigin.bundled,
+                  )
+                : null);
+        if (result == null ||
+            generation != (_campusGenerations[campusId] ?? 0)) {
+          return null;
+        }
+        if (result.origin == MapDataOrigin.bundled) {
+          _cacheStoredAt.remove('$organizationId:campus:$campusId');
+        }
+        _campuses[campusId] = result;
+        return result;
+      } finally {
+        unawaited(_pendingCachedCampuses.remove(campusId));
+      }
+    });
+  }
 
   bool get isAuthenticated => _supabase?.auth.currentUser != null;
   bool isSvgOffline(String path) => _offlineSvg.contains(path);
@@ -210,25 +300,43 @@ class MapDataRepository {
     }
   }
 
-  Future<CampusMapData> loadCampus(String campusId, {bool refresh = false}) {
+  Future<CampusMapData> loadCampus(
+    String campusId, {
+    bool refresh = false,
+    bool afterPending = false,
+  }) {
     final pending = _pendingCampuses[campusId];
-    if (pending != null) return pending;
-    if (refresh) _svg.clear();
+    if (pending != null && !afterPending) return pending;
     final cached = _campuses[campusId];
     if (!refresh &&
         cached != null &&
         cached.revision >= (_catalogRevisions[campusId] ?? 0)) {
       return Future.value(cached);
     }
-    return _pendingCampuses.putIfAbsent(campusId, () async {
+    late final Future<CampusMapData> request;
+    request = () async {
+      if (pending != null) {
+        try {
+          await pending;
+        } on Object {
+          // A failed earlier request must not prevent an explicit retry.
+        }
+      }
+      if (refresh) _svg.clear();
+      _campusGenerations[campusId] = (_campusGenerations[campusId] ?? 0) + 1;
       try {
         final result = await _loadCampus(campusId);
+        _campusGenerations[campusId] = (_campusGenerations[campusId] ?? 0) + 1;
         _campuses[campusId] = result;
         return result;
       } finally {
-        unawaited(_pendingCampuses.remove(campusId));
+        if (identical(_pendingCampuses[campusId], request)) {
+          unawaited(_pendingCampuses.remove(campusId));
+        }
       }
-    });
+    }();
+    _pendingCampuses[campusId] = request;
+    return request;
   }
 
   Future<CampusMapData> _loadCampus(String campusId) async {
@@ -288,13 +396,16 @@ class MapDataRepository {
     }
   }
 
-  Future<CampusMapData> refreshCampus(String campusId) =>
-      loadCampus(campusId, refresh: true);
+  Future<CampusMapData> refreshCampus(
+    String campusId, {
+    bool afterPending = false,
+  }) => loadCampus(campusId, refresh: true, afterPending: afterPending);
 
   Future<Map<String, Object?>> _completeCampusDocument(
     Map<String, Object?> document,
-    MapDataOrigin origin,
-  ) async {
+    MapDataOrigin origin, {
+    bool allowNetwork = true,
+  }) async {
     final id = _string(document['id']) ?? '';
     final revision = _number(document['revision'])?.toInt() ?? 0;
     final floors = <Map<String, Object?>>[];
@@ -330,6 +441,9 @@ class MapDataRepository {
         } on Exception {
           saved = null;
         }
+      }
+      if (!allowNetwork) {
+        throw const FormatException('No saved floor plan is available');
       }
       String svg;
       try {
@@ -445,7 +559,7 @@ class MapDataRepository {
     for (final entry in remoteEntries) {
       _catalogRevisions[entry.id] = entry.revision;
     }
-    return catalog;
+    return _catalog = catalog;
   }
 
   Future<MapCatalogData?> _tryBundledCatalog() async {
@@ -465,6 +579,7 @@ class MapDataRepository {
     for (final entry in mapJsonRows(json['campuses'])) {
       final id = _string(entry['id']);
       if (id == null || id.isEmpty) continue;
+      _bundledCampusMetadata[id] = entry;
       final file = _string(entry['asset']) ?? 'campus_$id.json';
       _bundledCampusAssets[id] = file.startsWith('packages/')
           ? file
@@ -769,6 +884,7 @@ class MapDataRepository {
     Map<String, Object?> json,
     MapDataOrigin origin, {
     String? warning,
+    bool Function()? shouldApply,
   }) async {
     final planDocuments = mapJsonRows(json['floors']);
     final planSize = planDocuments.fold<int>(
@@ -779,6 +895,9 @@ class MapDataRepository {
       await compute(_validateCampusPlans, planDocuments);
     } else {
       _validateCampusPlans(planDocuments);
+    }
+    if (shouldApply != null && !shouldApply()) {
+      throw const FormatException('The campus snapshot was superseded');
     }
     return _parseCampus(json, origin, warning: warning);
   }
@@ -840,6 +959,11 @@ class MapDataRepository {
       canModerate:
           origin == MapDataOrigin.remote && json['can_moderate'] == true,
     );
+    _campusContent[data] = {
+      for (final entry in json.entries)
+        if (entry.key != _cacheStoredAtKey) entry.key: entry.value,
+      'can_moderate': data.canModerate,
+    };
     _inlineSvg
       ..removeWhere((key, _) => key.startsWith('map://$id/'))
       ..addAll(newInline);
@@ -869,17 +993,34 @@ class MapDataRepository {
   Future<Map<String, Object?>?> _read(String key) async {
     try {
       final value = await _cache.read(key);
-      return value == null ? null : await _decodeMapDocument(value);
+      if (value == null) return null;
+      final decoded = await _decodeMapDocument(value);
+      final saved = decoded[_cacheStoredAtKey];
+      if (saved is String) {
+        final timestamp = DateTime.tryParse(saved);
+        final previous = _cacheStoredAt[key];
+        if (timestamp != null &&
+            (previous == null || timestamp.isAfter(previous))) {
+          _cacheStoredAt[key] = timestamp;
+        }
+      }
+      return decoded;
     } on Exception {
       return null;
     }
   }
 
   Future<void> _store(String key, Map<String, Object?> json) async {
+    final saved = _clock();
+    _cacheStoredAt[key] = saved;
     try {
+      final document = {
+        ...json,
+        _cacheStoredAtKey: saved.toUtc().toIso8601String(),
+      };
       final value = _largeMapDocument(json)
-          ? await compute(_encodeMapJson, json)
-          : jsonEncode(json);
+          ? await compute(_encodeMapJson, document)
+          : jsonEncode(document);
       await _cache.write(key, value);
     } on Exception {
       // Public cached data is optional when persistent storage is unavailable.

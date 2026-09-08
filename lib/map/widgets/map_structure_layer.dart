@@ -1,7 +1,8 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:rtu_mirea_app/map/services/map_planar_scale.dart';
+import 'package:rtu_mirea_app/map/services/map_scale_repaint.dart';
+import 'package:rtu_mirea_app/map/services/map_viewport_painter.dart';
 import 'package:rtu_mirea_app/map/services/svg_room_parser.dart';
 import 'package:xml/xml.dart';
 
@@ -11,6 +12,7 @@ class MapStructureLayer extends StatefulWidget {
     required this.size,
     this.openingsOnly = false,
     this.transform,
+    this.viewportSize,
     super.key,
   });
 
@@ -18,6 +20,7 @@ class MapStructureLayer extends StatefulWidget {
   final Size size;
   final bool openingsOnly;
   final ValueListenable<Matrix4>? transform;
+  final Size? viewportSize;
 
   @override
   State<MapStructureLayer> createState() => _MapStructureLayerState();
@@ -25,35 +28,53 @@ class MapStructureLayer extends StatefulWidget {
 
 class _MapStructureLayerState extends State<MapStructureLayer> {
   late MapStructureLayers _layers;
+  late final MapScaleRepaint _scale;
 
   @override
   void initState() {
     super.initState();
     _layers = MapStructureLayers.fromSvg(widget.svg);
+    _scale = MapScaleRepaint(widget.transform);
   }
 
   @override
   void didUpdateWidget(MapStructureLayer oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _scale.updateTransform(widget.transform);
     if (oldWidget.svg != widget.svg) {
       _layers = MapStructureLayers.fromSvg(widget.svg);
     }
   }
 
   @override
+  void dispose() {
+    _scale.dispose();
+    super.dispose();
+  }
+
+  CustomPainter _painter(AppColors colors) {
+    final painter = _StructurePainter(
+      widget.openingsOnly ? _layers.openingShapes : _layers.foundationShapes,
+      colors,
+      openingsOnly: widget.openingsOnly,
+      scale: _scale,
+    );
+    return widget.viewportSize == null
+        ? painter
+        : MapViewportPainter(
+            painter: painter,
+            sceneSize: widget.size,
+            transform: widget.transform,
+          );
+  }
+
+  @override
   Widget build(BuildContext context) => IgnorePointer(
     child: RepaintBoundary(
       child: SizedBox.fromSize(
-        size: widget.size,
+        size: widget.viewportSize ?? widget.size,
         child: CustomPaint(
-          painter: _StructurePainter(
-            widget.openingsOnly
-                ? _layers.openingShapes
-                : _layers.foundationShapes,
-            context.colors,
-            openingsOnly: widget.openingsOnly,
-            transform: widget.transform,
-          ),
+          painter: _painter(context.colors),
         ),
       ),
     ),
@@ -288,16 +309,17 @@ class MapStructureLayers {
 }
 
 class MapStructureShape {
-  const MapStructureShape({
+  MapStructureShape({
     required this.path,
     required this.fill,
     required this.stroke,
     required this.fillOpacity,
     required this.strokeOpacity,
     required this.clips,
-  });
+  }) : bounds = path.getBounds();
 
   final Path path;
+  final Rect bounds;
   final bool fill;
   final bool stroke;
   final double fillOpacity;
@@ -374,18 +396,17 @@ class _StructurePainter extends CustomPainter {
     this.shapes,
     this.colors, {
     required this.openingsOnly,
-    required this.transform,
-  }) : super(repaint: transform);
+    required this.scale,
+  }) : super(repaint: scale);
 
   final List<MapStructureShape> shapes;
   final AppColors colors;
   final bool openingsOnly;
-  final ValueListenable<Matrix4>? transform;
+  final ValueListenable<double> scale;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final raw = transform == null ? 1.0 : mapPlanarScale(transform!.value);
-    final scale = raw.isFinite && raw > 0 ? raw : 1.0;
+    final visible = canvas.getLocalClipBounds().inflate(2 / scale.value);
     final outline = openingsOnly
         ? colors.surface
         : Color.alphaBlend(
@@ -397,8 +418,9 @@ class _StructurePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeJoin = StrokeJoin.round
       ..strokeCap = StrokeCap.butt
-      ..strokeWidth = (openingsOnly ? 1.2 : 1) / scale;
+      ..strokeWidth = (openingsOnly ? 1.2 : 1) / scale.value;
     for (final shape in shapes) {
+      if (!shape.bounds.overlaps(visible)) continue;
       if (shape.clips.isNotEmpty) {
         canvas.save();
         shape.clips.forEach(canvas.clipPath);
@@ -424,5 +446,5 @@ class _StructurePainter extends CustomPainter {
       old.shapes != shapes ||
       old.colors != colors ||
       old.openingsOnly != openingsOnly ||
-      old.transform != transform;
+      old.scale != scale;
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,8 @@ import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
+import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
+import 'package:rtu_mirea_app/map/services/map_navigation_preparation.dart';
 import 'package:rtu_mirea_app/map/services/room_key.dart';
 import 'package:rtu_mirea_app/map/widgets/map_edit_menu.dart';
 import 'package:rtu_mirea_app/map/widgets/map_floor_alignment_page.dart';
@@ -22,6 +25,7 @@ import 'package:rtu_mirea_app/map/widgets/map_place_details_sheet.dart'
     hide mapPlaceKindLabel;
 import 'package:rtu_mirea_app/map/widgets/map_place_editor_page.dart';
 import 'package:rtu_mirea_app/map/widgets/map_places_explorer.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_guidance.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/map_saved_places_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/widgets.dart';
@@ -57,6 +61,14 @@ class _MapViewState extends State<MapView> {
   int _routeStep = 0;
   CampusMapData? _routeSnapshot;
   int? _manualRefreshRevision;
+  bool _is3D = false;
+  double _mapBearing = 0;
+  CampusMapData? _landmarkSnapshot;
+  IndoorNavigationGraph? _landmarkGraph;
+  Map<String, List<MapNavigationLandmark>> _floorLandmarks = const {};
+  ({CampusMapData snapshot, int revision, String floorId, List<Offset> points})?
+  _pendingNavigationFocus;
+  int _navigationFocusRevision = 0;
   late bool _incomingTargetPending =
       widget.initialCampusId != null || widget.initialRoomId != null;
   double _collapsedPanelSize = .3;
@@ -141,10 +153,13 @@ class _MapViewState extends State<MapView> {
 
   void _updateMapViewport(double panelSize) {
     _mapViewportPadding.value = EdgeInsets.fromLTRB(
-      20,
-      _viewportTop,
-      20,
-      _viewportHeight * panelSize + 12,
+      AppSpacing.lg,
+      _viewportTop + AppSpacing.md,
+      AppSpacing.lg + AppControlSize.touchTarget + AppSpacing.xlg,
+      _viewportHeight * panelSize +
+          (panelSize <= _collapsedPanelSize + .1
+              ? AppControlSize.touchTarget + AppSpacing.md + AppSpacing.xlg
+              : AppSpacing.md),
     );
   }
 
@@ -178,8 +193,10 @@ class _MapViewState extends State<MapView> {
     _manualRefreshRevision = null;
     _pendingRoom = null;
     _pendingPlaceId = null;
+    _pendingNavigationFocus = null;
     setState(() {
       _route = null;
+      _discardNavigationFocus();
       _routeSnapshot = null;
       _routeStartRoomId = null;
     });
@@ -198,6 +215,7 @@ class _MapViewState extends State<MapView> {
   }
 
   void _focusRoom(FreeRoomViewModel room) {
+    _discardNavigationFocus();
     final state = context.read<MapBloc>().state;
     final campus = state.selectedCampus;
     final floor = campus?.floors
@@ -249,7 +267,27 @@ class _MapViewState extends State<MapView> {
     if (_route != null && !identical(state.campusData, _routeSnapshot)) {
       setState(() {
         _route = null;
+        _discardNavigationFocus();
         _routeSnapshot = null;
+      });
+    }
+    if (_pendingNavigationFocus case final focus?
+        when !identical(focus.snapshot, state.campusData)) {
+      _discardNavigationFocus();
+    }
+    final focus = _pendingNavigationFocus;
+    if (focus != null && state.selectedFloor?.id == focus.floorId) {
+      _pendingNavigationFocus = null;
+      final snapshot = state.campusData;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final current = context.read<MapBloc>().state;
+        if (current.status == MapStatus.loaded &&
+            current.selectedFloor?.id == focus.floorId &&
+            identical(snapshot, current.campusData) &&
+            focus.revision == _navigationFocusRevision) {
+          _mapController.focusPoints(focus.points);
+        }
       });
     }
     if (_pendingRoom == null && _pendingPlaceId == null) return;
@@ -343,6 +381,7 @@ class _MapViewState extends State<MapView> {
             Navigator.of(context, rootNavigator: true).pop();
             setState(() {
               _route = null;
+              _discardNavigationFocus();
               _routeStartRoomId = null;
               _routeSnapshot = null;
             });
@@ -428,6 +467,9 @@ class _MapViewState extends State<MapView> {
         context,
         child: MapRouteSheet(
           campus: campus,
+          navigationGraph: identical(campus, _landmarkSnapshot)
+              ? _landmarkGraph
+              : null,
           onClose: () => Navigator.of(context, rootNavigator: true).pop(),
           startRoomId: _routeStartRoomId,
           destinationRoomId: destinationRoomId,
@@ -455,7 +497,17 @@ class _MapViewState extends State<MapView> {
               _panelController.jumpTo(_collapsedPanelSize);
             }
             _pendingRoom = null;
-            _pendingPlaceId = _routeStartRoomId;
+            _pendingPlaceId = null;
+            final firstFloorId = route.nodes.first.floorId;
+            _pendingNavigationFocus = (
+              snapshot: campus,
+              revision: ++_navigationFocusRevision,
+              floorId: firstFloorId,
+              points: [
+                for (final segment in route.segmentsForFloor(firstFloorId))
+                  for (final node in segment.nodes) Offset(node.x, node.y),
+              ],
+            );
             final floor = campus.floorForId(route.nodes.first.floorId)?.floor;
             if (floor != null &&
                 context.read<MapBloc>().state.selectedFloor?.id != floor.id) {
@@ -511,6 +563,20 @@ class _MapViewState extends State<MapView> {
                 onTap: () => open(_community),
               ),
             ],
+            AppListRow(
+              title: _is3D ? 'Вид сверху' : 'Объёмный план',
+              subtitle: 'Масштаб и выбранный участок сохранятся',
+              leading: const AppIconTile(icon: AppLineIcon.map),
+              onTap: () => open(() => setState(() => _is3D = !_is3D)),
+            ),
+            if (_is3D)
+              AppListRow(
+                title: 'Повернуть план',
+                subtitle: 'Двумя пальцами можно вращать и приближать',
+                leading: const AppIconTile(icon: AppLineIcon.refresh),
+                onTap: () =>
+                    open(() => setState(() => _mapBearing += math.pi / 4)),
+              ),
             AppListRow(
               title: 'Друзья на карте',
               leading: const AppIconTile(icon: AppLineIcon.people),
@@ -635,7 +701,16 @@ class _MapViewState extends State<MapView> {
     showNinjaToast(context, message: message);
   }
 
-  void _advanceRoute() {
+  void _discardNavigationFocus() {
+    _pendingNavigationFocus = null;
+    _navigationFocusRevision++;
+  }
+
+  void _advanceRoute() => _moveRouteStep(1);
+
+  void _retreatRoute() => _moveRouteStep(-1);
+
+  void _moveRouteStep(int delta) {
     final route = _route;
     final state = context.read<MapBloc>().state;
     final campus = state.campusData;
@@ -645,21 +720,143 @@ class _MapViewState extends State<MapView> {
         !identical(campus, _routeSnapshot)) {
       return;
     }
-    if (_routeStep >= route.instructions.length - 1) {
+    final index = _routeStep + delta;
+    if (index < 0) return;
+    if (index >= route.instructions.length) {
       setState(() {
         _route = null;
+        _discardNavigationFocus();
         _routeSnapshot = null;
       });
       return;
     }
-    setState(() => _routeStep++);
-    final step = route.instructions[_routeStep];
-    final floor = campus
-        .floorForId(
-          step.toNode?.floorId ?? step.atNode.floorId,
-        )
-        ?.floor;
-    if (floor != null) _floor(floor);
+    setState(() => _routeStep = index);
+    final step = route.instructions[index];
+    final floor = campus.floorForId(step.atNode.floorId)?.floor;
+    if (floor == null) return;
+    _pendingNavigationFocus = (
+      snapshot: campus,
+      revision: ++_navigationFocusRevision,
+      floorId: floor.id,
+      points: [
+        Offset(step.atNode.x, step.atNode.y),
+        if (step.toNode case final next? when next.floorId == floor.id)
+          Offset(next.x, next.y),
+      ],
+    );
+    if (state.selectedFloor?.id == floor.id) {
+      _focusPending(state);
+    } else {
+      _floor(floor);
+    }
+  }
+
+  List<MapNavigationLandmark> _navigationLandmarks(
+    CampusMapData? campus,
+    String floorId,
+  ) {
+    if (!identical(campus, _landmarkSnapshot)) {
+      _landmarkSnapshot = campus;
+      _landmarkGraph = null;
+      _floorLandmarks = {};
+      if (campus != null) {
+        unawaited(
+          prepareMapNavigation(campus).then((prepared) {
+            if (!mounted || !identical(campus, _landmarkSnapshot)) return;
+            setState(() {
+              _landmarkGraph = prepared.graph;
+              _floorLandmarks = prepared.byFloor;
+            });
+          }),
+        );
+      }
+    }
+    return _floorLandmarks[floorId] ?? const [];
+  }
+
+  void _openNavigationLandmark(MapNavigationLandmark landmark) {
+    final current = context.read<MapBloc>().state;
+    final campus = current.campusData;
+    final graph = _landmarkGraph;
+    if (current.status != MapStatus.loaded ||
+        campus == null ||
+        graph == null ||
+        !identical(campus, _landmarkSnapshot) ||
+        current.selectedFloor?.id != landmark.place.floorId ||
+        !(_floorLandmarks[landmark.place.floorId]?.contains(landmark) ??
+            false)) {
+      return;
+    }
+    final floor = campus.floorForId(landmark.place.floorId);
+    final targets = campus.floors
+        .where((floor) => landmark.outgoingFloorIds.contains(floor.floor.id))
+        .toList();
+    unawaited(
+      showAppSheet<void>(
+        context,
+        title: landmark.place.label,
+        subtitle: floor == null ? null : '${floor.floor.number} этаж',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(
+                landmark.closed
+                    ? 'Переход отмечен как закрытый.'
+                    : targets.isEmpty
+                    ? 'Связь с другими этажами не указана в плане.'
+                    : 'Переходы на другие этажи',
+                style: AppText.body,
+              ),
+            ),
+            for (final target in targets)
+              AppListRow(
+                title: '${target.floor.number} этаж',
+                subtitle: 'Показать переход на плане',
+                leading: Icon(mapPlaceKindIcon(landmark.place.kind)),
+                onTap: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  final state = context.read<MapBloc>().state;
+                  if (state.status != MapStatus.loaded ||
+                      !identical(state.campusData, campus)) {
+                    return;
+                  }
+                  IndoorNavigationNode? destination;
+                  for (final edge in graph.edges) {
+                    if (edge.closed || edge.kind.name != landmark.place.kind) {
+                      continue;
+                    }
+                    final from = graph.nodesById[edge.fromNodeId]!;
+                    final to = graph.nodesById[edge.toNodeId]!;
+                    if (from.closed || to.closed) continue;
+                    if (landmark.nodeIds.contains(from.id) &&
+                        to.floorId == target.floor.id) {
+                      destination = to;
+                    }
+                    if (edge.bidirectional &&
+                        landmark.nodeIds.contains(to.id) &&
+                        from.floorId == target.floor.id) {
+                      destination = from;
+                    }
+                    if (destination != null) break;
+                  }
+                  if (destination == null) return;
+                  _pendingNavigationFocus = (
+                    snapshot: campus,
+                    revision: ++_navigationFocusRevision,
+                    floorId: target.floor.id,
+                    points: [Offset(destination.x, destination.y)],
+                  );
+                  _floor(target.floor);
+                },
+              ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _geographic() async {
@@ -893,6 +1090,24 @@ class _MapViewState extends State<MapView> {
                         ? const {}
                         : context.read<MapBloc>().syntheticRoomIds,
                     routeSegments: _routeSegments(floor.id),
+                    is3D: _is3D,
+                    bearing: _mapBearing,
+                    navigationLandmarks: _navigationLandmarks(
+                      state.campusData,
+                      floor.id,
+                    ),
+                    onNavigationLandmarkTap: _openNavigationLandmark,
+                    showRouteStart: _route?.nodes.first.floorId == floor.id,
+                    showRouteDestination:
+                        _route?.nodes.last.floorId == floor.id,
+                    routeInstructionPoint:
+                        _route != null &&
+                            _route!.instructions[_routeStep].floorId == floor.id
+                        ? Offset(
+                            _route!.instructions[_routeStep].atNode.x,
+                            _route!.instructions[_routeStep].atNode.y,
+                          )
+                        : null,
                     places: [
                       for (final place
                           in state.campusData?.rooms ?? <MapPlaceData>[])
@@ -923,67 +1138,17 @@ class _MapViewState extends State<MapView> {
                       if (_route case final route?)
                         Padding(
                           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                          child: AppCard(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        mapRouteInstructionLabel(
-                                          route.instructions[_routeStep],
-                                          state.campusData!,
-                                        ),
-                                        style: AppText.labelStrong,
-                                      ),
-                                    ),
-                                    const SizedBox(width: AppSpacing.sm),
-                                    AppIconButton(
-                                      tooltip: 'Завершить маршрут',
-                                      shape: AppIconButtonShape.circle,
-                                      size: AppIconButtonSize.compact,
-                                      tone: AppIconButtonTone.surface,
-                                      onPressed: () => setState(() {
-                                        _route = null;
-                                        _routeSnapshot = null;
-                                      }),
-                                      icon: const AppLineIconWidget(
-                                        AppLineIcon.close,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        'Шаг ${_routeStep + 1} из '
-                                        '${route.instructions.length}'
-                                        ' · вручную',
-                                        style: AppText.caption,
-                                      ),
-                                    ),
-                                    const SizedBox(width: AppSpacing.sm),
-                                    AppIconButton(
-                                      tooltip: 'Следующий шаг',
-                                      shape: AppIconButtonShape.circle,
-                                      size: AppIconButtonSize.compact,
-                                      tone: AppIconButtonTone.primary,
-                                      onPressed: interactive
-                                          ? _advanceRoute
-                                          : null,
-                                      icon: const AppLineIconWidget(
-                                        AppLineIcon.arrowRight,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                          child: MapRouteGuidance(
+                            campus: state.campusData!,
+                            route: route,
+                            stepIndex: _routeStep,
+                            onNext: interactive ? _advanceRoute : null,
+                            onPrevious: interactive ? _retreatRoute : null,
+                            onClose: () => setState(() {
+                              _route = null;
+                              _discardNavigationFocus();
+                              _routeSnapshot = null;
+                            }),
                           ),
                         ),
                     ],
@@ -1004,7 +1169,7 @@ class _MapViewState extends State<MapView> {
                     final controlsFit =
                         constraints.maxHeight - panelHeight >=
                         _viewportTop +
-                            AppControlSize.touchTarget * 3 +
+                            AppControlSize.touchTarget * (_is3D ? 5 : 4) +
                             AppSpacing.xsm * 2 +
                             AppSpacing.md;
                     if (!controlsFit &&
@@ -1019,6 +1184,7 @@ class _MapViewState extends State<MapView> {
                           ? child!
                           : MapCanvasControls(
                               axis: Axis.horizontal,
+                              showZoom: false,
                               onZoomIn: interactive
                                   ? _mapController.zoomIn
                                   : null,
@@ -1030,6 +1196,13 @@ class _MapViewState extends State<MapView> {
                     );
                   },
                   child: MapCanvasControls(
+                    is3D: _is3D,
+                    onRotate: _is3D && interactive
+                        ? () => setState(() => _mapBearing += math.pi / 4)
+                        : null,
+                    onToggle3D: interactive
+                        ? () => setState(() => _is3D = !_is3D)
+                        : null,
                     onZoomIn: interactive ? _mapController.zoomIn : null,
                     onZoomOut: interactive ? _mapController.zoomOut : null,
                     onFit: interactive ? _mapController.fit : null,

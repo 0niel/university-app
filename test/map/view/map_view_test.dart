@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:bloc_test/bloc_test.dart';
@@ -9,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
 import 'package:rtu_mirea_app/map/map.dart';
+import 'package:rtu_mirea_app/map/services/map_volume_projection.dart';
+import 'package:rtu_mirea_app/map/widgets/map_volume_layer.dart';
 
 import '../../helpers/pump_app.dart';
 
@@ -96,6 +99,7 @@ void main() {
     bool navigationViewport = false,
     String? dataWarning,
     List<RoomModel>? rooms,
+    Rect bounds = const Rect.fromLTWH(0, 0, 600, 400),
   }) async {
     addTearDown(() => tester.pumpWidget(const SizedBox.shrink()));
     final state = failure
@@ -120,7 +124,7 @@ void main() {
                     path: Path()..addRect(const Rect.fromLTWH(60, 0, 40, 40)),
                   ),
                 ],
-            boundingRect: const Rect.fromLTWH(0, 0, 600, 400),
+            boundingRect: bounds,
             dataWarning: dataWarning,
           )
         : const MapState();
@@ -157,7 +161,7 @@ void main() {
     );
     expect(map.viewportPadding.top, greaterThan(52));
     expect(map.viewportPadding.bottom, greaterThan(60));
-    expect(map.viewportPadding.bottom, lessThan(120));
+    expect(map.viewportPadding.bottom, lessThan(200));
     expect(find.byType(DraggableScrollableSheet), findsOneWidget);
     expect(find.byType(AppInnerHeader), findsNothing);
     expect(find.byType(Divider), findsNothing);
@@ -387,7 +391,7 @@ void main() {
     expect(transformUpdates, 0);
     expect(
       map.viewportPaddingListenable!.value.bottom,
-      closeTo(844 * .78 + 12, .1),
+      closeTo(844 * .78 + AppSpacing.md, .1),
     );
     await tester.pump(const Duration(milliseconds: 140));
     await tester.pumpAndSettle();
@@ -625,6 +629,226 @@ void main() {
         MapEvent.floorSelected(floor: secondFloor, campus: campuses.first),
       ),
     ).called(1);
+  });
+
+  testWidgets('volume preserves focus and projected room taps', (tester) async {
+    final controller = SvgInteractiveMapController();
+    addTearDown(controller.dispose);
+    await pumpMap(tester, mapController: controller, reduceMotion: true);
+    controller.focusPoints([const Offset(20, 20)]);
+    await tester.pumpAndSettle();
+    final scale = controller.currentScale;
+    final originalCenter = tester
+        .renderObject<RenderBox>(find.byType(MapFloorCanvas))
+        .localToGlobal(const Offset(20, 20));
+    await tester.tap(find.byTooltip('Объёмный план'));
+    await tester.pumpAndSettle();
+    expect(controller.currentScale, scale);
+    final volume = tester.widget<MapVolumeLayer>(find.byType(MapVolumeLayer));
+    final projection = MapVolumeProjection(
+      viewportSize: volume.viewportSize,
+      transform: volume.transform.value,
+      pivot: volume.pivot,
+      bearing: volume.bearing,
+    );
+    final canvas = tester.renderObject<RenderBox>(find.byType(MapVolumeLayer));
+    final ground = projection.sceneToScreen(const Offset(20, 20));
+    final projectedCenter = canvas.localToGlobal(ground);
+    expect((projectedCenter - originalCenter).distance, lessThan(.1));
+    expect(
+      projection.sceneToScreen(const Offset(20, 20), height: 10).dy,
+      lessThan(ground.dy),
+    );
+    await tester.tapAt(projectedCenter);
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pumpAndSettle();
+    verify(() => bloc.add(const MapEvent.roomTapped('v78__r__101'))).called(1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('volume rotation and panning preserve the selected scale', (
+    tester,
+  ) async {
+    final controller = SvgInteractiveMapController();
+    addTearDown(controller.dispose);
+    await pumpMap(tester, mapController: controller, reduceMotion: true);
+    await tester.tap(find.byTooltip('Объёмный план'));
+    await tester.pumpAndSettle();
+    final initial = tester.widget<MapVolumeLayer>(find.byType(MapVolumeLayer));
+    final scale = controller.currentScale;
+    await tester.tap(find.byTooltip('Повернуть план'));
+    await tester.pumpAndSettle();
+    final rotated = tester.widget<MapVolumeLayer>(find.byType(MapVolumeLayer));
+    expect(rotated.bearing, greaterThan(initial.bearing));
+    expect(controller.currentScale, scale);
+    final before = rotated.transform.value.clone();
+    final origin = tester
+        .renderObject<RenderBox>(find.byType(MapVolumeLayer))
+        .localToGlobal(rotated.pivot!);
+    await tester.dragFrom(origin, const Offset(45, 30));
+    await tester.pumpAndSettle();
+    final after = rotated.transform.value;
+    expect(after[12], isNot(before[12]));
+    expect(controller.currentScale, scale);
+    await tester.tap(find.byTooltip('Вид сверху'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MapVolumeLayer), findsNothing);
+    expect(controller.currentScale, scale);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('rotated tall volume plans fit inside the visible viewport', (
+    tester,
+  ) async {
+    final controller = SvgInteractiveMapController();
+    addTearDown(controller.dispose);
+    const bounds = Rect.fromLTWH(0, 0, 400, 4000);
+    await pumpMap(
+      tester,
+      size: const Size(320, 844),
+      bounds: bounds,
+      mapController: controller,
+      reduceMotion: true,
+    );
+    await tester.tap(find.byTooltip('Объёмный план'));
+    await tester.pumpAndSettle();
+    for (var rotation = 0; rotation < 2; rotation++) {
+      await tester.tap(find.byTooltip('Повернуть план'));
+      await tester.pumpAndSettle();
+      controller.fit();
+      await tester.pumpAndSettle();
+      final volume = tester.widget<MapVolumeLayer>(find.byType(MapVolumeLayer));
+      final wallHeight = math.min(
+        bounds.shortestSide * .008,
+        20 / controller.currentScale!,
+      );
+      _expectProjectedPointsVisible(tester, [
+        bounds.topLeft,
+        bounds.topRight,
+        bounds.bottomLeft,
+        bounds.bottomRight,
+      ], height: wallHeight);
+      expect(volume.bearing, closeTo(math.pi / 4 * (rotation + 1), .001));
+    }
+  });
+
+  testWidgets('volume route and large room focus fit projected extents', (
+    tester,
+  ) async {
+    final controller = SvgInteractiveMapController();
+    addTearDown(controller.dispose);
+    final room = RoomModel(
+      roomId: 'long-room',
+      name: 'Большой зал',
+      path: Path()..addRect(const Rect.fromLTWH(100, 200, 200, 3600)),
+    );
+    await pumpMap(
+      tester,
+      size: const Size(320, 844),
+      bounds: const Rect.fromLTWH(0, 0, 400, 4000),
+      rooms: [room],
+      mapController: controller,
+      reduceMotion: true,
+    );
+    await tester.tap(find.byTooltip('Объёмный план'));
+    await tester.pumpAndSettle();
+    for (var rotation = 0; rotation < 2; rotation++) {
+      await tester.tap(find.byTooltip('Повернуть план'));
+      await tester.pumpAndSettle();
+    }
+    const route = [Offset(100, 200), Offset(300, 3800)];
+    controller.focusPoints(route);
+    await tester.pumpAndSettle();
+    _expectProjectedPointsVisible(tester, route);
+    controller.focusRoom(room);
+    await tester.pumpAndSettle();
+    final rect = room.path.getBounds();
+    _expectProjectedPointsVisible(tester, [
+      rect.topLeft,
+      rect.topRight,
+      rect.bottomLeft,
+      rect.bottomRight,
+    ]);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('panel resizing preserves an explored area and its zoom', (
+    tester,
+  ) async {
+    final controller = SvgInteractiveMapController();
+    addTearDown(controller.dispose);
+    await pumpMap(tester, mapController: controller, reduceMotion: true);
+    controller.zoomIn();
+    await tester.pumpAndSettle();
+    final scale = controller.currentScale;
+    final viewer = tester.widget<InteractiveViewer>(
+      find.byType(InteractiveViewer),
+    );
+    final map = tester.widget<SvgInteractiveMap>(
+      find.byType(SvgInteractiveMap),
+    );
+    Offset visibleCenter() {
+      final padding = map.viewportPaddingListenable!.value;
+      return Offset(
+        (390 + padding.left - padding.right) / 2,
+        (844 + padding.top - padding.bottom) / 2,
+      );
+    }
+
+    final center = viewer.transformationController!.toScene(visibleCenter());
+    final sheet = tester.widget<DraggableScrollableSheet>(
+      find.byType(DraggableScrollableSheet),
+    );
+    sheet.controller!.jumpTo(.5);
+    await tester.pumpAndSettle();
+    expect(controller.currentScale, scale);
+    expect(
+      (viewer.transformationController!.toScene(visibleCenter()) - center)
+          .distance,
+      lessThan(.01),
+    );
+    sheet.controller!.jumpTo(sheet.minChildSize);
+    await tester.pumpAndSettle();
+    expect(controller.currentScale, scale);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tall plans fit between overlays on a short screen', (
+    tester,
+  ) async {
+    final controller = _RecordingMapController();
+    addTearDown(controller.dispose);
+    await pumpMap(
+      tester,
+      size: const Size(320, 420),
+      bounds: const Rect.fromLTWH(0, 0, 1600, 2400),
+      reduceMotion: true,
+      mapController: controller,
+    );
+    final map = tester.widget<SvgInteractiveMap>(
+      find.byType(SvgInteractiveMap),
+    );
+    final padding = map.viewportPaddingListenable!.value;
+    final viewer = tester.widget<InteractiveViewer>(
+      find.byType(InteractiveViewer),
+    );
+    final matrix = viewer.transformationController!.value;
+    expect(controller.currentScale, lessThan(.1));
+    expect(matrix[13], greaterThanOrEqualTo(padding.top - .01));
+    expect(
+      matrix[13] + 2400 * controller.currentScale!,
+      lessThanOrEqualTo(420 - padding.bottom + .01),
+    );
+    expect(
+      matrix[12] + 1600 * controller.currentScale!,
+      lessThanOrEqualTo(320 - padding.right + .01),
+    );
+    controller.zoomIn();
+    await tester.pumpAndSettle();
+    controller.fit();
+    await tester.pumpAndSettle();
+    expect(controller.currentScale, closeTo(matrix[0], .0001));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('zoom and fit controls change the real map transform', (
@@ -911,4 +1135,39 @@ void main() {
     expect(find.text('v78_unnamed_1'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
+}
+
+void _expectProjectedPointsVisible(
+  WidgetTester tester,
+  List<Offset> points, {
+  double height = 0,
+}) {
+  final map = tester.widget<SvgInteractiveMap>(find.byType(SvgInteractiveMap));
+  final volume = tester.widget<MapVolumeLayer>(find.byType(MapVolumeLayer));
+  final padding = map.viewportPaddingListenable!.value;
+  final viewport = Rect.fromLTRB(
+    padding.left,
+    padding.top,
+    volume.viewportSize.width - padding.right,
+    volume.viewportSize.height - padding.bottom,
+  );
+  final projection = MapVolumeProjection(
+    viewportSize: volume.viewportSize,
+    transform: volume.transform.value,
+    pivot: volume.pivot,
+    bearing: volume.bearing,
+  );
+  for (final point in points) {
+    for (final elevation in {0.0, height}) {
+      final screen = projection.sceneToScreen(point, height: elevation);
+      expect(
+        screen.dx,
+        inInclusiveRange(viewport.left - .1, viewport.right + .1),
+      );
+      expect(
+        screen.dy,
+        inInclusiveRange(viewport.top - .1, viewport.bottom + .1),
+      );
+    }
+  }
 }

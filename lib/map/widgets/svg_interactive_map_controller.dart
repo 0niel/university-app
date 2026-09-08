@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
 
 class SvgInteractiveMapController {
@@ -19,6 +20,8 @@ class SvgInteractiveMapController {
 
   void focusRoom(RoomModel room) => _handle?.focusRoom(room);
 
+  void focusPoints(List<Offset> points) => _handle?.focusPoints(points);
+
   double? get currentScale => _handle?.currentScale;
 
   void dispose() => _handle = null;
@@ -34,4 +37,6 @@ abstract interface class SvgInteractiveMapHandle {
   void zoomOut();
 
   void focusRoom(RoomModel room);
+
+  void focusPoints(List<Offset> points);
 }

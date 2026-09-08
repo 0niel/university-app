@@ -20,6 +20,7 @@ import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
 import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/services/svg_room_parser.dart';
 import 'package:rtu_mirea_app/map/view/map_view.dart';
+import 'package:rtu_mirea_app/map/widgets/map_cartographic_layer.dart';
 import 'package:rtu_mirea_app/map/widgets/map_place_details_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/map_place_editor_page.dart';
 import 'package:rtu_mirea_app/map/widgets/map_place_share_sheet.dart';
@@ -156,6 +157,22 @@ void main() {
         );
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
+        if (id != 'mp-1') {
+          final preparation = Stopwatch()..start();
+          while (tester
+              .widget<MapCartographicLayer>(find.byType(MapCartographicLayer))
+              .navigationLandmarks
+              .isEmpty) {
+            if (preparation.elapsed > const Duration(seconds: 10)) {
+              fail('Navigation landmarks did not finish preparing for $id');
+            }
+            await tester.runAsync(
+              () => Future<void>.delayed(const Duration(milliseconds: 20)),
+            );
+            await tester.pump();
+          }
+          await tester.pumpAndSettle();
+        }
         expect(tester.takeException(), isNull);
         Future<void> capture(String suffix) async {
           if (!const bool.fromEnvironment('MAP_PREVIEWS')) return;
@@ -175,6 +192,21 @@ void main() {
           });
         }
 
+        Future<void> toggleVolume(String title) async {
+          final control = find.byTooltip(title);
+          if (control.evaluate().isNotEmpty) {
+            await tester.tap(control);
+          } else {
+            await tester.tap(find.byTooltip('Действия с картой'));
+            await tester.pumpAndSettle();
+            final action = find.widgetWithText(AppListRow, title);
+            await tester.ensureVisible(action);
+            await tester.pumpAndSettle();
+            await tester.tap(action);
+          }
+          await tester.pumpAndSettle();
+        }
+
         await capture('map');
         for (var step = 0; step < 4; step++) {
           await tester.tap(find.byTooltip('Приблизить карту'));
@@ -182,16 +214,33 @@ void main() {
         }
         expect(tester.takeException(), isNull);
         await capture('zoom');
+        await toggleVolume('Объёмный план');
+        expect(find.byTooltip('Вид сверху'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await capture('volume');
+        await toggleVolume('Вид сверху');
         tester.view.physicalSize = const Size(320, 568);
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         await capture('compact');
+        await toggleVolume('Объёмный план');
+        expect(tester.takeException(), isNull);
+        await capture('compact-volume');
+        await toggleVolume('Вид сверху');
         textScale.value = const TextScaler.linear(2);
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         await capture('compact-large-text');
         textScale.value = TextScaler.noScaling;
+        tester.view.physicalSize = const Size(320, 420);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await capture('short');
+        await toggleVolume('Объёмный план');
+        expect(tester.takeException(), isNull);
+        await capture('short-volume');
+        await toggleVolume('Вид сверху');
         tester.view.physicalSize = const Size(390, 844);
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();

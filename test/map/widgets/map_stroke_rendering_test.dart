@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
+import 'package:rtu_mirea_app/map/navigation/indoor_navigation_graph.dart';
+import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
 import 'package:rtu_mirea_app/map/services/svg_room_parser.dart';
 import 'package:rtu_mirea_app/map/widgets/map_cartographic_layer.dart';
 import 'package:rtu_mirea_app/map/widgets/map_structure_layer.dart';
@@ -328,6 +330,11 @@ void main() {
         .where((room) => room['floor_id'] == floor['id'])
         .map(MapPlaceData.fromJson)
         .toList();
+    final navigationLandmarks = mapNavigationLandmarks(
+      IndoorNavigationGraph.fromJson(data['graph'] as Map<String, dynamic>),
+      places: places,
+    ).where((landmark) => landmark.place.floorId == floor['id']).toList();
+    expect(navigationLandmarks, isNotEmpty);
     expect(places.where((place) => place.kind == 'entrance'), hasLength(1));
     expect(places.where((place) => place.kind == 'cafeteria'), hasLength(1));
     final transform = TransformationController(
@@ -343,6 +350,7 @@ void main() {
         (transform) => MapCartographicLayer(
           rooms: parsed.$1,
           places: places,
+          navigationLandmarks: navigationLandmarks,
           size: parsed.$2.size,
           svgContent: svg,
           transform: transform,
