@@ -11,6 +11,11 @@ on:
         description: Processed App Store build number
         required: true
         type: string
+      artifact_run_id:
+        description: Verify the release artifact and attach location review notes
+        required: false
+        type: string
+        default: ''
       replace_pending_review:
         description: Replace the previous build waiting for review
         required: false
@@ -18,6 +23,8 @@ on:
         default: false
 
 permissions:
+  actions: read
+  attestations: read
   contents: read
 
 concurrency:
@@ -38,6 +45,7 @@ jobs:
       MARKETING_VERSION: ${{ inputs.marketing_version }}
       BUILD_NUMBER: ${{ inputs.build_number }}
       REPLACE_PENDING_REVIEW: ${{ inputs.replace_pending_review }}
+      ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -48,13 +56,65 @@ jobs:
         run: |
           python3 - <<'PY'
           import os
+          import re
           import sys
           sys.path.insert(0, "tool")
           from app_store_submit import validate_version
           validate_version(os.environ["MARKETING_VERSION"], os.environ["BUILD_NUMBER"])
+          run_id = os.environ["ARTIFACT_RUN_ID"]
+          if run_id and not re.fullmatch(r"[0-9]+", run_id):
+              raise SystemExit("Invalid iOS artifact run ID")
           PY
           python3 -m unittest discover -s test/tool -p 'app_store_submit_test.py'
           python3 -m unittest discover -s test/tool -p 'app_store_build_status_test.py'
+
+      - name: Download release artifact
+        if: ${{ inputs.artifact_run_id != '' }}
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        with:
+          name: ios-shorebird-release
+          path: ${{ runner.temp }}/ios-review
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.artifact_run_id }}
+
+      - name: Verify artifact and prepare review notes
+        if: ${{ inputs.artifact_run_id != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          shopt -s nullglob
+          artifacts=("$RUNNER_TEMP/ios-review/"*.ipa)
+          if [[ ${#artifacts[@]} -ne 1 ]]; then
+            printf 'Exactly one signed iOS artifact is required\n' >&2
+            exit 1
+          fi
+          ipa="${artifacts[0]}"
+          gh attestation verify "$ipa" --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/shorebird-release.yml" \
+            --source-ref refs/heads/master
+          python3 tool/ios_artifact_check.py --ipa "$ipa" --bundle-id "$IOS_APP_BUNDLE_ID" \
+            --marketing-version "$MARKETING_VERSION" --build-number "$BUILD_NUMBER" \
+            > "$RUNNER_TEMP/ios-review-verification.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"])
+          result = json.loads((root / "ios-review-verification.json").read_text())
+          print(json.dumps(result, sort_keys=True))
+          note = (
+              f"Location clarification for version {os.environ['MARKETING_VERSION']} "
+              f"(build {os.environ['BUILD_NUMBER']}), guideline 2.5.4:\n"
+              "The signed IPA for this build has been inspected before this submission. "
+              "The main application's Info.plist does not declare location in UIBackgroundModes. "
+              "No embedded bundle declares the location background mode or an Always location usage description. "
+              "Location is used only while the app is open, for the map and optional location sharing. "
+              "Location updates stop when the app enters the background. "
+              "The permission prompt requests When In Use access only. "
+              "Please review the build number above for this submission."
+          )
+          (root / "ios-location-review-notes.txt").write_text(note, encoding="utf-8")
+          PY
 
       - name: Install publishing tools
         run: |
@@ -95,6 +155,9 @@ jobs:
           arguments=()
           if [[ "$REPLACE_PENDING_REVIEW" = true ]]; then
             arguments+=(--replace-pending-review)
+          fi
+          if [[ -n "$ARTIFACT_RUN_ID" ]]; then
+            arguments+=(--review-notes-file "$RUNNER_TEMP/ios-location-review-notes.txt")
           fi
           python3 tool/app_store_submit.py \
             --bundle-id "$IOS_APP_BUNDLE_ID" \
