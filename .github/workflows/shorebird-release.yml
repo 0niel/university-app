@@ -278,29 +278,22 @@ jobs:
         run: |
           python3 - <<'PY'
           import os
-          import plistlib
           import re
           import shutil
-          import zipfile
+          import sys
           from pathlib import Path
+
+          sys.path.insert(0, "tool")
+          from ios_artifact_check import verify_ipa
 
           candidates = list(Path("build/ios/ipa").glob("*.ipa"))
           if len(candidates) != 1:
               raise SystemExit("Exactly one signed iOS artifact is required")
           ipa = candidates[0]
-          with zipfile.ZipFile(ipa) as archive:
-              metadata_paths = [name for name in archive.namelist() if re.fullmatch(r"Payload/[^/]+\.app/Info\.plist", name)]
-              if len(metadata_paths) != 1:
-                  raise SystemExit("Exactly one application metadata file is required")
-              metadata = plistlib.loads(archive.read(metadata_paths[0]))
-          if metadata.get("CFBundleIdentifier") != os.environ["IOS_APP_BUNDLE_ID"]:
-              raise SystemExit("Unexpected iOS application identifier")
-          marketing_version = metadata.get("CFBundleShortVersionString", "")
-          build_number = metadata.get("CFBundleVersion", "")
-          if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){1,2}", marketing_version):
-              raise SystemExit("Invalid iOS marketing version")
-          if not re.fullmatch(r"[0-9]{1,4}(?:\.[0-9]{1,2}){0,2}", build_number):
-              raise SystemExit("Invalid iOS build number")
+          verification = verify_ipa(ipa, os.environ["IOS_APP_BUNDLE_ID"])
+          print(verification)
+          marketing_version = verification["marketing_version"]
+          build_number = verification["build_number"]
           pod_lock = Path("ios/Podfile.lock")
           if not pod_lock.is_file() or not pod_lock.stat().st_size:
               raise SystemExit("Resolved iOS Podfile.lock is required")
@@ -479,11 +472,14 @@ jobs:
           APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
           APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
         run: |
-          ipa="$(find "$RUNNER_TEMP/ios" -type f -name '*.ipa' -print -quit)"
-          if [[ -z "$ipa" ]]; then
-            printf 'Signed iOS artifact is unavailable\n' >&2
+          shopt -s nullglob
+          artifacts=("$RUNNER_TEMP/ios/"*.ipa)
+          if [[ ${#artifacts[@]} -ne 1 ]]; then
+            printf 'Exactly one signed iOS artifact is required\n' >&2
             exit 1
           fi
+          ipa="${artifacts[0]}"
+          python3 tool/ios_artifact_check.py --ipa "$ipa" --bundle-id "$IOS_APP_BUNDLE_ID"
           xcrun altool \
             --upload-app \
             --type ios \

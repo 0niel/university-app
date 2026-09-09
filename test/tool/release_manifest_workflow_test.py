@@ -119,6 +119,10 @@ class IosReleaseArtifactCollectionTest(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
+        (self.root / "tool").mkdir()
+        (self.root / "tool/ios_artifact_check.py").write_bytes(
+            (ROOT / "tool/ios_artifact_check.py").read_bytes()
+        )
         (self.root / "build/ios/ipa").mkdir(parents=True)
         (self.root / "ios").mkdir()
         (self.root / "ios/Podfile.lock").write_bytes(b"PODS: resolved fixture\n")
@@ -128,13 +132,15 @@ class IosReleaseArtifactCollectionTest(unittest.TestCase):
             "CFBundleIdentifier": "pro.oniel.it.university",
             "CFBundleShortVersionString": "5.2.1",
             "CFBundleVersion": "2440.17.53",
+            "NSLocationWhenInUseUsageDescription": "Show your location while the app is open.",
+            "UIBackgroundModes": ["fetch", "remote-notification"],
         }
         self.write_ipa()
 
     def write_ipa(self, filename="university.ipa", additional_metadata=False):
         with zipfile.ZipFile(self.root / "build/ios/ipa" / filename, "w") as archive:
             archive.writestr("Payload/Runner.app/Info.plist", plistlib.dumps(self.metadata))
-            archive.writestr("Payload/Runner.app/PlugIns/Home.app/Info.plist", b"nested ignored")
+            archive.writestr("Payload/Runner.app/PlugIns/Home.app/Info.plist", plistlib.dumps({}))
             if additional_metadata:
                 archive.writestr("Payload/Other.app/Info.plist", plistlib.dumps(self.metadata))
 
@@ -163,6 +169,13 @@ class IosReleaseArtifactCollectionTest(unittest.TestCase):
         self.write_ipa("other.ipa")
         self.assertNotEqual(self.collect().returncode, 0)
         self.assertFalse((self.root / "outputs").exists())
+
+    def test_rejects_background_location_before_collecting_artifacts(self):
+        self.metadata["UIBackgroundModes"].append("location")
+        self.write_ipa()
+        self.assertNotEqual(self.collect().returncode, 0)
+        self.assertFalse((self.root / "outputs").exists())
+        self.assertFalse((self.root / "dist").exists())
 
     def test_rejects_ambiguous_app_metadata(self):
         self.write_ipa(additional_metadata=True)

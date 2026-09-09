@@ -7,7 +7,7 @@
 		<key>NSFaceIDUsageDescription</key>
 		<string>Face ID используется, чтобы разблокировать пропуск.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>Геопозиция нужна, чтобы видеть себя на карте и по вашему выбору делиться местоположением с друзьями или всеми студентами.</string>
+		<string>Пока приложение открыто, геопозиция нужна, чтобы видеть себя на карте и по вашему выбору делиться местоположением с друзьями или всеми студентами. В фоне геопозиция не обновляется.</string>
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>fetch</string>

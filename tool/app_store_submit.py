@@ -320,11 +320,98 @@ def should_submit(
     return True
 
 
+def append_review_notes(client, bundle_id, marketing_version, build_id, note):
+    def get(path, query):
+        try:
+            return client.get(path, query)
+        except (RuntimeError, urllib.error.URLError):
+            raise RuntimeError("App Store review notes lookup failed") from None
+
+    response = get("/v1/apps", {"filter[bundleId]": bundle_id, "limit": "2"})
+    apps = response.get("data", [])
+    if response.get("links", {}).get("next") or len(apps) != 1:
+        raise RuntimeError("App Store review notes app is unavailable or ambiguous")
+    app_id = apps[0].get("id")
+    if not isinstance(app_id, str) or not re.fullmatch(r"[A-Za-z0-9-]+", app_id):
+        raise RuntimeError("App Store review notes app ID is invalid")
+    response = get(
+        f"/v1/apps/{app_id}/appStoreVersions",
+        {"filter[platform]": "IOS", "include": "build", "limit": "200"},
+    )
+    versions = [item for item in response.get("data", [])
+                if item.get("attributes", {}).get("versionString") == marketing_version]
+    if response.get("links", {}).get("next") or len(versions) != 1:
+        raise RuntimeError("App Store review notes version is unavailable or ambiguous")
+    version_id = versions[0].get("id")
+    if not isinstance(version_id, str) or not re.fullmatch(r"[A-Za-z0-9-]+", version_id):
+        raise RuntimeError("App Store review notes version ID is invalid")
+
+    def verify_version(current):
+        attributes = current.get("attributes", {})
+        selected = current.get("relationships", {}).get("build", {}).get("data") or {}
+        if (
+            current.get("id") != version_id
+            or attributes.get("platform") != "IOS"
+            or attributes.get("versionString") != marketing_version
+            or selected.get("id") != build_id
+            or (attributes.get("appVersionState") or attributes.get("appStoreState")) not in (
+                "PREPARE_FOR_SUBMISSION", "READY_FOR_REVIEW", "REJECTED",
+                "METADATA_REJECTED", "DEVELOPER_REJECTED", "INVALID_BINARY",
+            )
+        ):
+            raise RuntimeError("App Store review notes target changed or is not editable")
+
+    def current_version():
+        verify_version(get(f"/v1/appStoreVersions/{version_id}", {"include": "build"}).get("data", {}))
+
+    detail_path = f"/v1/appStoreVersions/{version_id}/appStoreReviewDetail"
+
+    def review_detail():
+        response = get(detail_path, {"fields[appStoreReviewDetails]": "notes"})
+        detail = response.get("data") or {}
+        attributes = detail.get("attributes", {})
+        notes = attributes.get("notes")
+        detail_id = detail.get("id")
+        if (
+            response.get("links", {}).get("next")
+            or detail.get("type") != "appStoreReviewDetails"
+            or not isinstance(detail_id, str) or not re.fullmatch(r"[A-Za-z0-9-]+", detail_id)
+            or "notes" not in attributes or (notes is not None and not isinstance(notes, str))
+        ):
+            raise RuntimeError("App Store review notes metadata is unavailable")
+        return detail_id, notes or ""
+
+    verify_version(versions[0])
+    detail_id, existing = review_detail()
+    combined = existing if note in existing else existing + ("\n\n" if existing else "") + note
+    if len(combined.encode("utf-8")) > 4000:
+        raise ValueError("Combined App Store review notes exceed 4000 bytes")
+    current_version()
+    if combined != existing:
+        if review_detail() != (detail_id, existing):
+            raise RuntimeError("App Store review notes changed before update")
+        try:
+            client.patch(
+                f"/v1/appStoreReviewDetails/{detail_id}",
+                {"data": {"type": "appStoreReviewDetails", "id": detail_id, "attributes": {"notes": combined}}},
+            )
+        except (RuntimeError, urllib.error.URLError):
+            raise RuntimeError("App Store review notes update failed") from None
+    if review_detail() != (detail_id, combined):
+        raise RuntimeError("App Store review notes verification failed")
+    current_version()
+
+
 def submit_build(
     client, bundle_id, marketing_version, build_number, private_key,
-    replace_pending_review=False,
+    replace_pending_review=False, review_notes_file: Path | None = None,
 ):
     validate_version(marketing_version, build_number)
+    note = None
+    if review_notes_file is not None:
+        note = review_notes_file.read_text(encoding="utf-8").strip()
+        if not note or len(note.encode("utf-8")) > 4000:
+            raise ValueError("App Store review notes must contain 1 to 4000 bytes")
     build = wait_for_build(
         client, bundle_id, marketing_version, build_number, timeout=1200, interval=30
     )
@@ -340,6 +427,8 @@ def submit_build(
     submission = should_submit(
         client, bundle_id, marketing_version, build_id, replace_pending_review,
     )
+    if submission and note is not None:
+        append_review_notes(client, bundle_id, marketing_version, build_id, note)
     if isinstance(submission, str):
         subprocess.run(
             [
@@ -384,6 +473,7 @@ def main() -> None:
     parser.add_argument("--issuer-id", required=True)
     parser.add_argument("--private-key", required=True, type=Path)
     parser.add_argument("--replace-pending-review", action="store_true")
+    parser.add_argument("--review-notes-file", type=Path)
     arguments = parser.parse_args()
     client = AppStoreSubmissionClient(
         arguments.key_id, arguments.issuer_id, arguments.private_key
@@ -392,6 +482,7 @@ def main() -> None:
         client, arguments.bundle_id, arguments.marketing_version,
         arguments.build_number, arguments.private_key,
         arguments.replace_pending_review,
+        arguments.review_notes_file,
     )
     print(json.dumps(result, sort_keys=True))
 

@@ -1,6 +1,7 @@
 import importlib.util
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
@@ -462,7 +463,15 @@ class AppStoreSubmissionWorkflowTest(unittest.TestCase):
         self.assertLess(workflow.index("tool/app_store_submit.py"), workflow.index("--release-status"))
         self.assertNotIn("--upload-app", workflow)
         self.assertNotIn("shorebird release", workflow)
-        self.assertNotIn("${{ inputs.", workflow.split("    steps:", 1)[1])
+        run_indent = None
+        for line in workflow.splitlines():
+            indent = len(line) - len(line.lstrip())
+            if run_indent is not None and line.strip() and indent <= run_indent:
+                run_indent = None
+            if line.lstrip().startswith("run:"):
+                run_indent = indent
+            if run_indent is not None:
+                self.assertNotRegex(line, r"\$\{\{\s*inputs\.")
 
 
 class AppStoreBuildReplacementTest(unittest.TestCase):
@@ -631,6 +640,193 @@ class AppStoreBuildReplacementTest(unittest.TestCase):
         self.assertEqual(request.full_url, "https://api.appstoreconnect.apple.com/v1/appStoreVersions/version-123/relationships/build")
         self.assertEqual(request.headers["Authorization"], "Bearer test-token")
         self.assertEqual(submit.json.loads(request.data), payload)
+
+
+class AppStoreReviewNotesTest(unittest.TestCase):
+    def setUp(self):
+        self.client = Mock()
+        self.target = version(state="READY_FOR_REVIEW", build_id="new")
+        self.detail = {
+            "id": "detail-123", "type": "appStoreReviewDetails",
+            "attributes": {"notes": "Existing login instructions.\n", "demoAccountPassword": "private"},
+        }
+        self.events = []
+
+        def get(path, query):
+            self.events.append(path)
+            if path == "/v1/apps":
+                return {"data": [{"id": "app-123"}]}
+            if path == "/v1/apps/app-123/appStoreVersions":
+                return {"data": [self.target]}
+            if path == "/v1/appStoreVersions/version-123":
+                return {"data": self.target}
+            if path == "/v1/appStoreVersions/version-123/appStoreReviewDetail":
+                self.assertEqual(query, {"fields[appStoreReviewDetails]": "notes"})
+                return {"data": self.detail}
+            raise AssertionError(path)
+
+        def update(path, payload):
+            self.events.append("patch")
+            self.assertEqual(path, "/v1/appStoreReviewDetails/detail-123")
+            self.assertEqual(set(payload["data"]["attributes"]), {"notes"})
+            self.detail["attributes"]["notes"] = payload["data"]["attributes"]["notes"]
+
+        self.client.get.side_effect = get
+        self.client.patch.side_effect = update
+        self.note = "5.2.1 (2442.12.0): Background location mode removed."
+
+    def append(self):
+        submit.append_review_notes(self.client, "app.bundle", "5.2.1", "new", self.note)
+
+    def test_preserves_existing_notes_and_credentials_and_rerun_is_idempotent(self):
+        self.append()
+        self.append()
+        self.assertEqual(self.detail["attributes"]["notes"], "Existing login instructions.\n\n\n" + self.note)
+        self.assertEqual(self.detail["attributes"]["demoAccountPassword"], "private")
+        self.client.patch.assert_called_once()
+
+    def test_null_notes_are_supported_without_extra_separator(self):
+        self.detail["attributes"]["notes"] = None
+        self.append()
+        self.assertEqual(self.detail["attributes"]["notes"], self.note)
+
+    def test_combined_utf8_byte_limit_does_not_truncate_existing_notes(self):
+        original = "я" * 1980
+        self.detail["attributes"]["notes"] = original
+        with self.assertRaisesRegex(ValueError, "4000 bytes"):
+            self.append()
+        self.assertEqual(self.detail["attributes"]["notes"], original)
+        self.client.patch.assert_not_called()
+
+    def test_incomplete_ambiguous_missing_and_foreign_target_cannot_mutate_notes(self):
+        original_get = self.client.get.side_effect
+        for path, response in (
+            ("/v1/apps", {"data": [{"id": "app-123"}], "links": {"next": "more"}}),
+            ("/v1/apps", {"data": [{"id": "app-123"}] * 2}),
+            ("/v1/apps/app-123/appStoreVersions", {"data": [self.target], "links": {"next": "more"}}),
+            ("/v1/apps/app-123/appStoreVersions", {"data": [self.target] * 2}),
+            ("/v1/apps/app-123/appStoreVersions", {"data": []}),
+            ("/v1/appStoreVersions/version-123/appStoreReviewDetail", {"data": None}),
+        ):
+            with self.subTest(path=path, response=response):
+                self.client.get.side_effect = lambda p, q: response if p == path else original_get(p, q)
+                with self.assertRaises(RuntimeError):
+                    self.append()
+                self.client.patch.assert_not_called()
+
+    def test_unknown_state_wrong_platform_or_selected_build_cannot_mutate(self):
+        for target in (
+            version(state="IN_REVIEW", build_id="new"),
+            version(state="WAITING_FOR_REVIEW", build_id="new"),
+            version(state="FUTURE_STATE", build_id="new"),
+            version(state="READY_FOR_REVIEW", build_id="other"),
+            version(state="READY_FOR_REVIEW"),
+        ):
+            self.target = target
+            with self.assertRaisesRegex(RuntimeError, "target changed"):
+                self.append()
+        self.target = version(state="READY_FOR_REVIEW", build_id="new")
+        self.target["attributes"]["platform"] = "MAC_OS"
+        with self.assertRaisesRegex(RuntimeError, "target changed"):
+            self.append()
+        self.client.patch.assert_not_called()
+
+    def test_build_changed_after_lookup_prevents_patch(self):
+        original_get = self.client.get.side_effect
+
+        def get(path, query):
+            if path == "/v1/appStoreVersions/version-123":
+                return {"data": version(state="READY_FOR_REVIEW", build_id="other")}
+            return original_get(path, query)
+
+        self.client.get.side_effect = get
+        with self.assertRaisesRegex(RuntimeError, "target changed"):
+            self.append()
+        self.client.patch.assert_not_called()
+
+    def test_failed_readback_blocks_submission_without_exposing_notes(self):
+        self.client.patch.side_effect = None
+        with self.assertRaisesRegex(RuntimeError, "verification failed") as error:
+            self.append()
+        self.assertNotIn("login", str(error.exception))
+
+    def test_concurrent_note_edit_is_preserved_and_prevents_patch(self):
+        original_get = self.client.get.side_effect
+        detail_reads = 0
+
+        def get(path, query):
+            nonlocal detail_reads
+            if path.endswith("/appStoreReviewDetail"):
+                detail_reads += 1
+                if detail_reads == 2:
+                    self.detail["attributes"]["notes"] = "Updated login instructions"
+            return original_get(path, query)
+
+        self.client.get.side_effect = get
+        with self.assertRaisesRegex(RuntimeError, "changed before update"):
+            self.append()
+        self.client.patch.assert_not_called()
+        self.assertEqual(self.detail["attributes"]["notes"], "Updated login instructions")
+
+    def test_transport_failure_does_not_expose_notes_or_password(self):
+        for method in (self.client.get, self.client.patch):
+            original = method.side_effect
+            method.side_effect = RuntimeError("private notes and password")
+            with self.assertRaises(RuntimeError) as error:
+                self.append()
+            self.assertNotIn("private", str(error.exception))
+            self.assertTrue(error.exception.__suppress_context__)
+            method.side_effect = original
+
+    def test_notes_are_verified_after_target_selection_and_before_confirmation(self):
+        build = {"build_id": "new", "build_number": "2442.12.0",
+                 "marketing_version": "5.2.1", "processing_state": "VALID"}
+        with tempfile.TemporaryDirectory() as directory:
+            note_file = Path(directory) / "notes.txt"
+            note_file.write_text(self.note, encoding="utf-8")
+            with patch.object(submit, "wait_for_build", return_value=build), \
+                 patch.object(submit, "should_submit", side_effect=lambda *args: self.events.append("selected") or "review-123"), \
+                 patch.object(submit.subprocess, "run", side_effect=lambda *args, **kwargs: self.events.append("confirmed")):
+                result = submit.submit_build(
+                    self.client, "app.bundle", "5.2.1", "2442.12.0", Path("key.p8"),
+                    True, review_notes_file=note_file,
+                )
+        self.assertEqual(result["submission_action"], "resumed")
+        self.assertEqual(self.events[0], "selected")
+        self.assertEqual(self.events[-1], "confirmed")
+        self.assertGreater(self.events.index("confirmed"), self.events.index("patch"))
+
+    def test_invalid_file_is_rejected_before_build_selection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            note_file = Path(directory) / "notes.txt"
+            for text in (" ", "я" * 2001):
+                note_file.write_text(text, encoding="utf-8")
+                with patch.object(submit, "wait_for_build") as wait:
+                    with self.assertRaises(ValueError):
+                        submit.submit_build(
+                            self.client, "app.bundle", "5.2.1", "2442.12.0", Path("key.p8"),
+                            review_notes_file=note_file,
+                        )
+                    wait.assert_not_called()
+            self.client.patch.assert_not_called()
+
+    def test_already_submitted_build_does_not_change_notes(self):
+        build = {"build_id": "new", "build_number": "2442.12.0",
+                 "marketing_version": "5.2.1", "processing_state": "VALID"}
+        with tempfile.TemporaryDirectory() as directory:
+            note_file = Path(directory) / "notes.txt"
+            note_file.write_text(self.note, encoding="utf-8")
+            with patch.object(submit, "wait_for_build", return_value=build), \
+                 patch.object(submit, "should_submit", return_value=False), \
+                 patch.object(submit.subprocess, "run") as run:
+                result = submit.submit_build(
+                    self.client, "app.bundle", "5.2.1", "2442.12.0", Path("key.p8"),
+                    review_notes_file=note_file,
+                )
+                self.assertEqual(result["submission_action"], "already_submitted")
+                self.client.get.assert_not_called()
+                self.client.patch.assert_not_called()
+                run.assert_not_called()
 
 
 if __name__ == "__main__":
