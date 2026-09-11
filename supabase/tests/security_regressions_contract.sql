@@ -197,11 +197,16 @@ begin
     raise exception 'Gamification sync is not serialized';
   end if;
 
+  -- The sweep runs in micro-batches and never waits on a lock owned by a live RPC.
   v_definition := pg_get_functiondef(
-    'internal.run_gamification_sweep()'::regprocedure
+    'internal.run_gamification_sweep_batch(integer,integer,interval)'::regprocedure
   );
-  if position('pg_advisory_xact_lock' in v_definition) = 0 then
-    raise exception 'Gamification sweep is not serialized';
+  if position('pg_try_advisory_xact_lock' in v_definition) = 0
+    or position('lock_timeout' in v_definition) = 0 then
+    raise exception 'Gamification sweep is not serialized per user';
+  end if;
+  if to_regprocedure('internal.run_gamification_sweep()') is not null then
+    raise exception 'Single-transaction gamification sweep must stay removed';
   end if;
 end;
 $$;

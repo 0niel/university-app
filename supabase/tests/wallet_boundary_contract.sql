@@ -24,7 +24,7 @@ begin
       'core.apply_shuriken_delta(uuid,text,text,integer)',
       'core.apply_organization_shuriken_delta(uuid,text,text,text,integer)',
       'core.refresh_quest_progress(uuid)', 'core.evaluate_achievements(uuid)',
-      'internal.run_gamification_sweep()'
+      'internal.run_gamification_sweep_batch(integer,integer,interval)'
     ] loop
       if has_function_privilege(v_role, v_function, 'EXECUTE') then
         raise exception 'Client role % can execute %', v_role, v_function;
@@ -67,9 +67,11 @@ begin
   foreach v_function in array array[
     'app_api_v1.sync_gamification()',
     'app_api_v1.increment_quest_progress(text,integer,date)',
-    'core.refresh_quest_progress(uuid)', 'internal.run_gamification_sweep()'
+    'core.refresh_quest_progress(uuid)',
+    'internal.run_gamification_sweep_batch(integer,integer,interval)'
   ] loop
-    if position('pg_advisory_xact_lock' in pg_get_functiondef(
+    -- Live RPCs block on the per-user lock; the sweep only try-locks.
+    if position('advisory_xact_lock' in pg_get_functiondef(
       v_function::regprocedure
     )) = 0 then
       raise exception 'Reward computation is not serialized: %', v_function;

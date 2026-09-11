@@ -1,0 +1,127 @@
+name: Supabase watchdog
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      force_restart:
+        description: Restart the project even if the probes pass
+        type: boolean
+        default: false
+
+concurrency:
+  group: supabase-watchdog
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  PROJECT_REF: ejzybbyjwtzbibrrwrli
+  SUPABASE_URL: https://ejzybbyjwtzbibrrwrli.supabase.co
+  PROBE_ATTEMPTS: '3'
+  PROBE_PAUSE_SECONDS: '40'
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Probe Auth and Data API
+        id: probe
+        env:
+          APIKEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -u
+          probe() {
+            curl -s -o /dev/null -w '%{http_code}' --max-time 20 \
+              -H "apikey: $APIKEY" -H "Authorization: Bearer $APIKEY" "$1" || echo 000
+          }
+          healthy=false
+          for attempt in $(seq 1 "$PROBE_ATTEMPTS"); do
+            auth=$(probe "$SUPABASE_URL/auth/v1/health")
+            rest=$(probe "$SUPABASE_URL/rest/v1/rpc/get_promo_banners?p_organization_id=watchdog&p_locale=ru")
+            echo "attempt $attempt: auth=$auth rest=$rest"
+            if [ "$auth" = "200" ] && [ "$rest" = "200" ]; then
+              healthy=true
+              break
+            fi
+            [ "$attempt" -lt "$PROBE_ATTEMPTS" ] && sleep "$PROBE_PAUSE_SECONDS"
+          done
+          echo "healthy=$healthy" >> "$GITHUB_OUTPUT"
+
+      - name: Check platform status
+        id: platform
+        if: steps.probe.outputs.healthy == 'false' || inputs.force_restart == true
+        env:
+          TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -u
+          if [ -z "$TOKEN" ]; then
+            echo "SUPABASE_ACCESS_TOKEN is not configured" >&2
+            echo "status=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          status=$(curl -s --max-time 30 -H "Authorization: Bearer $TOKEN" \
+            "https://api.supabase.com/v1/projects/$PROJECT_REF" | jq -r '.status // "unknown"')
+          health=$(curl -s --max-time 30 -H "Authorization: Bearer $TOKEN" \
+            "https://api.supabase.com/v1/projects/$PROJECT_REF/health?services=db,auth,rest,realtime,storage")
+          echo "project status: $status"
+          echo "service health: $health"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+
+      - name: Restart project
+        id: restart
+        if: >-
+          (steps.probe.outputs.healthy == 'false' || inputs.force_restart == true)
+          && steps.platform.outputs.status == 'ACTIVE_HEALTHY'
+        env:
+          TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -u
+          code=$(curl -s -o /tmp/restart.json -w '%{http_code}' --max-time 60 -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            "https://api.supabase.com/v1/projects/$PROJECT_REF/restart")
+          echo "restart response: $code $(cat /tmp/restart.json)"
+          case "$code" in
+            2*) echo "restarted=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "restarted=false" >> "$GITHUB_OUTPUT"; exit 1 ;;
+          esac
+
+      - name: Wait for recovery
+        if: steps.restart.outputs.restarted == 'true'
+        env:
+          APIKEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -u
+          for i in $(seq 1 20); do
+            sleep 20
+            auth=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 -H "apikey: $APIKEY" "$SUPABASE_URL/auth/v1/health" || echo 000)
+            echo "post-restart check $i: auth=$auth"
+            [ "$auth" = "200" ] && exit 0
+          done
+          echo "project did not recover within 400 s" >&2
+          exit 1
+
+      - name: Alert
+        if: always() && (steps.probe.outputs.healthy == 'false' || steps.restart.outputs.restarted == 'true')
+        env:
+          BOT: ${{ secrets.TELEGRAM_ALERT_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_ALERT_CHAT_ID }}
+          RESTARTED: ${{ steps.restart.outputs.restarted }}
+          STATUS: ${{ steps.platform.outputs.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -u
+          if [ -z "$BOT" ] || [ -z "$CHAT" ]; then
+            echo "telegram alert secrets missing; skipping"
+            exit 0
+          fi
+          if [ "$RESTARTED" = "true" ]; then
+            text="⚠️ Supabase prod ($PROJECT_REF) не отвечал, watchdog перезапустил проект. Статус платформы: $STATUS. $RUN_URL"
+          else
+            text="🚨 Supabase prod ($PROJECT_REF) не отвечает, автоперезапуск не выполнен (статус платформы: $STATUS). $RUN_URL"
+          fi
+          curl -s --max-time 20 -X POST "https://api.telegram.org/bot$BOT/sendMessage" \
+            --data-urlencode "chat_id=$CHAT" --data-urlencode "text=$text" -o /dev/null
