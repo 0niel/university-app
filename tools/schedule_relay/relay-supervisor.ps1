@@ -51,8 +51,10 @@ while ($true) {
   Start-Proxy
   if (Test-Path $tunnelLog) { Remove-Item $tunnelLog -Force }
 
+  # http2 (TCP 443) instead of the default QUIC/UDP: residential + RU links drop
+  # UDP, and cloudflared's QUIC stream stalls silently without reconnecting.
   $tunnel = Start-Process -FilePath $cloudflared `
-    -ArgumentList @('tunnel', '--no-autoupdate', '--url', "http://127.0.0.1:$Port") `
+    -ArgumentList @('tunnel', '--no-autoupdate', '--protocol', 'http2', '--url', "http://127.0.0.1:$Port") `
     -WorkingDirectory $InstallDir -WindowStyle Hidden -PassThru `
     -RedirectStandardError $tunnelLog -RedirectStandardOutput (Join-Path $InstallDir 'tunnel.out.log')
 
