@@ -70,3 +70,20 @@ jobs:
             & dart @arguments
           }
           exit $LASTEXITCODE
+
+      - name: Alert on failure
+        if: failure()
+        shell: bash
+        env:
+          BOT: ${{ secrets.TELEGRAM_ALERT_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_ALERT_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -u
+          if [ -z "$BOT" ] || [ -z "$CHAT" ]; then
+            echo "telegram alert secrets missing; skipping"
+            exit 0
+          fi
+          curl -s --max-time 20 -X POST "https://api.telegram.org/bot$BOT/sendMessage" \
+            --data-urlencode "chat_id=$CHAT" \
+            --data-urlencode "text=🚨 Синк расписания MIREA упал. $RUN_URL" -o /dev/null
