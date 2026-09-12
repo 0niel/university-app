@@ -23,6 +23,7 @@ export 'app_expandable_text.dart';
 export 'app_fab.dart';
 export 'app_filter_chip.dart';
 export 'app_hashtag.dart';
+export 'app_horizontal_scroll_view.dart';
 export 'app_icon_tile.dart';
 export 'app_image_page_controller.dart';
 export 'app_inner_header.dart';
