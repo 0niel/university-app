@@ -24,8 +24,10 @@
 // Screen response: the raw Stac widget JSON.
 // API response: the upstream JSON body (status code is forwarded).
 import { createClient } from "@supabase/supabase-js";
+import { readBoundedJson, RequestBodyError } from "../_shared/request_body.ts";
 
 const REQUEST_TIMEOUT_MS = 10_000;
+const MAX_REQUEST_BYTES = 1024 * 1024;
 const MAX_RESPONSE_BYTES = 512 * 1024;
 const RATE_LIMIT_PER_MINUTE = 180;
 
@@ -67,9 +69,20 @@ Deno.serve(async (req: Request) => {
 
   let body: ProxyRequest;
   try {
-    body = await req.json();
-  } catch {
+    body = await readBoundedJson(req, MAX_REQUEST_BYTES);
+  } catch (error) {
+    if (error instanceof RequestBodyError) {
+      return json({ error: error.message }, error.status);
+    }
     return json({ error: "Invalid JSON body" }, 400);
+  }
+  if (
+    typeof body.organizationId !== "string" ||
+    typeof body.slug !== "string" ||
+    (body.path != null && typeof body.path !== "string") ||
+    (body.method != null && typeof body.method !== "string")
+  ) {
+    return json({ error: "Invalid request fields" }, 400);
   }
   const organizationId = (body.organizationId ?? "").trim();
   const slug = (body.slug ?? "").trim().toLowerCase();
@@ -135,12 +148,14 @@ Deno.serve(async (req: Request) => {
   }
 
   // Remote apps: server-side fetch with SSRF protections.
-  const target = buildTargetUrl(app.originUrl ?? "", path ?? app.entryPath, body.query);
+  const target = buildTargetUrl(
+    app.originUrl ?? "",
+    path ?? app.entryPath,
+    body.query,
+  );
   if (target instanceof Response) return target;
 
-  const method = kind === "api"
-    ? sanitizeMethod(body.method)
-    : "GET";
+  const method = kind === "api" ? sanitizeMethod(body.method) : "GET";
   if (method == null) {
     return json({ error: "Unsupported method" }, 400);
   }
@@ -195,8 +210,9 @@ async function callServiceApp(
   body: ProxyRequest,
   userId: string,
 ): Promise<Response> {
-  const target =
-    `${Deno.env.get("SUPABASE_URL")}/functions/v1/miniapp-svc-${slug}`;
+  const target = `${
+    Deno.env.get("SUPABASE_URL")
+  }/functions/v1/miniapp-svc-${slug}`;
   let upstream: Response;
   try {
     upstream = await fetch(target, {

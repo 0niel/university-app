@@ -12,8 +12,9 @@
 //
 // Ответ: { ok, version, status, validation: {unknownWidgets, unknownActions} }
 import { createClient } from "@supabase/supabase-js";
+import { readBoundedJson, RequestBodyError } from "../_shared/request_body.ts";
 
-const MAX_BODY_BYTES = 1024 * 1024;
+const MAX_BODY_BYTES = 2 * 1024 * 1024;
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
@@ -26,10 +27,6 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Invalid deploy token" }, 401);
   }
 
-  const raw = await req.text();
-  if (raw.length > MAX_BODY_BYTES) {
-    return json({ error: "Body too large" }, 413);
-  }
   let body: {
     organizationId?: string;
     slug?: string;
@@ -37,11 +34,19 @@ Deno.serve(async (req: Request) => {
     submit?: boolean;
   };
   try {
-    body = JSON.parse(raw);
-  } catch {
+    body = await readBoundedJson(req, MAX_BODY_BYTES);
+  } catch (error) {
+    if (error instanceof RequestBodyError) {
+      return json({ error: error.message }, error.status);
+    }
     return json({ error: "Invalid JSON" }, 400);
   }
-  if (!body.organizationId || !body.slug || !Array.isArray(body.screens)) {
+  if (
+    typeof body.organizationId !== "string" || !body.organizationId.trim() ||
+    typeof body.slug !== "string" || !body.slug.trim() ||
+    !Array.isArray(body.screens) ||
+    (body.submit != null && typeof body.submit !== "boolean")
+  ) {
     return json(
       { error: "organizationId, slug and screens[] are required" },
       400,
@@ -60,6 +65,12 @@ Deno.serve(async (req: Request) => {
     p_submit: body.submit ?? true,
   });
   if (error) {
+    if (
+      error.code === "PT429" ||
+      (error.code === "P0001" && error.hint === "rate_limited:mini_app_deploy")
+    ) {
+      return json({ error: error.message }, 429);
+    }
     return json({ error: `Deploy failed: ${error.message}` }, 500);
   }
   if (!data?.ok) {
