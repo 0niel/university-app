@@ -86,6 +86,7 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           NFC_MODULE_DEPLOY_KEY: ${{ secrets.NFC_MODULE_DEPLOY_KEY }}
+          UNIVERSITY_PROVIDER_DEPLOY_KEY: ${{ secrets.UNIVERSITY_PROVIDER_DEPLOY_KEY }}
           UNIVERSITY_CONFIG_JSON: ${{ vars.UNIVERSITY_CONFIG_JSON }}
           FIREBASE_CONFIG_JSON: ${{ vars.FIREBASE_CONFIG_JSON }}
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
@@ -98,6 +99,7 @@ jobs:
             ANDROID_KEY_ALIAS
             ANDROID_KEY_PASSWORD
             NFC_MODULE_DEPLOY_KEY
+            UNIVERSITY_PROVIDER_DEPLOY_KEY
             UNIVERSITY_CONFIG_JSON
             FIREBASE_CONFIG_JSON
             SUPABASE_URL
@@ -121,6 +123,19 @@ jobs:
           ref: 6226b9b4c3f2ed2c4a0727ae062f8a5239e5aba5
           ssh-key: ${{ secrets.NFC_MODULE_DEPLOY_KEY }}
           path: android/private/nfc-pass-android
+          persist-credentials: false
+
+      - name: Read university provider pin
+        id: provider
+        run: python3 tool/university_provider_pin.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Check out university provider
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ steps.provider.outputs.repository }}
+          ref: ${{ steps.provider.outputs.ref }}
+          ssh-key: ${{ secrets.UNIVERSITY_PROVIDER_DEPLOY_KEY }}
+          path: private/university_provider
           persist-credentials: false
 
       - name: Set up Java
@@ -151,6 +166,12 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Configure university provider
+        run: |
+          dart run tool/configure_university_provider.dart \
+            --local private/university_provider
+          flutter pub get
 
       - name: Generate code
         run: dart run build_runner build
@@ -226,9 +247,11 @@ jobs:
           aab="build/app/outputs/bundle/productionRelease/app-production-release.aab"
           test -s "$apk"
           test -s "$aab"
+          test -s pubspec.lock
           mkdir -p dist
           cp "$apk" "dist/university-app-$RELEASE_VERSION.apk"
           cp "$aab" "dist/university-app-$RELEASE_VERSION.aab"
+          cp pubspec.lock dist/pubspec.lock
           symbols_root="$RUNNER_TEMP/release-symbols"
           symbols_archive="$RUNNER_TEMP/university-app-$RELEASE_VERSION-symbols.tar.gz"
           mkdir -p "$symbols_root/dart" "$symbols_root/android"

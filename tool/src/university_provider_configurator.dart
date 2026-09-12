@@ -4,11 +4,28 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+import 'university_provider_pin.dart';
 import 'university_provider_source.dart';
 
+typedef RepositoryAccess = bool Function(Uri repository);
+
+bool gitRepositoryReachable(Uri repository) {
+  final result = Process.runSync(
+    'git',
+    ['ls-remote', '--exit-code', '--quiet', repository.toString(), 'HEAD'],
+    environment: const {'GIT_TERMINAL_PROMPT': '0'},
+    runInShell: true,
+  );
+  return result.exitCode == 0;
+}
+
 final class UniversityProviderConfigurator {
-  const UniversityProviderConfigurator({required this.root});
+  const UniversityProviderConfigurator({
+    required this.root,
+    this.canReach = gitRepositoryReachable,
+  });
   final Directory root;
+  final RepositoryAccess canReach;
 
   void configure(UniversityProviderSource source) {
     final manifest = File(path.join(root.path, 'pubspec.yaml'));
@@ -19,8 +36,9 @@ final class UniversityProviderConfigurator {
     if (app is! YamlMap || app['name'] != 'rtu_mirea_app') {
       throw ArgumentError('Run from the University App directory.');
     }
-    final provider = switch (source) {
-      DefaultUniversityProvider() => null,
+    final selected = source is PinnedUniversityProvider ? _pinned() : source;
+    final provider = switch (selected) {
+      DefaultUniversityProvider() || PinnedUniversityProvider() => null,
       LocalUniversityProvider(path: final directory) => _local(directory),
       GitUniversityProvider(
         :final repository,
@@ -73,6 +91,15 @@ final class UniversityProviderConfigurator {
       ..writeln('Run fvm flutter pub get --no-example, then rebuild the app.');
   }
 
+  UniversityProviderSource _pinned() {
+    final pin = UniversityProviderPin.read(
+      File(path.join(root.path, UniversityProviderPin.fileName)),
+    );
+    if (canReach(pin.url)) return pin.source;
+    stdout.writeln('Provider repository ${pin.url} is not accessible.');
+    return const DefaultUniversityProvider();
+  }
+
   Map<String, Object?> _local(String directoryPath) {
     final directory = Directory(
       path.isAbsolute(directoryPath)
@@ -89,7 +116,12 @@ final class UniversityProviderConfigurator {
         'Provider package must be named university_provider.',
       );
     }
-    return {'path': directory.resolveSymbolicLinksSync().replaceAll(r'\', '/')};
+    final resolved = directory.resolveSymbolicLinksSync();
+    final app = root.resolveSymbolicLinksSync();
+    final location = path.isWithin(app, resolved)
+        ? path.relative(resolved, from: app)
+        : resolved;
+    return {'path': location.replaceAll(r'\', '/')};
   }
 }
 

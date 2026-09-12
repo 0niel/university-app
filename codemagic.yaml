@@ -25,6 +25,7 @@ definitions:
           APP_STORE_CONNECT_KEY_IDENTIFIER
           APP_STORE_CONNECT_ISSUER_ID
           CERTIFICATE_PRIVATE_KEY
+          UNIVERSITY_PROVIDER_DEPLOY_KEY
           UNIVERSITY_CONFIG_JSON
           FIREBASE_CONFIG_JSON
           SUPABASE_URL
@@ -60,6 +61,25 @@ definitions:
     - &install_dependencies
       name: Install dependencies
       script: flutter pub get
+    - &configure_university_provider
+      name: Configure university provider
+      script: |
+        repository="$(python3 tool/university_provider_pin.py --field repository)"
+        ref="$(python3 tool/university_provider_pin.py --field ref)"
+        provider="$CM_BUILD_DIR/private/university_provider"
+        key="$CM_BUILD_DIR/.university-provider-key"
+        umask 077
+        printf '%s\n' "$UNIVERSITY_PROVIDER_DEPLOY_KEY" > "$key"
+        export GIT_SSH_COMMAND="ssh -i $key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+        mkdir -p "$provider"
+        git -C "$provider" init -q
+        git -C "$provider" remote add origin "git@github.com:$repository.git"
+        git -C "$provider" fetch --depth 1 origin "$ref"
+        git -C "$provider" checkout -q --detach FETCH_HEAD
+        test "$(git -C "$provider" rev-parse HEAD)" = "$ref"
+        rm -f "$key"
+        dart run tool/configure_university_provider.dart --local private/university_provider
+        flutter pub get
     - &generate_code
       name: Generate code
       script: dart run build_runner build
@@ -98,6 +118,7 @@ definitions:
       script: |
         rm -f "$CM_BUILD_DIR/.ci-university.json"
         rm -f "$CM_BUILD_DIR/.ci-firebase.json"
+        rm -f "$CM_BUILD_DIR/.university-provider-key"
 
 workflows:
   ios-beta-release:
@@ -122,6 +143,7 @@ workflows:
       - *verify_environment
       - *install_shorebird
       - *install_dependencies
+      - *configure_university_provider
       - *generate_code
       - *verify_source
       - *configure_university
@@ -196,6 +218,7 @@ workflows:
       - *verify_environment
       - *install_shorebird
       - *install_dependencies
+      - *configure_university_provider
       - *generate_code
       - *verify_source
       - *configure_university

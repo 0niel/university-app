@@ -114,7 +114,10 @@ the same fail-closed path.
 The `beta` GitHub environment accepts protected branches only. Configure
 `UNIVERSITY_CONFIG_JSON`, `FIREBASE_CONFIG_JSON`, and `SUPABASE_URL` as
 repository variables. Configure `SUPABASE_PUBLISHABLE_KEY`, `SHOREBIRD_TOKEN`,
-`NFC_MODULE_DEPLOY_KEY`, `ANDROID_KEYSTORE_BASE64`,
-`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`
-as repository secrets. The signing values must identify the same long-lived
-Android key for every beta so installed builds remain upgradeable.
+`NFC_MODULE_DEPLOY_KEY`, `UNIVERSITY_PROVIDER_DEPLOY_KEY`,
+`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
+and `ANDROID_KEY_PASSWORD` as repository secrets. The signing values must
+identify the same long-lived Android key for every beta so installed builds
+remain upgradeable. `UNIVERSITY_PROVIDER_DEPLOY_KEY` is a read-only deploy key
+for the institution integration pinned in `config/university_provider.json`;
+see [`module-configuration.md`](module-configuration.md).

@@ -8,24 +8,69 @@ institution implementation.
 An institution integration is a separate repository whose root package is named
 `university_provider`. It exports `createUniversityModules()` from
 `lib/university_provider.dart` and depends on `university_modules: ^0.1.0`.
-Use a local path override for development or an immutable Git revision for a
-distributable build. Keep private provider credentials out of dependency files.
+The repository may stay private: contributors without access build the default
+application, while releases and developers with access build the integration.
+
+## Selecting a provider
+
+`config/university_provider.json` pins the institution integration to a GitHub
+repository and an immutable commit:
+
+```json
+{
+  "repository": "owner/integration",
+  "ref": "<full commit SHA>",
+  "path": "."
+}
+```
+
+Developers with read access attach it with one command. The tool probes the
+repository; when it is unreachable, the default provider stays selected and
+the command still succeeds:
 
 ```powershell
-fvm dart run tool/configure_university_provider.dart --local ../institution-integration
+fvm dart run tool/configure_university_provider.dart --pinned
 fvm flutter pub get --no-example
 ```
 
-The configuration tool writes the ignored `pubspec_overrides.yaml`, preserves
-existing dependency pins and saves previous overrides under `.dart_tool`.
-Build the application normally. Select `--remove` and resolve dependencies
-again to return to the default provider. For a Git dependency, use
+To work on the integration itself, point the tool at a local checkout:
+
+```powershell
+fvm dart run tool/configure_university_provider.dart --local ../integration
+fvm flutter pub get --no-example
+```
+
+Any other immutable Git revision can be selected with
 `--repository <https-url> --ref <full-commit-sha>` and optional `--path`.
-Mutable branches and credential-bearing URLs are rejected. The default
-provider intentionally lives outside the Dart workspace; the contract package
-belongs to the workspace.
-Local provider paths resolve relative to the application directory. Command-line
-source validation and dependency-file updates are separate tool components.
+Mutable branches and credential-bearing URLs are rejected. `--remove` restores
+the default provider.
+
+The tool writes the ignored `pubspec_overrides.yaml`, preserves existing
+dependency pins and saves previous overrides under `.dart_tool`. Resolving
+dependencies with a provider selected rewrites `pubspec.lock` locally; the
+committed lock must keep the default provider, which
+`test/tool/university_provider_lock_test.dart` enforces whenever no override is
+active. The default provider intentionally lives outside the Dart workspace;
+the contract package belongs to the workspace.
+
+## Releases and patches
+
+Release workflows check the pinned repository out into the ignored
+`private/university_provider` directory with the `UNIVERSITY_PROVIDER_DEPLOY_KEY`
+secret, select it with the tool and resolve dependencies before building. The
+release manifest records the provider commit as `provider_sha` and the resolved
+`pubspec.lock` digest, and the lock is published next to the manifest.
+
+Shorebird patches resolve the registered release, check the same provider
+commit out, restore the registered lock and resolve it with
+`--enforce-lockfile`, so a patch contains exactly the provider code of its
+release. Releases without a recorded provider keep the default provider.
+Codemagic builds fetch the pinned commit with the same deploy key from its
+`university` variable group.
+
+Update the pin by editing `config/university_provider.json` with the new full
+commit SHA. The private checkout, the deploy key and the override file are never
+committed; `tool/verify_private_native_boundary.dart` checks the boundary.
 
 ## Host contract
 

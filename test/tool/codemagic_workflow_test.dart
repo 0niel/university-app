@@ -88,6 +88,44 @@ void main() {
     expect(workflow, contains('flutter test'));
   });
 
+  test('builds every iOS workflow with the pinned university provider', () {
+    expect(
+      RegExp(r'- \*configure_university_provider').allMatches(workflow),
+      hasLength(2),
+    );
+    expect(workflow, contains('UNIVERSITY_PROVIDER_DEPLOY_KEY'));
+    expect(workflow, contains('tool/university_provider_pin.py --field ref'));
+    expect(
+      workflow,
+      contains(
+        'tool/configure_university_provider.dart '
+        '--local private/university_provider',
+      ),
+    );
+    expect(workflow, contains(r'test "$(git -C "$provider" rev-parse HEAD)"'));
+    expect(
+      workflow,
+      contains(r'rm -f "$CM_BUILD_DIR/.university-provider-key"'),
+    );
+    for (final name in ['ios-beta-release', 'ios-patch']) {
+      final scripts =
+          ((configuration['workflows'] as YamlMap)[name] as YamlMap)['scripts']
+              as YamlList;
+      final names = scripts
+          .cast<YamlMap>()
+          .map((step) => step['name'])
+          .toList();
+      expect(
+        names.indexOf('Configure university provider'),
+        greaterThan(names.indexOf('Install dependencies')),
+      );
+      expect(
+        names.indexOf('Configure university provider'),
+        lessThan(names.indexOf('Generate code')),
+      );
+    }
+  });
+
   test('pins and verifies Shorebird source', () {
     expect(
       workflow,

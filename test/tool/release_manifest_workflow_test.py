@@ -63,6 +63,32 @@ class ReleaseManifestWorkflowTest(unittest.TestCase):
         self.assertRegex(nfc["ref"], r"^[0-9a-f]{40}$")
         self.assertEqual(nfc["path"], "android/private/nfc-pass-android")
 
+    def test_releases_build_with_the_pinned_university_provider(self):
+        for workflow, job in ((ANDROID, "android"), (IOS, "release")):
+            with self.subTest(job=job):
+                self.assert_order(workflow, job, [
+                    "Read university provider pin", "Check out university provider",
+                    "Install dependencies", "Configure university provider", "Generate code",
+                ])
+                pin = step(workflow, job, "Read university provider pin")
+                self.assertEqual(pin["id"], "provider")
+                self.assertIn('tool/university_provider_pin.py --github-output "$GITHUB_OUTPUT"', pin["run"])
+                checkout = step(workflow, job, "Check out university provider")
+                self.assertEqual(checkout["uses"], CHECKOUT)
+                self.assertEqual(checkout["with"]["repository"], "${{ steps.provider.outputs.repository }}")
+                self.assertEqual(checkout["with"]["ref"], "${{ steps.provider.outputs.ref }}")
+                self.assertEqual(checkout["with"]["ssh-key"], "${{ secrets.UNIVERSITY_PROVIDER_DEPLOY_KEY }}")
+                self.assertEqual(checkout["with"]["path"], "private/university_provider")
+                self.assertFalse(checkout["with"]["persist-credentials"])
+                configure = step(workflow, job, "Configure university provider")["run"]
+                self.assertIn("tool/configure_university_provider.dart", configure)
+                self.assertIn("--local private/university_provider", configure)
+                self.assertIn("flutter pub get", configure)
+                verify = step(workflow, job, "Verify release configuration")
+                self.assertEqual(verify["env"]["UNIVERSITY_PROVIDER_DEPLOY_KEY"], "${{ secrets.UNIVERSITY_PROVIDER_DEPLOY_KEY }}")
+                self.assertIn("UNIVERSITY_PROVIDER_DEPLOY_KEY\n", verify["run"])
+        self.assertIn("cp pubspec.lock dist/pubspec.lock", step(ANDROID, "android", "Collect artifacts")["run"])
+
     def test_ios_records_completed_artifact_version_and_current_source(self):
         self.assert_order(IOS, "release", [
             "Configure university", "Release iOS", "Encrypt release symbols",
@@ -126,6 +152,7 @@ class IosReleaseArtifactCollectionTest(unittest.TestCase):
         (self.root / "build/ios/ipa").mkdir(parents=True)
         (self.root / "ios").mkdir()
         (self.root / "ios/Podfile.lock").write_bytes(b"PODS: resolved fixture\n")
+        (self.root / "pubspec.lock").write_bytes(b"packages: resolved fixture\n")
         (self.root / "build/release-symbols").mkdir()
         (self.root / "build/release-symbols/ios-release-symbols.cms").write_bytes(b"encrypted fixture")
         self.metadata = {
@@ -159,9 +186,11 @@ class IosReleaseArtifactCollectionTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((self.root / "outputs").read_text(), "release_version=5.2.1+2440.17.53\n")
         self.assertEqual({path.name for path in (self.root / "dist").iterdir()},
-                         {"university.ipa", "ios-release-symbols.cms", "Podfile.lock"})
+                         {"university.ipa", "ios-release-symbols.cms", "Podfile.lock", "pubspec.lock"})
         self.assertEqual((self.root / "dist/Podfile.lock").read_bytes(),
                          (self.root / "ios/Podfile.lock").read_bytes())
+        self.assertEqual((self.root / "dist/pubspec.lock").read_bytes(),
+                         (self.root / "pubspec.lock").read_bytes())
         self.assertEqual((self.root / "dist/university.ipa").read_bytes(),
                          (self.root / "build/ios/ipa/university.ipa").read_bytes())
 
@@ -183,7 +212,7 @@ class IosReleaseArtifactCollectionTest(unittest.TestCase):
         self.assertFalse((self.root / "outputs").exists())
 
     def test_requires_resolved_pod_lock_and_encrypted_symbols(self):
-        for name in ("ios/Podfile.lock", "build/release-symbols/ios-release-symbols.cms"):
+        for name in ("ios/Podfile.lock", "pubspec.lock", "build/release-symbols/ios-release-symbols.cms"):
             with self.subTest(name=name):
                 path = self.root / name
                 original = path.read_bytes()

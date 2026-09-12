@@ -15,23 +15,45 @@ void main() {
   });
   tearDown(() => root.deleteSync(recursive: true));
 
-  test('preserves existing overrides and restores the default provider', () {
-    final module = Directory('${root.path}/provider')..createSync();
+  Map<String, Object?> overrides() => _map(
+    _map(
+      jsonDecode(
+        File('${root.path}/pubspec_overrides.yaml').readAsStringSync(),
+      ),
+    )['dependency_overrides'],
+  );
+
+  Directory module(String name) {
+    final directory = Directory('${root.path}/$name')
+      ..createSync(recursive: true);
     File(
-      '${module.path}/pubspec.yaml',
+      '${directory.path}/pubspec.yaml',
     ).writeAsStringSync('name: university_provider\n');
-    final overrides = File('${root.path}/pubspec_overrides.yaml')
+    return directory;
+  }
+
+  void pin() {
+    File('${root.path}/config/university_provider.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(
+        jsonEncode({
+          'repository': 'example/provider',
+          'ref': 'a' * 40,
+          'path': '.',
+        }),
+      );
+  }
+
+  test('preserves existing overrides and restores the default provider', () {
+    final provider = module('provider');
+    final overridesFile = File('${root.path}/pubspec_overrides.yaml')
       ..writeAsStringSync('dependency_overrides:\n  unrelated: 1.2.3\n');
-    configureProvider(root, ['--local', module.path]);
-    var saved = _map(jsonDecode(overrides.readAsStringSync()));
-    expect(_map(saved['dependency_overrides'])['unrelated'], '1.2.3');
-    expect(
-      _map(_map(saved['dependency_overrides'])['university_provider'])['path'],
-      module.resolveSymbolicLinksSync().replaceAll(r'\', '/'),
-    );
+    configureProvider(root, ['--local', provider.path]);
+    expect(overrides()['unrelated'], '1.2.3');
+    expect(_map(overrides()['university_provider'])['path'], 'provider');
     configureProvider(root, ['--remove']);
-    saved = _map(jsonDecode(overrides.readAsStringSync()));
-    expect(saved['dependency_overrides'], {'unrelated': '1.2.3'});
+    expect(overrides(), {'unrelated': '1.2.3'});
+    expect(overridesFile.existsSync(), isTrue);
     expect(
       Directory('${root.path}/.dart_tool/provider_backups').listSync(),
       hasLength(2),
@@ -70,12 +92,7 @@ void main() {
       '--ref',
       'a' * 40,
     ]);
-    final saved =
-        jsonDecode(
-              File('${root.path}/pubspec_overrides.yaml').readAsStringSync(),
-            )
-            as Map;
-    expect(_map(saved['dependency_overrides'])['pinned'], '1.2.3');
+    expect(overrides()['pinned'], '1.2.3');
   });
 
   test('pins git provider and rejects repository path escapes', () {
@@ -87,15 +104,8 @@ void main() {
       '--path',
       'packages/provider',
     ]);
-    final saved =
-        jsonDecode(
-              File('${root.path}/pubspec_overrides.yaml').readAsStringSync(),
-            )
-            as Map;
     expect(
-      _map(
-        _map(_map(saved['dependency_overrides'])['university_provider'])['git'],
-      )['ref'],
+      _map(_map(overrides()['university_provider'])['git'])['ref'],
       'a' * 40,
     );
     expect(
@@ -110,30 +120,97 @@ void main() {
       throwsArgumentError,
     );
   });
-  test('local provider paths resolve against the requested app directory', () {
-    final module = Directory('${root.path}/provider')..createSync();
-    File('${module.path}/pubspec.yaml')
-        .writeAsStringSync('name: university_provider\n');
-    configureProvider(root, ['--local', 'provider']);
-    final saved = _map(jsonDecode(
-      File('${root.path}/pubspec_overrides.yaml').readAsStringSync(),
-    ));
+
+  test('local providers inside the app resolve to relative paths', () {
+    module('private/university_provider');
+    configureProvider(root, ['--local', 'private/university_provider']);
     expect(
-      _map(_map(saved['dependency_overrides'])['university_provider'])['path'],
-      module.resolveSymbolicLinksSync().replaceAll(r'\', '/'),
+      _map(overrides()['university_provider'])['path'],
+      'private/university_provider',
     );
+  });
+
+  test('local providers outside the app keep their absolute location', () {
+    final outside = Directory.systemTemp.createTempSync('provider-outside-');
+    addTearDown(() => outside.deleteSync(recursive: true));
+    File(
+      '${outside.path}/pubspec.yaml',
+    ).writeAsStringSync('name: university_provider\n');
+    configureProvider(root, ['--local', outside.path]);
+    expect(
+      _map(overrides()['university_provider'])['path'],
+      outside.resolveSymbolicLinksSync().replaceAll(r'\', '/'),
+    );
+  });
+
+  test('pinned provider is selected only when the repository is reachable', () {
+    pin();
+    final probed = <Uri>[];
+    configureProvider(
+      root,
+      ['--pinned'],
+      canReach: (repository) {
+        probed.add(repository);
+        return true;
+      },
+    );
+    expect(probed, [Uri.parse('https://github.com/example/provider.git')]);
+    expect(_map(_map(overrides()['university_provider'])['git']), {
+      'url': 'https://github.com/example/provider.git',
+      'ref': 'a' * 40,
+      'path': '.',
+    });
+    configureProvider(root, ['--pinned'], canReach: (_) => false);
+    expect(
+      File('${root.path}/pubspec_overrides.yaml').readAsStringSync(),
+      isNot(contains('university_provider')),
+    );
+  });
+
+  test('pinned provider requires a valid committed pin', () {
+    expect(
+      () => configureProvider(root, ['--pinned'], canReach: (_) => true),
+      throwsArgumentError,
+    );
+    for (final invalid in [
+      {'repository': 'example/provider', 'ref': 'main'},
+      {'repository': 'https://github.com/example/provider', 'ref': 'a' * 40},
+      {'repository': 'example/provider.git', 'ref': 'a' * 40},
+      {'repository': 'example/provider', 'ref': 'a' * 40, 'extra': true},
+      {'repository': 'example/provider', 'ref': 'a' * 40, 'path': '../out'},
+    ]) {
+      File('${root.path}/config/university_provider.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(jsonEncode(invalid));
+      expect(
+        () => configureProvider(root, ['--pinned'], canReach: (_) => true),
+        throwsA(anyOf(isArgumentError, isFormatException)),
+        reason: '$invalid',
+      );
+    }
+    expect(File('${root.path}/pubspec_overrides.yaml').existsSync(), isFalse);
   });
 
   test('duplicate source options leave existing configuration untouched', () {
     final file = File('${root.path}/pubspec_overrides.yaml')
       ..writeAsStringSync('dependency_overrides:\n  existing: 1.0.0\n');
     final previous = file.readAsStringSync();
-    expect(
-      () => configureProvider(root, ['--remove', '--remove']),
-      throwsArgumentError,
-    );
+    for (final arguments in [
+      ['--remove', '--remove'],
+      ['--pinned', '--remove'],
+      ['--pinned', '--local', 'provider'],
+    ]) {
+      expect(
+        () => configureProvider(root, arguments),
+        throwsArgumentError,
+        reason: '$arguments',
+      );
+    }
     expect(file.readAsStringSync(), previous);
-    expect(Directory('${root.path}/.dart_tool/provider_backups').existsSync(), isFalse);
+    expect(
+      Directory('${root.path}/.dart_tool/provider_backups').existsSync(),
+      isFalse,
+    );
   });
 }
 
