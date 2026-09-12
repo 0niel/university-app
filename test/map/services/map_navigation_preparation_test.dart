@@ -43,8 +43,8 @@ void main() {
         ),
       );
       expect(prepared.graph, isNotNull);
-      expect(prepared.graph!.nodes, hasLength(16217));
-      expect(prepared.graph!.edges, hasLength(41104));
+      expect(prepared.graph!.nodes, hasLength(16237));
+      expect(prepared.graph!.edges, hasLength(41218));
       expect(prepared.byFloor, hasLength(5));
       expect(prepared.byFloor.values.expand((items) => items), hasLength(94));
       for (final entry in prepared.byFloor.entries) {

@@ -7,6 +7,8 @@ abstract class NfcPassState with _$NfcPassState {
     int? passId,
     String? errorMessage,
     String? localFilePath,
+    DateTime? verificationRetryAt,
+    NfcVerificationIssue? verificationIssue,
   }) = _NfcPassState;
 
   const NfcPassState._();

@@ -79,8 +79,8 @@ class ReleaseManifestTest(unittest.TestCase):
             timeout=15, text=True,
         ).strip()
 
-    def private_checkout(self):
-        private = self.root / "android/private/nfc-pass-android"
+    def private_checkout(self, relative="android/private/nfc-pass-android"):
+        private = self.root / relative
         private.mkdir(parents=True)
         self.git(private, "init", "-q")
         self.git(private, "config", "user.name", "Fixture")
@@ -269,6 +269,101 @@ class ReleaseManifestTest(unittest.TestCase):
         manifest["evidence"]["missing_prepared_inputs"].append("ios/Podfile.lock")
         with self.assertRaises(ValueError):
             MODULE.validate_manifest(manifest)
+
+    def test_provider_release_records_lock_and_requires_it(self):
+        manifest = self.manifest()
+        manifest["provider_sha"] = "f" * 40
+        with self.assertRaises(ValueError):
+            MODULE.validate_manifest(manifest)
+        manifest["build_inputs"]["pubspec.lock"] = "e" * 64
+        self.assertIs(MODULE.validate_manifest(manifest), manifest)
+        manifest["provider_sha"] = "master"
+        with self.assertRaises(ValueError):
+            MODULE.validate_manifest(manifest)
+        legacy = self.manifest(kind="legacy")
+        legacy["provider_sha"] = None
+        MODULE.validate_manifest(legacy)
+
+    def test_build_manifest_records_provider_checkout_and_resolved_lock(self):
+        source = self.source_checkout()
+        expected = self.manifest()
+        evidence = {**expected["evidence"], "head_sha": source, "signing_sha": source}
+        for name in MODULE.GENERATED["ios"]:
+            self.write(name, (name + " generated").encode())
+        lock = self.write("pubspec.lock", b"packages: {}\n")
+        artifact = self.write("artifacts/application.ipa", b"fixture release binary")
+        live = {
+            "id": expected["release_id"], "app_id": expected["app_id"],
+            "version": expected["release_version"], "flutter_revision": expected["flutter_revision"],
+            "flutter_version": expected["flutter_version"], "platform_statuses": {"ios": "active"},
+        }
+        args = dict(repo=self.root, platform="ios", release_version=expected["release_version"],
+                    source_sha=source, artifact_dir=artifact.parent, evidence=evidence)
+        manifest = MODULE.build_manifest(**args, live_release=live)
+        self.assertIsNone(manifest["provider_sha"])
+        self.assertNotIn("pubspec.lock", manifest["build_inputs"])
+        provider, sha = self.private_checkout(MODULE.PROVIDER)
+        manifest = MODULE.build_manifest(**args, live_release=live)
+        self.assertEqual(manifest["provider_sha"], sha)
+        self.assertEqual(manifest["build_inputs"]["pubspec.lock"], MODULE.sha256(lock))
+        (provider / "injected.dart").write_text("changed", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            MODULE.build_manifest(**args, live_release=live)
+
+    def test_provider_checkout_must_match_the_release(self):
+        manifest = self.manifest()
+        provider, manifest["provider_sha"] = self.private_checkout(MODULE.PROVIDER)
+        for name in manifest["build_inputs"]:
+            manifest["build_inputs"][name] = MODULE.sha256(self.write(name, name.encode()))
+        manifest["build_inputs"]["pubspec.lock"] = MODULE.sha256(self.write("pubspec.lock", b"resolved"))
+        MODULE.verify_native_config(self.root, manifest)
+        self.write("pubspec.lock", b"different resolution")
+        with self.assertRaises(ValueError):
+            MODULE.verify_native_config(self.root, manifest)
+        self.write("pubspec.lock", b"resolved")
+        (provider / "native.kt").write_text("changed", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            MODULE.verify_native_config(self.root, manifest)
+        self.git(provider, "checkout", "--", "native.kt")
+        manifest["provider_sha"] = "0" * 40
+        with self.assertRaises(ValueError):
+            MODULE.verify_native_config(self.root, manifest)
+
+    def test_resolve_restores_the_dart_lock_and_publishes_provider_output(self):
+        manifest = self.manifest()
+        manifest["provider_sha"] = "f" * 40
+        manifest["build_inputs"]["ios/Podfile.lock"] = hashlib.sha256(b"lock").hexdigest()
+        manifest["build_inputs"]["pubspec.lock"] = hashlib.sha256(b"lock").hexdigest()
+        calls = []
+        output = self.root / "resolved/release-manifest.json"
+        workflow_output = self.root / "github-output"
+        with patch.object(MODULE, "run", side_effect=self.resolver_run(manifest, calls)), patch.object(MODULE, "api", return_value=self.run_record(manifest["evidence"])):
+            MODULE.resolve("ios", manifest["release_version"], output, workflow_output)
+        downloads = [call[call.index("--pattern") + 1] for call in calls if call[:3] == ("gh", "release", "download")]
+        self.assertEqual(downloads, ["release-manifest.json", "Podfile.lock", "pubspec.lock"])
+        self.assertEqual((output.parent / "pubspec.lock").read_bytes(), b"lock")
+        self.assertIn("provider_sha=" + "f" * 40, workflow_output.read_text())
+        manifest["provider_sha"] = None
+        with patch.object(MODULE, "run", side_effect=self.resolver_run(manifest, [])), patch.object(MODULE, "api", return_value=self.run_record(manifest["evidence"])):
+            MODULE.resolve("ios", manifest["release_version"], output, workflow_output)
+        self.assertIn("provider_sha=\n", workflow_output.read_text())
+
+    def test_publish_requires_the_recorded_dart_lock_asset(self):
+        manifest = self.manifest("android")
+        manifest["provider_sha"] = "f" * 40
+        manifest["build_inputs"]["pubspec.lock"] = hashlib.sha256(b"resolved").hexdigest()
+        path = self.root / "release-manifest.json"
+        MODULE.write_manifest(path, manifest)
+        with patch.object(MODULE, "run") as run:
+            with self.assertRaises(ValueError):
+                MODULE.publish(path, self.root)
+            run.assert_not_called()
+        self.write("pubspec.lock", b"resolved")
+        with patch.object(MODULE.subprocess, "run", return_value=subprocess.CompletedProcess([], 1)), patch.object(MODULE, "run") as run:
+            MODULE.publish(path, self.root)
+        created = run.call_args.args
+        self.assertEqual(created[:3], ("gh", "release", "create"))
+        self.assertIn(str(self.root / "pubspec.lock"), created)
 
     def test_android_release_requires_private_native_identity(self):
         manifest = self.manifest("android")

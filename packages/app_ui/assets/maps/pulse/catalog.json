@@ -10,7 +10,7 @@
       "asset": "packages/app_ui/assets/maps/pulse/campus_v-78.json",
       "source_url": "https://pulse.mirea.ru/services/maps?campus=019f9340-d2cc-7c8a-8472-2cbcc2dd3de3",
       "source_label": "Пульс РТУ МИРЭА",
-      "source_captured_at": "2026-09-06T15:42:04.653440+00:00",
+      "source_captured_at": "2026-09-12T09:26:32.038Z",
       "latitude": 55.669957,
       "longitude": 37.480225,
       "location_source": {
@@ -19,7 +19,7 @@
         "sha256": "7875ca7e2edeec53572d463ee53272b8f2ae3a4d85c42f35478e14a643305f65",
         "short_name": "В-78"
       },
-      "source_plan_sha256": "20e8d676785c77a3cf3422edd093f704c535e945643aca753dd659d89657d600"
+      "source_plan_sha256": "a3b57e777960a0d2fe2c8fdf01cb68466a17d24b31aa1207db9a842ff839d7d7"
     },
     {
       "id": "v-86",
@@ -29,7 +29,7 @@
       "asset": "packages/app_ui/assets/maps/pulse/campus_v-86.json",
       "source_url": "https://pulse.mirea.ru/services/maps?campus=01a023a4-e394-7f10-a979-16f396473e1e",
       "source_label": "Пульс РТУ МИРЭА",
-      "source_captured_at": "2026-09-06T15:33:43.061241+00:00",
+      "source_captured_at": "2026-09-12T09:28:14.191Z",
       "latitude": 55.661445,
       "longitude": 37.477049,
       "location_source": {
@@ -48,7 +48,7 @@
       "asset": "packages/app_ui/assets/maps/pulse/campus_s-20.json",
       "source_url": "https://pulse.mirea.ru/services/maps?campus=01a038f2-df0e-7324-9c5a-73b1766851af",
       "source_label": "Пульс РТУ МИРЭА",
-      "source_captured_at": "2026-09-06T15:43:21.801249+00:00",
+      "source_captured_at": "2026-09-12T09:42:36.820Z",
       "latitude": 55.794259,
       "longitude": 37.701448,
       "location_source": {

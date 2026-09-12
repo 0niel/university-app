@@ -33,6 +33,7 @@ void main(List<String> arguments) {
         .intersection(forbiddenPaths)
         .where((path) => File(path).existsSync()),
     ...tracked.where((path) => path.startsWith('android/private/')),
+    ...tracked.where((path) => path.startsWith('private/')),
   };
 
   for (final path in tracked.where(
@@ -46,12 +47,17 @@ void main(List<String> arguments) {
     if (forbiddenAndroidTerms.any(contents.contains)) violations.add(path);
   }
 
-  final ignored = Process.runSync(
-    'git',
-    <String>['check-ignore', '-q', 'android/private/nfc-pass-android'],
-    runInShell: true,
-  );
-  if (ignored.exitCode != 0) violations.add('.gitignore');
+  for (final private in const <String>[
+    'android/private/nfc-pass-android',
+    'private/university_provider',
+  ]) {
+    final ignored = Process.runSync(
+      'git',
+      <String>['check-ignore', '-q', private],
+      runInShell: true,
+    );
+    if (ignored.exitCode != 0) violations.add('.gitignore');
+  }
 
   if (arguments.contains('--history')) {
     final history = _git(<String>[
@@ -62,6 +68,7 @@ void main(List<String> arguments) {
       '--',
       ...forbiddenPaths,
       'android/private',
+      'private',
     ]).trim();
     if (history.isNotEmpty) violations.add('git history');
   }

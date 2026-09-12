@@ -50,6 +50,8 @@ void main() {
         value: any(named: 'value'),
       ),
     ).thenAnswer((_) async {});
+    when(() => storage.read(key: any(named: 'key')))
+        .thenAnswer((_) async => null);
     when(() => storage.delete(key: any(named: 'key'))).thenAnswer((_) async {});
     when(() => digitalPassChannel.savePassId(any())).thenAnswer((_) async {});
     when(() => digitalPassChannel.clearPassId()).thenAnswer((_) async {});

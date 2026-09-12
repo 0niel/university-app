@@ -163,11 +163,13 @@ Future<T?> showNinjaDialog<T>(
   required WidgetBuilder builder,
   bool barrierDismissible = true,
   double maxWidth = 340,
+  bool useRootNavigator = true,
 }) {
   final colors = context.colors;
   return showDialog(
     context: context,
     barrierDismissible: barrierDismissible,
+    useRootNavigator: useRootNavigator,
     barrierColor: colors.scrim,
     builder: (dialogContext) => Material(
       type: MaterialType.transparency,

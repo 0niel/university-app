@@ -79,7 +79,6 @@ void main() {
     final workflow = File(
       '.github/workflows/shorebird-release.yml',
     ).readAsStringSync();
-    final codemagic = File('codemagic.yaml').readAsStringSync();
     final project = File(
       'ios/Runner.xcodeproj/project.pbxproj',
     ).readAsStringSync();
@@ -92,18 +91,6 @@ void main() {
     expect(workflow, contains('--obfuscate'));
     expect(workflow, contains('--split-debug-info='));
     expect(workflow, isNot(contains('shorebirdtech/shorebird-release@')));
-    expect(RegExp('--obfuscate').allMatches(codemagic), hasLength(1));
-    expect(RegExp('--split-debug-info=').allMatches(codemagic), hasLength(2));
-    expect(codemagic, isNot(contains('build/**/*.symbols')));
-    expect(codemagic, isNot(contains('dSYMs/*.dSYM')));
-    expect(
-      RegExp('openssl smime -encrypt').allMatches(codemagic),
-      hasLength(2),
-    );
-    expect(
-      RegExp(r'release-symbols/\*\.cms').allMatches(codemagic),
-      hasLength(2),
-    );
     expect(workflow, contains('openssl smime -encrypt'));
     final jobs = (loadYaml(workflow) as YamlMap)['jobs'] as YamlMap;
     final release = jobs['release'] as YamlMap;

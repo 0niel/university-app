@@ -112,6 +112,94 @@ void main() {
   );
 
   test(
+    'newer source acknowledges publication without changing its revision',
+    () async {
+      final cache = _Cache();
+      var now = DateTime.utc(2026, 1, 4);
+      var remoteRevision = 17;
+      var calls = 0;
+      final assets = <String>[];
+      final bundled = {
+        ..._campus(),
+        'source_plan_sha256': 'new-source',
+        'source_captured_at': '2026-01-02T00:00:00Z',
+      };
+      MapDataRepository createRepository() => MapDataRepository(
+        organizationId: 'mirea',
+        cache: cache,
+        clock: () => now,
+        bundledCatalogAsset: 'catalog.json',
+        rpc: (name, _) async {
+          calls++;
+          if (name == 'get_map_catalog') {
+            return {
+              'campuses': [
+                {'id': 'v-78', 'revision': remoteRevision},
+              ],
+            };
+          }
+          return {
+            ..._campus(),
+            'revision': remoteRevision,
+            'source_plan_sha256': 'old-source',
+            'source_captured_at': '2026-01-01T00:00:00Z',
+          };
+        },
+        assetLoader: (asset) async {
+          assets.add(asset);
+          return jsonEncode(
+            asset == 'catalog.json'
+                ? {
+                    'campuses': [bundled],
+                  }
+                : bundled,
+          );
+        },
+      );
+      final repository = createRepository();
+      addTearDown(repository.dispose);
+      await repository.loadCatalog();
+      final campus = await repository.loadCampus('v-78');
+      expect(campus.origin, MapDataOrigin.bundled);
+      expect(campus.revision, 2);
+      expect(repository.isCampusCacheFresh('v-78'), isTrue);
+      final assetReads = assets.length;
+      expect(await repository.loadCachedCampus('v-78'), same(campus));
+      expect(await repository.loadCampus('v-78'), same(campus));
+      expect(calls, 2);
+      expect(assets, hasLength(assetReads));
+
+      final reopened = createRepository();
+      addTearDown(reopened.dispose);
+      await reopened.loadCachedCatalog();
+      final restored = await reopened.loadCachedCampus('v-78');
+      expect(restored?.origin, MapDataOrigin.cache);
+      expect(restored?.revision, 2);
+      expect(reopened.isCampusCacheFresh('v-78'), isTrue);
+      expect(calls, 2);
+      expect(assets, hasLength(assetReads + 1));
+      expect(await reopened.loadCampus('v-78'), same(restored));
+      expect(calls, 2);
+
+      now = now.add(const Duration(minutes: 31));
+      expect(reopened.isCampusCacheFresh('v-78'), isFalse);
+      final refreshed = await reopened.refreshCampus('v-78');
+      expect(refreshed.revision, 2);
+      expect(reopened.sameCampusContent(refreshed, restored!), isTrue);
+      expect(reopened.isCampusCacheFresh('v-78'), isTrue);
+      expect(calls, 3);
+
+      remoteRevision = 18;
+      await reopened.loadCatalog();
+      await reopened.loadCachedCampus('v-78');
+      expect(reopened.isCampusCacheFresh('v-78'), isFalse);
+      expect((await reopened.loadCampus('v-78')).revision, 2);
+      expect(reopened.isCampusCacheFresh('v-78'), isTrue);
+      expect(calls, 5);
+    },
+  );
+
+  test(
     'concurrent disk loads share parsing without decoding a duplicate bundle',
     () async {
       final cache = _Cache()

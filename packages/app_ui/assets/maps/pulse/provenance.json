@@ -8,12 +8,12 @@
       "source_url": "https://pulse.mirea.ru/services/maps?campus=019f9340-d2cc-7c8a-8472-2cbcc2dd3de3",
       "capture_method": "authenticated_GetCampus_response",
       "floor_count": 5,
-      "room_shape_count": 1169,
-      "captured_at": "2026-09-06T15:42:04.653440+00:00",
+      "room_shape_count": 1148,
+      "captured_at": "2026-09-12T09:26:32.038Z",
       "asset": "campus_v-78.json",
-      "sha256": "5df1f7598a0b337f51c150e21c69e3c54e6d966770a95d5f26ef94b9ca45628b",
-      "graph_nodes": 16217,
-      "graph_edges": 41104,
+      "sha256": "6279e0c77ad3e70274aadc6622c64c17282a3e90e4cc5858c19975125c4f632b",
+      "graph_nodes": 16237,
+      "graph_edges": 41218,
       "location_source": {
         "type": "existing_application_catalog",
         "path": "packages/rtu_mirea_schedule_api_client/lib/src/campuses.dart",
@@ -24,54 +24,60 @@
         {
           "id": "v-78-floor0",
           "level": 0,
-          "source_svg_sha256": "e852e4eeb9a25cd3e19f8854774d0f3c9a2bb8735acffe90bfe10845d6f7c92d",
-          "captured_at": "2026-09-06T13:30:11.591Z"
+          "source_svg_sha256": "76d43a3c1f87b1cc95c4082f2b08ae664b04f41171c0e9936597e6f013e6529f",
+          "captured_at": "2026-09-12T09:26:32.038Z",
+          "source_svg_method": "native_plan_svg"
         },
         {
           "id": "v-78-floor1",
           "level": 1,
-          "source_svg_sha256": "d3907e5c9b29ab115b31cec6375f03d7943adc2089c0e6a6b4d272abb41955dc",
-          "captured_at": "2026-09-06T13:31:03.646Z"
+          "source_svg_sha256": "41108afc5f0cdcaffb77307a42a969be411e04204ea2fee87d449b179858fa4b",
+          "captured_at": "2026-09-12T09:26:32.038Z",
+          "source_svg_method": "native_plan_svg"
         },
         {
           "id": "v-78-floor2",
           "level": 2,
-          "source_svg_sha256": "947f0513815b8d212a7cb6e6ee1491e7985d6629b8b31a9ff60fe74bb082d0a9",
-          "captured_at": "2026-09-06T13:31:06.084Z"
+          "source_svg_sha256": "81c92313986acba980804db3d51b8c15aa212d6b59059b283a071470fcb40f18",
+          "captured_at": "2026-09-12T09:26:32.038Z",
+          "source_svg_method": "native_plan_svg"
         },
         {
           "id": "v-78-floor3",
           "level": 3,
-          "source_svg_sha256": "bbe4d88ad23234fdc2fdd2ad6588ee5d5dfa9161a0009c6521b410a27a608ac8",
-          "captured_at": "2026-09-06T13:31:20.010Z"
+          "source_svg_sha256": "a5a88eb21c2c6b390fe92c06a9c50a9e82f0608677e379267e3fef431525e7aa",
+          "captured_at": "2026-09-12T09:26:32.038Z",
+          "source_svg_method": "native_plan_svg"
         },
         {
           "id": "v-78-floor4",
           "level": 4,
-          "source_svg_sha256": "d6c059531cb2c43cdb8c25d20b8a18de46eab185d51c80d817f28f82c15a3f19",
-          "captured_at": "2026-09-06T13:31:21.642Z"
+          "source_svg_sha256": "4ea73a668011f561b10e217352716dcf223defe5e75223fccda0c821108b63b6",
+          "captured_at": "2026-09-12T09:26:32.038Z",
+          "source_svg_method": "native_plan_svg"
         }
       ],
-      "source_plan_sha256": "20e8d676785c77a3cf3422edd093f704c535e945643aca753dd659d89657d600",
+      "source_plan_sha256": "a3b57e777960a0d2fe2c8fdf01cb68466a17d24b31aa1207db9a842ff839d7d7",
       "graph_import_stats": {
-        "source_skeleton_edges": 11332,
+        "source_skeleton_edges": 11344,
         "rejected_source_edges": 52,
-        "doors": 1368,
-        "blocked_boundaries_excluded": 2195,
+        "doors": 1372,
+        "blocked_boundaries_excluded": 2192,
         "closed_doors_excluded": 6,
         "floor_transitions": 47,
-        "nodes": 16217,
-        "edges": 41104,
-        "components": 534,
-        "largest_component_nodes": 13174,
-        "named_room_anchors": 1169,
+        "nodes": 16237,
+        "edges": 41218,
+        "components": 530,
+        "largest_component_nodes": 13217,
+        "named_room_anchors": 1148,
         "isolated_named_rooms": 0
       },
       "georeference": {
         "status": "approximate",
         "checked_at": "2026-09-07",
-        "evidence": "scripts/map/source/georeference_registration.json"
-      }
+        "evidence": "mirea-pulse/tools/map/source/georeference_registration.json"
+      },
+      "source_refresh_evidence": "mirea-pulse/tools/map/source/refresh_20260912.json"
     },
     {
       "id": "v-86",
@@ -80,9 +86,9 @@
       "capture_method": "authenticated_GetCampus_response",
       "floor_count": 8,
       "room_shape_count": 587,
-      "captured_at": "2026-09-06T15:33:43.061241+00:00",
+      "captured_at": "2026-09-12T09:28:14.191Z",
       "asset": "campus_v-86.json",
-      "sha256": "f599771a47e7b6bec6ea96e9600a147c726a8d5d620614aa720607ecb30e83e2",
+      "sha256": "1a0994f7b2137f2478e0e544ade8f604476bb8ad1872f17ef55cfb017978f9f5",
       "graph_nodes": 6205,
       "graph_edges": 14933,
       "location_source": {
@@ -159,7 +165,7 @@
       "georeference": {
         "status": "approximate",
         "checked_at": "2026-09-07",
-        "evidence": "scripts/map/source/georeference_registration.json"
+        "evidence": "mirea-pulse/tools/map/source/georeference_registration.json"
       }
     },
     {
@@ -169,9 +175,9 @@
       "capture_method": "authenticated_GetCampus_response",
       "floor_count": 4,
       "room_shape_count": 436,
-      "captured_at": "2026-09-06T15:43:21.801249+00:00",
+      "captured_at": "2026-09-12T09:42:36.820Z",
       "asset": "campus_s-20.json",
-      "sha256": "92a6f7059fd9e583cc3ba2895b9eb37520c890f958e7ba1911de20da74219bdc",
+      "sha256": "d882f55311334cccdd055016b7f27d0eca2849b51360126cb279e595aa728f06",
       "graph_nodes": 2874,
       "graph_edges": 8450,
       "location_source": {
@@ -222,7 +228,7 @@
       "georeference": {
         "status": "approximate",
         "checked_at": "2026-09-07",
-        "evidence": "scripts/map/source/georeference_registration.json"
+        "evidence": "mirea-pulse/tools/map/source/georeference_registration.json"
       }
     },
     {
@@ -283,7 +289,7 @@
       "georeference": {
         "status": "approximate",
         "checked_at": "2026-09-07",
-        "evidence": "scripts/map/source/georeference_registration.json"
+        "evidence": "mirea-pulse/tools/map/source/georeference_registration.json"
       }
     }
   ]
