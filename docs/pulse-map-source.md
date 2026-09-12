@@ -1,19 +1,22 @@
 # Campus floor source
 
-The current В-78, В-86 and Стромынка-20 floor plans were captured from **[Пульс РТУ МИРЭА](https://pulse.mirea.ru/services/maps)** on 6 September 2026 using an authorized browser session. Full native `GetCampus` responses supplement the rendered floor SVGs with original room identities, declared doors and inter-floor transitions, interior navigation data and metric units. The source credit and campus link are included in every campus document and shown in the map interface.
+The current В-78, В-86 and Стромынка-20 native plans were captured from **[Пульс РТУ МИРЭА](https://pulse.mirea.ru/services/maps)** on 12 September 2026 using an authorized browser session. Full `GetCampus` responses supply original room identities, declared doors and inter-floor transitions, interior navigation data and metric units. В-86 and Стромынка-20 are unchanged from 6 September, so their original browser SVGs remain valid. В-78 SVGs are now derived from the current native response using the verified public geometry transformation. The source credit and campus link are included in every campus document and shown in the map interface.
 
 | Local campus | Source campus | Visible floors | Selectable room shapes |
 | --- | --- | --- | --- |
-| В-78 | [Вернадского 78](https://pulse.mirea.ru/services/maps?campus=019f9340-d2cc-7c8a-8472-2cbcc2dd3de3) | 0–4 | 1169 |
+| В-78 | [Вернадского 78](https://pulse.mirea.ru/services/maps?campus=019f9340-d2cc-7c8a-8472-2cbcc2dd3de3) | 0–4 | 1148 |
 | В-86 | [Вернадского 86](https://pulse.mirea.ru/services/maps?campus=01a023a4-e394-7f10-a979-16f396473e1e) | 0–7 | 587 |
 | С-20 | [Стромынка 20](https://pulse.mirea.ru/services/maps?campus=01a038f2-df0e-7324-9c5a-73b1766851af) | 1–4 | 436 |
 
-There are **17 Pulse floors and 2192 selectable geometries**. Shape counts are not counts of unique room numbers: the source contains several shapes with the same label, including separate toilets and parts of larger rooms. The complete catalog also contains МП-1, for a total of **23 floors and 2680 selectable places**.
+There are **17 Pulse floors and 2171 selectable geometries**. Shape counts are not counts of unique room numbers: the source contains several shapes with the same label, including separate toilets and parts of larger rooms. The complete catalog also contains МП-1, for a total of **23 floors and 2659 selectable places**.
 
 ## Files and reproducibility
 
-- `scripts/map/source/{campus}_{floor}.json`: original rendered SVG, exact source URL, visible campus/floor labels and UTC capture time. No cookies, access tokens or account profile data are stored.
+- `scripts/map/source/{campus}_{floor}.json`: browser SVG captures or explicitly marked `native_plan_svg` derivatives, source URL, campus/floor labels and source capture time. No cookies, access tokens or account profile data are stored.
 - `scripts/map/source/{campus}_plan.json`: full authorized `GetCampus` plan with capture timestamp and source identifiers.
+- `scripts/map/render_pulse_native.py`: deterministic room, circulation and door SVG conversion from native geometry, including curved walls and a shared campus coordinate frame.
+- `scripts/map/source/room_identities.json`: persistent В-78 room identities keyed by official database ID; retired IDs remain reserved.
+- `scripts/map/source/refresh_20260912.json`: current source hashes, public renderer provenance, browser geometry parity and coordinate-frame revalidation evidence.
 - `scripts/map/import_pulse.py` and `pulse_native_geometry.py`: deterministic offline conversion into the application's own campus, floor, room and coordinate model.
 - `scripts/map/build_pulse_graph.py`: routing graph generation from native rooms, doors and transitions, invoked by the importer before publishing generated assets.
 - `packages/app_ui/assets/maps/pulse/catalog.json`: packaged catalog used when the remote catalog is unavailable.
@@ -31,11 +34,15 @@ fvm flutter test --no-pub test/map/data/pulse_bundle_test.dart
 
 The normalizer rejects mismatched visible campus/floor labels, truncated XML and room centers outside the plan. It preserves the source paths and doors, maps them to an origin of `(0, 0)`, and scales each plan's longest dimension to 2000 display units. Every room coordinate uses the same transformation. The application caches structural paths and renders outlines at a constant screen width, with room labels adapted to zoom. Original SVGs remain unchanged in the source captures; normalized SVGs also remain available to other renderers and editors.
 
-Canonical room IDs are `{campus}--{sourceLayerId}--{sourceAreaId}`. They remain stable when a room's display label or geometry changes. `source_room_id`, `source_layer_id` and the separate Pulse `source_db_id` preserve provenance; a Pulse database ID is not assumed to be an application's own schedule classroom ID. Previous IDs derived from label and occurrence order are preserved in `legacy_ids`. Every selectable rendered polygon is matched uniquely to the native area using its label and full outer/hole geometry; a mismatch fails the import rather than assigning a nearby room. `data-object` attributes match the canonical room IDs exactly.
+Original canonical room IDs use `{campus}--{sourceLayerId}--{sourceAreaId}`. Pulse renumbered В-78 area keys between the September captures, so those upstream keys cannot establish persistent identity. The В-78 registry matches official database IDs to the original canonical IDs and historical aliases. All 1148 current rooms retain their original IDs; 21 rooms that are no longer named retain reserved IDs. A newly encountered official database room uses `{campus}--room--{sourceDbId}`, preventing a reused area key from changing an old bookmark's destination. A room without a database ID cannot reuse a registered canonical ID.
+
+`source_room_id`, `source_layer_id` and the separate Pulse `source_db_id` preserve current source provenance; a Pulse database ID is not assumed to be an application's own schedule classroom ID. Every selectable SVG polygon is matched uniquely to its native area using its label and full outer/hole geometry; a mismatch fails the import rather than assigning a nearby room. `data-object` attributes match the persistent canonical room IDs exactly.
 
 Display floor levels come from `shortTitle` or `title`, not internal layer numbers. For example, В-86 native `floor-3` has internal number `3` but is displayed as **Этаж 1**. All three native captures declare centimetres; canonical `meters_per_unit` is `0.01 / source_coordinate_scale`. Source vertices `(x,y)` become SVG `(x,-y)`, then receive the same origin shift and scaling as the preserved SVG geometry.
 
 `source_captured_at` records the source response timestamp independently of the server publication time in `updated_at`. Catalog entries also preserve the source timestamp and native plan hash so remote publication revisions and bundled source versions do not share one revision counter.
+
+The application uses the same source precedence rule online, offline and during cached startup. A verified newer bundled physical plan can supersede an older published source. A matching source hash, a newer server source or server edits published after the bundled capture retain server authority. Invalid bundled data falls back to the valid published campus. When the bundle wins after a successful server check, local cache metadata records the acknowledged server revision separately from the bundle's revision. Repeated selections and restarts reuse that check for the normal 30-minute freshness interval; a higher server catalog revision requires another check. Community details and writes continue through their separate repository operations.
 
 ## МП-1 and campus locations
 
@@ -48,6 +55,16 @@ All four campus center coordinates come from the application's existing `package
 The website's public application code identifies the gRPC-web methods `rtu_tc.map.api.MapService/ListCampuses` and `GetCampus`. `GetCampus` returns a title and a JSON plan. An anonymous `ListCampuses` request returned HTTP 401 on the capture date. Use an authorized existing session or an explicitly provided official export; do not embed credentials or bypass authentication.
 
 Save only the decoded map response, using a wrapper with `campus`, `source_campus_id`, `source_url`, `captured_at`, `capture_method` and `plan`. The native plan includes unnamed circulation areas as well as named rooms; those areas must be retained for route generation even when excluded from the searchable room catalog. Preserve the source's blocked/closed connection information. Shared-boundary candidates do not establish a walkable opening on their own.
+
+To regenerate all floor SVGs from a reviewed native response:
+
+```powershell
+python scripts/map/render_pulse_native.py scripts/map/source/v-78_plan.json --output scripts/map/source
+```
+
+Derived wrappers are marked `native_plan_svg` and bind the complete native plan hash, source layer and capture timestamp. The importer rejects a derivative paired with another native response. The geometry transformation was checked against [the public Pulse renderer](https://pulse.mirea.ru/assets/shared-DJLuFHL-.js), build `2026-09-11T13:30:33.767Z`: native `(x, y)` becomes `(x, -y)`; cubic walls use at least 12 samples with a maximum 25-source-unit endpoint interval; all floors share the union of room polygons and wall endpoints plus 100 source units of padding. Door segments use the declared width and linear wall offset, including the closed-door state. The converter matched every polygon, door endpoint and campus view box in all 17 September 6 browser SVGs. Generated SVGs are source derivatives, not new browser captures.
+
+The September 12 В-78 update retained 1147 current room geometries, renamed additional rooms and changed the shape of one room, now named И-200. Its native coordinate frame and metric scale remain unchanged. The original approximate OpenStreetMap registration was revalidated in that frame, with the September 7 OSM verification date retained. The evidence lists matched, changed and retired official room identities per floor. It does not imply a new survey or updated OSM accuracy.
 
 For a rendered capture, select the named campus and each visible floor through the website. Read `svg[aria-label="План этажа"]` as `outerHTML`, and include:
 
@@ -68,7 +85,11 @@ The timestamp and SVG length in this example must be replaced with the actual va
 
 ## Publication
 
-The importer performs no network calls or Supabase writes. To prepare a transaction for review:
+The importer performs no network calls or Supabase writes.
+
+Refreshing an existing bundle retains geographic anchors and their original verification date only when each floor's geometry, coordinate frame, metric scale and source identity still match. Changes to capture timestamps or the whole native plan hash do not move an unchanged floor. Changed floors lose the old alignment and are listed by the importer for review; other floors keep their registration. The generated provenance hashes describe the final assets, including retained alignment.
+
+To prepare a transaction for review:
 
 ```powershell
 python scripts/map/import_pulse.py --sql "$env:TEMP\pulse-map-publish.sql"

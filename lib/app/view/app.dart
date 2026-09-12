@@ -22,6 +22,7 @@ import 'package:rtu_mirea_app/app/view/app_boot_placeholder.dart';
 import 'package:rtu_mirea_app/app/view/app_device_token_sync.dart';
 import 'package:rtu_mirea_app/app/view/app_router_view.dart';
 import 'package:rtu_mirea_app/app/view/app_schedule_refresh.dart';
+import 'package:rtu_mirea_app/app/view/nfc_session_account_boundary.dart';
 import 'package:rtu_mirea_app/app/widgets/user_preferences_scope.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/config/config.dart';
@@ -142,7 +143,15 @@ class App extends StatelessWidget {
                       : null,
                   userRepository: appScope.userRepository,
                   user: user,
-                  onBeforeLogout: tokenSyncController?.stopAndUnregister,
+                  onBeforeLogout: () async {
+                    try {
+                      await appScope.nfcPassRepository
+                          .clearSessionCookie()
+                          .timeout(const Duration(seconds: 10));
+                    } finally {
+                      await tokenSyncController?.stopAndUnregister();
+                    }
+                  },
                 )..add(const AppOpened()),
               ),
               BlocProvider(
@@ -235,10 +244,15 @@ class App extends StatelessWidget {
               ),
               BlocProvider(create: (_) => WatchConnectivityCubit()),
             ],
-            child: AppDeviceTokenSync(
-              controller: tokenSyncController,
-              child: const AppScheduleRefresh(
-                child: UserPreferencesScope(child: AppRouterView()),
+            child: NfcSessionAccountBoundary(
+              organizationId: appScope.universityConfig.organizationId,
+              synchronizeSessionAccount:
+                  appScope.nfcPassRepository.synchronizeSessionAccount,
+              child: AppDeviceTokenSync(
+                controller: tokenSyncController,
+                child: const AppScheduleRefresh(
+                  child: UserPreferencesScope(child: AppRouterView()),
+                ),
               ),
             ),
           ),

@@ -45,6 +45,7 @@ import 'package:rtu_mirea_app/schedule_management/schedule_management.dart';
 import 'package:rtu_mirea_app/search/view/search_page.dart';
 import 'package:rtu_mirea_app/services/view/view.dart';
 import 'package:rtu_mirea_app/tools/tools.dart';
+import 'package:rtu_mirea_app/university_modules/university_module_page.dart';
 import 'package:rtu_mirea_app/wallet/wallet.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -175,6 +176,7 @@ class GlobalSearchRoute extends GoRouteData with $GlobalSearchRoute {
           path: '/services',
           routes: [
             TypedGoRoute<NfcPassRoute>(path: 'nfc'),
+            TypedGoRoute<UniversityModuleRoute>(path: 'modules/:moduleId'),
             TypedGoRoute<DiscoursePostOverviewRoute>(
               path: 'discourse-post-overview/:postId',
             ),
@@ -485,6 +487,17 @@ class NfcPassRoute extends GoRouteData with $NfcPassRoute {
     }
     return const NfcPassPage();
   }
+}
+
+@immutable
+class UniversityModuleRoute extends GoRouteData with $UniversityModuleRoute {
+  const UniversityModuleRoute({required this.moduleId});
+
+  final String moduleId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      UniversityModulePage(moduleId: moduleId);
 }
 
 @immutable

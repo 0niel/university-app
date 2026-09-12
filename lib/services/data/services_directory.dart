@@ -6,6 +6,7 @@ import 'package:rtu_mirea_app/nfc_pass/nfc_pass_availability.dart';
 import 'package:rtu_mirea_app/services/config/catalog_service_mapper.dart';
 import 'package:rtu_mirea_app/services/models/service_entry.dart';
 import 'package:rtu_mirea_app/services/models/service_model.dart';
+import 'package:rtu_mirea_app/university_modules/app_university_modules.dart';
 import 'package:service_catalog_repository/service_catalog_repository.dart';
 
 abstract final class ServicesDirectory {
@@ -52,6 +53,21 @@ abstract final class ServicesDirectory {
     final colors = context.colors;
     final l10n = context.l10n;
     return [
+      ...AppUniversityModules.registry.availableFor(config.organizationId).map((
+        module,
+      ) {
+        final presentation = module.descriptor.presentationFor(
+          Localizations.localeOf(context).languageCode,
+        );
+        return _entry(
+          context,
+          title: presentation.title,
+          subtitle: presentation.description,
+          icon: AppLineIcon.grid,
+          tone: colors.lab,
+          routePath: '/services/modules/${module.descriptor.id}',
+        );
+      }),
       if (config.isEnabled(.campusMap))
         _entry(
           context,

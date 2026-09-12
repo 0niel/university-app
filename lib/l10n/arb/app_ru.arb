@@ -4547,7 +4547,13 @@
   "noteDrawingTouchDraw": "Рисовать пальцем",
   "noteDrawingResetView": "Показать весь холст",
   "noteDrawingColor": "Цвет {index}",
-  "@noteDrawingColor": {"placeholders": {"index": {"type": "int"}}},
+  "@noteDrawingColor": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "noteDrawingSaveError": "Не удалось сохранить рисунок",
   "noteTextToolsTitle": "Действия с текстом",
   "noteTextToolsDescription": "Выбранный текст будет передан выбранному приложению. Перевод и обработка доступны, если их поддерживают установленные приложения.",
@@ -4916,5 +4922,28 @@
   "scheduleChangeSubjectLabel": "Предмет",
   "scheduleChangeRenamed": "Изменено название",
   "scheduleChangeDetectedAt": "Обнаружено {time}",
-  "@scheduleChangeDetectedAt": {"placeholders": {"time": {"type": "String"}}}
+  "@scheduleChangeDetectedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "universityModulesTitle": "Сервисы университета",
+  "universityModuleSignInTitle": "Войдите в приложение",
+  "universityModuleUnavailableTitle": "Модуль недоступен",
+  "universityModuleSignInMessage": "После входа можно подключить сервисы университета.",
+  "universityModuleUnavailableMessage": "Этот сервис не подключён к вашему приложению.",
+  "universityModulesViewServices": "К сервисам",
+  "nfcPassWrongCode": "Код не подошёл. Проверьте цифры и введите его ещё раз.",
+  "nfcPassIssuanceFailed": "Сервис не смог выдать цифровой пропуск. Попробуйте подтвердить код позже.",
+  "nfcPassVerificationUnconfirmed": "Не удалось получить подтверждение от сервиса. Если код пришёл, его можно ввести. Повторная отправка доступна по кнопке ниже.",
+  "nfcPassCodeAlreadyRequested": "Если у вас уже есть код, введите его для привязки пропуска. Новый код можно запросить повторно.",
+  "nfcPassVerificationTitle": "Подтверждение пропуска",
+  "nfcPassNextCodeTime": "Повторная отправка будет доступна",
+  "nfcPassResendCode": "Отправить код повторно",
+  "nfcPassVerificationUnavailableTitle": "Подтверждение недоступно",
+  "nfcPassVerificationUnavailableDescription": "У аккаунта нет цифрового пропуска или способа подтверждения. Уточните возможность его подключения в университете.",
+  "nfcPassCodeSentTitle": "Код отправлен",
+  "nfcPassCodeSentDescription": "Введите код подтверждения, полученный от университета."
 }

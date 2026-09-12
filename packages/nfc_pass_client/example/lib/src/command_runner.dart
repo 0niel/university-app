@@ -31,11 +31,19 @@ class CommandRunner extends CompletionCommandRunner<int> {
     );
 
     final jwt = await client.getAccessTokenForDigitalPass();
-    stdout.writeln('Your JWT: $jwt');
 
-    await client.sendVerificationCode(jwt);
+    final verification = await client.sendVerificationCode(jwt);
+    switch (verification) {
+      case NfcVerificationCodeSent():
+        break;
+      case NfcVerificationCooldown(:final retryAt):
+        stdout.writeln('A code can be requested again at $retryAt.');
+      case NfcVerificationUnavailable():
+        stdout.writeln('No digital pass or verification method is available.');
+        return 1;
+    }
 
-    stdout.writeln('Enter the code from the email:');
+    stdout.writeln('Enter your verification code:');
     final code = stdin.readLineSync();
 
     final digitalPass = await client.getDigitalPass(

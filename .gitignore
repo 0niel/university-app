@@ -57,6 +57,7 @@ analysis_benchmark.json
 # Flutter/Dart/Pub related
 **/doc/api/
 .dart_tool/
+pubspec_overrides.yaml
 .flutter-plugins
 .flutter-plugins-dependencies
 **/generated_plugin_registrant.dart

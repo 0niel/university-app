@@ -12357,4 +12357,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String scheduleChangeDetectedAt(String time) {
     return 'Detected $time';
   }
+
+  @override
+  String get universityModulesTitle => 'University services';
+
+  @override
+  String get universityModuleSignInTitle => 'Sign in to the app';
+
+  @override
+  String get universityModuleUnavailableTitle => 'Module unavailable';
+
+  @override
+  String get universityModuleSignInMessage =>
+      'Sign in to connect your university services.';
+
+  @override
+  String get universityModuleUnavailableMessage =>
+      'This service is not connected to your app.';
+
+  @override
+  String get universityModulesViewServices => 'View services';
+
+  @override
+  String get nfcPassWrongCode =>
+      'The code was not accepted. Check the digits and enter it again.';
+
+  @override
+  String get nfcPassIssuanceFailed =>
+      'The service could not issue a digital pass. Try confirming the code again later.';
+
+  @override
+  String get nfcPassVerificationUnconfirmed =>
+      'The service did not confirm the result. If you received a code, you can enter it. Use the button below to request another code.';
+
+  @override
+  String get nfcPassCodeAlreadyRequested =>
+      'If you already have a code, enter it to connect your pass. You can also request another code.';
+
+  @override
+  String get nfcPassVerificationTitle => 'Verify your pass';
+
+  @override
+  String get nfcPassNextCodeTime => 'You can request another code at';
+
+  @override
+  String get nfcPassResendCode => 'Send another code';
+
+  @override
+  String get nfcPassVerificationUnavailableTitle => 'Verification unavailable';
+
+  @override
+  String get nfcPassVerificationUnavailableDescription =>
+      'This account has no digital pass or verification method. Contact your university about connecting a digital pass.';
+
+  @override
+  String get nfcPassCodeSentTitle => 'Code sent';
+
+  @override
+  String get nfcPassCodeSentDescription =>
+      'Enter the verification code you received from your university.';
 }

@@ -12551,4 +12551,63 @@ class AppLocalizationsRu extends AppLocalizations {
   String scheduleChangeDetectedAt(String time) {
     return 'Обнаружено $time';
   }
+
+  @override
+  String get universityModulesTitle => 'Сервисы университета';
+
+  @override
+  String get universityModuleSignInTitle => 'Войдите в приложение';
+
+  @override
+  String get universityModuleUnavailableTitle => 'Модуль недоступен';
+
+  @override
+  String get universityModuleSignInMessage =>
+      'После входа можно подключить сервисы университета.';
+
+  @override
+  String get universityModuleUnavailableMessage =>
+      'Этот сервис не подключён к вашему приложению.';
+
+  @override
+  String get universityModulesViewServices => 'К сервисам';
+
+  @override
+  String get nfcPassWrongCode =>
+      'Код не подошёл. Проверьте цифры и введите его ещё раз.';
+
+  @override
+  String get nfcPassIssuanceFailed =>
+      'Сервис не смог выдать цифровой пропуск. Попробуйте подтвердить код позже.';
+
+  @override
+  String get nfcPassVerificationUnconfirmed =>
+      'Не удалось получить подтверждение от сервиса. Если код пришёл, его можно ввести. Повторная отправка доступна по кнопке ниже.';
+
+  @override
+  String get nfcPassCodeAlreadyRequested =>
+      'Если у вас уже есть код, введите его для привязки пропуска. Новый код можно запросить повторно.';
+
+  @override
+  String get nfcPassVerificationTitle => 'Подтверждение пропуска';
+
+  @override
+  String get nfcPassNextCodeTime => 'Повторная отправка будет доступна';
+
+  @override
+  String get nfcPassResendCode => 'Отправить код повторно';
+
+  @override
+  String get nfcPassVerificationUnavailableTitle => 'Подтверждение недоступно';
+
+  @override
+  String get nfcPassVerificationUnavailableDescription =>
+      'У аккаунта нет цифрового пропуска или способа подтверждения. Уточните возможность его подключения в университете.';
+
+  @override
+  String get nfcPassCodeSentTitle => 'Код отправлен';
+
+  @override
+  String get nfcPassCodeSentDescription =>
+      'Введите код подтверждения, полученный от университета.';
 }
