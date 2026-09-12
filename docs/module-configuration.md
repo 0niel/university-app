@@ -65,8 +65,6 @@ Shorebird patches resolve the registered release, check the same provider
 commit out, restore the registered lock and resolve it with
 `--enforce-lockfile`, so a patch contains exactly the provider code of its
 release. Releases without a recorded provider keep the default provider.
-Codemagic builds fetch the pinned commit with the same deploy key from its
-`university` variable group.
 
 Update the pin by editing `config/university_provider.json` with the new full
 commit SHA. The private checkout, the deploy key and the override file are never

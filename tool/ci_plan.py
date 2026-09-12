@@ -27,7 +27,6 @@ SHARED_FILES = {
     "dart_test.yaml",
     "l10n.yaml",
     "flutter_native_splash.yaml",
-    "codemagic.yaml",
     "shorebird.yaml",
     "tool/package_test_runtime.dart",
 }
