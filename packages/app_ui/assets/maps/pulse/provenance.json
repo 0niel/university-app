@@ -75,9 +75,9 @@
       "georeference": {
         "status": "approximate",
         "checked_at": "2026-09-07",
-        "evidence": "scripts/map/source/georeference_registration.json"
+        "evidence": "mirea-pulse/tools/map/source/georeference_registration.json"
       },
-      "source_refresh_evidence": "scripts/map/source/refresh_20260912.json"
+      "source_refresh_evidence": "mirea-pulse/tools/map/source/refresh_20260912.json"
     },
     {
       "id": "v-86",
@@ -165,7 +165,7 @@
       "georeference": {
         "status": "approximate",
         "checked_at": "2026-09-07",
-        "evidence": "scripts/map/source/georeference_registration.json"
+        "evidence": "mirea-pulse/tools/map/source/georeference_registration.json"
       }
     },
     {
@@ -228,7 +228,7 @@
       "georeference": {
         "status": "approximate",
         "checked_at": "2026-09-07",
-        "evidence": "scripts/map/source/georeference_registration.json"
+        "evidence": "mirea-pulse/tools/map/source/georeference_registration.json"
       }
     },
     {
@@ -289,7 +289,7 @@
       "georeference": {
         "status": "approximate",
         "checked_at": "2026-09-07",
-        "evidence": "scripts/map/source/georeference_registration.json"
+        "evidence": "mirea-pulse/tools/map/source/georeference_registration.json"
       }
     }
   ]
