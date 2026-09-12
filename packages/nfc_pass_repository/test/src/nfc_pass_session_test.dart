@@ -9,7 +9,7 @@ import 'package:nfc_pass_client/nfc_pass_client.dart';
 import 'package:nfc_pass_repository/nfc_pass_repository.dart';
 import 'package:storage/storage.dart';
 import 'package:web_oauth_interceptor_client/web_oauth_interceptor_client.dart'
-    show LoginSuccessData, OAuthInterceptorClient;
+    show LoginSuccessData, OAuthFlowCancelled, OAuthInterceptorClient;
 
 class _Storage extends Mock implements Storage {}
 
@@ -99,6 +99,49 @@ void main() {
           _ => _response([10, 0]),
         };
     repository = createRepository();
+  });
+
+  test('authenticateSession shares the browser login with the pass', () async {
+    await repository.synchronizeSessionAccount('mirea:student-a');
+    when(() => oauth.initiateOAuthFlow()).thenAnswer(
+      (_) async => LoginSuccessData(
+        allCookies: {
+          '.AspNetCore.Cookies': 'chunks-1',
+          '.AspNetCore.CookiesC1': 'chunk',
+          'unrelated': 'ignored',
+        },
+      ),
+    );
+    final cookie = await repository.authenticateSession();
+    expect(cookie, '.AspNetCore.Cookies=chunks-1; .AspNetCore.CookiesC1=chunk');
+    expect(await repository.readSessionCookie(), cookie);
+    await repository.bindPass();
+    expect(requests.map((request) => request.url.path), ['/token', '/send']);
+    verify(() => oauth.initiateOAuthFlow()).called(1);
+  });
+
+  test('authenticateSession returns null when the browser is closed', () async {
+    await repository.synchronizeSessionAccount('mirea:student-a');
+    when(() => oauth.initiateOAuthFlow()).thenThrow(const OAuthFlowCancelled());
+    expect(await repository.authenticateSession(), isNull);
+    expect(await repository.readSessionCookie(), isNull);
+  });
+
+  test('authenticateSession reports missing cookies and browser failures',
+      () async {
+    await repository.synchronizeSessionAccount('mirea:student-a');
+    when(() => oauth.initiateOAuthFlow())
+        .thenAnswer((_) async => LoginSuccessData(allCookies: const {}));
+    await expectLater(
+      repository.authenticateSession(),
+      throwsA(isA<NfcPassLoginFailure>()),
+    );
+    when(() => oauth.initiateOAuthFlow()).thenThrow('Unable to open browser');
+    await expectLater(
+      repository.authenticateSession(),
+      throwsA(isA<NfcPassLoginFailure>()),
+    );
+    expect(await repository.readSessionCookie(), isNull);
   });
 
   test('restores the same account after restart without repeating OAuth',

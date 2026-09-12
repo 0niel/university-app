@@ -12,7 +12,8 @@ class _TestInAppWebViewPlatform extends InAppWebViewPlatform {
   @override
   PlatformInAppBrowser createPlatformInAppBrowser(
     PlatformInAppBrowserCreationParams params,
-  ) => _TestInAppBrowser(params);
+  ) =>
+      _TestInAppBrowser(params);
 }
 
 void main() {

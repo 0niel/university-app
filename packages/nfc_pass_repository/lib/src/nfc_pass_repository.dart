@@ -59,6 +59,25 @@ class NfcPassRepository {
 
   Future<String?> readSessionCookie() => _store.readSessionCookie();
 
+  /// Runs the institution's interactive login in the shared browser and
+  /// stores the resulting session for the digital pass. Returns the session
+  /// cookie header, or null when the user closes the browser.
+  Future<String?> authenticateSession() async {
+    final String cookie;
+    try {
+      cookie =
+          _sessionCookieOf(await oauthInterceptorClient.initiateOAuthFlow());
+    } on OAuthFlowCancelled {
+      return null;
+    } on NfcPassFailure {
+      rethrow;
+    } on Object catch (error, stackTrace) {
+      Error.throwWithStackTrace(NfcPassLoginFailure(error), stackTrace);
+    }
+    await _store.setSessionCookie(cookie);
+    return cookie;
+  }
+
   Future<void> setSessionCookie(String cookie) =>
       _store.setSessionCookie(cookie);
 
@@ -212,25 +231,29 @@ class NfcPassRepository {
     try {
       final (revision, request) = await _store.captureLogin(expectedRevision);
       _store.checkSession(revision);
-      final result = await oauthInterceptorClient.initiateOAuthFlow();
-      if ((result.allCookies['.AspNetCore.Cookies'] ?? '').isEmpty) {
-        throw const NfcPassLoginFailure('Cookie not found');
-      }
-      final cookieValue = nfcSessionCookieHeader(
-        result.allCookies.entries
-            .where(
-              (entry) => RegExp(r'^\.AspNetCore\.Cookies(?:C[1-9][0-9]*)?$')
-                  .hasMatch(entry.key),
-            )
-            .map((entry) => '${entry.key}=${entry.value}')
-            .join('; '),
-      );
+      final cookieValue =
+          _sessionCookieOf(await oauthInterceptorClient.initiateOAuthFlow());
       await _store.storeLoginCookie(cookieValue, revision, request);
     } on NfcPassFailure {
       rethrow;
     } on Object catch (error, stackTrace) {
       Error.throwWithStackTrace(NfcPassLoginFailure(error), stackTrace);
     }
+  }
+
+  static String _sessionCookieOf(LoginSuccessData result) {
+    if ((result.allCookies['.AspNetCore.Cookies'] ?? '').isEmpty) {
+      throw const NfcPassLoginFailure('Cookie not found');
+    }
+    return nfcSessionCookieHeader(
+      result.allCookies.entries
+          .where(
+            (entry) => RegExp(r'^\.AspNetCore\.Cookies(?:C[1-9][0-9]*)?$')
+                .hasMatch(entry.key),
+          )
+          .map((entry) => '${entry.key}=${entry.value}')
+          .join('; '),
+    );
   }
 
   Future<String> _getJwtAndSave(String cookie, int revision) async {

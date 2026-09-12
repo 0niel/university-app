@@ -9,6 +9,7 @@ final class AppModuleHost implements ModuleHost, DigitalPassDeviceHost {
     required this.accountId,
     required this.digitalPassAvailable,
     required this._storage,
+    this._institutionLogin,
     this._setDigitalPassSession,
     this._clearDigitalPassSession,
     this._clearDigitalPassBinding,
@@ -22,9 +23,21 @@ final class AppModuleHost implements ModuleHost, DigitalPassDeviceHost {
   final bool digitalPassAvailable;
 
   final ModuleScopedStorage _storage;
+  final Future<String?> Function()? _institutionLogin;
   final Future<void> Function(String cookie)? _setDigitalPassSession;
   final Future<void> Function()? _clearDigitalPassSession;
   final Future<void> Function()? _clearDigitalPassBinding;
+
+  @override
+  Future<String?> Function()? get institutionLogin =>
+      _institutionLogin == null ? null : _runInstitutionLogin;
+
+  Future<String?> _runInstitutionLogin() async {
+    _storage.checkAccount();
+    final cookie = await _institutionLogin!();
+    _storage.checkAccount();
+    return cookie;
+  }
 
   @override
   Future<void> Function(String cookie)? get setDigitalPassSession =>

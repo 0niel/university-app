@@ -71,6 +71,33 @@ void main() {
 
     expect(host.setDigitalPassSession, isNull);
     expect(host.clearDigitalPassSession, isNull);
+    expect(host.institutionLogin, isNull);
+  });
+
+  test('institution login runs only for the active account', () async {
+    var active = true;
+    var logins = 0;
+    final host = AppModuleHost(
+      organizationId: 'university-a',
+      accountId: 'student-a',
+      digitalPassAvailable: false,
+      storage: ModuleScopedStorage(
+        storage: _Storage(),
+        organizationId: 'university-a',
+        accountId: 'student-a',
+        moduleId: 'campus-services',
+        isAccountActive: () => active,
+      ),
+      institutionLogin: () async {
+        logins++;
+        return '.AspNetCore.Cookies=session';
+      },
+    );
+    final login = host.institutionLogin!;
+    expect(await login(), '.AspNetCore.Cookies=session');
+    active = false;
+    await expectLater(login(), throwsA(isA<ModuleAccountChangedException>()));
+    expect(logins, 1);
   });
 
   test(

@@ -52,6 +52,9 @@ class _ModuleAccountPageState extends State<ModuleAccountPage> {
             appBloc.state.status == .authenticated &&
             appBloc.state.user.id == widget.accountId,
       ),
+      institutionLogin: widget.config.isEnabled(.nfcPass)
+          ? context.read<NfcPassRepository>().authenticateSession
+          : null,
       setDigitalPassSession: digitalPassAvailable
           ? context.read<NfcPassRepository>().setSessionCookie
           : null,

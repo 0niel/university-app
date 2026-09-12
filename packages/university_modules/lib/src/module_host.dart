@@ -4,6 +4,7 @@ abstract interface class ModuleHost {
   String get organizationId;
   String get accountId;
   bool get digitalPassAvailable;
+  Future<String?> Function()? get institutionLogin;
   Future<void> Function(String cookie)? get setDigitalPassSession;
   Future<void> Function()? get clearDigitalPassSession;
 

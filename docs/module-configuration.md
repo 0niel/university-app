@@ -102,6 +102,12 @@ disposed, and must discard responses from a previous upstream session after
 disconnecting or changing accounts. The module owns explicit connection,
 reconnection and removal of its scoped stored session.
 
+When the institution's browser login is configured, the host exposes
+`institutionLogin`. It runs the same interactive login the digital pass uses,
+stores the resulting session for the pass and returns the session cookie
+header, or null when the user closes the browser. Modules prefer it over their
+own login page so one sign-in serves every institution feature.
+
 On Android, an enabled digital-pass integration exposes `openDigitalPass` and
 optional `setDigitalPassSession` and `clearDigitalPassSession` callbacks.
 The first callback transfers an existing
