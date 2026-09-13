@@ -829,5 +829,138 @@ class AppStoreReviewNotesTest(unittest.TestCase):
                 run.assert_not_called()
 
 
+class EnsureAppStoreVersionTest(unittest.TestCase):
+    def setUp(self):
+        self.client = Mock()
+        self.versions = []
+        self.events = []
+        self.detail = {"id": "detail-123", "type": "appStoreReviewDetails", "attributes": {"notes": None}}
+
+        def get(path, query):
+            self.events.append(path)
+            if path == "/v1/apps":
+                return {"data": [{"id": "app-123"}]}
+            if path == "/v1/apps/app-123/appStoreVersions":
+                self.assertEqual(query, {"filter[platform]": "IOS", "include": "build", "limit": "200"})
+                return {"data": list(self.versions)}
+            if path == "/v1/appStoreVersions/version-123":
+                return {"data": self.versions[0]}
+            if path == "/v1/appStoreVersions/version-123/appStoreReviewDetail":
+                return {"data": self.detail}
+            raise AssertionError(path)
+
+        def post(path, payload):
+            self.events.append("post")
+            self.assertEqual(path, "/v1/appStoreVersions")
+            data = payload["data"]
+            self.assertEqual(data["type"], "appStoreVersions")
+            self.assertEqual(data["attributes"], {
+                "platform": "IOS", "versionString": "5.2.2", "releaseType": "AFTER_APPROVAL",
+            })
+            self.assertEqual(data["relationships"]["app"], {"data": {"type": "apps", "id": "app-123"}})
+            self.assertEqual(data["relationships"]["build"], {"data": {"type": "builds", "id": "new"}})
+            created = version("5.2.2", "PREPARE_FOR_SUBMISSION", "new")
+            created["type"] = "appStoreVersions"
+            self.versions.append(created)
+            return {"data": {"type": "appStoreVersions", "id": "version-123"}}
+
+        def patch_(path, payload):
+            if path == "/v1/appStoreVersions/version-123":
+                self.events.append("attach")
+                self.assertEqual(payload["data"]["relationships"], {"build": {"data": {"type": "builds", "id": "new"}}})
+                self.versions[0]["relationships"]["build"]["data"] = {"id": "new"}
+                return
+            self.events.append("notes")
+            self.assertEqual(path, "/v1/appStoreReviewDetails/detail-123")
+            self.detail["attributes"]["notes"] = payload["data"]["attributes"]["notes"]
+
+        self.client.get.side_effect = get
+        self.client.post.side_effect = post
+        self.client.patch.side_effect = patch_
+
+    def ensure(self):
+        return submit.ensure_app_store_version(self.client, "app.bundle", "5.2.2", "new")
+
+    def test_missing_version_is_created_with_the_verified_build(self):
+        self.assertEqual(self.ensure(), "version-123")
+        self.assertEqual(self.events.count("post"), 1)
+        self.assertEqual(self.events[-1], "/v1/appStoreVersions/version-123")
+        self.client.patch.assert_not_called()
+
+    def test_prepared_version_without_build_gets_the_verified_build(self):
+        self.versions.append(version("5.2.2", "PREPARE_FOR_SUBMISSION"))
+        self.assertEqual(self.ensure(), "version-123")
+        self.assertEqual(self.events.count("attach"), 1)
+        self.client.post.assert_not_called()
+
+    def test_prepared_version_with_the_build_is_left_untouched(self):
+        self.versions.append(version("5.2.2", "REJECTED", "new"))
+        self.assertEqual(self.ensure(), "version-123")
+        self.client.post.assert_not_called()
+        self.client.patch.assert_not_called()
+
+    def test_other_states_builds_and_ambiguity_fail_closed(self):
+        cases = [
+            [version("5.2.2", "WAITING_FOR_REVIEW", "new")],
+            [version("5.2.2", "PREPARE_FOR_SUBMISSION", "other")],
+            [version("5.2.2", "PREPARE_FOR_SUBMISSION"), version("5.2.2", "PREPARE_FOR_SUBMISSION")],
+        ]
+        for versions in cases:
+            self.versions[:] = versions
+            with self.assertRaises(RuntimeError):
+                self.ensure()
+        self.client.post.assert_not_called()
+        self.client.patch.assert_not_called()
+
+    def test_unverifiable_creation_fails_closed(self):
+        self.client.post.side_effect = lambda path, payload: {"data": {"type": "appStoreVersions", "id": "version-123"}}
+        self.client.get.side_effect = [
+            {"data": [{"id": "app-123"}]}, {"data": []},
+            {"data": version("5.2.2", "PREPARE_FOR_SUBMISSION", "other")},
+        ]
+        with self.assertRaisesRegex(RuntimeError, "does not match"):
+            self.ensure()
+
+    def test_new_version_with_notes_is_created_before_notes_and_submission(self):
+        build = {"build_id": "new", "build_number": "2447.18.55",
+                 "marketing_version": "5.2.2", "processing_state": "VALID"}
+        with tempfile.TemporaryDirectory() as directory:
+            note_file = Path(directory) / "notes.txt"
+            note_file.write_text("5.2.2 (2447.18.55): location notes.", encoding="utf-8")
+            with patch.object(submit, "wait_for_build", return_value=build), \
+                 patch.object(submit.subprocess, "run", side_effect=lambda *args, **kwargs: self.events.append("submitted")):
+                result = submit.submit_build(
+                    self.client, "app.bundle", "5.2.2", "2447.18.55", Path("key.p8"),
+                    review_notes_file=note_file,
+                )
+        self.assertEqual(result["submission_action"], "submitted")
+        self.assertEqual(self.detail["attributes"]["notes"], "5.2.2 (2447.18.55): location notes.")
+        self.assertLess(self.events.index("post"), self.events.index("notes"))
+        self.assertEqual(self.events[-1], "submitted")
+
+    def test_submission_without_notes_does_not_create_the_version(self):
+        build = {"build_id": "new", "build_number": "2447.18.55",
+                 "marketing_version": "5.2.2", "processing_state": "VALID"}
+        with patch.object(submit, "wait_for_build", return_value=build), \
+             patch.object(submit.subprocess, "run") as run:
+            result = submit.submit_build(self.client, "app.bundle", "5.2.2", "2447.18.55", Path("key.p8"))
+        self.assertEqual(result["submission_action"], "submitted")
+        run.assert_called_once()
+        self.client.post.assert_not_called()
+        self.client.patch.assert_not_called()
+
+    def test_post_returns_the_created_resource(self):
+        client = submit.AppStoreSubmissionClient.__new__(submit.AppStoreSubmissionClient)
+        response = Mock()
+        response.read.return_value = b'{"data": {"id": "version-123"}}'
+        response.__enter__ = lambda self_: response
+        response.__exit__ = lambda self_, *args: None
+        with patch.object(client, "token", return_value="test-token"), \
+             patch.object(submit.urllib.request, "urlopen", return_value=response) as send:
+            created = client.post("/v1/appStoreVersions", {"data": {}})
+        self.assertEqual(created, {"data": {"id": "version-123"}})
+        self.assertEqual(send.call_args.args[0].get_method(), "POST")
+
+
 if __name__ == "__main__":
     unittest.main()

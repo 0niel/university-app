@@ -25,7 +25,7 @@ SUBMITTED_STATES = {
 
 
 class AppStoreSubmissionClient(AppStoreConnectClient):
-    def patch(self, path: str, payload: dict) -> None:
+    def _send(self, method: str, path: str, payload: dict, parse: bool) -> dict:
         request = urllib.request.Request(
             "https://api.appstoreconnect.apple.com" + path,
             data=json.dumps(payload, separators=(",", ":")).encode(),
@@ -33,16 +33,23 @@ class AppStoreSubmissionClient(AppStoreConnectClient):
                 "Accept": "application/json", "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.token()}",
             },
-            method="PATCH",
+            method=method,
         )
         try:
-            with urllib.request.urlopen(request, timeout=30):
-                pass
+            with urllib.request.urlopen(request, timeout=30) as response:
+                body = response.read() if parse else b""
         except urllib.error.HTTPError as error:
             detail = error.read().decode("utf-8", errors="replace")
             raise RuntimeError(
                 f"App Store Connect update failed with HTTP {error.code}: {detail}"
             ) from error
+        return json.loads(body) if body.strip() else {}
+
+    def patch(self, path: str, payload: dict) -> None:
+        self._send("PATCH", path, payload, False)
+
+    def post(self, path: str, payload: dict) -> dict:
+        return self._send("POST", path, payload, True)
 
 
 def validate_version(marketing_version: str, build_number: str) -> None:
@@ -320,6 +327,95 @@ def should_submit(
     return True
 
 
+PREPARABLE_STATES = {
+    "PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "INVALID_BINARY",
+    "METADATA_REJECTED", "REJECTED",
+}
+
+
+def ensure_app_store_version(client, bundle_id, marketing_version, build_id):
+    def get(path, query):
+        try:
+            return client.get(path, query)
+        except (RuntimeError, urllib.error.URLError):
+            raise RuntimeError("App Store version lookup failed") from None
+
+    def identifier(value, label):
+        if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9-]+", value):
+            raise RuntimeError(f"App Store {label} ID is invalid")
+        return value
+
+    def describe(item):
+        attributes = item.get("attributes", {})
+        selected = item.get("relationships", {}).get("build", {}).get("data") or {}
+        return (
+            item.get("type"), attributes.get("platform"), attributes.get("versionString"),
+            attributes.get("appVersionState") or attributes.get("appStoreState"),
+            selected.get("id"),
+        )
+
+    def verify(item, expected_id=None):
+        kind, platform, number, state, selected = describe(item)
+        if (
+            kind not in (None, "appStoreVersions") or platform != "IOS" or number != marketing_version
+            or state not in PREPARABLE_STATES or selected != build_id
+            or (expected_id and item.get("id") != expected_id)
+        ):
+            raise RuntimeError("Prepared App Store version does not match the request")
+        return identifier(item.get("id"), "version")
+
+    response = get("/v1/apps", {"filter[bundleId]": bundle_id, "limit": "2"})
+    apps = response.get("data", [])
+    if response.get("links", {}).get("next") or len(apps) != 1:
+        raise RuntimeError("App Store app is unavailable or ambiguous")
+    app_id = identifier(apps[0].get("id"), "app")
+    response = get(
+        f"/v1/apps/{app_id}/appStoreVersions",
+        {"filter[platform]": "IOS", "include": "build", "limit": "200"},
+    )
+    versions = [item for item in response.get("data", [])
+                if item.get("attributes", {}).get("versionString") == marketing_version]
+    if response.get("links", {}).get("next") or len(versions) > 1:
+        raise RuntimeError("App Store version is unavailable or ambiguous")
+    build = {"data": {"type": "builds", "id": build_id}}
+    try:
+        if not versions:
+            created = client.post(
+                "/v1/appStoreVersions",
+                {"data": {
+                    "type": "appStoreVersions",
+                    "attributes": {
+                        "platform": "IOS", "versionString": marketing_version,
+                        "releaseType": "AFTER_APPROVAL",
+                    },
+                    "relationships": {
+                        "app": {"data": {"type": "apps", "id": app_id}}, "build": build,
+                    },
+                }},
+            )
+            version_id = identifier((created.get("data") or {}).get("id"), "version")
+        else:
+            version = versions[0]
+            version_id = identifier(version.get("id"), "version")
+            _, _, _, state, selected = describe(version)
+            if state not in PREPARABLE_STATES:
+                raise RuntimeError(f"App Store version cannot be prepared in state {state}")
+            if selected and selected != build_id:
+                raise RuntimeError("App Store version selects a different build")
+            if selected != build_id:
+                client.patch(
+                    f"/v1/appStoreVersions/{version_id}",
+                    {"data": {
+                        "type": "appStoreVersions", "id": version_id,
+                        "relationships": {"build": build},
+                    }},
+                )
+    except (RuntimeError, urllib.error.URLError):
+        raise RuntimeError("App Store version preparation failed") from None
+    current = get(f"/v1/appStoreVersions/{version_id}", {"include": "build"}).get("data", {})
+    return verify(current, version_id)
+
+
 def append_review_notes(client, bundle_id, marketing_version, build_id, note):
     def get(path, query):
         try:
@@ -428,6 +524,8 @@ def submit_build(
         client, bundle_id, marketing_version, build_id, replace_pending_review,
     )
     if submission and note is not None:
+        if submission is True:
+            ensure_app_store_version(client, bundle_id, marketing_version, build_id)
         append_review_notes(client, bundle_id, marketing_version, build_id, note)
     if isinstance(submission, str):
         subprocess.run(
