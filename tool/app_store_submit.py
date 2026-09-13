@@ -25,7 +25,7 @@ SUBMITTED_STATES = {
 
 
 class AppStoreSubmissionClient(AppStoreConnectClient):
-    def patch(self, path: str, payload: dict) -> None:
+    def _send(self, method: str, path: str, payload: dict, *, read: bool) -> dict:
         request = urllib.request.Request(
             "https://api.appstoreconnect.apple.com" + path,
             data=json.dumps(payload, separators=(",", ":")).encode(),
@@ -33,16 +33,22 @@ class AppStoreSubmissionClient(AppStoreConnectClient):
                 "Accept": "application/json", "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.token()}",
             },
-            method="PATCH",
+            method=method,
         )
         try:
-            with urllib.request.urlopen(request, timeout=30):
-                pass
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return json.load(response) if read else {}
         except urllib.error.HTTPError as error:
             detail = error.read().decode("utf-8", errors="replace")
             raise RuntimeError(
                 f"App Store Connect update failed with HTTP {error.code}: {detail}"
             ) from error
+
+    def patch(self, path: str, payload: dict) -> None:
+        self._send("PATCH", path, payload, read=False)
+
+    def post(self, path: str, payload: dict) -> dict:
+        return self._send("POST", path, payload, read=True)
 
 
 def validate_version(marketing_version: str, build_number: str) -> None:
@@ -320,6 +326,77 @@ def should_submit(
     return True
 
 
+def ensure_app_store_version(client, bundle_id, marketing_version, build_id) -> str:
+    response = client.get("/v1/apps", {"filter[bundleId]": bundle_id, "limit": "2"})
+    apps = response.get("data", [])
+    if response.get("links", {}).get("next") or len(apps) != 1:
+        raise RuntimeError("App Store app is unavailable or ambiguous")
+    app_id = apps[0].get("id")
+    if not isinstance(app_id, str) or not re.fullmatch(r"[A-Za-z0-9-]+", app_id):
+        raise RuntimeError("App Store app ID is invalid")
+    response = client.get(
+        f"/v1/apps/{app_id}/appStoreVersions",
+        {"filter[platform]": "IOS", "include": "build", "limit": "200"},
+    )
+    if response.get("links", {}).get("next"):
+        raise RuntimeError("App Store version list is incomplete")
+    versions = [item for item in response.get("data", [])
+                if item.get("attributes", {}).get("versionString") == marketing_version]
+    if len(versions) > 1:
+        raise RuntimeError("App Store version is ambiguous")
+
+    def version_id_of(version):
+        version_id = version.get("id")
+        if not isinstance(version_id, str) or not re.fullmatch(r"[A-Za-z0-9-]+", version_id):
+            raise RuntimeError("App Store version ID is invalid")
+        return version_id
+
+    def selected_build(version):
+        return (version.get("relationships", {}).get("build", {}).get("data") or {}).get("id")
+
+    if versions:
+        version = versions[0]
+        version_id = version_id_of(version)
+        attributes = version.get("attributes", {})
+        state = attributes.get("appVersionState") or attributes.get("appStoreState")
+        if state not in EDITABLE_STATES:
+            raise RuntimeError(f"App Store version cannot be prepared in state {state}")
+        selected = selected_build(version)
+        if selected and selected != build_id:
+            raise RuntimeError("App Store version selects a different build")
+        if selected != build_id:
+            client.patch(
+                f"/v1/appStoreVersions/{version_id}/relationships/build",
+                {"data": {"type": "builds", "id": build_id}},
+            )
+    else:
+        created = client.post(
+            "/v1/appStoreVersions",
+            {"data": {
+                "type": "appStoreVersions",
+                "attributes": {
+                    "platform": "IOS", "versionString": marketing_version,
+                    "releaseType": "AFTER_APPROVAL",
+                },
+                "relationships": {
+                    "app": {"data": {"type": "apps", "id": app_id}},
+                    "build": {"data": {"type": "builds", "id": build_id}},
+                },
+            }},
+        ).get("data") or {}
+        version_id = version_id_of(created)
+    current = client.get(f"/v1/appStoreVersions/{version_id}", {"include": "build"}).get("data") or {}
+    attributes = current.get("attributes", {})
+    if (
+        current.get("id") != version_id
+        or attributes.get("platform") != "IOS"
+        or attributes.get("versionString") != marketing_version
+        or selected_build(current) != build_id
+    ):
+        raise RuntimeError("App Store version was not prepared for the verified build")
+    return version_id
+
+
 def append_review_notes(client, bundle_id, marketing_version, build_id, note):
     def get(path, query):
         try:
@@ -427,6 +504,8 @@ def submit_build(
     submission = should_submit(
         client, bundle_id, marketing_version, build_id, replace_pending_review,
     )
+    if submission is True and note is not None:
+        ensure_app_store_version(client, bundle_id, marketing_version, build_id)
     if submission and note is not None:
         append_review_notes(client, bundle_id, marketing_version, build_id, note)
     if isinstance(submission, str):
