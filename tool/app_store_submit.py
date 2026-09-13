@@ -397,6 +397,61 @@ def ensure_app_store_version(client, bundle_id, marketing_version, build_id) -> 
     return version_id
 
 
+def release_note_for(locale: str, release_notes: dict[str, str]) -> str | None:
+    language = locale.split("-")[0].lower()
+    for key in (locale, language):
+        for candidate, text in release_notes.items():
+            if candidate.lower() == key.lower():
+                return text
+    return release_notes.get("default")
+
+
+def set_release_notes(client, version_id: str, release_notes: dict[str, str]) -> None:
+    if not isinstance(version_id, str) or not re.fullmatch(r"[A-Za-z0-9-]+", version_id):
+        raise RuntimeError("App Store version ID is invalid")
+    for text in release_notes.values():
+        if not isinstance(text, str) or not text.strip() or len(text.encode("utf-8")) > 4000:
+            raise ValueError("App Store release notes must contain 1 to 4000 bytes")
+    query = {"fields[appStoreVersionLocalizations]": "locale,whatsNew", "limit": "200"}
+    response = client.get(f"/v1/appStoreVersions/{version_id}/appStoreVersionLocalizations", query)
+    localizations = response.get("data", [])
+    if response.get("links", {}).get("next") or not localizations:
+        raise RuntimeError("App Store version localizations are unavailable")
+    expected = {}
+    for localization in localizations:
+        localization_id = localization.get("id")
+        attributes = localization.get("attributes", {})
+        locale = attributes.get("locale")
+        if (
+            not isinstance(localization_id, str)
+            or not re.fullmatch(r"[A-Za-z0-9-]+", localization_id)
+            or not isinstance(locale, str)
+        ):
+            raise RuntimeError("App Store version localization is invalid")
+        existing = attributes.get("whatsNew")
+        if isinstance(existing, str) and existing.strip():
+            expected[localization_id] = existing
+            continue
+        text = release_note_for(locale, release_notes)
+        if text is None:
+            raise RuntimeError(f"App Store release notes are missing for locale {locale}")
+        client.patch(
+            f"/v1/appStoreVersionLocalizations/{localization_id}",
+            {"data": {
+                "type": "appStoreVersionLocalizations", "id": localization_id,
+                "attributes": {"whatsNew": text},
+            }},
+        )
+        expected[localization_id] = text
+    response = client.get(f"/v1/appStoreVersions/{version_id}/appStoreVersionLocalizations", query)
+    current = {
+        item.get("id"): item.get("attributes", {}).get("whatsNew")
+        for item in response.get("data", [])
+    }
+    if response.get("links", {}).get("next") or current != expected:
+        raise RuntimeError("App Store release notes verification failed")
+
+
 def append_review_notes(client, bundle_id, marketing_version, build_id, note):
     def get(path, query):
         try:
@@ -479,9 +534,29 @@ def append_review_notes(client, bundle_id, marketing_version, build_id, note):
     current_version()
 
 
+def load_release_notes(release_notes_file: Path | None) -> dict[str, str] | None:
+    if release_notes_file is None:
+        return None
+    try:
+        release_notes = json.loads(release_notes_file.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        raise ValueError("App Store release notes file must contain a JSON object") from None
+    if (
+        not isinstance(release_notes, dict) or not release_notes
+        or not all(isinstance(key, str) and key for key in release_notes)
+    ):
+        raise ValueError("App Store release notes file must map locales to text")
+    notes = {key: value.strip() if isinstance(value, str) else value for key, value in release_notes.items()}
+    for text in notes.values():
+        if not isinstance(text, str) or not text or len(text.encode("utf-8")) > 4000:
+            raise ValueError("App Store release notes must contain 1 to 4000 bytes")
+    return notes
+
+
 def submit_build(
     client, bundle_id, marketing_version, build_number, private_key,
     replace_pending_review=False, review_notes_file: Path | None = None,
+    release_notes_file: Path | None = None,
 ):
     validate_version(marketing_version, build_number)
     note = None
@@ -489,6 +564,7 @@ def submit_build(
         note = review_notes_file.read_text(encoding="utf-8").strip()
         if not note or len(note.encode("utf-8")) > 4000:
             raise ValueError("App Store review notes must contain 1 to 4000 bytes")
+    release_notes = load_release_notes(release_notes_file)
     build = wait_for_build(
         client, bundle_id, marketing_version, build_number, timeout=1200, interval=30
     )
@@ -504,8 +580,10 @@ def submit_build(
     submission = should_submit(
         client, bundle_id, marketing_version, build_id, replace_pending_review,
     )
-    if submission is True and note is not None:
-        ensure_app_store_version(client, bundle_id, marketing_version, build_id)
+    if submission is True and (note is not None or release_notes):
+        version_id = ensure_app_store_version(client, bundle_id, marketing_version, build_id)
+        if release_notes:
+            set_release_notes(client, version_id, release_notes)
     if submission and note is not None:
         append_review_notes(client, bundle_id, marketing_version, build_id, note)
     if isinstance(submission, str):
@@ -553,6 +631,7 @@ def main() -> None:
     parser.add_argument("--private-key", required=True, type=Path)
     parser.add_argument("--replace-pending-review", action="store_true")
     parser.add_argument("--review-notes-file", type=Path)
+    parser.add_argument("--release-notes-file", type=Path)
     arguments = parser.parse_args()
     client = AppStoreSubmissionClient(
         arguments.key_id, arguments.issuer_id, arguments.private_key
@@ -562,6 +641,7 @@ def main() -> None:
         arguments.build_number, arguments.private_key,
         arguments.replace_pending_review,
         arguments.review_notes_file,
+        arguments.release_notes_file,
     )
     print(json.dumps(result, sort_keys=True))
 

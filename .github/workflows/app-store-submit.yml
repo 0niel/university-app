@@ -21,6 +21,16 @@ on:
         required: false
         type: boolean
         default: false
+      release_notes_ru:
+        description: What's New text for Russian localizations
+        required: false
+        type: string
+        default: Исправления ошибок и улучшения стабильности.
+      release_notes_en:
+        description: What's New text for other localizations
+        required: false
+        type: string
+        default: Bug fixes and stability improvements.
 
 permissions:
   actions: read
@@ -46,6 +56,8 @@ jobs:
       BUILD_NUMBER: ${{ inputs.build_number }}
       REPLACE_PENDING_REVIEW: ${{ inputs.replace_pending_review }}
       ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+      RELEASE_NOTES_RU: ${{ inputs.release_notes_ru }}
+      RELEASE_NOTES_EN: ${{ inputs.release_notes_en }}
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -152,7 +164,20 @@ jobs:
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
           APP_STORE_CONNECT_DISABLE_JWT_CACHE: 'true'
         run: |
-          arguments=()
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          notes = {
+              "ru": os.environ["RELEASE_NOTES_RU"].strip(),
+              "default": os.environ["RELEASE_NOTES_EN"].strip(),
+          }
+          if not all(notes.values()):
+              raise SystemExit("Release notes must not be empty")
+          path = Path(os.environ["RUNNER_TEMP"]) / "ios-release-notes.json"
+          path.write_text(json.dumps(notes, ensure_ascii=False), encoding="utf-8")
+          PY
+          arguments=(--release-notes-file "$RUNNER_TEMP/ios-release-notes.json")
           if [[ "$REPLACE_PENDING_REVIEW" = true ]]; then
             arguments+=(--replace-pending-review)
           fi
