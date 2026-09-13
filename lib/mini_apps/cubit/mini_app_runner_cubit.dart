@@ -1,13 +1,12 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mini_apps_repository/mini_apps_repository.dart';
 import 'package:stac_bridge/stac_bridge.dart';
 
 part 'mini_app_runner_state.dart';
 part 'mini_app_runner_status.dart';
-part 'mini_app_runner_cubit.freezed.dart';
 
 class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
   MiniAppRunnerCubit({
@@ -18,8 +17,6 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
 
   final MiniAppsRepository _repository;
   final String slug;
-
-  static const _screenEquality = DeepCollectionEquality();
 
   Timer? _refreshTimer;
   Future<void>? _refreshFuture;
@@ -139,9 +136,7 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
       state.copyWith(
         status: .ready,
         app: app,
-        screen: _screenEquality.equals(state.screen, screen)
-            ? state.screen
-            : screen,
+        screen: jsonEquals(state.screen, screen) ? state.screen : screen,
         fromCache: false,
         refreshing: false,
         refreshFailed: false,

@@ -8,6 +8,7 @@ export 'src/expression/expression_engine.dart'
         ExpressionsEngine,
         MiniAppExpressionEngine,
         defaultMiniAppExpressionEngine;
+export 'src/expression/json_equality.dart' show jsonEquals;
 export 'src/expression/template_resolver.dart' show resolveTemplate;
 export 'src/expression/tree_resolver.dart'
     show MiniAppTreeResolver, wrapScreenForLogic;

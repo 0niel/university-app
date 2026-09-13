@@ -44,7 +44,6 @@ class _MiniAppRunnerViewState extends State<_MiniAppRunnerView> {
         child: MiniAppInnerScreen(
           path: path,
           title: title ?? app?.name ?? '',
-          accentColor: app?.accentColor,
           controller: controller,
         ),
       ),

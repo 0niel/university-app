@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mini_apps_repository/mini_apps_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/mini_apps/cubit/mini_app_runner_cubit.dart';
-import 'package:rtu_mirea_app/mini_apps/runtime/mini_app_accent.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_inner_screen.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_runner_body.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_runner_skeleton.dart';
@@ -102,10 +101,8 @@ void main() {
     final buttonContext = tester.element(find.byType(AppButton));
     expect(
       buttonContext.colors.accent,
-      AppColors.accentColor(AppAccent.violet, isDark: false),
+      Theme.of(tester.element(find.byType(MiniAppRunnerBody))).colors.accent,
     );
-    expect(miniAppAccentFor('#0E8A63'), AppAccent.green);
-    expect(miniAppAccentFor('oops'), isNull);
   });
 
   testWidgets('offline cached screen shows the warn banner', (tester) async {
@@ -329,7 +326,6 @@ void main() {
           key: ValueKey('inner-logic'),
           path: '/logic',
           title: 'Логика',
-          accentColor: '#8064FF',
         ),
       ),
     );

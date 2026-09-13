@@ -1,12 +1,11 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
+import 'package:stac_bridge/src/expression/json_equality.dart';
 
 class MiniAppStateStore extends ChangeNotifier {
   final Map<String, Object?> _values = <String, Object?>{};
   final Map<String, Object?> _initial = <String, Object?>{};
-  static const _equality = DeepCollectionEquality();
   bool _disposed = false;
   BuildContext? actionContext;
   final Map<String, int> _requests = {};
@@ -37,8 +36,8 @@ class MiniAppStateStore extends ChangeNotifier {
     var changed = false;
     for (final entry in initial.entries) {
       if (!_values.containsKey(entry.key) ||
-          _equality.equals(_values[entry.key], _initial[entry.key])) {
-        changed = changed || !_equality.equals(_values[entry.key], entry.value);
+          jsonEquals(_values[entry.key], _initial[entry.key])) {
+        changed = changed || !jsonEquals(_values[entry.key], entry.value);
         _values[entry.key] = entry.value;
       }
     }
@@ -67,7 +66,7 @@ class MiniAppStateStore extends ChangeNotifier {
     var changed = false;
     for (final entry in values.entries) {
       if (!_values.containsKey(entry.key) ||
-          !_equality.equals(_values[entry.key], entry.value)) {
+          !jsonEquals(_values[entry.key], entry.value)) {
         _values[entry.key] = entry.value;
         changed = true;
       }
