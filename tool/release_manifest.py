@@ -17,6 +17,9 @@ GENERATED = {
     "android": ("android/app/google-services.json", "android/tenant.properties"),
     "ios": ("ios/Flutter/Tenant.xcconfig", "ios/Podfile.lock"),
 }
+OPTIONAL_INPUTS = ("pubspec.lock",)
+LOCKS = (("ios/Podfile.lock", "CocoaPods"), ("pubspec.lock", "Dart"))
+PROVIDER = "private/university_provider"
 
 
 def run(*args, cwd=None):
@@ -35,13 +38,21 @@ def sha256(path):
     return digest.hexdigest()
 
 
+def checkout_source(repo, relative, label):
+    checkout = repo / relative
+    if Path(git(checkout, "rev-parse", "--show-toplevel")).resolve() != checkout.resolve():
+        raise ValueError(f"Missing {label} repository checkout")
+    if git(checkout, "status", "--porcelain", "--untracked-files=all"):
+        raise ValueError(f"{label.capitalize()} checkout has unrecorded changes")
+    return git(checkout, "rev-parse", "HEAD")
+
+
 def private_source(repo):
-    private = repo / "android/private/nfc-pass-android"
-    if Path(git(private, "rev-parse", "--show-toplevel")).resolve() != private.resolve():
-        raise ValueError("Missing private native repository checkout")
-    if git(private, "status", "--porcelain", "--untracked-files=all"):
-        raise ValueError("Private native checkout has unrecorded changes")
-    return git(private, "rev-parse", "HEAD")
+    return checkout_source(repo, "android/private/nfc-pass-android", "private native")
+
+
+def provider_source(repo):
+    return checkout_source(repo, PROVIDER, "university provider")
 
 
 def require(pattern, value, label):
@@ -129,9 +140,9 @@ def validate_manifest(manifest):
         raise ValueError("Unexpected manifest signer")
     require(r"[0-9a-f]{40}", evidence.get("signing_sha", evidence["head_sha"]), "signer SHA")
     inputs = manifest.get("build_inputs")
-    if not isinstance(inputs, dict) or set(inputs) - set(GENERATED[manifest["platform"]]):
+    if not isinstance(inputs, dict) or set(inputs) - set(GENERATED[manifest["platform"]]) - set(OPTIONAL_INPUTS):
         raise ValueError("Unsupported prepared build input")
-    if evidence["kind"] == "release" and set(inputs) != set(GENERATED[manifest["platform"]]):
+    if evidence["kind"] == "release" and not set(inputs) >= set(GENERATED[manifest["platform"]]):
         raise ValueError("Release is missing prepared build inputs")
     if evidence["kind"] == "legacy":
         missing = evidence.get("missing_prepared_inputs")
@@ -161,6 +172,10 @@ def validate_manifest(manifest):
         require(r"[0-9a-f]{40}", manifest["private_native_sha"], "private native source")
     elif manifest["platform"] == "android":
         raise ValueError("Android release is missing private native source")
+    if manifest.get("provider_sha") is not None:
+        require(r"[0-9a-f]{40}", manifest["provider_sha"], "university provider source")
+        if "pubspec.lock" not in inputs:
+            raise ValueError("Provider release is missing its resolved dependency lock")
     configs = manifest.get("configuration_inputs", {})
     if not isinstance(configs, dict) or set(configs) - {"firebase.json", "university.json"}:
         raise ValueError("Unexpected configuration inputs")
@@ -190,12 +205,13 @@ def build_manifest(*, repo, platform, release_version, source_sha, artifact_dir,
         raise ValueError("Release identity does not match the built platform")
     artifacts = []
     for path in sorted(artifact_dir.rglob("*")):
-        if path.is_file() and path.name != "release-manifest.json" and (path.suffix in (".apk", ".aab", ".ipa", ".cms") or path.name == "Podfile.lock"):
+        if path.is_file() and path.name != "release-manifest.json" and (path.suffix in (".apk", ".aab", ".ipa", ".cms") or path.name in ("Podfile.lock", "pubspec.lock")):
             if path.is_symlink():
                 raise ValueError("Artifact must not be a symlink")
             artifacts.append({"name": path.name, "sha256": sha256(path), "size": path.stat().st_size})
     inputs = {}
     private_native_sha = None
+    provider_sha = None
     if evidence["kind"] == "release":
         for name in GENERATED[platform]:
             target = safe_path(repo, name)
@@ -204,6 +220,9 @@ def build_manifest(*, repo, platform, release_version, source_sha, artifact_dir,
             inputs[name] = sha256(target)
         if platform == "android":
             private_native_sha = private_source(repo)
+        if (repo / PROVIDER).is_dir():
+            provider_sha = provider_source(repo)
+            inputs["pubspec.lock"] = sha256(safe_path(repo, "pubspec.lock"))
     elif platform == "android":
         private_native_sha = read_private_native_ref(repo, source_sha)
     manifest = {
@@ -214,6 +233,7 @@ def build_manifest(*, repo, platform, release_version, source_sha, artifact_dir,
         "flutter_revision": live["flutter_revision"], "target": "lib/main/main_production.dart",
         "flavor": "production" if platform == "android" else None,
         "build_inputs": inputs, "private_native_sha": private_native_sha,
+        "provider_sha": provider_sha,
         "configuration_inputs": config_digests() if evidence["kind"] == "release" else {},
         "artifacts": artifacts, "evidence": evidence,
     }
@@ -259,19 +279,23 @@ def resolve(platform, version, output, github_output=None):
         if evidence["kind"] == "legacy":
             registration = {**evidence, "run_id": evidence["registration_run_id"], "run_attempt": evidence.get("registration_run_attempt", 1), "head_sha": evidence["signing_sha"], "workflow_path": REGISTRAR}
             verify_run(repository, registration)
-        lock = None
-        if "ios/Podfile.lock" in manifest["build_inputs"]:
-            run("gh", "release", "download", tag, "--repo", repository, "--pattern", "Podfile.lock", "--dir", str(root))
-            lock = root / "Podfile.lock"
-            if sha256(lock) != manifest["build_inputs"]["ios/Podfile.lock"]:
-                raise ValueError("Stored CocoaPods lock digest mismatch")
+        locks = []
+        for name, label in LOCKS:
+            if name not in manifest["build_inputs"]:
+                continue
+            asset = PurePosixPath(name).name
+            run("gh", "release", "download", tag, "--repo", repository, "--pattern", asset, "--dir", str(root))
+            lock = root / asset
+            if sha256(lock) != manifest["build_inputs"][name]:
+                raise ValueError(f"Stored {label} lock digest mismatch")
+            locks.append(lock)
         output.parent.mkdir(parents=True, exist_ok=True)
-        if lock is not None:
-            (output.parent / "Podfile.lock").write_bytes(lock.read_bytes())
+        for lock in locks:
+            (output.parent / lock.name).write_bytes(lock.read_bytes())
         output.write_bytes(path.read_bytes())
     if github_output:
         values = {key: manifest[key] for key in ("app_id", "release_version", "flutter_version")}
-        values.update(baseline_sha=manifest["source_sha"], manifest_sha256=sha256(output), manifest_path=str(output.resolve()), private_native_sha=manifest.get("private_native_sha") or "")
+        values.update(baseline_sha=manifest["source_sha"], manifest_sha256=sha256(output), manifest_path=str(output.resolve()), private_native_sha=manifest.get("private_native_sha") or "", provider_sha=manifest.get("provider_sha") or "")
         with github_output.open("a", encoding="utf-8") as stream:
             for key, value in values.items():
                 if "\n" in str(value) or "\r" in str(value):
@@ -296,6 +320,8 @@ def verify_native_config(repo, manifest):
             raise ValueError(f"Prepared build input differs from the release: {name}")
     if manifest.get("private_native_sha") and private_source(repo) != manifest["private_native_sha"]:
         raise ValueError("Private native module differs from the release")
+    if manifest.get("provider_sha") and provider_source(repo) != manifest["provider_sha"]:
+        raise ValueError("University provider differs from the release")
     if manifest.get("configuration_inputs") and config_digests() != manifest["configuration_inputs"]:
         raise ValueError("Release configuration differs from its recorded canonical input")
 
@@ -307,10 +333,12 @@ def publish(path, artifacts_dir):
         raise ValueError("Registry publication requires the protected repository branch")
     tag = registry_tag(manifest["platform"], manifest["release_version"])
     assets = [path]
-    if "ios/Podfile.lock" in manifest["build_inputs"]:
-        lock = safe_path(artifacts_dir, "Podfile.lock")
-        if sha256(lock) != manifest["build_inputs"]["ios/Podfile.lock"]:
-            raise ValueError("CocoaPods lock does not match the manifest")
+    for name, label in LOCKS:
+        if name not in manifest["build_inputs"]:
+            continue
+        lock = safe_path(artifacts_dir, PurePosixPath(name).name)
+        if not lock.is_file() or sha256(lock) != manifest["build_inputs"][name]:
+            raise ValueError(f"{label} lock does not match the manifest")
         assets.append(lock)
     existing = subprocess.run(["gh", "release", "view", tag, "--repo", repository, "--json", "tagName"], capture_output=True, text=True)
     if existing.returncode == 0:

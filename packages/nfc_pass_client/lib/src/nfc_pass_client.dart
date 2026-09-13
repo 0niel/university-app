@@ -1,11 +1,14 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import 'package:nfc_pass_client/src/grpc_web_response.dart';
 import 'package:nfc_pass_client/src/nfc_pass_endpoints.dart';
+import 'package:nfc_pass_client/src/nfc_pass_transport_exception.dart';
+import 'package:nfc_pass_client/src/nfc_session_cookie.dart';
+import 'package:nfc_pass_client/src/nfc_verification_codec.dart';
+import 'package:nfc_pass_client/src/nfc_verification_result.dart';
 import 'package:nfc_pass_client/src/protos/human_pass.pb.dart';
-import 'package:random_user_agents/random_user_agents.dart';
 
 /// {@template cookie_provider}
 /// A function that provides a cookie for the gRPC-Web request.
@@ -24,7 +27,11 @@ class NfcPassClient {
     required CookieProvider cookieProvider,
     required this.endpoints,
     http.Client? httpClient,
-  })  : _onCookieRequested = cookieProvider,
+    this.requestTimeout = const Duration(seconds: 20),
+    this.maxResponseBytes = 1024 * 1024,
+  })  : assert(requestTimeout > Duration.zero, 'Timeout must be positive.'),
+        assert(maxResponseBytes > 0, 'Response limit must be positive.'),
+        _onCookieRequested = cookieProvider,
         httpClient = httpClient ?? http.Client();
 
   final CookieProvider _onCookieRequested;
@@ -34,6 +41,9 @@ class NfcPassClient {
 
   /// The HTTP client used to send requests.
   final http.Client httpClient;
+
+  final Duration requestTimeout;
+  final int maxResponseBytes;
 
   /// Creates a gRPC-Web frame from the specified protobuf message.
   Uint8List _makeGrpcWebFrame(Uint8List protobufMessage) {
@@ -47,81 +57,76 @@ class NfcPassClient {
     return Uint8List.fromList([...header, ...protobufMessage]);
   }
 
-  /// Parses the gRPC-Web response.
-  Uint8List _parseGrpcWebResponse(Uint8List responseBody) {
-    final responseHex = responseBody
-        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-        .join(' ');
-    developer.log('hex response: $responseHex');
-
-    if (responseBody.length < 5) {
-      throw const FormatException('Слишком короткий ответ, нет gRPC header.');
-    }
-
-    final [flags, lengthByte1, lengthByte2, lengthByte3, lengthByte4, ...] =
-        responseBody;
-    if (flags != 0) {
-      throw FormatException('Неподдерживаемые gRPC flags: $flags');
-    }
-
-    final length = (lengthByte1 << 24) |
-        (lengthByte2 << 16) |
-        (lengthByte3 << 8) |
-        lengthByte4;
-
-    if (responseBody.length < 5 + length) {
-      throw FormatException(
-        'Длина gRPC payload $length не совпадает с фактической '
-        '${responseBody.length - 5}',
-      );
-    }
-
-    final payload = responseBody.sublist(5, 5 + length);
-
-    if (responseBody.length > 5 + length) {
-      developer.log(
-        'Внимание: Дополнительные байты в ответе: '
-        '${responseBody.length - (5 + length)}',
-      );
-    }
-
-    return payload;
-  }
-
   /// Sends a gRPC-Web request to the specified URL.
   Future<Uint8List> _sendGrpcWebRequest({
     required String url,
     required Uint8List protobufMessage,
     Map<String, String> headers = const {},
   }) async {
-    final frame = _makeGrpcWebFrame(protobufMessage);
-    final ua = RandomUserAgents.random();
-    final response = await httpClient.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/grpc-web+proto',
-        'x-grpc-web': '1',
-        'User-Agent': ua,
-        ...headers,
-      },
-      body: frame,
-    );
+    final uri = Uri.parse(url);
+    if (uri.scheme != 'https' || uri.host.isEmpty || uri.userInfo.isNotEmpty) {
+      throw ArgumentError('NFC endpoints must use HTTPS without user info.');
+    }
+    final abort = Completer<void>();
+    final request =
+        http.AbortableRequest('POST', uri, abortTrigger: abort.future)
+          ..followRedirects = false
+          ..headers.addAll({
+            'Content-Type': 'application/grpc-web+proto',
+            'Accept': 'application/grpc-web+proto',
+            'x-grpc-web': '1',
+            ...headers,
+          })
+          ..bodyBytes = _makeGrpcWebFrame(protobufMessage);
+    try {
+      return await _readResponse(request).timeout(requestTimeout);
+    } finally {
+      if (!abort.isCompleted) abort.complete();
+    }
+  }
 
+  Future<Uint8List> _readResponse(http.BaseRequest request) async {
+    final response = await httpClient.send(request);
     if (response.statusCode != 200) {
-      throw Exception(
-        'HTTP ${response.statusCode} – Ошибка при вызове gRPC-Web метода',
+      await response.stream.listen(null).cancel();
+      throw NfcPassTransportException(
+        'HTTP request failed with status ${response.statusCode}.',
+        httpStatusCode: response.statusCode,
       );
     }
+    if ((response.contentLength ?? 0) > maxResponseBytes) {
+      await response.stream.listen(null).cancel();
+      throw const FormatException('gRPC-Web response exceeds size limit.');
+    }
+    final bytes = BytesBuilder(copy: false);
+    await for (final chunk in response.stream) {
+      if (chunk.length > maxResponseBytes - bytes.length) {
+        throw const FormatException('gRPC-Web response exceeds size limit.');
+      }
+      bytes.add(chunk);
+    }
+    return parseGrpcWebResponse(
+      bytes.takeBytes(),
+      headers: response.headers,
+    );
+  }
 
-    final responseBytes = response.bodyBytes;
-    return _parseGrpcWebResponse(responseBytes);
+  Future<String> _cookieHeader(String? sessionCookie) async {
+    final cookie = sessionCookie ?? await _onCookieRequested();
+    if (cookie.isEmpty) {
+      throw const NfcPassTransportException(
+        'An authenticated session is required.',
+        grpcStatus: 16,
+      );
+    }
+    return nfcSessionCookieHeader(cookie);
   }
 
   /// Obtaining JWT token for DigitalPass.
   ///
   /// This token is used to authenticate subsequent requests.
-  Future<String> getAccessTokenForDigitalPass() async {
-    final cookie = await _onCookieRequested();
+  Future<String> getAccessTokenForDigitalPass({String? sessionCookie}) async {
+    final cookie = await _cookieHeader(sessionCookie);
     final request = GetAccessTokenForDigitalPassRequest();
     final protobufBytes = request.writeToBuffer();
 
@@ -129,30 +134,37 @@ class NfcPassClient {
       url: endpoints.accessTokenUrl.toString(),
       protobufMessage: protobufBytes,
       headers: {
-        'Cookie': '.AspNetCore.Cookies=$cookie',
+        'Cookie': cookie,
       },
     );
 
     final response = GetAccessTokenForDigitalPassResponse.fromBuffer(
       responseBytes,
     );
+    if (!RegExp(r'^[A-Za-z0-9._~-]+$').hasMatch(response.jwt)) {
+      throw const FormatException('Invalid digital-pass access token.');
+    }
     return response.jwt;
   }
 
-  /// Sending a verification code to the user's email.
-  Future<void> sendVerificationCode(String bearerToken) async {
-    final cookie = await _onCookieRequested();
+  /// Requests a code through the account's verification method.
+  Future<NfcVerificationResult> sendVerificationCode(
+    String bearerToken, {
+    String? sessionCookie,
+  }) async {
+    final cookie = await _cookieHeader(sessionCookie);
     final request = SendVerificationCodeRequest();
     final protobufBytes = request.writeToBuffer();
 
-    await _sendGrpcWebRequest(
+    final response = await _sendGrpcWebRequest(
       url: endpoints.sendVerificationCodeUrl.toString(),
       protobufMessage: protobufBytes,
       headers: {
         'Authorization': 'Bearer $bearerToken',
-        'Cookie': '.AspNetCore.Cookies=$cookie',
+        'Cookie': cookie,
       },
     );
+    return NfcVerificationCodec.decodeCode(response);
   }
 
   /// Obtaining a digital pass.
@@ -162,11 +174,12 @@ class NfcPassClient {
     required String bearerToken,
     required String sixDigitCode,
     required String deviceName,
+    String? sessionCookie,
   }) async {
-    final cookie = await _onCookieRequested();
+    final cookie = await _cookieHeader(sessionCookie);
     final request = GetDigitalPassRequest()
-      ..code = sixDigitCode
-      ..deviceInfo = (DeviceInfo()..deviceName = deviceName);
+      ..receivedCode = sixDigitCode
+      ..deviceInfo = (DeviceInfo()..deviceInfoRaw = deviceName);
     final protobufBytes = request.writeToBuffer();
 
     final responseBytes = await _sendGrpcWebRequest(
@@ -174,11 +187,10 @@ class NfcPassClient {
       protobufMessage: protobufBytes,
       headers: {
         'Authorization': 'Bearer $bearerToken',
-        'Cookie': '.AspNetCore.Cookies=$cookie',
+        'Cookie': cookie,
       },
     );
 
-    final response = GetDigitalPassResponse.fromBuffer(responseBytes);
-    return response.inner.passId.toInt();
+    return NfcVerificationCodec.decodePass(responseBytes);
   }
 }

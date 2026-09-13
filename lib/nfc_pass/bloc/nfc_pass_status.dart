@@ -1,3 +1,11 @@
 part of 'nfc_pass_cubit.dart';
 
-enum NfcPassStatus { initial, loading, codeSent, bound, error }
+enum NfcPassStatus {
+  initial,
+  loading,
+  codeSent,
+  bound,
+  error,
+  verificationPending,
+  verificationUnavailable,
+}

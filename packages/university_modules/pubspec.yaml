@@ -1,0 +1,19 @@
+name: university_modules
+description: Contracts for optional university integrations.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+  flutter: ^3.44.0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: 10.3.0

@@ -322,6 +322,119 @@ void main() {
       );
     }
 
+    for (final remoteSource in [1, 2, 3]) {
+      test(
+        'online compares source $remoteSource independently of revisions',
+        () async {
+          final repository = MapDataRepository(
+            organizationId: 'mirea',
+            cache: _MemoryCache(),
+            bundledCatalogAsset: 'catalog.json',
+            rpc: (_, _) async => _sourceCampus(remoteSource, revision: 17),
+            assetLoader: (asset) async => jsonEncode(
+              asset == 'catalog.json'
+                  ? {
+                      'campuses': [_sourceCampus(2)],
+                    }
+                  : _sourceCampus(2),
+            ),
+          );
+          addTearDown(repository.dispose);
+          final campus = await repository.loadCampus('v-78');
+          expect(
+            campus.origin,
+            remoteSource == 1 ? MapDataOrigin.bundled : MapDataOrigin.remote,
+          );
+          expect(campus.revision, remoteSource == 1 ? 2 : 17);
+          expect(campus.canModerate, remoteSource != 1);
+        },
+      );
+    }
+
+    test(
+      'preserves server edits published after the bundled capture',
+      () async {
+        final cache = _MemoryCache();
+        var offline = false;
+        final publishedSvg = _svg.replaceFirst('width="10"', 'width="40"');
+        MapDataRepository createRepository() => MapDataRepository(
+          organizationId: 'mirea',
+          cache: cache,
+          bundledCatalogAsset: 'catalog.json',
+          rpc: (_, _) async {
+            if (offline) throw const MapDataException('offline');
+            return {
+              ..._sourceCampus(1, revision: 17),
+              'updated_at': '2026-01-03T00:00:00Z',
+              'floors': [
+                {
+                  'id': 'first',
+                  'level': 1,
+                  'svg': publishedSvg,
+                  'width': 100,
+                  'height': 100,
+                },
+              ],
+            };
+          },
+          assetLoader: (asset) async => jsonEncode(
+            asset == 'catalog.json'
+                ? {
+                    'campuses': [_sourceCampus(2)],
+                  }
+                : _sourceCampus(2),
+          ),
+        );
+        final repository = createRepository();
+        addTearDown(repository.dispose);
+        final campus = await repository.loadCampus('v-78');
+        expect(campus.origin, MapDataOrigin.remote);
+        expect(campus.revision, 17);
+        expect(campus.canModerate, isTrue);
+
+        offline = true;
+        final restarted = createRepository();
+        addTearDown(restarted.dispose);
+        final restored = await restarted.loadCachedCampus('v-78');
+        expect(restored?.origin, MapDataOrigin.cache);
+        expect(restored?.revision, 17);
+        expect(restored?.canModerate, isFalse);
+        expect(
+          await restarted.loadSvg(restored!.floors.single.floor.svgPath),
+          publishedSvg,
+        );
+
+        final refreshed = await repository.refreshCampus('v-78');
+        expect(refreshed.origin, MapDataOrigin.cache);
+        expect(refreshed.revision, 17);
+        expect(refreshed.canModerate, isFalse);
+        expect(
+          await repository.loadSvg(refreshed.floors.single.floor.svgPath),
+          publishedSvg,
+        );
+      },
+    );
+
+    test('invalid updated bundle keeps a valid published campus', () async {
+      final repository = MapDataRepository(
+        organizationId: 'mirea',
+        cache: _MemoryCache(),
+        bundledCatalogAsset: 'catalog.json',
+        rpc: (_, _) async => _sourceCampus(1, revision: 17),
+        assetLoader: (asset) async => jsonEncode(
+          asset == 'catalog.json'
+              ? {
+                  'campuses': [_sourceCampus(2)],
+                }
+              : {..._sourceCampus(2), 'floors': <Object?>[]},
+        ),
+      );
+      addTearDown(repository.dispose);
+      final campus = await repository.loadCampus('v-78');
+      expect(campus.origin, MapDataOrigin.remote);
+      expect(campus.revision, 17);
+    });
+
     test(
       'malformed newer bundle falls back to the last valid cached plan',
       () async {

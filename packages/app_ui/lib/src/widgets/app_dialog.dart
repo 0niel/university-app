@@ -36,9 +36,11 @@ Future<bool> showAppConfirmDialog(
   String? message,
   bool destructive = false,
   Widget? icon,
+  bool useRootNavigator = true,
 }) async {
   final confirmed = await showNinjaDialog<bool>(
     context,
+    useRootNavigator: useRootNavigator,
     builder: (dialogContext) => NinjaDialog(
       title: title,
       message: message,

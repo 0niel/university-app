@@ -93,11 +93,19 @@ class _MotionEntranceState extends State<_MotionEntrance>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_controller != null) return;
-    if (MediaQuery.disableAnimationsOf(context)) return;
+    final reduced = NinjaMotion.of(context, widget.duration) == Duration.zero;
+    final previous = _controller;
+    if (previous != null) {
+      if (reduced && previous.value != 1) previous.value = 1;
+      return;
+    }
     final total = widget.delay + widget.duration;
-    final controller = AnimationController(vsync: this, duration: total);
-    unawaited(controller.forward());
+    final controller = AnimationController(
+      vsync: this,
+      duration: total,
+      value: reduced ? 1 : 0,
+    );
+    if (!reduced) unawaited(controller.forward());
     _controller = controller;
     _animation = CurvedAnimation(
       parent: controller,

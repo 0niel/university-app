@@ -439,6 +439,38 @@ jobs:
     - name: Resolve locked workspace
       working-directory: ${{ env.PATCH_WORKSPACE }}
       run: flutter pub get --enforce-lockfile --no-example
+    - name: Read university provider pin
+      id: provider
+      run: python3 "$RELEASE_TOOLS/tool/university_provider_pin.py" --github-output "$GITHUB_OUTPUT"
+    - name: Check out university provider
+      if: steps.release.outputs.provider_sha != ''
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        repository: ${{ steps.provider.outputs.repository }}
+        ref: ${{ steps.release.outputs.provider_sha }}
+        ssh-key: ${{ secrets.UNIVERSITY_PROVIDER_DEPLOY_KEY }}
+        path: private/university_provider
+        persist-credentials: false
+    - name: Resolve registered provider workspace
+      if: steps.release.outputs.provider_sha != ''
+      working-directory: ${{ env.PATCH_WORKSPACE }}
+      run: |
+        dart run tool/configure_university_provider.dart --local private/university_provider
+        python3 - <<'PY'
+        import hashlib
+        import json
+        import os
+        from pathlib import Path
+
+        root = Path(os.environ["RUNNER_TEMP"])
+        manifest = json.loads((root / "release-manifest.json").read_text())
+        digest = manifest["build_inputs"]["pubspec.lock"]
+        data = (root / "pubspec.lock").read_bytes()
+        if hashlib.sha256(data).hexdigest() != digest:
+            raise SystemExit("Registered Dart lock digest mismatch")
+        (Path(os.environ["PATCH_WORKSPACE"]) / "pubspec.lock").write_bytes(data)
+        PY
+        flutter pub get --enforce-lockfile --no-example
     - name: Verify projected workspace
       env:
         BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}

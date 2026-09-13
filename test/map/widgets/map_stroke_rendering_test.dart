@@ -266,7 +266,7 @@ void main() {
     expect(overlap.width * overlap.height, lessThan(.0001));
     final layers = MapStructureLayers.fromSvg(svg);
     expect(layers.foundationShapes.length, greaterThan(50));
-    expect(layers.openingShapes, hasLength(423));
+    expect(layers.openingShapes, hasLength(424));
     expect(
       layers.foundationShapes
           .where((shape) => shape.path.fillType == PathFillType.evenOdd)

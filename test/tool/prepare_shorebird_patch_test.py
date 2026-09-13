@@ -289,19 +289,21 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "ignored runtime"):
             MODULE.verify_worktree(self.output, entries, receipt)
 
-    def private_checkout(self):
-        self.write(".gitignore", (self.root / ".gitignore").read_bytes() + b"/android/private/\n/other-private/\n")
+    def private_checkout(self, relative="android/private/nfc-pass-android"):
+        self.write(".gitignore", (self.root / ".gitignore").read_bytes() + b"/android/private/\n/other-private/\n/private/\n")
         self.baseline = self.commit()
         self.source = self.baseline
         entries, receipt = self.materialize()
-        private = self.output / "android/private/nfc-pass-android"
+        private = self.output / relative
         private.mkdir(parents=True)
         env = {**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull}
         MODULE.git(private, "init", "-q", env=env)
         (private / "Native.kt").write_bytes(b"class Native\n")
         MODULE.git(private, "add", "Native.kt", env=env)
         MODULE.git(private, "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "Fixture", env=env)
-        manifest = {"platform": "android", "private_native_sha": MODULE.git(private, "rev-parse", "HEAD").decode().strip(), "build_inputs": {}}
+        sha = MODULE.git(private, "rev-parse", "HEAD").decode().strip()
+        manifest = ({"platform": "ios", "provider_sha": sha, "build_inputs": {}} if relative == "private/university_provider"
+                    else {"platform": "android", "private_native_sha": sha, "build_inputs": {}})
         spec = importlib.util.spec_from_file_location("release_manifest", ROOT / "tool/release_manifest.py")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
@@ -339,6 +341,33 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
         for ancestor in (self.output / "android", private.parent, private):
             with self.subTest(ancestor=ancestor), patch.object(Path, "is_symlink", lambda path: path == ancestor or original(path)), self.assertRaisesRegex(ValueError, "Unsafe private"):
                 MODULE.verify_ignored_private_checkout(self.output, manifest)
+
+    def test_pinned_clean_ignored_provider_repository_is_verified_before_exemption(self):
+        provider, entries, receipt, manifest = self.private_checkout("private/university_provider")
+        ignored = MODULE.git(self.output, "ls-files", "--others", "--ignored", "--exclude-standard", "-z").decode().split("\0")
+        self.assertIn("private/university_provider/", ignored)
+        MODULE.verify_worktree(self.output, entries, receipt, manifest)
+        MODULE.verify_worktree(self.output, entries, receipt, {**manifest, "platform": "android", "private_native_sha": None})
+        for provided in (None, {**manifest, "provider_sha": None}, {**manifest, "provider_sha": "0" * 40}):
+            with self.subTest(manifest=provided), self.assertRaises(ValueError):
+                MODULE.verify_worktree(self.output, entries, receipt, provided)
+        (provider / "Native.kt").write_bytes(b"changed provider source\n")
+        with self.assertRaisesRegex(ValueError, "unrecorded changes"):
+            MODULE.verify_worktree(self.output, entries, receipt, manifest)
+
+    def test_restored_dart_lock_is_accepted_only_with_the_recorded_digest(self):
+        entries, receipt = self.materialize()
+        lock = self.output / "pubspec.lock"
+        lock.write_bytes(b"packages:\n  university_provider: resolved\n")
+        with self.assertRaisesRegex(ValueError, "Projection drift"):
+            MODULE.verify_worktree(self.output, entries, receipt)
+        manifest = {"build_inputs": {"pubspec.lock": hashlib.sha256(lock.read_bytes()).hexdigest()}}
+        MODULE.verify_worktree(self.output, entries, receipt, manifest)
+        lock.write_bytes(b"packages:\n  university_provider: other\n")
+        with self.assertRaisesRegex(ValueError, "fingerprint mismatch"):
+            MODULE.verify_worktree(self.output, entries, receipt, manifest)
+        with self.assertRaisesRegex(ValueError, "Projection drift"):
+            MODULE.verify_worktree(self.output, entries, receipt, {"build_inputs": {"pubspec.yaml": "ignored"}})
 
     def test_other_ignored_nested_repository_is_not_exempted(self):
         _, entries, receipt, manifest = self.private_checkout()

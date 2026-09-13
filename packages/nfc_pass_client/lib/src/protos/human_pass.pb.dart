@@ -14,6 +14,9 @@ import 'dart:core' as $core;
 
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
+import 'package:protobuf/well_known_types/google/protobuf/empty.pb.dart' as $2;
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
+    as $1;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
@@ -160,8 +163,28 @@ class SendVerificationCodeRequest extends $pb.GeneratedMessage {
   static SendVerificationCodeRequest? _defaultInstance;
 }
 
+enum SendVerificationCodeResponse_Result {
+  success,
+  waitForToNextAttempt,
+  noDigitalPassOrVerificationMethod,
+  notSet
+}
+
 class SendVerificationCodeResponse extends $pb.GeneratedMessage {
-  factory SendVerificationCodeResponse() => create();
+  factory SendVerificationCodeResponse({
+    VerificationCodeSent? success,
+    $1.Timestamp? waitForToNextAttempt,
+    $2.Empty? noDigitalPassOrVerificationMethod,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (waitForToNextAttempt != null)
+      result.waitForToNextAttempt = waitForToNextAttempt;
+    if (noDigitalPassOrVerificationMethod != null)
+      result.noDigitalPassOrVerificationMethod =
+          noDigitalPassOrVerificationMethod;
+    return result;
+  }
 
   SendVerificationCodeResponse._();
 
@@ -172,10 +195,25 @@ class SendVerificationCodeResponse extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
+  static const $core.Map<$core.int, SendVerificationCodeResponse_Result>
+      _SendVerificationCodeResponse_ResultByTag = {
+    1: SendVerificationCodeResponse_Result.success,
+    2: SendVerificationCodeResponse_Result.waitForToNextAttempt,
+    3: SendVerificationCodeResponse_Result.noDigitalPassOrVerificationMethod,
+    0: SendVerificationCodeResponse_Result.notSet
+  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SendVerificationCodeResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'rtu.humanpass'),
       createEmptyInstance: create)
+    ..oo(0, [1, 2, 3])
+    ..aOM<VerificationCodeSent>(1, _omitFieldNames ? '' : 'success',
+        subBuilder: VerificationCodeSent.create)
+    ..aOM<$1.Timestamp>(2, _omitFieldNames ? '' : 'waitForToNextAttempt',
+        subBuilder: $1.Timestamp.create)
+    ..aOM<$2.Empty>(
+        3, _omitFieldNames ? '' : 'noDigitalPassOrVerificationMethod',
+        subBuilder: $2.Empty.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -199,15 +237,116 @@ class SendVerificationCodeResponse extends $pb.GeneratedMessage {
   static SendVerificationCodeResponse getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SendVerificationCodeResponse>(create);
   static SendVerificationCodeResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  SendVerificationCodeResponse_Result whichResult() =>
+      _SendVerificationCodeResponse_ResultByTag[$_whichOneof(0)]!;
+  @$pb.TagNumber(1)
+  @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  void clearResult() => $_clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  VerificationCodeSent get success => $_getN(0);
+  @$pb.TagNumber(1)
+  set success(VerificationCodeSent value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+  @$pb.TagNumber(1)
+  VerificationCodeSent ensureSuccess() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $1.Timestamp get waitForToNextAttempt => $_getN(1);
+  @$pb.TagNumber(2)
+  set waitForToNextAttempt($1.Timestamp value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasWaitForToNextAttempt() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearWaitForToNextAttempt() => $_clearField(2);
+  @$pb.TagNumber(2)
+  $1.Timestamp ensureWaitForToNextAttempt() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $2.Empty get noDigitalPassOrVerificationMethod => $_getN(2);
+  @$pb.TagNumber(3)
+  set noDigitalPassOrVerificationMethod($2.Empty value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasNoDigitalPassOrVerificationMethod() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearNoDigitalPassOrVerificationMethod() => $_clearField(3);
+  @$pb.TagNumber(3)
+  $2.Empty ensureNoDigitalPassOrVerificationMethod() => $_ensure(2);
+}
+
+class VerificationCodeSent extends $pb.GeneratedMessage {
+  factory VerificationCodeSent({
+    $1.Timestamp? waitForToNextAttempt,
+  }) {
+    final result = create();
+    if (waitForToNextAttempt != null)
+      result.waitForToNextAttempt = waitForToNextAttempt;
+    return result;
+  }
+
+  VerificationCodeSent._();
+
+  factory VerificationCodeSent.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory VerificationCodeSent.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'VerificationCodeSent',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'rtu.humanpass'),
+      createEmptyInstance: create)
+    ..aOM<$1.Timestamp>(1, _omitFieldNames ? '' : 'waitForToNextAttempt',
+        subBuilder: $1.Timestamp.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  VerificationCodeSent clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  VerificationCodeSent copyWith(void Function(VerificationCodeSent) updates) =>
+      super.copyWith((message) => updates(message as VerificationCodeSent))
+          as VerificationCodeSent;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static VerificationCodeSent create() => VerificationCodeSent._();
+  @$core.override
+  VerificationCodeSent createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static VerificationCodeSent getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<VerificationCodeSent>(create);
+  static VerificationCodeSent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $1.Timestamp get waitForToNextAttempt => $_getN(0);
+  @$pb.TagNumber(1)
+  set waitForToNextAttempt($1.Timestamp value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasWaitForToNextAttempt() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearWaitForToNextAttempt() => $_clearField(1);
+  @$pb.TagNumber(1)
+  $1.Timestamp ensureWaitForToNextAttempt() => $_ensure(0);
 }
 
 class GetDigitalPassRequest extends $pb.GeneratedMessage {
   factory GetDigitalPassRequest({
-    $core.String? code,
+    $core.String? receivedCode,
     DeviceInfo? deviceInfo,
   }) {
     final result = create();
-    if (code != null) result.code = code;
+    if (receivedCode != null) result.receivedCode = receivedCode;
     if (deviceInfo != null) result.deviceInfo = deviceInfo;
     return result;
   }
@@ -225,7 +364,7 @@ class GetDigitalPassRequest extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'GetDigitalPassRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'rtu.humanpass'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'code')
+    ..aOS(1, _omitFieldNames ? '' : 'receivedCode')
     ..aOM<DeviceInfo>(2, _omitFieldNames ? '' : 'deviceInfo',
         subBuilder: DeviceInfo.create)
     ..hasRequiredFields = false;
@@ -251,13 +390,13 @@ class GetDigitalPassRequest extends $pb.GeneratedMessage {
   static GetDigitalPassRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get code => $_getSZ(0);
+  $core.String get receivedCode => $_getSZ(0);
   @$pb.TagNumber(1)
-  set code($core.String value) => $_setString(0, value);
+  set receivedCode($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasCode() => $_has(0);
+  $core.bool hasReceivedCode() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCode() => $_clearField(1);
+  void clearReceivedCode() => $_clearField(1);
 
   @$pb.TagNumber(2)
   DeviceInfo get deviceInfo => $_getN(1);
@@ -271,12 +410,18 @@ class GetDigitalPassRequest extends $pb.GeneratedMessage {
   DeviceInfo ensureDeviceInfo() => $_ensure(1);
 }
 
+enum GetDigitalPassResponse_Result { success, wrongCode, nfcError, notSet }
+
 class GetDigitalPassResponse extends $pb.GeneratedMessage {
   factory GetDigitalPassResponse({
-    DigitalPassInner? inner,
+    DigitalPass? success,
+    $2.Empty? wrongCode,
+    $2.Empty? nfcError,
   }) {
     final result = create();
-    if (inner != null) result.inner = inner;
+    if (success != null) result.success = success;
+    if (wrongCode != null) result.wrongCode = wrongCode;
+    if (nfcError != null) result.nfcError = nfcError;
     return result;
   }
 
@@ -289,12 +434,24 @@ class GetDigitalPassResponse extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
+  static const $core.Map<$core.int, GetDigitalPassResponse_Result>
+      _GetDigitalPassResponse_ResultByTag = {
+    1: GetDigitalPassResponse_Result.success,
+    2: GetDigitalPassResponse_Result.wrongCode,
+    3: GetDigitalPassResponse_Result.nfcError,
+    0: GetDigitalPassResponse_Result.notSet
+  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetDigitalPassResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'rtu.humanpass'),
       createEmptyInstance: create)
-    ..aOM<DigitalPassInner>(1, _omitFieldNames ? '' : 'inner',
-        subBuilder: DigitalPassInner.create)
+    ..oo(0, [1, 2, 3])
+    ..aOM<DigitalPass>(1, _omitFieldNames ? '' : 'success',
+        subBuilder: DigitalPass.create)
+    ..aOM<$2.Empty>(2, _omitFieldNames ? '' : 'wrongCode',
+        subBuilder: $2.Empty.create)
+    ..aOM<$2.Empty>(3, _omitFieldNames ? '' : 'nfcError',
+        subBuilder: $2.Empty.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -318,89 +475,121 @@ class GetDigitalPassResponse extends $pb.GeneratedMessage {
   static GetDigitalPassResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  DigitalPassInner get inner => $_getN(0);
+  @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  GetDigitalPassResponse_Result whichResult() =>
+      _GetDigitalPassResponse_ResultByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
-  set inner(DigitalPassInner value) => $_setField(1, value);
+  @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  void clearResult() => $_clearField($_whichOneof(0));
+
   @$pb.TagNumber(1)
-  $core.bool hasInner() => $_has(0);
+  DigitalPass get success => $_getN(0);
   @$pb.TagNumber(1)
-  void clearInner() => $_clearField(1);
+  set success(DigitalPass value) => $_setField(1, value);
   @$pb.TagNumber(1)
-  DigitalPassInner ensureInner() => $_ensure(0);
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+  @$pb.TagNumber(1)
+  DigitalPass ensureSuccess() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $2.Empty get wrongCode => $_getN(1);
+  @$pb.TagNumber(2)
+  set wrongCode($2.Empty value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasWrongCode() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearWrongCode() => $_clearField(2);
+  @$pb.TagNumber(2)
+  $2.Empty ensureWrongCode() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $2.Empty get nfcError => $_getN(2);
+  @$pb.TagNumber(3)
+  set nfcError($2.Empty value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasNfcError() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearNfcError() => $_clearField(3);
+  @$pb.TagNumber(3)
+  $2.Empty ensureNfcError() => $_ensure(2);
 }
 
-class DigitalPassInner extends $pb.GeneratedMessage {
-  factory DigitalPassInner({
-    $fixnum.Int64? passId,
-    $core.String? passUuid,
+class DigitalPass extends $pb.GeneratedMessage {
+  factory DigitalPass({
+    $fixnum.Int64? cardNumber,
+    $core.String? usingId,
   }) {
     final result = create();
-    if (passId != null) result.passId = passId;
-    if (passUuid != null) result.passUuid = passUuid;
+    if (cardNumber != null) result.cardNumber = cardNumber;
+    if (usingId != null) result.usingId = usingId;
     return result;
   }
 
-  DigitalPassInner._();
+  DigitalPass._();
 
-  factory DigitalPassInner.fromBuffer($core.List<$core.int> data,
+  factory DigitalPass.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory DigitalPassInner.fromJson($core.String json,
+  factory DigitalPass.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'DigitalPassInner',
+      _omitMessageNames ? '' : 'DigitalPass',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'rtu.humanpass'),
       createEmptyInstance: create)
-    ..aInt64(1, _omitFieldNames ? '' : 'passId')
-    ..aOS(2, _omitFieldNames ? '' : 'passUuid')
+    ..aInt64(1, _omitFieldNames ? '' : 'cardNumber')
+    ..aOS(2, _omitFieldNames ? '' : 'usingId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  DigitalPassInner clone() => deepCopy();
+  DigitalPass clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  DigitalPassInner copyWith(void Function(DigitalPassInner) updates) =>
-      super.copyWith((message) => updates(message as DigitalPassInner))
-          as DigitalPassInner;
+  DigitalPass copyWith(void Function(DigitalPass) updates) =>
+      super.copyWith((message) => updates(message as DigitalPass))
+          as DigitalPass;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static DigitalPassInner create() => DigitalPassInner._();
+  static DigitalPass create() => DigitalPass._();
   @$core.override
-  DigitalPassInner createEmptyInstance() => create();
+  DigitalPass createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static DigitalPassInner getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<DigitalPassInner>(create);
-  static DigitalPassInner? _defaultInstance;
+  static DigitalPass getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DigitalPass>(create);
+  static DigitalPass? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $fixnum.Int64 get passId => $_getI64(0);
+  $fixnum.Int64 get cardNumber => $_getI64(0);
   @$pb.TagNumber(1)
-  set passId($fixnum.Int64 value) => $_setInt64(0, value);
+  set cardNumber($fixnum.Int64 value) => $_setInt64(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasPassId() => $_has(0);
+  $core.bool hasCardNumber() => $_has(0);
   @$pb.TagNumber(1)
-  void clearPassId() => $_clearField(1);
+  void clearCardNumber() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get passUuid => $_getSZ(1);
+  $core.String get usingId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set passUuid($core.String value) => $_setString(1, value);
+  set usingId($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
-  $core.bool hasPassUuid() => $_has(1);
+  $core.bool hasUsingId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearPassUuid() => $_clearField(2);
+  void clearUsingId() => $_clearField(2);
 }
 
 class DeviceInfo extends $pb.GeneratedMessage {
   factory DeviceInfo({
-    $core.String? deviceName,
+    $core.String? deviceInfoRaw,
   }) {
     final result = create();
-    if (deviceName != null) result.deviceName = deviceName;
+    if (deviceInfoRaw != null) result.deviceInfoRaw = deviceInfoRaw;
     return result;
   }
 
@@ -417,7 +606,7 @@ class DeviceInfo extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'DeviceInfo',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'rtu.humanpass'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'deviceName')
+    ..aOS(1, _omitFieldNames ? '' : 'deviceInfoRaw')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -439,13 +628,13 @@ class DeviceInfo extends $pb.GeneratedMessage {
   static DeviceInfo? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get deviceName => $_getSZ(0);
+  $core.String get deviceInfoRaw => $_getSZ(0);
   @$pb.TagNumber(1)
-  set deviceName($core.String value) => $_setString(0, value);
+  set deviceInfoRaw($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasDeviceName() => $_has(0);
+  $core.bool hasDeviceInfoRaw() => $_has(0);
   @$pb.TagNumber(1)
-  void clearDeviceName() => $_clearField(1);
+  void clearDeviceInfoRaw() => $_clearField(1);
 }
 
 class GetDigitalPassStatusRequest extends $pb.GeneratedMessage {

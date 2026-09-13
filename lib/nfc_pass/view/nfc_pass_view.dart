@@ -2,10 +2,10 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
+import 'package:rtu_mirea_app/nfc_pass/view/nfc_pass_verification_body.dart';
 import 'package:rtu_mirea_app/nfc_pass/widgets/widgets.dart';
 
 part 'nfc_pass_bound_body.dart';
-part 'nfc_pass_code_sent_body.dart';
 part 'nfc_pass_loading_body.dart';
 part 'nfc_pass_loading_card_skeleton.dart';
 part 'nfc_pass_scrollable.dart';
@@ -71,7 +71,24 @@ class _NfcPassViewState extends State<NfcPassView> {
           child: NfcNotConnected(onConnect: widget.onConnect),
         );
       case .codeSent:
-        return _NfcPassCodeSentBody(onEnterCode: widget.onEnterCode);
+      case .verificationPending:
+        return _NfcPassScrollable(
+          child: NfcPassVerificationBody(
+            state: state,
+            onEnterCode: widget.onEnterCode,
+            onResend: widget.onConnect,
+          ),
+        );
+      case .verificationUnavailable:
+        return _NfcPassScrollable(
+          child: NinjaEmptyState(
+            icon: const AppLineIconWidget(AppLineIcon.contactless),
+            title: context.l10n.nfcPassVerificationUnavailableTitle,
+            message: context.l10n.nfcPassVerificationUnavailableDescription,
+            actionLabel: context.l10n.back,
+            onAction: widget.onRetry,
+          ).animateEmptyState(),
+        );
       case .bound:
         return _NfcPassScrollable(
           child: _NfcPassBoundBody(

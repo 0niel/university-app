@@ -4,6 +4,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nfc_pass_repository/nfc_pass_repository.dart';
+import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_verification_issue.dart';
+
+export 'package:rtu_mirea_app/nfc_pass/bloc/nfc_verification_issue.dart';
 
 part 'nfc_pass_cubit.freezed.dart';
 part 'nfc_pass_state.dart';
@@ -18,18 +21,34 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
 
   final NfcPassRepository _repository;
   final ImagePicker _imagePicker;
+  int _request = 0;
+  bool _verificationInFlight = false;
+
+  bool _isCurrent(int request) => !isClosed && request == _request;
 
   Future<void> checkBound() async {
-    emit(state.copyWith(status: .loading, errorMessage: null));
+    if (isClosed) return;
+    final request = ++_request;
+    emit(
+      state.copyWith(
+        status: .loading,
+        errorMessage: null,
+        verificationIssue: null,
+        verificationRetryAt: null,
+      ),
+    );
     try {
       final bound = await _repository.isPassBound();
+      if (!_isCurrent(request)) return;
       if (!bound) {
         emit(state.copyWith(status: .initial, passId: null));
       } else {
         final passId = await _repository.getPassId();
+        if (!_isCurrent(request)) return;
         emit(state.copyWith(status: .bound, passId: passId));
       }
     } on Object catch (error, stackTrace) {
+      if (!_isCurrent(request)) return;
       emit(
         state.copyWith(status: .error, errorMessage: error.toString()),
       );
@@ -38,15 +57,43 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
   }
 
   Future<void> bindPass() async {
+    if (isClosed || _verificationInFlight) return;
+    _verificationInFlight = true;
+    final request = ++_request;
     emit(state.copyWith(status: .loading, errorMessage: null));
     try {
-      await _repository.bindPass();
-      emit(state.copyWith(status: .codeSent));
-    } on Object catch (error, stackTrace) {
+      final result = await _repository.bindPass();
+      if (!_isCurrent(request)) return;
       emit(
-        state.copyWith(status: .error, errorMessage: error.toString()),
+        state.copyWith(
+          status: switch (result) {
+            NfcVerificationCodeSent() => .codeSent,
+            NfcVerificationCooldown() => .verificationPending,
+            NfcVerificationUnavailable() => .verificationUnavailable,
+          },
+          verificationRetryAt: switch (result) {
+            NfcVerificationCodeSent(:final retryAt) => retryAt,
+            NfcVerificationCooldown(:final retryAt) => retryAt,
+            NfcVerificationUnavailable() => null,
+          },
+          verificationIssue: null,
+        ),
+      );
+    } on Object catch (error, stackTrace) {
+      if (!_isCurrent(request)) return;
+      emit(
+        state.copyWith(
+          status: error is NfcPassSendCodeFailure
+              ? .verificationPending
+              : .error,
+          verificationIssue: error is NfcPassSendCodeFailure
+              ? .requestFailed
+              : null,
+        ),
       );
       addError(error, stackTrace);
+    } finally {
+      _verificationInFlight = false;
     }
   }
 
@@ -54,27 +101,59 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
     required String sixDigitCode,
     required String deviceName,
   }) async {
+    if (isClosed || _verificationInFlight) return;
+    _verificationInFlight = true;
+    final request = ++_request;
     emit(state.copyWith(status: .loading, errorMessage: null));
     try {
       final passId = await _repository.confirmBinding(
         sixDigitCode: sixDigitCode,
         deviceName: deviceName,
       );
-      emit(state.copyWith(status: .bound, passId: passId));
-    } on Object catch (error, stackTrace) {
+      if (!_isCurrent(request)) return;
       emit(
-        state.copyWith(status: .error, errorMessage: error.toString()),
+        state.copyWith(
+          status: .bound,
+          passId: passId,
+          verificationIssue: null,
+          verificationRetryAt: null,
+        ),
+      );
+    } on NfcPassVerificationFailure catch (error) {
+      if (!_isCurrent(request)) return;
+      emit(
+        state.copyWith(
+          status: .verificationPending,
+          verificationIssue: switch (error.reason) {
+            NfcVerificationFailure.wrongCode => .wrongCode,
+            NfcVerificationFailure.nfcError => .nfcError,
+          },
+        ),
+      );
+    } on Object catch (error, stackTrace) {
+      if (!_isCurrent(request)) return;
+      emit(
+        state.copyWith(
+          status: .verificationPending,
+          verificationIssue: .requestFailed,
+        ),
       );
       addError(error, stackTrace);
+    } finally {
+      _verificationInFlight = false;
     }
   }
 
   Future<void> unbindPass() async {
+    if (isClosed || _verificationInFlight) return;
+    final request = ++_request;
     emit(state.copyWith(status: .loading, errorMessage: null));
     try {
       await _repository.unbindPass();
+      if (!_isCurrent(request)) return;
       emit(const NfcPassState());
     } on Object catch (error, stackTrace) {
+      if (!_isCurrent(request)) return;
       emit(
         state.copyWith(status: .error, errorMessage: error.toString()),
       );

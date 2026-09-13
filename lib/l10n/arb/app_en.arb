@@ -11108,7 +11108,13 @@
   "noteDrawingTouchDraw": "Draw with touch",
   "noteDrawingResetView": "Fit canvas",
   "noteDrawingColor": "Color {index}",
-  "@noteDrawingColor": {"placeholders": {"index": {"type": "int"}}},
+  "@noteDrawingColor": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "noteDrawingSaveError": "Could not save drawing",
   "noteTextToolsTitle": "Text actions",
   "noteTextToolsDescription": "Selected text will be sent to the app you choose. Translation and processing depend on the apps installed on your device.",
@@ -11951,5 +11957,28 @@
   "scheduleChangeSubjectLabel": "Subject",
   "scheduleChangeRenamed": "Subject renamed",
   "scheduleChangeDetectedAt": "Detected {time}",
-  "@scheduleChangeDetectedAt": {"placeholders": {"time": {"type": "String"}}}
+  "@scheduleChangeDetectedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "universityModulesTitle": "University services",
+  "universityModuleSignInTitle": "Sign in to the app",
+  "universityModuleUnavailableTitle": "Module unavailable",
+  "universityModuleSignInMessage": "Sign in to connect your university services.",
+  "universityModuleUnavailableMessage": "This service is not connected to your app.",
+  "universityModulesViewServices": "View services",
+  "nfcPassWrongCode": "The code was not accepted. Check the digits and enter it again.",
+  "nfcPassIssuanceFailed": "The service could not issue a digital pass. Try confirming the code again later.",
+  "nfcPassVerificationUnconfirmed": "The service did not confirm the result. If you received a code, you can enter it. Use the button below to request another code.",
+  "nfcPassCodeAlreadyRequested": "If you already have a code, enter it to connect your pass. You can also request another code.",
+  "nfcPassVerificationTitle": "Verify your pass",
+  "nfcPassNextCodeTime": "You can request another code at",
+  "nfcPassResendCode": "Send another code",
+  "nfcPassVerificationUnavailableTitle": "Verification unavailable",
+  "nfcPassVerificationUnavailableDescription": "This account has no digital pass or verification method. Contact your university about connecting a digital pass.",
+  "nfcPassCodeSentTitle": "Code sent",
+  "nfcPassCodeSentDescription": "Enter the verification code you received from your university."
 }

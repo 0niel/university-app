@@ -1,5 +1,8 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
 package rtu.humanpass;
 
 service LongTimeTokenService {
@@ -23,24 +26,37 @@ message SendVerificationCodeRequest {
 }
 
 message SendVerificationCodeResponse {
+  oneof result {
+    VerificationCodeSent success = 1;
+    google.protobuf.Timestamp wait_for_to_next_attempt = 2;
+    google.protobuf.Empty no_digital_pass_or_verification_method = 3;
+  }
+}
+
+message VerificationCodeSent {
+  google.protobuf.Timestamp wait_for_to_next_attempt = 1;
 }
 
 message GetDigitalPassRequest {
-  string code = 1;      
+  string received_code = 1;
   DeviceInfo device_info = 2;
 }
 
 message GetDigitalPassResponse {
-  DigitalPassInner inner = 1;
+  oneof result {
+    DigitalPass success = 1;
+    google.protobuf.Empty wrong_code = 2;
+    google.protobuf.Empty nfc_error = 3;
+  }
 }
 
-message DigitalPassInner {
-  int64 pass_id = 1;     // NFC-card ID
-  string pass_uuid = 2;  // UUID
+message DigitalPass {
+  int64 card_number = 1;
+  string using_id = 2;
 }
 
 message DeviceInfo {
-  string device_name = 1;
+  string device_info_raw = 1;
 }
 
 message GetDigitalPassStatusRequest {

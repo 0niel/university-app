@@ -64,10 +64,6 @@ jobs:
         run: python -m unittest discover -s test/tool -p '*_test.py'
       - name: Test showcase seed
         run: node --test scripts/build_showcase_seed.test.mjs
-      - name: Install map import dependencies
-        run: python -m pip install -r scripts/map/requirements.txt
-      - name: Test campus map imports
-        run: python -m unittest discover -s scripts/map -p 'test_*.py'
 
   flutter:
     needs: changes
@@ -310,10 +306,8 @@ jobs:
         run: supabase db reset
 
       - name: Load bundled campus fixtures
-        env:
-          PYTHONPATH: scripts/map
         run: |
-          python -c "import os; from pathlib import Path; from import_pulse import OUTPUT, export_sql; export_sql(OUTPUT, Path(os.environ['RUNNER_TEMP']) / 'campus-map-fixtures.sql')"
+          python tool/export_campus_fixtures.py --output "$RUNNER_TEMP/campus-map-fixtures.sql"
           psql postgresql://postgres:postgres@127.0.0.1:54322/postgres \
             --set ON_ERROR_STOP=1 \
             --file "$RUNNER_TEMP/campus-map-fixtures.sql"

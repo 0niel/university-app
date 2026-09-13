@@ -285,6 +285,14 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   }
 }
 
+/// The user closed the browser before the OAuth flow completed.
+class OAuthFlowCancelled implements Exception {
+  const OAuthFlowCancelled();
+
+  @override
+  String toString() => 'Browser exited before login.';
+}
+
 /// Client class to initiate and handle the OAuth interception process.
 class OAuthInterceptorClient {
   const OAuthInterceptorClient({
@@ -344,7 +352,7 @@ class OAuthInterceptorClient {
       onBrowserExit: () {
         if (!completer.isCompleted) {
           completer.completeError(
-            'Browser exited before login.',
+            const OAuthFlowCancelled(),
             StackTrace.current,
           );
         }

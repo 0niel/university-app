@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_pass_cubit.dart';
+import 'package:rtu_mirea_app/nfc_pass/view/nfc_pass_verification_body.dart';
 import 'package:rtu_mirea_app/nfc_pass/view/nfc_pass_view.dart';
 import 'package:rtu_mirea_app/nfc_pass/widgets/nfc_pass_card.dart';
 
@@ -24,6 +25,92 @@ void main() {
   }
 
   group('NfcPassView', () {
+    testWidgets('unavailable verification never offers code entry', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(
+          const NfcPassState(
+            status: NfcPassStatus.verificationUnavailable,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NfcPassVerificationBody), findsNothing);
+      final notice = tester.widget<NinjaEmptyState>(
+        find.byType(NinjaEmptyState),
+      );
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(NfcPassView)),
+      );
+      expect(notice.title, l10n.nfcPassVerificationUnavailableTitle);
+      expect(notice.actionLabel, l10n.back);
+    });
+
+    testWidgets('cooldown disables resend while preserving manual code entry', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(
+          NfcPassState(
+            status: NfcPassStatus.verificationPending,
+            verificationRetryAt: DateTime.now().add(const Duration(minutes: 5)),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final resend = tester.widget<AppButton>(find.byType(AppButton));
+      expect(resend.onPressed, isNull);
+      expect(
+        tester.widget<NinjaEmptyState>(find.byType(NinjaEmptyState)).onAction,
+        isNotNull,
+      );
+
+      await tester.pumpWidget(
+        buildSubject(
+          NfcPassState(
+            status: NfcPassStatus.verificationPending,
+            verificationRetryAt: DateTime.now().subtract(
+              const Duration(seconds: 1),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<AppButton>(find.byType(AppButton)).onPressed,
+        isNotNull,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
+    testWidgets(
+      'wrong code offers a correction without claiming another send',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            const NfcPassState(
+              status: NfcPassStatus.verificationPending,
+              verificationIssue: NfcVerificationIssue.wrongCode,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final notice = tester.widget<NinjaEmptyState>(
+          find.byType(NinjaEmptyState),
+        );
+        final l10n = AppLocalizations.of(
+          tester.element(find.byType(NfcPassView)),
+        );
+
+        expect(notice.message, l10n.nfcPassWrongCode);
+        expect(notice.title, isNot(l10n.nfcPassCodeSentTitle));
+        expect(notice.onAction, isNotNull);
+      },
+    );
+
     testWidgets(
       'shows a Ninja skeleton and no spinner on the initial load',
       (tester) async {

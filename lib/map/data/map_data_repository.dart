@@ -101,6 +101,7 @@ class MapDataRepository {
   static const _requestTimeout = Duration(seconds: 15);
   static const _cacheFreshness = Duration(minutes: 30);
   static const _cacheStoredAtKey = '_map_cache_stored_at';
+  static const _acknowledgedRevisionKey = '_map_acknowledged_remote_revision';
 
   final String organizationId;
   final String? bundledCatalogAsset;
@@ -120,6 +121,7 @@ class MapDataRepository {
   final _offlineSvg = <String>{};
   final _campuses = <String, CampusMapData>{};
   final _campusContent = Expando<Map<String, Object?>>();
+  final _acknowledgedCampusRevisions = Expando<int>();
   final _campusGenerations = <String, int>{};
   final _pendingCampuses = <String, Future<CampusMapData>>{};
   final _pendingCachedCampuses = <String, Future<CampusMapData?>>{};
@@ -133,8 +135,14 @@ class MapDataRepository {
 
   bool isCampusCacheFresh(String campusId) =>
       _isCacheFresh('$organizationId:campus:$campusId') &&
-      (_campuses[campusId]?.revision ?? -1) >=
-          (_catalogRevisions[campusId] ?? 0);
+      _satisfiesCatalog(campusId, _campuses[campusId]);
+
+  bool _satisfiesCatalog(String campusId, CampusMapData? data) {
+    if (data == null) return false;
+    final revision = _catalogRevisions[campusId] ?? 0;
+    return data.revision >= revision ||
+        (_acknowledgedCampusRevisions[data] ?? -1) >= revision;
+  }
 
   bool sameCampusContent(CampusMapData a, CampusMapData b) {
     if (identical(a, b)) return true;
@@ -185,8 +193,7 @@ class MapDataRepository {
 
   Future<CampusMapData?> loadCachedCampus(String campusId) {
     final memory = _campuses[campusId];
-    if (memory != null &&
-        memory.revision >= (_catalogRevisions[campusId] ?? 0)) {
+    if (memory != null && _satisfiesCatalog(campusId, memory)) {
       return Future.value(memory);
     }
     return _pendingCachedCampuses.putIfAbsent(campusId, () async {
@@ -308,9 +315,7 @@ class MapDataRepository {
     final pending = _pendingCampuses[campusId];
     if (pending != null && !afterPending) return pending;
     final cached = _campuses[campusId];
-    if (!refresh &&
-        cached != null &&
-        cached.revision >= (_catalogRevisions[campusId] ?? 0)) {
+    if (!refresh && cached != null && _satisfiesCatalog(campusId, cached)) {
       return Future.value(cached);
     }
     late final Future<CampusMapData> request;
@@ -356,13 +361,35 @@ class MapDataRepository {
           'Campus response predates its catalog revision',
         );
       }
-      final complete = await _completeCampusDocument(
-        json,
-        MapDataOrigin.remote,
-      );
-      final data = await _parseCampusDocument(complete, MapDataOrigin.remote);
-      await _store(key, {...complete, 'can_moderate': false});
-      return data;
+      await _tryBundledCatalog();
+      final bundledMetadata = _bundledCampusMetadata[campusId];
+      if (bundledMetadata != null &&
+          _newerBundledSource(bundledMetadata, json)) {
+        final bundled = await _tryBundledCampusJson(campusId);
+        if (bundled != null && _newerBundledSource(bundled, json)) {
+          try {
+            final complete = await _completeCampusDocument(
+              {
+                ...bundled,
+                'can_moderate': false,
+                _acknowledgedRevisionKey:
+                    _number(json['revision'])?.toInt() ?? 0,
+              },
+              MapDataOrigin.bundled,
+              allowNetwork: false,
+            );
+            final data = await _parseCampusDocument(
+              complete,
+              MapDataOrigin.bundled,
+            );
+            await _store(key, complete);
+            return data;
+          } on Exception {
+            return await _publishedCampus(json, key);
+          }
+        }
+      }
+      return await _publishedCampus(json, key);
     } on Exception {
       final cached = await _read(key);
       final bundled = await _tryBundledCampusJson(campusId);
@@ -394,6 +421,21 @@ class MapDataRepository {
       }
       rethrow;
     }
+  }
+
+  Future<CampusMapData> _publishedCampus(
+    Map<String, Object?> json,
+    String key,
+  ) async {
+    final document = Map<String, Object?>.of(json)
+      ..remove(_acknowledgedRevisionKey);
+    final complete = await _completeCampusDocument(
+      document,
+      MapDataOrigin.remote,
+    );
+    final data = await _parseCampusDocument(complete, MapDataOrigin.remote);
+    await _store(key, {...complete, 'can_moderate': false});
+    return data;
   }
 
   Future<CampusMapData> refreshCampus(
@@ -521,6 +563,13 @@ class MapDataRepository {
           ? bundled['source_captured_at']! as String
           : '',
     );
+    final publishedTime = DateTime.tryParse(
+      _string(cached['updated_at']) ?? '',
+    );
+    if (publishedTime != null &&
+        (bundledTime == null || publishedTime.isAfter(bundledTime))) {
+      return false;
+    }
     final cachedTime = DateTime.tryParse(
       cached['source_captured_at'] is String
           ? cached['source_captured_at']! as String
@@ -961,9 +1010,16 @@ class MapDataRepository {
     );
     _campusContent[data] = {
       for (final entry in json.entries)
-        if (entry.key != _cacheStoredAtKey) entry.key: entry.value,
+        if (entry.key != _cacheStoredAtKey &&
+            entry.key != _acknowledgedRevisionKey)
+          entry.key: entry.value,
       'can_moderate': data.canModerate,
     };
+    if (origin != MapDataOrigin.remote) {
+      _acknowledgedCampusRevisions[data] = _number(
+        json[_acknowledgedRevisionKey],
+      )?.toInt();
+    }
     _inlineSvg
       ..removeWhere((key, _) => key.startsWith('map://$id/'))
       ..addAll(newInline);

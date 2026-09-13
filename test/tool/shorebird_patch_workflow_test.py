@@ -297,6 +297,42 @@ class ShorebirdPatchWorkflowTest(unittest.TestCase):
         self.execute(step(PATCH, 'patch', 'Restore registered dependency lock'))
         self.assertFalse((self.root / 'projection/ios/Podfile.lock').exists())
 
+    def test_patch_rebuilds_with_the_registered_university_provider(self):
+        names = [item['name'] for item in PATCH['jobs']['patch']['steps']]
+        for name in ('Read university provider pin', 'Check out university provider', 'Resolve registered provider workspace'):
+            self.assertGreater(names.index(name), names.index('Resolve locked workspace'))
+            self.assertLess(names.index(name), names.index('Verify projected workspace'))
+        self.assertIn('"$RELEASE_TOOLS/tool/university_provider_pin.py"', step(PATCH, 'patch', 'Read university provider pin')['run'])
+        checkout = step(PATCH, 'patch', 'Check out university provider')
+        self.assertEqual(checkout['if'], "steps.release.outputs.provider_sha != ''")
+        self.assertEqual(checkout['with']['repository'], '${{ steps.provider.outputs.repository }}')
+        self.assertEqual(checkout['with']['ref'], '${{ steps.release.outputs.provider_sha }}')
+        self.assertEqual(checkout['with']['path'], 'private/university_provider')
+        self.assertFalse(checkout['with']['persist-credentials'])
+        resolve = step(PATCH, 'patch', 'Resolve registered provider workspace')
+        self.assertEqual(resolve['if'], "steps.release.outputs.provider_sha != ''")
+        self.assertEqual(resolve['working-directory'], '${{ env.PATCH_WORKSPACE }}')
+        self.assertIn('tool/configure_university_provider.dart --local private/university_provider', resolve['run'])
+        self.assertLess(resolve['run'].index('configure_university_provider.dart'), resolve['run'].index("python3 - <<'PY'"))
+        self.assertLess(resolve['run'].index('\nPY'), resolve['run'].index('flutter pub get --enforce-lockfile'))
+        self.assertNotIn('Check out university provider', [item['name'] for item in PATCH['jobs']['validate']['steps']])
+
+    def test_registered_dart_lock_is_restored_only_with_its_digest(self):
+        import hashlib
+        data = b'packages:\n  university_provider: resolved\n'
+        self.write('release-manifest.json', {'build_inputs': {'pubspec.lock': hashlib.sha256(data).hexdigest()}})
+        (self.root / 'pubspec.lock').write_bytes(data)
+        (self.root / 'projection').mkdir(parents=True)
+        item = step(PATCH, 'patch', 'Resolve registered provider workspace')
+        self.execute(item)
+        self.assertEqual((self.root / 'projection/pubspec.lock').read_bytes(), data)
+        (self.root / 'pubspec.lock').write_bytes(b'changed')
+        with self.assertRaises(SystemExit):
+            self.execute(item)
+        self.write('release-manifest.json', {'build_inputs': {}})
+        with self.assertRaises(KeyError):
+            self.execute(item)
+
     def test_native_generators_come_from_projected_baseline(self):
         configure = step(PATCH, 'patch', 'Configure release parameters')
         self.assertEqual(configure['working-directory'], '${{ env.PATCH_WORKSPACE }}')

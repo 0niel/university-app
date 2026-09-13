@@ -287,6 +287,10 @@ RouteBase get $shellRouteData => StatefulShellRouteData.$route(
           routes: [
             GoRouteData.$route(path: 'nfc', factory: $NfcPassRoute._fromState),
             GoRouteData.$route(
+              path: 'modules/:moduleId',
+              factory: $UniversityModuleRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'discourse-post-overview/:postId',
               factory: $DiscoursePostOverviewRoute._fromState,
             ),
@@ -774,6 +778,31 @@ mixin $NfcPassRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/services/nfc');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $UniversityModuleRoute on GoRouteData {
+  static UniversityModuleRoute _fromState(GoRouterState state) =>
+      UniversityModuleRoute(moduleId: state.pathParameters['moduleId']!);
+
+  UniversityModuleRoute get _self => this as UniversityModuleRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/services/modules/${Uri.encodeComponent(_self.moduleId)}',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);

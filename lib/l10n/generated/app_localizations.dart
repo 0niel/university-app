@@ -21493,6 +21493,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Detected {time}'**
   String scheduleChangeDetectedAt(String time);
+
+  /// No description provided for @universityModulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'University services'**
+  String get universityModulesTitle;
+
+  /// No description provided for @universityModuleSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to the app'**
+  String get universityModuleSignInTitle;
+
+  /// No description provided for @universityModuleUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Module unavailable'**
+  String get universityModuleUnavailableTitle;
+
+  /// No description provided for @universityModuleSignInMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to connect your university services.'**
+  String get universityModuleSignInMessage;
+
+  /// No description provided for @universityModuleUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This service is not connected to your app.'**
+  String get universityModuleUnavailableMessage;
+
+  /// No description provided for @universityModulesViewServices.
+  ///
+  /// In en, this message translates to:
+  /// **'View services'**
+  String get universityModulesViewServices;
+
+  /// No description provided for @nfcPassWrongCode.
+  ///
+  /// In en, this message translates to:
+  /// **'The code was not accepted. Check the digits and enter it again.'**
+  String get nfcPassWrongCode;
+
+  /// No description provided for @nfcPassIssuanceFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The service could not issue a digital pass. Try confirming the code again later.'**
+  String get nfcPassIssuanceFailed;
+
+  /// No description provided for @nfcPassVerificationUnconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'The service did not confirm the result. If you received a code, you can enter it. Use the button below to request another code.'**
+  String get nfcPassVerificationUnconfirmed;
+
+  /// No description provided for @nfcPassCodeAlreadyRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'If you already have a code, enter it to connect your pass. You can also request another code.'**
+  String get nfcPassCodeAlreadyRequested;
+
+  /// No description provided for @nfcPassVerificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your pass'**
+  String get nfcPassVerificationTitle;
+
+  /// No description provided for @nfcPassNextCodeTime.
+  ///
+  /// In en, this message translates to:
+  /// **'You can request another code at'**
+  String get nfcPassNextCodeTime;
+
+  /// No description provided for @nfcPassResendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send another code'**
+  String get nfcPassResendCode;
+
+  /// No description provided for @nfcPassVerificationUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification unavailable'**
+  String get nfcPassVerificationUnavailableTitle;
+
+  /// No description provided for @nfcPassVerificationUnavailableDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has no digital pass or verification method. Contact your university about connecting a digital pass.'**
+  String get nfcPassVerificationUnavailableDescription;
+
+  /// No description provided for @nfcPassCodeSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent'**
+  String get nfcPassCodeSentTitle;
+
+  /// No description provided for @nfcPassCodeSentDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the verification code you received from your university.'**
+  String get nfcPassCodeSentDescription;
 }
 
 class _AppLocalizationsDelegate

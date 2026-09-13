@@ -1,0 +1,13 @@
+name: university_provider
+description: Default university integration registry.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  university_modules: ^0.1.0
+
+dev_dependencies:
+  very_good_analysis: 10.3.0

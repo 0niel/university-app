@@ -12,9 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
   grpc: ^5.1.0
-  http: ^1.2.2
+  http: ^1.6.0
   protobuf: ^6.0.0
-  random_user_agents: ^1.0.8
 
 dev_dependencies:
   flutter_test:

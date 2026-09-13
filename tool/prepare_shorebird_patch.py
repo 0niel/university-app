@@ -164,20 +164,33 @@ def manifest_for(path, baseline, root):
     return manifest
 
 
-def verify_ignored_private_checkout(root, manifest):
-    if (not manifest or manifest.get("platform") != "android"
-            or not COMMIT.fullmatch(manifest.get("private_native_sha") or "")):
-        raise ValueError("Ignored private checkout requires verified Android release inputs")
+def verify_checkout_path(root, parts, label):
     target = root
-    for part in ("android", "private", "nfc-pass-android"):
+    for part in parts:
         target /= part
         if (target.is_symlink() or not target.is_dir()
                 or not target.resolve().is_relative_to(root.resolve())
                 or getattr(target.lstat(), "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)):
-            raise ValueError("Unsafe private native checkout path")
+            raise ValueError(f"Unsafe {label} checkout path")
+
+
+def verify_ignored_private_checkout(root, manifest):
+    if (not manifest or manifest.get("platform") != "android"
+            or not COMMIT.fullmatch(manifest.get("private_native_sha") or "")):
+        raise ValueError("Ignored private checkout requires verified Android release inputs")
+    verify_checkout_path(root, ("android", "private", "nfc-pass-android"), "private native")
     from release_manifest import private_source
     if private_source(root) != manifest["private_native_sha"]:
         raise ValueError("Private native module differs from the release")
+
+
+def verify_ignored_provider_checkout(root, manifest):
+    if not manifest or not COMMIT.fullmatch(manifest.get("provider_sha") or ""):
+        raise ValueError("Ignored provider checkout requires verified release inputs")
+    verify_checkout_path(root, ("private", "university_provider"), "university provider")
+    from release_manifest import provider_source
+    if provider_source(root) != manifest["provider_sha"]:
+        raise ValueError("University provider differs from the release")
 
 
 def verify_worktree(root, entries, receipt, manifest=None, verify_native_inputs=False):
@@ -199,7 +212,7 @@ def verify_worktree(root, entries, receipt, manifest=None, verify_native_inputs=
         mode, _, identity = expected.split()
         actual = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
         if actual != identity:
-            if path not in native_inputs or safe_path(path)[0] not in NATIVE_ROOTS:
+            if path not in native_inputs or (path != "pubspec.lock" and safe_path(path)[0] not in NATIVE_ROOTS):
                 raise ValueError(f"Projection drift: {path}")
             if hashlib.sha256(data).hexdigest() != native_inputs[path]:
                 raise ValueError(f"Native fingerprint mismatch: {path}")
@@ -212,6 +225,9 @@ def verify_worktree(root, entries, receipt, manifest=None, verify_native_inputs=
     if "android/private/nfc-pass-android/" in ignored:
         verify_ignored_private_checkout(root, manifest)
         ignored.remove("android/private/nfc-pass-android/")
+    if "private/university_provider/" in ignored:
+        verify_ignored_provider_checkout(root, manifest)
+        ignored.remove("private/university_provider/")
     if any(is_runtime(path) for path in ignored):
         raise ValueError("Unexpected ignored runtime source in the projected workspace")
     for path in (untracked | ignored) & native_inputs.keys():

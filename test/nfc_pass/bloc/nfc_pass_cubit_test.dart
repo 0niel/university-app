@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -81,7 +83,9 @@ void main() {
     group('bindPass', () {
       blocTest<NfcPassCubit, NfcPassState>(
         'emits [loading, codeSent] when binding starts successfully',
-        setUp: () => when(repository.bindPass).thenAnswer((_) async {}),
+        setUp: () => when(
+          repository.bindPass,
+        ).thenAnswer((_) async => const NfcVerificationCodeSent()),
         build: buildCubit,
         act: (cubit) => cubit.bindPass(),
         expect: () => const [
@@ -99,10 +103,59 @@ void main() {
           NfcPassState(status: NfcPassStatus.loading),
           NfcPassState(
             status: NfcPassStatus.error,
-            errorMessage: 'Exception: boom',
           ),
         ],
       );
+
+      blocTest<NfcPassCubit, NfcPassState>(
+        'never claims that a code was sent when verification is unavailable',
+        setUp: () => when(
+          repository.bindPass,
+        ).thenAnswer((_) async => const NfcVerificationUnavailable()),
+        build: buildCubit,
+        act: (cubit) => cubit.bindPass(),
+        expect: () => const [
+          NfcPassState(status: NfcPassStatus.loading),
+          NfcPassState(status: NfcPassStatus.verificationUnavailable),
+        ],
+      );
+
+      test('preserves cooldown without emitting codeSent', () async {
+        final deadline = DateTime.utc(2027);
+        when(repository.bindPass).thenAnswer(
+          (_) async => NfcVerificationCooldown(retryAt: deadline),
+        );
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        final emitted = <NfcPassState>[];
+        final subscription = cubit.stream.listen(emitted.add);
+        addTearDown(subscription.cancel);
+
+        await cubit.bindPass();
+        await Future<void>.delayed(Duration.zero);
+
+        expect(cubit.state.status, NfcPassStatus.verificationPending);
+        expect(cubit.state.verificationRetryAt, deadline);
+        expect(
+          emitted.map((state) => state.status),
+          isNot(contains(NfcPassStatus.codeSent)),
+        );
+      });
+
+      test('coalesces taps and ignores an outcome after closure', () async {
+        final pending = Completer<NfcVerificationResult>();
+        when(repository.bindPass).thenAnswer((_) => pending.future);
+        final cubit = buildCubit();
+        final first = cubit.bindPass();
+        await cubit.bindPass();
+        await cubit.close();
+        pending.complete(const NfcVerificationCodeSent());
+
+        await first;
+
+        verify(repository.bindPass).called(1);
+        expect(cubit.state.status, NfcPassStatus.loading);
+      });
     });
 
     group('confirmBinding', () {
@@ -124,7 +177,7 @@ void main() {
       );
 
       blocTest<NfcPassCubit, NfcPassState>(
-        'emits [loading, error] when confirmation throws',
+        'keeps manual confirmation available after an ambiguous response',
         setUp: () => when(
           () => repository.confirmBinding(
             sixDigitCode: any(named: 'sixDigitCode'),
@@ -137,11 +190,39 @@ void main() {
         expect: () => const [
           NfcPassState(status: NfcPassStatus.loading),
           NfcPassState(
-            status: NfcPassStatus.error,
-            errorMessage: 'Exception: boom',
+            status: NfcPassStatus.verificationPending,
+            verificationIssue: NfcVerificationIssue.requestFailed,
           ),
         ],
       );
+
+      for (final (failure, issue) in [
+        (NfcVerificationFailure.wrongCode, NfcVerificationIssue.wrongCode),
+        (NfcVerificationFailure.nfcError, NfcVerificationIssue.nfcError),
+      ]) {
+        blocTest<NfcPassCubit, NfcPassState>(
+          'shows ${failure.name} without restarting the code send',
+          setUp: () => when(
+            () => repository.confirmBinding(
+              sixDigitCode: any(named: 'sixDigitCode'),
+              deviceName: any(named: 'deviceName'),
+            ),
+          ).thenThrow(NfcPassVerificationFailure(failure)),
+          build: buildCubit,
+          act: (cubit) => cubit.confirmBinding(
+            sixDigitCode: '123456',
+            deviceName: 'Phone',
+          ),
+          expect: () => [
+            const NfcPassState(status: NfcPassStatus.loading),
+            NfcPassState(
+              status: NfcPassStatus.verificationPending,
+              verificationIssue: issue,
+            ),
+          ],
+          verify: (_) => verifyNever(repository.bindPass),
+        );
+      }
     });
 
     group('unbindPass', () {
