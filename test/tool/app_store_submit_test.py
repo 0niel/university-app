@@ -906,5 +906,101 @@ class AppStoreVersionPreparationTest(unittest.TestCase):
             client.patch.assert_not_called()
 
 
+def localization(localization_id, locale, whats_new=None):
+    return {"id": localization_id, "attributes": {"locale": locale, "whatsNew": whats_new}}
+
+
+class AppStoreReleaseNotesTest(unittest.TestCase):
+    notes = {"ru": "Исправления.", "default": "Fixes."}
+
+    def test_locale_matching_prefers_exact_then_language_then_default(self):
+        self.assertEqual(submit.release_note_for("ru", self.notes), "Исправления.")
+        self.assertEqual(submit.release_note_for("ru-RU", self.notes), "Исправления.")
+        self.assertEqual(submit.release_note_for("en-US", self.notes), "Fixes.")
+        self.assertEqual(submit.release_note_for("en-US", {"en-US": "Exact", "en": "Language"}), "Exact")
+        self.assertIsNone(submit.release_note_for("de-DE", {"ru": "Только русский"}))
+
+    def test_only_empty_localizations_are_filled_and_verified(self):
+        client = Mock()
+        before = [localization("loc-ru", "ru-RU"), localization("loc-en", "en-US", "Kept"), localization("loc-blank", "en-GB", " ")]
+        after = [localization("loc-ru", "ru-RU", "Исправления."), localization("loc-en", "en-US", "Kept"), localization("loc-blank", "en-GB", "Fixes.")]
+        client.get.side_effect = [{"data": before}, {"data": after}]
+        submit.set_release_notes(client, "version-123", self.notes)
+        self.assertEqual(client.patch.call_count, 2)
+        self.assertEqual(client.patch.call_args_list[0].args, (
+            "/v1/appStoreVersionLocalizations/loc-ru",
+            {"data": {"type": "appStoreVersionLocalizations", "id": "loc-ru", "attributes": {"whatsNew": "Исправления."}}},
+        ))
+        self.assertEqual(client.patch.call_args_list[1].args[0], "/v1/appStoreVersionLocalizations/loc-blank")
+        self.assertEqual(client.get.call_args.args[0], "/v1/appStoreVersions/version-123/appStoreVersionLocalizations")
+
+    def test_missing_locale_text_incomplete_list_and_failed_readback_are_refused(self):
+        client = Mock()
+        client.get.side_effect = [{"data": [localization("loc-de", "de-DE")]}]
+        with self.assertRaisesRegex(RuntimeError, "missing for locale de-DE"):
+            submit.set_release_notes(client, "version-123", {"ru": "Только русский"})
+        client.patch.assert_not_called()
+        client = Mock()
+        client.get.side_effect = [{"data": [localization("loc-ru", "ru")], "links": {"next": "more"}}]
+        with self.assertRaises(RuntimeError):
+            submit.set_release_notes(client, "version-123", self.notes)
+        client = Mock()
+        client.get.side_effect = [{"data": [localization("loc-ru", "ru")]}, {"data": [localization("loc-ru", "ru")]}]
+        with self.assertRaisesRegex(RuntimeError, "verification failed"):
+            submit.set_release_notes(client, "version-123", self.notes)
+        with self.assertRaises(ValueError):
+            submit.set_release_notes(Mock(), "version-123", {"ru": " "})
+
+    def test_release_notes_file_is_validated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "notes.json"
+            for text in ("not json", "[]", "{}", '{"ru": ""}', '{"ru": 1}'):
+                path.write_text(text, encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    submit.load_release_notes(path)
+            path.write_text('{"ru": " Привет ", "default": "Hi"}', encoding="utf-8")
+            self.assertEqual(submit.load_release_notes(path), {"ru": "Привет", "default": "Hi"})
+        self.assertIsNone(submit.load_release_notes(None))
+
+    def test_fresh_submission_sets_release_notes_on_the_prepared_version(self):
+        build = {"build_id": "new", "build_number": "2447.18.55",
+                 "marketing_version": "5.2.2", "processing_state": "VALID"}
+        events = []
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "notes.json"
+            path.write_text('{"ru": "Исправления.", "default": "Fixes."}', encoding="utf-8")
+            with patch.object(submit, "wait_for_build", return_value=build), \
+                 patch.object(submit, "should_submit", return_value=True), \
+                 patch.object(submit, "ensure_app_store_version", side_effect=lambda *args: events.append("prepared") or "version-123") as ensure, \
+                 patch.object(submit, "set_release_notes", side_effect=lambda *args: events.append("notes")) as notes, \
+                 patch.object(submit.subprocess, "run", side_effect=lambda *args, **kwargs: events.append("submitted")):
+                result = submit.submit_build(
+                    Mock(), "app.bundle", "5.2.2", "2447.18.55", Path("key.p8"),
+                    release_notes_file=path,
+                )
+        self.assertEqual(events, ["prepared", "notes", "submitted"])
+        self.assertEqual(result["submission_action"], "submitted")
+        self.assertEqual(notes.call_args.args[1:], ("version-123", {"ru": "Исправления.", "default": "Fixes."}))
+        self.assertEqual(ensure.call_args.args[1:], ("app.bundle", "5.2.2", "new"))
+
+    def test_resumed_submission_does_not_touch_release_notes(self):
+        build = {"build_id": "new", "build_number": "2447.18.55",
+                 "marketing_version": "5.2.2", "processing_state": "VALID"}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "notes.json"
+            path.write_text('{"default": "Fixes."}', encoding="utf-8")
+            with patch.object(submit, "wait_for_build", return_value=build), \
+                 patch.object(submit, "should_submit", return_value="review-123"), \
+                 patch.object(submit, "ensure_app_store_version") as ensure, \
+                 patch.object(submit, "set_release_notes") as notes, \
+                 patch.object(submit.subprocess, "run"):
+                submit.submit_build(
+                    Mock(), "app.bundle", "5.2.2", "2447.18.55", Path("key.p8"),
+                    release_notes_file=path,
+                )
+        ensure.assert_not_called()
+        notes.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
