@@ -1,7 +1,7 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stac/stac.dart';
 import 'package:stac_bridge/src/expression/expression_engine.dart';
+import 'package:stac_bridge/src/expression/json_equality.dart';
 import 'package:stac_bridge/src/expression/tree_resolver.dart';
 import 'package:stac_bridge/src/widgets/mini_app_state_scope.dart';
 
@@ -45,7 +45,6 @@ class _ReactiveMiniAppNodeState extends State<ReactiveMiniAppNode> {
     deferActions: true,
     deferWidgets: true,
   );
-  static const _equality = DeepCollectionEquality();
   Map<String, Object?>? _resolved;
   Object? _boundValue;
   Widget? _child;
@@ -67,8 +66,8 @@ class _ReactiveMiniAppNodeState extends State<ReactiveMiniAppNode> {
       final key = widget.node['stateKey'];
       final boundValue = key is String ? store?.get(key) : null;
       if (_child == null ||
-          !_equality.equals(_resolved, resolved) ||
-          !_equality.equals(_boundValue, boundValue)) {
+          !jsonEquals(_resolved, resolved) ||
+          !jsonEquals(_boundValue, boundValue)) {
         _resolved = resolved;
         _boundValue = boundValue;
         _child = resolved == null

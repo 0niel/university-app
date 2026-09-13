@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/mini_apps/cubit/mini_app_runner_cubit.dart';
-import 'package:rtu_mirea_app/mini_apps/runtime/mini_app_accent.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_runner_skeleton.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_content.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_refresh_surface.dart';
@@ -62,18 +61,15 @@ class MiniAppRunnerBody extends StatelessWidget {
         if (screen == null) return _renderError(context);
         return KeyedSubtree(
           key: const ValueKey('runner-ready'),
-          child: MiniAppAccentTheme(
-            accentColor: state.app?.accentColor,
-            child: MiniAppRefreshSurface(
-              refreshing: state.refreshing,
-              failed: state.refreshFailed,
-              offline: offline,
-              onRetry: () => unawaited(_reload(context)),
-              child: Builder(
-                builder: (themedContext) =>
-                    MiniAppContent.render(screen, themedContext) ??
-                    _renderError(themedContext),
-              ),
+          child: MiniAppRefreshSurface(
+            refreshing: state.refreshing,
+            failed: state.refreshFailed,
+            offline: offline,
+            onRetry: () => unawaited(_reload(context)),
+            child: Builder(
+              builder: (contentContext) =>
+                  MiniAppContent.render(screen, contentContext) ??
+                  _renderError(contentContext),
             ),
           ),
         );

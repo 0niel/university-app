@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/mini_apps/cubit/mini_app_runner_cubit.dart';
-import 'package:rtu_mirea_app/mini_apps/runtime/mini_app_accent.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_runner_skeleton.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_content.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_refresh_surface.dart';
@@ -24,13 +23,11 @@ class MiniAppInnerScreen extends StatefulWidget {
     required this.path,
     required this.title,
     super.key,
-    this.accentColor,
     this.controller,
   });
 
   final String path;
   final String title;
-  final String? accentColor;
   final MiniAppInnerScreenController? controller;
 
   @override
@@ -144,7 +141,6 @@ class _MiniAppInnerScreenState extends State<MiniAppInnerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor = widget.accentColor;
     return MiniAppScaffold(
       title: widget.title,
       body: Builder(
@@ -157,21 +153,18 @@ class _MiniAppInnerScreenState extends State<MiniAppInnerScreen> {
           }
           return KeyedSubtree(
             key: const ValueKey('inner-ready'),
-            child: MiniAppAccentTheme(
-              accentColor: accentColor,
-              child: MiniAppRefreshSurface(
-                refreshing: _refreshing,
-                failed: _failed,
-                onRetry: () => unawaited(_reload()),
-                child: Builder(
-                  builder: (themedContext) =>
-                      MiniAppContent.render(screen, themedContext) ??
-                      _error(
-                        themedContext,
-                        key: const ValueKey('inner-render-error'),
-                        renderError: true,
-                      ),
-                ),
+            child: MiniAppRefreshSurface(
+              refreshing: _refreshing,
+              failed: _failed,
+              onRetry: () => unawaited(_reload()),
+              child: Builder(
+                builder: (contentContext) =>
+                    MiniAppContent.render(screen, contentContext) ??
+                    _error(
+                      contentContext,
+                      key: const ValueKey('inner-render-error'),
+                      renderError: true,
+                    ),
               ),
             ),
           );
