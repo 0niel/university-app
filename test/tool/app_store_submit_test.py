@@ -829,5 +829,82 @@ class AppStoreReviewNotesTest(unittest.TestCase):
                 run.assert_not_called()
 
 
+class AppStoreVersionPreparationTest(unittest.TestCase):
+    build = {"build_id": "new", "build_number": "2447.18.55",
+             "marketing_version": "5.2.2", "processing_state": "VALID"}
+
+    def prepared(self, existing, current_build="new", note=True):
+        client = Mock()
+        current = version("5.2.2", build_id=current_build)
+        current["id"] = "version-new" if not existing else "version-123"
+        client.get.side_effect = [
+            {"data": [{"id": "app-123"}]}, {"data": list(existing)}, {"data": current},
+        ]
+        events = []
+        with tempfile.TemporaryDirectory() as directory:
+            note_file = Path(directory) / "notes.txt"
+            note_file.write_text("Location clarification", encoding="utf-8")
+            with patch.object(submit, "wait_for_build", return_value=self.build), \
+                 patch.object(submit, "should_submit", return_value=True), \
+                 patch.object(submit, "append_review_notes", side_effect=lambda *args: events.append("notes")), \
+                 patch.object(submit.subprocess, "run", side_effect=lambda *args, **kwargs: events.append("submitted")):
+                client.post.side_effect = lambda *args: events.append("post") or {"data": {"id": "version-new"}}
+                client.patch.side_effect = lambda *args: events.append("patch")
+                result = submit.submit_build(
+                    client, "app.bundle", "5.2.2", "2447.18.55", Path("key.p8"),
+                    review_notes_file=note_file if note else None,
+                )
+        return client, events, result
+
+    def test_missing_version_is_created_with_the_build_before_notes(self):
+        client, events, result = self.prepared(existing=[])
+        self.assertEqual(events, ["post", "notes", "submitted"])
+        self.assertEqual(result["submission_action"], "submitted")
+        path, payload = client.post.call_args.args
+        self.assertEqual(path, "/v1/appStoreVersions")
+        self.assertEqual(payload["data"]["attributes"]["versionString"], "5.2.2")
+        self.assertEqual(payload["data"]["attributes"]["platform"], "IOS")
+        self.assertEqual(payload["data"]["relationships"]["app"]["data"]["id"], "app-123")
+        self.assertEqual(payload["data"]["relationships"]["build"]["data"]["id"], "new")
+        self.assertEqual(client.get.call_args.args[0], "/v1/appStoreVersions/version-new")
+
+    def test_empty_existing_version_gets_the_build_attached(self):
+        client, events, _ = self.prepared(existing=[version("5.2.2")])
+        self.assertEqual(events, ["patch", "notes", "submitted"])
+        client.post.assert_not_called()
+        self.assertEqual(client.patch.call_args.args, (
+            "/v1/appStoreVersions/version-123/relationships/build",
+            {"data": {"type": "builds", "id": "new"}},
+        ))
+
+    def test_existing_version_with_the_build_is_reused(self):
+        client, events, _ = self.prepared(existing=[version("5.2.2", build_id="new")])
+        self.assertEqual(events, ["notes", "submitted"])
+        client.post.assert_not_called()
+        client.patch.assert_not_called()
+
+    def test_submission_without_notes_does_not_prepare_a_version(self):
+        client, events, _ = self.prepared(existing=[], note=False)
+        self.assertEqual(events, ["submitted"])
+        client.post.assert_not_called()
+        client.get.assert_not_called()
+
+    def test_unprepared_version_blocks_notes_and_submission(self):
+        with self.assertRaisesRegex(RuntimeError, "not prepared"):
+            self.prepared(existing=[], current_build="other")
+
+    def test_version_with_another_build_or_locked_state_is_refused(self):
+        for existing in (
+            [version("5.2.2", build_id="other")],
+            [version("5.2.2", state="READY_FOR_SALE")],
+            [version("5.2.2"), version("5.2.2")],
+        ):
+            client = client_for(*existing)
+            with self.assertRaises(RuntimeError):
+                submit.ensure_app_store_version(client, "app.bundle", "5.2.2", "new")
+            client.post.assert_not_called()
+            client.patch.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
