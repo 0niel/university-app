@@ -47,6 +47,45 @@ void main() {
       config.nfcPass.redirectUrls,
       const ['https://pulse.mirea.ru/services'],
     );
+    for (final url in [
+      config.nfcPass.oauthUrl,
+      config.nfcPass.accessTokenUrl,
+      config.nfcPass.sendVerificationCodeUrl,
+      config.nfcPass.getDigitalPassUrl,
+    ]) {
+      expect(Uri.parse(url).host, 'pulse.mirea.ru');
+    }
+  });
+
+  test('maps the legacy attendance host onto pulse', () {
+    const legacy = NfcPassConfig(
+      oauthUrl:
+          'https://attendance.mirea.ru/api/auth/login?redirectUri=https%3A%2F%2Fpulse.mirea.ru%2Fservices&rememberMe=True',
+      redirectUrls: ['https://pulse.mirea.ru/services'],
+      accessTokenUrl:
+          'https://attendance.mirea.ru:443/rtu.pulse_app.LongTimeTokenService/GetAccessTokenForDigitalPass',
+      sendVerificationCodeUrl:
+          'https://api.university.example/nfc/send-code?host=attendance.mirea.ru',
+      getDigitalPassUrl: 'not a url',
+    );
+
+    final canonical = legacy.canonical;
+
+    expect(
+      canonical.oauthUrl,
+      'https://pulse.mirea.ru/api/auth/login?redirectUri=https%3A%2F%2Fpulse.mirea.ru%2Fservices&rememberMe=True',
+    );
+    expect(canonical.redirectUrls, legacy.redirectUrls);
+    expect(
+      canonical.accessTokenUrl,
+      'https://pulse.mirea.ru:443/rtu.pulse_app.LongTimeTokenService/GetAccessTokenForDigitalPass',
+    );
+    expect(canonical.sendVerificationCodeUrl, legacy.sendVerificationCodeUrl);
+    expect(canonical.getDigitalPassUrl, legacy.getDigitalPassUrl);
+    expect(
+      NfcPassConfig.canonicalUrl('https://user@attendance.mirea.ru/x'),
+      'https://user@attendance.mirea.ru/x',
+    );
   });
 
   test('parses explicit tenant capabilities', () {
