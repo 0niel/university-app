@@ -28,14 +28,14 @@ final class UniversityConfig {
     this.calendarEventUrl,
     this.nfcPass = const NfcPassConfig(
       oauthUrl:
-          'https://attendance.mirea.ru/api/auth/login?redirectUri=https%3A%2F%2Fpulse.mirea.ru%2Fservices&rememberMe=True',
+          'https://pulse.mirea.ru/api/auth/login?redirectUri=https%3A%2F%2Fpulse.mirea.ru%2Fservices&rememberMe=True',
       redirectUrls: ['https://pulse.mirea.ru/services'],
       accessTokenUrl:
-          'https://attendance.mirea.ru/rtu.pulse_app.LongTimeTokenService/GetAccessTokenForDigitalPass',
+          'https://pulse.mirea.ru/rtu.pulse_app.LongTimeTokenService/GetAccessTokenForDigitalPass',
       sendVerificationCodeUrl:
-          'https://attendance.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/SendVerificationCode',
+          'https://pulse.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/SendVerificationCode',
       getDigitalPassUrl:
-          'https://attendance.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/GetDigitalPass',
+          'https://pulse.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/GetDigitalPass',
     ),
     this.winterSessionStartMonth = 1,
     this.winterSessionStartDay = 9,
@@ -165,7 +165,7 @@ final class UniversityConfig {
         oauthUrl: const String.fromEnvironment(
           'APP_NFC_PASS_OAUTH_URL',
           defaultValue:
-              'https://attendance.mirea.ru/api/auth/login?redirectUri=https%3A%2F%2Fpulse.mirea.ru%2Fservices&rememberMe=True',
+              'https://pulse.mirea.ru/api/auth/login?redirectUri=https%3A%2F%2Fpulse.mirea.ru%2Fservices&rememberMe=True',
         ),
         redirectUrls: _csv(
           const String.fromEnvironment(
@@ -176,19 +176,19 @@ final class UniversityConfig {
         accessTokenUrl: const String.fromEnvironment(
           'APP_NFC_PASS_ACCESS_TOKEN_URL',
           defaultValue:
-              'https://attendance.mirea.ru/rtu.pulse_app.LongTimeTokenService/GetAccessTokenForDigitalPass',
+              'https://pulse.mirea.ru/rtu.pulse_app.LongTimeTokenService/GetAccessTokenForDigitalPass',
         ),
         sendVerificationCodeUrl: const String.fromEnvironment(
           'APP_NFC_PASS_SEND_CODE_URL',
           defaultValue:
-              'https://attendance.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/SendVerificationCode',
+              'https://pulse.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/SendVerificationCode',
         ),
         getDigitalPassUrl: const String.fromEnvironment(
           'APP_NFC_PASS_GET_PASS_URL',
           defaultValue:
-              'https://attendance.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/GetDigitalPass',
+              'https://pulse.mirea.ru/rtu_tc.rtu_attend.humanpass.HumanPassService/GetDigitalPass',
         ),
-      ),
+      ).canonical,
       enabledCapabilities: UniversityCapability.parseCsv(
         const String.fromEnvironment(
           'APP_ENABLED_CAPABILITIES',
