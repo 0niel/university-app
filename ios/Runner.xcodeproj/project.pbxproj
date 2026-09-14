@@ -12,8 +12,6 @@
 		26239B182749523600ADE724 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26239B172749523600ADE724 /* SwiftUI.framework */; };
 		26239B1B2749523600ADE724 /* HomeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26239B1A2749523600ADE724 /* HomeWidget.swift */; };
 		26239B1E2749523700ADE724 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26239B1D2749523700ADE724 /* Assets.xcassets */; };
-		26239B202749523700ADE724 /* HomeWidget.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 26239B1C2749523600ADE724 /* HomeWidget.intentdefinition */; };
-		26239B212749523700ADE724 /* HomeWidget.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 26239B1C2749523600ADE724 /* HomeWidget.intentdefinition */; };
 		26239B242749523700ADE724 /* HomeWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 26239B142749523600ADE724 /* HomeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		4A55D906CC5AE5F24C8AE3F7 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14870631A3537159DF649630 /* Pods_Runner.framework */; };
@@ -65,7 +63,6 @@
 		26239B152749523600ADE724 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		26239B172749523600ADE724 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		26239B1A2749523600ADE724 /* HomeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWidget.swift; sourceTree = "<group>"; };
-		26239B1C2749523600ADE724 /* HomeWidget.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = HomeWidget.intentdefinition; sourceTree = "<group>"; };
 		26239B1D2749523700ADE724 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		26239B1F2749523700ADE724 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		26239B2A2749526D00ADE724 /* HomeWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HomeWidgetExtension.entitlements; sourceTree = "<group>"; };
@@ -111,7 +108,6 @@
 			isa = PBXGroup;
 			children = (
 				26239B1A2749523600ADE724 /* HomeWidget.swift */,
-				26239B1C2749523600ADE724 /* HomeWidget.intentdefinition */,
 				26239B1D2749523700ADE724 /* Assets.xcassets */,
 				26239B1F2749523700ADE724 /* Info.plist */,
 			);
@@ -388,7 +384,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				26239B1B2749523600ADE724 /* HomeWidget.swift in Sources */,
-				26239B202749523700ADE724 /* HomeWidget.intentdefinition in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,7 +393,6 @@
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
-				26239B212749523700ADE724 /* HomeWidget.intentdefinition in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
