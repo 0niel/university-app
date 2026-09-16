@@ -35,7 +35,13 @@ credentials and no token is written to disk. Confirm it works:
 ```powershell
 Get-ScheduledTask MireaScheduleRelay
 gh variable get SCHEDULE_SOURCE_BASE_URL --repo 0niel/university-app
+Get-Content C:\ProgramData\mirea-schedule-relay\supervisor.log -Tail 20
 ```
+
+The supervisor logs to `supervisor.log` (the task window is hidden). If `gh`
+fails right after logon it retries every minute until the variable is set, and
+every 10 minutes it re-reads the variable and republishes if something else
+overwrote it.
 
 ## How the fetcher uses it
 
