@@ -11,6 +11,22 @@ abstract class NfcPassFailure with EquatableMixin implements Exception {
   /// The original error/message.
   final Object error;
 
+  /// The innermost cause, unwrapping failures that wrap other failures.
+  Object get rootCause {
+    var cause = error;
+    while (cause is NfcPassFailure) {
+      cause = cause.error;
+    }
+    return cause;
+  }
+
+  /// The pass backend could not be reached (timeout, DNS, TCP or TLS
+  /// failure). Retrying makes sense; re-authenticating does not.
+  NfcPassUnreachableException? get unreachable {
+    final cause = rootCause;
+    return cause is NfcPassUnreachableException ? cause : null;
+  }
+
   @override
   List<Object> get props => [error];
 }

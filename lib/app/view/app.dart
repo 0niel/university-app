@@ -216,8 +216,10 @@ class App extends StatelessWidget {
                 create: (_) => ScheduleComparisonCubit(),
               ),
               BlocProvider(
-                create: (_) =>
-                    NfcPassCubit(repository: appScope.nfcPassRepository),
+                create: (_) => NfcPassCubit(
+                  repository: appScope.nfcPassRepository,
+                  connectivityClient: ConnectivityClient(),
+                ),
               ),
               BlocProvider(
                 create: (_) =>

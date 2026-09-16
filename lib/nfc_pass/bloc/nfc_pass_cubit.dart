@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity_client/connectivity_client.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -16,15 +17,40 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
   NfcPassCubit({
     required this._repository,
     ImagePicker? imagePicker,
+    this._connectivityClient,
   }) : _imagePicker = imagePicker ?? ImagePicker(),
        super(const NfcPassState());
 
   final NfcPassRepository _repository;
   final ImagePicker _imagePicker;
+  final ConnectivityClient? _connectivityClient;
   int _request = 0;
   bool _verificationInFlight = false;
 
   bool _isCurrent(int request) => !isClosed && request == _request;
+
+  /// The pass backend did not answer; report which host and whether a VPN
+  /// may be in the way instead of a generic failure.
+  Future<NfcPassState> _unreachableState(
+    NfcPassUnreachableException cause,
+  ) async {
+    var vpnActive = false;
+    final connectivity = _connectivityClient;
+    if (connectivity != null) {
+      try {
+        vpnActive = await connectivity.hasVpn();
+      } on ConnectivityCheckFailure {
+        vpnActive = false;
+      }
+    }
+    return state.copyWith(
+      status: .error,
+      errorMessage: null,
+      verificationIssue: null,
+      unreachableHost: cause.host,
+      vpnActive: vpnActive,
+    );
+  }
 
   Future<void> checkBound() async {
     if (isClosed) return;
@@ -35,6 +61,8 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
         errorMessage: null,
         verificationIssue: null,
         verificationRetryAt: null,
+        unreachableHost: null,
+        vpnActive: false,
       ),
     );
     try {
@@ -60,7 +88,14 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
     if (isClosed || _verificationInFlight) return;
     _verificationInFlight = true;
     final request = ++_request;
-    emit(state.copyWith(status: .loading, errorMessage: null));
+    emit(
+      state.copyWith(
+        status: .loading,
+        errorMessage: null,
+        unreachableHost: null,
+        vpnActive: false,
+      ),
+    );
     try {
       final result = await _repository.bindPass();
       if (!_isCurrent(request)) return;
@@ -81,16 +116,22 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
       );
     } on Object catch (error, stackTrace) {
       if (!_isCurrent(request)) return;
-      emit(
-        state.copyWith(
-          status: error is NfcPassSendCodeFailure
-              ? .verificationPending
-              : .error,
-          verificationIssue: error is NfcPassSendCodeFailure
-              ? .requestFailed
-              : null,
-        ),
-      );
+      final unreachable = error is NfcPassFailure ? error.unreachable : null;
+      if (unreachable != null) {
+        final next = await _unreachableState(unreachable);
+        if (_isCurrent(request)) emit(next);
+      } else {
+        emit(
+          state.copyWith(
+            status: error is NfcPassSendCodeFailure
+                ? .verificationPending
+                : .error,
+            verificationIssue: error is NfcPassSendCodeFailure
+                ? .requestFailed
+                : null,
+          ),
+        );
+      }
       addError(error, stackTrace);
     } finally {
       _verificationInFlight = false;
@@ -132,10 +173,14 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
       );
     } on Object catch (error, stackTrace) {
       if (!_isCurrent(request)) return;
+      final unreachable = error is NfcPassFailure ? error.unreachable : null;
       emit(
         state.copyWith(
           status: .verificationPending,
-          verificationIssue: .requestFailed,
+          verificationIssue: unreachable == null
+              ? .requestFailed
+              : .unreachable,
+          unreachableHost: unreachable?.host,
         ),
       );
       addError(error, stackTrace);

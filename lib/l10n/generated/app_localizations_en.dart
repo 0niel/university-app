@@ -7547,6 +7547,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn\'t load your pass. Check your connection and try again.';
 
   @override
+  String get nfcPassUnreachableTitle => 'Pass service is not responding';
+
+  @override
+  String nfcPassUnreachableDescription(String host) {
+    return '$host is not responding. Check your internet connection and try again.';
+  }
+
+  @override
+  String nfcPassUnreachableVpnDescription(String host) {
+    return '$host is not responding through your VPN: the university blocks connections from VPN servers. Turn the VPN off or exclude this app from it, then try again.';
+  }
+
+  @override
   String get nfcPassHowItWorksTitle => 'How it works';
 
   @override

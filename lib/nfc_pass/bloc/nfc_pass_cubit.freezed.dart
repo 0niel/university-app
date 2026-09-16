@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$NfcPassState {
 
- NfcPassStatus get status; int? get passId; String? get errorMessage; String? get localFilePath; DateTime? get verificationRetryAt; NfcVerificationIssue? get verificationIssue;
+ NfcPassStatus get status; int? get passId; String? get errorMessage; String? get localFilePath; DateTime? get verificationRetryAt; NfcVerificationIssue? get verificationIssue; String? get unreachableHost; bool get vpnActive;
 /// Create a copy of NfcPassState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $NfcPassStateCopyWith<NfcPassState> get copyWith => _$NfcPassStateCopyWithImpl<N
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NfcPassState&&(identical(other.status, status) || other.status == status)&&(identical(other.passId, passId) || other.passId == passId)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.localFilePath, localFilePath) || other.localFilePath == localFilePath)&&(identical(other.verificationRetryAt, verificationRetryAt) || other.verificationRetryAt == verificationRetryAt)&&(identical(other.verificationIssue, verificationIssue) || other.verificationIssue == verificationIssue));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NfcPassState&&(identical(other.status, status) || other.status == status)&&(identical(other.passId, passId) || other.passId == passId)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.localFilePath, localFilePath) || other.localFilePath == localFilePath)&&(identical(other.verificationRetryAt, verificationRetryAt) || other.verificationRetryAt == verificationRetryAt)&&(identical(other.verificationIssue, verificationIssue) || other.verificationIssue == verificationIssue)&&(identical(other.unreachableHost, unreachableHost) || other.unreachableHost == unreachableHost)&&(identical(other.vpnActive, vpnActive) || other.vpnActive == vpnActive));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,passId,errorMessage,localFilePath,verificationRetryAt,verificationIssue);
+int get hashCode => Object.hash(runtimeType,status,passId,errorMessage,localFilePath,verificationRetryAt,verificationIssue,unreachableHost,vpnActive);
 
 @override
 String toString() {
-  return 'NfcPassState(status: $status, passId: $passId, errorMessage: $errorMessage, localFilePath: $localFilePath, verificationRetryAt: $verificationRetryAt, verificationIssue: $verificationIssue)';
+  return 'NfcPassState(status: $status, passId: $passId, errorMessage: $errorMessage, localFilePath: $localFilePath, verificationRetryAt: $verificationRetryAt, verificationIssue: $verificationIssue, unreachableHost: $unreachableHost, vpnActive: $vpnActive)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $NfcPassStateCopyWith<$Res>  {
   factory $NfcPassStateCopyWith(NfcPassState value, $Res Function(NfcPassState) _then) = _$NfcPassStateCopyWithImpl;
 @useResult
 $Res call({
- NfcPassStatus status, int? passId, String? errorMessage, String? localFilePath, DateTime? verificationRetryAt, NfcVerificationIssue? verificationIssue
+ NfcPassStatus status, int? passId, String? errorMessage, String? localFilePath, DateTime? verificationRetryAt, NfcVerificationIssue? verificationIssue, String? unreachableHost, bool vpnActive
 });
 
 
@@ -62,7 +62,7 @@ class _$NfcPassStateCopyWithImpl<$Res>
 
 /// Create a copy of NfcPassState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? passId = freezed,Object? errorMessage = freezed,Object? localFilePath = freezed,Object? verificationRetryAt = freezed,Object? verificationIssue = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? passId = freezed,Object? errorMessage = freezed,Object? localFilePath = freezed,Object? verificationRetryAt = freezed,Object? verificationIssue = freezed,Object? unreachableHost = freezed,Object? vpnActive = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as NfcPassStatus,passId: freezed == passId ? _self.passId : passId // ignore: cast_nullable_to_non_nullable
@@ -70,7 +70,9 @@ as int?,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessag
 as String?,localFilePath: freezed == localFilePath ? _self.localFilePath : localFilePath // ignore: cast_nullable_to_non_nullable
 as String?,verificationRetryAt: freezed == verificationRetryAt ? _self.verificationRetryAt : verificationRetryAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,verificationIssue: freezed == verificationIssue ? _self.verificationIssue : verificationIssue // ignore: cast_nullable_to_non_nullable
-as NfcVerificationIssue?,
+as NfcVerificationIssue?,unreachableHost: freezed == unreachableHost ? _self.unreachableHost : unreachableHost // ignore: cast_nullable_to_non_nullable
+as String?,vpnActive: null == vpnActive ? _self.vpnActive : vpnActive // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -155,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( NfcPassStatus status,  int? passId,  String? errorMessage,  String? localFilePath,  DateTime? verificationRetryAt,  NfcVerificationIssue? verificationIssue)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( NfcPassStatus status,  int? passId,  String? errorMessage,  String? localFilePath,  DateTime? verificationRetryAt,  NfcVerificationIssue? verificationIssue,  String? unreachableHost,  bool vpnActive)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NfcPassState() when $default != null:
-return $default(_that.status,_that.passId,_that.errorMessage,_that.localFilePath,_that.verificationRetryAt,_that.verificationIssue);case _:
+return $default(_that.status,_that.passId,_that.errorMessage,_that.localFilePath,_that.verificationRetryAt,_that.verificationIssue,_that.unreachableHost,_that.vpnActive);case _:
   return orElse();
 
 }
@@ -176,10 +178,10 @@ return $default(_that.status,_that.passId,_that.errorMessage,_that.localFilePath
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( NfcPassStatus status,  int? passId,  String? errorMessage,  String? localFilePath,  DateTime? verificationRetryAt,  NfcVerificationIssue? verificationIssue)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( NfcPassStatus status,  int? passId,  String? errorMessage,  String? localFilePath,  DateTime? verificationRetryAt,  NfcVerificationIssue? verificationIssue,  String? unreachableHost,  bool vpnActive)  $default,) {final _that = this;
 switch (_that) {
 case _NfcPassState():
-return $default(_that.status,_that.passId,_that.errorMessage,_that.localFilePath,_that.verificationRetryAt,_that.verificationIssue);case _:
+return $default(_that.status,_that.passId,_that.errorMessage,_that.localFilePath,_that.verificationRetryAt,_that.verificationIssue,_that.unreachableHost,_that.vpnActive);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +198,10 @@ return $default(_that.status,_that.passId,_that.errorMessage,_that.localFilePath
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( NfcPassStatus status,  int? passId,  String? errorMessage,  String? localFilePath,  DateTime? verificationRetryAt,  NfcVerificationIssue? verificationIssue)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( NfcPassStatus status,  int? passId,  String? errorMessage,  String? localFilePath,  DateTime? verificationRetryAt,  NfcVerificationIssue? verificationIssue,  String? unreachableHost,  bool vpnActive)?  $default,) {final _that = this;
 switch (_that) {
 case _NfcPassState() when $default != null:
-return $default(_that.status,_that.passId,_that.errorMessage,_that.localFilePath,_that.verificationRetryAt,_that.verificationIssue);case _:
+return $default(_that.status,_that.passId,_that.errorMessage,_that.localFilePath,_that.verificationRetryAt,_that.verificationIssue,_that.unreachableHost,_that.vpnActive);case _:
   return null;
 
 }
@@ -211,8 +213,8 @@ return $default(_that.status,_that.passId,_that.errorMessage,_that.localFilePath
 
 
 class _NfcPassState extends NfcPassState {
-  const _NfcPassState({this.status = NfcPassStatus.initial, this.passId, this.errorMessage, this.localFilePath, this.verificationRetryAt, this.verificationIssue}): super._();
-
+  const _NfcPassState({this.status = NfcPassStatus.initial, this.passId, this.errorMessage, this.localFilePath, this.verificationRetryAt, this.verificationIssue, this.unreachableHost, this.vpnActive = false}): super._();
+  
 
 @override@JsonKey() final  NfcPassStatus status;
 @override final  int? passId;
@@ -220,6 +222,8 @@ class _NfcPassState extends NfcPassState {
 @override final  String? localFilePath;
 @override final  DateTime? verificationRetryAt;
 @override final  NfcVerificationIssue? verificationIssue;
+@override final  String? unreachableHost;
+@override@JsonKey() final  bool vpnActive;
 
 /// Create a copy of NfcPassState
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +235,16 @@ _$NfcPassStateCopyWith<_NfcPassState> get copyWith => __$NfcPassStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NfcPassState&&(identical(other.status, status) || other.status == status)&&(identical(other.passId, passId) || other.passId == passId)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.localFilePath, localFilePath) || other.localFilePath == localFilePath)&&(identical(other.verificationRetryAt, verificationRetryAt) || other.verificationRetryAt == verificationRetryAt)&&(identical(other.verificationIssue, verificationIssue) || other.verificationIssue == verificationIssue));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NfcPassState&&(identical(other.status, status) || other.status == status)&&(identical(other.passId, passId) || other.passId == passId)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.localFilePath, localFilePath) || other.localFilePath == localFilePath)&&(identical(other.verificationRetryAt, verificationRetryAt) || other.verificationRetryAt == verificationRetryAt)&&(identical(other.verificationIssue, verificationIssue) || other.verificationIssue == verificationIssue)&&(identical(other.unreachableHost, unreachableHost) || other.unreachableHost == unreachableHost)&&(identical(other.vpnActive, vpnActive) || other.vpnActive == vpnActive));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,passId,errorMessage,localFilePath,verificationRetryAt,verificationIssue);
+int get hashCode => Object.hash(runtimeType,status,passId,errorMessage,localFilePath,verificationRetryAt,verificationIssue,unreachableHost,vpnActive);
 
 @override
 String toString() {
-  return 'NfcPassState(status: $status, passId: $passId, errorMessage: $errorMessage, localFilePath: $localFilePath, verificationRetryAt: $verificationRetryAt, verificationIssue: $verificationIssue)';
+  return 'NfcPassState(status: $status, passId: $passId, errorMessage: $errorMessage, localFilePath: $localFilePath, verificationRetryAt: $verificationRetryAt, verificationIssue: $verificationIssue, unreachableHost: $unreachableHost, vpnActive: $vpnActive)';
 }
 
 
@@ -251,7 +255,7 @@ abstract mixin class _$NfcPassStateCopyWith<$Res> implements $NfcPassStateCopyWi
   factory _$NfcPassStateCopyWith(_NfcPassState value, $Res Function(_NfcPassState) _then) = __$NfcPassStateCopyWithImpl;
 @override @useResult
 $Res call({
- NfcPassStatus status, int? passId, String? errorMessage, String? localFilePath, DateTime? verificationRetryAt, NfcVerificationIssue? verificationIssue
+ NfcPassStatus status, int? passId, String? errorMessage, String? localFilePath, DateTime? verificationRetryAt, NfcVerificationIssue? verificationIssue, String? unreachableHost, bool vpnActive
 });
 
 
@@ -268,7 +272,7 @@ class __$NfcPassStateCopyWithImpl<$Res>
 
 /// Create a copy of NfcPassState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? passId = freezed,Object? errorMessage = freezed,Object? localFilePath = freezed,Object? verificationRetryAt = freezed,Object? verificationIssue = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? passId = freezed,Object? errorMessage = freezed,Object? localFilePath = freezed,Object? verificationRetryAt = freezed,Object? verificationIssue = freezed,Object? unreachableHost = freezed,Object? vpnActive = null,}) {
   return _then(_NfcPassState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as NfcPassStatus,passId: freezed == passId ? _self.passId : passId // ignore: cast_nullable_to_non_nullable
@@ -276,7 +280,9 @@ as int?,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessag
 as String?,localFilePath: freezed == localFilePath ? _self.localFilePath : localFilePath // ignore: cast_nullable_to_non_nullable
 as String?,verificationRetryAt: freezed == verificationRetryAt ? _self.verificationRetryAt : verificationRetryAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,verificationIssue: freezed == verificationIssue ? _self.verificationIssue : verificationIssue // ignore: cast_nullable_to_non_nullable
-as NfcVerificationIssue?,
+as NfcVerificationIssue?,unreachableHost: freezed == unreachableHost ? _self.unreachableHost : unreachableHost // ignore: cast_nullable_to_non_nullable
+as String?,vpnActive: null == vpnActive ? _self.vpnActive : vpnActive // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

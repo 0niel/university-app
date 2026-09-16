@@ -9,6 +9,8 @@ abstract class NfcPassState with _$NfcPassState {
     String? localFilePath,
     DateTime? verificationRetryAt,
     NfcVerificationIssue? verificationIssue,
+    String? unreachableHost,
+    @Default(false) bool vpnActive,
   }) = _NfcPassState;
 
   const NfcPassState._();

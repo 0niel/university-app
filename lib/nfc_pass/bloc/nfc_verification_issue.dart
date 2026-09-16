@@ -1,1 +1,1 @@
-enum NfcVerificationIssue { wrongCode, nfcError, requestFailed }
+enum NfcVerificationIssue { wrongCode, nfcError, requestFailed, unreachable }

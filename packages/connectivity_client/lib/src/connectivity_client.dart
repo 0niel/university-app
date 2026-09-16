@@ -15,6 +15,17 @@ class ConnectivityClient {
       Error.throwWithStackTrace(ConnectivityCheckFailure(error), stackTrace);
     }
   }
+
+  /// Whether a VPN transport is active. The OS reports it alongside the
+  /// underlying Wi-Fi or mobile transport.
+  Future<bool> hasVpn() async {
+    try {
+      final results = await _connectivity.checkConnectivity();
+      return results.contains(ConnectivityResult.vpn);
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(ConnectivityCheckFailure(error), stackTrace);
+    }
+  }
 }
 
 class ConnectivityCheckFailure implements Exception {

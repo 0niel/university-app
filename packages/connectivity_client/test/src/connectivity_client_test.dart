@@ -29,6 +29,25 @@ void main() {
       expect(await client.hasWifiOrEthernet(), isFalse);
     });
 
+    test('detects an active VPN next to the underlying transport', () async {
+      when(connectivity.checkConnectivity).thenAnswer(
+        (_) => Future.value([ConnectivityResult.wifi, ConnectivityResult.vpn]),
+      );
+      expect(await client.hasVpn(), isTrue);
+      when(connectivity.checkConnectivity).thenAnswer(
+        (_) => Future.value([ConnectivityResult.wifi]),
+      );
+      expect(await client.hasVpn(), isFalse);
+    });
+
+    test('hasVpn throws ConnectivityCheckFailure on platform error', () async {
+      when(connectivity.checkConnectivity).thenThrow(Exception('boom'));
+      await expectLater(
+        client.hasVpn(),
+        throwsA(isA<ConnectivityCheckFailure>()),
+      );
+    });
+
     test('throws ConnectivityCheckFailure on platform error', () async {
       when(connectivity.checkConnectivity).thenThrow(Exception('boom'));
       await expectLater(

@@ -13382,6 +13382,24 @@ abstract class AppLocalizations {
   /// **'We couldn\'t load your pass. Check your connection and try again.'**
   String get nfcPassErrorDescription;
 
+  /// Title of the NFC pass error state when the pass server cannot be reached
+  ///
+  /// In en, this message translates to:
+  /// **'Pass service is not responding'**
+  String get nfcPassUnreachableTitle;
+
+  /// Description of the NFC pass error state when the pass server cannot be reached
+  ///
+  /// In en, this message translates to:
+  /// **'{host} is not responding. Check your internet connection and try again.'**
+  String nfcPassUnreachableDescription(String host);
+
+  /// Description of the NFC pass error state when the pass server cannot be reached and a VPN is active
+  ///
+  /// In en, this message translates to:
+  /// **'{host} is not responding through your VPN: the university blocks connections from VPN servers. Turn the VPN off or exclude this app from it, then try again.'**
+  String nfcPassUnreachableVpnDescription(String host);
+
   /// Title of the NFC pass onboarding steps
   ///
   /// In en, this message translates to:

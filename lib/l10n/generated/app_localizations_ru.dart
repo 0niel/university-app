@@ -7677,6 +7677,19 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось загрузить пропуск. Проверьте соединение и попробуйте снова.';
 
   @override
+  String get nfcPassUnreachableTitle => 'Сервис пропусков не отвечает';
+
+  @override
+  String nfcPassUnreachableDescription(String host) {
+    return '$host не отвечает. Проверьте подключение к интернету и попробуйте снова.';
+  }
+
+  @override
+  String nfcPassUnreachableVpnDescription(String host) {
+    return '$host не отвечает через VPN: университет не принимает подключения с VPN-серверов. Отключите VPN или исключите из него приложение и попробуйте снова.';
+  }
+
+  @override
   String get nfcPassHowItWorksTitle => 'Как это работает';
 
   @override

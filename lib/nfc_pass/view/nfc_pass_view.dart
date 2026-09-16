@@ -101,10 +101,17 @@ class _NfcPassViewState extends State<NfcPassView> {
       case .error:
         final l10n = context.l10n;
         final errorMessage = state.errorMessage;
+        final host = state.unreachableHost;
         return _NfcPassScrollable(
           child: NinjaErrorState(
-            title: l10n.nfcPassErrorTitle,
-            message: errorMessage != null && errorMessage.isNotEmpty
+            title: host == null
+                ? l10n.nfcPassErrorTitle
+                : l10n.nfcPassUnreachableTitle,
+            message: host != null
+                ? (state.vpnActive
+                      ? l10n.nfcPassUnreachableVpnDescription(host)
+                      : l10n.nfcPassUnreachableDescription(host))
+                : errorMessage != null && errorMessage.isNotEmpty
                 ? errorMessage
                 : l10n.nfcPassErrorDescription,
             retryLabel: l10n.retry,

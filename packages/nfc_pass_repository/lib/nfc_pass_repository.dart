@@ -3,6 +3,7 @@ library;
 
 export 'package:nfc_pass_client/nfc_pass_client.dart'
     show
+        NfcPassUnreachableException,
         NfcVerificationCodeSent,
         NfcVerificationCooldown,
         NfcVerificationFailure,
