@@ -27,7 +27,7 @@ class NfcPassClient {
     required CookieProvider cookieProvider,
     required this.endpoints,
     http.Client? httpClient,
-    this.requestTimeout = const Duration(seconds: 20),
+    this.requestTimeout = const Duration(seconds: 15),
     this.maxResponseBytes = 1024 * 1024,
   })  : assert(requestTimeout > Duration.zero, 'Timeout must be positive.'),
         assert(maxResponseBytes > 0, 'Response limit must be positive.'),
@@ -80,6 +80,16 @@ class NfcPassClient {
           ..bodyBytes = _makeGrpcWebFrame(protobufMessage);
     try {
       return await _readResponse(request).timeout(requestTimeout);
+    } on TimeoutException catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        NfcPassUnreachableException(uri.host, cause: error),
+        stackTrace,
+      );
+    } on http.ClientException catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        NfcPassUnreachableException(uri.host, cause: error),
+        stackTrace,
+      );
     } finally {
       if (!abort.isCompleted) abort.complete();
     }
@@ -92,6 +102,7 @@ class NfcPassClient {
       throw NfcPassTransportException(
         'HTTP request failed with status ${response.statusCode}.',
         httpStatusCode: response.statusCode,
+        redirectLocation: response.headers['location'],
       );
     }
     if ((response.contentLength ?? 0) > maxResponseBytes) {

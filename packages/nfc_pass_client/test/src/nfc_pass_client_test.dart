@@ -194,6 +194,71 @@ void main() {
     });
   }
 
+  for (final (status, location, expected) in <(int, String, bool)>[
+    (302, 'https://pulse.example/api/auth/login?redirectUri=%2Fx', true),
+    (303, '/api/auth/login', true),
+    (302, 'https://pulse.example/services', false),
+    (200, 'https://pulse.example/api/auth/login', false),
+    (500, 'https://pulse.example/api/auth/login', false),
+  ]) {
+    test('treats HTTP $status to $location as auth required: $expected',
+        () async {
+      final client = _client(
+        MockClient(
+          (_) async => http.Response(
+            '',
+            status,
+            headers: {
+              'location': location,
+              if (status == 200) ...{'content-type': 'text/html'},
+            },
+          ),
+        ),
+      );
+      await expectLater(
+        client.getAccessTokenForDigitalPass(),
+        throwsA(
+          status == 200
+              ? isA<FormatException>()
+              : isA<NfcPassTransportException>()
+                  .having(
+                    (error) => error.redirectLocation,
+                    'redirectLocation',
+                    location,
+                  )
+                  .having(
+                    (error) => error.requiresAuthentication,
+                    'requiresAuthentication',
+                    expected,
+                  ),
+        ),
+      );
+    });
+  }
+
+  test('reports a connection failure as unreachable', () async {
+    final client = _client(
+      MockClient(
+        (_) async => throw http.ClientException(
+          'Connection timed out',
+          Uri.parse('https://api.example/nfc/access-token'),
+        ),
+      ),
+    );
+    await expectLater(
+      client.getAccessTokenForDigitalPass(),
+      throwsA(
+        isA<NfcPassUnreachableException>()
+            .having((error) => error.host, 'host', 'pass.example')
+            .having(
+              (error) => error.cause,
+              'cause',
+              isA<http.ClientException>(),
+            ),
+      ),
+    );
+  });
+
   test('rejects a trailers-only verification response', () async {
     final client = _client(
       MockClient(
@@ -378,7 +443,10 @@ void main() {
       );
       await expectLater(
         client.sendVerificationCode('jwt'),
-        throwsA(isA<TimeoutException>()),
+        throwsA(
+          isA<NfcPassUnreachableException>()
+              .having((error) => error.cause, 'cause', isA<TimeoutException>()),
+        ),
       );
       await aborted.future;
     });

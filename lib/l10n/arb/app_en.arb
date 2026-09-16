@@ -6732,6 +6732,30 @@
   "@nfcPassErrorDescription": {
     "description": "Description of the NFC pass error state"
   },
+  "nfcPassUnreachableTitle": "Pass service is not responding",
+  "@nfcPassUnreachableTitle": {
+    "description": "Title of the NFC pass error state when the pass server cannot be reached"
+  },
+  "nfcPassUnreachableDescription": "{host} is not responding. Check your internet connection and try again.",
+  "@nfcPassUnreachableDescription": {
+    "description": "Description of the NFC pass error state when the pass server cannot be reached",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "example": "pulse.mirea.ru"
+      }
+    }
+  },
+  "nfcPassUnreachableVpnDescription": "{host} is not responding through your VPN: the university blocks connections from VPN servers. Turn the VPN off or exclude this app from it, then try again.",
+  "@nfcPassUnreachableVpnDescription": {
+    "description": "Description of the NFC pass error state when the pass server cannot be reached and a VPN is active",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "example": "pulse.mirea.ru"
+      }
+    }
+  },
   "nfcPassHowItWorksTitle": "How it works",
   "@nfcPassHowItWorksTitle": {
     "description": "Title of the NFC pass onboarding steps"

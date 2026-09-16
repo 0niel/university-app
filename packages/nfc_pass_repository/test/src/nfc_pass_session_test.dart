@@ -565,6 +565,52 @@ void main() {
     });
   }
 
+  test('recovers a session the backend redirects to its login page', () async {
+    values['nfc_cookie'] = 'expired';
+    handler = (request) async {
+      if (request.headers['cookie'] == '.AspNetCore.Cookies=expired') {
+        return http.Response(
+          '',
+          302,
+          headers: {'location': 'https://pass.example/api/auth/login?r=1'},
+        );
+      }
+      return request.url.path == '/token'
+          ? _response([10, 3, ...ascii.encode('jwt')])
+          : _response([10, 0]);
+    };
+
+    await repository.bindPass();
+
+    expect(requests.map((request) => request.url.path), [
+      '/token',
+      '/token',
+      '/send',
+    ]);
+    verify(() => oauth.initiateOAuthFlow()).called(1);
+  });
+
+  test('surfaces an unreachable pass backend without opening OAuth', () async {
+    values['nfc_cookie'] = 'session';
+    handler = (request) async => throw http.ClientException(
+          'Connection timed out',
+          request.url,
+        );
+
+    await expectLater(
+      repository.bindPass(),
+      throwsA(
+        isA<NfcPassJwtFailure>().having(
+          (failure) => failure.unreachable?.host,
+          'unreachable host',
+          'pass.example',
+        ),
+      ),
+    );
+    expect(requests.map((request) => request.url.path), ['/token']);
+    verifyNever(() => oauth.initiateOAuthFlow());
+  });
+
   test('does not loop when the replacement session is also rejected', () async {
     values['nfc_cookie'] = 'expired';
     handler = (_) async => _response([], status: 16);

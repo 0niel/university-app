@@ -67,6 +67,9 @@ class _NfcPassVerificationBodyState extends State<NfcPassVerificationBody> {
       .wrongCode => l10n.nfcPassWrongCode,
       .nfcError => l10n.nfcPassIssuanceFailed,
       .requestFailed => l10n.nfcPassVerificationUnconfirmed,
+      .unreachable => l10n.nfcPassUnreachableDescription(
+        state.unreachableHost ?? '',
+      ),
       null =>
         state.status == .codeSent
             ? l10n.nfcPassCodeSentDescription

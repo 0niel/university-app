@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
+import 'package:connectivity_client/connectivity_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,10 +15,15 @@ class MockImagePicker extends Mock implements ImagePicker {}
 
 class MockStorage extends Mock implements Storage {}
 
+class MockConnectivityClient extends Mock implements ConnectivityClient {}
+
+const _unreachable = NfcPassUnreachableException('pulse.example');
+
 void main() {
   late NfcPassRepository repository;
   late ImagePicker imagePicker;
   late Storage storage;
+  late ConnectivityClient connectivity;
 
   setUp(() {
     storage = MockStorage();
@@ -28,10 +34,15 @@ void main() {
 
     repository = MockNfcPassRepository();
     imagePicker = MockImagePicker();
+    connectivity = MockConnectivityClient();
+    when(connectivity.hasVpn).thenAnswer((_) async => false);
   });
 
-  NfcPassCubit buildCubit() =>
-      NfcPassCubit(repository: repository, imagePicker: imagePicker);
+  NfcPassCubit buildCubit() => NfcPassCubit(
+    repository: repository,
+    imagePicker: imagePicker,
+    connectivityClient: connectivity,
+  );
 
   group('NfcPassCubit', () {
     test('initial state is NfcPassState()', () {
@@ -104,6 +115,83 @@ void main() {
           NfcPassState(
             status: NfcPassStatus.error,
           ),
+        ],
+      );
+
+      for (final vpn in [false, true]) {
+        blocTest<NfcPassCubit, NfcPassState>(
+          'reports the unreachable host (vpn: $vpn) instead of a generic error',
+          setUp: () {
+            when(connectivity.hasVpn).thenAnswer((_) async => vpn);
+            when(
+              repository.bindPass,
+            ).thenThrow(const NfcPassJwtFailure(_unreachable));
+          },
+          build: buildCubit,
+          act: (cubit) => cubit.bindPass(),
+          expect: () => [
+            const NfcPassState(status: NfcPassStatus.loading),
+            NfcPassState(
+              status: NfcPassStatus.error,
+              unreachableHost: 'pulse.example',
+              vpnActive: vpn,
+            ),
+          ],
+        );
+      }
+
+      blocTest<NfcPassCubit, NfcPassState>(
+        'treats an unreachable code request as an error, not a sent code',
+        setUp: () => when(repository.bindPass).thenThrow(
+          const NfcPassSendCodeFailure(_unreachable),
+        ),
+        build: buildCubit,
+        act: (cubit) => cubit.bindPass(),
+        expect: () => const [
+          NfcPassState(status: NfcPassStatus.loading),
+          NfcPassState(
+            status: NfcPassStatus.error,
+            unreachableHost: 'pulse.example',
+          ),
+        ],
+      );
+
+      blocTest<NfcPassCubit, NfcPassState>(
+        'survives a failing VPN probe',
+        setUp: () {
+          when(connectivity.hasVpn).thenThrow(
+            const ConnectivityCheckFailure('boom'),
+          );
+          when(
+            repository.bindPass,
+          ).thenThrow(const NfcPassLoginFailure(_unreachable));
+        },
+        build: buildCubit,
+        act: (cubit) => cubit.bindPass(),
+        expect: () => const [
+          NfcPassState(status: NfcPassStatus.loading),
+          NfcPassState(
+            status: NfcPassStatus.error,
+            unreachableHost: 'pulse.example',
+          ),
+        ],
+      );
+
+      blocTest<NfcPassCubit, NfcPassState>(
+        'clears a previous unreachable report when retrying',
+        setUp: () => when(
+          repository.bindPass,
+        ).thenAnswer((_) async => const NfcVerificationCodeSent()),
+        build: buildCubit,
+        seed: () => const NfcPassState(
+          status: NfcPassStatus.error,
+          unreachableHost: 'pulse.example',
+          vpnActive: true,
+        ),
+        act: (cubit) => cubit.bindPass(),
+        expect: () => const [
+          NfcPassState(status: NfcPassStatus.loading),
+          NfcPassState(status: NfcPassStatus.codeSent),
         ],
       );
 
@@ -192,6 +280,28 @@ void main() {
           NfcPassState(
             status: NfcPassStatus.verificationPending,
             verificationIssue: NfcVerificationIssue.requestFailed,
+          ),
+        ],
+      );
+
+      blocTest<NfcPassCubit, NfcPassState>(
+        'keeps the code sheet with an unreachable hint when the pass server '
+        'does not answer',
+        setUp: () => when(
+          () => repository.confirmBinding(
+            sixDigitCode: any(named: 'sixDigitCode'),
+            deviceName: any(named: 'deviceName'),
+          ),
+        ).thenThrow(const NfcPassGetPassFailure(_unreachable)),
+        build: buildCubit,
+        act: (cubit) =>
+            cubit.confirmBinding(sixDigitCode: '123456', deviceName: 'Pixel'),
+        expect: () => const [
+          NfcPassState(status: NfcPassStatus.loading),
+          NfcPassState(
+            status: NfcPassStatus.verificationPending,
+            verificationIssue: NfcVerificationIssue.unreachable,
+            unreachableHost: 'pulse.example',
           ),
         ],
       );
