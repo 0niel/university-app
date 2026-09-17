@@ -7,6 +7,7 @@ import 'package:args/command_runner.dart' show UsageException;
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:rtu_mirea_schedule_api_client/rtu_mirea_schedule_api_client.dart';
+import 'package:schedule_fetcher/reingest_plan.dart';
 import 'package:schedule_fetcher/source_fetcher.dart';
 
 const kScheduleBaseUrl = 'https://schedule-of.mirea.ru';
@@ -17,7 +18,9 @@ const _minimumFullSyncTargetCounts = {
 };
 const _minimumFullSyncDatedParts = 10000;
 const _maximumFullSyncUndatedRatio = 0.05;
-const _fullReingestInterval = Duration(hours: 24);
+// Unchanged targets a full sync re-ingests per run (rolling cursor, see
+// reingest_plan.dart); ~4300 targets → a full cycle every ~17 runs.
+const _unchangedReingestBudget = 250;
 
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
@@ -201,7 +204,10 @@ class SyncMireaSchedule {
   String? _syncRunId;
   Map<String, String> _previousTargetHashes = const {};
   DateTime? _lastFullReingestAt;
-  var _reingestUnchanged = true;
+  String _reingestCursor = '';
+  ReingestPlan? _reingestPlan;
+  // Targeted runs (--type/--match/--skip/--limit) always re-ingest.
+  var _reingestAll = true;
 
   Future<void> run({
     required String? targetType,
@@ -219,12 +225,8 @@ class SyncMireaSchedule {
       _syncRunId = started.syncRunId;
       _previousTargetHashes = started.targetHashes;
       _lastFullReingestAt = started.lastFullReingestAt;
-      final lastFullReingestAt = _lastFullReingestAt;
-      _reingestUnchanged =
-          !fullSync ||
-          lastFullReingestAt == null ||
-          DateTime.now().toUtc().difference(lastFullReingestAt) >=
-              _fullReingestInterval;
+      _reingestCursor = started.reingestCursor;
+      _reingestAll = !fullSync;
     }
 
     try {
@@ -259,6 +261,7 @@ class SyncMireaSchedule {
         final checkpointHashes = fullSync
             ? result.targetHashes
             : {..._previousTargetHashes, ...result.targetHashes};
+        final plan = _reingestPlan;
         await _finishSync(
           status: 'succeeded',
           checkpoint: {
@@ -271,9 +274,12 @@ class SyncMireaSchedule {
               'undated': result.undatedParts,
             },
             'target_hashes': checkpointHashes,
-            'last_full_reingest_at': fullSync && _reingestUnchanged
+            'last_full_reingest_at': fullSync && (plan?.wrapped ?? false)
                 ? completedAt.toIso8601String()
                 : _lastFullReingestAt?.toIso8601String(),
+            'reingest_cursor': fullSync
+                ? plan?.nextCursor ?? ''
+                : _reingestCursor,
             'full_sync': fullSync,
           },
         );
@@ -291,7 +297,9 @@ class SyncMireaSchedule {
       _syncRunId = null;
       _previousTargetHashes = const {};
       _lastFullReingestAt = null;
-      _reingestUnchanged = true;
+      _reingestCursor = '';
+      _reingestPlan = null;
+      _reingestAll = true;
     }
   }
 
@@ -336,6 +344,19 @@ class SyncMireaSchedule {
         type: targets.where((target) => target.targetType == type).length,
     };
     if (enforceCoverage) {
+      final plan = planUnchangedReingest(
+        targetKeys: targets.map(
+          (target) => '${target.targetType}:${target.id}',
+        ),
+        cursor: _reingestCursor,
+        budget: _unchangedReingestBudget,
+      );
+      _reingestPlan = plan;
+      stdout.writeln(
+        'Rolling reingest: ${plan.due.length} unchanged targets due '
+        '(cursor=${_reingestCursor.isEmpty ? 'start' : _reingestCursor}, '
+        'wraps=${plan.wrapped})',
+      );
       for (final entry in _minimumFullSyncTargetCounts.entries) {
         if (targetCounts[entry.key]! < entry.value) {
           throw StateError(
@@ -388,8 +409,9 @@ class SyncMireaSchedule {
           final targetKey = '${target.targetType}:${target.id}';
           targetHashes[targetKey] = sourceHash;
           handled++;
-          if (!_reingestUnchanged &&
-              _previousTargetHashes[targetKey] == sourceHash) {
+          if (!_reingestAll &&
+              _previousTargetHashes[targetKey] == sourceHash &&
+              !(_reingestPlan?.due.contains(targetKey) ?? false)) {
             stdout.writeln(
               'Unchanged #$handled ${target.targetType}:${target.id} '
               '${target.fullTitle} parts=${parts.length} '
@@ -473,6 +495,7 @@ class SyncMireaSchedule {
       String syncRunId,
       Map<String, String> targetHashes,
       DateTime? lastFullReingestAt,
+      String reingestCursor,
     })
   >
   _startSync({required bool fullSync}) async {
@@ -500,12 +523,14 @@ class SyncMireaSchedule {
               : <String, String>{})
           ..removeWhere((_, value) => value.isEmpty);
     final rawReingestAt = checkpointMap['last_full_reingest_at'];
+    final rawCursor = checkpointMap['reingest_cursor'];
     return (
       syncRunId: result['sync_run_id']! as String,
       targetHashes: targetHashes,
       lastFullReingestAt: rawReingestAt is String
           ? DateTime.tryParse(rawReingestAt)?.toUtc()
           : null,
+      reingestCursor: rawCursor is String ? rawCursor : '',
     );
   }
 
