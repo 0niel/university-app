@@ -214,8 +214,8 @@ return $default(_that.app,_that.reports);case _:
 }
 
 /// @nodoc
-@JsonSerializable(createToJson: false)
 
+@JsonSerializable(checked: true, createToJson: false)
 class _ReportedMiniApp implements ReportedMiniApp {
   const _ReportedMiniApp({required this.app, final  List<MiniAppReport> reports = const <MiniAppReport>[]}): _reports = reports;
   factory _ReportedMiniApp.fromJson(Map<String, dynamic> json) => _$ReportedMiniAppFromJson(json);
@@ -490,8 +490,8 @@ return $default(_that.pending,_that.reported);case _:
 }
 
 /// @nodoc
-@JsonSerializable(createToJson: false)
 
+@JsonSerializable(checked: true, createToJson: false)
 class _MiniAppsModerationQueue extends MiniAppsModerationQueue {
   const _MiniAppsModerationQueue({final  List<MiniApp> pending = const <MiniApp>[], final  List<ReportedMiniApp> reported = const <ReportedMiniApp>[]}): _pending = pending,_reported = reported,super._();
   factory _MiniAppsModerationQueue.fromJson(Map<String, dynamic> json) => _$MiniAppsModerationQueueFromJson(json);
