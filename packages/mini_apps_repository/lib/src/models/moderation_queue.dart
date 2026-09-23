@@ -24,6 +24,7 @@ enum MiniAppModerationAction {
 @Freezed(toJson: false)
 abstract class ReportedMiniApp with _$ReportedMiniApp {
   /// Creates a reported-app queue entry.
+  @JsonSerializable(checked: true, createToJson: false)
   const factory ReportedMiniApp({
     required MiniApp app,
     @Default(<MiniAppReport>[]) List<MiniAppReport> reports,
@@ -38,6 +39,7 @@ abstract class ReportedMiniApp with _$ReportedMiniApp {
 @Freezed(toJson: false)
 abstract class MiniAppsModerationQueue with _$MiniAppsModerationQueue {
   /// Creates a moderation queue snapshot.
+  @JsonSerializable(checked: true, createToJson: false)
   const factory MiniAppsModerationQueue({
     @Default(<MiniApp>[]) List<MiniApp> pending,
     @Default(<ReportedMiniApp>[]) List<ReportedMiniApp> reported,

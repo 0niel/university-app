@@ -7,26 +7,46 @@ part of 'moderation_queue.dart';
 // **************************************************************************
 
 _ReportedMiniApp _$ReportedMiniAppFromJson(Map<String, dynamic> json) =>
-    _ReportedMiniApp(
-      app: MiniApp.fromJson(json['app'] as Map<String, dynamic>),
-      reports:
-          (json['reports'] as List<dynamic>?)
-              ?.map((e) => MiniAppReport.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const <MiniAppReport>[],
-    );
+    $checkedCreate('_ReportedMiniApp', json, ($checkedConvert) {
+      final val = _ReportedMiniApp(
+        app: $checkedConvert(
+          'app',
+          (v) => MiniApp.fromJson(v as Map<String, dynamic>),
+        ),
+        reports: $checkedConvert(
+          'reports',
+          (v) =>
+              (v as List<dynamic>?)
+                  ?.map(
+                    (e) => MiniAppReport.fromJson(e as Map<String, dynamic>),
+                  )
+                  .toList() ??
+              const <MiniAppReport>[],
+        ),
+      );
+      return val;
+    });
 
 _MiniAppsModerationQueue _$MiniAppsModerationQueueFromJson(
   Map<String, dynamic> json,
-) => _MiniAppsModerationQueue(
-  pending:
-      (json['pending'] as List<dynamic>?)
-          ?.map((e) => MiniApp.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const <MiniApp>[],
-  reported:
-      (json['reported'] as List<dynamic>?)
-          ?.map((e) => ReportedMiniApp.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const <ReportedMiniApp>[],
-);
+) => $checkedCreate('_MiniAppsModerationQueue', json, ($checkedConvert) {
+  final val = _MiniAppsModerationQueue(
+    pending: $checkedConvert(
+      'pending',
+      (v) =>
+          (v as List<dynamic>?)
+              ?.map((e) => MiniApp.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <MiniApp>[],
+    ),
+    reported: $checkedConvert(
+      'reported',
+      (v) =>
+          (v as List<dynamic>?)
+              ?.map((e) => ReportedMiniApp.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <ReportedMiniApp>[],
+    ),
+  );
+  return val;
+});

@@ -325,4 +325,36 @@ void main() {
       expect(await buildRepository().isModerator(), isFalse);
     });
   });
+
+  group('getModerationQueue', () {
+    test('wraps a malformed payload into GetModerationQueueFailure', () {
+      when(
+        () => supabase.rpc<Object?>(any(), params: any(named: 'params')),
+      ).thenAnswer(
+        (_) => _FakeRpcBuilder({
+          'reported': [
+            {'id': 'app-1', 'slug': 'notes', 'name': 'Notes'},
+          ],
+        }),
+      );
+
+      expect(
+        () => buildRepository().getModerationQueue(),
+        throwsA(isA<GetModerationQueueFailure>()),
+      );
+    });
+  });
+}
+
+class _FakeRpcBuilder extends Fake
+    implements PostgrestFilterBuilder<Object?> {
+  _FakeRpcBuilder(this._value);
+
+  final Object? _value;
+
+  @override
+  Future<R> then<R>(
+    FutureOr<R> Function(Object? value) onValue, {
+    Function? onError,
+  }) => Future<Object?>.value(_value).then(onValue, onError: onError);
 }
