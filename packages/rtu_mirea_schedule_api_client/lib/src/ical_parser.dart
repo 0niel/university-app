@@ -98,7 +98,10 @@ class ICalParser {
 
       final type = data['x-meta-lesson_type'] as String?;
 
-      final lessonType = getLessonTypeFromText(type ?? '');
+      final lessonType = getLessonTypeFromText(
+        type ?? '',
+        fullLessonType: data['x-meta-full_lesson_type'] as String?,
+      );
 
       final schedulePart = LessonSchedulePart(
         uid: data['uid'] as String?,

@@ -1,8 +1,54 @@
 import 'package:collection/collection.dart';
 import 'package:rtu_mirea_schedule_api_client/src/fields_data_parsers.dart';
+import 'package:schedule/schedule.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('getLessonTypeFromText', () {
+    test('maps every abbreviation used by the schedule source', () {
+      expect(getLessonTypeFromText('ЛК'), LessonType.lecture);
+      expect(getLessonTypeFromText('ЛЕК'), LessonType.lecture);
+      expect(getLessonTypeFromText('ПР'), LessonType.practice);
+      expect(getLessonTypeFromText('ЛАБ'), LessonType.laboratoryWork);
+      expect(getLessonTypeFromText('СР'), LessonType.individualWork);
+      expect(getLessonTypeFromText('ЗД'), LessonType.credit);
+      expect(getLessonTypeFromText('ЗАЧ'), LessonType.credit);
+      expect(getLessonTypeFromText('ЭКЗ'), LessonType.exam);
+      expect(getLessonTypeFromText('КОНС'), LessonType.consultation);
+      expect(getLessonTypeFromText('КР'), LessonType.courseWork);
+      expect(getLessonTypeFromText('КП'), LessonType.courseProject);
+      expect(getLessonTypeFromText(' лк '), LessonType.lecture);
+      expect(getLessonTypeFromText('ДОП'), LessonType.unknown);
+    });
+
+    test('prefers the full type name over the abbreviation', () {
+      expect(
+        getLessonTypeFromText('ЛЕК', fullLessonType: 'Лекции'),
+        LessonType.lecture,
+      );
+      expect(
+        getLessonTypeFromText('ЗД', fullLessonType: 'Зачёт дифференцированный'),
+        LessonType.credit,
+      );
+      expect(
+        getLessonTypeFromText('X', fullLessonType: 'Курсовая работа'),
+        LessonType.courseWork,
+      );
+      expect(
+        getLessonTypeFromText('X', fullLessonType: 'Курсовой проект'),
+        LessonType.courseProject,
+      );
+      expect(
+        getLessonTypeFromText('ПР', fullLessonType: 'Практические занятия'),
+        LessonType.practice,
+      );
+      expect(
+        getLessonTypeFromText('ЛАБ', fullLessonType: 'Неизвестный вид'),
+        LessonType.laboratoryWork,
+      );
+    });
+  });
+
   group('parseClassroomsFromLocation', () {
     test('should return empty list when location is empty', () {
       final result = getClassroomsFromLocationText('');
