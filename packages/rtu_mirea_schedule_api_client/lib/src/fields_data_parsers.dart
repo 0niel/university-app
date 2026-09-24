@@ -50,36 +50,42 @@ List<Classroom> getClassroomsFromLocationText(String location) {
   }
 }
 
-/// Parse lesson type from the text.
-LessonType getLessonTypeFromText(String lessonType) {
-  return _getLessonTypeByAbbreviation(lessonType.trim());
+/// Parse lesson type from the abbreviation, preferring the full type name
+/// because branches use their own abbreviations (e.g. `ЛЕК` for lectures).
+LessonType getLessonTypeFromText(
+  String lessonType, {
+  String? fullLessonType,
+}) {
+  final byName = _getLessonTypeByName(fullLessonType ?? '');
+  if (byName != LessonType.unknown) return byName;
+  return _getLessonTypeByAbbreviation(lessonType.trim().toUpperCase());
+}
+
+LessonType _getLessonTypeByName(String name) {
+  final value = name.trim().toLowerCase().replaceAll('ё', 'е');
+  if (value.startsWith('лекц')) return LessonType.lecture;
+  if (value.startsWith('практическ')) return LessonType.practice;
+  if (value.startsWith('лабораторн')) return LessonType.laboratoryWork;
+  if (value.startsWith('самостоятельн')) return LessonType.individualWork;
+  if (value.startsWith('курсовая')) return LessonType.courseWork;
+  if (value.startsWith('курсовой')) return LessonType.courseProject;
+  if (value.startsWith('экзамен')) return LessonType.exam;
+  if (value.startsWith('зачет')) return LessonType.credit;
+  if (value.startsWith('консультац')) return LessonType.consultation;
+  return LessonType.unknown;
 }
 
 LessonType _getLessonTypeByAbbreviation(String abbreviation) {
-  switch (abbreviation) {
-    case 'ЛК':
-      return LessonType.lecture;
-    case 'ПР':
-      return LessonType.practice;
-    case 'ЛР':
-    case 'ЛАБ':
-      return LessonType.laboratoryWork;
-    case 'СР':
-      return LessonType.individualWork;
-    case 'КП':
-      return LessonType.courseWork;
-    case 'КР':
-      return LessonType.courseProject;
-    case 'ЭКЗ':
-    case 'Э':
-      return LessonType.exam;
-    case 'ЗАЧ':
-    case 'З':
-      return LessonType.credit;
-    case 'КТ':
-      return LessonType.consultation;
-
-    default:
-      return LessonType.unknown;
-  }
+  return switch (abbreviation) {
+    'ЛК' || 'ЛЕК' => LessonType.lecture,
+    'ПР' => LessonType.practice,
+    'ЛР' || 'ЛАБ' => LessonType.laboratoryWork,
+    'СР' => LessonType.individualWork,
+    'КР' => LessonType.courseWork,
+    'КП' => LessonType.courseProject,
+    'ЭКЗ' || 'Э' => LessonType.exam,
+    'ЗАЧ' || 'З' || 'ЗД' || 'ДЗ' => LessonType.credit,
+    'КОНС' || 'КТ' => LessonType.consultation,
+    _ => LessonType.unknown,
+  };
 }

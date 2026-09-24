@@ -100,6 +100,24 @@ class ICalCustomFieldsRegistry {
       }
     });
 
+    registerField('X-META-FULL_LESSON_TYPE', (
+      value,
+      params,
+      event,
+      lastEvent,
+    ) {
+      try {
+        lastEvent['X-META-FULL_LESSON_TYPE'] = value;
+
+        return lastEvent;
+      } catch (error, stackTrace) {
+        Error.throwWithStackTrace(
+          InvalidICalendarDataException(error: error),
+          stackTrace,
+        );
+      }
+    });
+
     registerField('X-META-TEACHER', (value, params, event, lastEvent) {
       try {
         lastEvent['X-META-TEACHER'] = <Object?>[

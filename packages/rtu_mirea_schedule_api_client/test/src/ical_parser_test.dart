@@ -195,5 +195,44 @@ END:VCALENDAR
       expect(lesson.groups, isA<List<String>>());
       expect(lesson.groups?.firstOrNull, 'ИНБО-07-22');
     });
+
+    test('resolves branch lesson types from the full type name', () {
+      final lessons = ICalParser.fromString('''
+BEGIN:VCALENDAR
+PRODID:-//github.com/ical-org/ical.net//NONSGML ical.net//EN
+VERSION:2.0
+BEGIN:VEVENT
+DTEND;TZID=Europe/Moscow:20260901T094500
+DTSTART;TZID=Europe/Moscow:20260901T081500
+RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=20261221T205959Z
+TRANSP:OPAQUE
+UID:a676db6c-ec39-536c-a55a-b34de0ad4c3b
+X-META-DISCIPLINE;VALUE=TEXT:Программирование мобиль
+ ных приложений
+X-META-FULL_LESSON_TYPE;VALUE=TEXT:Лекции
+X-META-GROUP;VALUE=TEXT;ID=1200;TYPE=1:СВБО-01-23
+X-META-LESSON_TYPE;VALUE=TEXT:ЛЕК
+END:VEVENT
+BEGIN:VEVENT
+DTEND;TZID=Europe/Moscow:20260601T103000
+DTSTART;TZID=Europe/Moscow:20260601T090000
+RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=20260712T210000Z
+TRANSP:OPAQUE
+UID:4f7d1c2e-9b1a-5c55-8f60-1d2e3f4a5b6c
+X-META-DISCIPLINE;VALUE=TEXT:Учебная практика
+X-META-FULL_LESSON_TYPE;VALUE=TEXT:Зачет дифференцированный
+X-META-GROUP;VALUE=TEXT;ID=5588;TYPE=1:ФЭБО-01-25
+X-META-LESSON_TYPE;VALUE=TEXT:ЗД
+END:VEVENT
+END:VCALENDAR
+''').parse().cast<LessonSchedulePart>();
+
+      expect(lessons.map((lesson) => lesson.lessonType), [
+        LessonType.lecture,
+        LessonType.credit,
+      ]);
+      expect(lessons.first.lessonBells.startTime.hour, 8);
+      expect(lessons.first.lessonBells.startTime.minute, 15);
+    });
   });
 }
