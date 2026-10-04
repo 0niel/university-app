@@ -258,7 +258,6 @@ jobs:
         run: >-
           deno fmt --check supabase/functions/ingest supabase/functions/miniapp-notify
           supabase/functions/miniapp-deploy supabase/functions/miniapp-proxy
-          supabase/functions/miniapp-svc-teacher-reviews
           supabase/functions/_shared/request_body.ts supabase/functions/_shared/request_body_test.ts
 
       - name: Type-check
@@ -268,13 +267,11 @@ jobs:
           supabase/functions/miniapp-notify/index.ts
           supabase/functions/miniapp-deploy/index.ts
           supabase/functions/miniapp-proxy/index.ts
-          supabase/functions/miniapp-svc-teacher-reviews/index.ts
 
       - name: Lint
         run: >-
           deno lint supabase/functions/ingest supabase/functions/miniapp-notify
           supabase/functions/miniapp-deploy supabase/functions/miniapp-proxy
-          supabase/functions/miniapp-svc-teacher-reviews
           supabase/functions/_shared/request_body.ts supabase/functions/_shared/request_body_test.ts
 
       - name: Test
@@ -282,7 +279,6 @@ jobs:
           deno test --frozen --config=supabase/functions/deno.json
           supabase/functions/ingest
           supabase/functions/miniapp-notify
-          supabase/functions/miniapp-svc-teacher-reviews
           supabase/functions/_shared/request_body_test.ts
 
   supabase-migrations:
