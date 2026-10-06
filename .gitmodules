@@ -1,0 +1,3 @@
+[submodule "admin"]
+	path = admin
+	url = https://github.com/0niel/university-app-admin.git
