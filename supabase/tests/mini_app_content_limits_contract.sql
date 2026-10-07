@@ -33,8 +33,9 @@ begin
   select * into f from mini_content_fixture;
   insert into core.organizations (id, name)
   values (f.organization_id, 'Mini Content Contract');
-  insert into auth.users (id, is_anonymous)
-  values (f.owner_id, false), (f.other_owner_id, false);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[f.owner_id, f.other_owner_id]) id;
   insert into core.mini_apps (id, organization_id, owner_id, slug, name)
   values
     (f.app_id, f.organization_id, f.owner_id, 'content-contract', 'Content Contract'),

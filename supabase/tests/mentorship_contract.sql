@@ -57,14 +57,12 @@ begin
     ('mentor-test-a', 'Mentor Test A'),
     ('mentor-test-b', 'Mentor Test B');
 
-  insert into auth.users (id)
-  values
-    (v_mentor),
-    (v_requester),
-    (v_outsider),
-    (v_poor_requester),
-    (v_tenant_mentor),
-    (v_tenant_requester);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[
+    v_mentor, v_requester, v_outsider, v_poor_requester,
+    v_tenant_mentor, v_tenant_requester
+  ]) id;
 
   insert into core.user_academic_profiles (
     user_id,
