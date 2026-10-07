@@ -64,6 +64,7 @@ void main() {
 
       scheduleRepository = MockScheduleRepository();
       widgetUpdater = MockScheduleWidgetUpdater();
+      when(() => widgetUpdater.clearWidgets()).thenAnswer((_) async {});
       when(
         () => widgetUpdater.updateWidgetsFromSelectedSchedule(any()),
       ).thenAnswer((_) async {});
@@ -272,6 +273,7 @@ void main() {
       build: buildBloc,
       seed: () => ScheduleState(
         status: ScheduleStatus.loaded,
+        selectedSchedule: cached,
         groupsSchedule: [
           ('a', const Group(name: 'ИКБО-01-22'), [lesson]),
         ],
@@ -286,6 +288,321 @@ void main() {
       verify: (bloc) {
         expect(bloc.state.groupsSchedule, isEmpty);
         expect(bloc.state.scheduleSyncedAt.containsKey('a'), isFalse);
+        expect(bloc.state.selectedSchedule, cached);
+        verifyNever(() => widgetUpdater.clearWidgets());
+      },
+    );
+
+    final activeSchedules = <ScheduleTarget, SelectedSchedule>{
+      ScheduleTarget.group: const SelectedGroupSchedule(
+        group: Group(name: 'Group', uid: 'shared-id'),
+        schedule: [],
+      ),
+      ScheduleTarget.teacher: const SelectedTeacherSchedule(
+        teacher: Teacher(name: 'Teacher', uid: 'shared-id'),
+        schedule: [],
+      ),
+      ScheduleTarget.classroom: const SelectedClassroomSchedule(
+        classroom: Classroom(name: 'Classroom', uid: 'shared-id'),
+        schedule: [],
+      ),
+    };
+
+    for (final entry in activeSchedules.entries) {
+      blocTest<ScheduleBloc, ScheduleState>(
+        'deleting the active ${entry.key.name} clears selection and widgets',
+        build: buildBloc,
+        seed: () => ScheduleState(
+          status: ScheduleStatus.loaded,
+          selectedSchedule: entry.value,
+          groupsSchedule: const [
+            (
+              'shared-id',
+              Group(name: 'Group', uid: 'shared-id'),
+              <SchedulePart>[],
+            ),
+          ],
+          teachersSchedule: const [
+            (
+              'shared-id',
+              Teacher(name: 'Teacher', uid: 'shared-id'),
+              <SchedulePart>[],
+            ),
+          ],
+          classroomsSchedule: const [
+            (
+              'shared-id',
+              Classroom(name: 'Classroom', uid: 'shared-id'),
+              <SchedulePart>[],
+            ),
+          ],
+          scheduleSyncedAt: {'shared-id': lastSynced},
+          lastSyncedAt: lastSynced,
+          isOffline: true,
+        ),
+        act: (bloc) => bloc.add(
+          ScheduleDeleteRequested(identifier: 'shared-id', target: entry.key),
+        ),
+        verify: (bloc) {
+          expect(bloc.state.selectedSchedule, isNull);
+          expect(bloc.state.status, ScheduleStatus.loaded);
+          expect(bloc.state.lastSyncedAt, isNull);
+          expect(bloc.state.isOffline, isFalse);
+          expect(bloc.state.scheduleSyncedAt, isEmpty);
+          expect(
+            bloc.state.groupsSchedule.length,
+            entry.key == ScheduleTarget.group ? 0 : 1,
+          );
+          expect(
+            bloc.state.teachersSchedule.length,
+            entry.key == ScheduleTarget.teacher ? 0 : 1,
+          );
+          expect(
+            bloc.state.classroomsSchedule.length,
+            entry.key == ScheduleTarget.classroom ? 0 : 1,
+          );
+          verify(() => widgetUpdater.clearWidgets()).called(1);
+        },
+      );
+    }
+
+    blocTest<ScheduleBloc, ScheduleState>(
+      'deleting a teacher with the same id preserves the active group',
+      build: buildBloc,
+      seed: () => ScheduleState(
+        status: ScheduleStatus.loaded,
+        selectedSchedule: activeSchedules[ScheduleTarget.group],
+        teachersSchedule: const [
+          (
+            'shared-id',
+            Teacher(name: 'Teacher', uid: 'shared-id'),
+            <SchedulePart>[],
+          ),
+        ],
+      ),
+      act: (bloc) => bloc.add(
+        const ScheduleDeleteRequested(
+          identifier: 'shared-id',
+          target: ScheduleTarget.teacher,
+        ),
+      ),
+      verify: (bloc) {
+        expect(
+          bloc.state.selectedSchedule,
+          activeSchedules[ScheduleTarget.group],
+        );
+        expect(bloc.state.teachersSchedule, isEmpty);
+        verifyNever(() => widgetUpdater.clearWidgets());
+      },
+    );
+
+    for (final entry in activeSchedules.entries) {
+      test(
+        'a pending inactive ${entry.key.name} load cannot undo deletion',
+        () async {
+          final pending = Completer<ScheduleResponse>();
+          const identifier = 'shared-id';
+          switch (entry.key) {
+            case ScheduleTarget.group:
+              when(
+                () => scheduleRepository.getSchedule(group: identifier),
+              ).thenAnswer((_) => pending.future);
+            case ScheduleTarget.teacher:
+              when(
+                () =>
+                    scheduleRepository.getTeacherSchedule(teacher: identifier),
+              ).thenAnswer((_) => pending.future);
+            case ScheduleTarget.classroom:
+              when(
+                () => scheduleRepository.getClassroomSchedule(
+                  classroom: identifier,
+                ),
+              ).thenAnswer((_) => pending.future);
+          }
+          when(() => storage.read('ScheduleBloc')).thenReturn(
+            ScheduleState(
+              status: ScheduleStatus.loaded,
+              selectedSchedule: cached,
+              groupsSchedule: const [
+                (
+                  identifier,
+                  Group(name: 'Group', uid: identifier),
+                  <SchedulePart>[],
+                ),
+              ],
+              teachersSchedule: const [
+                (
+                  identifier,
+                  Teacher(name: 'Teacher', uid: identifier),
+                  <SchedulePart>[],
+                ),
+              ],
+              classroomsSchedule: const [
+                (
+                  identifier,
+                  Classroom(name: 'Classroom', uid: identifier),
+                  <SchedulePart>[],
+                ),
+              ],
+            ).toJson(),
+          );
+          final bloc = buildBloc();
+          addTearDown(bloc.close);
+          bloc.add(switch (entry.value) {
+            SelectedGroupSchedule(:final group) => ScheduleRequested(
+              group: group,
+              makeActive: false,
+            ),
+            SelectedTeacherSchedule(:final teacher) => TeacherScheduleRequested(
+              teacher: teacher,
+              makeActive: false,
+            ),
+            SelectedClassroomSchedule(:final classroom) =>
+              ClassroomScheduleRequested(
+                classroom: classroom,
+                makeActive: false,
+              ),
+            SelectedCustomSchedule() => throw StateError(
+              'Unexpected custom schedule',
+            ),
+          });
+          await pumpEventQueue();
+          bloc.add(
+            ScheduleDeleteRequested(identifier: identifier, target: entry.key),
+          );
+          await pumpEventQueue();
+          expect(bloc.state.status, ScheduleStatus.loaded);
+          pending.complete(ScheduleResponse(data: [lesson]));
+          await pumpEventQueue();
+
+          expect(bloc.state.selectedSchedule, cached);
+          expect(bloc.state.status, ScheduleStatus.loaded);
+          expect(bloc.state.scheduleSyncedAt.containsKey(identifier), isFalse);
+          final saved = switch (entry.key) {
+            ScheduleTarget.group => bloc.state.groupsSchedule.map(
+              (entry) => entry.$1,
+            ),
+            ScheduleTarget.teacher => bloc.state.teachersSchedule.map(
+              (entry) => entry.$1,
+            ),
+            ScheduleTarget.classroom => bloc.state.classroomsSchedule.map(
+              (entry) => entry.$1,
+            ),
+          };
+          expect(saved, isEmpty);
+        },
+      );
+    }
+
+    test(
+      'deletion preserves an independent load and allows adding again',
+      () async {
+        final pendingTeacher = Completer<ScheduleResponse>();
+        final pendingClassroom = Completer<ScheduleResponse>();
+        const teacher = Teacher(name: 'Teacher', uid: 'teacher-id');
+        const classroom = Classroom(name: 'Classroom', uid: 'classroom-id');
+        var teacherRequests = 0;
+        when(
+          () => scheduleRepository.getTeacherSchedule(teacher: teacher.uid!),
+        ).thenAnswer((_) {
+          teacherRequests += 1;
+          return teacherRequests == 1
+              ? pendingTeacher.future
+              : Future.value(ScheduleResponse(data: [lesson]));
+        });
+        when(
+          () => scheduleRepository.getClassroomSchedule(
+            classroom: classroom.uid!,
+          ),
+        ).thenAnswer((_) => pendingClassroom.future);
+        when(() => storage.read('ScheduleBloc')).thenReturn(
+          ScheduleState(
+            status: ScheduleStatus.loaded,
+            selectedSchedule: cached,
+            teachersSchedule: const [('teacher-id', teacher, <SchedulePart>[])],
+          ).toJson(),
+        );
+        final bloc = buildBloc();
+        addTearDown(bloc.close);
+        bloc
+          ..add(
+            const TeacherScheduleRequested(teacher: teacher, makeActive: false),
+          )
+          ..add(
+            const ClassroomScheduleRequested(
+              classroom: classroom,
+              makeActive: false,
+            ),
+          );
+        await pumpEventQueue();
+        bloc.add(
+          const ScheduleDeleteRequested(
+            identifier: 'teacher-id',
+            target: ScheduleTarget.teacher,
+          ),
+        );
+        await pumpEventQueue();
+        expect(bloc.state.status, ScheduleStatus.loading);
+        pendingClassroom.complete(ScheduleResponse(data: [lesson]));
+        pendingTeacher.complete(ScheduleResponse(data: [lesson]));
+        await pumpEventQueue();
+
+        expect(bloc.state.status, ScheduleStatus.loaded);
+        expect(bloc.state.teachersSchedule, isEmpty);
+        expect(bloc.state.classroomsSchedule.single.$1, 'classroom-id');
+        expect(bloc.state.selectedSchedule, cached);
+        bloc.add(
+          const TeacherScheduleRequested(teacher: teacher, makeActive: false),
+        );
+        await pumpEventQueue();
+        expect(bloc.state.teachersSchedule.single.$1, 'teacher-id');
+        expect(bloc.state.selectedSchedule, cached);
+      },
+    );
+
+    test(
+      'a pending refresh cannot restore a deleted active schedule',
+      () async {
+        final response = Completer<ScheduleResponse>();
+        final requested = Completer<void>();
+        when(() => storage.read('ScheduleBloc')).thenReturn(
+          ScheduleState(
+            status: ScheduleStatus.loaded,
+            selectedSchedule: cached,
+            groupsSchedule: [
+              (group.name, group, [lesson]),
+            ],
+          ).toJson(),
+        );
+        when(
+          () => scheduleRepository.getSchedule(group: group.name),
+        ).thenAnswer((_) {
+          requested.complete();
+          return response.future;
+        });
+        final bloc = buildBloc();
+        addTearDown(bloc.close);
+        bloc.add(const SelectedScheduleRefreshRequested());
+        await requested.future;
+        final deleted = bloc.stream.firstWhere(
+          (state) => state.selectedSchedule == null,
+        );
+        bloc.add(
+          ScheduleDeleteRequested(
+            identifier: group.name,
+            target: ScheduleTarget.group,
+          ),
+        );
+        await deleted;
+        response.complete(ScheduleResponse(data: [lesson]));
+        await pumpEventQueue();
+
+        expect(bloc.state.selectedSchedule, isNull);
+        expect(bloc.state.groupsSchedule, isEmpty);
+        verifyNever(
+          () => widgetUpdater.updateWidgetsFromSelectedSchedule(any()),
+        );
+        verify(() => widgetUpdater.clearWidgets()).called(1);
       },
     );
 
@@ -535,6 +852,8 @@ void main() {
       ).thenAnswer((_) => authChanges.stream);
       when(() => preferences.get(any())).thenAnswer((_) async => null);
       when(() => preferences.set(any(), any())).thenAnswer((_) async {});
+      when(() => preferences.remove(any())).thenAnswer((_) async {});
+      when(() => widgetUpdater.clearWidgets()).thenAnswer((_) async {});
       when(
         () => scheduleRepository.getSchedule(group: any(named: 'group')),
       ).thenAnswer((_) async => const ScheduleResponse(data: []));
@@ -546,6 +865,93 @@ void main() {
     tearDown(() async {
       await authChanges.close();
     });
+
+    test('deleting the selection removes its cloud backup', () async {
+      currentUserId = 'user-a';
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+      await pumpEventQueue();
+      bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-A')));
+      await pumpEventQueue();
+      bloc.add(
+        const ScheduleDeleteRequested(
+          identifier: 'GROUP-A',
+          target: ScheduleTarget.group,
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(bloc.state.selectedSchedule, isNull);
+      verify(() => preferences.remove('selected_schedule')).called(1);
+      expect(bloc.toJson(bloc.state)['selectionCleared'], isTrue);
+    });
+
+    test('a saved deletion retries cloud removal after restart', () async {
+      currentUserId = 'user-a';
+      when(() => storage.read('ScheduleBloc')).thenReturn({
+        ...const ScheduleState(status: ScheduleStatus.loaded).toJson(),
+        'selectionOwnerId': 'user-a',
+        'selectionCleared': true,
+      });
+      when(() => preferences.get('selected_schedule')).thenAnswer(
+        (_) async => remoteGroup('GROUP-A'),
+      );
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+      await pumpEventQueue();
+
+      expect(bloc.state.selectedSchedule, isNull);
+      verifyNever(() => preferences.get('selected_schedule'));
+      verify(() => preferences.remove('selected_schedule')).called(1);
+    });
+
+    test('a pending cloud restore cannot undo a manual deletion', () async {
+      currentUserId = 'user-a';
+      final remote = Completer<UserPreferenceEntry?>();
+      when(
+        () => preferences.get('selected_schedule'),
+      ).thenAnswer((_) => remote.future);
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+      await pumpEventQueue();
+      bloc.add(const ScheduleRequested(group: Group(name: 'GROUP-A')));
+      await pumpEventQueue();
+      bloc.add(
+        const ScheduleDeleteRequested(
+          identifier: 'GROUP-A',
+          target: ScheduleTarget.group,
+        ),
+      );
+      await pumpEventQueue();
+      remote.complete(remoteGroup('GROUP-B'));
+      await pumpEventQueue();
+
+      expect(bloc.state.selectedSchedule, isNull);
+      expect(bloc.state.groupsSchedule, isEmpty);
+      verifyNever(() => scheduleRepository.getSchedule(group: 'GROUP-B'));
+      verify(() => preferences.remove('selected_schedule')).called(1);
+    });
+
+    test(
+      'an old account deletion cannot remove a new account backup',
+      () async {
+        currentUserId = 'user-b';
+        when(() => storage.read('ScheduleBloc')).thenReturn({
+          ...const ScheduleState().toJson(),
+          'selectionOwnerId': 'user-a',
+          'selectionCleared': true,
+        });
+        when(() => preferences.get('selected_schedule')).thenAnswer(
+          (_) async => remoteGroup('GROUP-B'),
+        );
+        final bloc = buildBloc();
+        addTearDown(bloc.close);
+        await pumpEventQueue();
+
+        expect(bloc.state.selectedSchedule?.name, 'GROUP-B');
+        verifyNever(() => preferences.remove(any()));
+      },
+    );
 
     test('restores a group when login happens after startup', () async {
       when(

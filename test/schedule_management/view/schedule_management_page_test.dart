@@ -3,6 +3,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
@@ -13,6 +14,9 @@ class MockScheduleBloc extends MockBloc<ScheduleEvent, ScheduleState>
     implements ScheduleBloc {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(const SelectedScheduleRefreshRequested());
+  });
   group('ScheduleManagementPage', () {
     late ScheduleBloc scheduleBloc;
 
@@ -20,22 +24,26 @@ void main() {
       scheduleBloc = MockScheduleBloc();
     });
 
-    Widget buildSubject({double textScale = 1, bool reduceMotion = false}) {
-      return MaterialApp(
-        theme: NinjaTheme.dark(),
-        locale: const Locale('ru'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: MediaQuery(
-          data: MediaQueryData(
-            size: const Size(320, 700),
-            textScaler: TextScaler.linear(textScale),
-            accessibleNavigation: reduceMotion,
-            disableAnimations: reduceMotion,
-          ),
-          child: BlocProvider<ScheduleBloc>.value(
-            value: scheduleBloc,
-            child: const ScheduleManagementPage(),
+    Widget buildSubject({
+      double textScale = 1,
+      bool reduceMotion = false,
+      Widget page = const ScheduleManagementPage(),
+    }) {
+      return BlocProvider<ScheduleBloc>.value(
+        value: scheduleBloc,
+        child: MaterialApp(
+          theme: NinjaTheme.dark(),
+          locale: const Locale('ru'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MediaQuery(
+            data: MediaQueryData(
+              size: const Size(320, 700),
+              textScaler: TextScaler.linear(textScale),
+              accessibleNavigation: reduceMotion,
+              disableAnimations: reduceMotion,
+            ),
+            child: page,
           ),
         ),
       );
@@ -112,8 +120,7 @@ void main() {
       final pastel = find.byWidgetPredicate((widget) {
         if (widget is! Container) return false;
         final decoration = widget.decoration;
-        return decoration is BoxDecoration &&
-            decoration.color == colors.tint2;
+        return decoration is BoxDecoration && decoration.color == colors.tint2;
       });
       expect(pastel, findsOneWidget);
       expect(
@@ -135,6 +142,145 @@ void main() {
 
       expect(find.byType(PrimaryScheduleCard), findsNothing);
       expect(find.text('Пока нет расписаний'), findsOneWidget);
+    });
+
+    testWidgets('a single active schedule has an edit and deletion entry', (
+      tester,
+    ) async {
+      const active = Group(name: 'ИКБО-09-22', uid: 'group-id');
+      when(() => scheduleBloc.state).thenReturn(
+        const ScheduleState(
+          status: ScheduleStatus.loaded,
+          selectedSchedule: SelectedGroupSchedule(group: active, schedule: []),
+          groupsSchedule: [('group-id', active, <SchedulePart>[])],
+        ),
+      );
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Редактировать'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EditSchedulesPage), findsOneWidget);
+      await tester.tap(find.text('Удалить расписание'));
+      await tester.pumpAndSettle();
+      expect(find.byType(NinjaDialog), findsOneWidget);
+      verifyNever(() => scheduleBloc.add(any()));
+      await tester.tap(find.text('Удалить'));
+      await tester.pumpAndSettle();
+      verify(
+        () => scheduleBloc.add(
+          const ScheduleDeleteRequested(
+            identifier: 'group-id',
+            target: ScheduleTarget.group,
+          ),
+        ),
+      ).called(1);
+    });
+
+    for (final active in [true, false]) {
+      testWidgets(
+        '${active ? 'active' : 'secondary'} schedule tap offers deletion '
+        'and cancelling preserves the schedule',
+        (tester) async {
+          const group = Group(name: 'ИКБО-09-22', uid: 'group-id');
+          when(() => scheduleBloc.state).thenReturn(
+            ScheduleState(
+              status: ScheduleStatus.loaded,
+              selectedSchedule: active
+                  ? const SelectedGroupSchedule(group: group, schedule: [])
+                  : null,
+              groupsSchedule: const [('group-id', group, <SchedulePart>[])],
+            ),
+          );
+
+          await tester.pumpWidget(buildSubject());
+          await tester.pumpAndSettle();
+          await tester.tap(find.text(group.name));
+          await tester.pumpAndSettle();
+          expect(find.byType(AppSheet), findsOneWidget);
+          expect(find.text('Открыть'), findsOneWidget);
+          await tester.tap(find.text('Удалить расписание'));
+          await tester.pumpAndSettle();
+          expect(find.byType(AppSheet), findsNothing);
+          expect(find.byType(NinjaDialog), findsOneWidget);
+          verifyNever(() => scheduleBloc.add(any()));
+          await tester.tap(find.text('Отмена'));
+          await tester.pumpAndSettle();
+          expect(find.byType(NinjaDialog), findsNothing);
+          verifyNever(() => scheduleBloc.add(any()));
+
+          await tester.tap(find.text(group.name));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Удалить расписание'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Удалить'));
+          await tester.pumpAndSettle();
+          verify(
+            () => scheduleBloc.add(
+              const ScheduleDeleteRequested(
+                identifier: 'group-id',
+                target: ScheduleTarget.group,
+              ),
+            ),
+          ).called(1);
+          expect(find.byType(ScheduleManagementPage), findsOneWidget);
+        },
+      );
+    }
+
+    testWidgets('opening a saved schedule selects it and closes its sheet', (
+      tester,
+    ) async {
+      const group = Group(name: 'ИКБО-09-22', uid: 'group-id');
+      const selected = SelectedGroupSchedule(group: group, schedule: []);
+      when(() => scheduleBloc.state).thenReturn(
+        const ScheduleState(
+          status: ScheduleStatus.loaded,
+          groupsSchedule: [('group-id', group, <SchedulePart>[])],
+        ),
+      );
+      final router = GoRouter(
+        initialLocation: '/profile/schedule-management',
+        routes: [
+          GoRoute(
+            path: '/profile/schedule-management',
+            builder: (_, _) => const ScheduleManagementPage(),
+          ),
+          GoRoute(
+            path: '/schedule',
+            builder: (_, _) =>
+                const Scaffold(body: Text('Schedule destination')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        BlocProvider<ScheduleBloc>.value(
+          value: scheduleBloc,
+          child: MaterialApp.router(
+            theme: NinjaTheme.dark(),
+            locale: const Locale('ru'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(group.name));
+      await tester.pumpAndSettle();
+      verifyNever(() => scheduleBloc.add(any()));
+      await tester.tap(find.text('Открыть'));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => scheduleBloc.add(
+          const ScheduleSelected(selectedSchedule: selected),
+        ),
+      ).called(1);
+      expect(find.byType(AppSheet), findsNothing);
+      expect(find.text('Schedule destination'), findsOneWidget);
     });
 
     testWidgets('fits loaded content at 320px, 200% text and reduced motion', (

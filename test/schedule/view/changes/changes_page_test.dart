@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamification_repository/gamification_repository.dart';
+import 'package:local_notifications_repository/local_notifications_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
@@ -24,18 +25,30 @@ class MockScheduleChangesCubit extends MockCubit<ScheduleChangesState>
 class MockGamificationRepository extends Mock
     implements GamificationRepository {}
 
+class MockLocalNotificationsRepository extends Mock
+    implements LocalNotificationsRepository {}
+
 void main() {
+  setUpAll(() => registerFallbackValue(const UserSettings()));
   tearDown(ToastManager.debugReset);
 
   group('ChangesPage loading skeleton', () {
     late ScheduleBloc scheduleBloc;
     late ScheduleChangesCubit changesCubit;
     late GamificationRepository gamificationRepository;
+    late LocalNotificationsRepository notificationsRepository;
 
     setUp(() {
       scheduleBloc = MockScheduleBloc();
       changesCubit = MockScheduleChangesCubit();
       gamificationRepository = MockGamificationRepository();
+      notificationsRepository = MockLocalNotificationsRepository();
+      when(
+        notificationsRepository.hasPermission,
+      ).thenAnswer((_) async => true);
+      when(
+        notificationsRepository.ensurePermission,
+      ).thenAnswer((_) async => true);
 
       when(() => scheduleBloc.state).thenReturn(
         const ScheduleState(
@@ -75,6 +88,9 @@ void main() {
           providers: [
             RepositoryProvider<GamificationRepository>.value(
               value: gamificationRepository,
+            ),
+            RepositoryProvider<LocalNotificationsRepository>.value(
+              value: notificationsRepository,
             ),
           ],
           child: MultiBlocProvider(
@@ -259,6 +275,7 @@ void main() {
         when(
           () => gamificationRepository.updateSettings(
             const UserSettings(scheduleChangeAlerts: false),
+            previous: const UserSettings(),
           ),
         ).thenAnswer((_) => pending.future);
         await tester.pumpWidget(buildSubject());
@@ -275,9 +292,111 @@ void main() {
         verify(
           () => gamificationRepository.updateSettings(
             const UserSettings(scheduleChangeAlerts: false),
+            previous: const UserSettings(),
           ),
         ).called(1);
       },
     );
+
+    testWidgets('blocked device never shows cloud alerts as enabled', (
+      tester,
+    ) async {
+      when(() => changesCubit.state).thenReturn(const ScheduleChangesState());
+      when(
+        notificationsRepository.hasPermission,
+      ).thenAnswer((_) async => false);
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      expect(tester.widget<AppSwitch>(find.byType(AppSwitch)).value, isFalse);
+      verifyNever(
+        () => gamificationRepository.updateSettings(
+          any(),
+          previous: any(named: 'previous'),
+        ),
+      );
+      verifyNever(notificationsRepository.ensurePermission);
+    });
+
+    testWidgets(
+      'enabling alerts restores the master setting after permission',
+      (
+        tester,
+      ) async {
+        const previous = UserSettings(
+          notificationsEnabled: false,
+          scheduleChangeAlerts: false,
+        );
+        when(() => changesCubit.state).thenReturn(const ScheduleChangesState());
+        when(
+          () => gamificationRepository.getSettings(),
+        ).thenAnswer((_) async => previous);
+        when(
+          () => gamificationRepository.updateSettings(
+            const UserSettings(),
+            previous: previous,
+          ),
+        ).thenAnswer((_) async => const UserSettings());
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(tester.widget<AppSwitch>(find.byType(AppSwitch)).value, isFalse);
+        tester.widget<AppSwitch>(find.byType(AppSwitch)).onChanged!(true);
+        await tester.pumpAndSettle();
+        verify(notificationsRepository.ensurePermission).called(1);
+        verify(
+          () => gamificationRepository.updateSettings(
+            const UserSettings(),
+            previous: previous,
+          ),
+        ).called(1);
+        expect(tester.widget<AppSwitch>(find.byType(AppSwitch)).value, isTrue);
+      },
+    );
+
+    testWidgets('permission denial leaves alert settings unchanged', (
+      tester,
+    ) async {
+      when(() => changesCubit.state).thenReturn(const ScheduleChangesState());
+      when(
+        notificationsRepository.hasPermission,
+      ).thenAnswer((_) async => false);
+      when(
+        notificationsRepository.ensurePermission,
+      ).thenAnswer((_) async => false);
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      tester.widget<AppSwitch>(find.byType(AppSwitch)).onChanged!(true);
+      await tester.pumpAndSettle();
+      verify(notificationsRepository.ensurePermission).called(1);
+      verifyNever(
+        () => gamificationRepository.updateSettings(
+          any(),
+          previous: any(named: 'previous'),
+        ),
+      );
+      expect(tester.widget<AppSwitch>(find.byType(AppSwitch)).value, isFalse);
+      await tester.pump(const Duration(seconds: 5));
+    });
+
+    testWidgets('returning from system settings refreshes alert permission', (
+      tester,
+    ) async {
+      when(() => changesCubit.state).thenReturn(const ScheduleChangesState());
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      expect(tester.widget<AppSwitch>(find.byType(AppSwitch)).value, isTrue);
+      when(
+        notificationsRepository.hasPermission,
+      ).thenAnswer((_) async => false);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(tester.widget<AppSwitch>(find.byType(AppSwitch)).value, isFalse);
+      verifyNever(
+        () => gamificationRepository.updateSettings(
+          any(),
+          previous: any(named: 'previous'),
+        ),
+      );
+    });
   });
 }

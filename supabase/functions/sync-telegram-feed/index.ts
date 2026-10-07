@@ -7,11 +7,13 @@
 
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { buildNewsBlocks, extractTitle } from "./blocks.ts";
+import { collectPosts } from "./collect.ts";
 import {
-  fetchPreviewPage,
-  TelegramChannelInfo,
-  TelegramPost,
-} from "./telegram.ts";
+  TelegramImageMirror,
+  telegramImageUploader,
+  type UploadImage,
+} from "./media.ts";
+import { TelegramChannelInfo, TelegramPost } from "./telegram.ts";
 
 interface ChannelConfig {
   username: string;
@@ -105,46 +107,12 @@ function itemPayload(
   };
 }
 
-/// Loads posts newer than [afterId], paging backwards through the preview.
-async function collectPosts(
-  username: string,
-  afterId: number | null,
-  backfillPages: number,
-): Promise<{ channel: TelegramChannelInfo; posts: TelegramPost[] }> {
-  const collected = new Map<number, TelegramPost>();
-  let page = await fetchPreviewPage(username);
-  const channel = page.channel;
-  let pages = 1;
-  const maxPages = afterId == null
-    ? Math.min(backfillPages, MAX_PAGES_PER_RUN)
-    : MAX_PAGES_PER_RUN;
-
-  while (true) {
-    for (const post of page.posts) {
-      if (afterId == null || post.id > afterId) collected.set(post.id, post);
-    }
-    const oldest = page.posts[0]?.id;
-    const reachedCheckpoint = afterId != null &&
-      oldest != null && oldest <= afterId;
-    if (
-      reachedCheckpoint || page.posts.length === 0 || pages >= maxPages ||
-      oldest == null || oldest <= 1
-    ) {
-      break;
-    }
-    page = await fetchPreviewPage(username, oldest);
-    pages += 1;
-  }
-
-  const posts = [...collected.values()].sort((a, b) => a.id - b.id);
-  return { channel, posts };
-}
-
 async function syncChannel(
   supabase: SupabaseClient,
   organizationId: string,
   config: ChannelConfig,
   backfillPages: number,
+  uploadImage: UploadImage,
 ): Promise<ChannelResult> {
   const source = `telegram:${config.username}`;
   let syncRunId: string | null = null;
@@ -166,10 +134,17 @@ async function syncChannel(
       ? checkpoint.last_message_id
       : null;
 
-    const { channel, posts } = await collectPosts(
+    const preview = await collectPosts(
       config.username,
       lastMessageId,
       backfillPages,
+    );
+
+    const mirror = new TelegramImageMirror(organizationId, uploadImage);
+    const { channel, posts } = await mirror.mirror(
+      preview.channel,
+      preview.posts,
+      lastMessageId,
     );
 
     await rpc(supabase, "ingest_news_items", {
@@ -179,8 +154,8 @@ async function syncChannel(
       p_sync_run_id: syncRunId,
     });
 
-    const newLast = posts.length > 0
-      ? posts[posts.length - 1].id
+    const newLast = preview.posts.length > 0
+      ? Math.max(preview.posts[preview.posts.length - 1].id, lastMessageId ?? 0)
       : lastMessageId ?? 0;
     await rpc(supabase, "finish_content_sync", {
       p_organization_id: organizationId,
@@ -255,6 +230,7 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  const uploadImage = telegramImageUploader(supabaseUrl, serviceRoleKey);
 
   let body: Record<string, unknown> = {};
   try {
@@ -280,7 +256,13 @@ Deno.serve(async (req) => {
   const results: ChannelResult[] = [];
   for (const channel of channels) {
     results.push(
-      await syncChannel(supabase, organizationId, channel, backfillPages),
+      await syncChannel(
+        supabase,
+        organizationId,
+        channel,
+        backfillPages,
+        uploadImage,
+      ),
     );
   }
 

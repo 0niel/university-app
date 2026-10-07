@@ -9,6 +9,7 @@ import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/schedule_management/utils/utils.dart';
 import 'package:rtu_mirea_app/schedule_management/view/add_schedule_page.dart';
 import 'package:rtu_mirea_app/schedule_management/view/edit_schedules_page.dart';
+import 'package:rtu_mirea_app/schedule_management/view/schedule_delete.dart';
 import 'package:rtu_mirea_app/schedule_management/widgets/widgets.dart';
 
 part 'hub_body.dart';

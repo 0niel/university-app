@@ -10856,7 +10856,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authGuestExitWarning =>
-      'Signing out permanently loses access to this guest account. Link an email first to keep your data.';
+      'Signing out loses access to this guest account and its progress. App preferences and cached files stay on this device. Link an email first to keep your account.';
 
   @override
   String get settingsColorCustom => 'Custom color';

@@ -24,6 +24,13 @@ class ScheduleManagementView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
+    final hasSaved = context.select<ScheduleBloc, bool>(
+      (bloc) =>
+          bloc.state.selectedSchedule != null ||
+          bloc.state.groupsSchedule.isNotEmpty ||
+          bloc.state.teachersSchedule.isNotEmpty ||
+          bloc.state.classroomsSchedule.isNotEmpty,
+    );
 
     return Scaffold(
       backgroundColor: colors.canvas,
@@ -38,6 +45,8 @@ class ScheduleManagementView extends StatelessWidget {
             child: AppInnerHeader(
               title: l10n.schedulesTitle,
               onBack: () => Navigator.of(context).maybePop(),
+              trailingLabel: hasSaved ? l10n.edit : null,
+              onTrailingLabelTap: hasSaved ? () => _openEdit(context) : null,
               actions: [
                 AppHeaderAction(
                   icon: AppLineIcon.search,

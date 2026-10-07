@@ -11020,7 +11020,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get authGuestExitWarning =>
-      'Если выйти, гостевой аккаунт и его данные нельзя будет восстановить. Сначала привяжите email, чтобы сохранить их.';
+      'После выхода доступ к гостевому аккаунту и его прогрессу будет потерян. Настройки приложения и кэш останутся на этом устройстве. Сначала привяжите email, чтобы сохранить аккаунт.';
 
   @override
   String get settingsColorCustom => 'Свой цвет';

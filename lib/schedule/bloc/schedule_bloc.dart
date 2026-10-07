@@ -56,6 +56,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     on<_RemoteScheduleRestored>((event, emit) async {
       if (_preferencesRepository?.currentUserId != event.userId ||
           _activeUserId != event.userId ||
+          _selectionCleared ||
           state.selectedSchedule != event.previous) {
         return;
       }
@@ -99,8 +100,11 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   String? _selectionOwnerId;
   String? _activeUserId;
   String? _lastPushedDescriptor;
+  bool _selectionCleared = false;
   int _userGeneration = 0;
   int _refreshGeneration = 0;
+  final _deletionGenerations = <(ScheduleTarget, UID), int>{};
+  final _pendingLoads = <Object, (ScheduleTarget, UID, int, int)>{};
   Future<void> _pendingPush = Future<void>.value();
 
   void _onScheduleUserChanged(
@@ -114,6 +118,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     final userId = event.userId;
     if (userId == null) return;
     final previousOwner = _selectionOwnerId;
+    if (previousOwner != userId) _selectionCleared = false;
     if (previousOwner != null && previousOwner != userId) {
       _selectionOwnerId = userId;
       emit(const ScheduleState());
@@ -129,8 +134,12 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     if (userId == null || isClosed) return;
     final previous = state.selectedSchedule;
     final generation = _userGeneration;
-    if (previous != null && _selectionOwnerId == userId) {
-      _pushSelectedSchedule(state.selectedSchedule);
+    if ((previous != null || _selectionCleared) &&
+        _selectionOwnerId == userId) {
+      _pushSelectedSchedule(
+        state.selectedSchedule,
+        clearWhenNull: _selectionCleared,
+      );
       return;
     }
 
@@ -140,7 +149,8 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
       if (isClosed ||
           preferences.currentUserId != userId ||
           _activeUserId != userId ||
-          generation != _userGeneration) {
+          generation != _userGeneration ||
+          _selectionCleared) {
         return;
       }
 
@@ -222,10 +232,14 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   @override
   void onChange(Change<ScheduleState> change) {
     super.onChange(change);
+    if (change.nextState.selectedSchedule != null) _selectionCleared = false;
     _pushSelectedSchedule(change.nextState.selectedSchedule);
   }
 
-  void _pushSelectedSchedule(SelectedSchedule? selected) {
+  void _pushSelectedSchedule(
+    SelectedSchedule? selected, {
+    bool clearWhenNull = false,
+  }) {
     final preferences = _preferencesRepository;
     final userId = preferences?.currentUserId;
     if (preferences == null ||
@@ -236,7 +250,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     }
 
     final descriptor = _descriptorOf(selected);
-    if (descriptor == null) return;
+    if (descriptor == null && !clearWhenNull) return;
     final encoded = jsonEncode(descriptor);
     final generation = _userGeneration;
     _pendingPush = _pendingPush.then((_) async {
@@ -247,7 +261,11 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         return;
       }
       try {
-        await preferences.set(_selectedSchedulePreferenceKey, descriptor);
+        if (descriptor == null) {
+          await preferences.remove(_selectedSchedulePreferenceKey);
+        } else {
+          await preferences.set(_selectedSchedulePreferenceKey, descriptor);
+        }
         if (generation == _userGeneration &&
             preferences.currentUserId == userId) {
           _lastPushedDescriptor = encoded;
@@ -279,20 +297,26 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         emit,
       );
     }
-    await _runLoad(emit, () async {
-      final parts = (await _scheduleRepository.getSchedule(group: id)).data;
-      return state.copyWith(
-        groupsSchedule: [
-          for (final e in state.groupsSchedule)
-            if (e.$1 != id) e,
-          (id, group, parts),
-        ],
-        scheduleSyncedAt: _touchSync(id),
-        selectedSchedule: makeActive
-            ? SelectedGroupSchedule(group: group, schedule: parts)
-            : state.selectedSchedule,
-      );
-    }, claimSelection: makeActive);
+    await _runLoad(
+      emit,
+      () async {
+        final parts = (await _scheduleRepository.getSchedule(group: id)).data;
+        return state.copyWith(
+          groupsSchedule: [
+            for (final e in state.groupsSchedule)
+              if (e.$1 != id) e,
+            (id, group, parts),
+          ],
+          scheduleSyncedAt: _touchSync(id),
+          selectedSchedule: makeActive
+              ? SelectedGroupSchedule(group: group, schedule: parts)
+              : state.selectedSchedule,
+        );
+      },
+      claimSelection: makeActive,
+      target: .group,
+      identifier: id,
+    );
   }
 
   Future<void> _onTeacherScheduleRequested(
@@ -316,22 +340,28 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         emit,
       );
     }
-    await _runLoad(emit, () async {
-      final parts = (await _scheduleRepository.getTeacherSchedule(
-        teacher: id,
-      )).data;
-      return state.copyWith(
-        teachersSchedule: [
-          for (final e in state.teachersSchedule)
-            if (e.$1 != id) e,
-          (id, teacher, parts),
-        ],
-        scheduleSyncedAt: _touchSync(id),
-        selectedSchedule: makeActive
-            ? SelectedTeacherSchedule(teacher: teacher, schedule: parts)
-            : state.selectedSchedule,
-      );
-    }, claimSelection: makeActive);
+    await _runLoad(
+      emit,
+      () async {
+        final parts = (await _scheduleRepository.getTeacherSchedule(
+          teacher: id,
+        )).data;
+        return state.copyWith(
+          teachersSchedule: [
+            for (final e in state.teachersSchedule)
+              if (e.$1 != id) e,
+            (id, teacher, parts),
+          ],
+          scheduleSyncedAt: _touchSync(id),
+          selectedSchedule: makeActive
+              ? SelectedTeacherSchedule(teacher: teacher, schedule: parts)
+              : state.selectedSchedule,
+        );
+      },
+      claimSelection: makeActive,
+      target: .teacher,
+      identifier: id,
+    );
   }
 
   Future<void> _onClassroomScheduleRequested(
@@ -355,25 +385,31 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         emit,
       );
     }
-    await _runLoad(emit, () async {
-      final parts = (await _scheduleRepository.getClassroomSchedule(
-        classroom: id,
-      )).data;
-      return state.copyWith(
-        classroomsSchedule: [
-          for (final e in state.classroomsSchedule)
-            if (e.$1 != id) e,
-          (id, classroom, parts),
-        ],
-        scheduleSyncedAt: _touchSync(id),
-        selectedSchedule: makeActive
-            ? SelectedClassroomSchedule(
-                classroom: classroom,
-                schedule: parts,
-              )
-            : state.selectedSchedule,
-      );
-    }, claimSelection: makeActive);
+    await _runLoad(
+      emit,
+      () async {
+        final parts = (await _scheduleRepository.getClassroomSchedule(
+          classroom: id,
+        )).data;
+        return state.copyWith(
+          classroomsSchedule: [
+            for (final e in state.classroomsSchedule)
+              if (e.$1 != id) e,
+            (id, classroom, parts),
+          ],
+          scheduleSyncedAt: _touchSync(id),
+          selectedSchedule: makeActive
+              ? SelectedClassroomSchedule(
+                  classroom: classroom,
+                  schedule: parts,
+                )
+              : state.selectedSchedule,
+        );
+      },
+      claimSelection: makeActive,
+      target: .classroom,
+      identifier: id,
+    );
   }
 
   bool _shouldActivate(bool makeActive) =>
@@ -401,9 +437,20 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   Future<void> _runLoad(
     Emitter<ScheduleState> emit,
     Future<ScheduleState> Function() load, {
+    required ScheduleTarget target,
+    required UID identifier,
     bool claimSelection = false,
   }) async {
     final generation = _userGeneration;
+    final deletionKey = (target, identifier);
+    final deletionGeneration = _deletionGenerations[deletionKey] ?? 0;
+    final loadToken = Object();
+    _pendingLoads[loadToken] = (
+      target,
+      identifier,
+      deletionGeneration,
+      generation,
+    );
     final selected = state.selectedSchedule;
     emit(state.copyWith(status: .loading));
     try {
@@ -413,6 +460,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
         isOffline: false,
       );
       if (generation != _userGeneration ||
+          deletionGeneration != (_deletionGenerations[deletionKey] ?? 0) ||
           emit.isDone ||
           (claimSelection && state.selectedSchedule != selected)) {
         return;
@@ -420,6 +468,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
       final ownerChanged =
           (claimSelection || next.selectedSchedule != state.selectedSchedule) &&
           _claimSelectionForCurrentUser();
+      _pendingLoads.remove(loadToken);
       emit(next);
       if (ownerChanged) _persistSelectionOwner();
       if (next.selectedSchedule case final selected?) {
@@ -427,14 +476,24 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
       }
     } on Exception catch (error, stackTrace) {
       if (generation != _userGeneration ||
+          deletionGeneration != (_deletionGenerations[deletionKey] ?? 0) ||
           emit.isDone ||
           (claimSelection && state.selectedSchedule != selected)) {
         return;
       }
+      _pendingLoads.remove(loadToken);
       emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
+    } finally {
+      _pendingLoads.remove(loadToken);
     }
   }
+
+  bool get _hasPendingLoads => _pendingLoads.values.any(
+    (load) =>
+        load.$4 == _userGeneration &&
+        load.$3 == (_deletionGenerations[(load.$1, load.$2)] ?? 0),
+  );
 
   bool _claimSelectionForCurrentUser() {
     final userId = _preferencesRepository?.currentUserId;
@@ -461,42 +520,67 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
     ScheduleDeleteRequested event,
     Emitter<ScheduleState> emit,
   ) {
+    final deletionKey = (event.target, event.identifier);
+    _deletionGenerations[deletionKey] =
+        (_deletionGenerations[deletionKey] ?? 0) + 1;
+    final selected = state.selectedSchedule;
+    final removesSelected = switch ((selected, event.target)) {
+      (SelectedGroupSchedule(), .group) ||
+      (SelectedTeacherSchedule(), .teacher) ||
+      (
+        SelectedClassroomSchedule(),
+        .classroom,
+      ) => _idOf(selected!) == event.identifier,
+      _ => false,
+    };
+    final ownerChanged = removesSelected && _claimSelectionForCurrentUser();
     final syncedAt = {
       for (final entry in state.scheduleSyncedAt.entries)
         if (entry.key != event.identifier) entry.key: entry.value,
     };
-    switch (event.target) {
-      case .group:
-        emit(
-          state.copyWith(
-            groupsSchedule: [
-              for (final e in state.groupsSchedule)
-                if (e.$1 != event.identifier) e,
-            ],
-            scheduleSyncedAt: syncedAt,
-          ),
-        );
-      case .teacher:
-        emit(
-          state.copyWith(
-            teachersSchedule: [
-              for (final e in state.teachersSchedule)
-                if (e.$1 != event.identifier) e,
-            ],
-            scheduleSyncedAt: syncedAt,
-          ),
-        );
-      case .classroom:
-        emit(
-          state.copyWith(
-            classroomsSchedule: [
-              for (final e in state.classroomsSchedule)
-                if (e.$1 != event.identifier) e,
-            ],
-            scheduleSyncedAt: syncedAt,
-          ),
-        );
+    final next = switch (event.target) {
+      .group => state.copyWith(
+        groupsSchedule: [
+          for (final e in state.groupsSchedule)
+            if (e.$1 != event.identifier) e,
+        ],
+        scheduleSyncedAt: syncedAt,
+      ),
+      .teacher => state.copyWith(
+        teachersSchedule: [
+          for (final e in state.teachersSchedule)
+            if (e.$1 != event.identifier) e,
+        ],
+        scheduleSyncedAt: syncedAt,
+      ),
+      .classroom => state.copyWith(
+        classroomsSchedule: [
+          for (final e in state.classroomsSchedule)
+            if (e.$1 != event.identifier) e,
+        ],
+        scheduleSyncedAt: syncedAt,
+      ),
+    };
+    final status = _hasPendingLoads
+        ? ScheduleStatus.loading
+        : ScheduleStatus.loaded;
+    if (!removesSelected) {
+      emit(next.copyWith(status: status));
+      return;
     }
+    _refreshGeneration += 1;
+    _selectionCleared = true;
+    emit(
+      next.copyWith(
+        status: status,
+        selectedSchedule: null,
+        lastSyncedAt: null,
+        isOffline: false,
+      ),
+    );
+    if (ownerChanged) _persistSelectionOwner();
+    _pushSelectedSchedule(null, clearWhenNull: true);
+    unawaited(_widgetUpdater.clearWidgets());
   }
 
   void _onScheduleReordered(
@@ -708,6 +792,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   @override
   ScheduleState fromJson(Map<String, dynamic> json) {
     _selectionOwnerId = json['selectionOwnerId'] as String?;
+    _selectionCleared = json['selectionCleared'] == true;
     return ScheduleState.fromJson(json);
   }
 
@@ -715,6 +800,7 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
   Map<String, dynamic> toJson(ScheduleState state) => {
     ...state.toJson(),
     'selectionOwnerId': _selectionOwnerId,
+    'selectionCleared': _selectionCleared,
   };
 
   @override

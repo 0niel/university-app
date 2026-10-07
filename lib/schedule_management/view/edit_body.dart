@@ -62,6 +62,23 @@ class _EditBody extends StatelessWidget {
               updatedAt: state.scheduleSyncedAt[activeId] ?? state.lastSyncedAt,
             ),
           ),
+          if (activeId != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screen,
+              ),
+              child: NinjaButton.text(
+                label: l10n.deleteScheduleAction,
+                onPressed: () => unawaited(
+                  confirmScheduleDeletion(
+                    context,
+                    identifier: activeId,
+                    name: selected.name,
+                    target: SelectedSchedule.toScheduleTarget(selected.type),
+                  ),
+                ),
+              ),
+            ),
           const SizedBox(height: 18),
         ],
         _ReorderableSection(
