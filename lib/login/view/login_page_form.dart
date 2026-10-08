@@ -37,7 +37,8 @@ class _LoginPageForm extends StatelessWidget {
               placeholder: l10n.loginEmailPlaceholder,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.email],
+              autocorrect: false,
+              enableSuggestions: false,
               onChanged: onEmailChanged,
               onSubmitted: (_) => passwordFocusNode.requestFocus(),
               validateOnBlur: true,
@@ -64,7 +65,8 @@ class _LoginPageForm extends StatelessWidget {
               obscureText: true,
               showPasswordToggle: true,
               showClear: false,
-              autofillHints: const [AutofillHints.password],
+              autocorrect: false,
+              enableSuggestions: false,
               onChanged: onPasswordChanged,
               onSubmitted: (_) {
                 final bloc = context.read<LoginBloc>();

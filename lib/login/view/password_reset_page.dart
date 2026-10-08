@@ -80,7 +80,8 @@ class _PasswordResetViewState extends State<_PasswordResetView> {
                 placeholder: l10n.loginEmailPlaceholder,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.done,
-                autofillHints: const [AutofillHints.email],
+                autocorrect: false,
+                enableSuggestions: false,
                 onChanged: (value) =>
                     bloc.add(PasswordResetEmailChanged(value)),
                 onSubmitted: (_) {

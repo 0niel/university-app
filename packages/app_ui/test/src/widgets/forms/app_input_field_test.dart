@@ -42,6 +42,25 @@ void main() {
     );
   });
 
+  testWidgets(
+    'default correction follows the platform for password autofill',
+    (tester) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const AppInputField(
+            obscureText: true,
+            autofillHints: [AutofillHints.password],
+          ),
+        ),
+      );
+      expect(
+        tester.widget<EditableText>(find.byType(EditableText)).autocorrect,
+        isFalse,
+      );
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
   testWidgets('focus switches the fill to tint', (tester) async {
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);

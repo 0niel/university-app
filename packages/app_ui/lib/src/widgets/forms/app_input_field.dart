@@ -29,6 +29,8 @@ class AppInputField extends StatefulWidget {
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.autofillHints,
+    this.autocorrect,
+    this.enableSuggestions = true,
     this.fillColor,
     this.height = AppControlSize.field,
     this.borderRadius = AppRadius.field,
@@ -52,6 +54,8 @@ class AppInputField extends StatefulWidget {
   const AppInputField.multiline({
     super.key,
     this.controller,
+    this.autocorrect,
+    this.enableSuggestions = true,
     this.placeholder,
     this.label,
     this.onChanged,
@@ -106,6 +110,8 @@ class AppInputField extends StatefulWidget {
   final TextInputAction? textInputAction;
   final TextCapitalization textCapitalization;
   final Iterable<String>? autofillHints;
+  final bool? autocorrect;
+  final bool enableSuggestions;
   final Color? fillColor;
   final double height;
   final double borderRadius;
@@ -360,6 +366,8 @@ class _AppInputFieldState extends State<AppInputField> {
       textInputAction: widget.textInputAction,
       textCapitalization: widget.textCapitalization,
       autofillHints: widget.autofillHints,
+      autocorrect: widget.autocorrect,
+      enableSuggestions: widget.enableSuggestions,
       inputFormatters: widget.inputFormatters,
       maxLength: widget.maxLength,
       maxLines: multiline ? widget.maxLines : 1,

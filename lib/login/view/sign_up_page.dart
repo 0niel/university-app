@@ -91,7 +91,8 @@ class _SignUpViewState extends State<_SignUpView> {
                     placeholder: l10n.loginEmailPlaceholder,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    autofillHints: const [AutofillHints.email],
+                    autocorrect: false,
+                    enableSuggestions: false,
                     onChanged: (value) => bloc.add(SignUpEmailChanged(value)),
                     onSubmitted: (_) => _passwordFocusNode.requestFocus(),
                     validateOnBlur: true,
@@ -119,7 +120,8 @@ class _SignUpViewState extends State<_SignUpView> {
                     showPasswordToggle: true,
                     showClear: false,
                     textInputAction: TextInputAction.next,
-                    autofillHints: const [AutofillHints.newPassword],
+                    autocorrect: false,
+                    enableSuggestions: false,
                     onChanged: (value) =>
                         bloc.add(SignUpPasswordChanged(value)),
                     onSubmitted: (_) => _confirmFocusNode.requestFocus(),
@@ -151,7 +153,8 @@ class _SignUpViewState extends State<_SignUpView> {
                     showPasswordToggle: true,
                     showClear: false,
                     textInputAction: TextInputAction.done,
-                    autofillHints: const [AutofillHints.newPassword],
+                    autocorrect: false,
+                    enableSuggestions: false,
                     onChanged: (value) =>
                         bloc.add(SignUpConfirmPasswordChanged(value)),
                     onSubmitted: (_) {
