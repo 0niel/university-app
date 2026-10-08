@@ -1,9 +1,7 @@
-import 'dart:math' as math;
-
 import 'package:app_ui/app_ui.dart';
-import 'package:flutter/widgets.dart';
-import 'package:rtu_mirea_app/l10n/l10n.dart';
-import 'package:rtu_mirea_app/login/widgets/accent_title.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/login/widgets/auth_progress.dart';
 
 class AuthPageLayout extends StatelessWidget {
@@ -14,6 +12,9 @@ class AuthPageLayout extends StatelessWidget {
     this.titleAccent,
     this.subtitle,
     this.leading,
+    this.visual,
+    this.eyebrow,
+    this.headerTrailing,
     this.showBack = true,
     this.onBack,
     this.step,
@@ -27,6 +28,9 @@ class AuthPageLayout extends StatelessWidget {
   final String? subtitle;
   final Widget child;
   final Widget? leading;
+  final Widget? visual;
+  final String? eyebrow;
+  final Widget? headerTrailing;
   final bool showBack;
   final VoidCallback? onBack;
   final int? step;
@@ -34,105 +38,65 @@ class AuthPageLayout extends StatelessWidget {
   final Widget? actions;
   final bool large;
 
-  static const double horizontalPadding = 24;
-  static const double topPadding = 60;
-  static const double bottomPadding = 40;
+  static const double horizontalPadding = AppEntryLayout.horizontalPadding;
+  static const double topPadding = AppEntryLayout.topPadding;
+  static const double bottomPadding = AppEntryLayout.bottomPadding;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final padding = MediaQuery.paddingOf(context);
-    final top = math.max(topPadding, padding.top + 16);
-    final bottom = math.max(bottomPadding, padding.bottom + 16);
-    final step = this.step;
-    final totalSteps = this.totalSteps;
-    final subtitle = this.subtitle;
-    final actions = this.actions;
-    final leading = this.leading;
-    final titleStyle = large ? AppText.displayLarge : AppText.displayHero;
-    final leadStyle = large
-        ? AppText.lead.copyWith(height: 1.45, color: colors.muted)
-        : AppText.bodyLarge.copyWith(height: 1.45, color: colors.muted);
-
-    return CustomScrollView(
-      physics: const BouncingScrollPhysics(),
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-      slivers: [
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(
-            horizontalPadding,
-            top,
-            horizontalPadding,
-            AppSpacing.zero,
-          ),
-          sliver: SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+    final previewTheme = Theme.of(context);
+    return AppEntryTheme(
+      child: Builder(
+        builder: (context) {
+          return AppEntryLayout(
+            title: title,
+            titleAccent: titleAccent,
+            subtitle: subtitle,
+            eyebrow: eyebrow,
+            hero: large,
+            visual:
+                (visual == null
+                    ? null
+                    : Theme(data: previewTheme, child: visual!)) ??
+                (leading == null
+                    ? null
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: leading,
+                        ),
+                      )),
+            header: Row(
               children: [
-                if (step != null && totalSteps != null) ...[
-                  AuthProgress(step: step, total: totalSteps),
-                  const SizedBox(height: 28),
-                ],
                 if (showBack)
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Transform.translate(
-                      offset: const Offset(-6, 0),
-                      child: Semantics(
-                        label: context.l10n.back,
-                        child: AppBackButton(onPressed: onBack),
-                      ),
+                  AppBackButton(onPressed: onBack)
+                else
+                  Flexible(
+                    child: AppEntryBrand(
+                      label:
+                          context.read<UniversityConfig?>()?.appName ??
+                          UniversityConfig.current.appName,
                     ),
                   ),
-                if (leading != null) ...[
-                  if (showBack) const SizedBox(height: 20),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: leading,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child:
+                        headerTrailing ??
+                        (step != null && totalSteps != null
+                            ? AuthProgress(step: step!, total: totalSteps!)
+                            : const SizedBox.shrink()),
                   ),
-                ],
-                SizedBox(height: large ? 32 : 24),
-                AccentTitle(title, accent: titleAccent, style: titleStyle),
-                if (subtitle != null) ...[
-                  SizedBox(height: large ? 16 : 10),
-                  Text(subtitle, style: leadStyle),
-                ],
-                SizedBox(height: large ? 28 : 20),
-                child,
+                ),
               ],
             ),
-          ),
-        ),
-        if (actions != null)
-          SliverLayoutBuilder(
-            builder: (context, constraints) => SliverToBoxAdapter(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: math.max(
-                    AppSpacing.zero,
-                    constraints.viewportMainAxisExtent -
-                        constraints.precedingScrollExtent,
-                  ),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontalPadding,
-                    AppSpacing.xlg,
-                    horizontalPadding,
-                    bottom,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [actions],
-                  ),
-                ),
-              ),
-            ),
-          )
-        else
-          SliverToBoxAdapter(child: SizedBox(height: bottom)),
-      ],
+            actions: actions,
+            child: child,
+          );
+        },
+      ),
     );
   }
 }

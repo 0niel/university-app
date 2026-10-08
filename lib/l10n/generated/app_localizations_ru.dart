@@ -4445,7 +4445,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get loginWelcomeBack => 'С возвращением';
 
   @override
-  String get loginSubtitle => 'Войди, используя свой аккаунт (НЕ ЛКС МИРЭА)';
+  String get loginSubtitle =>
+      'Войди в аккаунт приложения. Пароль от личного кабинета вуза здесь не подойдёт.';
 
   @override
   String get loginEmailPlaceholder => 'name@example.com';
@@ -12623,4 +12624,53 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get nfcPassCodeSentDescription =>
       'Введите код подтверждения, полученный от университета.';
+
+  @override
+  String get entryWelcomeTitle => 'Универ.\nВ твоём ритме.';
+
+  @override
+  String get entryWelcomeAccent => 'ритме.';
+
+  @override
+  String get entryWelcomeSubtitle =>
+      'Расписание, кампус и люди рядом. Всё для твоего студенческого дня.';
+
+  @override
+  String get entryGuestHint => 'Можно познакомиться с приложением без аккаунта';
+
+  @override
+  String get entryPreviewLesson => 'Математический анализ';
+
+  @override
+  String get entryPreviewProgramming => 'Программирование';
+
+  @override
+  String get onboardingStoryScheduleTitle => 'Твой день.\nВсё по плану.';
+
+  @override
+  String get onboardingStoryScheduleAccent => 'по плану.';
+
+  @override
+  String get onboardingStoryScheduleLead =>
+      'Пары, переносы и дедлайны — под рукой. Меньше поиска, больше времени на себя.';
+
+  @override
+  String get onboardingStoryCampusTitle => 'Освойся\nна кампусе.';
+
+  @override
+  String get onboardingStoryCampusAccent => 'кампусе.';
+
+  @override
+  String get onboardingStoryCampusLead =>
+      'Находи аудитории и свободные места, чтобы позаниматься между парами.';
+
+  @override
+  String get onboardingStoryCommunityTitle => 'Твои люди.\nТвой универ.';
+
+  @override
+  String get onboardingStoryCommunityAccent => 'универ.';
+
+  @override
+  String get onboardingStoryCommunityLead =>
+      'Будь ближе к друзьям, находи сообщества и делись тем, что тебе интересно.';
 }

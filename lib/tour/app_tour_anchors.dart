@@ -1,11 +1,14 @@
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/tour/model/app_tour_target.dart';
 
 abstract final class AppTourAnchors {
   static final Map<AppTourTarget, List<BuildContext>> _anchors = {};
 
-  static void register(AppTourTarget target, BuildContext context) =>
-      _anchors.putIfAbsent(target, () => <BuildContext>[]).add(context);
+  static void register(AppTourTarget target, BuildContext context) {
+    if (AppPreviewScope.of(context)) return;
+    _anchors.putIfAbsent(target, () => <BuildContext>[]).add(context);
+  }
 
   static void unregister(AppTourTarget target, BuildContext context) =>
       _anchors[target]?.remove(context);

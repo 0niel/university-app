@@ -8,12 +8,14 @@ class SettingToggleRow extends StatelessWidget {
     required this.value,
     required this.onChanged,
     super.key,
+    this.icon,
   });
 
   final String title;
   final String subtitle;
   final bool value;
   final ValueChanged<bool>? onChanged;
+  final AppLineIcon? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,10 @@ class SettingToggleRow extends StatelessWidget {
           ),
           child: Row(
             children: [
+              if (icon != null) ...[
+                AppLineIconWidget(icon!, color: colors.muted),
+                const SizedBox(width: 14),
+              ],
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

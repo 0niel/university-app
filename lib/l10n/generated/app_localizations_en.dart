@@ -12429,4 +12429,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nfcPassCodeSentDescription =>
       'Enter the verification code you received from your university.';
+
+  @override
+  String get entryWelcomeTitle => 'University.\nAt your pace.';
+
+  @override
+  String get entryWelcomeAccent => 'pace.';
+
+  @override
+  String get entryWelcomeSubtitle =>
+      'Your schedule, campus and people. Everything for your student day.';
+
+  @override
+  String get entryGuestHint => 'Explore the app without an account';
+
+  @override
+  String get entryPreviewLesson => 'Mathematical analysis';
+
+  @override
+  String get entryPreviewProgramming => 'Programming';
+
+  @override
+  String get onboardingStoryScheduleTitle => 'Your day.\nAll planned out.';
+
+  @override
+  String get onboardingStoryScheduleAccent => 'planned out.';
+
+  @override
+  String get onboardingStoryScheduleLead =>
+      'Classes, changes and deadlines at hand. Less searching, more time for you.';
+
+  @override
+  String get onboardingStoryCampusTitle => 'Feel at home\non campus.';
+
+  @override
+  String get onboardingStoryCampusAccent => 'campus.';
+
+  @override
+  String get onboardingStoryCampusLead =>
+      'Find classrooms and free spaces to study between classes.';
+
+  @override
+  String get onboardingStoryCommunityTitle => 'Your people.\nYour university.';
+
+  @override
+  String get onboardingStoryCommunityAccent => 'university.';
+
+  @override
+  String get onboardingStoryCommunityLead =>
+      'Stay close to friends, discover communities and share what interests you.';
 }

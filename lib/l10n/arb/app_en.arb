@@ -12004,5 +12004,20 @@
   "nfcPassVerificationUnavailableTitle": "Verification unavailable",
   "nfcPassVerificationUnavailableDescription": "This account has no digital pass or verification method. Contact your university about connecting a digital pass.",
   "nfcPassCodeSentTitle": "Code sent",
-  "nfcPassCodeSentDescription": "Enter the verification code you received from your university."
+  "nfcPassCodeSentDescription": "Enter the verification code you received from your university.",
+  "entryWelcomeTitle": "University.\nAt your pace.",
+  "entryWelcomeAccent": "pace.",
+  "entryWelcomeSubtitle": "Your schedule, campus and people. Everything for your student day.",
+  "entryGuestHint": "Explore the app without an account",
+  "entryPreviewLesson": "Mathematical analysis",
+  "entryPreviewProgramming": "Programming",
+  "onboardingStoryScheduleTitle": "Your day.\nAll planned out.",
+  "onboardingStoryScheduleAccent": "planned out.",
+  "onboardingStoryScheduleLead": "Classes, changes and deadlines at hand. Less searching, more time for you.",
+  "onboardingStoryCampusTitle": "Feel at home\non campus.",
+  "onboardingStoryCampusAccent": "campus.",
+  "onboardingStoryCampusLead": "Find classrooms and free spaces to study between classes.",
+  "onboardingStoryCommunityTitle": "Your people.\nYour university.",
+  "onboardingStoryCommunityAccent": "university.",
+  "onboardingStoryCommunityLead": "Stay close to friends, discover communities and share what interests you."
 }

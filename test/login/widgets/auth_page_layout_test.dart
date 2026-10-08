@@ -44,7 +44,7 @@ Widget _app({
 }
 
 void main() {
-  testWidgets('renders serif title, lead, back circle and progress', (
+  testWidgets('uses the entry kit title, lead, back and step indicator', (
     tester,
   ) async {
     var backs = 0;
@@ -60,8 +60,9 @@ void main() {
 
     final colors = tester.element(find.byType(AuthPageLayout)).colors;
     final title = tester.widget<Text>(find.text('Welcome back'));
-    expect(title.style?.fontFamily, AppText.serifFamily);
-    expect(title.style?.fontSize, AppText.displayHero.fontSize);
+    expect(find.byType(AppEntryLayout), findsOneWidget);
+    expect(title.style?.fontFamily, AppText.sansFamily);
+    expect(title.style?.fontSize, AppText.entryTitle.fontSize);
     final lead = tester.widget<Text>(
       find.text('Use your university account to continue'),
     );
@@ -69,20 +70,7 @@ void main() {
     expect(lead.style?.fontSize, AppText.bodyLarge.fontSize);
 
     expect(find.bySemanticsLabel('Шаг 2 из 3'), findsOneWidget);
-    final bars = tester
-        .widgetList<AnimatedContainer>(
-          find.descendant(
-            of: find.byType(AuthProgress),
-            matching: find.byType(AnimatedContainer),
-          ),
-        )
-        .toList();
-    expect(bars, hasLength(3));
-    Color? barColor(AnimatedContainer bar) =>
-        (bar.decoration as BoxDecoration?)?.color;
-    expect(barColor(bars[0]), colors.accent);
-    expect(barColor(bars[1]), colors.accent);
-    expect(barColor(bars[2]), colors.surface2);
+    expect(find.byType(AppStepIndicator), findsOneWidget);
 
     expect(
       tester.getSize(find.byType(AppBackButton)).shortestSide,
@@ -99,10 +87,12 @@ void main() {
     await tester.pump();
 
     expect(find.byType(AppBackButton), findsNothing);
-    expect(find.byType(AuthProgress), findsNothing);
+    expect(find.byType(AppStepIndicator), findsNothing);
   });
 
-  testWidgets('accent word renders italic in accent colour', (tester) async {
+  testWidgets('accent word renders as an italic serif in the ink colour', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _app(titleAccent: 'back', child: const SizedBox.shrink()),
     );
@@ -121,8 +111,12 @@ void main() {
       return true;
     });
     expect(accent, isNotNull);
-    expect(accent?.style?.color, colors.accent);
+    expect(
+      accent?.style?.color ?? (rich.text as TextSpan).style?.color,
+      colors.ink,
+    );
     expect(accent?.style?.fontStyle, FontStyle.italic);
+    expect(accent?.style?.fontFamily, AppText.serifFamily);
   });
 
   testWidgets('pins actions at the bottom and stays scrollable when large', (

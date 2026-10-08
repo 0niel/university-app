@@ -195,6 +195,10 @@ class _OnboardingIdentityStepState extends State<OnboardingIdentityStep> {
       totalSteps: widget.totalSteps,
       title: l10n.onboardingIdentityTitle,
       subtitle: l10n.onboardingIdentitySubtitle,
+      leading: AppEntryEmblem(
+        icon: AppLineIcon.people,
+        tone: context.colors.lab,
+      ),
       onBack: widget.onBack,
       actions: AppButton.primary(
         key: const Key('onboarding_identityContinue'),

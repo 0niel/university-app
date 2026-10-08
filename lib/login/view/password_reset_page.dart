@@ -63,6 +63,7 @@ class _PasswordResetViewState extends State<_PasswordResetView> {
           title: l10n.authPasswordResetTitle,
           titleAccent: l10n.authPasswordResetTitleAccent,
           subtitle: l10n.authPasswordResetSubtitle,
+          leading: const AppEntryEmblem(icon: AppLineIcon.lock),
           onBack: () => Navigator.of(context).maybePop(),
           actions: const _PasswordResetButton(),
           child: BlocBuilder<PasswordResetBloc, PasswordResetState>(

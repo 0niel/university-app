@@ -120,6 +120,7 @@ class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
         totalSteps: widget.totalSteps,
         title: l10n.onboardingGroupTitle,
         subtitle: l10n.onboardingGroupLead,
+        leading: const AppEntryEmblem(icon: AppLineIcon.calendar),
         onBack: widget.onBack,
         actions: AppButton.primary(
           key: const Key('onboarding_groupContinue'),
@@ -137,7 +138,7 @@ class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
               controller: _controller,
               placeholder: l10n.onboardingGroupPlaceholder,
               leadingIcon: AppLineIcon.search,
-              height: 54,
+              height: 58,
               fillColor: _fieldColor(colors),
               textCapitalization: TextCapitalization.characters,
               textInputAction: TextInputAction.search,

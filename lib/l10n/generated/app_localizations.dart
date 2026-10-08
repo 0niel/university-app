@@ -21613,6 +21613,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter the verification code you received from your university.'**
   String get nfcPassCodeSentDescription;
+
+  /// No description provided for @entryWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'University.\nAt your pace.'**
+  String get entryWelcomeTitle;
+
+  /// No description provided for @entryWelcomeAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'pace.'**
+  String get entryWelcomeAccent;
+
+  /// No description provided for @entryWelcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your schedule, campus and people. Everything for your student day.'**
+  String get entryWelcomeSubtitle;
+
+  /// No description provided for @entryGuestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore the app without an account'**
+  String get entryGuestHint;
+
+  /// No description provided for @entryPreviewLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Mathematical analysis'**
+  String get entryPreviewLesson;
+
+  /// No description provided for @entryPreviewProgramming.
+  ///
+  /// In en, this message translates to:
+  /// **'Programming'**
+  String get entryPreviewProgramming;
+
+  /// No description provided for @onboardingStoryScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your day.\nAll planned out.'**
+  String get onboardingStoryScheduleTitle;
+
+  /// No description provided for @onboardingStoryScheduleAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'planned out.'**
+  String get onboardingStoryScheduleAccent;
+
+  /// No description provided for @onboardingStoryScheduleLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes, changes and deadlines at hand. Less searching, more time for you.'**
+  String get onboardingStoryScheduleLead;
+
+  /// No description provided for @onboardingStoryCampusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Feel at home\non campus.'**
+  String get onboardingStoryCampusTitle;
+
+  /// No description provided for @onboardingStoryCampusAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'campus.'**
+  String get onboardingStoryCampusAccent;
+
+  /// No description provided for @onboardingStoryCampusLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Find classrooms and free spaces to study between classes.'**
+  String get onboardingStoryCampusLead;
+
+  /// No description provided for @onboardingStoryCommunityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your people.\nYour university.'**
+  String get onboardingStoryCommunityTitle;
+
+  /// No description provided for @onboardingStoryCommunityAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'university.'**
+  String get onboardingStoryCommunityAccent;
+
+  /// No description provided for @onboardingStoryCommunityLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay close to friends, discover communities and share what interests you.'**
+  String get onboardingStoryCommunityLead;
 }
 
 class _AppLocalizationsDelegate

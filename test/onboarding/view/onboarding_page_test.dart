@@ -127,11 +127,7 @@ void main() {
 
   Future<void> openGroupStep(WidgetTester tester) async {
     await pumpPage(tester);
-    await tester.scrollUntilVisible(
-      find.byKey(const Key('onboarding_start')),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await tester.ensureVisible(find.byKey(const Key('onboarding_start')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('onboarding_start')));
     await tester.pump();
@@ -157,48 +153,82 @@ void main() {
           .onPressed !=
       null;
 
-  testWidgets('welcome step renders the mock elements', (tester) async {
+  testWidgets('welcome shows its first story, preview and setup actions', (
+    tester,
+  ) async {
     await pumpPage(tester);
+    final l10n = tester.element(find.byType(OnBoardingPage)).l10n;
 
     expect(
-      find.text('Университет\nв одном касании', findRichText: true),
+      find.text(l10n.onboardingStoryScheduleTitle, findRichText: true),
       findsOneWidget,
     );
-    expect(
-      find.text(
-        'Пары, дедлайны, свободные аудитории и пропуск — без лишних вкладок.',
-      ),
-      findsOneWidget,
-    );
-    expect(find.text('Расписание с изменениями'), findsOneWidget);
-    expect(find.text('Свободные аудитории рядом'), findsOneWidget);
-    expect(find.text('Друзья на кампусе'), findsOneWidget);
-    expect(find.text('Начать'), findsOneWidget);
+    expect(find.text(l10n.onboardingStoryScheduleLead), findsOneWidget);
+    expect(find.byType(AppEntryPreview), findsOneWidget);
+    expect(find.byKey(const Key('onboarding_storyNext')), findsOneWidget);
+    expect(find.byKey(const Key('onboarding_start')), findsOneWidget);
     expect(find.text('У меня есть аккаунт'), findsOneWidget);
-    expect(find.bySemanticsLabel('Шаг 1 из 4'), findsOneWidget);
+    expect(find.bySemanticsLabel('Шаг 1 из 3'), findsOneWidget);
     expect(find.textContaining('MIREA'), findsNothing);
   });
 
-  testWidgets('welcome accent word is italic accent serif', (tester) async {
+  testWidgets('welcome accent word is an italic serif in the ink colour', (
+    tester,
+  ) async {
     await pumpPage(tester);
+    final l10n = tester.element(find.byType(OnBoardingPage)).l10n;
 
     final rich = tester.widget<RichText>(
       find.byWidgetPredicate(
         (widget) =>
             widget is RichText &&
-            widget.text.toPlainText() == 'Университет\nв одном касании',
+            widget.text.toPlainText() == l10n.onboardingStoryScheduleTitle,
       ),
     );
     final colors = tester.element(find.byType(OnBoardingPage)).colors;
     final spans = <TextSpan>[];
     rich.text.visitChildren((span) {
-      if (span is TextSpan && span.text == 'касании') spans.add(span);
+      if (span is TextSpan && span.text == l10n.onboardingStoryScheduleAccent) {
+        spans.add(span);
+      }
       return true;
     });
     expect(spans, hasLength(1));
-    expect(spans.single.style?.color, colors.accent);
+    expect(
+      spans.single.style?.color ?? (rich.text as TextSpan).style?.color,
+      colors.ink,
+    );
     expect(spans.single.style?.fontStyle, FontStyle.italic);
     expect(spans.single.style?.fontFamily, AppText.serifFamily);
+  });
+
+  testWidgets('story paging reaches campus, community and group setup', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+    final l10n = tester.element(find.byType(OnBoardingPage)).l10n;
+    for (final story in [
+      (l10n.onboardingStoryCampusTitle, 2),
+      (l10n.onboardingStoryCommunityTitle, 3),
+    ]) {
+      await tester.ensureVisible(find.byKey(const Key('onboarding_storyNext')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('onboarding_storyNext')));
+      await tester.pumpAndSettle();
+      expect(find.text(story.$1, findRichText: true), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(l10n.onboardingStepSemantics(story.$2, 3)),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    }
+    expect(find.byKey(const Key('onboarding_storyNext')), findsNothing);
+    await tester.ensureVisible(find.byKey(const Key('onboarding_start')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onboarding_start')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('onboarding_groupSearch')), findsOneWidget);
+    expect(continueEnabled(tester), isFalse);
   });
 
   testWidgets('start opens the group step with a disabled continue', (
@@ -225,7 +255,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Начать'), findsOneWidget);
+    expect(find.byKey(const Key('onboarding_storyNext')), findsOneWidget);
   });
 
   testWidgets('picking a group requests its schedule and enables continue', (
@@ -292,13 +322,22 @@ void main() {
     await tester.scrollUntilVisible(
       find.byKey(const Key('onboarding_haveAccount')),
       200,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: find
+          .byWidgetPredicate(
+            (widget) =>
+                widget is Scrollable &&
+                widget.axisDirection == AxisDirection.down,
+          )
+          .first,
     );
     await tester.pumpAndSettle();
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Начать'), findsOneWidget);
+    expect(
+      find.byKey(const Key('onboarding_storyNext')).hitTestable(),
+      findsOneWidget,
+    );
     expect(find.text('У меня есть аккаунт'), findsOneWidget);
   });
 }

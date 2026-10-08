@@ -53,6 +53,12 @@ abstract final class AppText {
   static final TextStyle displayLarge =
       serif(42, height: 1.05, letterSpacingEm: -.02);
 
+  static final TextStyle entryHero =
+      sans(38, FontWeight.w500, height: 1.08, letterSpacingEm: -.045);
+
+  static final TextStyle entryTitle =
+      sans(32, FontWeight.w500, height: 1.12, letterSpacingEm: -.035);
+
   static final TextStyle displayHero =
       serif(36, height: 1.08, letterSpacingEm: -.02);
 

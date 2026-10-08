@@ -16,6 +16,7 @@ void main() {
     WidgetTester tester,
     Widget page, {
     UserRepository? repository,
+    bool openLoginForm = true,
   }) async {
     tester.view
       ..devicePixelRatio = 1
@@ -34,6 +35,14 @@ void main() {
       ),
     );
     await tester.pump();
+    if (page is LoginPage && openLoginForm) {
+      await tester.ensureVisible(
+        find.byKey(const Key('loginPage_startButton')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('loginPage_startButton')));
+      await tester.pumpAndSettle();
+    }
   }
 
   Finder input(String key) => find.descendant(
@@ -83,6 +92,112 @@ void main() {
       'loginPage_passwordInput',
       'password123',
     );
+  });
+
+  testWidgets('welcome opens login and back retains the entered credentials', (
+    tester,
+  ) async {
+    await pumpPage(tester, const LoginPage(), openLoginForm: false);
+    expect(find.byType(EditableText), findsNothing);
+    expect(find.byKey(const Key('loginPage_signUpLink')), findsOneWidget);
+    expect(find.byKey(const Key('loginPage_guestButton')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('loginPage_startButton')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      input('loginPage_emailInput'),
+      'student@example.com',
+    );
+    await tester.enterText(input('loginPage_passwordInput'), 'password123');
+    await tester.pumpAndSettle();
+    final passwordFocus = tester
+        .widget<EditableText>(
+          input('loginPage_passwordInput'),
+        )
+        .focusNode;
+    expect(passwordFocus.hasFocus, isTrue);
+
+    tester.testTextInput.log.clear();
+    await tester.tap(find.byType(AppBackButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(EditableText), findsNothing);
+    expect(passwordFocus.hasFocus, isFalse);
+    expect(find.byKey(const Key('loginPage_startButton')), findsOneWidget);
+    final autofillFinishes = tester.testTextInput.log
+        .where((call) => call.method == 'TextInput.finishAutofillContext')
+        .map((call) => call.arguments);
+    expect(autofillFinishes, isNotEmpty);
+    expect(autofillFinishes, everyElement(isFalse));
+
+    await tester.tap(find.byKey(const Key('loginPage_startButton')));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<EditableText>(input('loginPage_emailInput'))
+          .controller
+          .text,
+      'student@example.com',
+    );
+    expect(
+      tester
+          .widget<EditableText>(input('loginPage_passwordInput'))
+          .controller
+          .text,
+      'password123',
+    );
+    expect(
+      tester
+          .widget<AppButton>(find.byKey(const Key('loginPage_submitButton')))
+          .onPressed,
+      isNotNull,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('welcome starts a guest session and blocks competing actions', (
+    tester,
+  ) async {
+    final repository = _UserRepository();
+    final request = Completer<void>();
+    addTearDown(() {
+      if (!request.isCompleted) request.complete();
+    });
+    when(repository.signInAnonymously).thenAnswer((_) => request.future);
+    await pumpPage(
+      tester,
+      const LoginPage(),
+      repository: repository,
+      openLoginForm: false,
+    );
+    await tester.tap(find.byKey(const Key('loginPage_guestButton')));
+    await tester.pump();
+    await tester.pump();
+
+    verify(repository.signInAnonymously).called(1);
+    for (final key in [
+      'loginPage_startButton',
+      'loginPage_signUpLink',
+      'loginPage_guestButton',
+    ]) {
+      expect(tester.widget<AppButton>(find.byKey(Key(key))).onPressed, isNull);
+    }
+    expect(find.byType(EditableText), findsNothing);
+    request.complete();
+    await tester.pump();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('system back returns from credentials to the welcome', (
+    tester,
+  ) async {
+    await pumpPage(tester, const LoginPage());
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byType(LoginPage), findsOneWidget);
+    expect(find.byType(EditableText), findsNothing);
+    expect(find.byKey(const Key('loginPage_startButton')), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
@@ -177,9 +292,11 @@ void main() {
     );
     await tester.enterText(input('loginPage_passwordInput'), 'password123');
     await tester.pump();
-    final focus = tester.widget<EditableText>(
-      input('loginPage_passwordInput'),
-    ).focusNode;
+    final focus = tester
+        .widget<EditableText>(
+          input('loginPage_passwordInput'),
+        )
+        .focusNode;
     await tester.tap(find.byKey(const Key('loginPage_submitButton')));
     await tester.pump();
 
@@ -191,11 +308,18 @@ void main() {
     }
     expect(focus.hasFocus, isTrue);
 
+    tester.testTextInput.log.clear();
     request.complete();
     await tester.pump();
     await tester.pump();
     expect(focus.hasFocus, isTrue);
     expect(tester.testTextInput.isVisible, isTrue);
+    expect(
+      tester.testTextInput.log
+          .where((call) => call.method == 'TextInput.finishAutofillContext')
+          .map((call) => call.arguments),
+      contains(isTrue),
+    );
     expect(
       tester
           .widget<EditableText>(input('loginPage_passwordInput'))

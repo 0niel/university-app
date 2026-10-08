@@ -217,6 +217,31 @@ void main() {
     },
   );
 
+  testWidgets('registration back cancels saving the unfinished credentials', (
+    tester,
+  ) async {
+    await pump(tester, const SizedBox.shrink());
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    unawaited(
+      navigator.push<void>(
+        MaterialPageRoute(builder: (_) => const SignUpPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await fillSignUp(tester);
+    tester.testTextInput.log.clear();
+
+    await tester.tap(find.byType(AppBackButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(SignUpPage), findsNothing);
+    final autofillFinishes = tester.testTextInput.log
+        .where((call) => call.method == 'TextInput.finishAutofillContext')
+        .map((call) => call.arguments);
+    expect(autofillFinishes, isNotEmpty);
+    expect(autofillFinishes, everyElement(isFalse));
+    expect(tester.takeException(), isNull);
+  });
+
   for (final page in [
     const SignUpPage(),
     const PasswordResetPage(),

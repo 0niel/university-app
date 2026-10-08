@@ -64,38 +64,42 @@ void main() {
     WidgetTester tester, {
     double scale = 1,
     DateTime? selectedDay,
-  }) => tester.pumpApp(
-    MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider<CampusRepository>.value(value: _Campus()),
-        RepositoryProvider<ScheduleRepository>.value(value: _Schedule()),
-      ],
-      child: MultiBlocProvider(
+    bool preview = false,
+  }) {
+    final activity = LessonActivityBuilder(
+      lesson: lesson,
+      day: selectedDay ?? day,
+      builder: (context, annotations) => AppLessonRow(
+        title: lesson.subject,
+        time: '09:00',
+        typeLabel: 'ЛЕК',
+        scheduleStyle: true,
+        annotations: annotations,
+        onTap: () => fail('The note marker must not open the lesson'),
+      ),
+    );
+    return tester.pumpApp(
+      MultiRepositoryProvider(
         providers: [
-          BlocProvider<LessonCommentsCubit>.value(value: comments),
-          BlocProvider<LessonReactionsCubit>.value(value: reactions),
+          RepositoryProvider<CampusRepository>.value(value: _Campus()),
+          RepositoryProvider<ScheduleRepository>.value(value: _Schedule()),
         ],
-        child: Scaffold(
-          body: SingleChildScrollView(
-            child: LessonActivityBuilder(
-              lesson: lesson,
-              day: selectedDay ?? day,
-              builder: (context, annotations) => AppLessonRow(
-                title: lesson.subject,
-                time: '09:00',
-                typeLabel: 'ЛЕК',
-                scheduleStyle: true,
-                annotations: annotations,
-                onTap: () => fail('The note marker must not open the lesson'),
-              ),
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<LessonCommentsCubit>.value(value: comments),
+            BlocProvider<LessonReactionsCubit>.value(value: reactions),
+          ],
+          child: Scaffold(
+            body: SingleChildScrollView(
+              child: preview ? AppPreviewScope(child: activity) : activity,
             ),
           ),
         ),
       ),
-    ),
-    size: const Size(320, 844),
-    textScaler: TextScaler.linear(scale),
-  );
+      size: const Size(320, 844),
+      textScaler: TextScaler.linear(scale),
+    );
+  }
 
   testWidgets('empty activity adds no markers or card space', (tester) async {
     await pump(tester);
@@ -109,6 +113,61 @@ void main() {
       ),
     ).called(1);
   });
+
+  testWidgets(
+    'preview isolates inherited activity and preserves normal cards',
+    (
+      tester,
+    ) async {
+      when(
+        () => comments.state,
+      ).thenReturn(LessonCommentsState(comments: [note()]));
+      when(
+        () => reactions.state,
+      ).thenReturn(LessonReactionsState(summaries: [summary()]));
+      final next = day.add(const Duration(days: 7));
+      when(
+        () => reactions.ensureSummary(
+          subjectName: lesson.subject,
+          lessonDate: next,
+          lessonBells: lesson.lessonBells,
+        ),
+      ).thenAnswer((_) async {});
+
+      await pump(tester, preview: true);
+      expect(find.text(lesson.subject), findsOneWidget);
+      expect(
+        tester.widget<AppLessonRow>(find.byType(AppLessonRow)).annotations,
+        isEmpty,
+      );
+      await pump(tester, preview: true, selectedDay: next);
+      verifyNever(() => comments.state);
+      verifyNever(() => comments.stream);
+      verifyNever(() => reactions.state);
+      verifyNever(() => reactions.stream);
+      for (final date in [day, next]) {
+        verifyNever(
+          () => reactions.ensureSummary(
+            subjectName: lesson.subject,
+            lessonDate: date,
+            lessonBells: lesson.lessonBells,
+          ),
+        );
+      }
+
+      await pump(tester);
+      expect(find.byKey(const ValueKey('lesson-note-marker')), findsOneWidget);
+      expect(find.text('🧠🔥 15'), findsOneWidget);
+      verify(
+        () => reactions.ensureSummary(
+          subjectName: lesson.subject,
+          lessonDate: day,
+          lessonBells: lesson.lessonBells,
+        ),
+      ).called(1);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('other dates and blank notes do not leak into the card', (
     tester,
