@@ -172,6 +172,7 @@ void main() {
       (_) => const Stream<String>.empty(),
     );
     when(localNotifications.initialize).thenAnswer((_) async {});
+    when(localNotifications.hasPermission).thenAnswer((_) async => true);
     when(localNotifications.takePendingInteraction).thenReturn(null);
     watch = _Watch();
     when(() => watch.state).thenReturn(const WatchConnectivityState());
