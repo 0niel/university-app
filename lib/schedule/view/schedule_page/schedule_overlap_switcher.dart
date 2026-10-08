@@ -75,6 +75,9 @@ class _ScheduleOverlapSwitcherState extends State<ScheduleOverlapSwitcher> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          verticalDirection: widget.compact
+              ? VerticalDirection.up
+              : VerticalDirection.down,
           children: [
             AppPressable(
               key: const ValueKey('schedule-overlap-next'),

@@ -12,6 +12,18 @@ class ScheduleWidgetUpdater {
 
   final HomeScreenWidgetService _widgetService;
 
+  Future<void> clearWidgets() async {
+    if (kIsWeb) return;
+    await _widgetService.setSchedule(
+      jsonEncode({
+        'group': '',
+        'schedule': <Map<String, Object?>>[],
+        'weekNumber': _getCurrentWeekNumber(),
+        'lastUpdated': DateTime.now().toIso8601String(),
+      }),
+    );
+  }
+
   int _getCurrentWeekNumber() {
     try {
       return getWeek();

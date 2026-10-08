@@ -18893,7 +18893,7 @@ abstract class AppLocalizations {
   /// No description provided for @authGuestExitWarning.
   ///
   /// In en, this message translates to:
-  /// **'Signing out permanently loses access to this guest account. Link an email first to keep your data.'**
+  /// **'Signing out loses access to this guest account and its progress. App preferences and cached files stay on this device. Link an email first to keep your account.'**
   String get authGuestExitWarning;
 
   /// No description provided for @settingsColorCustom.

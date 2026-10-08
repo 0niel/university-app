@@ -11006,7 +11006,7 @@
   "authGuestUpgradePassword": "Set password",
   "authGuestUpgradeDone": "Account saved",
   "authGuestUpgradeError": "Could not save the account. Check your details and try again.",
-  "authGuestExitWarning": "Signing out permanently loses access to this guest account. Link an email first to keep your data.",
+  "authGuestExitWarning": "Signing out loses access to this guest account and its progress. App preferences and cached files stay on this device. Link an email first to keep your account.",
   "settingsColorCustom": "Custom color",
   "settingsColorHex": "HEX",
   "settingsColorHue": "Hue",

@@ -82,6 +82,7 @@ class AppSearchField extends StatelessWidget {
               controller: controller,
               focusNode: focusNode,
               autofocus: autofocus,
+              autofillHints: null,
               textInputAction: TextInputAction.search,
               textCapitalization: textCapitalization,
               keyboardType: keyboardType,

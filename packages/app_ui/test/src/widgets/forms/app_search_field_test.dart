@@ -5,6 +5,28 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../kit_harness.dart';
 
 void main() {
+  testWidgets('search does not register an autofill client on Android', (
+    tester,
+  ) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      wrapKit(
+        SizedBox(
+          width: 320,
+          child: AppSearchField(controller: controller),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final configuration = tester.testTextInput.setClientArgs!;
+    expect(configuration['autofill'], isNull);
+    expect(configuration['inputAction'], 'TextInputAction.search');
+  });
+
   testWidgets('is a 50px surface2 pill with a search glyph', (tester) async {
     final controller = TextEditingController();
     addTearDown(controller.dispose);

@@ -4,7 +4,10 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart' hide TimeOfDay;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
+import 'package:local_notifications_repository/local_notifications_repository.dart';
+import 'package:rtu_mirea_app/app/view/app_device_token_sync.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/notifications/notification_permission.dart';
 import 'package:rtu_mirea_app/notifications/view/schedule_changes_read_scope.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
@@ -22,19 +25,53 @@ class ChangesPage extends StatefulWidget {
   State<ChangesPage> createState() => _ChangesPageState();
 }
 
-class _ChangesPageState extends State<ChangesPage> {
+class _ChangesPageState extends State<ChangesPage> with WidgetsBindingObserver {
   UserSettings? _settings;
+  bool? _permissionGranted;
+  var _permissionRead = 0;
   bool _savingSettings = false;
   bool _settingsError = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       unawaited(_loadChanges());
       unawaited(_loadSettings());
+      unawaited(_refreshPermission());
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _permissionRead++;
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !_savingSettings) {
+      unawaited(_refreshPermission());
+    }
+  }
+
+  Future<void> _refreshPermission() async {
+    final request = ++_permissionRead;
+    try {
+      final granted = await hasNotificationPermission(
+        context.read<LocalNotificationsRepository>(),
+      );
+      if (mounted && request == _permissionRead) {
+        setState(() => _permissionGranted = granted);
+      }
+    } on Exception {
+      if (mounted && request == _permissionRead) {
+        setState(() => _permissionGranted = false);
+      }
+    }
   }
 
   Future<void> _loadChanges() {
@@ -66,13 +103,33 @@ class _ChangesPageState extends State<ChangesPage> {
   Future<void> _toggleAlerts(bool value) async {
     final current = _settings;
     if (current == null || _savingSettings) return;
-    setState(() {
-      _settings = current.copyWith(scheduleChangeAlerts: value);
-      _savingSettings = true;
-    });
+    _permissionRead++;
+    setState(() => _savingSettings = true);
     try {
+      if (value) {
+        final granted = await requestNotificationPermission(
+          context.read<LocalNotificationsRepository>(),
+        );
+        if (!mounted) return;
+        setState(() => _permissionGranted = granted);
+        if (!granted) {
+          ToastManager.showWarning(
+            context,
+            message: context.l10n.onboardingPushDenied,
+          );
+          return;
+        }
+        await AppDeviceTokenSync.refresh(context);
+        if (!mounted) return;
+      }
+      final next = current.copyWith(
+        scheduleChangeAlerts: value,
+        notificationsEnabled: value || current.notificationsEnabled,
+      );
+      setState(() => _settings = next);
       await context.read<GamificationRepository>().updateSettings(
-        current.copyWith(scheduleChangeAlerts: value),
+        next,
+        previous: current,
       );
     } on Exception catch (_) {
       if (mounted) {
@@ -176,11 +233,15 @@ class _ChangesPageState extends State<ChangesPage> {
                             actionLabel: l10n.retry,
                             onAction: () => unawaited(_loadSettings()),
                           )
-                        else if (_settings == null)
+                        else if (_settings == null ||
+                            _permissionGranted == null)
                           const AppSkeletonRow()
                         else
                           _SubscribeBanner(
-                            enabled: _settings!.scheduleChangeAlerts,
+                            enabled:
+                                _settings!.notificationsEnabled &&
+                                _settings!.scheduleChangeAlerts &&
+                                _permissionGranted == true,
                             onChanged: _savingSettings
                                 ? null
                                 : (value) => unawaited(_toggleAlerts(value)),

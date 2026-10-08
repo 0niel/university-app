@@ -129,30 +129,30 @@ Future<void> showSyncPolicySheet(
   BuildContext context, {
   required SyncPolicy current,
   required ValueChanged<SyncPolicy> onSelected,
-}) {
+}) async {
   final l10n = context.l10n;
-  return showAppSheet<void>(
+  final selected = await showAppSheet<SyncPolicy>(
     context,
     title: l10n.settingsSync,
     subtitle: l10n.settingsSyncSheetSubtitle,
     contentPadding: .zero,
-    child: Column(
-      mainAxisSize: .min,
-      crossAxisAlignment: .stretch,
-      children: [
-        for (final policy in SyncPolicy.values)
-          _SelectRow(
-            label: syncPolicyLabel(l10n, policy),
-            value: policy,
-            groupValue: current,
-            onTap: () {
-              onSelected(policy);
-              Navigator.of(context).pop();
-            },
-          ),
-      ],
+    child: Builder(
+      builder: (sheetContext) => Column(
+        mainAxisSize: .min,
+        crossAxisAlignment: .stretch,
+        children: [
+          for (final policy in SyncPolicy.values)
+            _SelectRow(
+              label: syncPolicyLabel(l10n, policy),
+              value: policy,
+              groupValue: current,
+              onTap: () => Navigator.of(sheetContext).pop(policy),
+            ),
+        ],
+      ),
     ),
   );
+  if (selected != null && context.mounted) onSelected(selected);
 }
 
 String startupScreenLabel(AppLocalizations l10n, StartupScreen screen) =>

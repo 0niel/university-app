@@ -19,6 +19,7 @@ class SearchTextField extends StatelessWidget {
       child: NinjaInput(
         controller: controller,
         autofocus: autofocus,
+        textInputAction: TextInputAction.search,
         leadingIcon: const AppLineIconWidget(AppLineIcon.search),
         placeholder: context.l10n.searchGlobalHint,
       ),

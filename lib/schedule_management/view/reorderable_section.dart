@@ -67,11 +67,13 @@ class _ReorderableSection extends StatelessWidget {
   }
 
   void _onRemove(BuildContext context, _EditEntry entry) {
-    context.read<ScheduleBloc>().add(
-      ScheduleDeleteRequested(identifier: entry.id, target: target),
+    unawaited(
+      confirmScheduleDeletion(
+        context,
+        identifier: entry.id,
+        name: entry.name,
+        target: target,
+      ),
     );
-    NinjaToastHost.maybeOf(
-      context,
-    )?.show(NinjaToastData(message: context.l10n.scheduleRemovedToast));
   }
 }

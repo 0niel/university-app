@@ -1,5 +1,7 @@
 part of 'schedule_management_page.dart';
 
+enum _SavedScheduleAction { open, delete }
+
 class _HubBody extends StatelessWidget {
   const _HubBody({
     required this.state,
@@ -72,7 +74,7 @@ class _HubBody extends StatelessWidget {
                 schedule: selected,
                 updatedAt:
                     state.scheduleSyncedAt[activeId] ?? state.lastSyncedAt,
-                onTap: () => _openSchedule(context),
+                onTap: () => _showActions(context, selected),
               ),
             ),
             const SizedBox(height: 18),
@@ -88,12 +90,13 @@ class _HubBody extends StatelessWidget {
                     name: entry.$2.name,
                     schedule: entry.$3,
                     updatedAt: state.scheduleSyncedAt[entry.$1],
-                    onTap: () => _select(
+                    onTap: () => _showActions(
                       context,
                       SelectedGroupSchedule(
                         group: entry.$2,
                         schedule: entry.$3,
                       ),
+                      identifier: entry.$1,
                     ),
                   ),
               ],
@@ -109,12 +112,13 @@ class _HubBody extends StatelessWidget {
                     name: entry.$2.name,
                     schedule: entry.$3,
                     updatedAt: state.scheduleSyncedAt[entry.$1],
-                    onTap: () => _select(
+                    onTap: () => _showActions(
                       context,
                       SelectedTeacherSchedule(
                         teacher: entry.$2,
                         schedule: entry.$3,
                       ),
+                      identifier: entry.$1,
                     ),
                   ),
               ],
@@ -130,12 +134,13 @@ class _HubBody extends StatelessWidget {
                     name: entry.$2.name,
                     schedule: entry.$3,
                     updatedAt: state.scheduleSyncedAt[entry.$1],
-                    onTap: () => _select(
+                    onTap: () => _showActions(
                       context,
                       SelectedClassroomSchedule(
                         classroom: entry.$2,
                         schedule: entry.$3,
                       ),
+                      identifier: entry.$1,
                     ),
                   ),
               ],
@@ -143,6 +148,55 @@ class _HubBody extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _showActions(
+    BuildContext context,
+    SelectedSchedule schedule, {
+    String? identifier,
+  }) async {
+    final l10n = context.l10n;
+    final id = identifier ?? scheduleSelectedId(schedule);
+    final action = await showAppSheet<_SavedScheduleAction>(
+      context,
+      title: schedule.name,
+      child: Builder(
+        builder: (sheetContext) => AppListGroup(
+          children: [
+            AppListRow(
+              title: l10n.openSchedule,
+              leading: const AppLineIconWidget(AppLineIcon.calendar),
+              onTap: () => Navigator.of(sheetContext).pop(
+                _SavedScheduleAction.open,
+              ),
+            ),
+            if (id != null)
+              AppListRow(
+                title: l10n.deleteScheduleAction,
+                leading: const AppLineIconWidget(AppLineIcon.trash),
+                destructive: true,
+                onTap: () => Navigator.of(sheetContext).pop(
+                  _SavedScheduleAction.delete,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (!context.mounted) return;
+    switch (action) {
+      case .open:
+        _select(context, schedule);
+      case .delete:
+        await confirmScheduleDeletion(
+          context,
+          identifier: id!,
+          name: schedule.name,
+          target: SelectedSchedule.toScheduleTarget(schedule.type),
+        );
+      case null:
+        break;
+    }
   }
 
   void _select(BuildContext context, SelectedSchedule schedule) {
