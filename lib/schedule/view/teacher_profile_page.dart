@@ -25,6 +25,7 @@ Future<void> showTeacherProfileSheet(
   BuildContext context, {
   required Teacher teacher,
   bool readOnly = false,
+  TeacherProfile? initialProfile,
 }) => showAppSheet<void>(
   context,
   child: RepositoryProvider.value(
@@ -34,6 +35,7 @@ Future<void> showTeacherProfileSheet(
       teacher: teacher,
       inSheet: true,
       readOnly: readOnly,
+      initialProfile: initialProfile,
     ),
   ),
 );
@@ -44,12 +46,14 @@ class TeacherProfilePage extends StatefulWidget {
     this.teacher,
     this.inSheet = false,
     this.readOnly = false,
+    this.initialProfile,
     super.key,
   });
   final String teacherName;
   final Teacher? teacher;
   final bool inSheet;
   final bool readOnly;
+  final TeacherProfile? initialProfile;
 
   @override
   State<TeacherProfilePage> createState() => _TeacherProfilePageState();
@@ -76,6 +80,14 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
   @override
   void initState() {
     super.initState();
+    final initial = widget.initialProfile;
+    if (initial != null &&
+        initial.teacherName.trim().toLowerCase() ==
+            widget.teacherName.trim().toLowerCase()) {
+      _profile = initial;
+      _loading = false;
+      return;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) unawaited(_load());
     });

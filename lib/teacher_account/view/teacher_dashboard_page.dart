@@ -339,6 +339,15 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage>
     ).push<void>(context),
   );
 
+  void _openOwnReviews(Teacher teacher) => unawaited(
+    showTeacherProfileSheet(
+      context,
+      teacher: teacher,
+      readOnly: true,
+      initialProfile: _profile?.copyWith(teacherName: teacher.name),
+    ),
+  );
+
   String _duration(Duration duration) {
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
@@ -486,6 +495,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage>
     );
     final current = workload.currentAt(_now);
     final next = current ?? workload.nextAt(_now);
+    final preview = _hasSchedule ? next : null;
+    final dayOccurrences = workload.occurrencesForDay(_day);
+    final dayLessons = dayOccurrences.where((entry) => entry != preview);
     final groups = workload.groups;
     final rooms = workload.classrooms;
     final mapEnabled = context.read<UniversityConfig>().isEnabled(.campusMap);
@@ -515,6 +527,18 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage>
         style: AppText.body.copyWith(color: colors.muted),
       ),
       const SizedBox(height: AppSpacing.md),
+      _TeacherRatingShortcut(
+        profile: _profile,
+        loading: _ratingLoading,
+        error: _ratingError,
+        formatRating: _rating,
+        onTap: _profile != null
+            ? () => _openOwnReviews(teacher)
+            : _ratingError
+            ? () => unawaited(_refreshRating())
+            : null,
+      ),
+      const SizedBox(height: AppSpacing.md),
       AppButton.text(
         label: l10n.teacherChange,
         expanded: true,
@@ -529,6 +553,16 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage>
         loading: _openingSchedule,
         onPressed: _openingSchedule ? null : () => unawaited(_openSchedule()),
       ),
+      if (preview != null) ...[
+        AppOverline(
+          current != null ? l10n.teacherCurrentLesson : l10n.teacherNextLesson,
+        ),
+        _TeacherLessonTile(
+          occurrence: preview,
+          showDate: true,
+          onTap: () => _openLesson(preview),
+        ),
+      ],
       AppOverline(l10n.teacherWeekWorkload),
       Row(
         children: [
@@ -633,18 +667,6 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage>
             style: AppText.body.copyWith(color: colors.muted),
           ),
         ],
-        if (next != null && !DateUtils.isSameDay(next.date, _day)) ...[
-          AppOverline(
-            current != null
-                ? l10n.teacherCurrentLesson
-                : l10n.teacherNextLesson,
-          ),
-          _TeacherLessonTile(
-            occurrence: next,
-            showDate: true,
-            onTap: () => _openLesson(next),
-          ),
-        ],
         AppOverline(DateFormat.MMMMEEEEd(l10n.localeName).format(_day)),
         _TeacherWeekDays(
           week: _week,
@@ -652,23 +674,18 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage>
           onSelect: (day) => setState(() => _day = day),
         ),
         const SizedBox(height: AppSpacing.md),
-        if (workload.occurrencesForDay(_day).isEmpty)
+        if (dayOccurrences.isEmpty)
           AppEmptyState(
             title: l10n.teacherNoLessons,
             subtitle: l10n.teacherNoLessonsDescription,
             lineIcon: AppLineIcon.calendar,
           )
-        else
+        else if (dayLessons.isNotEmpty)
           AppListGroup(
             children: [
-              for (final occurrence in workload.occurrencesForDay(_day))
+              for (final occurrence in dayLessons)
                 _TeacherLessonTile(
                   occurrence: occurrence,
-                  status: occurrence == next
-                      ? current != null
-                            ? l10n.teacherCurrentLesson
-                            : l10n.teacherNextLesson
-                      : null,
                   onTap: () => _openLesson(occurrence),
                 ),
             ],
@@ -753,9 +770,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage>
         _TeacherRatingCard(
           profile: _profile,
           formatRating: _rating,
-          onReviews: () => unawaited(
-            showTeacherProfileSheet(context, teacher: teacher, readOnly: true),
-          ),
+          onReviews: () => _openOwnReviews(teacher),
         ),
       ],
       AppOverline(l10n.services),
@@ -800,6 +815,126 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage>
   String _rating(double? value) => value == null
       ? '—'
       : NumberFormat('0.0', context.l10n.localeName).format(value);
+}
+
+class _TeacherRatingShortcut extends StatelessWidget {
+  const _TeacherRatingShortcut({
+    required this.profile,
+    required this.loading,
+    required this.error,
+    required this.formatRating,
+    required this.onTap,
+  });
+
+  final TeacherProfile? profile;
+  final bool loading;
+  final bool error;
+  final String Function(double?) formatRating;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final summary = profile != null
+        ? profile?.overall == null
+              ? l10n.teacherNoRating
+              : formatRating(profile?.overall)
+        : error
+        ? l10n.teacherRatingRefreshError
+        : loading
+        ? l10n.loadingContent
+        : l10n.teacherNoRating;
+    final reviews = profile == null
+        ? null
+        : '${l10n.scheduleTeacherReviews}: ${profile?.reviewsCount ?? 0}';
+    final refreshStatus = profile == null
+        ? null
+        : error
+        ? l10n.teacherRatingRefreshError
+        : loading
+        ? l10n.loadingContent
+        : null;
+    return AppCard(
+      key: const ValueKey('teacher-rating-shortcut'),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      semanticsLabel: [
+        l10n.teacherOwnRating,
+        summary,
+        reviews,
+        refreshStatus,
+      ].whereType<String>().join(', '),
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: AppControlSize.touchTarget - 2 * AppSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            AppLineIconWidget(
+              AppLineIcon.star,
+              color: colors.accent,
+              size: AppIconSize.sm,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.xs,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        l10n.teacherOwnRating,
+                        style: AppText.subtext.copyWith(color: colors.muted),
+                      ),
+                      Text(
+                        summary,
+                        style: AppText.labelStrong.copyWith(color: colors.ink),
+                      ),
+                      if (reviews != null)
+                        Text(
+                          reviews,
+                          style: AppText.subtext.copyWith(color: colors.muted),
+                        ),
+                      if (error && profile == null)
+                        Text(
+                          l10n.retry,
+                          style: AppText.subtextStrong.copyWith(
+                            color: colors.accent,
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (refreshStatus != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      refreshStatus,
+                      style: AppText.caption.copyWith(color: colors.muted),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (onTap != null) ...[
+              const SizedBox(width: AppSpacing.sm),
+              AppLineIconWidget(
+                AppLineIcon.chevronR,
+                color: colors.muted,
+                size: AppIconSize.sm,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _TeacherWeekDays extends StatelessWidget {
@@ -1010,13 +1145,11 @@ class _TeacherLessonTile extends StatelessWidget {
     required this.occurrence,
     required this.onTap,
     this.showDate = false,
-    this.status,
   });
 
   final TeacherLessonOccurrence occurrence;
   final VoidCallback onTap;
   final bool showDate;
-  final String? status;
 
   @override
   Widget build(BuildContext context) {
@@ -1029,30 +1162,19 @@ class _TeacherLessonTile extends StatelessWidget {
       if (showDate) DateFormat.MMMEd(l10n.localeName).format(occurrence.date),
       time,
       lessonTypeName(l10n, occurrence.lesson.lessonType),
-      if (occurrence.groups.isNotEmpty)
-        occurrence.groups.map((group) => group.name).join(', '),
       if (occurrence.lesson.classrooms.isNotEmpty)
         occurrence.lesson.classrooms.map(classroomLabel).join(', '),
+      if (occurrence.groups.isNotEmpty)
+        occurrence.groups.map((group) => group.name).join(', '),
       if (occurrence.isCancelled) l10n.lessonMetaCancelled,
     ].join(' · ');
     return AppCard(
       key: ValueKey((occurrence.start, occurrence.lesson)),
-      semanticsLabel: [
-        status,
-        occurrence.lesson.subject,
-        meta,
-      ].whereType<String>().join(', '),
+      semanticsLabel: '${occurrence.lesson.subject}, $meta',
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (status != null)
-            AppOverline(
-              status!,
-              topPadding: 0,
-              bottomPadding: AppSpacing.sm,
-              color: colors.accent,
-            ),
           Text(
             occurrence.lesson.subject,
             style: AppText.headlineStrong.copyWith(

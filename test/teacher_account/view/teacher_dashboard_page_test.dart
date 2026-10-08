@@ -14,6 +14,7 @@ import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:rtu_mirea_app/schedule/view/teacher_profile_page.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:rtu_mirea_app/teacher_account/view/teacher_dashboard_page.dart';
 import 'package:schedule_repository/schedule_repository.dart';
@@ -126,9 +127,10 @@ void main() {
     WidgetTester tester, {
     TextScaler textScaler = TextScaler.noScaling,
     bool dark = false,
+    Size size = const Size(320, 844),
   }) async {
     tester.view
-      ..physicalSize = const Size(320, 844)
+      ..physicalSize = size
       ..devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     addTearDown(() => tester.pumpWidget(const SizedBox.shrink()));
@@ -196,6 +198,140 @@ void main() {
     expect(find.text('СЕЙЧАС ИДЁТ ЗАНЯТИЕ'), findsOneWidget);
     expect(find.textContaining('Математика'), findsWidgets);
     expect(find.textContaining('ГРУППА-01'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'rating is visible immediately and opens cached read-only reviews',
+    (
+      tester,
+    ) async {
+      await loadGalleryFonts();
+      await pumpDashboard(tester, size: const Size(390, 844));
+      final shortcut = find.byKey(const ValueKey('teacher-rating-shortcut'));
+      expect(shortcut, findsOneWidget);
+      expect(
+        find.descendant(of: shortcut, matching: find.text('4,5')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: shortcut, matching: find.text('отзывов: 12')),
+        findsOneWidget,
+      );
+      expect(tester.getBottomRight(shortcut).dy, lessThan(844));
+      expect(
+        tester.getBottomRight(find.text('Моё расписание')).dy,
+        lessThan(844),
+      );
+      expect(find.text('Математика'), findsOneWidget);
+      expect(tester.getBottomRight(find.text('Математика')).dy, lessThan(844));
+      final lessonMeta = find.textContaining('09:00–10:30');
+      expect(tester.getBottomRight(lessonMeta).dy, lessThan(844));
+      final meta = tester.widget<Text>(lessonMeta).data!;
+      expect(meta.indexOf('А-101'), lessThan(meta.indexOf('ГРУППА-01')));
+      expect(find.text('Занятий в этот день нет'), findsNothing);
+      await tester.tap(shortcut);
+      await tester.pumpAndSettle();
+      final page = tester.widget<TeacherProfilePage>(
+        find.byType(TeacherProfilePage),
+      );
+      expect(page.readOnly, isTrue);
+      expect(page.initialProfile?.reviewsCount, 12);
+      expect(find.text('Оставить отзыв'), findsNothing);
+      expect(find.text('Написать'), findsNothing);
+      verify(() => campus.getTeacherProfile(teacher.name)).called(1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('day list keeps lessons other than the top preview', (
+    tester,
+  ) async {
+    when(
+      () => schedules.getTeacherSchedule(
+        teacher: any(named: 'teacher'),
+        dateFrom: any(named: 'dateFrom'),
+        dateTo: any(named: 'dateTo'),
+      ),
+    ).thenAnswer(
+      (_) async => ScheduleResponse(
+        data: [
+          lesson(),
+          lesson(subject: 'Практика'),
+        ],
+      ),
+    );
+    await pumpDashboard(tester);
+    expect(find.text('Математика'), findsOneWidget);
+    expect(find.text('Практика'), findsOneWidget);
+    expect(find.text('Занятий в этот день нет'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('rating shortcut shows an honest empty summary', (tester) async {
+    when(() => campus.getTeacherProfile(any())).thenAnswer(
+      (_) async => TeacherProfile.empty,
+    );
+    await pumpDashboard(tester);
+    final shortcut = find.byKey(const ValueKey('teacher-rating-shortcut'));
+    expect(
+      find.descendant(of: shortcut, matching: find.text('Оценок пока нет')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: shortcut, matching: find.text('отзывов: 0')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: shortcut, matching: find.text('0,0')),
+      findsNothing,
+    );
+    await tester.tap(shortcut);
+    await tester.pumpAndSettle();
+    expect(find.text('О вас ещё нет отзывов'), findsOneWidget);
+    expect(find.text('Оставить отзыв'), findsNothing);
+    verify(() => campus.getTeacherProfile(teacher.name)).called(1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('rating shortcut distinguishes loading and a retryable failure', (
+    tester,
+  ) async {
+    final pending = Completer<TeacherProfile>();
+    when(() => campus.getTeacherProfile(any())).thenAnswer(
+      (_) => pending.future,
+    );
+    await pumpDashboard(tester);
+    final shortcut = find.byKey(const ValueKey('teacher-rating-shortcut'));
+    final l10n = tester.element(shortcut).l10n;
+    expect(
+      find.descendant(of: shortcut, matching: find.text(l10n.loadingContent)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: shortcut, matching: find.text('отзывов: 0')),
+      findsNothing,
+    );
+    expect(tester.widget<AppCard>(shortcut).onTap, isNull);
+    pending.completeError(Exception('offline'));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: shortcut,
+        matching: find.text(l10n.teacherRatingRefreshError),
+      ),
+      findsOneWidget,
+    );
+    when(() => campus.getTeacherProfile(any())).thenAnswer(
+      (_) async => TeacherProfile.empty,
+    );
+    await tester.tap(shortcut);
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: shortcut, matching: find.text(l10n.teacherNoRating)),
+      findsOneWidget,
+    );
+    verify(() => campus.getTeacherProfile(teacher.name)).called(2);
     expect(tester.takeException(), isNull);
   });
 
@@ -501,7 +637,7 @@ void main() {
       ],
     );
     await pumpRouter(tester, router);
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.ensureVisible(find.text('Математика').first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Математика').first);
     await tester.pumpAndSettle();
@@ -634,7 +770,7 @@ void main() {
       (tester) async {
         await loadGalleryFonts();
         tester.view
-          ..physicalSize = const Size(390, 1800)
+          ..physicalSize = const Size(390, 844)
           ..devicePixelRatio = 1;
         addTearDown(tester.view.reset);
         addTearDown(() => tester.pumpWidget(const SizedBox.shrink()));
