@@ -26,6 +26,8 @@ import 'package:rtu_mirea_app/profile/widgets/leaderboard_sheet.dart';
 import 'package:rtu_mirea_app/profile/widgets/profile/profile_widgets.dart';
 import 'package:rtu_mirea_app/profile/widgets/profile_activity_card.dart';
 import 'package:rtu_mirea_app/profile/widgets/rows/settings_rows.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/teacher_account_shortcut.dart';
 import 'package:rtu_mirea_app/tour/tour.dart';
 import 'package:user_repository/user_repository.dart';
 

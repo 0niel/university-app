@@ -30,6 +30,7 @@ import 'package:rtu_mirea_app/schedule/widgets/custom_schedule_selector.dart';
 import 'package:rtu_mirea_app/schedule/widgets/schedule_metrics.dart';
 import 'package:rtu_mirea_app/schedule/widgets/widgets.dart';
 import 'package:rtu_mirea_app/search/widgets/global_search_button.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -77,11 +78,13 @@ class ScheduleDetailsPage extends StatefulWidget {
   const ScheduleDetailsPage({
     required this.lesson,
     required this.selectedDate,
+    this.sourceTeacher,
     super.key,
   });
 
   final LessonSchedulePart lesson;
   final DateTime selectedDate;
+  final Teacher? sourceTeacher;
 
   @override
   State<ScheduleDetailsPage> createState() => _ScheduleDetailsPageState();
@@ -161,6 +164,9 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage>
         reactionBusy: _reactionBusy,
         peers: _peers,
         teacherProfile: _teacherProfile,
+        sourceChanges: widget.sourceTeacher == null ? null : _sourceChanges,
+        sourceChangesError: _sourceChangesError,
+        onRetrySourceChanges: _loadSourceChanges,
         showGroups: _streamGroupNames.isNotEmpty,
         onBack: () => Navigator.of(context).maybePop(),
         onShare: () => showScheduleShareSheet(

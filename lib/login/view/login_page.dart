@@ -2,9 +2,12 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:gamification_repository/gamification_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/login/login.dart';
 import 'package:rtu_mirea_app/navigation/navigation.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_entry_intent_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/account_role_selector.dart';
 
 part 'login_page_form.dart';
 
@@ -33,6 +36,7 @@ class _LoginPageViewState extends State<_LoginPageView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _passwordFocusNode = FocusNode();
+  bool _teacherEntry = false;
 
   @override
   void dispose() {
@@ -55,6 +59,9 @@ class _LoginPageViewState extends State<_LoginPageView> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bloc = context.read<LoginBloc>();
+    final teacherEntry =
+        _teacherEntry ||
+        context.watch<AccountEntryIntentCubit?>()?.state == AccountRole.teacher;
     return Scaffold(
       backgroundColor: context.colors.canvas,
       body: BlocListener<LoginBloc, LoginState>(
@@ -63,18 +70,46 @@ class _LoginPageViewState extends State<_LoginPageView> {
           if (state.status.isFailure) _onFailure(context, state);
         },
         child: AuthPageLayout(
-          title: l10n.loginWelcomeBack,
-          titleAccent: l10n.loginWelcomeBackAccent,
-          subtitle: l10n.loginSubtitle,
+          title: teacherEntry ? l10n.teacherLoginTitle : l10n.loginWelcomeBack,
+          titleAccent: teacherEntry ? null : l10n.loginWelcomeBackAccent,
+          subtitle: teacherEntry
+              ? l10n.teacherLoginDescription
+              : l10n.loginSubtitle,
           showBack: Navigator.of(context).canPop(),
           onBack: () => Navigator.of(context).maybePop(),
           actions: const _LoginPageActions(),
-          child: _LoginPageForm(
-            emailController: _emailController,
-            passwordController: _passwordController,
-            passwordFocusNode: _passwordFocusNode,
-            onEmailChanged: (value) => bloc.add(LoginEmailChanged(value)),
-            onPasswordChanged: (value) => bloc.add(LoginPasswordChanged(value)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              BlocBuilder<LoginBloc, LoginState>(
+                builder: (context, state) => AccountRoleSelector(
+                  key: const Key('loginPage_roleSelector'),
+                  role: teacherEntry
+                      ? AccountRole.teacher
+                      : AccountRole.student,
+                  showDescription: false,
+                  onChanged: state.status.isInProgress
+                      ? null
+                      : (role) {
+                          context.read<AccountEntryIntentCubit?>()?.select(
+                            role,
+                          );
+                          setState(
+                            () => _teacherEntry = role == AccountRole.teacher,
+                          );
+                        },
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
+              _LoginPageForm(
+                emailController: _emailController,
+                passwordController: _passwordController,
+                passwordFocusNode: _passwordFocusNode,
+                onEmailChanged: (value) => bloc.add(LoginEmailChanged(value)),
+                onPasswordChanged: (value) =>
+                    bloc.add(LoginPasswordChanged(value)),
+              ),
+            ],
           ),
         ),
       ),

@@ -9,6 +9,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/onboarding/view/onboarding_page.dart';
+import 'package:rtu_mirea_app/onboarding/widgets/identity_step.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
@@ -137,6 +138,112 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
   }
+
+  Future<void> openTeacherStep(WidgetTester tester) async {
+    await pumpPage(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('onboarding_teacherStart')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onboarding_teacherStart')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets(
+    'teacher onboarding uses the catalog without requesting a group',
+    (tester) async {
+      const teacher = Teacher(uid: 'teacher-a', name: 'Иванов Иван Иванович');
+      when(
+        () => scheduleRepository.searchTeachers(query: any(named: 'query')),
+      ).thenAnswer(
+        (_) async => const SearchTeachersResponse(results: [teacher]),
+      );
+      await openTeacherStep(tester);
+      expect(find.bySemanticsLabel('Шаг 2 из 4'), findsOneWidget);
+      expect(
+        tester
+            .widget<AppButton>(
+              find.byKey(const Key('onboarding_teacherContinue')),
+            )
+            .onPressed,
+        isNull,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('teacher-picker-id:teacher-a')),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const Key('onboarding_teacherContinue')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('onboarding_teacherContinue')));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<OnboardingIdentityStep>(find.byType(OnboardingIdentityStep))
+            .initialName,
+        teacher.name,
+      );
+      verifyNever(() => scheduleBloc.add(any()));
+    },
+  );
+
+  testWidgets('choose later clears the draft teacher selection', (
+    tester,
+  ) async {
+    const teacher = Teacher(uid: 'teacher-a', name: 'Иванов Иван Иванович');
+    when(
+      () => scheduleRepository.searchTeachers(query: any(named: 'query')),
+    ).thenAnswer((_) async => const SearchTeachersResponse(results: [teacher]));
+    await openTeacherStep(tester);
+    await tester.tap(find.byKey(const ValueKey('teacher-picker-id:teacher-a')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const Key('onboarding_teacherLater')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onboarding_teacherLater')));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<OnboardingIdentityStep>(find.byType(OnboardingIdentityStep))
+          .initialName,
+      isNull,
+    );
+    await tester.tap(find.byType(AppBackButton));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<AppButton>(
+            find.byKey(const Key('onboarding_teacherContinue')),
+          )
+          .onPressed,
+      isNull,
+    );
+  });
+
+  testWidgets('teacher onboarding can return to the ordinary student flow', (
+    tester,
+  ) async {
+    await openTeacherStep(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('onboarding_studentMode')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onboarding_studentMode')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('onboarding_groupSearch')), findsOneWidget);
+    expect(
+      tester
+          .widget<AppButton>(find.byKey(const Key('onboarding_groupContinue')))
+          .onPressed,
+      isNull,
+    );
+  });
 
   Future<void> search(WidgetTester tester, String query) async {
     await tester.enterText(

@@ -61,6 +61,10 @@ class SettingsSearchFilter {
   bool get showAbout => _matches([l10n.aboutApp]);
 
   bool get showAccount => _matches([
+    l10n.accountPersonaTitle,
+    l10n.teacherRoleFallback,
+    l10n.accountRoleStudent,
+    l10n.teacherCabinetTitle,
     l10n.profileAccount,
     l10n.settingsManageAccount,
     l10n.profileSignOut,

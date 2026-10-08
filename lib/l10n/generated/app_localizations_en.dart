@@ -12429,4 +12429,205 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nfcPassCodeSentDescription =>
       'Enter the verification code you received from your university.';
+
+  @override
+  String get teacherPickerPlaceholder => 'Teacher’s surname or name';
+
+  @override
+  String get teacherPickerEmpty => 'Teacher not found';
+
+  @override
+  String get teacherPickerEmptyHint =>
+      'Check the spelling or search by surname. You can choose a teacher later.';
+
+  @override
+  String teacherPickerSelected(String name) {
+    return 'Selected teacher: $name';
+  }
+
+  @override
+  String teacherPickerIdentity(String id) {
+    return 'Schedule entry: $id';
+  }
+
+  @override
+  String get teacherPickerHint =>
+      'Find yourself in the catalog and choose the correct entry.';
+
+  @override
+  String get teacherCabinetTitle => 'Teacher dashboard';
+
+  @override
+  String get teacherCabinetSubtitle =>
+      'Your classes, groups and student reviews';
+
+  @override
+  String get teacherChooseTitle => 'Choose a teacher';
+
+  @override
+  String get teacherChooseDescription =>
+      'Find yourself in the university schedule to see your classes and rating.';
+
+  @override
+  String get teacherUnavailableTitle => 'Teacher unavailable';
+
+  @override
+  String get teacherUnavailableDescription =>
+      'This teacher is no longer listed in the schedule. Choose a teacher again.';
+
+  @override
+  String get teacherChange => 'Change teacher';
+
+  @override
+  String get teacherOwnSchedule => 'My schedule';
+
+  @override
+  String get teacherOwnRating => 'My rating';
+
+  @override
+  String get teacherOwnReviews => 'Student reviews';
+
+  @override
+  String get teacherOwnReviewsEmpty => 'No reviews about you yet';
+
+  @override
+  String get teacherOwnReviewsEmptyDescription =>
+      'Student ratings and reviews will appear here.';
+
+  @override
+  String get teacherWeekWorkload => 'Weekly workload';
+
+  @override
+  String get teacherTeachingTime => 'Teaching time';
+
+  @override
+  String get teacherWindowTime => 'Gaps between classes';
+
+  @override
+  String get teacherLessonCount => 'Classes';
+
+  @override
+  String get teacherGroups => 'My groups';
+
+  @override
+  String get teacherRooms => 'My rooms';
+
+  @override
+  String get teacherNextLesson => 'Next class';
+
+  @override
+  String get teacherCurrentLesson => 'Class in progress';
+
+  @override
+  String get teacherNoLessons => 'No classes on this day';
+
+  @override
+  String get teacherNoLessonsDescription => 'Choose another day or week.';
+
+  @override
+  String get teacherNoRating => 'No ratings yet';
+
+  @override
+  String get teacherRatingDescription =>
+      'Student ratings across three criteria';
+
+  @override
+  String get teacherRoleFallback => 'Teacher';
+
+  @override
+  String get teacherPreviousWeek => 'Previous week';
+
+  @override
+  String get teacherNextWeek => 'Next week';
+
+  @override
+  String get teacherWeekNoLessons => 'No classes this week';
+
+  @override
+  String get accountPersonaTitle => 'Account mode';
+
+  @override
+  String get accountPersonaSubtitle =>
+      'Choose the information to show in your dashboard.';
+
+  @override
+  String get accountRoleStudent => 'Student';
+
+  @override
+  String get accountRoleStudentDescription =>
+      'Group schedule and the usual app features';
+
+  @override
+  String get accountRoleTeacherDescription =>
+      'Your classes, groups, rooms and rating';
+
+  @override
+  String get accountPersonaSave => 'Save mode';
+
+  @override
+  String get accountPersonaSaved => 'Account mode updated';
+
+  @override
+  String get accountPersonaSyncError =>
+      'Your choice is saved on this device. It could not be synced to your account.';
+
+  @override
+  String get teacherLogin => 'Sign in as a teacher';
+
+  @override
+  String get teacherLoginTitle => 'Teacher sign-in';
+
+  @override
+  String get teacherLoginDescription =>
+      'Sign in or create an account, then choose your entry in the teacher catalog.';
+
+  @override
+  String get teacherRegistrationHint =>
+      'After confirming your email, you can choose your schedule and open your teacher dashboard.';
+
+  @override
+  String get onboardingTeacherStart => 'I’m a teacher';
+
+  @override
+  String get onboardingTeacherTitle => 'Your schedule';
+
+  @override
+  String get onboardingTeacherLead =>
+      'Find yourself in the university catalog. Your schedule and rating will appear in your dashboard.';
+
+  @override
+  String get onboardingStudentStart => 'I’m a student';
+
+  @override
+  String get teacherChooseLater => 'Choose later';
+
+  @override
+  String get teacherDisconnect => 'Unlink teacher';
+
+  @override
+  String get teacherChangesLoadError =>
+      'Could not check recent changes. Cancellation and rescheduling details may be outdated.';
+
+  @override
+  String get teacherPickerUnavailable =>
+      'This entry cannot be linked to an account yet';
+
+  @override
+  String get teacherScheduleSaved => 'Showing the saved schedule';
+
+  @override
+  String get teacherScheduleRefreshError => 'Could not refresh the schedule';
+
+  @override
+  String get teacherRatingRefreshError => 'Could not refresh the rating';
+
+  @override
+  String get teacherPickerCatalogEmpty => 'Teacher catalog is empty';
+
+  @override
+  String get teacherPickerCatalogEmptyHint =>
+      'Try refreshing the catalog. You can choose a teacher later.';
+
+  @override
+  String get teacherPickerSelectionLabel => 'Selected teacher';
 }

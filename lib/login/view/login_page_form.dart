@@ -137,6 +137,7 @@ class _LoginPageActions extends StatelessWidget {
               ? null
               : () => const SignUpRoute().push<void>(context),
         ),
+        const SizedBox(height: 10),
         AppButton.secondary(
           key: const Key('loginPage_guestButton'),
           label: l10n.loginGuest,

@@ -6,6 +6,7 @@ import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/app/widgets/adaptive_theme_wrapper.dart';
 import 'package:rtu_mirea_app/navigation/navigation.dart';
 import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 
 class AppRouterView extends StatefulWidget {
   const AppRouterView({super.key});
@@ -26,6 +27,10 @@ class _AppRouterViewState extends State<AppRouterView> {
     _router = createRouter(
       appBloc: appBloc,
       startupScreen: context.read<StartupScreenCubit>().state,
+      initialLocation:
+          context.read<AccountPersonaCubit?>()?.state.entryRequested == true
+          ? '/profile/teacher'
+          : null,
       homeCubit: context.read(),
       refreshListenable: _routerRefreshStream,
     );

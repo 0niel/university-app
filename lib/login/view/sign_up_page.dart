@@ -2,9 +2,11 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:gamification_repository/gamification_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/login/login.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_entry_intent_cubit.dart';
 
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
@@ -62,7 +64,11 @@ class _SignUpViewState extends State<_SignUpView> {
         child: AuthPageLayout(
           title: l10n.authSignUpTitle,
           titleAccent: l10n.authSignUpTitleAccent,
-          subtitle: l10n.authAnyEmailHint,
+          subtitle:
+              context.watch<AccountEntryIntentCubit?>()?.state ==
+                  AccountRole.teacher
+              ? l10n.teacherRegistrationHint
+              : l10n.authAnyEmailHint,
           onBack: () => Navigator.of(context).maybePop(),
           actions: const _SignUpButton(),
           child: Column(

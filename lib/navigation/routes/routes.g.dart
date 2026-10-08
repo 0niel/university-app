@@ -387,6 +387,10 @@ RouteBase get $shellRouteData => StatefulShellRouteData.$route(
           factory: $ProfileRoute._fromState,
           routes: [
             GoRouteData.$route(
+              path: 'teacher',
+              factory: $TeacherDashboardRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'schedule-management',
               factory: $ScheduleManagementRoute._fromState,
             ),
@@ -554,13 +558,21 @@ mixin $CustomScheduleRoute on GoRouteData {
 mixin $ScheduleDetailsRoute on GoRouteData {
   static ScheduleDetailsRoute _fromState(GoRouterState state) =>
       ScheduleDetailsRoute(
+        teacherId: state.uri.queryParameters['teacher-id'],
+        teacherName: state.uri.queryParameters['teacher-name'],
         $extra: state.extra as (LessonSchedulePart, DateTime),
       );
 
   ScheduleDetailsRoute get _self => this as ScheduleDetailsRoute;
 
   @override
-  String get location => GoRouteData.$location('/schedule/details');
+  String get location => GoRouteData.$location(
+    '/schedule/details',
+    queryParams: {
+      if (_self.teacherId != null) 'teacher-id': _self.teacherId,
+      if (_self.teacherName != null) 'teacher-name': _self.teacherName,
+    },
+  );
 
   @override
   void go(BuildContext context) => context.go(location, extra: _self.$extra);
@@ -1291,6 +1303,27 @@ mixin $ProfileRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/profile');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TeacherDashboardRoute on GoRouteData {
+  static TeacherDashboardRoute _fromState(GoRouterState state) =>
+      const TeacherDashboardRoute();
+
+  @override
+  String get location => GoRouteData.$location('/profile/teacher');
 
   @override
   void go(BuildContext context) => context.go(location);

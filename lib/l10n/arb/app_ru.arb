@@ -4948,5 +4948,79 @@
   "nfcPassVerificationUnavailableTitle": "Подтверждение недоступно",
   "nfcPassVerificationUnavailableDescription": "У аккаунта нет цифрового пропуска или способа подтверждения. Уточните возможность его подключения в университете.",
   "nfcPassCodeSentTitle": "Код отправлен",
-  "nfcPassCodeSentDescription": "Введите код подтверждения, полученный от университета."
+  "nfcPassCodeSentDescription": "Введите код подтверждения, полученный от университета.",
+  "teacherPickerPlaceholder": "Фамилия или имя преподавателя",
+  "teacherPickerEmpty": "Преподаватель не найден",
+  "teacherPickerEmptyHint": "Проверьте написание или попробуйте фамилию. Можно выбрать преподавателя позже.",
+  "teacherPickerSelected": "Выбран преподаватель: {name}",
+  "@teacherPickerSelected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherPickerIdentity": "Запись в расписании: {id}",
+  "@teacherPickerIdentity": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherPickerHint": "Найдите себя в каталоге и выберите нужную запись.",
+  "teacherCabinetTitle": "Кабинет преподавателя",
+  "teacherCabinetSubtitle": "Ваши занятия, группы и отзывы студентов",
+  "teacherChooseTitle": "Выберите преподавателя",
+  "teacherChooseDescription": "Найдите себя в расписании университета, чтобы увидеть свои занятия и рейтинг.",
+  "teacherUnavailableTitle": "Преподаватель недоступен",
+  "teacherUnavailableDescription": "Запись больше не найдена в расписании. Выберите преподавателя заново.",
+  "teacherChange": "Сменить преподавателя",
+  "teacherOwnSchedule": "Моё расписание",
+  "teacherOwnRating": "Мой рейтинг",
+  "teacherOwnReviews": "Отзывы студентов",
+  "teacherOwnReviewsEmpty": "О вас ещё нет отзывов",
+  "teacherOwnReviewsEmptyDescription": "Здесь появятся оценки и отзывы студентов.",
+  "teacherWeekWorkload": "Нагрузка за неделю",
+  "teacherTeachingTime": "Время занятий",
+  "teacherWindowTime": "Окна между занятиями",
+  "teacherLessonCount": "Занятия",
+  "teacherGroups": "Мои группы",
+  "teacherRooms": "Мои аудитории",
+  "teacherNextLesson": "Ближайшее занятие",
+  "teacherCurrentLesson": "Сейчас идёт занятие",
+  "teacherNoLessons": "Занятий в этот день нет",
+  "teacherNoLessonsDescription": "Посмотрите другой день или неделю.",
+  "teacherNoRating": "Оценок пока нет",
+  "teacherRatingDescription": "Оценки студентов по трём критериям",
+  "teacherRoleFallback": "Преподаватель",
+  "teacherPreviousWeek": "Предыдущая неделя",
+  "teacherNextWeek": "Следующая неделя",
+  "teacherWeekNoLessons": "На этой неделе занятий нет",
+  "accountPersonaTitle": "Режим аккаунта",
+  "accountPersonaSubtitle": "Выберите, какие данные показывать в вашем личном кабинете.",
+  "accountRoleStudent": "Студент",
+  "accountRoleStudentDescription": "Расписание группы и обычные возможности приложения",
+  "accountRoleTeacherDescription": "Свои занятия, группы, аудитории и рейтинг",
+  "accountPersonaSave": "Сохранить режим",
+  "accountPersonaSaved": "Режим аккаунта обновлён",
+  "accountPersonaSyncError": "Выбор сохранён на устройстве. Не удалось синхронизировать его с аккаунтом.",
+  "teacherLogin": "Войти как преподаватель",
+  "teacherLoginTitle": "Вход для преподавателя",
+  "teacherLoginDescription": "Войдите или создайте аккаунт, затем выберите себя в каталоге преподавателей.",
+  "teacherRegistrationHint": "После подтверждения почты вы сможете выбрать своё расписание и открыть кабинет преподавателя.",
+  "onboardingTeacherStart": "Я преподаватель",
+  "onboardingTeacherTitle": "Ваше расписание",
+  "onboardingTeacherLead": "Найдите себя в каталоге университета. Расписание и рейтинг появятся в личном кабинете.",
+  "onboardingStudentStart": "Я студент",
+  "teacherChooseLater": "Выбрать позже",
+  "teacherDisconnect": "Отвязать преподавателя",
+  "teacherChangesLoadError": "Не удалось проверить свежие изменения. Сведения об отменах и переносах могут быть устаревшими.",
+  "teacherPickerUnavailable": "Эту запись пока нельзя связать с аккаунтом",
+  "teacherScheduleSaved": "Показана сохранённая версия расписания",
+  "teacherScheduleRefreshError": "Не удалось обновить расписание",
+  "teacherRatingRefreshError": "Не удалось обновить рейтинг",
+  "teacherPickerCatalogEmpty": "Каталог преподавателей пока пуст",
+  "teacherPickerCatalogEmptyHint": "Попробуйте обновить каталог. Вы сможете выбрать преподавателя позже.",
+  "teacherPickerSelectionLabel": "Выбран преподаватель"
 }

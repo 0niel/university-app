@@ -30,6 +30,8 @@ import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
 import 'package:rtu_mirea_app/search/search.dart';
 import 'package:rtu_mirea_app/services/services.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/teacher_account_shortcut.dart';
 import 'package:rtu_mirea_app/top_discussions/top_discussions.dart';
 import 'package:rtu_mirea_app/top_discussions/view/discourse_topic_utils.dart';
 import 'package:schedule_repository/schedule_repository.dart';
@@ -62,6 +64,8 @@ class HomeDashboardContent extends StatelessWidget {
     final colors = context.colors;
     final config = context.read<UniversityConfig>();
     final user = context.watch<AppBloc>().state.user;
+    final persona = context.watch<AccountPersonaCubit?>()?.state;
+    final isTeacher = persona?.isTeacher == true;
     final identityCubit = context.watch<HomeIdentityCubit?>();
     final identity = identityCubit?.state;
     final fullName = identity?.fullName?.trim();
@@ -72,6 +76,8 @@ class HomeDashboardContent extends StatelessWidget {
         ? fullName
         : hasHandle
         ? '@$handle'
+        : isTeacher
+        ? l10n.teacherRoleFallback
         : l10n.homeStudent;
     final firstName = hasFullName
         ? fullName.split(RegExp(r'\s+')).first
@@ -214,6 +220,13 @@ class HomeDashboardContent extends StatelessWidget {
                     : '$dayLabel · ${homeStatusLabel(l10n, entries, kind)}',
               ),
             ),
+            if (isTeacher)
+              inset(
+                const Padding(
+                  padding: EdgeInsets.only(top: AppSpacing.lg),
+                  child: TeacherAccountShortcut(),
+                ),
+              ),
             const PromoBannerSlot(
               placement: PromoPlacement.home,
               homeSlot: PromoHomeSlot.top,
@@ -338,8 +351,8 @@ class HomeDashboardContent extends StatelessWidget {
                 deadlines: deadlines.deadlines,
                 profile: profile,
                 now: now,
-                exam: exam,
-                readiness: readiness,
+                exam: isTeacher ? null : exam,
+                readiness: isTeacher ? null : readiness,
                 onProfile: () => const ProfileRoute().go(context),
                 onDeadlines: openDeadlines,
                 onExam: () => const ScheduleSessionRoute().go(context),

@@ -37,6 +37,7 @@ import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule_management/bloc/schedule_exporter_cubit.dart';
 import 'package:rtu_mirea_app/services/services.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_entry_intent_cubit.dart';
 import 'package:rtu_mirea_app/watch/watch.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:yx_scope_flutter/yx_scope_flutter.dart';
@@ -96,6 +97,7 @@ class App extends StatelessWidget {
           child: MultiBlocProvider(
             providers: [
               BlocProvider(create: (_) => HomeCubit()),
+              BlocProvider(create: (_) => AccountEntryIntentCubit()),
               BlocProvider(create: (_) => ThemeCubit()),
               BlocProvider(create: (_) => LocaleCubit()),
               BlocProvider(create: (_) => ScheduleDisplayCubit()),

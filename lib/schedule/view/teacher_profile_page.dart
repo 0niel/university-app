@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:schedule_repository/schedule_repository.dart' show Teacher;
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,6 +24,7 @@ part 'stars_row.dart';
 Future<void> showTeacherProfileSheet(
   BuildContext context, {
   required Teacher teacher,
+  bool readOnly = false,
 }) => showAppSheet<void>(
   context,
   child: RepositoryProvider.value(
@@ -31,6 +33,7 @@ Future<void> showTeacherProfileSheet(
       teacherName: teacher.name,
       teacher: teacher,
       inSheet: true,
+      readOnly: readOnly,
     ),
   ),
 );
@@ -40,11 +43,13 @@ class TeacherProfilePage extends StatefulWidget {
     required this.teacherName,
     this.teacher,
     this.inSheet = false,
+    this.readOnly = false,
     super.key,
   });
   final String teacherName;
   final Teacher? teacher;
   final bool inSheet;
+  final bool readOnly;
 
   @override
   State<TeacherProfilePage> createState() => _TeacherProfilePageState();
@@ -57,6 +62,16 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
   bool _error = false;
   int _loadRevision = 0;
   CampusRepository get _repository => context.read();
+
+  bool get _readOnly {
+    if (widget.readOnly) return true;
+    final own = context.read<AccountPersonaCubit?>()?.state.teacher;
+    if (own == null) return false;
+    final uid = widget.teacher?.uid;
+    return (uid != null && uid == own.uid) ||
+        own.name.trim().toLowerCase() ==
+            widget.teacherName.trim().toLowerCase();
+  }
 
   @override
   void initState() {
@@ -98,6 +113,7 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
   }
 
   Future<void> _review() async {
+    if (_readOnly) return;
     final saved = await showAppSheet<bool>(
       context,
       title: context.l10n.teacherProfileReviewTitle,
@@ -157,10 +173,14 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
     }
     if (_profile.reviews.isEmpty) {
       return AppEmptyState(
-        title: l10n.teacherProfileEmptyTitle,
-        subtitle: l10n.teacherProfileEmptySub,
-        actionLabel: l10n.teacherProfileLeaveReview,
-        onAction: _review,
+        title: _readOnly
+            ? l10n.teacherOwnReviewsEmpty
+            : l10n.teacherProfileEmptyTitle,
+        subtitle: _readOnly
+            ? l10n.teacherOwnReviewsEmptyDescription
+            : l10n.teacherProfileEmptySub,
+        actionLabel: _readOnly ? null : l10n.teacherProfileLeaveReview,
+        onAction: _readOnly ? null : _review,
       );
     }
     if (widget.inSheet) {
@@ -323,34 +343,36 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
         else
           AppOverline(l10n.teacherProfileReviews),
         AppStateSwitcher(child: _buildReviews(context)),
-        const SizedBox(height: AppSpacing.sectionGap),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final buttons = [
-              AppButton.secondary(
-                label: l10n.scheduleTeacherWrite,
-                expanded: true,
-                backgroundColor: colors.surface,
-                onPressed: _write,
-              ),
-              AppButton.primary(
-                label: l10n.scheduleTeacherReview,
-                expanded: true,
-                onPressed: _review,
-              ),
-            ];
-            return constraints.maxWidth < 320 ||
-                    MediaQuery.textScalerOf(context).scale(1) > 1.4
-                ? Column(spacing: AppSpacing.sm, children: buttons)
-                : Row(
-                    children: [
-                      Expanded(child: buttons.first),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(child: buttons.last),
-                    ],
-                  );
-          },
-        ),
+        if (!_readOnly) ...[
+          const SizedBox(height: AppSpacing.sectionGap),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final buttons = [
+                AppButton.secondary(
+                  label: l10n.scheduleTeacherWrite,
+                  expanded: true,
+                  backgroundColor: colors.surface,
+                  onPressed: _write,
+                ),
+                AppButton.primary(
+                  label: l10n.scheduleTeacherReview,
+                  expanded: true,
+                  onPressed: _review,
+                ),
+              ];
+              return constraints.maxWidth < 320 ||
+                      MediaQuery.textScalerOf(context).scale(1) > 1.4
+                  ? Column(spacing: AppSpacing.sm, children: buttons)
+                  : Row(
+                      children: [
+                        Expanded(child: buttons.first),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(child: buttons.last),
+                      ],
+                    );
+            },
+          ),
+        ],
       ],
     );
   }
@@ -392,6 +414,7 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<AccountPersonaCubit?>();
     if (widget.inSheet) return _content(context);
     return Scaffold(
       backgroundColor: context.colors.canvas,

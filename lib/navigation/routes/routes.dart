@@ -44,6 +44,7 @@ import 'package:rtu_mirea_app/schedule_diff/view/view.dart';
 import 'package:rtu_mirea_app/schedule_management/schedule_management.dart';
 import 'package:rtu_mirea_app/search/view/search_page.dart';
 import 'package:rtu_mirea_app/services/view/view.dart';
+import 'package:rtu_mirea_app/teacher_account/view/teacher_dashboard_page.dart';
 import 'package:rtu_mirea_app/tools/tools.dart';
 import 'package:rtu_mirea_app/university_modules/university_module_page.dart';
 import 'package:rtu_mirea_app/wallet/wallet.dart';
@@ -218,6 +219,7 @@ class GlobalSearchRoute extends GoRouteData with $GlobalSearchRoute {
         TypedGoRoute<ProfileRoute>(
           path: '/profile',
           routes: [
+            TypedGoRoute<TeacherDashboardRoute>(path: 'teacher'),
             TypedGoRoute<ScheduleManagementRoute>(path: 'schedule-management'),
             TypedGoRoute<AboutAppRoute>(path: 'about'),
             TypedGoRoute<AccountManagementRoute>(path: 'account'),
@@ -387,13 +389,26 @@ class CustomScheduleRoute extends GoRouteData with $CustomScheduleRoute {
 
 @immutable
 class ScheduleDetailsRoute extends GoRouteData with $ScheduleDetailsRoute {
-  const ScheduleDetailsRoute({required this.$extra});
+  const ScheduleDetailsRoute({
+    required this.$extra,
+    this.teacherId,
+    this.teacherName,
+  });
 
   final (LessonSchedulePart, DateTime) $extra;
+  final String? teacherId;
+  final String? teacherName;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ScheduleDetailsPage(lesson: $extra.$1, selectedDate: $extra.$2);
+    final name = teacherName?.trim();
+    return ScheduleDetailsPage(
+      lesson: $extra.$1,
+      selectedDate: $extra.$2,
+      sourceTeacher: name == null || name.isEmpty
+          ? null
+          : Teacher(name: name, uid: teacherId),
+    );
   }
 }
 
@@ -775,6 +790,15 @@ class ProfileRoute extends GoRouteData with $ProfileRoute {
 }
 
 @immutable
+class TeacherDashboardRoute extends GoRouteData with $TeacherDashboardRoute {
+  const TeacherDashboardRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const TeacherDashboardPage();
+}
+
+@immutable
 class ScheduleManagementRoute extends GoRouteData
     with $ScheduleManagementRoute {
   const ScheduleManagementRoute();
@@ -904,9 +928,10 @@ GoRouter createRouter({
   AppBloc? appBloc,
   HomeCubit? homeCubit,
   StartupScreen startupScreen = StartupScreen.home,
+  String? initialLocation,
 }) => _routerInstance = GoRouter(
   routes: Routes.all,
-  initialLocation: startupScreen.location,
+  initialLocation: initialLocation ?? startupScreen.location,
   debugLogDiagnostics: kDebugMode,
   refreshListenable: refreshListenable,
   onException: (_, state, router) => router.go('/feed'),
@@ -934,7 +959,9 @@ GoRouter createRouter({
       return '/onboarding';
     }
 
-    if (isLoggedIn && inAuthFlow) return startupScreen.location;
+    if (isLoggedIn && inAuthFlow) {
+      return initialLocation ?? startupScreen.location;
+    }
 
     if (!NfcPassAvailability.isSupported && state.uri.path == '/services/nfc') {
       return '/services';

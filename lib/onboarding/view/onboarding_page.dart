@@ -12,9 +12,11 @@ import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
+import 'package:rtu_mirea_app/onboarding/widgets/teacher_step.dart';
 import 'package:rtu_mirea_app/onboarding/widgets/widgets.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/selected_schedule.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:rtu_mirea_app/tour/tour.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
@@ -30,13 +32,16 @@ class OnBoardingPage extends StatefulWidget {
   State<OnBoardingPage> createState() => _OnBoardingPageState();
 }
 
-enum _Stage { welcome, group, identity, settings }
+enum _Stage { welcome, group, teacher, identity, settings }
 
 class _OnBoardingPageState extends State<OnBoardingPage> {
   _Stage _stage = _Stage.welcome;
   String? _existingName;
   String? _existingHandle;
   Group? _selectedGroup;
+  Teacher? _selectedTeacher;
+  var _isTeacher = false;
+  var _modeEdited = false;
   var _groupQuery = '';
   var _identityRevision = 0;
   var _identityRequired = true;
@@ -54,6 +59,11 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     super.initState();
     _identityRequired =
         !(context.read<AppBloc?>()?.state.user.isGuest ?? false);
+    final persona = context.read<AccountPersonaCubit?>()?.state;
+    _isTeacher = persona?.isTeacher ?? false;
+    _selectedTeacher = persona?.persona.teacherAvailable == true
+        ? persona?.teacher
+        : null;
     unawaited(_preloadIdentity());
   }
 
@@ -62,6 +72,9 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     final userId = context.read<AppBloc?>()?.state.user.id;
     try {
       final repository = context.read<GamificationRepository>();
+      final persona = context.read<AccountPersonaCubit?>();
+      await persona?.restore();
+      if (!mounted || revision != _identityRevision) return;
       final organizationId = context.read<UniversityConfig>().organizationId;
       await repository.ensureAcademicProfile(organizationId);
       final overview = await repository
@@ -73,6 +86,12 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
         return;
       }
       setState(() {
+        if (!_modeEdited && persona != null) {
+          _isTeacher = persona.state.isTeacher;
+          _selectedTeacher = persona.state.persona.teacherAvailable
+              ? persona.state.teacher
+              : null;
+        }
         _existingName = overview.academic.fullName?.trim();
         _existingHandle = overview.academic.handle?.trim();
         if (!_groupEdited) {
@@ -103,6 +122,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
       final group = _selectedGroup;
       final schedule = context.read<ScheduleBloc?>();
       if (!_groupEdited &&
+          !_isTeacher &&
           group != null &&
           schedule != null &&
           schedule.state.selectedSchedule == null) {
@@ -112,12 +132,14 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
           !_groupEdited &&
           !_finishing &&
           _identityComplete &&
-          (overview.academic.group?.trim().isNotEmpty ?? false) &&
+          (_isTeacher
+              ? persona?.state.persona.teacherAvailable == true
+              : (overview.academic.group?.trim().isNotEmpty ?? false)) &&
           userId != null &&
           !context.read<HomeCubit>().state.settings.onboardingShown &&
           !(context.read<AppBloc?>()?.state.user.isGuest ?? true)) {
         context.read<HomeCubit>().closeOnboarding();
-        context.go('/feed');
+        context.go(_isTeacher ? '/profile/teacher' : '/feed');
       }
     } on Exception catch (error, stackTrace) {
       log(
@@ -134,8 +156,13 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   void _afterGroup() =>
       _go(_identityRequired ? _Stage.identity : _Stage.settings);
 
-  void _beforeSettings() =>
-      _go(_identityRequired ? _Stage.identity : _Stage.group);
+  void _beforeSettings() => _go(
+    _identityRequired
+        ? _Stage.identity
+        : _isTeacher
+        ? _Stage.teacher
+        : _Stage.group,
+  );
 
   void _completeIdentity(String name, String handle) {
     _identityRevision++;
@@ -153,8 +180,29 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     try {
       await context.read<GamificationRepository>().ensureAcademicProfile(
         context.read<UniversityConfig>().organizationId,
-        academicGroup: _selectedGroup?.name,
+        academicGroup: _isTeacher ? null : _selectedGroup?.name,
       );
+      if (!mounted || context.read<AppBloc?>()?.state.user.id != userId) {
+        return false;
+      }
+      final persona = context.read<AccountPersonaCubit?>();
+      if (persona != null) {
+        final teacher = _selectedTeacher;
+        final saved = await persona.configure(
+          role: _isTeacher ? AccountRole.teacher : AccountRole.student,
+          teacher: _isTeacher ? teacher : null,
+          clearTeacher: _isTeacher && teacher == null,
+        );
+        if (!saved) {
+          if (mounted) {
+            ToastManager.showError(
+              context,
+              message: context.l10n.identitySaveError,
+            );
+          }
+          return false;
+        }
+      }
       return mounted && context.read<AppBloc?>()?.state.user.id == userId;
     } on Exception catch (error, stackTrace) {
       log(
@@ -178,14 +226,20 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   Future<void> _finish() async {
     if (!await _prepareFinish() || !mounted) return;
     final group = _selectedGroup;
+    final teacher = _selectedTeacher;
+    if (_isTeacher && teacher != null) {
+      context.read<ScheduleBloc>().add(
+        TeacherScheduleRequested(teacher: teacher),
+      );
+    }
     context.read<HomeCubit>().closeOnboarding();
-    if (group != null) {
+    if (!_isTeacher && group != null) {
       ToastManager.showSuccess(
         context,
         message: context.l10n.onboardingWelcomeToast(group.name),
       );
     }
-    context.go('/feed');
+    context.go(_isTeacher ? '/profile/teacher' : '/feed');
     unawaited(startAppTour(context));
   }
 
@@ -226,7 +280,12 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
           _Stage.welcome => OnboardingWelcomeStep(
             key: const ValueKey('onboarding_welcome'),
             totalSteps: _totalSteps,
-            onStart: () => _go(_Stage.group),
+            onStart: () => _go(_isTeacher ? _Stage.teacher : _Stage.group),
+            onTeacherStart: () {
+              _modeEdited = true;
+              _isTeacher = true;
+              _go(_Stage.teacher);
+            },
             onHaveAccount: () => unawaited(_openAccount()),
           ),
           _Stage.group => OnboardingGroupStep(
@@ -252,9 +311,10 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
             key: const ValueKey('onboarding_identity'),
             step: 3,
             totalSteps: _totalSteps,
-            initialName: _existingName,
+            initialName:
+                _existingName ?? (_isTeacher ? _selectedTeacher?.name : null),
             initialHandle: _existingHandle,
-            onBack: () => _go(_Stage.group),
+            onBack: () => _go(_isTeacher ? _Stage.teacher : _Stage.group),
             onNext: _completeIdentity,
           ),
           _Stage.settings => OnboardingSettingsStep(
@@ -265,6 +325,27 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
             onBack: _beforeSettings,
             onFinish: () => unawaited(_finish()),
             finishing: _finishing,
+          ),
+          _Stage.teacher => OnboardingTeacherStep(
+            key: const ValueKey('onboarding_teacher'),
+            totalSteps: _totalSteps,
+            onBack: () => _go(_Stage.welcome),
+            selected: _selectedTeacher,
+            onSelected: (teacher) => setState(() {
+              _modeEdited = true;
+              _selectedTeacher = teacher;
+            }),
+            onNext: _afterGroup,
+            onLater: () {
+              _modeEdited = true;
+              _selectedTeacher = null;
+              _afterGroup();
+            },
+            onStudentMode: () {
+              _modeEdited = true;
+              _isTeacher = false;
+              _go(_Stage.group);
+            },
           ),
         },
       ),

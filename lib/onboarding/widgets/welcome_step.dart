@@ -8,12 +8,14 @@ class OnboardingWelcomeStep extends StatelessWidget {
     required this.totalSteps,
     required this.onStart,
     required this.onHaveAccount,
+    this.onTeacherStart,
     super.key,
   });
 
   final int totalSteps;
   final VoidCallback onStart;
   final VoidCallback onHaveAccount;
+  final VoidCallback? onTeacherStart;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +55,14 @@ class OnboardingWelcomeStep extends StatelessWidget {
             onPressed: onStart,
           ),
           const SizedBox(height: 10),
+          if (onTeacherStart != null)
+            AppButton.secondary(
+              key: const Key('onboarding_teacherStart'),
+              label: l10n.onboardingTeacherStart,
+              expanded: true,
+              size: AppButtonSize.large,
+              onPressed: onTeacherStart,
+            ),
           AppButton.text(
             key: const Key('onboarding_haveAccount'),
             label: l10n.onboardingHaveAccount,
