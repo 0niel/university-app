@@ -1,4 +1,5 @@
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:flutter/widgets.dart';
 
 class AppStepIndicator extends StatelessWidget {
@@ -35,7 +36,7 @@ class AppStepIndicator extends StatelessWidget {
                 width: index == step - 1 ? 22 : 5,
                 decoration: BoxDecoration(
                   color: index < step ? colors.ink : colors.surface2,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
               ),
             ],
