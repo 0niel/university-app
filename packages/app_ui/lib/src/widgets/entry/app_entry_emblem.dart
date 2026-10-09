@@ -1,4 +1,5 @@
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:flutter/widgets.dart';
 
@@ -18,7 +19,7 @@ class AppEntryEmblem extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: tone == null ? colors.surface2 : colors.tintOf(color, .12),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.banner),
       ),
       child: AppLineIconWidget(icon, size: 24, color: color),
     );
