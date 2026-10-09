@@ -1,4 +1,5 @@
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:flutter/material.dart';
 
 class AppEntryPreview extends StatelessWidget {
@@ -28,7 +29,7 @@ class AppEntryPreview extends StatelessWidget {
                   height: viewport.height,
                   decoration: BoxDecoration(
                     color: colors.canvas,
-                    borderRadius: BorderRadius.circular(26),
+                    borderRadius: BorderRadius.circular(AppRadius.hero),
                     border: Border.all(
                       color: colors.ink.withValues(alpha: .12),
                     ),
