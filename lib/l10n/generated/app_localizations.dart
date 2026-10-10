@@ -21377,8 +21377,14 @@ abstract class AppLocalizations {
   /// No description provided for @friendsBackgroundMobileSub.
   ///
   /// In en, this message translates to:
-  /// **'On phones, background updates require location permission and may be limited by battery saving. Force-closing the app or restarting the device can stop sharing; open the app to resume.'**
+  /// **'While sharing is enabled, your location keeps updating after you close the app. An ongoing notification shows that sharing is active. Force-stopping in phone settings, restarting the phone or battery saving may interrupt sharing; open the app to resume.'**
   String get friendsBackgroundMobileSub;
+
+  /// No description provided for @friendsBackgroundIosSub.
+  ///
+  /// In en, this message translates to:
+  /// **'While sharing is enabled, your location keeps updating with the app minimized or the screen locked. iPhone shows the system location indicator. Swiping the app away from recent apps stops sharing; open it to resume.'**
+  String get friendsBackgroundIosSub;
 
   /// No description provided for @friendsBackgroundForegroundSub.
   ///

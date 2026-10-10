@@ -116,6 +116,9 @@ void main() {
 
     setUp(() {
       repository = MockFriendsRepository();
+      when(
+        () => repository.userIdChanges,
+      ).thenAnswer((_) => const Stream.empty());
       preferences = MockPreferencesRepository();
       permissions = MockPermissionClient();
       locationService = _LocationService();
@@ -601,6 +604,90 @@ void main() {
           await cubit.close();
         },
       );
+
+      for (final nextUser in <String?>[null, 'second']) {
+        test(
+          'session change to $nextUser stops tracking without a frame',
+          () async {
+            final users = StreamController<String?>.broadcast(sync: true);
+            addTearDown(users.close);
+            when(
+              () => repository.userIdChanges,
+            ).thenAnswer((_) => users.stream);
+            when(() => repository.currentUserId).thenReturn('first');
+            final cubit = buildCubit();
+            await cubit.updateGeoSettings(
+              const GeoSharingSettings(sharing: true),
+            );
+            clearInteractions(locationService);
+
+            when(() => repository.currentUserId).thenReturn(nextUser);
+            users.add(nextUser);
+            verify(() => locationService.stop()).called(1);
+            expect(cubit.isClosed, isFalse);
+            cubit.ingestDeviceFix(devicePosition());
+            await cubit.retryLocation();
+            verifyNever(
+              () => locationService.start(
+                backgroundEnabled: any(named: 'backgroundEnabled'),
+                requestPermission: any(named: 'requestPermission'),
+              ),
+            );
+            verifyNever(
+              () => repository.publishLocation(
+                latitude: any(named: 'latitude'),
+                longitude: any(named: 'longitude'),
+                accuracyM: any(named: 'accuracyM'),
+                heading: any(named: 'heading'),
+                speedMps: any(named: 'speedMps'),
+              ),
+            );
+
+            when(() => repository.currentUserId).thenReturn('first');
+            users.add('first');
+            await cubit.retryLocation();
+            cubit.ingestDeviceFix(devicePosition(dtSeconds: 10));
+            verifyNever(
+              () => locationService.start(
+                backgroundEnabled: any(named: 'backgroundEnabled'),
+                requestPermission: any(named: 'requestPermission'),
+              ),
+            );
+            expect(cubit.state.hasMyLocation, isFalse);
+            await cubit.close();
+            expect(users.hasListener, isFalse);
+            verify(() => locationService.dispose()).called(1);
+          },
+        );
+      }
+
+      test('same-user auth updates preserve active sharing', () async {
+        final users = StreamController<String?>.broadcast(sync: true);
+        addTearDown(users.close);
+        when(() => repository.userIdChanges).thenAnswer((_) => users.stream);
+        when(() => repository.currentUserId).thenReturn('first');
+        final cubit = buildCubit();
+        await cubit.updateGeoSettings(const GeoSharingSettings(sharing: true));
+        clearInteractions(locationService);
+
+        users
+          ..add('first')
+          ..add('first');
+        cubit.ingestDeviceFix(devicePosition());
+        await pumpEventQueue();
+        verifyNever(() => locationService.stop());
+        verify(
+          () => repository.publishLocation(
+            latitude: any(named: 'latitude'),
+            longitude: any(named: 'longitude'),
+            accuracyM: any(named: 'accuracyM'),
+            heading: any(named: 'heading'),
+            speedMps: any(named: 'speedMps'),
+          ),
+        ).called(1);
+        await cubit.close();
+        expect(users.hasListener, isFalse);
+      });
 
       test('account switch interrupts a pending privacy operation', () async {
         when(() => repository.currentUserId).thenReturn('first');

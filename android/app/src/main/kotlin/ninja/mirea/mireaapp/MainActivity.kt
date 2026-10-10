@@ -1,6 +1,10 @@
 package ninja.mirea.mireaapp
 
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Bundle
+import io.flutter.embedding.android.FlutterFragment
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -26,9 +30,50 @@ class MainActivity : FlutterFragmentActivity() {
             .map(::createNativeFeature)
     }
     private val nativeChannels = mutableListOf<MethodChannel>()
+    private var pendingInitialIntent: Intent? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        val forwardsInitialIntent = when (intent.action) {
+            Intent.ACTION_VIEW -> intent.data != null
+            "SELECT_NOTIFICATION", "SELECT_FOREGROUND_NOTIFICATION" -> true
+            else -> false
+        }
+        if (savedInstanceState == null &&
+            forwardsInitialIntent &&
+            intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0 &&
+            FriendsLocationEngine.retainedEngine()?.dartExecutor?.isExecutingDart == true
+        ) {
+            pendingInitialIntent = intent
+        }
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        pendingInitialIntent?.let {
+            pendingInitialIntent = null
+            super.onNewIntent(it)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        pendingInitialIntent = null
+        super.onNewIntent(intent)
+    }
+
+    override fun provideFlutterEngine(context: Context): FlutterEngine? =
+        FriendsLocationEngine.retainedEngine()
+
+    override fun createFlutterFragment(): FlutterFragment =
+        FriendsLocationFlutterFragment().apply {
+            arguments = super.createFlutterFragment().arguments
+        }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        if (!flutterEngine.plugins.has(FriendsLocationEngine::class.java)) {
+            flutterEngine.plugins.add(FriendsLocationEngine(flutterEngine))
+        }
         nativeFeatures.forEach { feature ->
             MethodChannel(flutterEngine.dartExecutor.binaryMessenger, feature.channelName)
                 .also(nativeChannels::add)
@@ -44,6 +89,12 @@ class MainActivity : FlutterFragmentActivity() {
         }
     }
 
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        nativeChannels.forEach { it.setMethodCallHandler(null) }
+        nativeChannels.clear()
+        super.cleanUpFlutterEngine(flutterEngine)
+    }
+
     override fun onResume() {
         super.onResume()
         nativeFeatures.forEach { it.onResume(this) }
@@ -55,8 +106,6 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     override fun onDestroy() {
-        nativeChannels.forEach { it.setMethodCallHandler(null) }
-        nativeChannels.clear()
         nativeFeatures.forEach { it.onDestroy(this) }
         super.onDestroy()
     }

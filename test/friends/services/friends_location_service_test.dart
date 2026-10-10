@@ -85,12 +85,17 @@ void main() {
 
   late _Geolocator geolocator;
   late FriendsLocationService service;
+  late List<bool> backgroundSharing;
 
   setUp(() {
     geolocator = _Geolocator();
+    backgroundSharing = [];
     service = FriendsLocationService(
       geolocator: geolocator,
       platform: TargetPlatform.android,
+      onBackgroundSharingChanged: ({required enabled}) async {
+        backgroundSharing.add(enabled);
+      },
     );
   });
 
@@ -105,6 +110,7 @@ void main() {
       geolocator: geolocator,
       platform: TargetPlatform.android,
       heartbeatInterval: const Duration(milliseconds: 10),
+      onBackgroundSharingChanged: ({required enabled}) async {},
     );
   }
 
@@ -116,6 +122,7 @@ void main() {
       expect(settings.foregroundNotificationConfig, isNotNull);
       expect(settings.foregroundNotificationConfig!.enableWakeLock, isTrue);
       expect(geolocator.streams, 1);
+      expect(backgroundSharing.last, isTrue);
       final fix = service.positions.first;
       service.didChangeAppLifecycleState(AppLifecycleState.paused);
       geolocator.positions.add(_position());
@@ -131,6 +138,7 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(geolocator.positions.hasListener, isFalse);
     expect(service.status, FriendsLocationStatus.stopped);
+    expect(backgroundSharing.last, isFalse);
     service.didChangeAppLifecycleState(AppLifecycleState.resumed);
     await Future<void>.delayed(Duration.zero);
     expect(geolocator.streams, 2);
@@ -316,7 +324,7 @@ void main() {
     },
   );
 
-  test('Apple sharing never enables background location', () {
+  test('iOS background sharing enables the visible system indicator', () {
     final foreground =
         friendsMapLocationSettings(
               TargetPlatform.iOS,
@@ -332,8 +340,8 @@ void main() {
             as AppleSettings;
     expect(foreground.allowBackgroundLocationUpdates, isFalse);
     expect(foreground.showBackgroundLocationIndicator, isFalse);
-    expect(background.allowBackgroundLocationUpdates, isFalse);
-    expect(background.showBackgroundLocationIndicator, isFalse);
+    expect(background.allowBackgroundLocationUpdates, isTrue);
+    expect(background.showBackgroundLocationIndicator, isTrue);
     expect(background.distanceFilter, 0);
     expect(background.pauseLocationUpdatesAutomatically, isFalse);
   });
@@ -344,7 +352,7 @@ void main() {
     AppLifecycleState.detached,
   ]) {
     test(
-      'iOS sharing stops when $lifecycle and resumes without prompting',
+      'iOS sharing stays active when $lifecycle without restarting the stream',
       () async {
         await service.dispose();
         service = FriendsLocationService(
@@ -358,22 +366,10 @@ void main() {
         geolocator.positions.add(_position(timestamp: initialTimestamp));
         await Future<void>.delayed(Duration.zero);
         expect(received, hasLength(1));
-        expect(service.supportsBackground, isFalse);
+        expect(service.supportsBackground, isTrue);
 
         service.didChangeAppLifecycleState(lifecycle);
         await Future<void>.delayed(Duration.zero);
-        geolocator.positions.add(_position());
-        await Future<void>.delayed(Duration.zero);
-        expect(received, hasLength(1));
-        expect(geolocator.positions.hasListener, isFalse);
-        expect(service.status, FriendsLocationStatus.stopped);
-        await service.start(backgroundEnabled: true, requestPermission: false);
-        expect(geolocator.streams, 1);
-
-        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
-        await Future<void>.delayed(Duration.zero);
-        expect(geolocator.streams, 2);
-        expect(geolocator.requests, 0);
         geolocator.positions.add(
           _position(
             timestamp: initialTimestamp.add(const Duration(seconds: 1)),
@@ -381,6 +377,22 @@ void main() {
         );
         await Future<void>.delayed(Duration.zero);
         expect(received, hasLength(2));
+        expect(geolocator.positions.hasListener, isTrue);
+        expect(service.status, FriendsLocationStatus.active);
+        await service.start(backgroundEnabled: true, requestPermission: false);
+        expect(geolocator.streams, 1);
+
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        await Future<void>.delayed(Duration.zero);
+        expect(geolocator.streams, 1);
+        expect(geolocator.requests, 0);
+        geolocator.positions.add(
+          _position(
+            timestamp: initialTimestamp.add(const Duration(seconds: 2)),
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        expect(received, hasLength(3));
         await subscription.cancel();
       },
     );
@@ -420,5 +432,145 @@ void main() {
             )
             as AppleSettings;
     expect(mac.allowBackgroundLocationUpdates, isFalse);
+  });
+
+  for (final platform in [
+    TargetPlatform.iOS,
+    TargetPlatform.macOS,
+    TargetPlatform.windows,
+    TargetPlatform.linux,
+  ]) {
+    test('$platform viewing without sharing stops when hidden', () async {
+      await service.dispose();
+      service = FriendsLocationService(
+        geolocator: geolocator,
+        platform: platform,
+      );
+      await service.start(backgroundEnabled: false);
+      service.didChangeAppLifecycleState(AppLifecycleState.hidden);
+      await Future<void>.delayed(Duration.zero);
+      expect(geolocator.positions.hasListener, isFalse);
+      expect(service.status, FriendsLocationStatus.stopped);
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await Future<void>.delayed(Duration.zero);
+      expect(geolocator.streams, 2);
+      expect(geolocator.requests, 0);
+    });
+  }
+
+  test('iOS sharing can be disabled while already in the background', () async {
+    await service.dispose();
+    service = FriendsLocationService(
+      geolocator: geolocator,
+      platform: TargetPlatform.iOS,
+    );
+    await service.start(backgroundEnabled: true);
+    service.didChangeAppLifecycleState(AppLifecycleState.paused);
+    await service.start(backgroundEnabled: false);
+    expect(geolocator.positions.hasListener, isFalse);
+    expect(service.status, FriendsLocationStatus.stopped);
+    service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    await Future<void>.delayed(Duration.zero);
+    final settings = geolocator.settings! as AppleSettings;
+    expect(settings.allowBackgroundLocationUpdates, isFalse);
+    expect(settings.showBackgroundLocationIndicator, isFalse);
+  });
+
+  test(
+    'iOS defers a first stream if permission completes after hiding',
+    () async {
+      await service.dispose();
+      service = FriendsLocationService(
+        geolocator: geolocator,
+        platform: TargetPlatform.iOS,
+      );
+      geolocator.permissionResult = Completer<LocationPermission>();
+      final starting = service.start(backgroundEnabled: true);
+      await Future<void>.delayed(Duration.zero);
+      service.didChangeAppLifecycleState(AppLifecycleState.hidden);
+      geolocator.permissionResult!.complete(LocationPermission.whileInUse);
+      await starting;
+      expect(geolocator.streams, 0);
+      expect(service.status, FriendsLocationStatus.stopped);
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await Future<void>.delayed(Duration.zero);
+      expect(geolocator.streams, 1);
+      expect(geolocator.requests, 0);
+    },
+  );
+
+  test('permission is never requested after hiding during a check', () async {
+    geolocator.permissionResult = Completer<LocationPermission>();
+    final starting = service.start(backgroundEnabled: true);
+    await Future<void>.delayed(Duration.zero);
+    service.didChangeAppLifecycleState(AppLifecycleState.hidden);
+    geolocator.permissionResult!.complete(LocationPermission.denied);
+    await starting;
+    expect(geolocator.streams, 0);
+    expect(geolocator.requests, 0);
+  });
+
+  test('resume preserves a background stream awaiting its first fix', () async {
+    await service.start(backgroundEnabled: true);
+    service
+      ..didChangeAppLifecycleState(AppLifecycleState.paused)
+      ..didChangeAppLifecycleState(AppLifecycleState.resumed);
+    await Future<void>.delayed(Duration.zero);
+    expect(service.status, FriendsLocationStatus.locating);
+    expect(geolocator.streams, 1);
+  });
+
+  test(
+    'stop releases Android retention after a pending enable finishes',
+    () async {
+      await service.dispose();
+      final enableCompleted = Completer<void>();
+      final enabling = Completer<void>();
+      service = FriendsLocationService(
+        geolocator: geolocator,
+        platform: TargetPlatform.android,
+        onBackgroundSharingChanged: ({required enabled}) async {
+          backgroundSharing.add(enabled);
+          if (enabled) {
+            enabling.complete();
+            await enableCompleted.future;
+          }
+        },
+      );
+      final starting = service.start(backgroundEnabled: true);
+      await enabling.future;
+      final stopping = service.stop();
+      enableCompleted.complete();
+      await Future.wait([starting, stopping]);
+      expect(backgroundSharing.last, isFalse);
+      expect(geolocator.positions.hasListener, isFalse);
+      expect(service.status, FriendsLocationStatus.stopped);
+    },
+  );
+
+  test('failed Android retention cancels the stream and releases it', () async {
+    await service.dispose();
+    service = FriendsLocationService(
+      geolocator: geolocator,
+      platform: TargetPlatform.android,
+      onBackgroundSharingChanged: ({required enabled}) async {
+        backgroundSharing.add(enabled);
+        if (enabled) throw StateError('Unavailable');
+      },
+    );
+    await service.start(backgroundEnabled: true);
+    await Future<void>.delayed(Duration.zero);
+    expect(service.status, FriendsLocationStatus.failure);
+    expect(geolocator.positions.hasListener, isFalse);
+    expect(backgroundSharing.last, isFalse);
+  });
+
+  test('a stream failure releases Android retention', () async {
+    await service.start(backgroundEnabled: true);
+    geolocator.positions.addError(StateError('Location unavailable'));
+    await Future<void>.delayed(Duration.zero);
+    expect(geolocator.positions.hasListener, isFalse);
+    expect(backgroundSharing.last, isFalse);
+    expect(service.status, FriendsLocationStatus.failure);
   });
 }

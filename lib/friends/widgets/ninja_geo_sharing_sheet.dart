@@ -129,9 +129,13 @@ class NinjaGeoSharingSheet extends StatelessWidget {
             const SizedBox(height: AppSpacing.contentGap),
             _NinjaGeoSettingsSection(
               title: l10n.friendsBackgroundTitle,
-              helper: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-                  ? l10n.friendsBackgroundMobileSub
-                  : l10n.friendsBackgroundForegroundSub,
+              helper: kIsWeb
+                  ? l10n.friendsBackgroundForegroundSub
+                  : switch (defaultTargetPlatform) {
+                      TargetPlatform.android => l10n.friendsBackgroundMobileSub,
+                      TargetPlatform.iOS => l10n.friendsBackgroundIosSub,
+                      _ => l10n.friendsBackgroundForegroundSub,
+                    },
               child: Text(
                 state.backgroundLocationActive
                     ? l10n.friendsBackgroundActive

@@ -43,14 +43,16 @@ def verify_ipa(ipa: Path, bundle_id: str, marketing_version=None, build_number=N
                 modes = metadata.get('UIBackgroundModes', [])
                 if not isinstance(modes, list) or any(not isinstance(mode, str) for mode in modes):
                     raise ValueError('Background modes must be an array of strings')
-                if 'location' in modes:
-                    raise ValueError('Persistent background location is not permitted')
+                if 'location' in modes and name != main_paths[0]:
+                    raise ValueError('Background location is only permitted in the main application')
                 if any(key in metadata for key in ALWAYS_USAGE_KEYS):
                     raise ValueError('Always location usage declarations are not permitted')
                 if name == main_paths[0]:
                     main = metadata
     if main.get('CFBundleIdentifier') != bundle_id:
         raise ValueError('Unexpected application identifier')
+    if 'location' not in main.get('UIBackgroundModes', []):
+        raise ValueError('Background location mode is required for opt-in sharing')
     version = main.get('CFBundleShortVersionString')
     build = main.get('CFBundleVersion')
     if not isinstance(version, str) or not re.fullmatch(r'[0-9]+(?:\.[0-9]+){1,2}', version):
@@ -63,7 +65,7 @@ def verify_ipa(ipa: Path, bundle_id: str, marketing_version=None, build_number=N
         raise ValueError('Unexpected build number')
     when_in_use = main.get('NSLocationWhenInUseUsageDescription')
     if not isinstance(when_in_use, str) or not when_in_use.strip():
-        raise ValueError('Foreground location usage description is required')
+        raise ValueError('When-in-use location usage description is required')
     return {
         'artifact_sha256': digest,
         'bundle_id': bundle_id,
@@ -84,7 +86,7 @@ def main(argv=None):
     try:
         result = verify_ipa(args.ipa, args.bundle_id, args.marketing_version, args.build_number)
     except (ValueError, OSError, KeyError, zipfile.BadZipFile, plistlib.InvalidFileException):
-        parser.exit(1, 'iOS artifact failed foreground location and identity validation\n')
+        parser.exit(1, 'iOS artifact failed location and identity validation\n')
     print(json.dumps(result, sort_keys=True))
     return 0
 
