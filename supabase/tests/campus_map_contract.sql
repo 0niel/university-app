@@ -79,7 +79,9 @@ begin
     raise exception 'Room patch bypassed navigation review';
   exception when invalid_parameter_value then null; end;
   insert into core.organizations(id,name) values ('map-contract-a','Map Contract A'),('map-contract-b','Map Contract B');
-  insert into auth.users(id) values (v_author),(v_moderator),(v_other),(v_outsider);
+  insert into auth.users(id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[v_author, v_moderator, v_other, v_outsider]) id;
   insert into auth.users(id,is_anonymous) values (v_guest,true);
   insert into core.user_academic_profiles(user_id,organization_id) values
     (v_author,'map-contract-a'),(v_moderator,'map-contract-a'),(v_other,'map-contract-a'),(v_outsider,'map-contract-b'),(v_guest,'map-contract-a');

@@ -167,6 +167,10 @@ verify_jwt = false
 verify_jwt = false
 import_map = "./functions/deno.json"
 
+[functions.miniapp-proxy]
+verify_jwt = true
+import_map = "./functions/deno.json"
+
 [functions.moderate-content]
 verify_jwt = false
 import_map = "./functions/deno.json"

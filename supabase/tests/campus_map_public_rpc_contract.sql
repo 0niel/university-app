@@ -49,7 +49,9 @@ declare
   v_result jsonb;
 begin
   insert into core.organizations(id,name) values ('map-public-contract','Map public contract');
-  insert into auth.users(id) values (v_author),(v_other),(v_moderator);
+  insert into auth.users(id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[v_author, v_other, v_moderator]) id;
   insert into core.user_academic_profiles(user_id,organization_id) values
     (v_author,'map-public-contract'),(v_other,'map-public-contract'),(v_moderator,'map-public-contract');
   insert into core.map_moderators(organization_id,user_id) values ('map-public-contract',v_moderator);

@@ -7,6 +7,9 @@ create temporary table storage_upload_fixture
 create trigger enforce_storage_upload_limits
 after insert or update on storage_upload_fixture
 for each row execute function core.enforce_storage_upload_limits();
+create trigger guard_shared_storage_write
+before insert or update on storage_upload_fixture
+for each row execute function internal.guard_shared_storage_write();
 grant select, insert, update, delete on storage_upload_fixture
 to authenticated, service_role;
 
@@ -37,9 +40,10 @@ begin
     raise exception 'Storage limiter is directly callable';
   end if;
 
-  insert into auth.users (id, is_anonymous)
-  values (v_user, false), (v_bytes_user, false), (v_guest, true),
-    (v_markers_user, false);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[v_user, v_bytes_user, v_markers_user]) id;
+  insert into auth.users (id, is_anonymous) values (v_guest, true);
 
   perform set_config('request.jwt.claim.sub', v_user::text, true);
   perform set_config('request.jwt.claim.role', 'authenticated', true);
@@ -152,20 +156,26 @@ begin
     get stacked diagnostics v_hint = pg_exception_hint;
     if v_hint not like 'rate_limited:%' then raise; end if;
   end;
-  for i in 1..3 loop
-    insert into pg_temp.storage_upload_fixture (bucket_id, name, owner_id, metadata)
-    values ('lesson-materials', v_guest || '/guest-' || i,
-      v_guest::text, jsonb_build_object('size', v_size));
-  end loop;
   begin
     insert into pg_temp.storage_upload_fixture (bucket_id, name, owner_id, metadata)
-    values ('lesson-materials', v_guest || '/guest-over-bytes', v_guest::text,
-      jsonb_build_object('size', v_size));
-    raise exception 'Final service upload lost the anonymous account limit';
+    values ('lesson-materials', v_guest || '/guest-shared', v_guest::text,
+      jsonb_build_object('size', 1));
+    raise exception 'Guest account uploaded shared content';
   exception when insufficient_privilege then
     get stacked diagnostics v_hint = pg_exception_hint;
-    if v_hint not like 'rate_limited:%' then raise; end if;
+    if v_hint is distinct from 'content_account_unverified' then raise; end if;
   end;
+  for i in 1..3 loop
+    begin
+      insert into pg_temp.storage_upload_fixture (bucket_id, name, owner_id, metadata)
+      values ('note-media', v_guest || '/guest-' || i,
+        v_guest::text, jsonb_build_object('size', v_size));
+      raise exception 'Guest account uploaded private content';
+    exception when insufficient_privilege then
+      get stacked diagnostics v_hint = pg_exception_hint;
+      if v_hint is distinct from 'content_account_unverified' then raise; end if;
+    end;
+  end loop;
   begin
     insert into pg_temp.storage_upload_fixture (bucket_id, name, owner_id, metadata)
     values ('lesson-materials', v_bytes_user || '/invalid-size', v_bytes_user::text,
