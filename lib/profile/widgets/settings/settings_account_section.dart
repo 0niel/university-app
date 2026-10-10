@@ -9,6 +9,8 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/profile/widgets/guest_upgrade_sheet.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_row.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_section.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/account_persona_sheet.dart';
 
 class SettingsAccountSection extends StatelessWidget {
   const SettingsAccountSection({super.key});
@@ -17,9 +19,20 @@ class SettingsAccountSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final user = context.watch<AppBloc>().state.user;
+    final persona = context.watch<AccountPersonaCubit?>()?.state;
     return SettingsSection(
       label: l10n.profileAccount,
       children: [
+        if (persona != null)
+          SettingsRow(
+            title: l10n.accountPersonaTitle,
+            value: persona.isTeacher
+                ? l10n.teacherRoleFallback
+                : l10n.accountRoleStudent,
+            subtitle: persona.isTeacher ? persona.teacher?.name : null,
+            lineIcon: AppLineIcon.people,
+            onTap: () => unawaited(showAccountPersonaSheet(context)),
+          ),
         SettingsRow(
           title: l10n.accountEmailLabel,
           value: user.isGuest || (user.email?.isEmpty ?? true)

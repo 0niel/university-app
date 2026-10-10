@@ -63,6 +63,7 @@ class _PasswordResetViewState extends State<_PasswordResetView> {
           title: l10n.authPasswordResetTitle,
           titleAccent: l10n.authPasswordResetTitleAccent,
           subtitle: l10n.authPasswordResetSubtitle,
+          leading: const AppEntryEmblem(icon: AppLineIcon.lock),
           onBack: () => Navigator.of(context).maybePop(),
           actions: const _PasswordResetButton(),
           child: BlocBuilder<PasswordResetBloc, PasswordResetState>(
@@ -80,7 +81,8 @@ class _PasswordResetViewState extends State<_PasswordResetView> {
                 placeholder: l10n.loginEmailPlaceholder,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.done,
-                autofillHints: const [AutofillHints.email],
+                autocorrect: false,
+                enableSuggestions: false,
                 onChanged: (value) =>
                     bloc.add(PasswordResetEmailChanged(value)),
                 onSubmitted: (_) {

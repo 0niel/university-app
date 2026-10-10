@@ -19,6 +19,7 @@ class LoginWithEmailPage extends StatelessWidget {
           title: context.l10n.authEmailHeaderTitle,
           titleAccent: context.l10n.authEmailHeaderTitleAccent,
           subtitle: context.l10n.authEmailHeaderSubtitle,
+          leading: const AppEntryEmblem(icon: AppLineIcon.at),
           step: 1,
           totalSteps: 2,
           onBack: () => Navigator.of(context).maybePop(),

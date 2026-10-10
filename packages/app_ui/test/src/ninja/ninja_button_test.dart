@@ -61,10 +61,10 @@ void main() {
       expect(decorationOf(tester).boxShadow, isNull);
     });
 
-    testWidgets('disabled uses canvas + muted2', (tester) async {
+    testWidgets('disabled uses surface2 + muted2', (tester) async {
       await tester.pumpWidget(wrapKit(const NinjaButton(label: 'Нет')));
 
-      expect(decorationOf(tester).color, kitColors.canvas);
+      expect(decorationOf(tester).color, kitColors.surface2);
       expect(kitStyleOf(tester, 'Нет')?.color, kitColors.muted2);
     });
 

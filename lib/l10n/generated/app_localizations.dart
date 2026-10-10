@@ -18893,7 +18893,7 @@ abstract class AppLocalizations {
   /// No description provided for @authGuestExitWarning.
   ///
   /// In en, this message translates to:
-  /// **'Signing out loses access to this guest account and its progress. App preferences and cached files stay on this device. Link an email first to keep your account.'**
+  /// **'Signing out permanently loses access to this guest account. Link an email first to keep your data.'**
   String get authGuestExitWarning;
 
   /// No description provided for @settingsColorCustom.
@@ -21613,6 +21613,480 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter the verification code you received from your university.'**
   String get nfcPassCodeSentDescription;
+
+  /// No description provided for @teacherPickerPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher’s surname or name'**
+  String get teacherPickerPlaceholder;
+
+  /// No description provided for @teacherPickerEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher not found'**
+  String get teacherPickerEmpty;
+
+  /// No description provided for @teacherPickerEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the spelling or search by surname. You can choose a teacher later.'**
+  String get teacherPickerEmptyHint;
+
+  /// No description provided for @teacherPickerSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected teacher: {name}'**
+  String teacherPickerSelected(String name);
+
+  /// No description provided for @teacherPickerIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule entry: {id}'**
+  String teacherPickerIdentity(String id);
+
+  /// No description provided for @teacherPickerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Find yourself in the catalog and choose the correct entry.'**
+  String get teacherPickerHint;
+
+  /// No description provided for @teacherCabinetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your dashboard'**
+  String get teacherCabinetTitle;
+
+  /// No description provided for @teacherCabinetEntryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your schedule, groups and rating'**
+  String get teacherCabinetEntryDescription;
+
+  /// No description provided for @teacherCabinetEntryRestoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your dashboard'**
+  String get teacherCabinetEntryRestoring;
+
+  /// No description provided for @teacherScheduleSwipeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe to browse days and weeks'**
+  String get teacherScheduleSwipeHint;
+
+  /// No description provided for @teacherCabinetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your classes, groups and student reviews'**
+  String get teacherCabinetSubtitle;
+
+  /// No description provided for @teacherChooseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a teacher'**
+  String get teacherChooseTitle;
+
+  /// No description provided for @teacherChooseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Find yourself in the university schedule to see your classes and rating.'**
+  String get teacherChooseDescription;
+
+  /// No description provided for @teacherUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher unavailable'**
+  String get teacherUnavailableTitle;
+
+  /// No description provided for @teacherUnavailableDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This teacher is no longer listed in the schedule. Choose a teacher again.'**
+  String get teacherUnavailableDescription;
+
+  /// No description provided for @teacherChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change teacher'**
+  String get teacherChange;
+
+  /// No description provided for @teacherOwnSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'My schedule'**
+  String get teacherOwnSchedule;
+
+  /// No description provided for @teacherOwnRating.
+  ///
+  /// In en, this message translates to:
+  /// **'My rating'**
+  String get teacherOwnRating;
+
+  /// No description provided for @teacherOwnReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Student reviews'**
+  String get teacherOwnReviews;
+
+  /// No description provided for @teacherOwnReviewsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews about you yet'**
+  String get teacherOwnReviewsEmpty;
+
+  /// No description provided for @teacherOwnReviewsEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ratings and reviews will appear here.'**
+  String get teacherOwnReviewsEmptyDescription;
+
+  /// No description provided for @teacherWeekWorkload.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly workload'**
+  String get teacherWeekWorkload;
+
+  /// No description provided for @teacherTeachingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching time'**
+  String get teacherTeachingTime;
+
+  /// No description provided for @teacherWindowTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Gaps between classes'**
+  String get teacherWindowTime;
+
+  /// No description provided for @teacherLessonCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get teacherLessonCount;
+
+  /// No description provided for @teacherGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'My groups'**
+  String get teacherGroups;
+
+  /// No description provided for @teacherRooms.
+  ///
+  /// In en, this message translates to:
+  /// **'My rooms'**
+  String get teacherRooms;
+
+  /// No description provided for @teacherNextLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Next class'**
+  String get teacherNextLesson;
+
+  /// No description provided for @teacherCurrentLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Class in progress'**
+  String get teacherCurrentLesson;
+
+  /// No description provided for @teacherNoLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes on this day'**
+  String get teacherNoLessons;
+
+  /// No description provided for @teacherNoLessonsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another day or week.'**
+  String get teacherNoLessonsDescription;
+
+  /// No description provided for @teacherNoRating.
+  ///
+  /// In en, this message translates to:
+  /// **'No ratings yet'**
+  String get teacherNoRating;
+
+  /// No description provided for @teacherRatingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ratings across three criteria'**
+  String get teacherRatingDescription;
+
+  /// No description provided for @teacherRoleFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get teacherRoleFallback;
+
+  /// No description provided for @teacherPreviousWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous week'**
+  String get teacherPreviousWeek;
+
+  /// No description provided for @teacherNextWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Next week'**
+  String get teacherNextWeek;
+
+  /// No description provided for @teacherWeekNoLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes this week'**
+  String get teacherWeekNoLessons;
+
+  /// No description provided for @accountPersonaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account mode'**
+  String get accountPersonaTitle;
+
+  /// No description provided for @accountPersonaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the information to show in your dashboard.'**
+  String get accountPersonaSubtitle;
+
+  /// No description provided for @accountRoleStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get accountRoleStudent;
+
+  /// No description provided for @accountRoleStudentDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Group schedule and the usual app features'**
+  String get accountRoleStudentDescription;
+
+  /// No description provided for @accountRoleTeacherDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your classes, groups, rooms and rating'**
+  String get accountRoleTeacherDescription;
+
+  /// No description provided for @accountPersonaSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save mode'**
+  String get accountPersonaSave;
+
+  /// No description provided for @accountPersonaSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Account mode updated'**
+  String get accountPersonaSaved;
+
+  /// No description provided for @accountPersonaSyncError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your choice is saved on this device. It could not be synced to your account.'**
+  String get accountPersonaSyncError;
+
+  /// No description provided for @accountPersonaLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account mode could not be loaded. Try again.'**
+  String get accountPersonaLoadError;
+
+  /// No description provided for @teacherLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in as a teacher'**
+  String get teacherLogin;
+
+  /// No description provided for @teacherLoginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher sign-in'**
+  String get teacherLoginTitle;
+
+  /// No description provided for @teacherLoginDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or create an account, then choose your entry in the teacher catalog.'**
+  String get teacherLoginDescription;
+
+  /// No description provided for @teacherRegistrationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After confirming your email, you can choose your schedule and open your teacher dashboard.'**
+  String get teacherRegistrationHint;
+
+  /// No description provided for @onboardingTeacherStart.
+  ///
+  /// In en, this message translates to:
+  /// **'I’m a teacher'**
+  String get onboardingTeacherStart;
+
+  /// No description provided for @onboardingTeacherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your schedule'**
+  String get onboardingTeacherTitle;
+
+  /// No description provided for @onboardingTeacherLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Find yourself in the university catalog. Your schedule and rating will appear in your dashboard.'**
+  String get onboardingTeacherLead;
+
+  /// No description provided for @onboardingStudentStart.
+  ///
+  /// In en, this message translates to:
+  /// **'I’m a student'**
+  String get onboardingStudentStart;
+
+  /// No description provided for @teacherChooseLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose later'**
+  String get teacherChooseLater;
+
+  /// No description provided for @teacherDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink teacher'**
+  String get teacherDisconnect;
+
+  /// No description provided for @teacherChangesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check recent changes. Cancellation and rescheduling details may be outdated.'**
+  String get teacherChangesLoadError;
+
+  /// No description provided for @teacherPickerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This entry cannot be linked to an account yet'**
+  String get teacherPickerUnavailable;
+
+  /// No description provided for @teacherScheduleSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing the saved schedule'**
+  String get teacherScheduleSaved;
+
+  /// No description provided for @teacherScheduleRefreshError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not refresh the schedule'**
+  String get teacherScheduleRefreshError;
+
+  /// No description provided for @teacherRatingRefreshError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not refresh the rating'**
+  String get teacherRatingRefreshError;
+
+  /// No description provided for @teacherPickerCatalogEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher catalog is empty'**
+  String get teacherPickerCatalogEmpty;
+
+  /// No description provided for @teacherPickerCatalogEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try refreshing the catalog. You can choose a teacher later.'**
+  String get teacherPickerCatalogEmptyHint;
+
+  /// No description provided for @teacherPickerSelectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected teacher'**
+  String get teacherPickerSelectionLabel;
+
+  /// No description provided for @entryGuestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore the app without an account'**
+  String get entryGuestHint;
+
+  /// No description provided for @entryPreviewLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Mathematical analysis'**
+  String get entryPreviewLesson;
+
+  /// No description provided for @entryPreviewProgramming.
+  ///
+  /// In en, this message translates to:
+  /// **'Programming'**
+  String get entryPreviewProgramming;
+
+  /// No description provided for @entryWelcomeAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'pace.'**
+  String get entryWelcomeAccent;
+
+  /// No description provided for @entryWelcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your schedule, campus and people. Everything for your student day.'**
+  String get entryWelcomeSubtitle;
+
+  /// No description provided for @entryWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'University.\nAt your pace.'**
+  String get entryWelcomeTitle;
+
+  /// No description provided for @onboardingStoryCampusAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'campus.'**
+  String get onboardingStoryCampusAccent;
+
+  /// No description provided for @onboardingStoryCampusLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Find classrooms and free spaces to study between classes.'**
+  String get onboardingStoryCampusLead;
+
+  /// No description provided for @onboardingStoryCampusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Feel at home\non campus.'**
+  String get onboardingStoryCampusTitle;
+
+  /// No description provided for @onboardingStoryCommunityAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'university.'**
+  String get onboardingStoryCommunityAccent;
+
+  /// No description provided for @onboardingStoryCommunityLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay close to friends, discover communities and share what interests you.'**
+  String get onboardingStoryCommunityLead;
+
+  /// No description provided for @onboardingStoryCommunityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your people.\nYour university.'**
+  String get onboardingStoryCommunityTitle;
+
+  /// No description provided for @onboardingStoryScheduleAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'planned out.'**
+  String get onboardingStoryScheduleAccent;
+
+  /// No description provided for @onboardingStoryScheduleLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes, changes and deadlines at hand. Less searching, more time for you.'**
+  String get onboardingStoryScheduleLead;
+
+  /// No description provided for @onboardingStoryScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your day.\nAll planned out.'**
+  String get onboardingStoryScheduleTitle;
 }
 
 class _AppLocalizationsDelegate

@@ -21,6 +21,8 @@ class OnboardingIdentityStep extends StatefulWidget {
     required this.onNext,
     this.initialName,
     this.initialHandle,
+    this.verifiedHandle,
+    this.onDraftChanged,
     super.key,
   });
 
@@ -30,6 +32,8 @@ class OnboardingIdentityStep extends StatefulWidget {
   final void Function(String name, String handle) onNext;
   final String? initialName;
   final String? initialHandle;
+  final String? verifiedHandle;
+  final void Function(String name, String handle)? onDraftChanged;
 
   @override
   State<OnboardingIdentityStep> createState() => _OnboardingIdentityStepState();
@@ -50,6 +54,10 @@ class _OnboardingIdentityStepState extends State<OnboardingIdentityStep> {
 
   GamificationRepository get _repo => context.read();
 
+  String? get _verifiedHandle => widget.onDraftChanged == null
+      ? widget.initialHandle?.trim()
+      : widget.verifiedHandle?.trim();
+
   String _authName() {
     try {
       return context.read<AppBloc>().state.user.name?.trim() ?? '';
@@ -67,7 +75,11 @@ class _OnboardingIdentityStepState extends State<OnboardingIdentityStep> {
     final savedHandle = widget.initialHandle?.trim() ?? '';
     if (savedHandle.isNotEmpty) {
       _handle.text = savedHandle;
-      _check = _HandleCheck.available;
+      if (savedHandle == _verifiedHandle) {
+        _check = _HandleCheck.available;
+      } else {
+        _onHandleChanged(savedHandle, notify: false);
+      }
     }
   }
 
@@ -82,7 +94,11 @@ class _OnboardingIdentityStepState extends State<OnboardingIdentityStep> {
     final nextHandle = widget.initialHandle?.trim() ?? '';
     if (!_handleDirty && nextHandle.isNotEmpty && nextHandle != _handle.text) {
       _handle.text = nextHandle;
-      _check = _HandleCheck.available;
+      if (nextHandle == _verifiedHandle) {
+        _check = _HandleCheck.available;
+      } else {
+        _onHandleChanged(nextHandle, notify: false);
+      }
     }
   }
 
@@ -97,11 +113,13 @@ class _OnboardingIdentityStepState extends State<OnboardingIdentityStep> {
 
   void _onNameChanged(String value) {
     _nameDirty = true;
+    widget.onDraftChanged?.call(value, _handle.text);
     setState(() => _hasName = value.trim().isNotEmpty);
   }
 
-  void _onHandleChanged(String value) {
+  void _onHandleChanged(String value, {bool notify = true}) {
     _handleDirty = true;
+    if (notify) widget.onDraftChanged?.call(_name.text, value);
     _debounce?.cancel();
     _availabilityRequest++;
     final handle = value.trim();
@@ -113,7 +131,7 @@ class _OnboardingIdentityStepState extends State<OnboardingIdentityStep> {
       setState(() => _check = _HandleCheck.invalid);
       return;
     }
-    if (handle == widget.initialHandle?.trim()) {
+    if (handle == _verifiedHandle) {
       setState(() => _check = _HandleCheck.available);
       return;
     }
@@ -191,10 +209,16 @@ class _OnboardingIdentityStepState extends State<OnboardingIdentityStep> {
       _HandleCheck.checking => (null, l10n.identityHandleHelp),
     };
     return AuthPageLayout(
+      presentation: AppEntryPresentation.staged,
+      contentIdentity: widget.key,
       step: widget.step,
       totalSteps: widget.totalSteps,
       title: l10n.onboardingIdentityTitle,
       subtitle: l10n.onboardingIdentitySubtitle,
+      leading: AppEntryEmblem(
+        icon: AppLineIcon.people,
+        tone: context.colors.lab,
+      ),
       onBack: widget.onBack,
       actions: AppButton.primary(
         key: const Key('onboarding_identityContinue'),

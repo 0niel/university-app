@@ -82,9 +82,13 @@ class AppButtonPalette {
     required bool enabled,
   }) {
     if (!enabled) {
+      final background = switch (variant) {
+        AppButtonVariant.text || AppButtonVariant.ghost => Colors.transparent,
+        _ => colors.surface2,
+      };
       return AppButtonPalette(
-        background: colors.canvas,
-        pressed: colors.canvas,
+        background: background,
+        pressed: background,
         foreground: colors.muted2,
         spinnerTrack: colors.line,
       );

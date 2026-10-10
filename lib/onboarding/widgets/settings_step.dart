@@ -227,10 +227,16 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
     final sharing = context.watch<GeoSharingCubit>().state;
     final busy = _busy || _settingsLoading || sharing.busy || widget.finishing;
     return AuthPageLayout(
+      presentation: AppEntryPresentation.staged,
+      contentIdentity: widget.key,
       step: widget.step,
       totalSteps: widget.totalSteps,
       title: l10n.onboardingSettingsTitle,
       subtitle: l10n.onboardingSettingsLead,
+      leading: AppEntryEmblem(
+        icon: AppLineIcon.shield,
+        tone: context.colors.lecture,
+      ),
       onBack: widget.onBack,
       actions: AppButton.primary(
         key: const Key('onboarding_finish'),
@@ -259,10 +265,13 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
             ),
             const SizedBox(height: 12),
           ],
+          const OnboardingThemeCard(),
+          const SizedBox(height: 24),
           AppListGroup(
             children: [
               SettingToggleRow(
                 key: const Key('onboarding_togglePush'),
+                icon: AppLineIcon.bell,
                 title: l10n.notifications,
                 subtitle: l10n.onboardingPushSub,
                 value: _push,
@@ -272,6 +281,7 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
               ),
               SettingToggleRow(
                 key: const Key('onboarding_toggleGeo'),
+                icon: AppLineIcon.pin,
                 title: l10n.onboardingGeoTitle,
                 subtitle: l10n.onboardingGeoSub,
                 value: _geo,
@@ -281,6 +291,7 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
               ),
               SettingToggleRow(
                 key: const Key('onboarding_toggleFriends'),
+                icon: AppLineIcon.people,
                 title: l10n.onboardingFriendsTitle,
                 subtitle: l10n.onboardingFriendsSharingSub,
                 value: sharing.sharing,
@@ -290,8 +301,6 @@ class _OnboardingSettingsStepState extends State<OnboardingSettingsStep>
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          const OnboardingThemeCard(),
         ],
       ),
     );

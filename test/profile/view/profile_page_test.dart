@@ -16,6 +16,8 @@ import 'package:rtu_mirea_app/profile/view/profile_settings_page.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/ninja_path_view.dart';
 import 'package:rtu_mirea_app/profile/widgets/profile/profile_widgets.dart';
 import 'package:rtu_mirea_app/profile/widgets/profile_activity_card.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/teacher_account_shortcut.dart';
 import 'package:user_repository/user_repository.dart';
 
 import '../helpers/profile_test_environment.dart';
@@ -24,6 +26,9 @@ class _MockGamificationRepository extends Mock
     implements GamificationRepository {}
 
 class _MockAppBloc extends MockBloc<AppEvent, AppState> implements AppBloc {}
+
+class _Account extends MockCubit<AccountPersonaState>
+    implements AccountPersonaCubit {}
 
 void main() {
   const config = UniversityConfig(
@@ -179,6 +184,7 @@ void main() {
     Size size = const Size(420, 1400),
     TextScaler textScaler = TextScaler.noScaling,
     bool light = false,
+    AccountPersonaCubit? account,
   }) async {
     tester.view
       ..physicalSize = size
@@ -186,7 +192,12 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       environment.wrap(
-        child: subject(textScaler: textScaler, light: light),
+        child: account == null
+            ? subject(textScaler: textScaler, light: light)
+            : BlocProvider<AccountPersonaCubit>.value(
+                value: account,
+                child: subject(textScaler: textScaler, light: light),
+              ),
       ),
     );
     await tester.pumpAndSettle();
@@ -226,6 +237,35 @@ void main() {
     expect(find.text('Поставь реакцию на паре'), findsOneWidget);
     expect(find.text('1 / 3'), findsOneWidget);
   });
+
+  testWidgets(
+    'teacher profile preserves progress and removes student metadata',
+    (
+      tester,
+    ) async {
+      final account = _Account();
+      when(() => account.state).thenReturn(
+        const AccountPersonaState(
+          persona: AccountPersona(
+            role: AccountRole.teacher,
+            teacherId: 'teacher-id',
+            teacherName: 'Иванов Иван Иванович',
+            teacherAvailable: true,
+          ),
+          loaded: true,
+        ),
+      );
+      await pumpProfile(tester, account: account);
+      expect(find.text('Иван Иванов'), findsOneWidget);
+      expect(find.text('@ivan'), findsOneWidget);
+      expect(find.text('ИКБО-09-23 · @ivan'), findsNothing);
+      expect(find.text('#2 в группе'), findsNothing);
+      expect(find.byType(TeacherAccountShortcut), findsOneWidget);
+      expect(find.textContaining('2 400 XP'), findsOneWidget);
+      expect(find.byType(ProfileActivityCard), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('settings action has an accessible 44 px target', (tester) async {
     final semantics = tester.ensureSemantics();

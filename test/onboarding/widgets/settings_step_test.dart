@@ -132,8 +132,25 @@ void main() {
   bool switchValue(WidgetTester tester, String key) =>
       tester.widget<AppSwitch>(switchIn(key)).value;
 
-  testWidgets('renders toggles, theme segmented and done', (tester) async {
+  Future<void> revealFinish(WidgetTester tester) async {
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('onboarding_finish')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> tapSwitch(WidgetTester tester, String key) async {
+    final finder = switchIn(key);
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
+    await tester.tap(finder);
+  }
+
+  testWidgets('renders toggles, theme previews and done', (tester) async {
     await pumpStep(tester);
+    await revealFinish(tester);
 
     expect(find.text('Пара настроек'), findsOneWidget);
     expect(find.text('Всё можно поменять позже.'), findsOneWidget);
@@ -176,7 +193,7 @@ void main() {
 
   testWidgets('geo toggle requests the location permission', (tester) async {
     await pumpStep(tester);
-    await tester.tap(switchIn('onboarding_toggleGeo'));
+    await tapSwitch(tester, 'onboarding_toggleGeo');
     await tester.pump();
     await tester.pump();
 
@@ -189,7 +206,7 @@ void main() {
       () => permissions.requestLocationWhenInUse(),
     ).thenAnswer((_) async => PermissionStatus.permanentlyDenied);
     await pumpStep(tester);
-    await tester.tap(switchIn('onboarding_toggleGeo'));
+    await tapSwitch(tester, 'onboarding_toggleGeo');
     await tester.pump();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -206,7 +223,7 @@ void main() {
     tester,
   ) async {
     await pumpStep(tester);
-    await tester.tap(switchIn('onboarding_togglePush'));
+    await tapSwitch(tester, 'onboarding_togglePush');
     await tester.pump();
     await tester.pump();
 
@@ -230,7 +247,7 @@ void main() {
     'friends toggle changes location sharing, not profile visibility',
     (tester) async {
       await pumpStep(tester);
-      await tester.tap(switchIn('onboarding_toggleFriends'));
+      await tapSwitch(tester, 'onboarding_toggleFriends');
       await tester.pump();
       await tester.pump();
 
@@ -250,7 +267,7 @@ void main() {
   ) async {
     sharing.fails = true;
     await pumpStep(tester);
-    await tester.tap(switchIn('onboarding_toggleFriends'));
+    await tapSwitch(tester, 'onboarding_toggleFriends');
     await tester.pump();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -270,7 +287,7 @@ void main() {
         () => permissions.locationWhenInUseStatus(),
       ).thenAnswer((_) async => PermissionStatus.granted);
       await pumpStep(tester);
-      await tester.tap(switchIn('onboarding_toggleGeo'));
+      await tapSwitch(tester, 'onboarding_toggleGeo');
       await tester.pump();
       await tester.pump();
       verify(() => permissions.openPermissionSettings()).called(1);
@@ -289,7 +306,7 @@ void main() {
     ).thenThrow(Exception('offline'));
     await pumpStep(tester);
     expect(switchValue(tester, 'onboarding_togglePush'), isTrue);
-    await tester.tap(switchIn('onboarding_togglePush'));
+    await tapSwitch(tester, 'onboarding_togglePush');
     await tester.pump();
     await tester.pump();
     expect(switchValue(tester, 'onboarding_togglePush'), isTrue);
@@ -305,8 +322,9 @@ void main() {
           gamification.updateSettings(any(), previous: any(named: 'previous')),
     ).thenAnswer((_) => completer.future);
     await pumpStep(tester);
-    await tester.tap(switchIn('onboarding_togglePush'));
+    await tapSwitch(tester, 'onboarding_togglePush');
     await tester.pump();
+    await revealFinish(tester);
     expect(
       tester
           .widget<AppButton>(find.byKey(const Key('onboarding_finish')))

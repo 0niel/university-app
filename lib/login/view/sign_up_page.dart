@@ -1,10 +1,13 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:gamification_repository/gamification_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/login/login.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_entry_intent_cubit.dart';
 
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
@@ -48,12 +51,15 @@ class _SignUpViewState extends State<_SignUpView> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bloc = context.read<SignUpBloc>();
+    final teacherEntry =
+        context.watch<AccountEntryIntentCubit?>()?.state == AccountRole.teacher;
     return Scaffold(
       backgroundColor: context.colors.canvas,
       body: BlocListener<SignUpBloc, SignUpState>(
         listenWhen: (previous, current) => previous.status != current.status,
         listener: (context, state) {
           if (state.status.isSuccess) {
+            TextInput.finishAutofillContext();
             LoginEmailConfirmationRoute(email: state.email.value).go(context);
           } else if (state.status.isFailure) {
             ToastManager.showError(context, message: l10n.authSignUpFailed);
@@ -62,104 +68,113 @@ class _SignUpViewState extends State<_SignUpView> {
         child: AuthPageLayout(
           title: l10n.authSignUpTitle,
           titleAccent: l10n.authSignUpTitleAccent,
-          subtitle: l10n.authAnyEmailHint,
+          subtitle: teacherEntry
+              ? l10n.teacherLoginDescription
+              : l10n.authAnyEmailHint,
+          leading: const AppEntryEmblem(icon: AppLineIcon.people),
           onBack: () => Navigator.of(context).maybePop(),
           actions: const _SignUpButton(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              BlocBuilder<SignUpBloc, SignUpState>(
-                buildWhen: (previous, current) =>
-                    previous.email != current.email ||
-                    previous.status != current.status,
-                builder: (context, state) {
-                  final showError =
-                      state.email.isNotValid && !state.email.isPure;
-                  return AppInputField(
-                    key: const Key('signUpPage_emailInput'),
-                    controller: _emailController,
-                    readOnly: state.status.isInProgress,
-                    label: l10n.authYourEmail,
-                    leadingIcon: AppLineIcon.at,
-                    placeholder: l10n.loginEmailPlaceholder,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    autofillHints: const [AutofillHints.email],
-                    onChanged: (value) => bloc.add(SignUpEmailChanged(value)),
-                    onSubmitted: (_) => _passwordFocusNode.requestFocus(),
-                    validateOnBlur: true,
-                    errorText: showError ? l10n.authInvalidEmail : null,
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              BlocBuilder<SignUpBloc, SignUpState>(
-                buildWhen: (previous, current) =>
-                    previous.password != current.password ||
-                    previous.status != current.status,
-                builder: (context, state) {
-                  final showError =
-                      state.password.isNotValid && !state.password.isPure;
-                  return AppInputField(
-                    key: const Key('signUpPage_passwordInput'),
-                    controller: _passwordController,
-                    focusNode: _passwordFocusNode,
-                    readOnly: state.status.isInProgress,
-                    label: l10n.authPasswordLabel,
-                    leadingIcon: AppLineIcon.lock,
-                    placeholder: '••••••••',
-                    obscureText: true,
-                    showPasswordToggle: true,
-                    showClear: false,
-                    textInputAction: TextInputAction.next,
-                    autofillHints: const [AutofillHints.newPassword],
-                    onChanged: (value) =>
-                        bloc.add(SignUpPasswordChanged(value)),
-                    onSubmitted: (_) => _confirmFocusNode.requestFocus(),
-                    validateOnBlur: true,
-                    errorText: showError
-                        ? l10n.authPasswordMinLength(Password.minLength)
-                        : null,
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              BlocBuilder<SignUpBloc, SignUpState>(
-                buildWhen: (previous, current) =>
-                    previous.confirmedPassword != current.confirmedPassword ||
-                    previous.status != current.status,
-                builder: (context, state) {
-                  final showError =
-                      state.confirmedPassword.isNotValid &&
-                      !state.confirmedPassword.isPure;
-                  return AppInputField(
-                    key: const Key('signUpPage_confirmPasswordInput'),
-                    controller: _confirmController,
-                    focusNode: _confirmFocusNode,
-                    readOnly: state.status.isInProgress,
-                    label: l10n.authConfirmPasswordLabel,
-                    leadingIcon: AppLineIcon.lock,
-                    placeholder: '••••••••',
-                    obscureText: true,
-                    showPasswordToggle: true,
-                    showClear: false,
-                    textInputAction: TextInputAction.done,
-                    autofillHints: const [AutofillHints.newPassword],
-                    onChanged: (value) =>
-                        bloc.add(SignUpConfirmPasswordChanged(value)),
-                    onSubmitted: (_) {
-                      if (bloc.state.isValid &&
-                          !bloc.state.status.isInProgress) {
-                        bloc.add(SignUpSubmitted());
-                      }
-                    },
-                    validateOnBlur: true,
-                    errorText: showError ? l10n.authPasswordsDontMatch : null,
-                  );
-                },
-              ),
-            ],
+          child: AutofillGroup(
+            onDisposeAction: AutofillContextAction.cancel,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BlocBuilder<SignUpBloc, SignUpState>(
+                  buildWhen: (previous, current) =>
+                      previous.email != current.email ||
+                      previous.status != current.status,
+                  builder: (context, state) {
+                    final showError =
+                        state.email.isNotValid && !state.email.isPure;
+                    return AppInputField(
+                      key: const Key('signUpPage_emailInput'),
+                      controller: _emailController,
+                      readOnly: state.status.isInProgress,
+                      label: l10n.authYourEmail,
+                      leadingIcon: AppLineIcon.at,
+                      placeholder: l10n.loginEmailPlaceholder,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      onChanged: (value) => bloc.add(SignUpEmailChanged(value)),
+                      onSubmitted: (_) => _passwordFocusNode.requestFocus(),
+                      validateOnBlur: true,
+                      errorText: showError ? l10n.authInvalidEmail : null,
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                BlocBuilder<SignUpBloc, SignUpState>(
+                  buildWhen: (previous, current) =>
+                      previous.password != current.password ||
+                      previous.status != current.status,
+                  builder: (context, state) {
+                    final showError =
+                        state.password.isNotValid && !state.password.isPure;
+                    return AppInputField(
+                      key: const Key('signUpPage_passwordInput'),
+                      controller: _passwordController,
+                      focusNode: _passwordFocusNode,
+                      readOnly: state.status.isInProgress,
+                      label: l10n.authPasswordLabel,
+                      leadingIcon: AppLineIcon.lock,
+                      placeholder: '••••••••',
+                      obscureText: true,
+                      showPasswordToggle: true,
+                      showClear: false,
+                      textInputAction: TextInputAction.next,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      onChanged: (value) =>
+                          bloc.add(SignUpPasswordChanged(value)),
+                      onSubmitted: (_) => _confirmFocusNode.requestFocus(),
+                      validateOnBlur: true,
+                      errorText: showError
+                          ? l10n.authPasswordMinLength(Password.minLength)
+                          : null,
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                BlocBuilder<SignUpBloc, SignUpState>(
+                  buildWhen: (previous, current) =>
+                      previous.confirmedPassword != current.confirmedPassword ||
+                      previous.status != current.status,
+                  builder: (context, state) {
+                    final showError =
+                        state.confirmedPassword.isNotValid &&
+                        !state.confirmedPassword.isPure;
+                    return AppInputField(
+                      key: const Key('signUpPage_confirmPasswordInput'),
+                      controller: _confirmController,
+                      focusNode: _confirmFocusNode,
+                      readOnly: state.status.isInProgress,
+                      label: l10n.authConfirmPasswordLabel,
+                      leadingIcon: AppLineIcon.lock,
+                      placeholder: '••••••••',
+                      obscureText: true,
+                      showPasswordToggle: true,
+                      showClear: false,
+                      textInputAction: TextInputAction.done,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      onChanged: (value) =>
+                          bloc.add(SignUpConfirmPasswordChanged(value)),
+                      onSubmitted: (_) {
+                        if (bloc.state.isValid &&
+                            !bloc.state.status.isInProgress) {
+                          bloc.add(SignUpSubmitted());
+                        }
+                      },
+                      validateOnBlur: true,
+                      errorText: showError ? l10n.authPasswordsDontMatch : null,
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -110,12 +110,13 @@ void main() {
       expect(kitStyleOf(tester, 'Выйти')?.color, kitColors.danger);
     });
 
-    testWidgets('disabled falls back to canvas and muted2', (tester) async {
+    testWidgets('disabled retains its filled shape with muted2 text',
+        (tester) async {
       await tester.pumpWidget(
         wrapKit(const AppButton.primary(label: 'Нельзя')),
       );
 
-      expect(decorationOf(tester).color, kitColors.canvas);
+      expect(decorationOf(tester).color, kitColors.surface2);
       expect(kitStyleOf(tester, 'Нельзя')?.color, kitColors.muted2);
     });
 

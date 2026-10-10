@@ -44,7 +44,61 @@ Widget _app({
 }
 
 void main() {
-  testWidgets('renders serif title, lead, back circle and progress', (
+  for (final presentation in AppEntryPresentation.values) {
+    testWidgets(
+      'auth $presentation inherits shared colours for content and actions',
+      (
+        tester,
+      ) async {
+        final colors = AppColors.dark.copyWith(
+          canvas: AppColors.amoledCanvas,
+          surface: AppColors.amoledSurface,
+          surface2: AppColors.amoledSurface2,
+        );
+        AppColors? contentColors;
+        AppColors? actionColors;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme.copyWith(extensions: [colors]),
+            locale: const Locale('ru'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: AuthPageLayout(
+                title: 'Welcome',
+                presentation: presentation,
+                actions: Builder(
+                  builder: (context) {
+                    actionColors = context.colors;
+                    return AppButton.primary(
+                      label: 'Continue',
+                      onPressed: () {},
+                    );
+                  },
+                ),
+                child: Builder(
+                  builder: (context) {
+                    contentColors = context.colors;
+                    return const SizedBox();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+        for (final inherited in [contentColors, actionColors]) {
+          expect(inherited?.accent, colors.accent);
+          expect(inherited?.onAccent, colors.onAccent);
+          expect(inherited?.canvas, colors.canvas);
+          expect(inherited?.lecture, colors.lecture);
+        }
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('uses the entry kit title, lead, back and step indicator', (
     tester,
   ) async {
     var backs = 0;
@@ -60,8 +114,9 @@ void main() {
 
     final colors = tester.element(find.byType(AuthPageLayout)).colors;
     final title = tester.widget<Text>(find.text('Welcome back'));
-    expect(title.style?.fontFamily, AppText.serifFamily);
-    expect(title.style?.fontSize, AppText.displayHero.fontSize);
+    expect(find.byType(AppEntryLayout), findsOneWidget);
+    expect(title.style?.fontFamily, AppText.sansFamily);
+    expect(title.style?.fontSize, AppText.entryTitle.fontSize);
     final lead = tester.widget<Text>(
       find.text('Use your university account to continue'),
     );
@@ -69,20 +124,7 @@ void main() {
     expect(lead.style?.fontSize, AppText.bodyLarge.fontSize);
 
     expect(find.bySemanticsLabel('Шаг 2 из 3'), findsOneWidget);
-    final bars = tester
-        .widgetList<AnimatedContainer>(
-          find.descendant(
-            of: find.byType(AuthProgress),
-            matching: find.byType(AnimatedContainer),
-          ),
-        )
-        .toList();
-    expect(bars, hasLength(3));
-    Color? barColor(AnimatedContainer bar) =>
-        (bar.decoration as BoxDecoration?)?.color;
-    expect(barColor(bars[0]), colors.accent);
-    expect(barColor(bars[1]), colors.accent);
-    expect(barColor(bars[2]), colors.surface2);
+    expect(find.byType(AppStepIndicator), findsOneWidget);
 
     expect(
       tester.getSize(find.byType(AppBackButton)).shortestSide,
@@ -99,10 +141,12 @@ void main() {
     await tester.pump();
 
     expect(find.byType(AppBackButton), findsNothing);
-    expect(find.byType(AuthProgress), findsNothing);
+    expect(find.byType(AppStepIndicator), findsNothing);
   });
 
-  testWidgets('accent word renders italic in accent colour', (tester) async {
+  testWidgets('accent word renders as an italic serif in the ink colour', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _app(titleAccent: 'back', child: const SizedBox.shrink()),
     );
@@ -121,8 +165,12 @@ void main() {
       return true;
     });
     expect(accent, isNotNull);
-    expect(accent?.style?.color, colors.accent);
+    expect(
+      accent?.style?.color ?? (rich.text as TextSpan).style?.color,
+      colors.ink,
+    );
     expect(accent?.style?.fontStyle, FontStyle.italic);
+    expect(accent?.style?.fontFamily, AppText.serifFamily);
   });
 
   testWidgets('pins actions at the bottom and stays scrollable when large', (

@@ -7,6 +7,65 @@ class GamificationRepository {
 
   final SupabaseClient _supabase;
 
+  Future<AccountPersona> getAccountPersona({
+    required String organizationId,
+    required String expectedUserId,
+  }) async {
+    final response = await _supabase
+        .rpc<Object?>(
+          'get_account_persona',
+          params: {
+            'p_organization_id': organizationId,
+            'p_expected_user_id': expectedUserId,
+          },
+        )
+        .timeout(const Duration(seconds: 8));
+    return _decodeModel(
+      _decodeObject(response, operation: 'get account persona'),
+      operation: 'get account persona',
+      factory: AccountPersona.fromJson,
+    );
+  }
+
+  Future<AccountPersona> setAccountPersona({
+    required String organizationId,
+    required String expectedUserId,
+    required AccountRole role,
+    required int expectedRevision,
+    String? teacherId,
+  }) async {
+    if (expectedRevision < 0) {
+      throw ArgumentError.value(expectedRevision, 'expectedRevision');
+    }
+    try {
+      final response = await _supabase
+          .rpc<Object?>(
+            'set_account_persona',
+            params: {
+              'p_organization_id': organizationId,
+              'p_expected_user_id': expectedUserId,
+              'p_role': role.name,
+              'p_teacher_id': teacherId,
+              'p_expected_revision': expectedRevision,
+            },
+          )
+          .timeout(const Duration(seconds: 8));
+      return _decodeModel(
+        _decodeObject(response, operation: 'set account persona'),
+        operation: 'set account persona',
+        factory: AccountPersona.fromJson,
+      );
+    } on PostgrestException catch (error, stackTrace) {
+      if (error.code == 'PT409') {
+        Error.throwWithStackTrace(
+          const AccountPersonaConflictException(),
+          stackTrace,
+        );
+      }
+      rethrow;
+    }
+  }
+
   Future<void> ensureAcademicProfile(
     String organizationId, {
     String? academicGroup,
@@ -359,6 +418,10 @@ class GamificationRepository {
 
 class HandleTakenException implements Exception {
   const HandleTakenException();
+}
+
+class AccountPersonaConflictException implements Exception {
+  const AccountPersonaConflictException();
 }
 
 class GamificationResponseException implements Exception {

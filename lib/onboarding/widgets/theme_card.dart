@@ -17,30 +17,38 @@ class OnboardingThemeCard extends StatelessWidget {
     final manager = AdaptiveTheme.maybeOf(context);
     final current = mode ?? manager?.mode ?? AdaptiveThemeMode.system;
     final onModeSelected = onChanged ?? manager?.setThemeMode;
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.settingsTheme,
-            style: AppText.headline.copyWith(color: colors.ink),
-          ),
-          const SizedBox(height: 12),
-          AppSegmentedControl<AdaptiveThemeMode>(
-            key: const Key('onboarding_themeSegmented'),
-            value: current,
-            onChanged: onModeSelected == null
-                ? null
-                : (mode) {
-                    if (mode != current) onModeSelected(mode);
-                  },
-            options: [
-              for (final mode in AdaptiveThemeMode.values)
-                AppSegmentedOption(value: mode, label: mode.label(l10n)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.settingsTheme,
+          style: AppText.headline.copyWith(color: colors.ink),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          key: const Key('onboarding_themeChoices'),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final mode in AdaptiveThemeMode.values) ...[
+              if (mode != AdaptiveThemeMode.values.first)
+                const SizedBox(width: 10),
+              Expanded(
+                child: AppThemePreview(
+                  label: mode.label(l10n),
+                  selected: mode == current,
+                  dark: mode == AdaptiveThemeMode.dark,
+                  system: mode == AdaptiveThemeMode.system,
+                  onPressed: onModeSelected == null
+                      ? null
+                      : () {
+                          if (mode != current) onModeSelected(mode);
+                        },
+                ),
+              ),
             ],
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 }

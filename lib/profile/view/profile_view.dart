@@ -9,6 +9,8 @@ class ProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
+    final isTeacher =
+        context.watch<AccountPersonaCubit?>()?.state.isTeacher ?? false;
     return Scaffold(
       backgroundColor: colors.canvas,
       body: BlocListener<ProfileCubit, ProfileState>(
@@ -81,8 +83,12 @@ class ProfileView extends StatelessWidget {
                             name:
                                 state.overview.academic.fullName ??
                                 state.user.name ??
-                                l10n.profileStudentFallback,
-                            meta: state.overview.academic.group ?? '',
+                                (isTeacher
+                                    ? l10n.teacherRoleFallback
+                                    : l10n.profileStudentFallback),
+                            meta: isTeacher
+                                ? ''
+                                : state.overview.academic.group ?? '',
                             onTap: () => showEditProfileSheet(context),
                           ),
                         ],

@@ -72,14 +72,20 @@ class _ProfileBodyState extends State<_ProfileBody> {
           user.name,
           user.email?.split('@').firstOrNull,
         ].firstWhereOrNull((value) => value != null && value.isNotEmpty) ??
-        l10n.profileStudentFallback;
+        (context.read<AccountPersonaCubit?>()?.state.isTeacher == true
+            ? l10n.teacherRoleFallback
+            : l10n.profileStudentFallback);
   }
 
   String _meta(AppLocalizations l10n) {
     final academic = state.overview.academic;
+    final isTeacher =
+        context.read<AccountPersonaCubit?>()?.state.isTeacher == true;
     final parts = <String>[
-      if (academic.group case final group? when group.isNotEmpty) group,
-      if (academic.course case final course?) l10n.profileCourseLabel(course),
+      if (!isTeacher) ...[
+        if (academic.group case final group? when group.isNotEmpty) group,
+        if (academic.course case final course?) l10n.profileCourseLabel(course),
+      ],
       if (academic.handle case final handle? when handle.isNotEmpty) '@$handle',
     ];
     return parts.isEmpty ? (state.user.email ?? '') : parts.join(' · ');
@@ -96,6 +102,8 @@ class _ProfileBodyState extends State<_ProfileBody> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isTeacher =
+        context.watch<AccountPersonaCubit?>()?.state.isTeacher == true;
     final academic = state.overview.academic;
     final profile = state.gamificationProfile;
     final badges = [...state.earnedBadges, ...state.closestBadges];
@@ -138,6 +146,10 @@ class _ProfileBodyState extends State<_ProfileBody> {
                 meta: _meta(l10n),
                 onTap: () => showEditProfileSheet(context),
               ),
+              if (isTeacher) ...[
+                const SizedBox(height: AppSpacing.md),
+                const TeacherAccountShortcut(),
+              ],
               if (state.hasFailed(ProfileSection.profile))
                 _sectionError(ProfileSection.profile),
               if (state.hasFailed(ProfileSection.overview))
@@ -148,7 +160,7 @@ class _ProfileBodyState extends State<_ProfileBody> {
                 child: ProfileLevelCard(
                   xp: profile.xp,
                   streakDays: profile.streakDays,
-                  groupRank: state.overview.groupRank,
+                  groupRank: isTeacher ? null : state.overview.groupRank,
                   onTap: () => showLeaderboardSheet(context),
                 ),
               ),
@@ -197,7 +209,7 @@ class _ProfileBodyState extends State<_ProfileBody> {
                     : null,
                 onTap: () => const FriendsRoute().push<void>(context),
               ),
-              if (NfcPassAvailability.isSupported)
+              if (NfcPassAvailability.isSupported && !isTeacher)
                 ProfileLinkRow(
                   icon: AppLineIcon.contactless,
                   title: l10n.profileStudentCard,

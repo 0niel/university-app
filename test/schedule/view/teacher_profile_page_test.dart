@@ -1,19 +1,80 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
+import 'package:bloc_test/bloc_test.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gamification_repository/gamification_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/view/teacher_profile_page.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:schedule_repository/schedule_repository.dart' show Teacher;
 
 class MockCampusRepository extends Mock implements CampusRepository {}
 
+class _Account extends MockCubit<AccountPersonaState>
+    implements AccountPersonaCubit {}
+
 void main() {
+  for (final explicitReadOnly in [true, false]) {
+    testWidgets(
+      '${explicitReadOnly ? 'read-only' : 'own binding in student mode'} '
+      'hides self-review and self-contact actions',
+      (tester) async {
+        final repository = MockCampusRepository();
+        when(() => repository.getTeacherProfile(any())).thenAnswer(
+          (_) async => TeacherProfile.empty,
+        );
+        final account = _Account();
+        when(() => account.state).thenReturn(
+          AccountPersonaState(
+            persona: explicitReadOnly
+                ? AccountPersona.empty
+                : const AccountPersona(
+                    teacherId: 'teacher-id',
+                    teacherName: 'Иванов Иван Иванович',
+                    teacherAvailable: true,
+                  ),
+          ),
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            locale: const Locale('ru'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: RepositoryProvider<CampusRepository>.value(
+              value: repository,
+              child: BlocProvider<AccountPersonaCubit>.value(
+                value: account,
+                child: TeacherProfilePage(
+                  teacherName: 'Иванов Иван Иванович',
+                  teacher: const Teacher(
+                    uid: 'teacher-id',
+                    name: 'Иванов Иван Иванович',
+                    email: 'teacher@example.com',
+                  ),
+                  readOnly: explicitReadOnly,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.drag(find.byType(ListView), const Offset(0, -600));
+        await tester.pumpAndSettle();
+        expect(find.text('О вас ещё нет отзывов'), findsOneWidget);
+        expect(find.text('Оставить отзыв'), findsNothing);
+        expect(find.text('Написать'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('teacher photo opens the shared viewer', (tester) async {
     final repository = MockCampusRepository();
     when(

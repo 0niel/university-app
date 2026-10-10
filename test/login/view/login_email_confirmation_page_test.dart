@@ -67,7 +67,7 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('renders the serif title, accent word, progress and cells', (
+  testWidgets('renders the entry title, accent word, progress and cells', (
     tester,
   ) async {
     await pumpPage(tester);
@@ -92,8 +92,12 @@ void main() {
       if (span is TextSpan && span.text == 'почту') accent = span;
       return true;
     });
-    expect(accent?.style?.color, colors.accent);
+    expect(
+      accent?.style?.color ?? (rich.text as TextSpan).style?.color,
+      colors.ink,
+    );
     expect(accent?.style?.fontStyle, FontStyle.italic);
+    expect(accent?.style?.fontFamily, AppText.serifFamily);
   });
 
   testWidgets('a complete code is submitted to the repository', (

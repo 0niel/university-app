@@ -2,13 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:preferences_repository/preferences_repository.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
+import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
 import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
 import 'package:rtu_mirea_app/notifications/data/notification_inbox_repository.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
 import 'package:rtu_mirea_app/promo/cubit/promo_dismissals_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_entry_intent_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/account_persona_lifecycle.dart';
 
 class UserPreferencesScope extends StatelessWidget {
   const UserPreferencesScope({required this.child, super.key});
@@ -22,6 +27,24 @@ class UserPreferencesScope extends StatelessWidget {
       builder: (context, userId) => MultiBlocProvider(
         key: ValueKey(userId),
         providers: [
+          BlocProvider(
+            lazy: false,
+            create: (context) {
+              final preferences = context.read<PreferencesRepository>();
+              final role = context.read<AppBloc>().state.status.isLoggedIn
+                  ? context.read<AccountEntryIntentCubit?>()?.consume()
+                  : null;
+              final cubit = AccountPersonaCubit(
+                userId: userId,
+                organizationId: context.read<UniversityConfig>().organizationId,
+                repository: context.read(),
+                currentUserId: () => preferences.currentUserId,
+                entryRole: role,
+              );
+              unawaited(cubit.restore());
+              return cubit;
+            },
+          ),
           BlocProvider(create: (_) => StartupScreenCubit(userId: userId)),
           BlocProvider(
             lazy: false,
@@ -61,7 +84,7 @@ class UserPreferencesScope extends StatelessWidget {
             },
           ),
         ],
-        child: child,
+        child: AccountPersonaLifecycle(child: child),
       ),
     );
   }

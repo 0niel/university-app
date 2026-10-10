@@ -4445,7 +4445,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get loginWelcomeBack => 'С возвращением';
 
   @override
-  String get loginSubtitle => 'Войди, используя свой аккаунт (НЕ ЛКС МИРЭА)';
+  String get loginSubtitle =>
+      'Войди в аккаунт приложения. Пароль от личного кабинета вуза здесь не подойдёт.';
 
   @override
   String get loginEmailPlaceholder => 'name@example.com';
@@ -11020,7 +11021,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get authGuestExitWarning =>
-      'После выхода доступ к гостевому аккаунту и его прогрессу будет потерян. Настройки приложения и кэш останутся на этом устройстве. Сначала привяжите email, чтобы сохранить аккаунт.';
+      'Если выйти, гостевой аккаунт и его данные нельзя будет восстановить. Сначала привяжите email, чтобы сохранить их.';
 
   @override
   String get settingsColorCustom => 'Свой цвет';
@@ -12623,4 +12624,268 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get nfcPassCodeSentDescription =>
       'Введите код подтверждения, полученный от университета.';
+
+  @override
+  String get teacherPickerPlaceholder => 'Фамилия или имя преподавателя';
+
+  @override
+  String get teacherPickerEmpty => 'Преподаватель не найден';
+
+  @override
+  String get teacherPickerEmptyHint =>
+      'Проверьте написание или попробуйте фамилию. Можно выбрать преподавателя позже.';
+
+  @override
+  String teacherPickerSelected(String name) {
+    return 'Выбран преподаватель: $name';
+  }
+
+  @override
+  String teacherPickerIdentity(String id) {
+    return 'Запись в расписании: $id';
+  }
+
+  @override
+  String get teacherPickerHint =>
+      'Найдите себя в каталоге и выберите нужную запись.';
+
+  @override
+  String get teacherCabinetTitle => 'Ваш кабинет';
+
+  @override
+  String get teacherCabinetEntryDescription =>
+      'Своё расписание, группы и рейтинг';
+
+  @override
+  String get teacherCabinetEntryRestoring => 'Загружаем ваш кабинет';
+
+  @override
+  String get teacherScheduleSwipeHint => 'Листайте дни и недели свайпом';
+
+  @override
+  String get teacherCabinetSubtitle =>
+      'Ваши занятия, группы и отзывы студентов';
+
+  @override
+  String get teacherChooseTitle => 'Выберите преподавателя';
+
+  @override
+  String get teacherChooseDescription =>
+      'Найдите себя в расписании университета, чтобы увидеть свои занятия и рейтинг.';
+
+  @override
+  String get teacherUnavailableTitle => 'Преподаватель недоступен';
+
+  @override
+  String get teacherUnavailableDescription =>
+      'Запись больше не найдена в расписании. Выберите преподавателя заново.';
+
+  @override
+  String get teacherChange => 'Сменить преподавателя';
+
+  @override
+  String get teacherOwnSchedule => 'Моё расписание';
+
+  @override
+  String get teacherOwnRating => 'Мой рейтинг';
+
+  @override
+  String get teacherOwnReviews => 'Отзывы студентов';
+
+  @override
+  String get teacherOwnReviewsEmpty => 'О вас ещё нет отзывов';
+
+  @override
+  String get teacherOwnReviewsEmptyDescription =>
+      'Здесь появятся оценки и отзывы студентов.';
+
+  @override
+  String get teacherWeekWorkload => 'Нагрузка за неделю';
+
+  @override
+  String get teacherTeachingTime => 'Время занятий';
+
+  @override
+  String get teacherWindowTime => 'Окна между занятиями';
+
+  @override
+  String get teacherLessonCount => 'Занятия';
+
+  @override
+  String get teacherGroups => 'Мои группы';
+
+  @override
+  String get teacherRooms => 'Мои аудитории';
+
+  @override
+  String get teacherNextLesson => 'Ближайшее занятие';
+
+  @override
+  String get teacherCurrentLesson => 'Сейчас идёт занятие';
+
+  @override
+  String get teacherNoLessons => 'Занятий в этот день нет';
+
+  @override
+  String get teacherNoLessonsDescription =>
+      'Посмотрите другой день или неделю.';
+
+  @override
+  String get teacherNoRating => 'Оценок пока нет';
+
+  @override
+  String get teacherRatingDescription => 'Оценки студентов по трём критериям';
+
+  @override
+  String get teacherRoleFallback => 'Преподаватель';
+
+  @override
+  String get teacherPreviousWeek => 'Предыдущая неделя';
+
+  @override
+  String get teacherNextWeek => 'Следующая неделя';
+
+  @override
+  String get teacherWeekNoLessons => 'На этой неделе занятий нет';
+
+  @override
+  String get accountPersonaTitle => 'Режим аккаунта';
+
+  @override
+  String get accountPersonaSubtitle =>
+      'Выберите, какие данные показывать в вашем личном кабинете.';
+
+  @override
+  String get accountRoleStudent => 'Студент';
+
+  @override
+  String get accountRoleStudentDescription =>
+      'Расписание группы и обычные возможности приложения';
+
+  @override
+  String get accountRoleTeacherDescription =>
+      'Свои занятия, группы, аудитории и рейтинг';
+
+  @override
+  String get accountPersonaSave => 'Сохранить режим';
+
+  @override
+  String get accountPersonaSaved => 'Режим аккаунта обновлён';
+
+  @override
+  String get accountPersonaSyncError =>
+      'Выбор сохранён на устройстве. Не удалось синхронизировать его с аккаунтом.';
+
+  @override
+  String get accountPersonaLoadError =>
+      'Не удалось загрузить режим аккаунта. Попробуйте ещё раз.';
+
+  @override
+  String get teacherLogin => 'Войти как преподаватель';
+
+  @override
+  String get teacherLoginTitle => 'Вход для преподавателя';
+
+  @override
+  String get teacherLoginDescription =>
+      'Войдите или создайте аккаунт, затем выберите себя в каталоге преподавателей.';
+
+  @override
+  String get teacherRegistrationHint =>
+      'После подтверждения почты вы сможете выбрать своё расписание и открыть кабинет преподавателя.';
+
+  @override
+  String get onboardingTeacherStart => 'Я преподаватель';
+
+  @override
+  String get onboardingTeacherTitle => 'Ваше расписание';
+
+  @override
+  String get onboardingTeacherLead =>
+      'Найдите себя в каталоге университета. Расписание и рейтинг появятся в личном кабинете.';
+
+  @override
+  String get onboardingStudentStart => 'Я студент';
+
+  @override
+  String get teacherChooseLater => 'Выбрать позже';
+
+  @override
+  String get teacherDisconnect => 'Отвязать преподавателя';
+
+  @override
+  String get teacherChangesLoadError =>
+      'Не удалось проверить свежие изменения. Сведения об отменах и переносах могут быть устаревшими.';
+
+  @override
+  String get teacherPickerUnavailable =>
+      'Эту запись пока нельзя связать с аккаунтом';
+
+  @override
+  String get teacherScheduleSaved => 'Показана сохранённая версия расписания';
+
+  @override
+  String get teacherScheduleRefreshError => 'Не удалось обновить расписание';
+
+  @override
+  String get teacherRatingRefreshError => 'Не удалось обновить рейтинг';
+
+  @override
+  String get teacherPickerCatalogEmpty => 'Каталог преподавателей пока пуст';
+
+  @override
+  String get teacherPickerCatalogEmptyHint =>
+      'Попробуйте обновить каталог. Вы сможете выбрать преподавателя позже.';
+
+  @override
+  String get teacherPickerSelectionLabel => 'Выбран преподаватель';
+
+  @override
+  String get entryGuestHint => 'Можно познакомиться с приложением без аккаунта';
+
+  @override
+  String get entryPreviewLesson => 'Математический анализ';
+
+  @override
+  String get entryPreviewProgramming => 'Программирование';
+
+  @override
+  String get entryWelcomeAccent => 'ритме.';
+
+  @override
+  String get entryWelcomeSubtitle =>
+      'Расписание, кампус и люди рядом. Всё для твоего студенческого дня.';
+
+  @override
+  String get entryWelcomeTitle => 'Универ.\nВ твоём ритме.';
+
+  @override
+  String get onboardingStoryCampusAccent => 'кампусе.';
+
+  @override
+  String get onboardingStoryCampusLead =>
+      'Находи аудитории и свободные места, чтобы позаниматься между парами.';
+
+  @override
+  String get onboardingStoryCampusTitle => 'Освойся\nна кампусе.';
+
+  @override
+  String get onboardingStoryCommunityAccent => 'универ.';
+
+  @override
+  String get onboardingStoryCommunityLead =>
+      'Будь ближе к друзьям, находи сообщества и делись тем, что тебе интересно.';
+
+  @override
+  String get onboardingStoryCommunityTitle => 'Твои люди.\nТвой универ.';
+
+  @override
+  String get onboardingStoryScheduleAccent => 'по плану.';
+
+  @override
+  String get onboardingStoryScheduleLead =>
+      'Пары, переносы и дедлайны — под рукой. Меньше поиска, больше времени на себя.';
+
+  @override
+  String get onboardingStoryScheduleTitle => 'Твой день.\nВсё по плану.';
 }

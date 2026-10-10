@@ -49,7 +49,8 @@ class _LoginWithEmailFormState extends State<LoginWithEmailForm> {
             leadingIcon: AppLineIcon.at,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.done,
-            autofillHints: const [AutofillHints.email],
+            autocorrect: false,
+            enableSuggestions: false,
             onChanged: (email) =>
                 context.read<LoginBloc>().add(LoginEmailChanged(email)),
             onSubmitted: (_) {
