@@ -86,7 +86,7 @@ class TeacherDashboardScheduleSection extends StatelessWidget {
           )
         else
           const SizedBox(height: AppSpacing.md),
-        if (state.schedule.isLoading && state.schedule.data == null)
+        if (!state.schedule.hasError && state.schedule.data == null)
           AppSkeletonGroup(
             semanticsLabel: l10n.loadingContent,
             child: const AppSkeleton(height: 160, radius: AppRadius.card),
@@ -128,15 +128,19 @@ class TeacherDashboardScheduleSection extends StatelessWidget {
               style: AppText.body.copyWith(color: colors.muted),
             ),
           ],
-          TeacherDaySchedule(
-            workload: workload,
-            week: state.week,
-            day: state.day,
-            now: state.now,
-            preview: preview,
-            onSelectDay: onSelectDay,
-            onOpenLesson: onOpenLesson,
-          ),
+        ],
+        TeacherDaySchedule(
+          key: const ValueKey('teacher-dashboard-days'),
+          schedule: state.schedule,
+          workload: workload,
+          week: state.week,
+          day: state.day,
+          now: state.now,
+          preview: preview,
+          onSelectDay: onSelectDay,
+          onOpenLesson: onOpenLesson,
+        ),
+        if (state.schedule.data != null)
           TeacherDashboardTargetsSection(
             key: ValueKey(state.query),
             groups: workload.groups,
@@ -144,7 +148,6 @@ class TeacherDashboardScheduleSection extends StatelessWidget {
             onOpenGroup: onOpenGroup,
             onOpenRoom: onOpenRoom,
           ),
-        ],
       ],
     );
   }

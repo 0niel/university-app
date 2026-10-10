@@ -308,6 +308,51 @@ void main() {
     expect(bloc.state.navigation, const TeacherScheduleNavigation.idle());
   });
 
+  test('refresh completes when an unbind is already queued', () async {
+    final bloc = create();
+    await _drain();
+    bloc.add(
+      const TeacherDashboardEvent.accountChanged(
+        AccountPersonaState(loaded: true),
+      ),
+    );
+    final refresh = bloc.refresh();
+    await refresh.timeout(const Duration(seconds: 1));
+
+    expect(bloc.state.teacher, isNull);
+    expect(bloc.state.schedule.isLoading, isFalse);
+  });
+
+  test(
+    'changing weeks releases refresh without waiting for old RPCs',
+    () async {
+      final bloc = create();
+      await _drain();
+      final pendingSchedule = Completer<TeacherScheduleSnapshot>();
+      final pendingRating = Completer<TeacherProfile>();
+      when(() => repository.loadSchedule(any())).thenAnswer(
+        (_) => pendingSchedule.future,
+      );
+      when(() => repository.loadRating(any())).thenAnswer(
+        (_) => pendingRating.future,
+      );
+      final refresh = bloc.refresh();
+      await _drain();
+      expect(bloc.state.schedule.isLoading, isTrue);
+      expect(bloc.state.rating.isLoading, isTrue);
+
+      bloc.add(const TeacherDashboardEvent.weekChanged(1));
+      await refresh.timeout(const Duration(seconds: 1));
+      await _drain();
+      expect(bloc.state.week, _monday.add(const Duration(days: 7)));
+      expect(bloc.state.schedule.isLoading, isTrue);
+
+      pendingSchedule.complete(_snapshot('New week', week: bloc.state.week));
+      pendingRating.complete(_rating(_teacher, 4));
+      await _drain();
+    },
+  );
+
   test(
     'closing detaches account changes and ignores pending completions',
     () async {

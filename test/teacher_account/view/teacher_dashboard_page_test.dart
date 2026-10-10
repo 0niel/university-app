@@ -19,6 +19,7 @@ import 'package:rtu_mirea_app/schedule/view/teacher_profile_page.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:rtu_mirea_app/teacher_account/view/teacher_dashboard_page.dart';
 import 'package:rtu_mirea_app/teacher_account/widgets/dashboard/teacher_dashboard_services_section.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/dashboard/teacher_day_schedule.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 import '../../gallery/gallery_fonts.dart';
@@ -131,6 +132,7 @@ void main() {
     WidgetTester tester, {
     TextScaler textScaler = TextScaler.noScaling,
     bool dark = false,
+    bool reduceMotion = false,
     Size size = const Size(320, 844),
   }) async {
     tester.view
@@ -146,7 +148,11 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+          data: MediaQuery.of(context).copyWith(
+            textScaler: textScaler,
+            disableAnimations: reduceMotion,
+            accessibleNavigation: reduceMotion,
+          ),
           child: NinjaToastHost(child: child!),
         ),
         home: subject(),
@@ -510,7 +516,7 @@ void main() {
     'shared week strip keeps lesson markers and selecting days needs no fetch',
     (tester) async {
       await pumpDashboard(tester, size: const Size(390, 844));
-      final stripFinder = find.byType(AppWeekStrip);
+      final stripFinder = find.byKey(ValueKey(monday));
       var strip = tester.widget<AppWeekStrip>(stripFinder);
       expect(strip.days, hasLength(7));
       expect(strip.selectedIndex, 3);
@@ -530,7 +536,9 @@ void main() {
       final sunday = find.byWidgetPredicate(
         (widget) => widget is AppDayPill && widget.day.label == '11',
       );
-      await tester.ensureVisible(sunday);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('teacher-dashboard-week-days')),
+      );
       await tester.pumpAndSettle();
       await tester.tap(sunday);
       await tester.pumpAndSettle();
@@ -555,6 +563,223 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets(
+    'day swipes show real lessons and preserve vertical scroll and refresh',
+    (tester) async {
+      final friday = now.add(const Duration(days: 1));
+      when(
+        () => schedules.getTeacherSchedule(
+          teacher: any(named: 'teacher'),
+          dateFrom: any(named: 'dateFrom'),
+          dateTo: any(named: 'dateTo'),
+        ),
+      ).thenAnswer(
+        (_) async => ScheduleResponse(
+          data: [
+            lesson(),
+            lesson(subject: 'Пятничная пара').copyWith(dates: [friday]),
+          ],
+        ),
+      );
+      await pumpDashboard(tester, size: const Size(390, 844));
+      final pager = find.byKey(const ValueKey('teacher-dashboard-day-pager'));
+      await tester.ensureVisible(pager);
+      await tester.pumpAndSettle();
+      expect(tester.getSize(pager).height, greaterThanOrEqualTo(88));
+      await tester.drag(pager, const Offset(-310, 0));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TeacherDaySchedule>(find.byType(TeacherDaySchedule)).day,
+        DateUtils.dateOnly(friday),
+      );
+      expect(find.text('Пятничная пара'), findsOneWidget);
+      verify(
+        () => schedules.getTeacherSchedule(
+          teacher: teacher.uid!,
+          dateFrom: monday,
+          dateTo: monday.add(const Duration(days: 6)),
+        ),
+      ).called(1);
+      final vertical = tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byType(ListView),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      final before = vertical.pixels;
+      await tester.drag(pager, const Offset(0, -180));
+      await tester.pumpAndSettle();
+      expect(vertical.pixels, greaterThan(before));
+      expect(
+        tester.widget<TeacherDaySchedule>(find.byType(TeacherDaySchedule)).day,
+        DateUtils.dateOnly(friday),
+      );
+      vertical.jumpTo(0);
+      await tester.pumpAndSettle();
+      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.pumpAndSettle();
+      verify(
+        () => schedules.getTeacherSchedule(
+          teacher: teacher.uid!,
+          dateFrom: monday,
+          dateTo: monday.add(const Duration(days: 6)),
+        ),
+      ).called(1);
+      verifyNever(() => schedule.add(any()));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('day swipes cross Sunday and Monday in both directions', (
+    tester,
+  ) async {
+    final nextMonday = monday.add(const Duration(days: 7));
+    when(
+      () => schedules.getTeacherSchedule(
+        teacher: any(named: 'teacher'),
+        dateFrom: any(named: 'dateFrom'),
+        dateTo: any(named: 'dateTo'),
+      ),
+    ).thenAnswer((invocation) async {
+      final date = invocation.namedArguments[#dateFrom] as DateTime;
+      return ScheduleResponse(
+        data: [
+          if (date == nextMonday)
+            lesson(subject: 'Следующая неделя').copyWith(dates: [nextMonday])
+          else
+            lesson(),
+        ],
+      );
+    });
+    await pumpDashboard(tester, size: const Size(390, 844));
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('teacher-dashboard-week-days')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byWidgetPredicate(
+        (widget) => widget is AppDayPill && widget.day.label == '11',
+      ),
+    );
+    await tester.pumpAndSettle();
+    final pager = find.byKey(const ValueKey('teacher-dashboard-day-pager'));
+    await tester.ensureVisible(pager);
+    await tester.pumpAndSettle();
+    final pagerState = tester.state(pager);
+    await tester.drag(pager, const Offset(-310, 0));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<TeacherDaySchedule>(find.byType(TeacherDaySchedule)).day,
+      nextMonday,
+    );
+    expect(tester.state(pager), same(pagerState));
+    expect(find.text('Следующая неделя'), findsOneWidget);
+    expect(find.text('Занятий в этот день нет'), findsNothing);
+    verify(
+      () => schedules.getTeacherSchedule(
+        teacher: teacher.uid!,
+        dateFrom: nextMonday,
+        dateTo: nextMonday.add(const Duration(days: 6)),
+      ),
+    ).called(1);
+    await tester.ensureVisible(pager);
+    await tester.pumpAndSettle();
+    await tester.drag(pager, const Offset(310, 0));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<TeacherDaySchedule>(find.byType(TeacherDaySchedule)).day,
+      monday.add(const Duration(days: 6)),
+    );
+    expect(tester.state(pager), same(pagerState));
+    expect(find.text('Занятий в этот день нет'), findsOneWidget);
+    verifyNever(() => schedule.add(any()));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('week swipes retain day controls through loading and failure', (
+    tester,
+  ) async {
+    final pending = Completer<ScheduleResponse>();
+    final nextMonday = monday.add(const Duration(days: 7));
+    when(
+      () => schedules.getTeacherSchedule(
+        teacher: teacher.uid!,
+        dateFrom: nextMonday,
+        dateTo: nextMonday.add(const Duration(days: 6)),
+      ),
+    ).thenAnswer((_) => pending.future);
+    await pumpDashboard(tester, size: const Size(390, 844));
+    final weeks = find.byKey(const ValueKey('teacher-dashboard-week-days'));
+    final days = find.byKey(const ValueKey('teacher-dashboard-day-pager'));
+    await tester.ensureVisible(weeks);
+    await tester.pumpAndSettle();
+    final pagerState = tester.state(days);
+    await tester.drag(weeks, const Offset(-310, 0));
+    for (var frame = 0; frame < 12; frame++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(
+      tester.widget<TeacherDaySchedule>(find.byType(TeacherDaySchedule)).day,
+      nextMonday.add(const Duration(days: 3)),
+    );
+    expect(tester.state(days), same(pagerState));
+    expect(find.text('Занятий в этот день нет'), findsNothing);
+    pending.completeError(Exception('offline'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AppErrorState), findsOneWidget);
+    expect(tester.state(days), same(pagerState));
+    await tester.ensureVisible(weeks);
+    await tester.pumpAndSettle();
+    await tester.drag(weeks, const Offset(310, 0));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<TeacherDaySchedule>(find.byType(TeacherDaySchedule)).day,
+      DateUtils.dateOnly(now),
+    );
+    expect(find.text('Математика'), findsOneWidget);
+    expect(tester.state(days), same(pagerState));
+    verifyNever(() => schedule.add(any()));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('reduced motion day taps settle without animated scrolling', (
+    tester,
+  ) async {
+    await pumpDashboard(
+      tester,
+      textScaler: const TextScaler.linear(2),
+      reduceMotion: true,
+    );
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('teacher-dashboard-week-days')),
+    );
+    await tester.pumpAndSettle();
+    final dayArea = find.byKey(const ValueKey('teacher-dashboard-day-pager'));
+    expect(tester.getRect(dayArea).bottom, lessThanOrEqualTo(844));
+    expect(dayArea.hitTestable(), findsOneWidget);
+    await tester.tap(
+      find.byWidgetPredicate(
+        (widget) => widget is AppDayPill && widget.day.label == '11',
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    final pager = tester.widget<PageView>(
+      find.byKey(const ValueKey('teacher-dashboard-day-pager')),
+    );
+    expect(pager.controller!.page, pager.controller!.page!.roundToDouble());
+    expect(pager.controller!.position.isScrollingNotifier.value, isFalse);
+    expect(
+      tester.widget<TeacherDaySchedule>(find.byType(TeacherDaySchedule)).day,
+      monday.add(const Duration(days: 6)),
+    );
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'teacher tools keep changes and calendar without global shortcuts',
@@ -978,7 +1203,9 @@ void main() {
         final sunday = find.byWidgetPredicate(
           (widget) => widget is AppDayPill && widget.day.label == '11',
         );
-        await tester.ensureVisible(sunday);
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('teacher-dashboard-week-days')),
+        );
         await tester.pumpAndSettle();
         final daySize = tester.getSize(sunday);
         expect(daySize.width, greaterThanOrEqualTo(44));

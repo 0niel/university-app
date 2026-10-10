@@ -163,7 +163,14 @@ class _LoginWelcome extends StatelessWidget {
           ? l10n.teacherLoginDescription
           : l10n.entryWelcomeSubtitle,
       headerContent: roleSelector,
-      visual: const EntryFeaturePreview(feature: EntryFeature.schedule),
+      visual: AppEntryBodyTransition(
+        identity: teacherEntry,
+        child: EntryFeaturePreview(
+          feature: teacherEntry
+              ? EntryFeature.teacherSchedule
+              : EntryFeature.schedule,
+        ),
+      ),
       actions: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

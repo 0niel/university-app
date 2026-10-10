@@ -11,6 +11,7 @@ import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_strip.dar
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_view.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_header.dart';
 import 'package:rtu_mirea_app/services/view/widgets/service_row.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/dashboard/teacher_lesson_tile.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -68,6 +69,11 @@ void main() {
             expect(find.byType(ScheduleHeader), findsOneWidget);
             expect(find.byType(ScheduleDayStrip), findsOneWidget);
             expect(find.byType(ScheduleTimelineLesson), findsNWidgets(2));
+          case EntryFeature.teacherSchedule:
+            expect(find.text('Ваш кабинет'), findsOneWidget);
+            expect(find.byType(ScheduleDayStrip), findsOneWidget);
+            expect(find.byType(TeacherLessonTile), findsNWidgets(2));
+            expect(find.textContaining('ИКБО-02-24'), findsNWidgets(2));
           case EntryFeature.campus:
             expect(find.byType(MapTopBar), findsOneWidget);
             final canvas = tester.widget<MapFloorCanvas>(

@@ -9,9 +9,11 @@ import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_view.dart
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_header.dart';
 import 'package:rtu_mirea_app/services/data/services_directory.dart';
 import 'package:rtu_mirea_app/services/view/widgets/service_row.dart';
+import 'package:rtu_mirea_app/teacher_account/domain/teacher_workload.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/dashboard/teacher_lesson_tile.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-enum EntryFeature { schedule, campus, community }
+enum EntryFeature { schedule, teacherSchedule, campus, community }
 
 class EntryFeaturePreview extends StatelessWidget {
   const EntryFeaturePreview({required this.feature, super.key});
@@ -24,6 +26,9 @@ class EntryFeaturePreview extends StatelessWidget {
       color: context.colors.canvas,
       child: switch (feature) {
         EntryFeature.schedule => const _SchedulePreview(),
+        EntryFeature.teacherSchedule => const _SchedulePreview(
+          feature: EntryFeature.teacherSchedule,
+        ),
         EntryFeature.campus => const EntryCampusPreview(),
         EntryFeature.community => const _CommunityPreview(),
       },
@@ -32,7 +37,9 @@ class EntryFeaturePreview extends StatelessWidget {
 }
 
 class _SchedulePreview extends StatelessWidget {
-  const _SchedulePreview();
+  const _SchedulePreview({this.feature = EntryFeature.schedule});
+
+  final EntryFeature feature;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +73,9 @@ class _SchedulePreview extends StatelessWidget {
           subject: data.$1,
           lessonType: data.$2,
           teachers: const [Teacher(name: 'Иванов Алексей Сергеевич')],
-          groups: const ['ИКБО-01-24'],
+          groups: feature == EntryFeature.teacherSchedule
+              ? const ['ИКБО-01-24', 'ИКБО-02-24']
+              : const ['ИКБО-01-24'],
           classrooms: [
             Classroom(
               name: data.$7,
@@ -90,11 +99,32 @@ class _SchedulePreview extends StatelessWidget {
       showCancelled: true,
       showGaps: false,
     );
+    final workload = TeacherWorkload.fromSchedule(
+      schedule: lessons,
+      weekStart: day.subtract(Duration(days: day.weekday - 1)),
+    );
     return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
       child: Column(
         children: [
-          ScheduleHeader(day: day, name: null, topInset: AppSpacing.screenTop),
+          if (feature == EntryFeature.teacherSchedule)
+            AppScreenHeader(
+              title: l10n.teacherCabinetTitle,
+              overline: l10n.teacherRoleFallback,
+              applyTopInset: false,
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                AppSpacing.xlg,
+                AppSpacing.screen,
+                AppSpacing.lg,
+              ),
+            )
+          else
+            ScheduleHeader(
+              day: day,
+              name: null,
+              topInset: AppSpacing.screenTop,
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
             child: Column(
@@ -109,11 +139,22 @@ class _SchedulePreview extends StatelessWidget {
                   onDay: (_) {},
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                for (final entry
-                    in timeline.entries.whereType<ScheduleLessonEntry>()) ...[
-                  ScheduleTimelineLesson(entry: entry, day: day),
-                  const SizedBox(height: AppSpacing.sm),
-                ],
+                if (feature == EntryFeature.teacherSchedule)
+                  for (final occurrence in workload.occurrences) ...[
+                    TeacherLessonTile(
+                      occurrence: occurrence,
+                      now: now,
+                      isNext: occurrence == workload.nextAt(now),
+                      onTap: () {},
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                  ]
+                else
+                  for (final entry
+                      in timeline.entries.whereType<ScheduleLessonEntry>()) ...[
+                    ScheduleTimelineLesson(entry: entry, day: day),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
               ],
             ),
           ),

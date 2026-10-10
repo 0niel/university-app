@@ -12653,6 +12653,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get teacherCabinetTitle => 'Ваш кабинет';
 
   @override
+  String get teacherCabinetEntryDescription =>
+      'Своё расписание, группы и рейтинг';
+
+  @override
+  String get teacherCabinetEntryRestoring => 'Загружаем ваш кабинет';
+
+  @override
+  String get teacherScheduleSwipeHint => 'Листайте дни и недели свайпом';
+
+  @override
   String get teacherCabinetSubtitle =>
       'Ваши занятия, группы и отзывы студентов';
 

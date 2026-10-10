@@ -65,6 +65,7 @@ export 'app_week_pager.dart';
 export 'app_zoomable_image.dart';
 export 'buttons/app_back_button.dart';
 export 'buttons/app_button.dart';
+export 'entry/app_entry_body_transition.dart';
 export 'entry/app_entry_brand.dart';
 export 'entry/app_entry_emblem.dart';
 export 'entry/app_entry_layout.dart';

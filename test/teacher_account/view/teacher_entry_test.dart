@@ -12,6 +12,7 @@ import 'package:rtu_mirea_app/login/view/login_page.dart';
 import 'package:rtu_mirea_app/login/view/sign_up_page.dart';
 import 'package:rtu_mirea_app/login/widgets/entry_feature_preview.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_entry_intent_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/dashboard/teacher_lesson_tile.dart';
 import 'package:user_repository/user_repository.dart';
 
 class _Users extends Mock implements UserRepository {}
@@ -136,12 +137,21 @@ void main() {
     ) async {
       await pump(tester);
       expect(find.byType(EditableText), findsNothing);
+      expect(find.byType(TeacherLessonTile), findsNothing);
       expect(
         tester.getTopLeft(find.text('Преподаватель')).dy,
         lessThan(tester.getTopLeft(find.byType(EntryFeaturePreview)).dy),
       );
       await tester.tap(find.text('Преподаватель'));
       await tester.pumpAndSettle();
+      expect(find.byType(TeacherLessonTile), findsNWidgets(2));
+      expect(find.text('Ваш кабинет'), findsOneWidget);
+      expect(
+        tester
+            .widget<EntryFeaturePreview>(find.byType(EntryFeaturePreview))
+            .feature,
+        EntryFeature.teacherSchedule,
+      );
       await tester.ensureVisible(
         find.byKey(const Key('loginPage_startButton')),
       );

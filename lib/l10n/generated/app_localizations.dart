@@ -21656,6 +21656,24 @@ abstract class AppLocalizations {
   /// **'Your dashboard'**
   String get teacherCabinetTitle;
 
+  /// No description provided for @teacherCabinetEntryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your schedule, groups and rating'**
+  String get teacherCabinetEntryDescription;
+
+  /// No description provided for @teacherCabinetEntryRestoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your dashboard'**
+  String get teacherCabinetEntryRestoring;
+
+  /// No description provided for @teacherScheduleSwipeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe to browse days and weeks'**
+  String get teacherScheduleSwipeHint;
+
   /// No description provided for @teacherCabinetSubtitle.
   ///
   /// In en, this message translates to:

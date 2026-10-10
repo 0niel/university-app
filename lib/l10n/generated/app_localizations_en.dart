@@ -12458,6 +12458,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get teacherCabinetTitle => 'Your dashboard';
 
   @override
+  String get teacherCabinetEntryDescription =>
+      'Your schedule, groups and rating';
+
+  @override
+  String get teacherCabinetEntryRestoring => 'Loading your dashboard';
+
+  @override
+  String get teacherScheduleSwipeHint => 'Swipe to browse days and weeks';
+
+  @override
   String get teacherCabinetSubtitle =>
       'Your classes, groups and student reviews';
 

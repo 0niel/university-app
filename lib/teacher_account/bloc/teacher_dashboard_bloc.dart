@@ -186,8 +186,10 @@ class TeacherDashboardBloc
   }
 
   Future<void> refresh() async {
-    if (state.teacher == null || isClosed) return;
+    final query = state.query;
+    if (query == null || isClosed) return;
     final completion = stream
+        .takeWhile((state) => state.query == query)
         .skipWhile(
           (state) => !state.schedule.isLoading && !state.rating.isLoading,
         )
