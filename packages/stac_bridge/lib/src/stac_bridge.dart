@@ -16,6 +16,7 @@ import 'package:stac_bridge/src/actions/storage_actions.dart';
 import 'package:stac_bridge/src/expression/tree_resolver.dart';
 import 'package:stac_bridge/src/proxy_interceptor.dart';
 import 'package:stac_bridge/src/stac_bridge_config.dart';
+import 'package:stac_bridge/src/widgets/inset_scroll_view_parser.dart';
 import 'package:stac_bridge/src/widgets/kit/kit_widget_parsers.dart';
 import 'package:stac_bridge/src/widgets/material/material_override_parsers.dart';
 import 'package:stac_bridge/src/widgets/reactive_mini_app_node.dart';
@@ -27,6 +28,7 @@ abstract final class StacBridge {
 
   static const parsers = <StacParser<Object?>>[
     StacReactiveNodeParser(),
+    StacInsetScrollViewParser(),
     ...kitWidgetParsers,
     ...materialOverrideParsers,
   ];
