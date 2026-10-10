@@ -46,6 +46,7 @@ class _LessonActivityBuilderState extends State<LessonActivityBuilder> {
   void _load() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      if (AppPreviewScope.of(context)) return;
       unawaited(
         context.read<LessonReactionsCubit?>()?.ensureSummary(
           subjectName: widget.lesson.subject,
@@ -58,6 +59,7 @@ class _LessonActivityBuilderState extends State<LessonActivityBuilder> {
 
   @override
   Widget build(BuildContext context) {
+    if (AppPreviewScope.of(context)) return widget.builder(context, const []);
     final comments = context.read<LessonCommentsCubit?>();
     final reactions = context.read<LessonReactionsCubit?>();
     final slotKey = ValueKey((
