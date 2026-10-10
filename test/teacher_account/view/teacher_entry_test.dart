@@ -86,6 +86,12 @@ void main() {
     tester,
   ) async {
     await pump(tester);
+    expect(
+      tester.getTopLeft(find.text('Преподаватель')).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('loginPage_emailInput'))).dy,
+      ),
+    );
     await tester.enterText(
       find.descendant(
         of: find.byKey(const Key('loginPage_emailInput')),
@@ -117,6 +123,32 @@ void main() {
     expect(email.controller?.text, 'teacher@example.edu');
     expect(password.controller?.text, 'password123');
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('entry follows a changed shared role while preserving input', (
+    tester,
+  ) async {
+    intent.select(AccountRole.teacher);
+    await pump(tester);
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const Key('loginPage_emailInput')),
+        matching: find.byType(EditableText),
+      ),
+      'teacher@example.edu',
+    );
+    intent.select(AccountRole.student);
+    await tester.pumpAndSettle();
+    expect(find.text('Вход для преподавателя'), findsNothing);
+    expect(
+      tester
+          .widget<AppInputField>(
+            find.byKey(const Key('loginPage_emailInput')),
+          )
+          .controller
+          ?.text,
+      'teacher@example.edu',
+    );
   });
 
   testWidgets('teacher intent follows the shared registration route', (

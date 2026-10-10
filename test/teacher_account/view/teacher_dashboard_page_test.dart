@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -33,6 +34,7 @@ class _Schedule extends MockBloc<ScheduleEvent, ScheduleState>
 
 void main() {
   final now = DateTime(2026, 10, 8, 10);
+  var clockNow = now;
   final monday = DateTime(2026, 10, 5);
   const teacher = Teacher(uid: 'teacher-id', name: 'Иванов Иван Иванович');
   const accountState = AccountPersonaState(
@@ -72,6 +74,7 @@ void main() {
   });
 
   setUp(() {
+    clockNow = now;
     account = _Account();
     schedules = _Schedules();
     campus = _Campus();
@@ -119,7 +122,7 @@ void main() {
         BlocProvider<AccountPersonaCubit>.value(value: account),
         BlocProvider<ScheduleBloc>.value(value: schedule),
       ],
-      child: TeacherDashboardPage(clock: () => now),
+      child: TeacherDashboardPage(clock: () => clockNow),
     ),
   );
 
@@ -225,9 +228,13 @@ void main() {
       );
       expect(find.text('Математика'), findsOneWidget);
       expect(tester.getBottomRight(find.text('Математика')).dy, lessThan(844));
-      final lessonMeta = find.textContaining('09:00–10:30');
+      final lessonRow = tester.widget<AppLessonRow>(find.byType(AppLessonRow));
+      expect(lessonRow.time, '09:00');
+      expect(lessonRow.endTime, '10:30');
+      expect(tester.getBottomRight(find.text('10:30')).dy, lessThan(844));
+      final lessonMeta = find.text(lessonRow.meta!);
       expect(tester.getBottomRight(lessonMeta).dy, lessThan(844));
-      final meta = tester.widget<Text>(lessonMeta).data!;
+      final meta = lessonRow.meta!;
       expect(meta.indexOf('А-101'), lessThan(meta.indexOf('ГРУППА-01')));
       expect(find.text('Занятий в этот день нет'), findsNothing);
       await tester.tap(shortcut);
@@ -240,6 +247,131 @@ void main() {
       expect(find.text('Оставить отзыв'), findsNothing);
       expect(find.text('Написать'), findsNothing);
       verify(() => campus.getTeacherProfile(teacher.name)).called(1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'shared lesson row updates next, current and past at boundaries',
+    (
+      tester,
+    ) async {
+      clockNow = DateTime(2026, 10, 8, 8, 45);
+      await pumpDashboard(tester);
+      final rowFinder = find.byType(AppLessonRow);
+      final l10n = tester.element(rowFinder).l10n;
+      var row = tester.widget<AppLessonRow>(rowFinder);
+      expect(row.state, LessonRowState.next);
+      expect(row.chipLabel, l10n.lessonTagNext);
+      expect(row.progress, isNull);
+      expect(row.scheduleStyle, isTrue);
+      expect(row.typeLabel, l10n.lessonShortLecture);
+      expect(row.meta, contains('А-101'));
+      expect(row.meta, contains('ГРУППА-01, ГРУППА-02'));
+      expect(row.onTap, isNotNull);
+      expect(row.onLongPress, isNull);
+      expect(row.annotations, isEmpty);
+
+      clockNow = DateTime(2026, 10, 8, 9);
+      await tester.pump(const Duration(minutes: 1));
+      row = tester.widget<AppLessonRow>(rowFinder);
+      expect(row.state, LessonRowState.current);
+      expect(row.chipLabel, l10n.lessonTagLive(90));
+      expect(row.progress, 0);
+
+      clockNow = now;
+      await tester.pump(const Duration(minutes: 1));
+      row = tester.widget<AppLessonRow>(rowFinder);
+      expect(row.state, LessonRowState.current);
+      expect(row.chipLabel, l10n.lessonTagLive(30));
+      expect(row.progress, closeTo(2 / 3, 0.0001));
+
+      clockNow = DateTime(2026, 10, 8, 10, 30);
+      await tester.pump(const Duration(minutes: 1));
+      row = tester.widget<AppLessonRow>(rowFinder);
+      expect(row.state, LessonRowState.past);
+      expect(row.chipLabel, isNull);
+      expect(row.progress, isNull);
+      expect(row.meta, contains(l10n.lessonMetaPast));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'cancelled shared row retains groups and suppresses live progress',
+    (
+      tester,
+    ) async {
+      when(
+        () => schedules.getScheduleChanges(
+          targetType: any(named: 'targetType'),
+          target: any(named: 'target'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          ScheduleChange(
+            id: 'cancel',
+            kind: .cancel,
+            subject: 'Математика',
+            lessonDate: now,
+            createdAt: now,
+          ),
+        ],
+      );
+      await pumpDashboard(tester);
+      final rowFinder = find.byType(AppLessonRow);
+      final row = tester.widget<AppLessonRow>(rowFinder);
+      final context = tester.element(rowFinder);
+      expect(row.state, LessonRowState.cancelled);
+      expect(row.chipLabel, context.l10n.lessonTagCancelled);
+      expect(row.chipColor, context.colors.danger);
+      expect(row.progress, isNull);
+      expect(row.meta, contains(context.l10n.lessonMetaCancelled));
+      expect(row.meta, contains('А-101'));
+      expect(row.meta, contains('ГРУППА-01, ГРУППА-02'));
+      expect(
+        tester.widget<Text>(find.text('Математика')).style?.decoration,
+        TextDecoration.lineThrough,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'future shared preview retains its date and separate bell times',
+    (
+      tester,
+    ) async {
+      final tomorrow = now.add(const Duration(days: 1));
+      when(
+        () => schedules.getTeacherSchedule(
+          teacher: any(named: 'teacher'),
+          dateFrom: any(named: 'dateFrom'),
+          dateTo: any(named: 'dateTo'),
+        ),
+      ).thenAnswer(
+        (_) async => ScheduleResponse(
+          data: [
+            lesson().copyWith(dates: [tomorrow]),
+          ],
+        ),
+      );
+      await pumpDashboard(tester);
+      final rowFinder = find.byType(AppLessonRow);
+      final row = tester.widget<AppLessonRow>(rowFinder);
+      expect(row.state, LessonRowState.next);
+      expect(row.time, '09:00');
+      expect(row.endTime, '10:30');
+      expect(
+        row.meta,
+        contains(
+          DateFormat.MMMEd(
+            tester.element(rowFinder).l10n.localeName,
+          ).format(tomorrow),
+        ),
+      );
+      expect(row.meta, contains('А-101'));
+      expect(row.meta, contains('ГРУППА-01, ГРУППА-02'));
       expect(tester.takeException(), isNull);
     },
   );

@@ -559,6 +559,8 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage>
         ),
         _TeacherLessonTile(
           occurrence: preview,
+          now: _now,
+          isNext: preview == next,
           showDate: true,
           onTap: () => _openLesson(preview),
         ),
@@ -686,6 +688,8 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage>
               for (final occurrence in dayLessons)
                 _TeacherLessonTile(
                   occurrence: occurrence,
+                  now: _now,
+                  isNext: occurrence == next,
                   onTap: () => _openLesson(occurrence),
                 ),
             ],
@@ -1143,56 +1147,80 @@ class _TeacherMetrics extends StatelessWidget {
 class _TeacherLessonTile extends StatelessWidget {
   const _TeacherLessonTile({
     required this.occurrence,
+    required this.now,
     required this.onTap,
+    this.isNext = false,
     this.showDate = false,
   });
 
   final TeacherLessonOccurrence occurrence;
+  final DateTime now;
   final VoidCallback onTap;
+  final bool isNext;
   final bool showDate;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
-    final time =
-        '${DateFormat.Hm().format(occurrence.start)}–'
-        '${DateFormat.Hm().format(occurrence.end)}';
+    final past = !now.isBefore(occurrence.end);
+    final live = !now.isBefore(occurrence.start) && !past;
+    final state = occurrence.isCancelled
+        ? LessonRowState.cancelled
+        : past
+        ? LessonRowState.past
+        : live
+        ? LessonRowState.current
+        : isNext
+        ? LessonRowState.next
+        : (occurrence.lesson.lessonType == LessonType.exam ||
+              occurrence.lesson.lessonType == LessonType.credit)
+        ? LessonRowState.exam
+        : LessonRowState.plain;
     final meta = [
       if (showDate) DateFormat.MMMEd(l10n.localeName).format(occurrence.date),
-      time,
       lessonTypeName(l10n, occurrence.lesson.lessonType),
       if (occurrence.lesson.classrooms.isNotEmpty)
         occurrence.lesson.classrooms.map(classroomLabel).join(', '),
       if (occurrence.groups.isNotEmpty)
         occurrence.groups.map((group) => group.name).join(', '),
       if (occurrence.isCancelled) l10n.lessonMetaCancelled,
+      if (past && !occurrence.isCancelled) l10n.lessonMetaPast,
     ].join(' · ');
-    return AppCard(
+    return AppLessonRow(
       key: ValueKey((occurrence.start, occurrence.lesson)),
-      semanticsLabel: '${occurrence.lesson.subject}, $meta',
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            occurrence.lesson.subject,
-            style: AppText.headlineStrong.copyWith(
-              color: occurrence.isCancelled ? colors.muted : colors.ink,
-              decoration: occurrence.isCancelled
-                  ? TextDecoration.lineThrough
-                  : null,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            meta,
-            style: AppText.subtext.copyWith(
-              color: occurrence.isCancelled ? colors.danger : colors.muted,
-            ),
-          ),
-        ],
+      title: occurrence.lesson.subject,
+      time: DateFormat.Hm().format(occurrence.start),
+      endTime: DateFormat.Hm().format(occurrence.end),
+      meta: meta,
+      state: state,
+      color: lessonAccentOf(context, occurrence.lesson),
+      typeLabel: lessonShortLabel(l10n, occurrence.lesson.lessonType),
+      chipLabel: occurrence.isCancelled
+          ? l10n.lessonTagCancelled
+          : live
+          ? l10n.lessonTagLive(occurrence.end.difference(now).inMinutes)
+          : isNext
+          ? l10n.lessonTagNext
+          : null,
+      chipColor: occurrence.isCancelled
+          ? context.colors.danger
+          : context.colors.accent,
+      progress: live && !occurrence.isCancelled
+          ? (now.difference(occurrence.start).inSeconds /
+                    occurrence.duration.inSeconds)
+                .clamp(0, 1)
+                .toDouble()
+          : null,
+      inset: 0,
+      outerVerticalInset: 0,
+      scheduleStyle: true,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.fieldGap,
+        AppSpacing.lg,
+        AppSpacing.xsm,
+        AppSpacing.lg,
       ),
+      onTap: onTap,
     );
   }
 }

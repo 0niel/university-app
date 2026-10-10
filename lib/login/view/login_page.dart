@@ -59,9 +59,10 @@ class _LoginPageViewState extends State<_LoginPageView> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bloc = context.read<LoginBloc>();
-    final teacherEntry =
-        _teacherEntry ||
-        context.watch<AccountEntryIntentCubit?>()?.state == AccountRole.teacher;
+    final role =
+        context.watch<AccountEntryIntentCubit?>()?.state ??
+        (_teacherEntry ? AccountRole.teacher : AccountRole.student);
+    final teacherEntry = role == AccountRole.teacher;
     return Scaffold(
       backgroundColor: context.colors.canvas,
       body: BlocListener<LoginBloc, LoginState>(
@@ -78,38 +79,29 @@ class _LoginPageViewState extends State<_LoginPageView> {
           showBack: Navigator.of(context).canPop(),
           onBack: () => Navigator.of(context).maybePop(),
           actions: const _LoginPageActions(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              BlocBuilder<LoginBloc, LoginState>(
-                builder: (context, state) => AccountRoleSelector(
-                  key: const Key('loginPage_roleSelector'),
-                  role: teacherEntry
-                      ? AccountRole.teacher
-                      : AccountRole.student,
-                  showDescription: false,
-                  onChanged: state.status.isInProgress
-                      ? null
-                      : (role) {
-                          context.read<AccountEntryIntentCubit?>()?.select(
-                            role,
-                          );
-                          setState(
-                            () => _teacherEntry = role == AccountRole.teacher,
-                          );
-                        },
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sectionGap),
-              _LoginPageForm(
-                emailController: _emailController,
-                passwordController: _passwordController,
-                passwordFocusNode: _passwordFocusNode,
-                onEmailChanged: (value) => bloc.add(LoginEmailChanged(value)),
-                onPasswordChanged: (value) =>
-                    bloc.add(LoginPasswordChanged(value)),
-              ),
-            ],
+          headerContent: BlocBuilder<LoginBloc, LoginState>(
+            builder: (context, state) => AccountRoleSelector(
+              key: const Key('loginPage_roleSelector'),
+              role: role,
+              showDescription: false,
+              onChanged: state.status.isInProgress
+                  ? null
+                  : (role) {
+                      context.read<AccountEntryIntentCubit?>()?.select(
+                        role,
+                      );
+                      setState(
+                        () => _teacherEntry = role == AccountRole.teacher,
+                      );
+                    },
+            ),
+          ),
+          child: _LoginPageForm(
+            emailController: _emailController,
+            passwordController: _passwordController,
+            passwordFocusNode: _passwordFocusNode,
+            onEmailChanged: (value) => bloc.add(LoginEmailChanged(value)),
+            onPasswordChanged: (value) => bloc.add(LoginPasswordChanged(value)),
           ),
         ),
       ),

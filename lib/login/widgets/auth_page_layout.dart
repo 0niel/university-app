@@ -14,6 +14,7 @@ class AuthPageLayout extends StatelessWidget {
     this.titleAccent,
     this.subtitle,
     this.leading,
+    this.headerContent,
     this.showBack = true,
     this.onBack,
     this.step,
@@ -27,6 +28,7 @@ class AuthPageLayout extends StatelessWidget {
   final String? subtitle;
   final Widget child;
   final Widget? leading;
+  final Widget? headerContent;
   final bool showBack;
   final VoidCallback? onBack;
   final int? step;
@@ -84,6 +86,10 @@ class AuthPageLayout extends StatelessWidget {
                       ),
                     ),
                   ),
+                if (headerContent != null) ...[
+                  if (showBack) const SizedBox(height: 20),
+                  headerContent!,
+                ],
                 if (leading != null) ...[
                   if (showBack) const SizedBox(height: 20),
                   Align(
