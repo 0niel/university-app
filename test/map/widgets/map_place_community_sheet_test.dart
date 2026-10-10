@@ -51,6 +51,10 @@ class _Repository extends Fake implements MapDataRepository {
   bool get isAuthenticated => authenticated;
 
   @override
+  bool isCampusRevisionCurrent(CampusMapData campus, int revision) =>
+      campus.origin != MapDataOrigin.bundled && campus.revision == revision;
+
+  @override
   Future<MapRoomDetails> getRoom(
     String campusId,
     String roomId, {
@@ -446,6 +450,7 @@ void main() {
           textScaler: const TextScaler.linear(2),
         );
         await tester.pumpAndSettle();
+        expect(refreshes, 1);
         for (final label in ['Маршрут сюда', 'Отсюда']) {
           final button = find.widgetWithText(AppButton, label);
           expect(tester.widget<AppButton>(button).onPressed, isNull);
@@ -457,14 +462,14 @@ void main() {
         await tester.ensureVisible(find.text('Обновить карту'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Обновить карту'));
-        expect(refreshes, 1);
+        expect(refreshes, 2);
         expect(tester.takeException(), isNull);
       },
     );
   }
 
   testWidgets(
-    'bundled revision needs a full plan only after remote details load',
+    'bundled plan refreshes once when remote details arrive',
     (
       tester,
     ) async {
@@ -500,12 +505,16 @@ void main() {
           await tester.tap(button);
         }
         expect(routes, remoteLoaded ? 0 : 2);
+        expect(refreshes, remoteLoaded ? 1 : 0);
         if (remoteLoaded) {
-          expect(find.textContaining('Обновите полный план'), findsOneWidget);
+          expect(
+            find.textContaining('Не удалось обновить план'),
+            findsOneWidget,
+          );
           await tester.ensureVisible(find.text('Обновить карту'));
           await tester.pumpAndSettle();
           await tester.tap(find.text('Обновить карту'));
-          expect(refreshes, 1);
+          expect(refreshes, 2);
         } else {
           expect(find.text('Обновить карту'), findsNothing);
         }

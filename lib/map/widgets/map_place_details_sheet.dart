@@ -20,6 +20,7 @@ class MapPlaceDetailsSheet extends StatefulWidget {
     this.onEditLocation,
     this.onClose,
     this.onRefreshMap,
+    this.isRefreshing = false,
     super.key,
   });
 
@@ -31,6 +32,7 @@ class MapPlaceDetailsSheet extends StatefulWidget {
   final VoidCallback? onEditLocation;
   final VoidCallback? onClose;
   final VoidCallback? onRefreshMap;
+  final bool isRefreshing;
 
   @override
   State<MapPlaceDetailsSheet> createState() => _MapPlaceDetailsSheetState();
@@ -49,12 +51,42 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
   MapRoomVerification? _verification;
   String? _actionError;
   int _generation = 0;
+  int? _requestedRevision;
+
+  bool get _staleMap =>
+      _details != null &&
+      !widget.repository.isCampusRevisionCurrent(
+        widget.campus,
+        _details!.revision,
+      );
 
   @override
   void initState() {
     super.initState();
     unawaited(_load());
     if (widget.repository.isAuthenticated) unawaited(_loadBookmark());
+  }
+
+  @override
+  void didUpdateWidget(MapPlaceDetailsSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if ((!identical(oldWidget.campus, widget.campus) &&
+            (_details == null || _staleMap)) ||
+        (oldWidget.isRefreshing && !widget.isRefreshing && _staleMap)) {
+      unawaited(_load());
+    }
+  }
+
+  void _refreshIfNeeded() {
+    final revision = _details?.revision;
+    if (!_staleMap ||
+        widget.isRefreshing ||
+        widget.onRefreshMap == null ||
+        _requestedRevision == revision) {
+      return;
+    }
+    _requestedRevision = revision;
+    widget.onRefreshMap!();
   }
 
   Future<void> _loadBookmark() async {
@@ -140,6 +172,7 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
         _verification = details.verification;
         _loading = false;
       });
+      _refreshIfNeeded();
     } on Object {
       if (!mounted || generation != _generation) return;
       setState(() {
@@ -231,12 +264,12 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
   @override
   Widget build(BuildContext context) {
     final room = _details?.room ?? widget.room;
-    final staleMap =
-        _details != null &&
-        (widget.campus.origin == MapDataOrigin.bundled ||
-            _details!.revision != widget.campus.revision);
-    final navigationNeedsReview = room.raw['navigation_needs_review'] == true;
-    final canRoute = !staleMap && !navigationNeedsReview;
+    final staleMap = _staleMap;
+    final navigationNeedsReview =
+        room.raw['navigation_needs_review'] == true ||
+        widget.room.raw['navigation_needs_review'] == true;
+    final canRoute =
+        !widget.isRefreshing && !staleMap && !navigationNeedsReview;
     final colors = context.colors;
     final metadata = room.metadata;
     final updatedAt = DateTime.tryParse('${metadata['updated_at'] ?? ''}');
@@ -361,15 +394,22 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
           },
         ),
         const SizedBox(height: AppSpacing.sectionGap),
-        if (staleMap)
+        if (widget.isRefreshing)
+          const Padding(
+            padding: EdgeInsets.only(bottom: AppSpacing.lg),
+            child: AppBanner(
+              message: 'Обновляем план и проходы для маршрута…',
+            ),
+          )
+        else if (staleMap)
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             child: AppBanner(
               message: navigationNeedsReview
-                  ? 'Место перенесено. Обновите полный план; '
+                  ? 'Место перенесено. Не удалось обновить план; '
                         'проходы к нему ещё проверяются.'
-                  : 'Обновите полный план, '
-                        'чтобы построить актуальный маршрут.',
+                  : 'Не удалось обновить план для маршрута. '
+                        'Проверьте соединение и попробуйте ещё раз.',
               tone: AppBannerTone.warn,
               actionLabel: widget.onRefreshMap == null
                   ? null
