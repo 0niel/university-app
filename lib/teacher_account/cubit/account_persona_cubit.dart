@@ -1,61 +1,13 @@
 import 'dart:async';
 
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AccountPersonaState {
-  const AccountPersonaState({
-    this.persona = AccountPersona.empty,
-    this.loaded = false,
-    this.loading = false,
-    this.saving = false,
-    this.syncError = false,
-    this.pendingSync = false,
-    this.teacherSelectionPending = false,
-    this.entryRequested = false,
-  });
-
-  final AccountPersona persona;
-  final bool loaded;
-  final bool loading;
-  final bool saving;
-  final bool syncError;
-  final bool pendingSync;
-  final bool teacherSelectionPending;
-  final bool entryRequested;
-
-  bool get isTeacher => persona.role == AccountRole.teacher;
-
-  Teacher? get teacher {
-    final id = persona.teacherId;
-    final name = persona.teacherName;
-    if (id == null || id.isEmpty || name == null || name.isEmpty) return null;
-    return Teacher(uid: id, name: name);
-  }
-
-  AccountPersonaState copyWith({
-    AccountPersona? persona,
-    bool? loaded,
-    bool? loading,
-    bool? saving,
-    bool? syncError,
-    bool? pendingSync,
-    bool? teacherSelectionPending,
-    bool? entryRequested,
-  }) => AccountPersonaState(
-    persona: persona ?? this.persona,
-    loaded: loaded ?? this.loaded,
-    loading: loading ?? this.loading,
-    saving: saving ?? this.saving,
-    syncError: syncError ?? this.syncError,
-    pendingSync: pendingSync ?? this.pendingSync,
-    teacherSelectionPending:
-        teacherSelectionPending ?? this.teacherSelectionPending,
-    entryRequested: entryRequested ?? this.entryRequested,
-  );
-}
+part 'account_persona_cubit.freezed.dart';
+part 'account_persona_state.dart';
 
 class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
   AccountPersonaCubit({
@@ -70,7 +22,7 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
       emit(
         state.copyWith(
           persona: state.persona.copyWith(role: entryRole),
-          pendingSync: true,
+          pendingEdit: state.pendingEdit ?? AccountPersonaEdit.roleOnly,
           entryRequested: entryRole == AccountRole.teacher,
         ),
       );
@@ -81,7 +33,7 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
   final String organizationId;
   final GamificationRepository _repository;
   final String? Function() _currentUserId;
-  Future<void>? _restore;
+  Future<bool>? _restore;
   Future<bool>? _save;
   int _editRevision = 0;
   int _serverRevision = 0;
@@ -96,23 +48,27 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
   bool get _ownsSession =>
       !isClosed && userId.isNotEmpty && _currentUserId() == userId;
 
-  Future<void> restore() => _restore ??= _restorePersona();
+  Future<void> restore() async {
+    await (_restore ??= _restorePersona());
+  }
 
-  Future<void> _restorePersona() async {
-    if (!_ownsSession) return;
+  Future<bool> _restorePersona() async {
+    if (!_ownsSession) return false;
     final edit = _editRevision;
-    emit(state.copyWith(loading: true, syncError: false));
+    emit(state.copyWith(operation: AccountPersonaOperation.restoring));
     try {
       await _repository.ensureAcademicProfile(organizationId);
-      if (!_ownsSession) return;
+      if (!_ownsSession) return false;
       final remote = await _repository.getAccountPersona(
         organizationId: organizationId,
         expectedUserId: userId,
       );
-      if (!_ownsSession) return;
+      if (!_ownsSession) return false;
       if (remote.revision < _serverRevision) {
-        emit(state.copyWith(loaded: true, loading: false));
-        return;
+        emit(
+          state.copyWith(loaded: true, operation: AccountPersonaOperation.idle),
+        );
+        return true;
       }
       _serverRevision = remote.revision;
       _confirmed = remote;
@@ -125,20 +81,24 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
       emit(
         state.copyWith(
           persona: persona,
-          pendingSync: !useRemote && persona != remote,
-          teacherSelectionPending:
-              !useRemote && persona != remote && state.teacherSelectionPending,
+          pendingEdit: !useRemote && persona != remote
+              ? state.pendingEdit
+              : null,
           loaded: true,
-          loading: false,
-          syncError: false,
+          operation: AccountPersonaOperation.idle,
         ),
       );
-    } on Exception {
-      if (!_ownsSession) return;
+    } on Exception catch (error, stackTrace) {
+      if (!_ownsSession) return false;
+      addError(error, stackTrace);
       _serverRevision = state.persona.revision;
-      emit(state.copyWith(loaded: true, loading: false, syncError: true));
+      emit(
+        state.copyWith(loaded: true, operation: AccountPersonaOperation.failed),
+      );
+      return false;
     }
     if (_ownsSession && state.pendingSync) unawaited(_persist());
+    return true;
   }
 
   Future<bool> selectRole(AccountRole role) =>
@@ -205,9 +165,12 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
       state.copyWith(
         persona: persona,
         loaded: true,
-        pendingSync: true,
-        teacherSelectionPending: state.teacherSelectionPending || teacherEdited,
-        syncError: false,
+        pendingEdit: teacherEdited
+            ? AccountPersonaEdit.teacherSelection
+            : state.pendingEdit ?? AccountPersonaEdit.roleOnly,
+        operation: state.syncError
+            ? AccountPersonaOperation.idle
+            : state.operation,
       ),
     );
     await restore();
@@ -217,29 +180,44 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
   }
 
   Future<void> retry() async {
-    if (!_ownsSession) return;
-    await _save;
-    if (!_ownsSession) return;
-    if (!state.loading) _restore = null;
-    await restore();
-    if (_ownsSession && state.pendingSync) await _persist();
+    while (_ownsSession) {
+      final saving = _save;
+      await saving;
+      if (!_ownsSession) return;
+      if (!identical(_save, saving)) continue;
+      if (!state.loading) _restore = null;
+      await restore();
+      if (_ownsSession && state.pendingSync) await _persist();
+      return;
+    }
   }
 
-  Future<bool> _persist() {
-    if (_save case final saving?) return saving;
-    final saving = _drain();
-    _save = saving;
-    unawaited(
-      saving.whenComplete(() {
-        if (identical(_save, saving)) _save = null;
-      }),
-    );
-    return saving;
+  Future<bool> _persist() async {
+    while (_ownsSession) {
+      final restoring = _restore;
+      final restored = await restoring;
+      if (!_ownsSession) return false;
+      if (!identical(_restore, restoring)) continue;
+      if (restored != true) {
+        emit(state.copyWith(operation: AccountPersonaOperation.failed));
+        return false;
+      }
+      if (_save case final saving?) return saving;
+      final saving = _drain();
+      _save = saving;
+      unawaited(
+        saving.whenComplete(() {
+          if (identical(_save, saving)) _save = null;
+        }),
+      );
+      return saving;
+    }
+    return false;
   }
 
   Future<bool> _drain() async {
     if (!_ownsSession) return false;
-    emit(state.copyWith(saving: true));
+    emit(state.copyWith(operation: AccountPersonaOperation.saving));
     var conflictRetried = false;
     while (_ownsSession && state.pendingSync) {
       final edit = _editRevision;
@@ -261,17 +239,15 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
             persona: unchanged
                 ? saved
                 : state.persona.copyWith(revision: saved.revision),
-            pendingSync: !unchanged,
-            teacherSelectionPending:
-                !unchanged && state.teacherSelectionPending,
-            syncError: false,
+            pendingEdit: unchanged ? null : state.pendingEdit,
           ),
         );
         conflictRetried = false;
-      } on AccountPersonaConflictException {
+      } on AccountPersonaConflictException catch (error, stackTrace) {
         if (!_ownsSession) return false;
         if (conflictRetried) {
-          emit(state.copyWith(saving: false, syncError: true));
+          addError(error, stackTrace);
+          emit(state.copyWith(operation: AccountPersonaOperation.failed));
           return false;
         }
         conflictRetried = true;
@@ -290,36 +266,37 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
               ),
             );
           }
-        } on Exception {
+        } on Exception catch (error, stackTrace) {
           if (_ownsSession) {
-            emit(state.copyWith(saving: false, syncError: true));
+            addError(error, stackTrace);
+            emit(state.copyWith(operation: AccountPersonaOperation.failed));
           }
           return false;
         }
-      } on Exception catch (error) {
+      } on Exception catch (error, stackTrace) {
         if (error is PostgrestException &&
             (error.code == '22023' || error.code == '42501')) {
           if (!_ownsSession) return false;
           if (edit != _editRevision) continue;
+          addError(error, stackTrace);
           emit(
             state.copyWith(
               persona: _confirmed,
-              pendingSync: false,
-              teacherSelectionPending: false,
-              saving: false,
-              syncError: true,
+              pendingEdit: null,
+              operation: AccountPersonaOperation.failed,
             ),
           );
           return false;
         }
         if (_ownsSession) {
-          emit(state.copyWith(saving: false, syncError: true));
+          addError(error, stackTrace);
+          emit(state.copyWith(operation: AccountPersonaOperation.failed));
         }
         return false;
       }
     }
     if (!_ownsSession) return false;
-    emit(state.copyWith(saving: false));
+    emit(state.copyWith(operation: AccountPersonaOperation.idle));
     return true;
   }
 
@@ -336,10 +313,23 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
           value['revision'] != null && value['revision'] is! num) {
         return null;
       }
+      final AccountPersonaEdit? pendingEdit;
+      if (json.containsKey('pendingEdit')) {
+        final value = json['pendingEdit'];
+        pendingEdit = AccountPersonaEdit.values
+            .where((edit) => edit.name == value)
+            .firstOrNull;
+        if (value != null && pendingEdit == null) return null;
+      } else {
+        pendingEdit = json['pendingSync'] == true
+            ? json['teacherSelectionPending'] == true
+                  ? AccountPersonaEdit.teacherSelection
+                  : AccountPersonaEdit.roleOnly
+            : null;
+      }
       return AccountPersonaState(
         persona: AccountPersona.fromJson(value),
-        pendingSync: json['pendingSync'] == true,
-        teacherSelectionPending: json['teacherSelectionPending'] == true,
+        pendingEdit: pendingEdit,
       );
     } on FormatException {
       return null;
@@ -349,7 +339,6 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
   @override
   Map<String, dynamic> toJson(AccountPersonaState state) => {
     'persona': state.persona.toJson(),
-    'pendingSync': state.pendingSync,
-    'teacherSelectionPending': state.teacherSelectionPending,
+    'pendingEdit': state.pendingEdit?.name,
   };
 }

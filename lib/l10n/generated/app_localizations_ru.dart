@@ -4445,7 +4445,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get loginWelcomeBack => 'С возвращением';
 
   @override
-  String get loginSubtitle => 'Войди, используя свой аккаунт (НЕ ЛКС МИРЭА)';
+  String get loginSubtitle =>
+      'Войди в аккаунт приложения. Пароль от личного кабинета вуза здесь не подойдёт.';
 
   @override
   String get loginEmailPlaceholder => 'name@example.com';
@@ -11020,7 +11021,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get authGuestExitWarning =>
-      'После выхода доступ к гостевому аккаунту и его прогрессу будет потерян. Настройки приложения и кэш останутся на этом устройстве. Сначала привяжите email, чтобы сохранить аккаунт.';
+      'Если выйти, гостевой аккаунт и его данные нельзя будет восстановить. Сначала привяжите email, чтобы сохранить их.';
 
   @override
   String get settingsColorCustom => 'Свой цвет';
@@ -12649,7 +12650,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Найдите себя в каталоге и выберите нужную запись.';
 
   @override
-  String get teacherCabinetTitle => 'Кабинет преподавателя';
+  String get teacherCabinetTitle => 'Ваш кабинет';
 
   @override
   String get teacherCabinetSubtitle =>
@@ -12766,6 +12767,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Выбор сохранён на устройстве. Не удалось синхронизировать его с аккаунтом.';
 
   @override
+  String get accountPersonaLoadError =>
+      'Не удалось загрузить режим аккаунта. Попробуйте ещё раз.';
+
+  @override
   String get teacherLogin => 'Войти как преподаватель';
 
   @override
@@ -12824,4 +12829,53 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get teacherPickerSelectionLabel => 'Выбран преподаватель';
+
+  @override
+  String get entryGuestHint => 'Можно познакомиться с приложением без аккаунта';
+
+  @override
+  String get entryPreviewLesson => 'Математический анализ';
+
+  @override
+  String get entryPreviewProgramming => 'Программирование';
+
+  @override
+  String get entryWelcomeAccent => 'ритме.';
+
+  @override
+  String get entryWelcomeSubtitle =>
+      'Расписание, кампус и люди рядом. Всё для твоего студенческого дня.';
+
+  @override
+  String get entryWelcomeTitle => 'Универ.\nВ твоём ритме.';
+
+  @override
+  String get onboardingStoryCampusAccent => 'кампусе.';
+
+  @override
+  String get onboardingStoryCampusLead =>
+      'Находи аудитории и свободные места, чтобы позаниматься между парами.';
+
+  @override
+  String get onboardingStoryCampusTitle => 'Освойся\nна кампусе.';
+
+  @override
+  String get onboardingStoryCommunityAccent => 'универ.';
+
+  @override
+  String get onboardingStoryCommunityLead =>
+      'Будь ближе к друзьям, находи сообщества и делись тем, что тебе интересно.';
+
+  @override
+  String get onboardingStoryCommunityTitle => 'Твои люди.\nТвой универ.';
+
+  @override
+  String get onboardingStoryScheduleAccent => 'по плану.';
+
+  @override
+  String get onboardingStoryScheduleLead =>
+      'Пары, переносы и дедлайны — под рукой. Меньше поиска, больше времени на себя.';
+
+  @override
+  String get onboardingStoryScheduleTitle => 'Твой день.\nВсё по плану.';
 }

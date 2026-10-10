@@ -13,6 +13,7 @@ import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
 import 'package:rtu_mirea_app/promo/cubit/promo_dismissals_cubit.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_entry_intent_cubit.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/account_persona_lifecycle.dart';
 
 class UserPreferencesScope extends StatelessWidget {
   const UserPreferencesScope({required this.child, super.key});
@@ -83,7 +84,7 @@ class UserPreferencesScope extends StatelessWidget {
             },
           ),
         ],
-        child: child,
+        child: AccountPersonaLifecycle(child: child),
       ),
     );
   }

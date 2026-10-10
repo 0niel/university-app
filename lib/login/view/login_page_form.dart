@@ -18,6 +18,9 @@ class _LoginPageForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final busy = context.select<LoginBloc, bool>(
+      (bloc) => bloc.state.status.isInProgress,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -88,7 +91,9 @@ class _LoginPageForm extends StatelessWidget {
             key: const Key('loginPage_forgotPassword'),
             label: l10n.loginForgotPassword,
             size: AppButtonSize.small,
-            onPressed: () => const PasswordResetRoute().push<void>(context),
+            onPressed: busy
+                ? null
+                : () => const PasswordResetRoute().push<void>(context),
           ),
         ),
       ],
@@ -119,12 +124,11 @@ class _LoginPageActions extends StatelessWidget {
               : null,
         ),
         const SizedBox(height: 10),
-        AppButton.text(
+        AppButton.secondary(
           key: const Key('loginPage_emailCodeButton'),
           label: l10n.loginWithCode,
           size: AppButtonSize.large,
           expanded: true,
-          foregroundColor: colors.muted,
           onPressed: state.status.isInProgress
               ? null
               : () => const LoginWithEmailRoute().push<void>(context),
@@ -138,16 +142,6 @@ class _LoginPageActions extends StatelessWidget {
           onPressed: state.status.isInProgress
               ? null
               : () => const SignUpRoute().push<void>(context),
-        ),
-        const SizedBox(height: 10),
-        AppButton.secondary(
-          key: const Key('loginPage_guestButton'),
-          label: l10n.loginGuest,
-          size: AppButtonSize.large,
-          expanded: true,
-          onPressed: state.status.isInProgress
-              ? null
-              : () => context.read<LoginBloc>().add(ContinueAsGuestRequested()),
         ),
       ],
     );

@@ -12,6 +12,16 @@ class _Repository extends Mock implements GamificationRepository {}
 
 class _Storage extends Mock implements Storage {}
 
+class _Observer extends BlocObserver {
+  final errors = <Object>[];
+
+  @override
+  void onError(BlocBase<dynamic> bloc, Object error, StackTrace stackTrace) {
+    errors.add(error);
+    super.onError(bloc, error, stackTrace);
+  }
+}
+
 const _teacher = Teacher(uid: 'teacher-a', name: 'Иванов Иван Иванович');
 const _otherTeacher = Teacher(uid: 'teacher-b', name: 'Иванов Иван Иванович');
 const _saved = AccountPersona(
@@ -188,6 +198,102 @@ void main() {
     expect(resumed.state.pendingSync, isFalse);
   });
 
+  test(
+    'failed bootstrap preserves the choice without an unauthorized write',
+    () async {
+      when(
+        () => repository.ensureAcademicProfile(any()),
+      ).thenThrow(Exception('offline'));
+      when(
+        () => repository.setAccountPersona(
+          organizationId: any(named: 'organizationId'),
+          expectedUserId: any(named: 'expectedUserId'),
+          role: any(named: 'role'),
+          teacherId: any(named: 'teacherId'),
+          expectedRevision: any(named: 'expectedRevision'),
+        ),
+      ).thenThrow(
+        const PostgrestException(
+          message: 'Organization access denied',
+          code: '42501',
+        ),
+      );
+      final cubit = create();
+      expect(await cubit.selectTeacher(_otherTeacher), isTrue);
+      expect(cubit.state.teacher?.uid, 'teacher-b');
+      expect(cubit.state.pendingSync, isTrue);
+      expect(cubit.state.syncError, isTrue);
+      verifyNever(
+        () => repository.setAccountPersona(
+          organizationId: any(named: 'organizationId'),
+          expectedUserId: any(named: 'expectedUserId'),
+          role: any(named: 'role'),
+          teacherId: any(named: 'teacherId'),
+          expectedRevision: any(named: 'expectedRevision'),
+        ),
+      );
+      when(
+        () => repository.ensureAcademicProfile(any()),
+      ).thenAnswer((_) async {});
+      when(
+        () => repository.getAccountPersona(
+          organizationId: 'campus',
+          expectedUserId: 'account-a',
+        ),
+      ).thenAnswer((_) async => _saved);
+      when(
+        () => repository.setAccountPersona(
+          organizationId: 'campus',
+          expectedUserId: 'account-a',
+          role: AccountRole.teacher,
+          teacherId: 'teacher-b',
+          expectedRevision: 3,
+        ),
+      ).thenAnswer(
+        (_) async => _saved.copyWith(teacherId: 'teacher-b', revision: 4),
+      );
+      await cubit.retry();
+      expect(cubit.state.teacher?.uid, 'teacher-b');
+      expect(cubit.state.persona.revision, 4);
+      expect(cubit.state.pendingSync, isFalse);
+      expect(cubit.state.syncError, isFalse);
+    },
+  );
+
+  test(
+    'missing backend RPC reports the original error and keeps the edit',
+    () async {
+      final observer = _Observer();
+      final previous = Bloc.observer;
+      Bloc.observer = observer;
+      addTearDown(() => Bloc.observer = previous);
+      const error = PostgrestException(
+        message: 'RPC unavailable',
+        code: 'PGRST202',
+      );
+      when(
+        () => repository.getAccountPersona(
+          organizationId: 'campus',
+          expectedUserId: 'account-a',
+        ),
+      ).thenThrow(error);
+      final cubit = create();
+      expect(await cubit.selectTeacher(_teacher), isTrue);
+      expect(cubit.state.pendingSync, isTrue);
+      expect(cubit.state.syncError, isTrue);
+      expect(observer.errors, [same(error)]);
+      verifyNever(
+        () => repository.setAccountPersona(
+          organizationId: any(named: 'organizationId'),
+          expectedUserId: any(named: 'expectedUserId'),
+          role: any(named: 'role'),
+          teacherId: any(named: 'teacherId'),
+          expectedRevision: any(named: 'expectedRevision'),
+        ),
+      );
+    },
+  );
+
   test('coalesces retries while restoration is in flight', () async {
     final response = Completer<AccountPersona>();
     when(
@@ -211,6 +317,56 @@ void main() {
     await Future.wait([original, retry]);
     expect(cubit.state.persona, _saved);
     expect(cubit.state.loading, isFalse);
+  });
+
+  test('serializes a retry with a simultaneous new selection', () async {
+    when(
+      () => repository.getAccountPersona(
+        organizationId: 'campus',
+        expectedUserId: 'account-a',
+      ),
+    ).thenAnswer((_) async => _saved);
+    final cubit = create();
+    await cubit.restore();
+    final restoring = Completer<AccountPersona>();
+    final saving = Completer<AccountPersona>();
+    when(
+      () => repository.getAccountPersona(
+        organizationId: 'campus',
+        expectedUserId: 'account-a',
+      ),
+    ).thenAnswer((_) => restoring.future);
+    when(
+      () => repository.setAccountPersona(
+        organizationId: 'campus',
+        expectedUserId: 'account-a',
+        role: AccountRole.teacher,
+        teacherId: 'teacher-b',
+        expectedRevision: 3,
+      ),
+    ).thenAnswer((_) => saving.future);
+    final retry = cubit.retry();
+    final selection = cubit.selectTeacher(_otherTeacher);
+    await Future<void>.delayed(Duration.zero);
+    expect(cubit.state.operation, AccountPersonaOperation.restoring);
+    verifyNever(
+      () => repository.setAccountPersona(
+        organizationId: any(named: 'organizationId'),
+        expectedUserId: any(named: 'expectedUserId'),
+        role: any(named: 'role'),
+        teacherId: any(named: 'teacherId'),
+        expectedRevision: any(named: 'expectedRevision'),
+      ),
+    );
+    restoring.complete(_saved);
+    await Future<void>.delayed(Duration.zero);
+    expect(cubit.state.operation, AccountPersonaOperation.saving);
+    saving.complete(_saved.copyWith(teacherId: 'teacher-b', revision: 4));
+    await Future.wait([retry, selection]);
+    expect(cubit.state.teacher?.uid, 'teacher-b');
+    expect(cubit.state.persona.revision, 4);
+    expect(cubit.state.operation, AccountPersonaOperation.idle);
+    expect(cubit.state.pendingEdit, isNull);
   });
 
   test('configures role and unlink in one atomic request', () async {
@@ -386,6 +542,92 @@ void main() {
     final otherCampus = create(org: 'other-campus');
     expect(otherAccount.state.teacher, isNull);
     expect(otherCampus.state.teacher, isNull);
+  });
+
+  test('legacy role intent rebases onto the current remote teacher', () async {
+    final seed = create();
+    await seed.restore();
+    values[values.keys.single] = {
+      'persona': _saved.copyWith(role: AccountRole.student).toJson(),
+      'pendingSync': true,
+      'teacherSelectionPending': false,
+    };
+    final resumed = create();
+    expect(resumed.state.pendingEdit, AccountPersonaEdit.roleOnly);
+    when(
+      () => repository.getAccountPersona(
+        organizationId: 'campus',
+        expectedUserId: 'account-a',
+      ),
+    ).thenAnswer(
+      (_) async => _saved.copyWith(teacherId: 'teacher-b', revision: 4),
+    );
+    await resumed.restore();
+    await Future<void>.delayed(Duration.zero);
+    expect(resumed.state.persona.role, AccountRole.student);
+    expect(resumed.state.teacher?.uid, 'teacher-b');
+    expect(resumed.state.pendingEdit, isNull);
+    verify(
+      () => repository.setAccountPersona(
+        organizationId: 'campus',
+        expectedUserId: 'account-a',
+        role: AccountRole.student,
+        teacherId: 'teacher-b',
+        expectedRevision: 4,
+      ),
+    ).called(1);
+  });
+
+  test('legacy pending unlink survives hydration and remote restore', () async {
+    final seed = create();
+    await seed.restore();
+    values[values.keys.single] = {
+      'persona': const AccountPersona(role: AccountRole.teacher).toJson(),
+      'pendingSync': true,
+      'teacherSelectionPending': true,
+    };
+    final resumed = create();
+    expect(resumed.state.pendingEdit, AccountPersonaEdit.teacherSelection);
+    when(
+      () => repository.getAccountPersona(
+        organizationId: 'campus',
+        expectedUserId: 'account-a',
+      ),
+    ).thenAnswer((_) async => _saved);
+    await resumed.restore();
+    await Future<void>.delayed(Duration.zero);
+    expect(resumed.state.teacher, isNull);
+    expect(resumed.state.isTeacher, isTrue);
+    expect(resumed.state.pendingEdit, isNull);
+    verify(
+      () => repository.setAccountPersona(
+        organizationId: 'campus',
+        expectedUserId: 'account-a',
+        role: AccountRole.teacher,
+        expectedRevision: 3,
+      ),
+    ).called(1);
+  });
+
+  test('hydration retains only the persona and typed pending edit', () {
+    final cubit = create();
+    const pending = AccountPersonaState(
+      persona: _saved,
+      loaded: true,
+      operation: AccountPersonaOperation.failed,
+      pendingEdit: AccountPersonaEdit.teacherSelection,
+      entryRequested: true,
+    );
+    final hydrated = cubit.fromJson(cubit.toJson(pending));
+    expect(hydrated?.persona, _saved);
+    expect(hydrated?.pendingEdit, AccountPersonaEdit.teacherSelection);
+    expect(hydrated?.loaded, isFalse);
+    expect(hydrated?.operation, AccountPersonaOperation.idle);
+    expect(hydrated?.entryRequested, isFalse);
+    expect(
+      cubit.fromJson({'persona': _saved.toJson(), 'pendingEdit': 'unknown'}),
+      isNull,
+    );
   });
 
   test('retains offline choice for explicit retry', () async {

@@ -10,6 +10,7 @@ import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/login/view/login_page.dart';
 import 'package:rtu_mirea_app/login/view/sign_up_page.dart';
+import 'package:rtu_mirea_app/login/widgets/entry_feature_preview.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_entry_intent_cubit.dart';
 import 'package:user_repository/user_repository.dart';
 
@@ -42,6 +43,12 @@ void main() {
   });
 
   Future<void> pump(WidgetTester tester, {double scale = 1}) async {
+    if (scale == 1) {
+      tester.view
+        ..physicalSize = const Size(390, 844)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+    }
     await tester.pumpWidget(
       MultiRepositoryProvider(
         providers: [
@@ -86,12 +93,9 @@ void main() {
     tester,
   ) async {
     await pump(tester);
-    expect(
-      tester.getTopLeft(find.text('Преподаватель')).dy,
-      lessThan(
-        tester.getTopLeft(find.byKey(const Key('loginPage_emailInput'))).dy,
-      ),
-    );
+    await tester.ensureVisible(find.byKey(const Key('loginPage_startButton')));
+    await tester.tap(find.byKey(const Key('loginPage_startButton')));
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.descendant(
         of: find.byKey(const Key('loginPage_emailInput')),
@@ -125,31 +129,31 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('entry follows a changed shared role while preserving input', (
-    tester,
-  ) async {
-    intent.select(AccountRole.teacher);
-    await pump(tester);
-    await tester.enterText(
-      find.descendant(
-        of: find.byKey(const Key('loginPage_emailInput')),
-        matching: find.byType(EditableText),
-      ),
-      'teacher@example.edu',
-    );
-    intent.select(AccountRole.student);
-    await tester.pumpAndSettle();
-    expect(find.text('Вход для преподавателя'), findsNothing);
-    expect(
-      tester
-          .widget<AppInputField>(
-            find.byKey(const Key('loginPage_emailInput')),
-          )
-          .controller
-          ?.text,
-      'teacher@example.edu',
-    );
-  });
+  testWidgets(
+    'first-screen role survives opening the form',
+    (
+      tester,
+    ) async {
+      await pump(tester);
+      expect(find.byType(EditableText), findsNothing);
+      expect(
+        tester.getTopLeft(find.text('Преподаватель')).dy,
+        lessThan(tester.getTopLeft(find.byType(EntryFeaturePreview)).dy),
+      );
+      await tester.tap(find.text('Преподаватель'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const Key('loginPage_startButton')),
+      );
+      await tester.tap(find.byKey(const Key('loginPage_startButton')));
+      await tester.pumpAndSettle();
+      expect(intent.state, AccountRole.teacher);
+      expect(find.text('Вход для преподавателя'), findsOneWidget);
+      expect(find.byKey(const Key('loginPage_emailInput')), findsOneWidget);
+      expect(find.text('Студент'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('teacher intent follows the shared registration route', (
     tester,
@@ -162,7 +166,12 @@ void main() {
     await tester.tap(find.byKey(const Key('loginPage_signUpLink')));
     await tester.pumpAndSettle();
     expect(find.byType(SignUpPage), findsOneWidget);
-    expect(find.textContaining('После подтверждения почты'), findsOneWidget);
+    expect(
+      find.text(
+        tester.element(find.byType(SignUpPage)).l10n.teacherLoginDescription,
+      ),
+      findsOneWidget,
+    );
     expect(intent.state, AccountRole.teacher);
     router.pop();
     await tester.pumpAndSettle();

@@ -48,10 +48,15 @@ class GroupResultRow extends StatelessWidget {
               height: 22,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected ? colors.accent : colors.surface2,
+                color: selected ? colors.accent : colors.surface,
+                border: selected
+                    ? null
+                    : Border.all(color: colors.line, width: 1.5),
                 shape: BoxShape.circle,
               ),
-              child: AppCheckMark(size: 12, color: colors.onAccent),
+              child: selected
+                  ? AppCheckMark(size: 12, color: colors.onAccent)
+                  : null,
             ),
           ],
         ),

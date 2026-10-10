@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/teacher_account/bloc/teacher_picker_bloc.dart';
 import 'package:rtu_mirea_app/teacher_account/widgets/teacher_picker.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
@@ -257,14 +258,26 @@ void main() {
     await tester.pumpWidget(_subject(repository, onSelected: (_) {}));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'И');
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     await tester.enterText(find.byType(TextField), 'Ив');
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     verifyNever(() => repository.searchTeachers(query: 'И'));
     verify(() => repository.searchTeachers(query: 'Ив')).called(1);
     await tester.enterText(find.byType(TextField), 'Петров');
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
+    final bloc = tester
+        .widget<BlocBuilder<TeacherPickerBloc, TeacherPickerState>>(
+          find.byType(BlocBuilder<TeacherPickerBloc, TeacherPickerState>),
+        )
+        .bloc!;
+    expect(bloc.state.query, 'Петров');
+    verify(() => repository.searchTeachers(query: 'Петров')).called(1);
     await tester.pumpAndSettle();
+    expect(old.isCompleted, isFalse);
     expect(
       find.byKey(const ValueKey('teacher-picker-id:petrov')),
       findsOneWidget,

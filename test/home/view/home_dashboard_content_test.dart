@@ -47,7 +47,7 @@ void main() {
     );
     expect(find.byType(TeacherAccountShortcut), findsOneWidget);
     expect(find.text('Иванов Иван Иванович'), findsOneWidget);
-    expect(find.text('Кабинет преподавателя'), findsOneWidget);
+    expect(find.text('Ваш кабинет'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

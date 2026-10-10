@@ -18,6 +18,7 @@ import 'package:rtu_mirea_app/schedule/models/models.dart';
 import 'package:rtu_mirea_app/schedule/view/teacher_profile_page.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:rtu_mirea_app/teacher_account/view/teacher_dashboard_page.dart';
+import 'package:rtu_mirea_app/teacher_account/widgets/dashboard/teacher_dashboard_services_section.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 import '../../gallery/gallery_fonts.dart';
@@ -506,6 +507,93 @@ void main() {
   });
 
   testWidgets(
+    'shared week strip keeps lesson markers and selecting days needs no fetch',
+    (tester) async {
+      await pumpDashboard(tester, size: const Size(390, 844));
+      final stripFinder = find.byType(AppWeekStrip);
+      var strip = tester.widget<AppWeekStrip>(stripFinder);
+      expect(strip.days, hasLength(7));
+      expect(strip.selectedIndex, 3);
+      expect(strip.days[3].isToday, isTrue);
+      expect(strip.days[3].dots, hasLength(1));
+      expect(
+        strip.days[3].semanticsLabel,
+        contains(
+          AppLocalizations.of(
+            tester.element(find.byType(TeacherDashboardPage)),
+          ).scheduleDayLessons(1),
+        ),
+      );
+      expect(strip.days[6].isWeekend, isTrue);
+      expect(strip.days[6].dots, isEmpty);
+      expect(find.text('Сегодня'), findsNothing);
+      final sunday = find.byWidgetPredicate(
+        (widget) => widget is AppDayPill && widget.day.label == '11',
+      );
+      await tester.ensureVisible(sunday);
+      await tester.pumpAndSettle();
+      await tester.tap(sunday);
+      await tester.pumpAndSettle();
+      strip = tester.widget<AppWeekStrip>(stripFinder);
+      expect(strip.selectedIndex, 6);
+      expect(find.text('Занятий в этот день нет'), findsOneWidget);
+      verify(
+        () => schedules.getTeacherSchedule(
+          teacher: teacher.uid!,
+          dateFrom: monday,
+          dateTo: monday.add(const Duration(days: 6)),
+        ),
+      ).called(1);
+      final today = find.text('Сегодня');
+      await tester.ensureVisible(today);
+      await tester.pumpAndSettle();
+      await tester.tap(today);
+      await tester.pumpAndSettle();
+      expect(tester.widget<AppWeekStrip>(stripFinder).selectedIndex, 3);
+      expect(find.text('Занятий в этот день нет'), findsNothing);
+      verifyNever(() => schedule.add(any()));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'teacher tools keep changes and calendar without global shortcuts',
+    (tester) async {
+      var changes = 0;
+      var exports = 0;
+      Future<void> pumpTools({bool busy = false}) => tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: const Locale('ru'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: TeacherDashboardServicesSection(
+              navigationBusy: busy,
+              onOpenChanges: () => changes++,
+              onExport: () => exports++,
+            ),
+          ),
+        ),
+      );
+      await pumpTools();
+      expect(find.text('Свободные аудитории'), findsNothing);
+      expect(find.text('Карта кампуса'), findsNothing);
+      expect(find.text('Конспекты'), findsNothing);
+      await tester.tap(find.text('Изменения в расписании'));
+      await tester.tap(find.text('Экспорт в календарь'));
+      expect(changes, 1);
+      expect(exports, 1);
+      await pumpTools(busy: true);
+      await tester.tap(find.text('Изменения в расписании'));
+      await tester.tap(find.text('Экспорт в календарь'));
+      expect(changes, 1);
+      expect(exports, 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'week navigation fetches the chosen week and discards stale data',
     (
       tester,
@@ -579,7 +667,10 @@ void main() {
     tester,
   ) async {
     when(() => account.state).thenReturn(
-      accountState.copyWith(syncError: true, pendingSync: true),
+      accountState.copyWith(
+        operation: AccountPersonaOperation.failed,
+        pendingEdit: AccountPersonaEdit.roleOnly,
+      ),
     );
     when(() => account.retry()).thenAnswer((_) async {});
     await pumpDashboard(tester);
@@ -688,6 +779,7 @@ void main() {
           find.byType(RefreshIndicator),
         )
         .onRefresh();
+    await tester.pump();
     await tester.pump();
     expect(find.textContaining('Математика'), findsWidgets);
     expect(
@@ -830,8 +922,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     }
-    expect(find.text('Свободные аудитории'), findsOneWidget);
-    expect(find.text('Конспекты'), findsOneWidget);
+    expect(find.text('Экспорт в календарь'), findsOneWidget);
+    expect(find.text('Свободные аудитории'), findsNothing);
+    expect(find.text('Карта кампуса'), findsNothing);
+    expect(find.text('Конспекты'), findsNothing);
   });
 
   for (final dark in [false, true]) {
@@ -863,22 +957,26 @@ void main() {
         expect(
           tester
               .renderObject<RenderParagraph>(
-                find.text('Кабинет преподавателя'),
+                find.text(
+                  AppLocalizations.of(
+                    tester.element(find.byType(TeacherDashboardPage)),
+                  ).teacherCabinetTitle,
+                ),
               )
               .didExceedMaxLines,
           isFalse,
+        );
+        final changeTeacher = find.byKey(
+          const ValueKey('teacher-dashboard-change-teacher'),
         );
         expect(
-          tester
-              .renderObject<RenderParagraph>(
-                find.text('Сменить преподавателя'),
-              )
-              .didExceedMaxLines,
-          isFalse,
+          tester.widget<AppIconButton>(changeTeacher).tooltip,
+          'Сменить преподавателя',
         );
-        final sundayDate = monday.add(const Duration(days: 6));
-        final sunday = find.byKey(
-          ValueKey('teacher-day-${sundayDate.toIso8601String()}'),
+        expect(tester.getSize(changeTeacher).width, greaterThanOrEqualTo(44));
+        expect(tester.getSize(changeTeacher).height, greaterThanOrEqualTo(44));
+        final sunday = find.byWidgetPredicate(
+          (widget) => widget is AppDayPill && widget.day.label == '11',
         );
         await tester.ensureVisible(sunday);
         await tester.pumpAndSettle();
@@ -893,7 +991,8 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
         }
-        expect(find.text('Свободные аудитории'), findsOneWidget);
+        expect(find.text('Экспорт в календарь'), findsOneWidget);
+        expect(find.text('Свободные аудитории'), findsNothing);
       },
     );
 

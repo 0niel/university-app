@@ -29,6 +29,8 @@ class OnboardingTeacherStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return AuthPageLayout(
+      presentation: AppEntryPresentation.staged,
+      contentIdentity: key,
       step: 2,
       totalSteps: totalSteps,
       title: l10n.onboardingTeacherTitle,

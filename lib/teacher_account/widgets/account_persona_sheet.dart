@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:formz/formz.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/teacher_account/bloc/account_persona_form_cubit.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:rtu_mirea_app/teacher_account/widgets/account_role_selector.dart';
 import 'package:rtu_mirea_app/teacher_account/widgets/teacher_picker.dart';
-import 'package:schedule_repository/schedule_repository.dart';
 
 Future<bool?> showAccountPersonaSheet(
   BuildContext context, {
@@ -26,76 +27,49 @@ Future<bool?> showAccountPersonaSheet(
   );
 }
 
-class AccountPersonaSheet extends StatefulWidget {
+class AccountPersonaSheet extends StatelessWidget {
   const AccountPersonaSheet({this.initialRole, super.key});
 
   final AccountRole? initialRole;
 
   @override
-  State<AccountPersonaSheet> createState() => _AccountPersonaSheetState();
+  Widget build(BuildContext context) => BlocProvider(
+    create: (_) => AccountPersonaFormCubit(
+      account: context.read<AccountPersonaCubit>(),
+      initialRole: initialRole,
+    ),
+    child: BlocConsumer<AccountPersonaFormCubit, AccountPersonaFormState>(
+      listenWhen: (previous, current) => previous.status != current.status,
+      listener: (context, state) {
+        if (state.status == FormzSubmissionStatus.success) {
+          Navigator.of(context).pop(true);
+        }
+      },
+      builder: (context, state) => _AccountPersonaForm(state: state),
+    ),
+  );
 }
 
-class _AccountPersonaSheetState extends State<AccountPersonaSheet> {
-  late final AccountPersonaCubit _cubit;
-  late AccountRole _role;
-  Teacher? _teacher;
-  var _saving = false;
-  var _failed = false;
-  var _unlink = false;
-  var _teacherEdited = false;
+class _AccountPersonaForm extends StatelessWidget {
+  const _AccountPersonaForm({required this.state});
 
-  @override
-  void initState() {
-    super.initState();
-    _cubit = context.read<AccountPersonaCubit>();
-    _role = widget.initialRole ?? _cubit.state.persona.role;
-    _teacher = _cubit.state.teacher;
-  }
-
-  Future<void> _save() async {
-    if (_saving || _cubit.isClosed) return;
-    setState(() {
-      _saving = true;
-      _failed = false;
-    });
-    FocusScope.of(context).unfocus();
-    final saved = await _cubit.configure(
-      role: _role,
-      teacher: _teacherEdited ? _teacher : null,
-      clearTeacher: _unlink,
-    );
-    if (!mounted) return;
-    if (saved) {
-      Navigator.of(context).pop(true);
-    } else {
-      setState(() {
-        _saving = false;
-        _failed = true;
-      });
-    }
-  }
+  final AccountPersonaFormState state;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final persona = context.watch<AccountPersonaCubit>().state.persona;
-    final changed = _role != persona.role || _teacherEdited || _unlink;
-    final unavailable =
-        _teacher?.uid == persona.teacherId &&
-        persona.teacherId != null &&
-        !persona.teacherAvailable &&
-        !_teacherEdited;
+    final form = context.read<AccountPersonaFormCubit>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
         AccountRoleSelector(
-          role: _role,
-          onChanged: _saving ? null : (role) => setState(() => _role = role),
+          role: state.role,
+          onChanged: state.busy ? null : form.selectRole,
         ),
-        if (_role == AccountRole.teacher) ...[
+        if (state.role == AccountRole.teacher) ...[
           const SizedBox(height: AppSpacing.sectionGap),
-          if (unavailable) ...[
+          if (state.teacherUnavailable) ...[
             AppBanner(
               message: l10n.teacherUnavailableDescription,
               tone: AppBannerTone.warn,
@@ -103,27 +77,17 @@ class _AccountPersonaSheetState extends State<AccountPersonaSheet> {
             const SizedBox(height: AppSpacing.md),
           ],
           TeacherPicker(
-            selected: _teacher,
-            enabled: !_saving,
-            onSelected: (teacher) => setState(() {
-              _teacher = teacher;
-              _unlink = false;
-              _teacherEdited = true;
-            }),
+            selected: state.teacher,
+            enabled: !state.busy,
+            onSelected: form.selectTeacher,
           ),
-          if (_teacher != null)
+          if (state.teacher != null)
             AppButton.text(
               label: l10n.teacherDisconnect,
-              onPressed: _saving
-                  ? null
-                  : () => setState(() {
-                      _teacher = null;
-                      _unlink = true;
-                      _teacherEdited = false;
-                    }),
+              onPressed: state.busy ? null : form.clearTeacher,
             ),
         ],
-        if (_failed) ...[
+        if (state.failed) ...[
           const SizedBox(height: AppSpacing.md),
           AppBanner(message: l10n.identitySaveError, tone: AppBannerTone.warn),
         ],
@@ -133,8 +97,13 @@ class _AccountPersonaSheetState extends State<AccountPersonaSheet> {
           label: l10n.accountPersonaSave,
           expanded: true,
           size: AppButtonSize.large,
-          loading: _saving,
-          onPressed: _saving || !changed ? null : () => unawaited(_save()),
+          loading: state.busy,
+          onPressed: state.busy || !state.canSubmit
+              ? null
+              : () {
+                  FocusScope.of(context).unfocus();
+                  unawaited(form.save());
+                },
         ),
       ],
     );

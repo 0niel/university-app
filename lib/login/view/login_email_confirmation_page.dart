@@ -22,6 +22,7 @@ class LoginEmailConfirmationPage extends StatelessWidget {
           title: l10n.authCheckEmailTitle,
           titleAccent: l10n.authCheckEmailTitleAccent,
           subtitle: l10n.authCheckEmailSubtitle(email),
+          leading: const AppEntryEmblem(icon: AppLineIcon.message),
           step: 2,
           totalSteps: 2,
           onBack: () => Navigator.of(context).maybePop(),

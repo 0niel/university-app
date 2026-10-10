@@ -38,6 +38,10 @@ void main() {
   });
 
   Future<void> pumpLogin(WidgetTester tester, Exception failure) async {
+    tester.view
+      ..physicalSize = const Size(390, 844)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     when(
       () => userRepository.logInWithPassword(
         email: any(named: 'email'),
@@ -62,6 +66,11 @@ void main() {
       ),
     );
 
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('loginPage_startButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('loginPage_startButton')));
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.descendant(
         of: find.byKey(const Key('loginPage_emailInput')),

@@ -9,29 +9,9 @@ class AuthProgress extends StatelessWidget {
   final int total;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final duration = NinjaMotion.of(context, NinjaMotion.fast);
-    return Semantics(
-      label: context.l10n.onboardingStepSemantics(step, total),
-      child: Row(
-        children: [
-          for (var index = 0; index < total; index++) ...[
-            if (index != 0) const SizedBox(width: 6),
-            Expanded(
-              child: AnimatedContainer(
-                duration: duration,
-                curve: NinjaMotion.enter,
-                height: 3,
-                decoration: BoxDecoration(
-                  color: index < step ? colors.accent : colors.surface2,
-                  borderRadius: BorderRadius.circular(AppRadius.xxs),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => AppStepIndicator(
+    step: step,
+    total: total,
+    semanticsLabel: context.l10n.onboardingStepSemantics(step, total),
+  );
 }

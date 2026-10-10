@@ -10856,7 +10856,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authGuestExitWarning =>
-      'Signing out loses access to this guest account and its progress. App preferences and cached files stay on this device. Link an email first to keep your account.';
+      'Signing out permanently loses access to this guest account. Link an email first to keep your data.';
 
   @override
   String get settingsColorCustom => 'Custom color';
@@ -12455,7 +12455,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Find yourself in the catalog and choose the correct entry.';
 
   @override
-  String get teacherCabinetTitle => 'Teacher dashboard';
+  String get teacherCabinetTitle => 'Your dashboard';
 
   @override
   String get teacherCabinetSubtitle =>
@@ -12572,6 +12572,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your choice is saved on this device. It could not be synced to your account.';
 
   @override
+  String get accountPersonaLoadError =>
+      'Your account mode could not be loaded. Try again.';
+
+  @override
   String get teacherLogin => 'Sign in as a teacher';
 
   @override
@@ -12630,4 +12634,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get teacherPickerSelectionLabel => 'Selected teacher';
+
+  @override
+  String get entryGuestHint => 'Explore the app without an account';
+
+  @override
+  String get entryPreviewLesson => 'Mathematical analysis';
+
+  @override
+  String get entryPreviewProgramming => 'Programming';
+
+  @override
+  String get entryWelcomeAccent => 'pace.';
+
+  @override
+  String get entryWelcomeSubtitle =>
+      'Your schedule, campus and people. Everything for your student day.';
+
+  @override
+  String get entryWelcomeTitle => 'University.\nAt your pace.';
+
+  @override
+  String get onboardingStoryCampusAccent => 'campus.';
+
+  @override
+  String get onboardingStoryCampusLead =>
+      'Find classrooms and free spaces to study between classes.';
+
+  @override
+  String get onboardingStoryCampusTitle => 'Feel at home\non campus.';
+
+  @override
+  String get onboardingStoryCommunityAccent => 'university.';
+
+  @override
+  String get onboardingStoryCommunityLead =>
+      'Stay close to friends, discover communities and share what interests you.';
+
+  @override
+  String get onboardingStoryCommunityTitle => 'Your people.\nYour university.';
+
+  @override
+  String get onboardingStoryScheduleAccent => 'planned out.';
+
+  @override
+  String get onboardingStoryScheduleLead =>
+      'Classes, changes and deadlines at hand. Less searching, more time for you.';
+
+  @override
+  String get onboardingStoryScheduleTitle => 'Your day.\nAll planned out.';
 }

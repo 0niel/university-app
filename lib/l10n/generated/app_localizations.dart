@@ -18893,7 +18893,7 @@ abstract class AppLocalizations {
   /// No description provided for @authGuestExitWarning.
   ///
   /// In en, this message translates to:
-  /// **'Signing out loses access to this guest account and its progress. App preferences and cached files stay on this device. Link an email first to keep your account.'**
+  /// **'Signing out permanently loses access to this guest account. Link an email first to keep your data.'**
   String get authGuestExitWarning;
 
   /// No description provided for @settingsColorCustom.
@@ -21653,7 +21653,7 @@ abstract class AppLocalizations {
   /// No description provided for @teacherCabinetTitle.
   ///
   /// In en, this message translates to:
-  /// **'Teacher dashboard'**
+  /// **'Your dashboard'**
   String get teacherCabinetTitle;
 
   /// No description provided for @teacherCabinetSubtitle.
@@ -21866,6 +21866,12 @@ abstract class AppLocalizations {
   /// **'Your choice is saved on this device. It could not be synced to your account.'**
   String get accountPersonaSyncError;
 
+  /// No description provided for @accountPersonaLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account mode could not be loaded. Try again.'**
+  String get accountPersonaLoadError;
+
   /// No description provided for @teacherLogin.
   ///
   /// In en, this message translates to:
@@ -21973,6 +21979,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Selected teacher'**
   String get teacherPickerSelectionLabel;
+
+  /// No description provided for @entryGuestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore the app without an account'**
+  String get entryGuestHint;
+
+  /// No description provided for @entryPreviewLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Mathematical analysis'**
+  String get entryPreviewLesson;
+
+  /// No description provided for @entryPreviewProgramming.
+  ///
+  /// In en, this message translates to:
+  /// **'Programming'**
+  String get entryPreviewProgramming;
+
+  /// No description provided for @entryWelcomeAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'pace.'**
+  String get entryWelcomeAccent;
+
+  /// No description provided for @entryWelcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your schedule, campus and people. Everything for your student day.'**
+  String get entryWelcomeSubtitle;
+
+  /// No description provided for @entryWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'University.\nAt your pace.'**
+  String get entryWelcomeTitle;
+
+  /// No description provided for @onboardingStoryCampusAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'campus.'**
+  String get onboardingStoryCampusAccent;
+
+  /// No description provided for @onboardingStoryCampusLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Find classrooms and free spaces to study between classes.'**
+  String get onboardingStoryCampusLead;
+
+  /// No description provided for @onboardingStoryCampusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Feel at home\non campus.'**
+  String get onboardingStoryCampusTitle;
+
+  /// No description provided for @onboardingStoryCommunityAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'university.'**
+  String get onboardingStoryCommunityAccent;
+
+  /// No description provided for @onboardingStoryCommunityLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay close to friends, discover communities and share what interests you.'**
+  String get onboardingStoryCommunityLead;
+
+  /// No description provided for @onboardingStoryCommunityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your people.\nYour university.'**
+  String get onboardingStoryCommunityTitle;
+
+  /// No description provided for @onboardingStoryScheduleAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'planned out.'**
+  String get onboardingStoryScheduleAccent;
+
+  /// No description provided for @onboardingStoryScheduleLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes, changes and deadlines at hand. Less searching, more time for you.'**
+  String get onboardingStoryScheduleLead;
+
+  /// No description provided for @onboardingStoryScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your day.\nAll planned out.'**
+  String get onboardingStoryScheduleTitle;
 }
 
 class _AppLocalizationsDelegate
