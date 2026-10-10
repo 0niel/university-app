@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:rtu_mirea_app/friends/services/friends_location_background.dart';
 
 enum FriendsLocationStatus {
   stopped,
@@ -21,10 +22,13 @@ class FriendsLocationService with WidgetsBindingObserver {
     GeolocatorPlatform? geolocator,
     TargetPlatform? platform,
     bool? isWeb,
+    Future<void> Function({required bool enabled})? onBackgroundSharingChanged,
     this.heartbeatInterval = const Duration(seconds: 90),
   }) : _geolocator = geolocator ?? GeolocatorPlatform.instance,
        _platform = platform ?? defaultTargetPlatform,
-       _isWeb = isWeb ?? kIsWeb {
+       _isWeb = isWeb ?? kIsWeb,
+       _onBackgroundSharingChanged =
+           onBackgroundSharingChanged ?? FriendsLocationBackground.setEnabled {
     final lifecycle = WidgetsBinding.instance.lifecycleState;
     _foreground =
         lifecycle == null || lifecycle == .resumed || lifecycle == .inactive;
@@ -34,6 +38,8 @@ class FriendsLocationService with WidgetsBindingObserver {
   final GeolocatorPlatform _geolocator;
   final TargetPlatform _platform;
   final bool _isWeb;
+  final Future<void> Function({required bool enabled})
+  _onBackgroundSharingChanged;
   final Duration heartbeatInterval;
   final _positions = StreamController<Position>.broadcast();
   final _statuses = StreamController<FriendsLocationStatus>.broadcast();
@@ -50,11 +56,13 @@ class FriendsLocationService with WidgetsBindingObserver {
   var _disposed = false;
   var _foreground = true;
   DateTime? _lastPositionAt;
+  Future<void> _backgroundSharingUpdate = Future<void>.value();
 
   Stream<Position> get positions => _positions.stream;
   Stream<FriendsLocationStatus> get statuses => _statuses.stream;
   FriendsLocationStatus get status => _status;
-  bool get supportsBackground => !_isWeb && _platform == .android;
+  bool get supportsBackground =>
+      !_isWeb && (_platform == .android || _platform == .iOS);
 
   Future<void> start({
     required bool backgroundEnabled,
@@ -83,26 +91,35 @@ class FriendsLocationService with WidgetsBindingObserver {
     _positionSubscription = null;
     await previousSubscription?.cancel();
     if (!_isCurrent(generation)) return;
-    if (!_foreground) return;
-    _setStatus(.locating);
     try {
+      await _syncBackgroundSharing();
+      if (!_isCurrent(generation)) return;
+      if (!_foreground) {
+        _setStatus(.stopped);
+        return;
+      }
+      _setStatus(.locating);
       if (!_isWeb && !await _geolocator.isLocationServiceEnabled()) {
         if (!_isCurrent(generation)) return;
         _setStatus(.serviceDisabled);
         _watchService();
-        if (openServiceSettings) await _geolocator.openLocationSettings();
+        if (openServiceSettings && _foreground) {
+          await _geolocator.openLocationSettings();
+        }
         return;
       }
       if (!_isCurrent(generation)) return;
       var permission = await _geolocator.checkPermission();
       if (!_isCurrent(generation)) return;
-      if (permission == .denied && requestPermission) {
+      if (permission == .denied && requestPermission && _foreground) {
         permission = await _geolocator.requestPermission();
       }
       if (!_isCurrent(generation)) return;
       if (permission == .deniedForever) {
         _setStatus(.permissionDeniedForever);
-        if (openPermissionSettings) await _geolocator.openAppSettings();
+        if (openPermissionSettings && _foreground) {
+          await _geolocator.openAppSettings();
+        }
         return;
       }
       if (permission == .denied) {
@@ -113,7 +130,10 @@ class FriendsLocationService with WidgetsBindingObserver {
         _setStatus(.unavailable);
         return;
       }
-      if (!_foreground) return;
+      if (!_foreground) {
+        _setStatus(.stopped);
+        return;
+      }
       _watchService();
       _positionSubscription = _geolocator
           .getPositionStream(
@@ -139,6 +159,8 @@ class FriendsLocationService with WidgetsBindingObserver {
             },
             cancelOnError: true,
           );
+      await _syncBackgroundSharing();
+      if (!_isCurrent(generation)) return;
       if (_sharingEnabled &&
           (_isWeb || (_platform != .iOS && _platform != .macOS))) {
         _heartbeatTimer = Timer.periodic(heartbeatInterval, (_) {
@@ -153,6 +175,25 @@ class FriendsLocationService with WidgetsBindingObserver {
   bool _isCurrent(int generation) =>
       !_disposed && _enabled && generation == _generation;
 
+  Future<void> _syncBackgroundSharing() {
+    if (_isWeb || _platform != .android) return Future<void>.value();
+    Future<void> update() => _onBackgroundSharingChanged(
+      enabled:
+          !_disposed &&
+          _enabled &&
+          _backgroundEnabled &&
+          _positionSubscription != null,
+    );
+    return _backgroundSharingUpdate = _backgroundSharingUpdate.then(
+      (_) => update(),
+      onError: (Object _, StackTrace _) => update(),
+    );
+  }
+
+  void _releaseBackgroundSharing() {
+    unawaited(_syncBackgroundSharing().catchError((Object _) {}));
+  }
+
   void _emitPosition(Position position) {
     if (!_isUsablePosition(position)) return;
     _lastPositionAt = position.timestamp;
@@ -162,9 +203,7 @@ class FriendsLocationService with WidgetsBindingObserver {
 
   Future<void> _refreshPosition(int generation) async {
     if (!_isCurrent(generation) || _heartbeatBusy) return;
-    if (!_foreground && (_isWeb || supportsBackground && !_backgroundEnabled)) {
-      return;
-    }
+    if (!_foreground && !_backgroundEnabled) return;
     _heartbeatBusy = true;
     try {
       final position = await _geolocator
@@ -215,6 +254,7 @@ class FriendsLocationService with WidgetsBindingObserver {
             _heartbeatTimer?.cancel();
             unawaited(_positionSubscription?.cancel());
             _positionSubscription = null;
+            _releaseBackgroundSharing();
             _setStatus(.serviceDisabled);
           } else if (_foreground) {
             unawaited(
@@ -237,6 +277,7 @@ class FriendsLocationService with WidgetsBindingObserver {
     _heartbeatTimer?.cancel();
     unawaited(_positionSubscription?.cancel());
     _positionSubscription = null;
+    _releaseBackgroundSharing();
     if (error is PermissionDeniedException) {
       _setStatus(.permissionDenied);
     } else if (error is LocationServiceDisabledException) {
@@ -272,7 +313,7 @@ class FriendsLocationService with WidgetsBindingObserver {
     if (_disposed) return;
     if (state == .resumed) {
       _foreground = true;
-      if (_enabled && _status != .active) {
+      if (_enabled && _positionSubscription == null) {
         unawaited(
           start(
             backgroundEnabled: _sharingEnabled,
@@ -283,13 +324,12 @@ class FriendsLocationService with WidgetsBindingObserver {
     } else if (state == .paused || state == .hidden || state == .detached) {
       _foreground = false;
       _retryTimer?.cancel();
-      if (_isWeb ||
-          _platform == .iOS ||
-          (!_backgroundEnabled && supportsBackground)) {
+      if (!_backgroundEnabled) {
         ++_generation;
         _heartbeatTimer?.cancel();
         unawaited(_positionSubscription?.cancel());
         _positionSubscription = null;
+        _releaseBackgroundSharing();
         _setStatus(.stopped);
       }
     }
@@ -307,6 +347,7 @@ class FriendsLocationService with WidgetsBindingObserver {
     _serviceSubscription = null;
     await positionSubscription?.cancel();
     await serviceCancellation;
+    await _syncBackgroundSharing();
     if (generation == _generation) _setStatus(.stopped);
   }
 
@@ -349,7 +390,8 @@ LocationSettings friendsMapLocationSettings(
     .iOS || .macOS => AppleSettings(
       accuracy: .high,
       activityType: .otherNavigation,
-      allowBackgroundLocationUpdates: false,
+      allowBackgroundLocationUpdates: platform == .iOS && backgroundEnabled,
+      showBackgroundLocationIndicator: platform == .iOS && backgroundEnabled,
     ),
     .fuchsia || .linux || .windows => const LocationSettings(
       accuracy: .high,

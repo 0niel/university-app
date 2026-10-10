@@ -31,10 +31,20 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
        _fusion = fusionFilter ?? GeoFusionFilter(),
        _locationService = locationService ?? FriendsLocationService(),
        _ownerId = _repository.currentUserId,
-       super(const FriendsMapState());
+       super(const FriendsMapState()) {
+    _userIdSubscription = _repository.userIdChanges.listen(
+      _onUserIdChanged,
+      onError: (Object error, StackTrace stackTrace) {
+        if (!isClosed && !_isClosing) addError(error, stackTrace);
+      },
+    );
+  }
 
   final String? _ownerId;
-  bool get _sessionEnded => _repository.currentUserId != _ownerId;
+  bool _ownerSessionEnded = false;
+  bool get _sessionEnded =>
+      _ownerSessionEnded || _repository.currentUserId != _ownerId;
+  late final StreamSubscription<String?> _userIdSubscription;
   final FriendsLocationService _locationService;
   final FriendsRepository _repository;
   final PreferencesRepository? _preferences;
@@ -58,6 +68,20 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
   bool _publishInProgress = false;
   Completer<void>? _pendingPublish;
   bool _friendsRefreshing = false;
+
+  void _onUserIdChanged(String? userId) {
+    if (isClosed || _isClosing || _ownerSessionEnded || userId == _ownerId) {
+      return;
+    }
+    _ownerSessionEnded = true;
+    _wifiTimer?.cancel();
+    _studentsTimer?.cancel();
+    unawaited(
+      _locationService.stop().catchError((Object error, StackTrace stackTrace) {
+        if (!isClosed && !_isClosing) addError(error, stackTrace);
+      }),
+    );
+  }
 
   Future<void> initialize() =>
       _initialization ??= _enqueuePrivacyOperation(_initialize);
@@ -798,6 +822,7 @@ class FriendsMapCubit extends Cubit<FriendsMapState> {
     _wifiTimer?.cancel();
     _studentsTimer?.cancel();
     final closed = super.close();
+    await _userIdSubscription.cancel();
     await _locationStatusSub?.cancel();
     await _locationsSub?.cancel();
     await _positionSub?.cancel();

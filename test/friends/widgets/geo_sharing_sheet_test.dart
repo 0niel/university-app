@@ -14,7 +14,7 @@ void main() {
   setUpAll(() => registerFallbackValue(const GeoSharingSettings()));
 
   testWidgets(
-    'iOS explains that sharing only updates in the foreground',
+    'iOS explains background sharing and the force-close limitation',
     (
       tester,
     ) async {
@@ -23,6 +23,7 @@ void main() {
       when(() => cubit.state).thenReturn(
         const FriendsMapState(
           locationStatus: FriendsLocationStatus.active,
+          backgroundLocationActive: true,
           geoSettings: GeoSharingSettings(sharing: true),
         ),
       );
@@ -30,11 +31,11 @@ void main() {
       await tester.pumpWidget(_app(cubit));
 
       expect(
-        find.textContaining('пока приложение открыто и активно'),
+        find.textContaining('при сворачивании приложения и блокировке экрана'),
         findsOneWidget,
       );
-      expect(find.textContaining('для фонового обновления'), findsNothing);
-      expect(find.text('Фоновое обновление включено'), findsNothing);
+      expect(find.textContaining('смахнуть приложение'), findsOneWidget);
+      expect(find.text('Фоновое обновление включено'), findsOneWidget);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );

@@ -149,6 +149,7 @@ void main() {
     preferences = _Preferences();
     when(() => preferences.get(any())).thenAnswer((_) async => null);
     friends = _Friends();
+    when(() => friends.userIdChanges).thenAnswer((_) => const Stream.empty());
     promos = _Promos();
     when(
       () => promos.getDismissals(userId: any(named: 'userId')),

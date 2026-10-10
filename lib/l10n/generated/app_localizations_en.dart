@@ -12292,7 +12292,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get friendsBackgroundMobileSub =>
-      'On phones, background updates require location permission and may be limited by battery saving. Force-closing the app or restarting the device can stop sharing; open the app to resume.';
+      'While sharing is enabled, your location keeps updating after you close the app. An ongoing notification shows that sharing is active. Force-stopping in phone settings, restarting the phone or battery saving may interrupt sharing; open the app to resume.';
+
+  @override
+  String get friendsBackgroundIosSub =>
+      'While sharing is enabled, your location keeps updating with the app minimized or the screen locked. iPhone shows the system location indicator. Swiping the app away from recent apps stops sharing; open it to resume.';
 
   @override
   String get friendsBackgroundForegroundSub =>

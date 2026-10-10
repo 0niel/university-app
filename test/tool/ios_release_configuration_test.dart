@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:xml/xml.dart';
 
 void main() {
-  test('iOS location sharing requires only foreground authorization', () {
+  test('iOS background sharing uses when-in-use authorization', () {
     final plist = XmlDocument.parse(
       File('ios/Runner/Info.plist').readAsStringSync(),
     );
@@ -13,7 +13,7 @@ void main() {
       root,
       'UIBackgroundModes',
     ).findElements('string').map((mode) => mode.innerText);
-    expect(backgroundModes, isNot(contains('location')));
+    expect(backgroundModes, contains('location'));
     expect(backgroundModes, contains('remote-notification'));
     expect(
       plistValue(root, 'NSLocationWhenInUseUsageDescription').innerText,

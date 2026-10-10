@@ -24,7 +24,7 @@ class IosArtifactCheckTest(unittest.TestCase):
             'CFBundleIdentifier': 'pro.oniel.it.university',
             'CFBundleShortVersionString': '5.2.1',
             'CFBundleVersion': '2443.18.9',
-            'UIBackgroundModes': ['fetch', 'remote-notification'],
+            'UIBackgroundModes': ['fetch', 'location', 'remote-notification'],
             'NSLocationWhenInUseUsageDescription': 'Show your position on the map.',
         }
 
@@ -48,7 +48,7 @@ class IosArtifactCheckTest(unittest.TestCase):
             'bundle_id': 'pro.oniel.it.university',
             'marketing_version': '5.2.1',
             'build_number': '2443.18.9',
-            'background_modes': ['fetch', 'remote-notification'],
+            'background_modes': ['fetch', 'location', 'remote-notification'],
             'metadata_plists_checked': 2,
         })
 
@@ -57,17 +57,17 @@ class IosArtifactCheckTest(unittest.TestCase):
         result = self.module.verify_ipa(self.root, 'pro.oniel.it.university')
         self.assertEqual(result['build_number'], '2443.18.9')
 
-    def test_main_location_mode_rejected(self):
-        self.metadata['UIBackgroundModes'].append('location')
+    def test_missing_main_location_mode_rejected(self):
+        self.metadata['UIBackgroundModes'].remove('location')
         self.write_ipa()
-        with self.assertRaisesRegex(ValueError, 'Persistent background location'):
+        with self.assertRaisesRegex(ValueError, 'Background location mode is required'):
             self.check()
 
     def test_embedded_bundle_location_mode_rejected(self):
         for embedded in ('PlugIns/Widget.appex', 'Frameworks/Dependency.framework', 'Watch/Watch.app'):
             with self.subTest(embedded=embedded):
                 self.write_ipa({f'Payload/University.app/{embedded}/Info.plist': {'UIBackgroundModes': ['location']}})
-                with self.assertRaisesRegex(ValueError, 'Persistent background location'):
+                with self.assertRaisesRegex(ValueError, 'only permitted in the main application'):
                     self.check()
 
     def test_always_usage_keys_rejected_in_main_and_embedded_bundle(self):
@@ -82,14 +82,14 @@ class IosArtifactCheckTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'Always location'):
                     self.check()
 
-    def test_missing_or_empty_foreground_purpose_rejected(self):
+    def test_missing_or_empty_when_in_use_purpose_rejected(self):
         for value in ('', '  ', 1, None):
             with self.subTest(value=value):
                 self.metadata.pop('NSLocationWhenInUseUsageDescription', None)
                 if value is not None:
                     self.metadata['NSLocationWhenInUseUsageDescription'] = value
                 self.write_ipa()
-                with self.assertRaisesRegex(ValueError, 'Foreground location'):
+                with self.assertRaisesRegex(ValueError, 'When-in-use location'):
                     self.check()
 
     def test_wrong_bundle_id_rejected(self):
@@ -122,10 +122,11 @@ class IosArtifactCheckTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'array of strings'):
                     self.check()
 
-    def test_no_background_modes_allowed(self):
+    def test_no_background_modes_rejected(self):
         del self.metadata['UIBackgroundModes']
         self.write_ipa()
-        self.assertEqual(self.check()['background_modes'], [])
+        with self.assertRaisesRegex(ValueError, 'Background location mode is required'):
+            self.check()
 
     def test_multiple_or_missing_application_bundles_rejected(self):
         self.write_ipa({'Payload/Other.app/Info.plist': self.metadata})

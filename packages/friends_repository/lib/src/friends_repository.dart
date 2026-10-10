@@ -25,6 +25,10 @@ class FriendsRepository {
 
   String? get currentUserId => _supabase.auth.currentUser?.id;
 
+  Stream<String?> get userIdChanges => _supabase.auth.onAuthStateChange
+      .map((state) => state.session?.user.id)
+      .distinct();
+
   void close() {
     if (_ownsNetworkLocation) _networkLocation.close();
   }
