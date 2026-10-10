@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -25,6 +26,29 @@ class _Cache implements MapDataCache {
 
   @override
   Future<void> write(String key, String value) async => entries[key] = value;
+}
+
+class _ReadCountingNodes extends ListBase<Object?> {
+  _ReadCountingNodes(this._nodes);
+
+  final List<Object?> _nodes;
+  int reads = 0;
+
+  @override
+  int get length => _nodes.length;
+
+  @override
+  set length(int value) => throw UnsupportedError('Immutable nodes');
+
+  @override
+  Object? operator [](int index) {
+    reads++;
+    return _nodes[index];
+  }
+
+  @override
+  void operator []=(int index, Object? value) =>
+      throw UnsupportedError('Immutable nodes');
 }
 
 const _svg = '<svg viewBox="0 0 100 100"><rect width="30" height="30"/></svg>';
@@ -163,6 +187,9 @@ void main() {
       expect(campus.origin, MapDataOrigin.bundled);
       expect(campus.revision, 2);
       expect(repository.isCampusCacheFresh('v-78'), isTrue);
+      expect(repository.isCampusRevisionCurrent(campus, 17), isTrue);
+      expect(repository.isCampusRevisionCurrent(campus, 2), isFalse);
+      expect(repository.isCampusRevisionCurrent(campus, 18), isFalse);
       final assetReads = assets.length;
       expect(await repository.loadCachedCampus('v-78'), same(campus));
       expect(await repository.loadCampus('v-78'), same(campus));
@@ -176,6 +203,8 @@ void main() {
       expect(restored?.origin, MapDataOrigin.cache);
       expect(restored?.revision, 2);
       expect(reopened.isCampusCacheFresh('v-78'), isTrue);
+      expect(reopened.isCampusRevisionCurrent(restored!, 17), isTrue);
+      expect(reopened.isCampusRevisionCurrent(restored, 2), isFalse);
       expect(calls, 2);
       expect(assets, hasLength(assetReads + 1));
       expect(await reopened.loadCampus('v-78'), same(restored));
@@ -185,7 +214,7 @@ void main() {
       expect(reopened.isCampusCacheFresh('v-78'), isFalse);
       final refreshed = await reopened.refreshCampus('v-78');
       expect(refreshed.revision, 2);
-      expect(reopened.sameCampusContent(refreshed, restored!), isTrue);
+      expect(reopened.sameCampusContent(refreshed, restored), isTrue);
       expect(reopened.isCampusCacheFresh('v-78'), isTrue);
       expect(calls, 3);
 
@@ -195,9 +224,106 @@ void main() {
       expect(reopened.isCampusCacheFresh('v-78'), isFalse);
       expect((await reopened.loadCampus('v-78')).revision, 2);
       expect(reopened.isCampusCacheFresh('v-78'), isTrue);
+      expect(reopened.isCampusRevisionCurrent(restored, 18), isTrue);
+      expect(reopened.isCampusRevisionCurrent(restored, 17), isFalse);
       expect(calls, 5);
     },
   );
+
+  test('bundled revision needs verification against publication', () async {
+    final repository = MapDataRepository(
+      organizationId: 'mirea',
+      cache: _Cache(),
+      bundledCatalogAsset: 'catalog.json',
+      rpc: (_, _) async => _campus(),
+      assetLoader: (asset) async => jsonEncode(
+        asset == 'catalog.json' ? _catalog() : _campus(),
+      ),
+    );
+    addTearDown(repository.dispose);
+    final bundled = (await repository.loadCachedCampus('v-78'))!;
+    expect(bundled.origin, MapDataOrigin.bundled);
+    expect(repository.isCampusRevisionCurrent(bundled, 2), isFalse);
+
+    final published = await repository.refreshCampus('v-78');
+    expect(published.origin, MapDataOrigin.remote);
+    expect(repository.sameCampusContent(bundled, published), isTrue);
+    expect(repository.isCampusRevisionCurrent(bundled, 2), isTrue);
+    expect(repository.isCampusRevisionCurrent(bundled, 3), isFalse);
+  });
+
+  test('changed contents cannot validate a retained campus snapshot', () async {
+    var document = _campus();
+    final repository = MapDataRepository(
+      organizationId: 'mirea',
+      cache: _Cache(),
+      rpc: (_, _) async => document,
+    );
+    addTearDown(repository.dispose);
+    final displayed = await repository.loadCampus('v-78');
+    expect(repository.isCampusRevisionCurrent(displayed, 2), isTrue);
+    document = _campus(svg: _svg.replaceFirst('width="30"', 'width="40"'));
+    final updated = await repository.refreshCampus('v-78');
+
+    expect(repository.sameCampusContent(displayed, updated), isFalse);
+    expect(repository.isCampusRevisionCurrent(displayed, 2), isFalse);
+    expect(repository.isCampusRevisionCurrent(updated, 2), isTrue);
+  });
+
+  test('published disk snapshot retains its exact revision', () async {
+    final cache = _Cache();
+    final repository = MapDataRepository(
+      organizationId: 'mirea',
+      cache: cache,
+      rpc: (_, _) async => _campus(),
+    );
+    addTearDown(repository.dispose);
+    await repository.loadCampus('v-78');
+    final reopened = MapDataRepository(
+      organizationId: 'mirea',
+      cache: cache,
+      rpc: (_, _) async => fail('Cached startup must not start an RPC'),
+    );
+    addTearDown(reopened.dispose);
+    final restored = (await reopened.loadCachedCampus('v-78'))!;
+
+    expect(restored.origin, MapDataOrigin.cache);
+    expect(reopened.isCampusRevisionCurrent(restored, 2), isTrue);
+    expect(reopened.isCampusRevisionCurrent(restored, 1), isFalse);
+    expect(reopened.isCampusRevisionCurrent(restored, 3), isFalse);
+  });
+
+  test('repeated snapshot checks avoid traversing the same graph', () async {
+    final graphs = <_ReadCountingNodes>[];
+    final repository = MapDataRepository(
+      organizationId: 'mirea',
+      cache: _Cache(),
+      rpc: (_, _) async {
+        final nodes = _ReadCountingNodes([
+          {'id': 'node', 'x': 15, 'y': 15},
+        ]);
+        graphs.add(nodes);
+        return {
+          ..._campus(),
+          'graph': {'nodes': nodes, 'edges': <Object?>[]},
+        };
+      },
+    );
+    addTearDown(repository.dispose);
+    final displayed = await repository.loadCampus('v-78');
+    final refreshed = await repository.refreshCampus('v-78');
+    int graphReads() => graphs.fold(0, (total, nodes) => total + nodes.reads);
+    final beforeComparison = graphReads();
+
+    expect(repository.sameCampusContent(refreshed, displayed), isTrue);
+    final afterComparison = graphReads();
+    expect(afterComparison, greaterThan(beforeComparison));
+    for (var build = 0; build < 20; build++) {
+      expect(repository.isCampusRevisionCurrent(displayed, 2), isTrue);
+      expect(repository.sameCampusContent(displayed, refreshed), isTrue);
+    }
+    expect(graphReads(), afterComparison);
+  });
 
   test(
     'concurrent disk loads share parsing without decoding a duplicate bundle',

@@ -373,46 +373,57 @@ class _MapViewState extends State<MapView> {
     unawaited(
       showAppSheet<void>(
         context,
-        child: MapPlaceDetailsSheet(
-          repository: repository,
-          campus: campus,
-          room: place,
-          onClose: () => Navigator.of(context, rootNavigator: true).pop(),
-          onRefreshMap: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            setState(() {
-              _route = null;
-              _discardNavigationFocus();
-              _routeStartRoomId = null;
-              _routeSnapshot = null;
-            });
-            _pendingRoom = null;
-            _pendingPlaceId = place.id;
-            bloc.add(const MapEvent.refreshRequested());
-          },
-          onEditLocation: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            unawaited(
-              Navigator.of(context, rootNavigator: true).push<bool>(
-                MaterialPageRoute(
-                  builder: (_) => MapPlaceEditorPage(
-                    campus: campus,
-                    repository: repository,
-                    room: place,
-                    initialFloorId: place.floorId,
-                  ),
-                ),
-              ),
+        child: BlocBuilder<MapBloc, MapState>(
+          bloc: bloc,
+          builder: (context, state) {
+            final currentCampus = state.campusData;
+            final sameCampus = currentCampus?.campus.id == campus.campus.id;
+            final snapshot = sameCampus ? currentCampus! : campus;
+            final currentPlace = snapshot.placeForId(place.id);
+            final available =
+                sameCampus &&
+                currentPlace != null &&
+                state.status == MapStatus.loaded;
+            return MapPlaceDetailsSheet(
+              repository: repository,
+              campus: snapshot,
+              room: currentPlace ?? place,
+              isRefreshing: state.status == MapStatus.loading,
+              onClose: () => Navigator.of(context, rootNavigator: true).pop(),
+              onRefreshMap: sameCampus
+                  ? () => bloc.add(const MapEvent.refreshRequested())
+                  : null,
+              onEditLocation: !available
+                  ? null
+                  : () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      unawaited(
+                        Navigator.of(context, rootNavigator: true).push<bool>(
+                          MaterialPageRoute(
+                            builder: (_) => MapPlaceEditorPage(
+                              campus: snapshot,
+                              repository: repository,
+                              room: currentPlace,
+                              initialFloorId: currentPlace.floorId,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+              onRouteFrom: !available
+                  ? null
+                  : () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      setState(() => _routeStartRoomId = currentPlace.id);
+                      _planRoute();
+                    },
+              onRouteTo: !available
+                  ? null
+                  : () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      _planRoute(destinationRoomId: currentPlace.id);
+                    },
             );
-          },
-          onRouteFrom: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            setState(() => _routeStartRoomId = place.id);
-            _planRoute();
-          },
-          onRouteTo: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            _planRoute(destinationRoomId: place.id);
           },
         ),
       ),

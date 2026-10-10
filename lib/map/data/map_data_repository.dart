@@ -121,6 +121,7 @@ class MapDataRepository {
   final _offlineSvg = <String>{};
   final _campuses = <String, CampusMapData>{};
   final _campusContent = Expando<Map<String, Object?>>();
+  final _campusContentComparisons = Expando<Expando<bool>>();
   final _acknowledgedCampusRevisions = Expando<int>();
   final _campusGenerations = <String, int>{};
   final _pendingCampuses = <String, Future<CampusMapData>>{};
@@ -137,6 +138,16 @@ class MapDataRepository {
       _isCacheFresh('$organizationId:campus:$campusId') &&
       _satisfiesCatalog(campusId, _campuses[campusId]);
 
+  bool isCampusRevisionCurrent(CampusMapData campus, int revision) {
+    final current = _campuses[campus.campus.id];
+    if (current != null && !sameCampusContent(campus, current)) return false;
+    final snapshot = current ?? campus;
+    final acknowledged = _acknowledgedCampusRevisions[snapshot];
+    if (acknowledged != null) return acknowledged == revision;
+    return snapshot.origin != MapDataOrigin.bundled &&
+        snapshot.revision == revision;
+  }
+
   bool _satisfiesCatalog(String campusId, CampusMapData? data) {
     if (data == null) return false;
     final revision = _catalogRevisions[campusId] ?? 0;
@@ -148,9 +159,13 @@ class MapDataRepository {
     if (identical(a, b)) return true;
     final before = _campusContent[a];
     final after = _campusContent[b];
-    return before != null &&
-        after != null &&
-        const DeepCollectionEquality().equals(before, after);
+    if (before == null || after == null) return false;
+    final previous =
+        _campusContentComparisons[a]?[b] ?? _campusContentComparisons[b]?[a];
+    if (previous != null) return previous;
+    final same = const DeepCollectionEquality().equals(before, after);
+    (_campusContentComparisons[a] ??= Expando<bool>())[b] = same;
+    return same;
   }
 
   bool _isCacheFresh(String key) {
