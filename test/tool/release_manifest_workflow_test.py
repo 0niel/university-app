@@ -159,8 +159,8 @@ class IosReleaseArtifactCollectionTest(unittest.TestCase):
             "CFBundleIdentifier": "pro.oniel.it.university",
             "CFBundleShortVersionString": "5.2.1",
             "CFBundleVersion": "2440.17.53",
-            "NSLocationWhenInUseUsageDescription": "Show your location while the app is open.",
-            "UIBackgroundModes": ["fetch", "remote-notification"],
+            "NSLocationWhenInUseUsageDescription": "Share your location in the background when enabled.",
+            "UIBackgroundModes": ["fetch", "location", "remote-notification"],
         }
         self.write_ipa()
 
@@ -199,8 +199,8 @@ class IosReleaseArtifactCollectionTest(unittest.TestCase):
         self.assertNotEqual(self.collect().returncode, 0)
         self.assertFalse((self.root / "outputs").exists())
 
-    def test_rejects_background_location_before_collecting_artifacts(self):
-        self.metadata["UIBackgroundModes"].append("location")
+    def test_rejects_missing_background_location_before_collecting_artifacts(self):
+        self.metadata["UIBackgroundModes"].remove("location")
         self.write_ipa()
         self.assertNotEqual(self.collect().returncode, 0)
         self.assertFalse((self.root / "outputs").exists())
