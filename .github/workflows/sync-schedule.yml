@@ -18,7 +18,9 @@ jobs:
       vars.SCHEDULE_INGEST_URL != '' &&
       vars.SCHEDULE_ORGANIZATION_ID == 'mirea'
     runs-on: windows-latest
-    timeout-minutes: 45
+    # A steady-state run takes ~8 min, but a catch-up after days of relay
+    # downtime re-ingests every target and needs well over 45 min.
+    timeout-minutes: 120
 
     steps:
       - name: Check out repository
