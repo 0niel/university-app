@@ -79,6 +79,18 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
         MODULE.materialize(self.root, self.output, entries, receipt)
         return entries, receipt
 
+    def gitlink_baseline(self, path="admin"):
+        identity = "1" * 40
+        self.write(".gitmodules", f'[submodule "admin"]\n\tpath = {path}\n\turl = https://example.invalid/admin.git\n'.encode())
+        (self.root / path).mkdir(parents=True)
+        self.git("add", ".gitmodules")
+        self.git("update-index", "--add", "--cacheinfo", "160000", identity, path)
+        self.git("commit", "-qm", "Gitlink baseline")
+        self.baseline = self.git("rev-parse", "HEAD")
+        self.write("lib/main.dart", b"void main() { print('gitlink baseline'); }\n")
+        self.source = self.commit()
+        return identity
+
     def test_future_arbitrary_release_projects_without_version_or_sha_pins(self):
         entries, receipt = self.materialize()
         self.assertEqual((self.output / "lib/main.dart").read_bytes(), b"void main() { print('new'); }\n")
@@ -259,7 +271,7 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
                 self.git("update-index", "--add", "--cacheinfo", mode, identity, path)
                 self.git("commit", "-qm", "Special file")
                 self.source = self.git("rev-parse", "HEAD")
-                with self.assertRaisesRegex(ValueError, "Symlinks, gitlinks"):
+                with self.assertRaisesRegex(ValueError, "Symlinks" if mode == "120000" else "Gitlink changes"):
                     self.project()
 
     def test_unchanged_baseline_symlink_is_also_rejected(self):
@@ -268,8 +280,88 @@ class PrepareShorebirdPatchTest(unittest.TestCase):
         self.git("commit", "-qm", "Link baseline")
         self.baseline = self.git("rev-parse", "HEAD")
         self.source = self.baseline
-        with self.assertRaisesRegex(ValueError, "Symlinks, gitlinks"):
+        with self.assertRaisesRegex(ValueError, "Symlinks"):
             self.project()
+
+    def test_unchanged_gitlink_is_preserved_without_hydrating_submodule_content(self):
+        identity = self.gitlink_baseline()
+        self.write("admin/local-only.txt", b"keep local content\n")
+        with patch.dict(os.environ, {
+            "GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "submodule.recurse", "GIT_CONFIG_VALUE_0": "true",
+        }):
+            entries, receipt = self.materialize()
+            MODULE.verify_worktree(self.output, entries, receipt)
+        self.assertEqual(entries["admin"], f"160000 commit {identity}")
+        self.assertEqual(MODULE.git(self.output, "ls-files", "--stage", "admin").decode().strip(),
+                         f"160000 {identity} 0\tadmin")
+        self.assertEqual(receipt["runtime_paths"], ["lib/main.dart"])
+        self.assertEqual(list((self.output / "admin").iterdir()), [])
+        self.assertEqual((self.root / "admin/local-only.txt").read_bytes(), b"keep local content\n")
+        (self.output / "admin").rmdir()
+        MODULE.verify_worktree(self.output, entries, receipt)
+
+    def test_changed_removed_and_replaced_gitlinks_are_rejected_before_materialization(self):
+        self.gitlink_baseline("docs/admin")
+        source = self.source
+        blob = self.git("hash-object", "-w", "--stdin", input=b"replacement\n")
+        for change in ("changed", "removed", "replaced"):
+            with self.subTest(change=change):
+                self.git("reset", "--hard", source)
+                if change == "removed":
+                    self.git("update-index", "--force-remove", "docs/admin")
+                else:
+                    mode, identity = ("160000", "2" * 40) if change == "changed" else ("100644", blob)
+                    self.git("update-index", "--add", "--cacheinfo", mode, identity, "docs/admin")
+                self.git("commit", "-qm", "Changed gitlink")
+                self.source = self.git("rev-parse", "HEAD")
+                with self.assertRaisesRegex(ValueError, "Gitlink changes require a full release"):
+                    self.materialize()
+                self.assertFalse(self.output.exists())
+
+    def test_populated_gitlink_directory_is_rejected_without_modifying_it(self):
+        self.gitlink_baseline()
+        entries, receipt = self.materialize()
+        target = self.output / "admin/local-only.txt"
+        target.write_bytes(b"unverified submodule\n")
+        with self.assertRaisesRegex(ValueError, "must remain uninitialized"):
+            MODULE.verify_worktree(self.output, entries, receipt)
+        self.assertEqual(target.read_bytes(), b"unverified submodule\n")
+
+    def test_gitlink_checkout_rejects_symlink_ancestors_and_file_replacements(self):
+        self.gitlink_baseline("docs/admin")
+        entries, receipt = self.materialize()
+        original = Path.is_symlink
+        target = self.output / "docs/admin"
+        for ancestor in (target.parent, target):
+            with self.subTest(ancestor=ancestor), patch.object(Path, "is_symlink", lambda path: path == ancestor or original(path)), self.assertRaisesRegex(ValueError, "Unsafe gitlink"):
+                MODULE.verify_worktree(self.output, entries, receipt)
+        target.rmdir()
+        target.write_bytes(b"not a submodule\n")
+        with self.assertRaisesRegex(ValueError, "Unsafe gitlink"):
+            MODULE.verify_worktree(self.output, entries, receipt)
+
+    def test_case_folded_gitlink_descendants_are_rejected_before_materialization(self):
+        self.gitlink_baseline()
+        blob = self.git("hash-object", "-w", "--stdin", input=b"injected\n")
+        self.git("update-index", "--add", "--cacheinfo", "100644", blob, "ADMIN/file.dart")
+        self.git("commit", "-qm", "Overlapping gitlink")
+        self.source = self.git("rev-parse", "HEAD")
+        with self.assertRaisesRegex(ValueError, "overlaps a gitlink"):
+            self.materialize()
+        self.assertFalse(self.output.exists())
+
+    def test_gitlink_checkout_rejects_windows_junctions_even_when_the_target_is_missing(self):
+        self.gitlink_baseline()
+        entries, receipt = self.materialize()
+        target = self.output / "admin"
+        target.rmdir()
+        original = Path.lstat
+        metadata = types.SimpleNamespace(st_mode=MODULE.stat.S_IFDIR, st_file_attributes=0x400)
+        with patch.object(MODULE.stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400, create=True), \
+                patch.object(Path, "is_symlink", return_value=False), \
+                patch.object(Path, "lstat", lambda path: metadata if path == target else original(path)), \
+                self.assertRaisesRegex(ValueError, "Unsafe gitlink"):
+            MODULE.verify_worktree(self.output, entries, receipt)
 
     def test_worktree_injection_and_tracked_drift_are_rejected(self):
         entries, receipt = self.materialize()

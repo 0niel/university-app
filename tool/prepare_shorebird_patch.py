@@ -11,12 +11,13 @@ import tempfile
 
 COMMIT = re.compile(r"[0-9a-f]{40}")
 REGULAR_MODES = {"100644", "100755"}
+GITLINK_MODE = "160000"
 NATIVE_ROOTS = {"android", "ios", "macos", "windows", "linux", "web"}
 
 
 def git(root, *args, input=None, env=None):
     return subprocess.check_output(
-        ["git", "-c", "core.autocrlf=false", "-C", str(root), *args],
+        ["git", "-c", "core.autocrlf=false", "-c", "submodule.recurse=false", "-C", str(root), *args],
         input=input, env=env, stderr=subprocess.PIPE,
     )
 
@@ -41,12 +42,18 @@ def tree(root, revision):
         path = raw_path.decode("utf-8")
         safe_path(path)
         mode, kind, identity = metadata.decode("ascii").split()
-        if kind != "blob" or mode not in REGULAR_MODES:
-            raise ValueError(f"Symlinks, gitlinks and non-regular files are unsupported: {path}")
+        if not ((kind == "blob" and mode in REGULAR_MODES)
+                or (kind == "commit" and mode == GITLINK_MODE)):
+            raise ValueError(f"Symlinks and non-regular files are unsupported: {path}")
         if path.casefold() in folded:
             raise ValueError(f"Case-colliding repository paths are unsupported: {path}")
         folded.add(path.casefold())
         entries[path] = f"{mode} {kind} {identity}"
+    gitlinks = {path.casefold() for path, value in entries.items()
+                if value.split()[0] == GITLINK_MODE}
+    for path in entries:
+        if any(parent.as_posix().casefold() in gitlinks for parent in PurePosixPath(path).parents):
+            raise ValueError(f"Repository path overlaps a gitlink: {path}")
     return entries
 
 
@@ -126,6 +133,8 @@ def projection(root, baseline, source):
     package_roots = {path.rsplit("/", 1)[0] for path in before
                      if path.startswith("packages/") and path.endswith("/pubspec.yaml")}
     for path in changed:
+        if any(value and value.split()[0] == GITLINK_MODE for value in (before.get(path), after.get(path))):
+            raise ValueError(f"Gitlink changes require a full release: {path}")
         if path in before and path in after and before[path].split()[0] != after[path].split()[0]:
             raise ValueError(f"File mode changes require a full release: {path}")
         category = classification(path, package_roots)
@@ -193,6 +202,23 @@ def verify_ignored_provider_checkout(root, manifest):
         raise ValueError("University provider differs from the release")
 
 
+def verify_gitlink_checkout(root, path):
+    target = root
+    for part in safe_path(path):
+        target /= part
+        if target.is_symlink():
+            raise ValueError(f"Unsafe gitlink checkout path: {path}")
+        try:
+            metadata = target.lstat()
+        except FileNotFoundError:
+            return
+        if (getattr(metadata, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+                or not stat.S_ISDIR(metadata.st_mode) or not target.resolve().is_relative_to(root.resolve())):
+            raise ValueError(f"Unsafe gitlink checkout path: {path}")
+    if any(target.iterdir()):
+        raise ValueError(f"Gitlink checkouts must remain uninitialized: {path}")
+
+
 def verify_worktree(root, entries, receipt, manifest=None, verify_native_inputs=False):
     if git(root, "rev-parse", "HEAD").decode().strip() != receipt["baseline_sha"]:
         raise ValueError("Projected checkout HEAD must remain at the release baseline")
@@ -200,6 +226,10 @@ def verify_worktree(root, entries, receipt, manifest=None, verify_native_inputs=
         raise ValueError("Projected index differs from the validated tree")
     native_inputs = (manifest or {}).get("build_inputs", {})
     for path, expected in entries.items():
+        mode, _, identity = expected.split()
+        if mode == GITLINK_MODE:
+            verify_gitlink_checkout(root, path)
+            continue
         target = root / path
         parent = root
         unsafe_parent = False
@@ -209,7 +239,6 @@ def verify_worktree(root, entries, receipt, manifest=None, verify_native_inputs=
         if unsafe_parent or not target.is_file() or not target.resolve().is_relative_to(root.resolve()):
             raise ValueError(f"Missing or unsafe projected file: {path}")
         data = target.read_bytes()
-        mode, _, identity = expected.split()
         actual = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
         if actual != identity:
             if path not in native_inputs or (path != "pubspec.lock" and safe_path(path)[0] not in NATIVE_ROOTS):
@@ -250,7 +279,7 @@ def materialize(root, output, entries, receipt):
     if output.exists() and any(output.iterdir()):
         raise ValueError("Output directory must be empty")
     output.parent.mkdir(parents=True, exist_ok=True)
-    git(root, "clone", "--quiet", "--local", "--no-hardlinks", "--no-checkout", str(root), str(output))
+    git(root, "clone", "--quiet", "--local", "--no-hardlinks", "--no-checkout", "--no-recurse-submodules", str(root), str(output))
     git(output, "config", "core.autocrlf", "false")
     git(output, "checkout", "--quiet", "--detach", receipt["baseline_sha"])
     git(output, "read-tree", "--reset", "-u", receipt["projected_tree_sha"])
