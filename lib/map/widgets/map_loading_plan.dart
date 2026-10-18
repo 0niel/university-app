@@ -44,7 +44,7 @@ class _LoadingPlanPainter extends CustomPainter {
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         const Rect.fromLTWH(1, 1, 98, 72),
-        const Radius.circular(4),
+        const Radius.circular(AppRadius.xs),
       ),
       Paint()..color = corridor,
     );
@@ -52,7 +52,7 @@ class _LoadingPlanPainter extends CustomPainter {
       for (var column = 0; column < 6; column++) {
         final rect = RRect.fromRectAndRadius(
           Rect.fromLTWH(4 + column * 15.5, row == 0 ? 4 : 44, 14, 25),
-          const Radius.circular(1.6),
+          const Radius.circular(AppRadius.connector),
         );
         canvas
           ..drawRRect(rect, fill)
@@ -61,7 +61,7 @@ class _LoadingPlanPainter extends CustomPainter {
     }
     final core = RRect.fromRectAndRadius(
       const Rect.fromLTWH(37, 31, 26, 11),
-      const Radius.circular(1.5),
+      const Radius.circular(AppRadius.connector),
     );
     canvas
       ..drawRRect(core, fill)
