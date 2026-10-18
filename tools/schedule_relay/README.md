@@ -14,8 +14,9 @@ provides HTTPS at `https://app-api.mirea.ninja/schedule/api/` on the external
 `application` network. Existing `/api` routes belong to the original backend.
 The relay has no published host ports and restarts automatically with Docker.
 
-Deploy `Dockerfile`, `.dockerignore`, `compose.yaml`, `local_proxy.mjs`, and
-`server.mjs` to that directory. Keep `relay.env` readable only by root and set
+Deploy `Dockerfile`, `.dockerignore`, `compose.yaml`, `local_proxy.mjs`,
+`server.mjs`, `request_policy.mjs`, and `upstream_proxy.mjs` to that directory.
+Keep `relay.env` readable only by root and set
 `RELAY_AUTHORIZATION` to the same bearer value as the repository's
 `SCHEDULE_SOURCE_AUTHORIZATION` Actions secret. Never commit that file.
 

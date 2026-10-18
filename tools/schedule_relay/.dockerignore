@@ -2,3 +2,5 @@
 !Dockerfile
 !local_proxy.mjs
 !server.mjs
+!request_policy.mjs
+!upstream_proxy.mjs
