@@ -1,40 +1,101 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/map/widgets/map_loading_plan.dart';
 
 class MapSkeleton extends StatelessWidget {
   const MapSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) => NinjaSkeletonGroup(
-    child: CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(
-            AppSpacing.screen,
-            MediaQuery.paddingOf(context).top + AppSpacing.screenTop,
-            AppSpacing.screen,
-            AppBottomBar.extentOf(context) + AppSpacing.screen,
-          ),
-          sliver: const SliverFillRemaining(
-            hasScrollBody: false,
-            child: Column(
-              children: [
-                NinjaSkeleton(height: 50, radius: AppRadius.full),
-                SizedBox(height: AppSpacing.gap),
-                NinjaSkeleton(
-                  height: 44,
-                  widthFactor: .8,
-                  radius: AppRadius.full,
+    semanticsLabel: 'Загружаем план кампуса',
+    child: ColoredBox(
+      color: context.colors.canvas,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final insets = MediaQuery.paddingOf(context);
+          final bottom = AppBottomBar.extentOf(context) + AppSpacing.lg;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.xlg,
+                  insets.top + 72,
+                  AppSpacing.xlg,
+                  bottom + 72,
                 ),
-                Spacer(),
-                AppSkeletonRow(),
-                AppSkeletonRow(),
-                AppSkeletonRow(),
-              ],
-            ),
-          ),
-        ),
-      ],
+                child: const MapLoadingPlan(),
+              ),
+              Positioned(
+                top: insets.top + AppSpacing.sm,
+                left: AppSpacing.lg,
+                right: AppSpacing.lg,
+                child: const Row(
+                  children: [
+                    NinjaSkeleton.avatar(),
+                    SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: NinjaSkeleton(
+                          height: 40,
+                          width: 132,
+                          radius: AppRadius.full,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.sm),
+                    NinjaSkeleton.avatar(),
+                  ],
+                ),
+              ),
+              if (constraints.maxHeight - insets.top - bottom > 300)
+                Positioned(
+                  right: AppSpacing.lg,
+                  top: insets.top + 96,
+                  child: const Column(
+                    children: [
+                      NinjaSkeleton.avatar(),
+                      SizedBox(height: AppSpacing.sm),
+                      NinjaSkeleton.avatar(),
+                    ],
+                  ),
+                ),
+              Positioned(
+                bottom: bottom,
+                left: AppSpacing.lg,
+                right: AppSpacing.lg,
+                child: Align(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 360),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: context.colors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.card),
+                    ),
+                    child: Row(
+                      children: [
+                        const AppSpinner(size: 20),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Text(
+                            'Загружаем план кампуса',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.body.copyWith(
+                              color: context.colors.muted,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     ),
   );
 }

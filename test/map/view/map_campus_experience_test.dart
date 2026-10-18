@@ -243,6 +243,8 @@ void main() {
 
   testWidgets('search discovers equipment on another floor', (tester) async {
     await pump(tester);
+    await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(AppSearchField), 'проектор');
     await tester.pumpAndSettle();
     expect(find.text('Б-201'), findsOneWidget);

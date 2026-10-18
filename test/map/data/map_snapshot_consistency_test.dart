@@ -59,6 +59,105 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
+    'remote editor keeps its source plan and size across refresh offline',
+    () async {
+      var revision = 1;
+      var offline = false;
+      var requests = 0;
+      final client = MockClient((request) async {
+        requests++;
+        if (offline) throw Exception('Offline');
+        final first = request.url.path == '/1.svg';
+        final side = first ? 100 : 200;
+        return http.Response(
+          '<svg viewBox="0 0 $side $side"><title>${first ? 1 : 2}</title></svg>',
+          200,
+        );
+      });
+      final repository = MapDataRepository(
+        organizationId: 'mirea',
+        cache: Cache(),
+        httpClient: client,
+        rpc: (_, _) async => {
+          ...campus(revision: revision),
+          'floors': [
+            {
+              'id': 'f1',
+              'level': 1,
+              'width': revision * 100,
+              'height': revision * 100,
+              'image_url': 'https://maps.example.org/$revision.svg',
+            },
+          ],
+        },
+      );
+      addTearDown(repository.dispose);
+      addTearDown(client.close);
+      final original = await repository.loadCampus('v-78');
+      revision = 2;
+      final refreshed = await repository.refreshCampus('v-78');
+      offline = true;
+      expect(
+        await repository.loadSvg(
+          original.floors.single.floor.svgPath,
+          campus: original,
+        ),
+        contains('viewBox="0 0 100 100"><title>1</title>'),
+      );
+      expect(
+        await repository.loadSvg(
+          refreshed.floors.single.floor.svgPath,
+          campus: refreshed,
+        ),
+        contains('viewBox="0 0 200 200"><title>2</title>'),
+      );
+      expect(requests, 2);
+    },
+  );
+
+  test(
+    'an open editor retains its exact plan after a campus refresh',
+    () async {
+      var revision = 1;
+      final repository = MapDataRepository(
+        organizationId: 'mirea',
+        cache: Cache(),
+        rpc: (_, _) async => {
+          ...campus(revision: revision),
+          'floors': [
+            {
+              'id': 'f1',
+              'level': 1,
+              'width': 100,
+              'height': 100,
+              'svg':
+                  '<svg viewBox="0 0 100 100"><title>$revision</title></svg>',
+            },
+          ],
+        },
+      );
+      addTearDown(repository.dispose);
+      final original = await repository.loadCampus('v-78');
+      final originalPath = original.floors.single.floor.svgPath;
+      revision = 2;
+      final refreshed = await repository.refreshCampus('v-78');
+      expect(refreshed.floors.single.floor.svgPath, isNot(originalPath));
+      expect(
+        await repository.loadSvg(originalPath, campus: original),
+        contains('<title>1</title>'),
+      );
+      expect(
+        await repository.loadSvg(refreshed.floors.single.floor.svgPath),
+        contains('<title>2</title>'),
+      );
+      expect(
+        () => repository.loadSvg(originalPath, campus: refreshed),
+        throwsFormatException,
+      );
+    },
+  );
+
+  test(
     'legacy complete SVG cache is used without retrying each network URL',
     () async {
       const svg = '<svg viewBox="0 0 100 100" />';

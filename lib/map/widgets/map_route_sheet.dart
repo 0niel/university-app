@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
-import 'package:rtu_mirea_app/map/services/room_key.dart';
-import 'package:rtu_mirea_app/map/widgets/map_route_presentation.dart';
+import 'package:rtu_mirea_app/map/services/map_route_destinations.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_endpoints.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_node_picker.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_options.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_preview.dart';
 
 export 'package:rtu_mirea_app/map/widgets/map_route_presentation.dart';
 
@@ -36,30 +38,39 @@ class MapRouteSheet extends StatefulWidget {
 
 class _MapRouteSheetState extends State<MapRouteSheet> {
   IndoorNavigationGraph? _graph;
+  MapRouteDestinations? _destinations;
   late final IndoorRoutePlanner _planner;
   IndoorNavigationNode? _start;
   IndoorNavigationNode? _destination;
   IndoorRouteResult? _result;
+  IndoorRouteOptions _options = const IndoorRouteOptions();
   String? _error;
-  bool _stepFree = false;
-  bool _wheelchair = false;
-  bool _fastest = true;
 
   @override
   void initState() {
     super.initState();
     try {
-      _graph =
+      final graph =
           widget.navigationGraph ??
           IndoorNavigationGraph.fromJson(widget.campus.graph);
-      _planner = IndoorRoutePlanner(_graph!);
-      _fastest = _graph!.hasCompleteDuration;
-      _start = _nodeForRoom(widget.startRoomId);
-      _destination = _nodeForRoom(widget.destinationRoomId);
+      _graph = graph;
+      _planner = IndoorRoutePlanner(graph);
+      final destinations = MapRouteDestinations(
+        campus: widget.campus,
+        planner: _planner,
+      );
+      _destinations = destinations;
+      _options = IndoorRouteOptions(
+        metric: graph.hasCompleteDuration
+            ? IndoorRouteMetric.duration
+            : IndoorRouteMetric.distance,
+      );
+      _start = destinations.nodeForRoom(widget.startRoomId);
+      _destination = destinations.nodeForRoom(widget.destinationRoomId);
       if (_needsNavigationReview(widget.startRoomId) ||
           _needsNavigationReview(widget.destinationRoomId)) {
         _error = 'Место перенесено. Проходы к нему ещё проверяются.';
-      } else if (_graph!.nodes.isEmpty || _graph!.edges.isEmpty) {
+      } else if (graph.nodes.isEmpty || graph.edges.isEmpty) {
         _error =
             'Проходы этого кампуса ещё не проверены. '
             'Можно найти помещение на плане и предложить уточнение маршрутов.';
@@ -76,71 +87,48 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
     }
   }
 
-  String _label(IndoorNavigationNode node) =>
-      widget.campus.placeForId(node.roomId ?? '')?.label ??
-      node.label ??
-      'Точка на плане';
-
-  String? _floorLabel(IndoorNavigationNode node) {
-    final floor = widget.campus.floorForId(node.floorId);
-    return floor == null ? null : '${floor.floor.number} этаж';
-  }
-
   bool _needsNavigationReview(String? roomId) =>
       widget.campus.placeForId(roomId ?? '')?.raw['navigation_needs_review'] ==
       true;
 
-  IndoorNavigationNode? _nodeForRoom(String? roomId) {
-    if (roomId == null || _needsNavigationReview(roomId)) return null;
-    final place = widget.campus.placeForId(roomId);
-    return _graph!.nodesForRoom(place?.id ?? roomId).firstOrNull;
-  }
-
   void _calculate() {
-    final graph = _graph;
+    final destinations = _destinations;
     final start = _start;
     final destination = _destination;
-    _result = graph == null || start == null || destination == null
+    _result = destinations == null || start == null || destination == null
         ? null
         : _planner.findRouteBetween(
-            startNodeIds: start.roomId == null
-                ? [start.id]
-                : graph.nodesForRoom(start.roomId!).map((node) => node.id),
-            destinationNodeIds: destination.roomId == null
-                ? [destination.id]
-                : graph
-                      .nodesForRoom(destination.roomId!)
-                      .map((node) => node.id),
-            options: IndoorRouteOptions(
-              stepFree: _stepFree,
-              wheelchair: _wheelchair,
-              metric: _fastest
-                  ? IndoorRouteMetric.duration
-                  : IndoorRouteMetric.distance,
-            ),
+            startNodeIds: destinations.nodeIdsFor(start),
+            destinationNodeIds: destinations.nodeIdsFor(destination),
+            options: _options,
           );
   }
 
-  Future<void> _pick({required bool start}) async {
-    final graph = _graph;
-    if (graph == null) return;
+  Future<void> _pick(MapRouteEndpoint endpoint) async {
+    final destinations = _destinations;
+    if (destinations == null) return;
+    final pickingStart = endpoint == MapRouteEndpoint.start;
+    final opposite = pickingStart ? _destination : _start;
     final node = await showAppSheet<IndoorNavigationNode>(
       context,
-      title: start ? 'Откуда идём' : 'Куда идём',
-      child: _RouteNodePicker(
-        nodes: graph.nodes
-            .where(
-              (node) =>
-                  !node.closed && (node.roomId != null || node.label != null),
-            )
-            .toList(),
+      scrollable: false,
+      showGrabber: false,
+      child: MapRouteNodePicker(
+        nodes: destinations.candidates(
+          endpoint: endpoint,
+          opposite: opposite,
+          options: _options,
+        ),
         campus: widget.campus,
-        label: _label,
+        endpoint: endpoint,
+        opposite: opposite,
+        selected: pickingStart ? _start : _destination,
+        restricted: _options.stepFree || _options.wheelchair,
       ),
     );
     if (node == null || !mounted) return;
     setState(() {
-      if (start) {
+      if (pickingStart) {
         _start = node;
       } else {
         _destination = node;
@@ -150,11 +138,36 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
     });
   }
 
+  void _changeOptions(IndoorRouteOptions options) {
+    setState(() {
+      _options = options;
+      _calculate();
+    });
+  }
+
+  void _swap() {
+    setState(() {
+      final previous = _start;
+      _start = _destination;
+      _destination = previous;
+      _calculate();
+    });
+  }
+
+  void _resetEndpoints() {
+    setState(() {
+      _start = null;
+      _destination = null;
+      _result = null;
+      _error = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final route = _result?.route;
-    final ready = _graph != null && _graph!.edges.isNotEmpty;
-    final canEstimateDuration = _graph?.hasCompleteDuration ?? false;
+    final ready = _destinations != null && (_graph?.edges.isNotEmpty ?? false);
+    final restricted = _options.stepFree || _options.wheelchair;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -166,345 +179,70 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
               AppSheetCloseButton(onTap: widget.onClose),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSpacing.xxs),
         Text(widget.campus.campus.displayName, style: AppText.subtext),
-        const SizedBox(height: 16),
-        if (_error != null) ...[
-          AppBanner(message: _error!),
-          const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.lg),
+        if (_error case final error?) ...[
+          AppBanner(message: error),
+          const SizedBox(height: AppSpacing.md),
         ],
-        AppListGroup(
-          children: [
-            AppListRow(
-              title: _start == null
-                  ? 'Выберите начало'
-                  : 'Откуда: ${_label(_start!)}',
-              titleMaxLines: null,
-              leading: const AppIconTile(
-                child: Icon(Icons.trip_origin_rounded, size: 20),
-              ),
-              subtitle: _start == null
-                  ? 'Где вы сейчас на плане'
-                  : _floorLabel(_start!),
-              onTap: ready ? () => unawaited(_pick(start: true)) : null,
-            ),
-          ],
+        MapRouteEndpoints(
+          campus: widget.campus,
+          start: _start,
+          destination: _destination,
+          onPick: ready ? (endpoint) => unawaited(_pick(endpoint)) : null,
+          onSwap: _start == null && _destination == null ? null : _swap,
+          onReset: _start == null && _destination == null
+              ? null
+              : _resetEndpoints,
         ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: AppIconButton(
-            tooltip: 'Поменять местами',
-            shape: AppIconButtonShape.circle,
-            size: AppIconButtonSize.compact,
-            onPressed: _start == null && _destination == null
-                ? null
-                : () {
-                    setState(() {
-                      final previous = _start;
-                      _start = _destination;
-                      _destination = previous;
-                      _calculate();
-                    });
-                  },
-            icon: const Icon(Icons.swap_vert_rounded),
+        const SizedBox(height: AppSpacing.md),
+        if (ready) ...[
+          MapRouteOptions(
+            options: _options,
+            canEstimateDuration: _graph!.hasCompleteDuration,
+            onChanged: _changeOptions,
           ),
-        ),
-        AppListGroup(
-          children: [
-            AppListRow(
-              title: _destination == null
-                  ? 'Выберите назначение'
-                  : 'Куда: ${_label(_destination!)}',
-              titleMaxLines: null,
-              leading: const AppIconTile(
-                child: Icon(Icons.flag_rounded, size: 20),
-              ),
-              subtitle: _destination == null
-                  ? 'Помещение, вход или сервис'
-                  : _floorLabel(_destination!),
-              onTap: ready ? () => unawaited(_pick(start: false)) : null,
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (route != null) ...[
-          AppBanner(
-            message: [
-              if (route.distanceMeters case final distance?)
-                '${distance.round()} м',
-              if (route.durationSeconds case final duration?)
-                duration == 0
-                    ? route.legs.isEmpty
-                          ? 'Вы на месте'
-                          : '<1 мин'
-                    : '≈ ${(duration / 60).ceil().clamp(1, 999)} мин',
-              '${route.floorIds.length} эт.',
-            ].join(' · '),
-          ),
-          const SizedBox(height: 12),
-          AppButton.primary(
-            label: 'Показать путь',
-            expanded: true,
-            onPressed: () {
+          const SizedBox(height: AppSpacing.md),
+        ],
+        if (route != null)
+          MapRoutePreview(
+            route: route,
+            campus: widget.campus,
+            onApply: () {
               Navigator.of(context).pop();
               widget.onApply(route);
             },
+          )
+        else if (_result != null) ...[
+          AppBanner(
+            message: restricted
+                ? 'Подходящий путь не найден. Для выбранных условий '
+                      'нет подтверждённого прохода между этими точками.'
+                : 'Подходящий путь не найден. Возможно, проход закрыт '
+                      'или доступность маршрута ещё не подтверждена.',
           ),
-          const SizedBox(height: 12),
-        ] else if (_result != null) ...[
-          const AppBanner(
-            message:
-                'Подходящий путь не найден. Возможно, проход закрыт '
-                'или доступность маршрута ещё не подтверждена.',
-          ),
-          const SizedBox(height: 12),
-        ],
-        if (ready) ...[
-          AppListGroup(
-            key: const ValueKey('map-route-options'),
-            children: [
-              AppDisclosure(
-                title: 'Параметры маршрута',
-                subtitle: _stepFree || _wheelchair
-                    ? [
-                        if (_stepFree) 'Без лестниц',
-                        if (_wheelchair) 'На коляске',
-                      ].join(' · ')
-                    : 'Лестницы и доступность',
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    AppChip.filter(
-                      label: 'Без лестниц',
-                      selected: _stepFree,
-                      onTap: () => setState(() {
-                        _stepFree = !_stepFree;
-                        _calculate();
-                      }),
-                    ),
-                    AppChip.filter(
-                      label: 'На коляске',
-                      selected: _wheelchair,
-                      onTap: () => setState(() {
-                        _wheelchair = !_wheelchair;
-                        _calculate();
-                      }),
-                    ),
-                    if (canEstimateDuration)
-                      AppChip.filter(
-                        label: _fastest ? 'Быстрее' : 'Короче',
-                        selected: _fastest,
-                        onTap: () => setState(() {
-                          _fastest = !_fastest;
-                          _calculate();
-                        }),
-                      ),
-                  ],
-                ),
+          if (restricted)
+            AppButton.text(
+              label: 'Сбросить ограничения',
+              onPressed: () => _changeOptions(
+                IndoorRouteOptions(metric: _options.metric),
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-        ],
-        if (route != null) ...[
-          if (!route.hasCompleteDistance || !route.hasCompleteDuration) ...[
-            const SizedBox(height: 8),
-            const AppBanner(
-              message:
-                  'Для части маршрута пока нет оценки расстояния или времени.',
             ),
-          ],
-          const SizedBox(height: 12),
-          Text('По шагам', style: AppText.sectionSmall),
-          const SizedBox(height: 8),
-          AppListGroup(
-            children: [
-              for (final instruction in route.instructions)
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppIconTile(
-                        child: Icon(
-                          mapRouteInstructionIcon(instruction.maneuver),
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              mapRouteInstructionLabel(
-                                instruction,
-                                widget.campus,
-                              ),
-                              style: AppText.bodyStrong,
-                            ),
-                            Text(
-                              mapRouteInstructionContext(
-                                instruction,
-                                widget.campus,
-                              ),
-                              style: AppText.caption.copyWith(
-                                color: context.colors.muted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
+        ] else if (ready)
+          Text(
+            _start == null
+                ? 'Укажите, где вы сейчас. Начальная точка задаётся вручную.'
+                : 'Выберите, куда хотите пройти.',
+            style: AppText.caption.copyWith(color: context.colors.muted),
           ),
-          const SizedBox(height: 12),
-          const AppBanner(
-            message:
-                'Начальная точка задаётся вручную. '
-                'Переходы по шагам не определяют ваше местоположение.',
-          ),
-        ],
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         AppButton.text(
           label: 'Уточнить проходы',
           onPressed: () {
             Navigator.of(context).pop();
             widget.onContribute();
           },
-        ),
-      ],
-    );
-  }
-}
-
-class _RouteNodePicker extends StatefulWidget {
-  const _RouteNodePicker({
-    required this.nodes,
-    required this.campus,
-    required this.label,
-  });
-
-  final List<IndoorNavigationNode> nodes;
-  final CampusMapData campus;
-  final String Function(IndoorNavigationNode) label;
-
-  @override
-  State<_RouteNodePicker> createState() => _RouteNodePickerState();
-}
-
-class _RouteNodePickerState extends State<_RouteNodePicker> {
-  final _query = TextEditingController();
-  late final List<IndoorNavigationNode> _nodes;
-
-  @override
-  void initState() {
-    super.initState();
-    final rooms = <String, IndoorNavigationNode>{};
-    for (final node in widget.nodes) {
-      if (node.closed) continue;
-      final place = widget.campus.placeForId(node.roomId ?? '');
-      if (place?.raw['navigation_needs_review'] == true) continue;
-      final technical = const {
-        'door',
-        'stairs',
-        'elevator',
-        'escalator',
-        'corridor',
-        'junction',
-        'portal',
-      }.contains(node.kind);
-      if (place == null &&
-          ((node.label?.trim().isEmpty ?? true) || technical)) {
-        continue;
-      }
-      rooms.putIfAbsent(
-        place?.id ?? node.roomId ?? 'node:${node.id}',
-        () => node,
-      );
-    }
-    _nodes = rooms.values.toList()
-      ..sort((a, b) {
-        final firstFloor = widget.campus.floorForId(a.floorId);
-        final secondFloor = widget.campus.floorForId(b.floorId);
-        final floorOrder = (firstFloor?.floor.number ?? 0).compareTo(
-          secondFloor?.floor.number ?? 0,
-        );
-        if (floorOrder != 0) return floorOrder;
-        final labelOrder = compareNatural(
-          firstFloor?.label ?? a.floorId,
-          secondFloor?.label ?? b.floorId,
-        );
-        if (labelOrder != 0) return labelOrder;
-        final roomOrder = compareNatural(
-          roomKey(widget.label(a)),
-          roomKey(widget.label(b)),
-        );
-        return roomOrder == 0 ? a.id.compareTo(b.id) : roomOrder;
-      });
-  }
-
-  @override
-  void dispose() {
-    _query.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final nodes = _nodes
-        .where(
-          (node) => roomKey(widget.label(node)).contains(roomKey(_query.text)),
-        )
-        .toList();
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        AppSearchField(
-          controller: _query,
-          hintText: 'Аудитория, вход или сервис',
-          onChanged: (_) => setState(() {}),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: MediaQuery.sizeOf(context).height * .4,
-          child: nodes.isEmpty
-              ? const Center(child: Text('Нет проверенных точек'))
-              : ListView.builder(
-                  itemCount: nodes.length,
-                  itemBuilder: (context, index) {
-                    final node = nodes[index];
-                    final floor = widget.campus.floorForId(node.floorId);
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (index == 0 ||
-                            nodes[index - 1].floorId != node.floorId)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 16, 12, 4),
-                            child: Text(
-                              floor?.label.isNotEmpty == true
-                                  ? floor!.label
-                                  : '${floor?.floor.number ?? '—'} этаж',
-                              style: AppText.caption,
-                            ),
-                          ),
-                        AppListRow(
-                          title: widget.label(node),
-                          titleMaxLines: null,
-                          leading: const AppIconTile(
-                            child: Icon(Icons.place_outlined, size: 20),
-                          ),
-                          onTap: () => Navigator.of(context).pop(node),
-                        ),
-                      ],
-                    );
-                  },
-                ),
         ),
       ],
     );

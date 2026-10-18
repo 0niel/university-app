@@ -5,6 +5,8 @@ import 'package:rtu_mirea_app/map/navigation/indoor_navigation_graph.dart';
 
 enum IndoorRouteMetric { distance, duration }
 
+enum IndoorRouteDirection { forward, reverse }
+
 enum IndoorRouteStatus {
   found,
   unknownStart,
@@ -147,19 +149,84 @@ class IndoorRoutePlanner {
     for (final edge in graph.edges) {
       final from = graph.nodesById[edge.fromNodeId]!;
       final to = graph.nodesById[edge.toNodeId]!;
-      (_adjacency[from.id] ??= []).add(
-        IndoorRouteLeg(from: from, to: to, edge: edge),
-      );
+      _addLeg(IndoorRouteLeg(from: from, to: to, edge: edge));
       if (edge.bidirectional) {
-        (_adjacency[to.id] ??= []).add(
-          IndoorRouteLeg(from: to, to: from, edge: edge),
-        );
+        _addLeg(IndoorRouteLeg(from: to, to: from, edge: edge));
       }
     }
   }
 
   final IndoorNavigationGraph graph;
   final _adjacency = <String, List<IndoorRouteLeg>>{};
+  final _reverseAdjacency = <String, List<IndoorRouteLeg>>{};
+
+  void _addLeg(IndoorRouteLeg leg) {
+    (_adjacency[leg.from.id] ??= []).add(leg);
+    (_reverseAdjacency[leg.to.id] ??= []).add(leg);
+  }
+
+  Set<String> reachableNodeIds({
+    required Iterable<String> nodeIds,
+    IndoorRouteDirection direction = IndoorRouteDirection.forward,
+    IndoorRouteOptions options = const IndoorRouteOptions(),
+  }) => Set.unmodifiable(
+    _reachableLabels({'': nodeIds}, direction, options).keys,
+  );
+
+  Map<String, Set<String>> connectedEndpointNodeIds({
+    required Map<String, Iterable<String>> endpoints,
+    required IndoorRouteDirection direction,
+    IndoorRouteOptions options = const IndoorRouteOptions(),
+  }) {
+    final labels = _reachableLabels(endpoints, direction, options);
+    return Map.unmodifiable({
+      for (final endpoint in endpoints.entries)
+        endpoint.key: Set<String>.unmodifiable(
+          endpoint.value.where(
+            (nodeId) =>
+                labels[nodeId]?.any((key) => key != endpoint.key) ?? false,
+          ),
+        ),
+    });
+  }
+
+  Map<String, Set<String>> _reachableLabels(
+    Map<String, Iterable<String>> endpoints,
+    IndoorRouteDirection direction,
+    IndoorRouteOptions options,
+  ) {
+    final labels = <String, Set<String>>{};
+    final queue = <(IndoorNavigationNode, String)>[];
+    void enqueue(IndoorNavigationNode node, String key) {
+      if (_nodeClosed(node, options) ||
+          (options.wheelchair && !node.wheelchairAccessible)) {
+        return;
+      }
+      final owners = labels.putIfAbsent(node.id, () => {});
+      if (owners.length < 2 && owners.add(key)) queue.add((node, key));
+    }
+
+    for (final endpoint in endpoints.entries) {
+      for (final nodeId in endpoint.value) {
+        final node = graph.nodesById[nodeId];
+        if (node != null) enqueue(node, endpoint.key);
+      }
+    }
+    final adjacency = direction == IndoorRouteDirection.forward
+        ? _adjacency
+        : _reverseAdjacency;
+    for (var index = 0; index < queue.length; index++) {
+      final (node, key) = queue[index];
+      for (final leg in adjacency[node.id] ?? <IndoorRouteLeg>[]) {
+        if (!_allowed(leg, options)) continue;
+        enqueue(
+          direction == IndoorRouteDirection.forward ? leg.to : leg.from,
+          key,
+        );
+      }
+    }
+    return labels;
+  }
 
   IndoorRouteResult findRoute({
     required String startNodeId,

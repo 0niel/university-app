@@ -17,6 +17,7 @@ import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/services/objects_service.dart';
 import 'package:rtu_mirea_app/map/view/map_view.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_guidance.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_overlay.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/svg_interactive_map.dart';
 import 'package:rtu_mirea_app/map/widgets/svg_interactive_map_controller.dart';
@@ -515,7 +516,11 @@ void main() {
     },
   );
 
-  for (final size in [const Size(390, 844), const Size(320, 420)]) {
+  for (final size in [
+    const Size(390, 844),
+    const Size(320, 420),
+    const Size(844, 390),
+  ]) {
     testWidgets('timeline leaves visible map at $size with large text', (
       tester,
     ) async {
@@ -551,7 +556,18 @@ void main() {
         find.byType(SvgInteractiveMap),
       );
       final padding = map.viewportPaddingListenable!.value;
-      expect(guide.bottom, lessThan(size.height - padding.bottom - 32));
+      if (size.width >= 600 && size.height < 600) {
+        final overlay = tester.getRect(find.byType(MapRouteOverlay));
+        expect(overlay.right, lessThanOrEqualTo(padding.left));
+        expect(
+          overlay.bottom,
+          lessThanOrEqualTo(size.height - padding.bottom + 16),
+        );
+        expect(padding.left, greaterThan(250));
+        expect(size.width - padding.horizontal, greaterThan(280));
+      } else {
+        expect(guide.bottom, lessThan(size.height - padding.bottom - 32));
+      }
       expect(
         tester.getRect(find.byTooltip('Завершить маршрут')).bottom,
         lessThan(size.height),
@@ -576,6 +592,30 @@ void main() {
       }
     });
   }
+
+  testWidgets(
+    'rotation preserves the route and frees the map beside guidance',
+    (tester) async {
+      final harness = _Harness();
+      await harness.mount(tester);
+      harness.guidance(tester).onNext!();
+      await tester.pumpAndSettle();
+      final step = harness.guidance(tester).stepIndex;
+      tester.view.physicalSize = const Size(844, 390);
+      await tester.pumpAndSettle();
+      expect(harness.guidance(tester).stepIndex, step);
+      final map = tester.widget<SvgInteractiveMap>(
+        find.byType(SvgInteractiveMap),
+      );
+      expect(map.viewportPaddingListenable!.value.left, greaterThan(250));
+      expect(find.byTooltip('Завершить маршрут').hitTestable(), findsOneWidget);
+      tester.view.physicalSize = const Size(390, 844);
+      await tester.pumpAndSettle();
+      expect(harness.guidance(tester).stepIndex, step);
+      expect(map.viewportPaddingListenable!.value.left, lessThan(40));
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'stairs stay on departure floor until advancing and back restores it',

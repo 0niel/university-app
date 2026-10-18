@@ -17,6 +17,7 @@ import 'package:rtu_mirea_app/map/models/models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
 import 'package:rtu_mirea_app/map/services/map_navigation_preparation.dart';
+import 'package:rtu_mirea_app/map/services/map_route_destinations.dart';
 import 'package:rtu_mirea_app/map/services/room_key.dart';
 import 'package:rtu_mirea_app/map/widgets/map_edit_menu.dart';
 import 'package:rtu_mirea_app/map/widgets/map_floor_alignment_page.dart';
@@ -25,7 +26,7 @@ import 'package:rtu_mirea_app/map/widgets/map_place_details_sheet.dart'
     hide mapPlaceKindLabel;
 import 'package:rtu_mirea_app/map/widgets/map_place_editor_page.dart';
 import 'package:rtu_mirea_app/map/widgets/map_places_explorer.dart';
-import 'package:rtu_mirea_app/map/widgets/map_route_guidance.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_overlay.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/map_saved_places_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/widgets.dart';
@@ -65,6 +66,7 @@ class _MapViewState extends State<MapView> {
   double _mapBearing = 0;
   CampusMapData? _landmarkSnapshot;
   IndoorNavigationGraph? _landmarkGraph;
+  final _routeDestinations = ValueNotifier<MapRouteDestinations?>(null);
   Map<String, List<MapNavigationLandmark>> _floorLandmarks = const {};
   ({CampusMapData snapshot, int revision, String floorId, List<Offset> points})?
   _pendingNavigationFocus;
@@ -75,6 +77,7 @@ class _MapViewState extends State<MapView> {
   bool _panelFramePending = false;
   double _viewportHeight = 0;
   double _viewportTop = 0;
+  double _routePanelWidth = 0;
   final GlobalKey _topOverlayKey = GlobalKey();
   double? _measuredTopExtent;
   bool _measurePending = false;
@@ -130,6 +133,7 @@ class _MapViewState extends State<MapView> {
     _panelController.dispose();
     _panelExtent.dispose();
     _mapViewportPadding.dispose();
+    _routeDestinations.dispose();
     _query.dispose();
     super.dispose();
   }
@@ -153,7 +157,8 @@ class _MapViewState extends State<MapView> {
 
   void _updateMapViewport(double panelSize) {
     _mapViewportPadding.value = EdgeInsets.fromLTRB(
-      AppSpacing.lg,
+      AppSpacing.lg +
+          (_routePanelWidth == 0 ? 0 : _routePanelWidth + AppSpacing.md),
       _viewportTop + AppSpacing.md,
       AppSpacing.lg + AppControlSize.touchTarget + AppSpacing.xlg,
       _viewportHeight * panelSize +
@@ -171,11 +176,18 @@ class _MapViewState extends State<MapView> {
     }
   }
 
+  void _searchClosed() => _animatePanel(_collapsedPanelSize);
+
   void _togglePanel() {
     if (!_panelController.isAttached) return;
     final target = _panelController.size > _collapsedPanelSize + .08
         ? _collapsedPanelSize
         : .78;
+    _animatePanel(target);
+  }
+
+  void _animatePanel(double target) {
+    if (!_panelController.isAttached) return;
     if (MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context)) {
       _panelController.jumpTo(target);
@@ -373,58 +385,89 @@ class _MapViewState extends State<MapView> {
     unawaited(
       showAppSheet<void>(
         context,
-        child: BlocBuilder<MapBloc, MapState>(
-          bloc: bloc,
-          builder: (context, state) {
-            final currentCampus = state.campusData;
-            final sameCampus = currentCampus?.campus.id == campus.campus.id;
-            final snapshot = sameCampus ? currentCampus! : campus;
-            final currentPlace = snapshot.placeForId(place.id);
-            final available =
-                sameCampus &&
-                currentPlace != null &&
-                state.status == MapStatus.loaded;
-            return MapPlaceDetailsSheet(
-              repository: repository,
-              campus: snapshot,
-              room: currentPlace ?? place,
-              isRefreshing: state.status == MapStatus.loading,
-              onClose: () => Navigator.of(context, rootNavigator: true).pop(),
-              onRefreshMap: sameCampus
-                  ? () => bloc.add(const MapEvent.refreshRequested())
-                  : null,
-              onEditLocation: !available
-                  ? null
-                  : () {
-                      Navigator.of(context, rootNavigator: true).pop();
-                      unawaited(
-                        Navigator.of(context, rootNavigator: true).push<bool>(
-                          MaterialPageRoute(
-                            builder: (_) => MapPlaceEditorPage(
-                              campus: snapshot,
-                              repository: repository,
-                              room: currentPlace,
-                              initialFloorId: currentPlace.floorId,
+        child: ListenableBuilder(
+          listenable: _routeDestinations,
+          builder: (context, _) => BlocBuilder<MapBloc, MapState>(
+            bloc: bloc,
+            builder: (context, state) {
+              final currentCampus = state.campusData;
+              final sameCampus = currentCampus?.campus.id == campus.campus.id;
+              final snapshot = sameCampus ? currentCampus! : campus;
+              final currentPlace = snapshot.placeForId(place.id);
+              final available =
+                  sameCampus &&
+                  currentPlace != null &&
+                  state.status == MapStatus.loaded;
+              final destinations =
+                  identical(
+                    snapshot,
+                    _routeDestinations.value?.campus,
+                  )
+                  ? _routeDestinations.value
+                  : null;
+              final canRouteFrom =
+                  available &&
+                  destinations != null &&
+                  destinations.supportsRoom(
+                    currentPlace.id,
+                    endpoint: MapRouteEndpoint.start,
+                  );
+              final canRouteTo =
+                  available &&
+                  destinations != null &&
+                  destinations.supportsRoom(
+                    currentPlace.id,
+                    endpoint: MapRouteEndpoint.destination,
+                    opposite: destinations.nodeForRoom(_routeStartRoomId),
+                  );
+              return MapPlaceDetailsSheet(
+                repository: repository,
+                campus: snapshot,
+                room: currentPlace ?? place,
+                isRefreshing: state.status == MapStatus.loading,
+                routeUnavailableMessage: destinations == null
+                    ? 'Проверяем доступные проходы…'
+                    : _routeStartRoomId != null && !canRouteTo && canRouteFrom
+                    ? 'Из выбранного начала сюда нет пути. '
+                          'Можно начать новый маршрут отсюда.'
+                    : null,
+                onClose: () => Navigator.of(context, rootNavigator: true).pop(),
+                onRefreshMap: sameCampus
+                    ? () => bloc.add(const MapEvent.refreshRequested())
+                    : null,
+                onEditLocation: !available
+                    ? null
+                    : () {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        unawaited(
+                          Navigator.of(context, rootNavigator: true).push<bool>(
+                            MaterialPageRoute(
+                              builder: (_) => MapPlaceEditorPage(
+                                campus: snapshot,
+                                repository: repository,
+                                room: currentPlace,
+                                initialFloorId: currentPlace.floorId,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-              onRouteFrom: !available
-                  ? null
-                  : () {
-                      Navigator.of(context, rootNavigator: true).pop();
-                      setState(() => _routeStartRoomId = currentPlace.id);
-                      _planRoute();
-                    },
-              onRouteTo: !available
-                  ? null
-                  : () {
-                      Navigator.of(context, rootNavigator: true).pop();
-                      _planRoute(destinationRoomId: currentPlace.id);
-                    },
-            );
-          },
+                        );
+                      },
+                onRouteFrom: !canRouteFrom
+                    ? null
+                    : () {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        setState(() => _routeStartRoomId = currentPlace.id);
+                        _planRoute();
+                      },
+                onRouteTo: !canRouteTo
+                    ? null
+                    : () {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        _planRoute(destinationRoomId: currentPlace.id);
+                      },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -790,6 +833,12 @@ class _MapViewState extends State<MapView> {
             if (!mounted || !identical(campus, _landmarkSnapshot)) return;
             setState(() {
               _landmarkGraph = prepared.graph;
+              _routeDestinations.value = prepared.graph == null
+                  ? null
+                  : MapRouteDestinations(
+                      campus: campus,
+                      planner: IndoorRoutePlanner(prepared.graph!),
+                    );
               _floorLandmarks = prepared.byFloor;
             });
           }),
@@ -1061,6 +1110,33 @@ class _MapViewState extends State<MapView> {
     );
   }
 
+  Widget _routeOverlay(MapState state, {double? maxHeight}) {
+    final route = _route!;
+    final interactive = state.status == MapStatus.loaded;
+    return MapRouteOverlay(
+      campus: state.campusData!,
+      route: route,
+      stepIndex: _routeStep,
+      maxHeight: maxHeight,
+      onNext: interactive ? _advanceRoute : null,
+      onPrevious: interactive ? _retreatRoute : null,
+      onStepSelected: interactive
+          ? (index) {
+              if (!identical(_route, route) ||
+                  !identical(_routeSnapshot, state.campusData)) {
+                return;
+              }
+              _selectRouteStep(index);
+            }
+          : null,
+      onClose: () => setState(() {
+        _route = null;
+        _discardNavigationFocus();
+        _routeSnapshot = null;
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: context.colors.canvas,
@@ -1091,6 +1167,12 @@ class _MapViewState extends State<MapView> {
                 ((bottomInset + compactContentExtent) / constraints.maxHeight)
                     .clamp(.06, .42);
             _viewportHeight = constraints.maxHeight;
+            _routePanelWidth =
+                _route != null &&
+                    constraints.maxWidth >= 600 &&
+                    constraints.maxHeight < 600
+                ? math.min(320, constraints.maxWidth * .44)
+                : 0;
             _viewportTop =
                 _measuredTopExtent ??
                 (MediaQuery.paddingOf(context).top +
@@ -1147,52 +1229,61 @@ class _MapViewState extends State<MapView> {
                   top: 0,
                   left: 0,
                   right: 0,
-                  child: Column(
-                    key: _topOverlayKey,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      MapTopBar(
-                        compact: constraints.maxHeight < 650,
-                        showCampusSelector:
-                            _route == null || constraints.maxHeight >= 600,
-                        controller: _query,
-                        campuses: state.availableCampuses,
-                        selectedCampus: state.selectedCampus,
-                        onQueryChanged: _queryChanged,
-                        onCampusSelected: _campus,
-                        onFriends: _friends,
-                      ),
-                      if (_route case final route?)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                          child: MapRouteGuidance(
-                            campus: state.campusData!,
-                            route: route,
-                            stepIndex: _routeStep,
-                            onNext: interactive ? _advanceRoute : null,
-                            onPrevious: interactive ? _retreatRoute : null,
-                            onStepSelected: interactive
-                                ? (index) {
-                                    if (!identical(_route, route) ||
-                                        !identical(
-                                          _routeSnapshot,
-                                          state.campusData,
-                                        )) {
-                                      return;
-                                    }
-                                    _selectRouteStep(index);
-                                  }
-                                : null,
-                            onClose: () => setState(() {
-                              _route = null;
-                              _discardNavigationFocus();
-                              _routeSnapshot = null;
-                            }),
+                  child: NotificationListener<SizeChangedLayoutNotification>(
+                    onNotification: (_) {
+                      _measureTopOverlay();
+                      return false;
+                    },
+                    child: SizeChangedLayoutNotifier(
+                      child: Column(
+                        key: _topOverlayKey,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          MapTopBar(
+                            compact: constraints.maxHeight < 650,
+                            showCampusSelector:
+                                _route == null || constraints.maxHeight >= 600,
+                            controller: _query,
+                            campuses: state.availableCampuses,
+                            selectedCampus: state.selectedCampus,
+                            onQueryChanged: _queryChanged,
+                            onSearchClosed: _searchClosed,
+                            onCampusSelected: _campus,
+                            onFriends: _friends,
                           ),
-                        ),
-                    ],
+                          if (_route != null && _routePanelWidth == 0)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                              child: _routeOverlay(state),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
+                if (_route != null && _routePanelWidth > 0)
+                  AnimatedBuilder(
+                    animation: _panelExtent,
+                    builder: (context, _) {
+                      final extent = _panelController.isAttached
+                          ? _panelController.size
+                          : panelSize;
+                      final availableHeight =
+                          constraints.maxHeight * (1 - extent) -
+                          _viewportTop -
+                          AppSpacing.md;
+                      if (availableHeight <= 0 ||
+                          extent > _collapsedPanelSize + .1) {
+                        return const SizedBox.shrink();
+                      }
+                      return Positioned(
+                        left: AppSpacing.lg,
+                        top: _viewportTop + AppSpacing.sm,
+                        width: _routePanelWidth,
+                        child: _routeOverlay(state, maxHeight: availableHeight),
+                      );
+                    },
+                  ),
                 AnimatedBuilder(
                   animation: _panelExtent,
                   builder: (context, child) {

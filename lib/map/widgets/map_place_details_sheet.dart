@@ -20,6 +20,7 @@ class MapPlaceDetailsSheet extends StatefulWidget {
     this.onEditLocation,
     this.onClose,
     this.onRefreshMap,
+    this.routeUnavailableMessage,
     this.isRefreshing = false,
     super.key,
   });
@@ -32,6 +33,7 @@ class MapPlaceDetailsSheet extends StatefulWidget {
   final VoidCallback? onEditLocation;
   final VoidCallback? onClose;
   final VoidCallback? onRefreshMap;
+  final String? routeUnavailableMessage;
   final bool isRefreshing;
 
   @override
@@ -426,10 +428,12 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
             ),
           )
         else if (widget.onRouteTo == null)
-          const Padding(
-            padding: EdgeInsets.only(bottom: AppSpacing.lg),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             child: AppBanner(
-              message: 'Для этого места пока нет проверенного пути на плане.',
+              message:
+                  widget.routeUnavailableMessage ??
+                  'Для этого места пока нет проверенного пути на плане.',
               tone: AppBannerTone.warn,
             ),
           ),

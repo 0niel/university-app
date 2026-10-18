@@ -194,7 +194,10 @@ class _MapPlaceEditorPageState extends State<MapPlaceEditorPage> {
       final room = widget.room;
       if (room != null && (_kind == 'classroom' || _kind == 'room')) {
         final (rooms, _) = await SvgRoomParser(
-          onLoadSvg: widget.repository.loadSvg,
+          onLoadSvg: (path) => widget.repository.loadSvg(
+            path,
+            campus: widget.campus,
+          ),
         ).parseSvg(floor.floor.svgPath);
         if (!mounted) return;
         roomGeometry = rooms
@@ -306,6 +309,7 @@ class _MapPlaceEditorPageState extends State<MapPlaceEditorPage> {
                                 420.0,
                               ),
                           child: MapEditorFloorCanvas(
+                            campus: widget.campus,
                             key: ValueKey(floor.floor.id),
                             floor: floor,
                             repository: widget.repository,

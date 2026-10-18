@@ -672,7 +672,23 @@ class MapDataRepository {
     }
   }
 
-  Future<String> loadSvg(String path) async {
+  Future<String> loadSvg(String path, {CampusMapData? campus}) async {
+    if (campus != null) {
+      final floor = campus.floors
+          .where((floor) => floor.floor.svgPath == path)
+          .firstOrNull;
+      if (floor == null) {
+        throw const FormatException('Floor plan does not belong to the campus');
+      }
+      final document = _campusContent[campus];
+      if (document != null) {
+        final source = mapJsonRows(
+          document['floors'],
+        ).where((row) => row['id'] == floor.floor.id).firstOrNull;
+        final svg = _string(source?['svg']);
+        if (svg != null && svg.isNotEmpty) return svg;
+      }
+    }
     final inline = _inlineSvg[path];
     if (inline != null) return inline;
     final cached = _svg.remove(path);

@@ -166,7 +166,8 @@ void main() {
     expect(find.byType(AppInnerHeader), findsNothing);
     expect(find.byType(Divider), findsNothing);
     expect(find.text('В-78'), findsWidgets);
-    expect(find.text('Аудитория, кафедра, столовая'), findsOneWidget);
+    expect(find.byTooltip('Аудитория, кафедра, столовая'), findsOneWidget);
+    expect(find.byType(AppSearchField), findsNothing);
     expect(find.text('1 этаж'), findsWidgets);
 
     expect(find.byType(MapFreeRoomsPanel), findsOneWidget);
@@ -185,59 +186,44 @@ void main() {
     const size = Size(390, 844);
     await pumpMap(tester);
 
-    final search = tester.getRect(find.text('Аудитория, кафедра, столовая'));
+    await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+    await tester.pumpAndSettle();
+    final search = tester.getRect(find.byType(AppSearchField));
     expect(search.center.dy, lessThan(size.height * .2));
   });
 
   for (final scale in [1.0, 2.0]) {
-    testWidgets('friends action inside search works at 320px and $scale text', (
+    testWidgets('search can close back to friends at 320px and $scale text', (
       tester,
     ) async {
-      final semantics = tester.ensureSemantics();
-      try {
-        await pumpMap(
-          tester,
-          size: const Size(320, 568),
-          textScaler: TextScaler.linear(scale),
-        );
-        final search = find.byType(AppSearchField);
-        final friends = find.descendant(
-          of: search,
-          matching: find.bySemanticsLabel('Друзья на карте'),
-        );
-        expect(friends, findsOneWidget);
-        expect(
-          tester.getRect(search).contains(tester.getCenter(friends)),
-          isTrue,
-        );
-        await tester.enterText(search, 'А-101');
-        await tester.pumpAndSettle();
-        expect(friends, findsNothing);
-        final clearLabel = MaterialLocalizations.of(
-          tester.element(search),
-        ).deleteButtonTooltip;
-        await tester.tap(
-          find.descendant(
-            of: search,
-            matching: find.bySemanticsLabel(clearLabel),
-          ),
-        );
-        await tester.pumpAndSettle();
-        expect(friends, findsOneWidget);
-        await tester.tap(friends);
-        await tester.pumpAndSettle();
-        expect(
-          find.textContaining('Позиции внутри здания и этажи неизвестны.'),
-          findsOneWidget,
-        );
-        expect(
-          find.widgetWithText(AppButton, 'Друзья на карте'),
-          findsOneWidget,
-        );
-        expect(tester.takeException(), isNull);
-      } finally {
-        semantics.dispose();
-      }
+      await pumpMap(
+        tester,
+        size: const Size(320, 568),
+        textScaler: TextScaler.linear(scale),
+      );
+      expect(find.byTooltip('Друзья на карте'), findsOneWidget);
+      await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+      await tester.pumpAndSettle();
+      final search = find.byType(AppSearchField);
+      expect(search, findsOneWidget);
+      expect(find.byTooltip('Друзья на карте'), findsNothing);
+      await tester.enterText(search, 'А-101');
+      await tester.pumpAndSettle();
+      final back = MaterialLocalizations.of(
+        tester.element(search),
+      ).backButtonTooltip;
+      await tester.tap(find.byTooltip(back));
+      await tester.pumpAndSettle();
+      expect(search, findsNothing);
+      expect(find.byTooltip('Друзья на карте'), findsOneWidget);
+      await tester.tap(find.byTooltip('Друзья на карте'));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Позиции внутри здания и этажи неизвестны.'),
+        findsOneWidget,
+      );
+      expect(find.widgetWithText(AppButton, 'Друзья на карте'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   }
 
@@ -342,7 +328,10 @@ void main() {
     await tester.pump();
     expect(sheet.controller!.size, .78);
     expect(find.byType(MapCanvasControls), findsNothing);
-    expect(find.byType(AppSearchField).hitTestable(), findsOneWidget);
+    expect(
+      find.byTooltip('Аудитория, кафедра, столовая').hitTestable(),
+      findsOneWidget,
+    );
     expect(
       tester
           .widget<SvgInteractiveMap>(find.byType(SvgInteractiveMap))
@@ -449,6 +438,8 @@ void main() {
       find.byType(DraggableScrollableSheet),
     );
     expect(sheet.controller!.size, sheet.minChildSize);
+    await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'А-101');
     await tester.pumpAndSettle();
     verify(() => freeRooms.queryChanged('А-101')).called(1);
