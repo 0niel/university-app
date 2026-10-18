@@ -12,6 +12,7 @@ param(
 $ErrorActionPreference = 'Stop'
 New-Item -ItemType Directory -Force $InstallDir | Out-Null
 Copy-Item (Join-Path $PSScriptRoot 'local_proxy.mjs') (Join-Path $InstallDir 'local_proxy.mjs') -Force
+Copy-Item (Join-Path $PSScriptRoot 'server.mjs') (Join-Path $InstallDir 'server.mjs') -Force
 Copy-Item (Join-Path $PSScriptRoot 'relay-supervisor.ps1') (Join-Path $InstallDir 'relay-supervisor.ps1') -Force
 
 $cloudflared = Join-Path $InstallDir 'cloudflared.exe'
