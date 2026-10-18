@@ -20,6 +20,8 @@ enum _Scene {
   signUp,
   signUpInvalid,
   reset,
+  resetCode,
+  resetPassword,
   email,
   confirm,
   confirmInvalid,
@@ -62,6 +64,12 @@ void main() {
             code: any(named: 'code'),
           ),
         ).thenThrow(Exception('invalid'));
+        when(
+          () => repository.verifyPasswordResetCode(
+            email: any(named: 'email'),
+            code: any(named: 'code'),
+          ),
+        ).thenAnswer((_) async => 'verified-owner');
         await tester.pumpWidget(
           MultiRepositoryProvider(
             providers: [
@@ -81,6 +89,8 @@ void main() {
               home: switch (scene) {
                 _Scene.signUp || _Scene.signUpInvalid => const SignUpPage(),
                 _Scene.reset => const PasswordResetPage(),
+                _Scene.resetCode || _Scene.resetPassword =>
+                  const PasswordResetPage(initialEmail: 'student@mirea.ru'),
                 _Scene.email => const LoginWithEmailPage(),
                 _Scene.confirm || _Scene.confirmInvalid =>
                   const LoginEmailConfirmationPage(email: 'student@mirea.ru'),
@@ -102,6 +112,24 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        if (scene == _Scene.resetCode || scene == _Scene.resetPassword) {
+          await tester.tap(
+            find.byKey(const Key('passwordResetPage_haveCodeButton')),
+          );
+          await tester.pumpAndSettle();
+          if (scene == _Scene.resetPassword) {
+            await tester.enterText(
+              find.descendant(
+                of: find.byKey(const Key('passwordResetPage_codeInput')),
+                matching: find.byType(EditableText),
+              ),
+              '123456',
+            );
+            await tester.pumpAndSettle();
+          }
+          FocusManager.instance.primaryFocus?.unfocus();
+          await tester.pumpAndSettle();
+        }
         if (scene == _Scene.signUpInvalid) {
           await tester.enterText(
             find.descendant(

@@ -6071,13 +6071,13 @@ abstract class AppLocalizations {
   /// No description provided for @authPasswordResetSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enter your email — we\'\'ll send a recovery link.'**
+  /// **'Enter your email — we\'\'ll send a recovery code.'**
   String get authPasswordResetSubtitle;
 
   /// No description provided for @authPasswordResetButton.
   ///
   /// In en, this message translates to:
-  /// **'Send link'**
+  /// **'Send code'**
   String get authPasswordResetButton;
 
   /// No description provided for @authPasswordResetSent.
@@ -6091,6 +6091,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'\'t send the email. Try again.'**
   String get authPasswordResetFailed;
+
+  /// No description provided for @authPasswordResetHaveCode.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have a code'**
+  String get authPasswordResetHaveCode;
+
+  /// No description provided for @authPasswordResetCodeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the recovery code sent to {email}.'**
+  String authPasswordResetCodeSubtitle(String email);
+
+  /// No description provided for @authPasswordResetCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your spam folder if the email has not arrived.'**
+  String get authPasswordResetCodeHint;
+
+  /// No description provided for @authPasswordResetVerifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify code'**
+  String get authPasswordResetVerifyCode;
+
+  /// No description provided for @authPasswordResetResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code again'**
+  String get authPasswordResetResend;
+
+  /// No description provided for @authPasswordResetResendAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again in {seconds}s'**
+  String authPasswordResetResendAfter(int seconds);
+
+  /// No description provided for @authPasswordResetNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get authPasswordResetNewTitle;
+
+  /// No description provided for @authPasswordResetNewTitleAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'password'**
+  String get authPasswordResetNewTitleAccent;
+
+  /// No description provided for @authPasswordResetNewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access confirmed. Choose a new password for your account.'**
+  String get authPasswordResetNewSubtitle;
+
+  /// No description provided for @authPasswordResetSavePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get authPasswordResetSavePassword;
+
+  /// No description provided for @authPasswordResetComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed'**
+  String get authPasswordResetComplete;
+
+  /// No description provided for @authPasswordResetVerifyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'\'t verify the code. Check your connection and try again.'**
+  String get authPasswordResetVerifyFailed;
+
+  /// No description provided for @authPasswordResetRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many email requests. Enter the code you already received or wait before sending another.'**
+  String get authPasswordResetRateLimited;
+
+  /// No description provided for @authPasswordResetWeakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a stronger password: this one does not meet the security requirements.'**
+  String get authPasswordResetWeakPassword;
+
+  /// No description provided for @authPasswordResetSamePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password different from your previous one.'**
+  String get authPasswordResetSamePassword;
+
+  /// No description provided for @authPasswordResetSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recovery session has ended. Request a new code.'**
+  String get authPasswordResetSessionExpired;
+
+  /// No description provided for @authPasswordResetUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'\'t save the password. Try again — you do not need to enter the code again.'**
+  String get authPasswordResetUpdateFailed;
 
   /// No description provided for @authCheckEmailTitle.
   ///

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/profile/widgets/guest_upgrade_sheet.dart';
 import 'package:rtu_mirea_app/profile/widgets/widgets.dart';
 import 'package:user_repository/user_repository.dart';
@@ -19,7 +20,6 @@ class AccountManagementPage extends StatefulWidget {
 
 class _AccountManagementPageState extends State<AccountManagementPage> {
   var _busy = false;
-  var _resetSent = false;
   String? _error;
 
   bool _current(String userId) =>
@@ -38,7 +38,6 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
       listenWhen: (previous, current) => previous.user.id != current.user.id,
       listener: (context, state) => setState(() {
         _busy = false;
-        _resetSent = false;
         _error = null;
       }),
       child: Scaffold(
@@ -88,13 +87,14 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                           SettingsRow(
                             title: l10n.accountChangePassword,
                             lineIcon: AppLineIcon.lock,
-                            subtitle: _resetSent
-                                ? l10n.accountResetSent
-                                : l10n.accountChangePasswordSub,
+                            subtitle: l10n.accountChangePasswordSub,
                             valueColor: colors.accent,
                             enabled: !_busy,
-                            onTap: () =>
-                                unawaited(_resetPassword(context, email)),
+                            onTap: () => unawaited(
+                              PasswordResetRoute(email: email).push<void>(
+                                context,
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -132,34 +132,6 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _resetPassword(BuildContext context, String email) async {
-    if (_busy) return;
-    final userId = context.read<AppBloc>().state.user.id;
-    final l10n = context.l10n;
-    final repository = context.read<UserRepository>();
-    setState(() {
-      _busy = true;
-      _error = null;
-      _resetSent = false;
-    });
-    try {
-      await repository.sendPasswordResetEmail(email: email);
-      if (_current(userId)) {
-        setState(() => _resetSent = true);
-      }
-    } on Exception catch (error, stackTrace) {
-      log(
-        'Password reset failed',
-        error: error,
-        stackTrace: stackTrace,
-        name: 'AccountManagementPage',
-      );
-      if (_current(userId)) setState(() => _error = l10n.accountResetError);
-    } finally {
-      if (_current(userId)) setState(() => _busy = false);
-    }
   }
 
   Future<void> _confirmSignOut() async {

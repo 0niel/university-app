@@ -3391,10 +3391,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authPasswordResetSubtitle =>
-      'Enter your email — we\'\'ll send a recovery link.';
+      'Enter your email — we\'\'ll send a recovery code.';
 
   @override
-  String get authPasswordResetButton => 'Send link';
+  String get authPasswordResetButton => 'Send code';
 
   @override
   String get authPasswordResetSent =>
@@ -3403,6 +3403,69 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authPasswordResetFailed =>
       'Couldn\'\'t send the email. Try again.';
+
+  @override
+  String get authPasswordResetHaveCode => 'I already have a code';
+
+  @override
+  String authPasswordResetCodeSubtitle(String email) {
+    return 'Enter the recovery code sent to $email.';
+  }
+
+  @override
+  String get authPasswordResetCodeHint =>
+      'Check your spam folder if the email has not arrived.';
+
+  @override
+  String get authPasswordResetVerifyCode => 'Verify code';
+
+  @override
+  String get authPasswordResetResend => 'Send code again';
+
+  @override
+  String authPasswordResetResendAfter(int seconds) {
+    return 'Send again in ${seconds}s';
+  }
+
+  @override
+  String get authPasswordResetNewTitle => 'New password';
+
+  @override
+  String get authPasswordResetNewTitleAccent => 'password';
+
+  @override
+  String get authPasswordResetNewSubtitle =>
+      'Access confirmed. Choose a new password for your account.';
+
+  @override
+  String get authPasswordResetSavePassword => 'Save password';
+
+  @override
+  String get authPasswordResetComplete => 'Password changed';
+
+  @override
+  String get authPasswordResetVerifyFailed =>
+      'Couldn\'\'t verify the code. Check your connection and try again.';
+
+  @override
+  String get authPasswordResetRateLimited =>
+      'Too many email requests. Enter the code you already received or wait before sending another.';
+
+  @override
+  String get authPasswordResetWeakPassword =>
+      'Choose a stronger password: this one does not meet the security requirements.';
+
+  @override
+  String get authPasswordResetSamePassword =>
+      'Choose a password different from your previous one.';
+
+  @override
+  String get authPasswordResetSessionExpired =>
+      'Your recovery session has ended. Request a new code.';
+
+  @override
+  String get authPasswordResetUpdateFailed =>
+      'Couldn\'\'t save the password. Try again — you do not need to enter the code again.';
 
   @override
   String get authCheckEmailTitle => 'Check your email';

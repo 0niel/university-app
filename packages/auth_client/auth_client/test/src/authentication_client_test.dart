@@ -25,6 +25,12 @@ class FakeAuthenticationClient extends Fake implements AuthenticationClient {
   }) async {}
 
   @override
+  Future<String> verifyPasswordResetCode({
+    required String email,
+    required String code,
+  }) async => 'verified-user';
+
+  @override
   Future<void> logOut() async {}
 
   @override

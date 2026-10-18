@@ -3,100 +3,118 @@ import 'dart:async';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:formz/formz.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/login/login.dart';
+import 'package:rtu_mirea_app/login/widgets/password_reset_code_step.dart';
+import 'package:rtu_mirea_app/login/widgets/password_reset_email_step.dart';
+import 'package:rtu_mirea_app/login/widgets/password_reset_feedback.dart';
+import 'package:rtu_mirea_app/login/widgets/password_reset_password_step.dart';
 
 class PasswordResetPage extends StatelessWidget {
-  const PasswordResetPage({super.key});
+  const PasswordResetPage({this.initialEmail = '', super.key});
+
+  final String initialEmail;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (innerContext) => PasswordResetBloc(
         userRepository: innerContext.read(),
+        initialEmail: initialEmail,
       ),
       child: const _PasswordResetView(),
     );
   }
 }
 
-class _PasswordResetView extends StatefulWidget {
+class _PasswordResetView extends StatelessWidget {
   const _PasswordResetView();
-
-  @override
-  State<_PasswordResetView> createState() => _PasswordResetViewState();
-}
-
-class _PasswordResetViewState extends State<_PasswordResetView> {
-  final _emailController = TextEditingController();
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bloc = context.read<PasswordResetBloc>();
-    return Scaffold(
-      backgroundColor: context.colors.canvas,
-      body: BlocListener<PasswordResetBloc, PasswordResetState>(
-        listenWhen: (previous, current) => previous.status != current.status,
-        listener: (context, state) {
-          if (state.status.isSuccess) {
-            ToastManager.showSuccess(
-              context,
-              message: l10n.authPasswordResetSent,
-            );
+    return BlocConsumer<PasswordResetBloc, PasswordResetState>(
+      listenWhen: (previous, current) =>
+          previous.step != current.step && current.step == .complete,
+      listener: (context, state) {
+        FocusScope.of(context).unfocus();
+        ToastManager.showSuccess(
+          context,
+          message: l10n.authPasswordResetComplete,
+        );
+        final router = GoRouter.maybeOf(context);
+        if (router != null) {
+          router.go('/auth');
+        } else {
+          unawaited(Navigator.of(context).maybePop());
+        }
+      },
+      builder: (context, state) {
+        void back() {
+          if (state.step == .code && !state.isBusy) {
+            bloc.add(const PasswordResetEmailEntryRequested());
+          } else {
             unawaited(Navigator.of(context).maybePop());
-          } else if (state.status.isFailure) {
-            ToastManager.showError(
-              context,
-              message: l10n.authPasswordResetFailed,
-            );
           }
-        },
-        child: AuthPageLayout(
-          title: l10n.authPasswordResetTitle,
-          titleAccent: l10n.authPasswordResetTitleAccent,
-          subtitle: l10n.authPasswordResetSubtitle,
-          leading: const AppEntryEmblem(icon: AppLineIcon.lock),
-          onBack: () => Navigator.of(context).maybePop(),
-          actions: const _PasswordResetButton(),
-          child: BlocBuilder<PasswordResetBloc, PasswordResetState>(
-            buildWhen: (previous, current) =>
-                previous.email != current.email ||
-                previous.status != current.status,
-            builder: (context, state) {
-              final showError = state.email.isNotValid && !state.email.isPure;
-              return AppInputField(
-                key: const Key('passwordResetPage_emailInput'),
-                controller: _emailController,
-                readOnly: state.status.isInProgress,
-                label: l10n.authYourEmail,
-                leadingIcon: AppLineIcon.at,
-                placeholder: l10n.loginEmailPlaceholder,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.done,
-                autocorrect: false,
-                enableSuggestions: false,
-                onChanged: (value) =>
-                    bloc.add(PasswordResetEmailChanged(value)),
-                onSubmitted: (_) {
-                  if (bloc.state.isValid && !bloc.state.status.isInProgress) {
-                    bloc.add(PasswordResetRequested());
-                  }
-                },
-                validateOnBlur: true,
-                errorText: showError ? l10n.authInvalidEmail : null,
-              );
-            },
+        }
+
+        return PopScope(
+          canPop: state.step != .code || state.isBusy,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) back();
+          },
+          child: Scaffold(
+            backgroundColor: context.colors.canvas,
+            body: AuthPageLayout(
+              title: switch (state.step) {
+                .email => l10n.authPasswordResetTitle,
+                .code => l10n.authCheckEmailTitle,
+                .password || .complete => l10n.authPasswordResetNewTitle,
+              },
+              titleAccent: switch (state.step) {
+                .email => l10n.authPasswordResetTitleAccent,
+                .code => l10n.authCheckEmailTitleAccent,
+                .password || .complete => l10n.authPasswordResetNewTitleAccent,
+              },
+              subtitle: switch (state.step) {
+                .email => l10n.authPasswordResetSubtitle,
+                .code => l10n.authPasswordResetCodeSubtitle(state.email.value),
+                .password || .complete => l10n.authPasswordResetNewSubtitle,
+              },
+              leading: AppEntryEmblem(
+                icon: state.step == .code
+                    ? AppLineIcon.message
+                    : AppLineIcon.lock,
+              ),
+              step: state.step == .complete ? 3 : state.step.index + 1,
+              totalSteps: 3,
+              contentIdentity: state.step,
+              onBack: back,
+              actions: const _PasswordResetButton(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  switch (state.step) {
+                    .email => const PasswordResetEmailStep(),
+                    .code => const PasswordResetCodeStep(),
+                    .password => const PasswordResetPasswordStep(),
+                    .complete => AppBanner(
+                      message: l10n.authPasswordResetComplete,
+                      tone: AppBannerTone.success,
+                    ),
+                  },
+                  if (state.error != null) ...[
+                    const SizedBox(height: 18),
+                    PasswordResetFeedback(error: state.error!),
+                  ],
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -107,16 +125,32 @@ class _PasswordResetButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<PasswordResetBloc>().state;
+    final l10n = context.l10n;
+    final canSubmit =
+        state.isValid &&
+        !state.isBusy &&
+        (state.step != .email || state.canResend);
     return AppButton.primary(
       key: const Key('passwordResetPage_submitButton'),
-      label: context.l10n.authPasswordResetButton,
+      label: switch (state.step) {
+        .email =>
+          state.resendSeconds > 0
+              ? l10n.authPasswordResetResendAfter(state.resendSeconds)
+              : l10n.authPasswordResetButton,
+        .code => l10n.authPasswordResetVerifyCode,
+        .password || .complete => l10n.authPasswordResetSavePassword,
+      },
       size: AppButtonSize.hero,
       expanded: true,
-      loading: state.status.isInProgress,
-      onPressed: state.isValid
-          ? () => context.read<PasswordResetBloc>().add(
-              PasswordResetRequested(),
-            )
+      loading: state.isBusy,
+      onPressed: canSubmit
+          ? () {
+              context.read<PasswordResetBloc>().add(switch (state.step) {
+                .email => PasswordResetRequested(),
+                .code => const PasswordResetCodeSubmitted(),
+                .password || .complete => const PasswordResetSubmitted(),
+              });
+            }
           : null,
     );
   }

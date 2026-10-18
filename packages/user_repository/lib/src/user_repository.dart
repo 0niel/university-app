@@ -198,6 +198,22 @@ class UserRepository {
     }
   }
 
+  Future<String> verifyPasswordResetCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      return await _authenticationClient.verifyPasswordResetCode(
+        email: email,
+        code: code,
+      );
+    } on ResetPasswordFailure {
+      rethrow;
+    } on Exception catch (error, stackTrace) {
+      Error.throwWithStackTrace(ResetPasswordFailure(error), stackTrace);
+    }
+  }
+
   /// Confirms a password reset using the one-time [code] sent to [email] and
   /// sets the [newPassword].
   ///

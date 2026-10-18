@@ -193,6 +193,50 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
   }
 
   @override
+  Future<String> verifyPasswordResetCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      _ensureNoGuestSession();
+      final expectedEmail = email.trim().toLowerCase();
+      if (expectedEmail.isEmpty || code.trim().isEmpty) {
+        throw StateError('An email and recovery code are required.');
+      }
+      final response = await _supabaseAuth.verifyOTP(
+        email: email.trim(),
+        token: code.trim(),
+        type: OtpType.recovery,
+      );
+      final verified = response.user;
+      final session = response.session;
+      final currentSession = _supabaseAuth.currentSession;
+      final current = _supabaseAuth.currentUser;
+      bool matches(User? user) =>
+          user != null &&
+          user.id == verified?.id &&
+          !user.isAnonymous &&
+          (user.emailConfirmedAt?.isNotEmpty ?? false) &&
+          user.email?.trim().toLowerCase() == expectedEmail;
+      if (verified == null ||
+          verified.id.trim().isEmpty ||
+          session == null ||
+          session.accessToken.trim().isEmpty ||
+          currentSession == null ||
+          currentSession.accessToken.trim().isEmpty ||
+          !matches(verified) ||
+          !matches(session.user) ||
+          !matches(currentSession.user) ||
+          !matches(current)) {
+        throw StateError('The verified recovery session does not match.');
+      }
+      return verified.id;
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(ResetPasswordFailure(error), stackTrace);
+    }
+  }
+
+  @override
   Future<void> resetPassword({
     required String email,
     required String code,

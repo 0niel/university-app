@@ -37,7 +37,6 @@ void main() {
         expect: () => <PasswordResetState>[
           const PasswordResetState(
             email: Email.dirty(validEmail),
-            isValid: true,
           ),
         ],
       );
@@ -57,7 +56,6 @@ void main() {
     group('PasswordResetRequested', () {
       const validState = PasswordResetState(
         email: Email.dirty(validEmail),
-        isValid: true,
       );
 
       blocTest<PasswordResetBloc, PasswordResetState>(
@@ -75,13 +73,16 @@ void main() {
       );
 
       blocTest<PasswordResetBloc, PasswordResetState>(
-        'emits [inProgress, success] when sendPasswordResetEmail succeeds',
+        'opens code entry when sendPasswordResetEmail succeeds',
         build: buildBloc,
         seed: () => validState,
         act: (bloc) => bloc.add(PasswordResetRequested()),
         expect: () => <PasswordResetState>[
           validState.copyWith(status: FormzSubmissionStatus.inProgress),
-          validState.copyWith(status: FormzSubmissionStatus.success),
+          validState.copyWith(
+            step: PasswordResetStep.code,
+            resendSeconds: 60,
+          ),
         ],
         verify: (_) {
           verify(
@@ -104,7 +105,10 @@ void main() {
         act: (bloc) => bloc.add(PasswordResetRequested()),
         expect: () => <PasswordResetState>[
           validState.copyWith(status: FormzSubmissionStatus.inProgress),
-          validState.copyWith(status: FormzSubmissionStatus.failure),
+          validState.copyWith(
+            status: FormzSubmissionStatus.failure,
+            error: PasswordResetError.sendFailed,
+          ),
         ],
         verify: (_) {
           verify(
