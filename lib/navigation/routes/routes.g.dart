@@ -98,10 +98,15 @@ RouteBase get $passwordResetRoute => GoRouteData.$route(
 
 mixin $PasswordResetRoute on GoRouteData {
   static PasswordResetRoute _fromState(GoRouterState state) =>
-      const PasswordResetRoute();
+      PasswordResetRoute(email: state.uri.queryParameters['email']);
+
+  PasswordResetRoute get _self => this as PasswordResetRoute;
 
   @override
-  String get location => GoRouteData.$location('/password-reset');
+  String get location => GoRouteData.$location(
+    '/password-reset',
+    queryParams: {if (_self.email != null) 'email': _self.email},
+  );
 
   @override
   void go(BuildContext context) => context.go(location);

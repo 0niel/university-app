@@ -87,6 +87,11 @@ abstract class AuthenticationClient {
   /// Throws a [SendPasswordResetEmailFailure] if an exception occurs.
   Future<void> sendPasswordResetEmail({required String email});
 
+  Future<String> verifyPasswordResetCode({
+    required String email,
+    required String code,
+  });
+
   /// Confirms a password reset using the one-time [code] sent to [email] and
   /// sets the [newPassword].
   ///

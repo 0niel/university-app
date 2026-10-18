@@ -6,9 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamification_repository/gamification_repository.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/login/login.dart';
+import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/profile/cubit/profile_cubit.dart';
 import 'package:rtu_mirea_app/profile/view/account_management_page.dart';
 import 'package:rtu_mirea_app/profile/widgets/edit_identity_sheet.dart';
@@ -93,6 +96,51 @@ void main() {
           ),
         ),
       );
+
+  Future<GoRouter> pumpAccountRecovery(
+    WidgetTester tester,
+    AppBloc app,
+    UserRepository repository,
+  ) async {
+    final router = GoRouter(
+      initialLocation: '/account',
+      routes: [
+        GoRoute(
+          path: '/account',
+          builder: (_, _) => const AccountManagementPage(),
+        ),
+        Routes.all.whereType<GoRoute>().singleWhere(
+          (route) => route.path == '/password-reset',
+        ),
+      ],
+    );
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      router.dispose();
+    });
+    await tester.pumpWidget(
+      RepositoryProvider<UserRepository>.value(
+        value: repository,
+        child: BlocProvider<AppBloc>.value(
+          value: app,
+          child: MaterialApp.router(
+            routerConfig: router,
+            theme: AppTheme.lightTheme,
+            locale: const Locale('ru'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: NinjaToastHost(child: child!),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return router;
+  }
 
   testWidgets(
     'account deletion requires confirmation and failure stays recoverable',
@@ -333,7 +381,7 @@ void main() {
   }
 
   testWidgets(
-    'account reset is single flight and exposes a recoverable error',
+    'account password action opens prefilled recovery before sending a code',
     (tester) async {
       final app = _App();
       final repository = _UserRepository();
@@ -343,42 +391,102 @@ void main() {
           user: User(id: 'one', email: 'anna@example.org'),
         ),
       );
-      final response = Completer<void>();
       when(
         () => repository.sendPasswordResetEmail(email: 'anna@example.org'),
-      ).thenAnswer((_) => response.future);
-      await tester.pumpWidget(
-        RepositoryProvider<UserRepository>.value(
-          value: repository,
-          child: BlocProvider<AppBloc>.value(
-            value: app,
-            child: MaterialApp(
-              theme: AppTheme.lightTheme,
-              locale: const Locale('ru'),
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              home: const AccountManagementPage(),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      ).thenAnswer((_) async {});
+      await pumpAccountRecovery(tester, app, repository);
       await tester.tap(find.text(l10n.accountChangePassword));
-      await tester.pump();
-      final row = tester.widget<SettingsRow>(
-        find.ancestor(
-          of: find.text(l10n.accountChangePassword),
-          matching: find.byType(SettingsRow),
-        ),
-      );
-      expect(row.enabled, isFalse);
-      response.completeError(Exception('offline'));
       await tester.pumpAndSettle();
-      expect(find.text(l10n.accountResetError), findsOneWidget);
-      expect(find.text(l10n.accountResetSent), findsNothing);
+      expect(find.byType(PasswordResetPage), findsOneWidget);
+      final resetUri = GoRouterState.of(
+        tester.element(find.byType(PasswordResetPage)),
+      ).uri;
+      expect(resetUri.path, '/password-reset');
+      expect(
+        resetUri.queryParameters['email'],
+        'anna@example.org',
+      );
+      final emailInput = find.descendant(
+        of: find.byKey(const Key('passwordResetPage_emailInput')),
+        matching: find.byType(EditableText),
+      );
+      expect(
+        tester.widget<EditableText>(emailInput).controller.text,
+        'anna@example.org',
+      );
+      verifyNever(
+        () => repository.sendPasswordResetEmail(email: any(named: 'email')),
+      );
+
+      await tester.tap(find.byKey(const Key('passwordResetPage_submitButton')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('passwordResetPage_codeInput')),
+        findsOneWidget,
+      );
       verify(
         () => repository.sendPasswordResetEmail(email: 'anna@example.org'),
       ).called(1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'account recovery keeps a failed request editable and returns to settings',
+    (tester) async {
+      final app = _App();
+      final repository = _UserRepository();
+      when(() => app.state).thenReturn(
+        const AppState(
+          status: AppStatus.authenticated,
+          user: User(id: 'one', email: 'anna@example.org'),
+        ),
+      );
+      when(
+        () => repository.sendPasswordResetEmail(email: 'anna@example.org'),
+      ).thenThrow(Exception('offline'));
+      final router = await pumpAccountRecovery(tester, app, repository);
+      await tester.tap(find.text(l10n.accountChangePassword));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('passwordResetPage_submitButton')));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.authPasswordResetFailed), findsOneWidget);
+      expect(
+        tester
+            .widget<EditableText>(
+              find.descendant(
+                of: find.byKey(const Key('passwordResetPage_emailInput')),
+                matching: find.byType(EditableText),
+              ),
+            )
+            .controller
+            .text,
+        'anna@example.org',
+      );
+      verify(
+        () => repository.sendPasswordResetEmail(email: 'anna@example.org'),
+      ).called(1);
+
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(AccountManagementPage), findsOneWidget);
+      expect(find.text(l10n.accountResetSent), findsNothing);
+      for (final title in [l10n.profileSignOut, l10n.accountDelete]) {
+        expect(
+          tester
+              .widget<SettingsRow>(
+                find.ancestor(
+                  of: find.text(title),
+                  matching: find.byType(SettingsRow),
+                ),
+              )
+              .enabled,
+          isTrue,
+        );
+      }
+      verifyNever(repository.deleteAccount);
+      verifyNever(() => app.add(const AppLogoutRequested()));
+      expect(tester.takeException(), isNull);
     },
   );
 }

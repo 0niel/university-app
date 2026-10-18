@@ -3443,10 +3443,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get authPasswordResetSubtitle =>
-      'Введите email — мы отправим ссылку для восстановления доступа.';
+      'Введите email — мы отправим код для восстановления доступа.';
 
   @override
-  String get authPasswordResetButton => 'Отправить ссылку';
+  String get authPasswordResetButton => 'Отправить код';
 
   @override
   String get authPasswordResetSent =>
@@ -3455,6 +3455,69 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get authPasswordResetFailed =>
       'Не удалось отправить письмо. Попробуйте ещё раз.';
+
+  @override
+  String get authPasswordResetHaveCode => 'У меня уже есть код';
+
+  @override
+  String authPasswordResetCodeSubtitle(String email) {
+    return 'Введите код восстановления из письма на $email.';
+  }
+
+  @override
+  String get authPasswordResetCodeHint =>
+      'Если письма нет, проверьте папку «Спам».';
+
+  @override
+  String get authPasswordResetVerifyCode => 'Подтвердить код';
+
+  @override
+  String get authPasswordResetResend => 'Отправить код ещё раз';
+
+  @override
+  String authPasswordResetResendAfter(int seconds) {
+    return 'Отправить снова через $seconds с';
+  }
+
+  @override
+  String get authPasswordResetNewTitle => 'Новый пароль';
+
+  @override
+  String get authPasswordResetNewTitleAccent => 'пароль';
+
+  @override
+  String get authPasswordResetNewSubtitle =>
+      'Доступ подтверждён. Придумайте новый пароль для вашего аккаунта.';
+
+  @override
+  String get authPasswordResetSavePassword => 'Сохранить пароль';
+
+  @override
+  String get authPasswordResetComplete => 'Пароль изменён';
+
+  @override
+  String get authPasswordResetVerifyFailed =>
+      'Не удалось проверить код. Проверьте соединение и повторите попытку.';
+
+  @override
+  String get authPasswordResetRateLimited =>
+      'Письма запрашиваются слишком часто. Введите уже полученный код или дождитесь повторной отправки.';
+
+  @override
+  String get authPasswordResetWeakPassword =>
+      'Выберите более сложный пароль: этот не соответствует требованиям безопасности.';
+
+  @override
+  String get authPasswordResetSamePassword =>
+      'Новый пароль должен отличаться от прежнего.';
+
+  @override
+  String get authPasswordResetSessionExpired =>
+      'Сессия восстановления завершилась. Запросите новый код.';
+
+  @override
+  String get authPasswordResetUpdateFailed =>
+      'Не удалось сохранить пароль. Попробуйте ещё раз — код повторно вводить не нужно.';
 
   @override
   String get authCheckEmailTitle => 'Проверьте почту';

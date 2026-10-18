@@ -91,11 +91,13 @@ class SignUpRoute extends GoRouteData with $SignUpRoute {
 @TypedGoRoute<PasswordResetRoute>(path: '/password-reset')
 @immutable
 class PasswordResetRoute extends GoRouteData with $PasswordResetRoute {
-  const PasswordResetRoute();
+  const PasswordResetRoute({this.email});
+
+  final String? email;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const PasswordResetPage();
+    return PasswordResetPage(initialEmail: email ?? '');
   }
 }
 
@@ -946,6 +948,8 @@ GoRouter createRouter({
     final inAuthFlow = _isAuthFlowLocation(state.matchedLocation);
 
     if (!isLoggedIn && !inAuthFlow) return '/auth';
+
+    if (state.matchedLocation == '/password-reset') return null;
 
     final isMobile =
         !kIsWeb &&

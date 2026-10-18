@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PasswordResetState {
 
- Email get email; FormzSubmissionStatus get status; bool get isValid;
+ PasswordResetStep get step; Email get email; String get code; Password get password; ConfirmedPassword get confirmedPassword; String? get verifiedUserId; FormzSubmissionStatus get status; PasswordResetError? get error; int get resendSeconds;
 /// Create a copy of PasswordResetState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $PasswordResetStateCopyWith<PasswordResetState> get copyWith => _$PasswordResetS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PasswordResetState&&(identical(other.email, email) || other.email == email)&&(identical(other.status, status) || other.status == status)&&(identical(other.isValid, isValid) || other.isValid == isValid));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PasswordResetState&&(identical(other.step, step) || other.step == step)&&(identical(other.email, email) || other.email == email)&&(identical(other.code, code) || other.code == code)&&(identical(other.password, password) || other.password == password)&&(identical(other.confirmedPassword, confirmedPassword) || other.confirmedPassword == confirmedPassword)&&(identical(other.verifiedUserId, verifiedUserId) || other.verifiedUserId == verifiedUserId)&&(identical(other.status, status) || other.status == status)&&(identical(other.error, error) || other.error == error)&&(identical(other.resendSeconds, resendSeconds) || other.resendSeconds == resendSeconds));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,email,status,isValid);
+int get hashCode => Object.hash(runtimeType,step,email,code,password,confirmedPassword,verifiedUserId,status,error,resendSeconds);
 
 @override
 String toString() {
-  return 'PasswordResetState(email: $email, status: $status, isValid: $isValid)';
+  return 'PasswordResetState(step: $step, email: $email, code: $code, password: $password, confirmedPassword: $confirmedPassword, verifiedUserId: $verifiedUserId, status: $status, error: $error, resendSeconds: $resendSeconds)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $PasswordResetStateCopyWith<$Res>  {
   factory $PasswordResetStateCopyWith(PasswordResetState value, $Res Function(PasswordResetState) _then) = _$PasswordResetStateCopyWithImpl;
 @useResult
 $Res call({
- Email email, FormzSubmissionStatus status, bool isValid
+ PasswordResetStep step, Email email, String code, Password password, ConfirmedPassword confirmedPassword, String? verifiedUserId, FormzSubmissionStatus status, PasswordResetError? error, int resendSeconds
 });
 
 
@@ -62,12 +62,18 @@ class _$PasswordResetStateCopyWithImpl<$Res>
 
 /// Create a copy of PasswordResetState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? status = null,Object? isValid = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? step = null,Object? email = null,Object? code = null,Object? password = null,Object? confirmedPassword = null,Object? verifiedUserId = freezed,Object? status = null,Object? error = freezed,Object? resendSeconds = null,}) {
   return _then(_self.copyWith(
-email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as Email,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as FormzSubmissionStatus,isValid: null == isValid ? _self.isValid : isValid // ignore: cast_nullable_to_non_nullable
-as bool,
+step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
+as PasswordResetStep,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as Email,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as Password,confirmedPassword: null == confirmedPassword ? _self.confirmedPassword : confirmedPassword // ignore: cast_nullable_to_non_nullable
+as ConfirmedPassword,verifiedUserId: freezed == verifiedUserId ? _self.verifiedUserId : verifiedUserId // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as FormzSubmissionStatus,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as PasswordResetError?,resendSeconds: null == resendSeconds ? _self.resendSeconds : resendSeconds // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -152,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Email email,  FormzSubmissionStatus status,  bool isValid)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PasswordResetStep step,  Email email,  String code,  Password password,  ConfirmedPassword confirmedPassword,  String? verifiedUserId,  FormzSubmissionStatus status,  PasswordResetError? error,  int resendSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PasswordResetState() when $default != null:
-return $default(_that.email,_that.status,_that.isValid);case _:
+return $default(_that.step,_that.email,_that.code,_that.password,_that.confirmedPassword,_that.verifiedUserId,_that.status,_that.error,_that.resendSeconds);case _:
   return orElse();
 
 }
@@ -173,10 +179,10 @@ return $default(_that.email,_that.status,_that.isValid);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Email email,  FormzSubmissionStatus status,  bool isValid)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PasswordResetStep step,  Email email,  String code,  Password password,  ConfirmedPassword confirmedPassword,  String? verifiedUserId,  FormzSubmissionStatus status,  PasswordResetError? error,  int resendSeconds)  $default,) {final _that = this;
 switch (_that) {
 case _PasswordResetState():
-return $default(_that.email,_that.status,_that.isValid);case _:
+return $default(_that.step,_that.email,_that.code,_that.password,_that.confirmedPassword,_that.verifiedUserId,_that.status,_that.error,_that.resendSeconds);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -193,10 +199,10 @@ return $default(_that.email,_that.status,_that.isValid);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Email email,  FormzSubmissionStatus status,  bool isValid)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PasswordResetStep step,  Email email,  String code,  Password password,  ConfirmedPassword confirmedPassword,  String? verifiedUserId,  FormzSubmissionStatus status,  PasswordResetError? error,  int resendSeconds)?  $default,) {final _that = this;
 switch (_that) {
 case _PasswordResetState() when $default != null:
-return $default(_that.email,_that.status,_that.isValid);case _:
+return $default(_that.step,_that.email,_that.code,_that.password,_that.confirmedPassword,_that.verifiedUserId,_that.status,_that.error,_that.resendSeconds);case _:
   return null;
 
 }
@@ -208,12 +214,18 @@ return $default(_that.email,_that.status,_that.isValid);case _:
 
 
 class _PasswordResetState extends PasswordResetState {
-  const _PasswordResetState({this.email = const Email.pure(), this.status = FormzSubmissionStatus.initial, this.isValid = false}): super._();
+  const _PasswordResetState({this.step = PasswordResetStep.email, this.email = const Email.pure(), this.code = '', this.password = const Password.pure(), this.confirmedPassword = const ConfirmedPassword.pure(), this.verifiedUserId, this.status = FormzSubmissionStatus.initial, this.error, this.resendSeconds = 0}): super._();
 
 
+@override@JsonKey() final  PasswordResetStep step;
 @override@JsonKey() final  Email email;
+@override@JsonKey() final  String code;
+@override@JsonKey() final  Password password;
+@override@JsonKey() final  ConfirmedPassword confirmedPassword;
+@override final  String? verifiedUserId;
 @override@JsonKey() final  FormzSubmissionStatus status;
-@override@JsonKey() final  bool isValid;
+@override final  PasswordResetError? error;
+@override@JsonKey() final  int resendSeconds;
 
 /// Create a copy of PasswordResetState
 /// with the given fields replaced by the non-null parameter values.
@@ -225,16 +237,16 @@ _$PasswordResetStateCopyWith<_PasswordResetState> get copyWith => __$PasswordRes
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PasswordResetState&&(identical(other.email, email) || other.email == email)&&(identical(other.status, status) || other.status == status)&&(identical(other.isValid, isValid) || other.isValid == isValid));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PasswordResetState&&(identical(other.step, step) || other.step == step)&&(identical(other.email, email) || other.email == email)&&(identical(other.code, code) || other.code == code)&&(identical(other.password, password) || other.password == password)&&(identical(other.confirmedPassword, confirmedPassword) || other.confirmedPassword == confirmedPassword)&&(identical(other.verifiedUserId, verifiedUserId) || other.verifiedUserId == verifiedUserId)&&(identical(other.status, status) || other.status == status)&&(identical(other.error, error) || other.error == error)&&(identical(other.resendSeconds, resendSeconds) || other.resendSeconds == resendSeconds));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,email,status,isValid);
+int get hashCode => Object.hash(runtimeType,step,email,code,password,confirmedPassword,verifiedUserId,status,error,resendSeconds);
 
 @override
 String toString() {
-  return 'PasswordResetState(email: $email, status: $status, isValid: $isValid)';
+  return 'PasswordResetState(step: $step, email: $email, code: $code, password: $password, confirmedPassword: $confirmedPassword, verifiedUserId: $verifiedUserId, status: $status, error: $error, resendSeconds: $resendSeconds)';
 }
 
 
@@ -245,7 +257,7 @@ abstract mixin class _$PasswordResetStateCopyWith<$Res> implements $PasswordRese
   factory _$PasswordResetStateCopyWith(_PasswordResetState value, $Res Function(_PasswordResetState) _then) = __$PasswordResetStateCopyWithImpl;
 @override @useResult
 $Res call({
- Email email, FormzSubmissionStatus status, bool isValid
+ PasswordResetStep step, Email email, String code, Password password, ConfirmedPassword confirmedPassword, String? verifiedUserId, FormzSubmissionStatus status, PasswordResetError? error, int resendSeconds
 });
 
 
@@ -262,12 +274,18 @@ class __$PasswordResetStateCopyWithImpl<$Res>
 
 /// Create a copy of PasswordResetState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? status = null,Object? isValid = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? step = null,Object? email = null,Object? code = null,Object? password = null,Object? confirmedPassword = null,Object? verifiedUserId = freezed,Object? status = null,Object? error = freezed,Object? resendSeconds = null,}) {
   return _then(_PasswordResetState(
-email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as Email,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as FormzSubmissionStatus,isValid: null == isValid ? _self.isValid : isValid // ignore: cast_nullable_to_non_nullable
-as bool,
+step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
+as PasswordResetStep,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as Email,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as Password,confirmedPassword: null == confirmedPassword ? _self.confirmedPassword : confirmedPassword // ignore: cast_nullable_to_non_nullable
+as ConfirmedPassword,verifiedUserId: freezed == verifiedUserId ? _self.verifiedUserId : verifiedUserId // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as FormzSubmissionStatus,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as PasswordResetError?,resendSeconds: null == resendSeconds ? _self.resendSeconds : resendSeconds // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

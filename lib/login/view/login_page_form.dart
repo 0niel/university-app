@@ -93,7 +93,9 @@ class _LoginPageForm extends StatelessWidget {
             size: AppButtonSize.small,
             onPressed: busy
                 ? null
-                : () => const PasswordResetRoute().push<void>(context),
+                : () => PasswordResetRoute(
+                    email: context.read<LoginBloc>().state.email.value,
+                  ).push<void>(context),
           ),
         ),
       ],

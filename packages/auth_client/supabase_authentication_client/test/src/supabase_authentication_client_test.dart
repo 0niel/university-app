@@ -19,6 +19,7 @@ void main() {
 
   User user({
     bool guest = true,
+    bool confirmed = true,
     String id = 'guest',
     String? email,
     Map<String, dynamic> metadata = const {},
@@ -31,7 +32,7 @@ void main() {
       createdAt: '2026-09-02T10:00:00Z',
       isAnonymous: guest,
       email: email,
-      emailConfirmedAt: guest ? null : '2026-09-02T10:00:00Z',
+      emailConfirmedAt: guest || !confirmed ? null : '2026-09-02T10:00:00Z',
     );
   }
 
@@ -298,6 +299,246 @@ void main() {
       },
     );
 
+    group('verifyPasswordResetCode', () {
+      const email = 'student@example.edu';
+      late _MockGoTrueClient auth;
+      late SupabaseAuthenticationClient client;
+      late User verified;
+      late Session? returnedSession;
+      late User? returnedUser;
+      Session? activeSession;
+      User? activeUser;
+
+      setUp(() {
+        auth = _MockGoTrueClient();
+        client = SupabaseAuthenticationClient(supabaseAuth: auth);
+        verified = user(guest: false, id: 'verified-owner', email: email);
+        returnedUser = verified;
+        returnedSession = Session(
+          accessToken: 'recovery-access-token',
+          refreshToken: 'recovery-refresh-token',
+          tokenType: 'bearer',
+          user: verified,
+        );
+        activeSession = null;
+        activeUser = null;
+        when(() => auth.currentUser).thenAnswer((_) => activeUser);
+        when(() => auth.currentSession).thenAnswer((_) => activeSession);
+        when(
+          () => auth.verifyOTP(
+            email: any(named: 'email'),
+            token: any(named: 'token'),
+            type: OtpType.recovery,
+          ),
+        ).thenAnswer((_) async {
+          activeSession = returnedSession;
+          activeUser = returnedUser;
+          return AuthResponse(session: returnedSession, user: returnedUser);
+        });
+      });
+
+      test('verifies a recovery OTP without updating the password', () async {
+        expect(
+          await client.verifyPasswordResetCode(email: email, code: '123456'),
+          'verified-owner',
+        );
+        verify(
+          () => auth.verifyOTP(
+            email: email,
+            token: '123456',
+            type: OtpType.recovery,
+          ),
+        ).called(1);
+        verifyNever(() => auth.updateUser(any()));
+      });
+
+      test(
+        'compares confirmed email addresses without case or whitespace',
+        () async {
+          expect(
+            await client.verifyPasswordResetCode(
+              email: '  STUDENT@EXAMPLE.EDU  ',
+              code: ' 123456 ',
+            ),
+            'verified-owner',
+          );
+          verify(
+            () => auth.verifyOTP(
+              email: 'STUDENT@EXAMPLE.EDU',
+              token: '123456',
+              type: OtpType.recovery,
+            ),
+          ).called(1);
+        },
+      );
+
+      test(
+        'preserves an invalid-code error without another OTP attempt',
+        () async {
+          const error = AuthException('Token has expired', code: 'otp_expired');
+          when(
+            () => auth.verifyOTP(
+              email: email,
+              token: '123456',
+              type: OtpType.recovery,
+            ),
+          ).thenThrow(error);
+          await expectLater(
+            client.verifyPasswordResetCode(email: email, code: '123456'),
+            throwsA(
+              isA<ResetPasswordFailure>().having(
+                (failure) => failure.error,
+                'error',
+                same(error),
+              ),
+            ),
+          );
+          verify(
+            () => auth.verifyOTP(
+              email: email,
+              token: '123456',
+              type: OtpType.recovery,
+            ),
+          ).called(1);
+          verifyNever(() => auth.updateUser(any()));
+        },
+      );
+
+      for (final missingSession in [true, false]) {
+        test(
+          missingSession
+              ? 'rejects a response without a session'
+              : 'rejects an empty session token',
+          () async {
+            returnedSession =
+                missingSession
+                    ? null
+                    : Session(
+                      accessToken: ' ',
+                      tokenType: 'bearer',
+                      user: verified,
+                    );
+            await expectLater(
+              client.verifyPasswordResetCode(email: email, code: '123456'),
+              throwsA(isA<ResetPasswordFailure>()),
+            );
+            verifyNever(() => auth.updateUser(any()));
+          },
+        );
+      }
+
+      for (final (name, identity) in [
+        ('empty owner', user(guest: false, id: ' ', email: email)),
+        ('different email', user(guest: false, email: 'other@example.edu')),
+        ('guest', user(email: email)),
+        (
+          'unconfirmed email',
+          user(guest: false, confirmed: false, email: email),
+        ),
+      ]) {
+        test('rejects a recovery response with $name', () async {
+          returnedUser = identity;
+          returnedSession = Session(
+            accessToken: 'recovery-access-token',
+            tokenType: 'bearer',
+            user: identity,
+          );
+          await expectLater(
+            client.verifyPasswordResetCode(email: email, code: '123456'),
+            throwsA(isA<ResetPasswordFailure>()),
+          );
+          verifyNever(() => auth.updateUser(any()));
+        });
+      }
+
+      for (final signedOut in [false, true]) {
+        test(
+          signedOut
+              ? 'rejects a session lost during verification'
+              : 'rejects an account changed during verification',
+          () async {
+            when(
+              () => auth.verifyOTP(
+                email: email,
+                token: '123456',
+                type: OtpType.recovery,
+              ),
+            ).thenAnswer((_) async {
+              activeUser =
+                  signedOut
+                      ? null
+                      : user(guest: false, id: 'other-owner', email: email);
+              activeSession =
+                  signedOut
+                      ? null
+                      : Session(
+                        accessToken: 'other-access-token',
+                        tokenType: 'bearer',
+                        user: activeUser!,
+                      );
+              return AuthResponse(session: returnedSession, user: verified);
+            });
+            await expectLater(
+              client.verifyPasswordResetCode(email: email, code: '123456'),
+              throwsA(isA<ResetPasswordFailure>()),
+            );
+            verifyNever(() => auth.updateUser(any()));
+          },
+        );
+      }
+
+      test('cannot replace an active guest with a recovery session', () async {
+        activeUser = user();
+        await expectLater(
+          client.verifyPasswordResetCode(email: email, code: '123456'),
+          throwsA(isA<ResetPasswordFailure>()),
+        );
+        verifyNever(
+          () => auth.verifyOTP(
+            email: any(named: 'email'),
+            token: any(named: 'token'),
+            type: OtpType.recovery,
+          ),
+        );
+      });
+
+      test(
+        'password update retries do not verify the consumed code again',
+        () async {
+          final owner = await client.verifyPasswordResetCode(
+            email: email,
+            code: '123456',
+          );
+          var attempts = 0;
+          when(() => auth.updateUser(any())).thenAnswer((_) async {
+            if (attempts++ == 0) {
+              throw AuthRetryableFetchException(message: 'Offline');
+            }
+            return _MockUserResponse();
+          });
+          await expectLater(
+            client.setAccountPassword(
+              userId: owner,
+              password: 'newPassword123',
+            ),
+            throwsA(isA<SignUpFailure>()),
+          );
+          await client.setAccountPassword(
+            userId: owner,
+            password: 'newPassword123',
+          );
+          verify(() => auth.updateUser(any())).called(2);
+          verify(
+            () => auth.verifyOTP(
+              email: email,
+              token: '123456',
+              type: OtpType.recovery,
+            ),
+          ).called(1);
+        },
+      );
+    });
+
     test(
       'account switching or unverified email prevents setting a password',
       () async {
@@ -309,8 +550,20 @@ void main() {
           throwsA(isA<SignUpFailure>()),
         );
         when(() => auth.currentUser).thenReturn(
+          user(guest: false, confirmed: false, email: 'student@gmail.com'),
+        );
+        await expectLater(
+          client.setAccountPassword(userId: 'guest', password: 'password123'),
+          throwsA(isA<SignUpFailure>()),
+        );
+        when(() => auth.currentUser).thenReturn(
           user(guest: false, id: 'other', email: 'student@gmail.com'),
         );
+        await expectLater(
+          client.setAccountPassword(userId: 'guest', password: 'password123'),
+          throwsA(isA<SignUpFailure>()),
+        );
+        when(() => auth.currentUser).thenReturn(null);
         await expectLater(
           client.setAccountPassword(userId: 'guest', password: 'password123'),
           throwsA(isA<SignUpFailure>()),

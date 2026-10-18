@@ -693,6 +693,71 @@ void main() {
       });
     });
 
+    group('verifyPasswordResetCode', () {
+      const email = 'email@example.com';
+      const code = '123456';
+
+      test('returns the verified owner from AuthenticationClient', () async {
+        when(
+          () => authenticationClient.verifyPasswordResetCode(
+            email: email,
+            code: code,
+          ),
+        ).thenAnswer((_) async => 'verified-owner');
+
+        expect(
+          await userRepository.verifyPasswordResetCode(
+            email: email,
+            code: code,
+          ),
+          'verified-owner',
+        );
+        verify(
+          () => authenticationClient.verifyPasswordResetCode(
+            email: email,
+            code: code,
+          ),
+        ).called(1);
+      });
+
+      test('preserves ResetPasswordFailure and its cause', () async {
+        const cause = FormatException('Invalid recovery code');
+        const error = ResetPasswordFailure(cause);
+        when(
+          () => authenticationClient.verifyPasswordResetCode(
+            email: email,
+            code: code,
+          ),
+        ).thenThrow(error);
+
+        await expectLater(
+          userRepository.verifyPasswordResetCode(email: email, code: code),
+          throwsA(same(error)),
+        );
+      });
+
+      test('wraps a generic verification failure', () async {
+        final cause = Exception('Unavailable');
+        when(
+          () => authenticationClient.verifyPasswordResetCode(
+            email: email,
+            code: code,
+          ),
+        ).thenThrow(cause);
+
+        await expectLater(
+          userRepository.verifyPasswordResetCode(email: email, code: code),
+          throwsA(
+            isA<ResetPasswordFailure>().having(
+              (failure) => failure.error,
+              'error',
+              same(cause),
+            ),
+          ),
+        );
+      });
+    });
+
     group('resetPassword', () {
       const email = 'email@example.com';
       const code = '123456';
