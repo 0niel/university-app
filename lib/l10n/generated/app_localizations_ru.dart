@@ -3736,16 +3736,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String friendsMeters(int meters) {
-    return '$meters м';
-  }
-
-  @override
-  String friendsKm(String km) {
-    return '$km км';
-  }
-
-  @override
   String get friendsJustNow => 'сейчас';
 
   @override
@@ -13125,8 +13115,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'Начало задано вручную. Шаги переключаете вы.';
 
   @override
-  String get mapRouteIncompleteMetrics =>
-      'Для части маршрута пока нет оценки расстояния или времени.';
+  String get mapRouteIncompleteDuration =>
+      'Для части маршрута пока нет оценки времени.';
 
   @override
   String get mapRouteSteps => 'По шагам';

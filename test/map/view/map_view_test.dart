@@ -564,15 +564,16 @@ void main() {
     expect(find.byType(MapFreeRoomsPanel), findsOneWidget);
   });
 
-  testWidgets('loading state mirrors the map composition with one pulse', (
+  testWidgets('loading state shows one status without fake map controls', (
     tester,
   ) async {
     await pumpMap(tester, initialize: false);
 
     expect(find.byType(MapSkeleton), findsOneWidget);
-    expect(find.byType(NinjaSkeletonGroup), findsWidgets);
-    expect(find.byType(NinjaSkeleton), findsWidgets);
-    expect(find.byType(NinjaSpinner), findsNothing);
+    expect(find.byType(NinjaSkeletonGroup), findsNothing);
+    expect(find.byType(NinjaSkeleton), findsNothing);
+    expect(find.byType(AppSpinner), findsOneWidget);
+    expect(find.bySemanticsLabel('Загружаем план кампуса'), findsOneWidget);
     expect(find.byType(SvgInteractiveMap), findsNothing);
   });
 

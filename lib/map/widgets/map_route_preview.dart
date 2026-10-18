@@ -38,8 +38,6 @@ class MapRoutePreview extends StatelessWidget {
       );
     }
     final metrics = [
-      if (route.distanceMeters case final distance?)
-        l10n.friendsMeters(distance.round()),
       if (route.durationSeconds case final duration?)
         duration == 0
             ? '<${l10n.minutesShort(1)}'
@@ -84,9 +82,9 @@ class MapRoutePreview extends StatelessWidget {
           textAlign: TextAlign.center,
           style: AppText.caption.copyWith(color: context.colors.muted),
         ),
-        if (!route.hasCompleteDistance || !route.hasCompleteDuration) ...[
+        if (!route.hasCompleteDuration) ...[
           const SizedBox(height: AppSpacing.md),
-          AppBanner(message: l10n.mapRouteIncompleteMetrics),
+          AppBanner(message: l10n.mapRouteIncompleteDuration),
         ],
         const SizedBox(height: AppSpacing.md),
         AppListGroup(

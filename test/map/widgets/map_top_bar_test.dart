@@ -171,6 +171,87 @@ void main() {
     expect(find.byType(TextField), findsNothing);
   });
 
+  testWidgets('opening keeps field layout fixed and focuses after expansion', (
+    tester,
+  ) async {
+    addTearDown(tester.view.reset);
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    await _pumpBar(tester, controller: controller, reducedMotion: false);
+    final originalBar = tester.getRect(find.byType(MapTopBar));
+    final originalButton = tester.getCenter(
+      find.byTooltip('Аудитория, кафедра, столовая'),
+    );
+    await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+    await tester.pump();
+    final field = tester.widget<TextField>(find.byType(TextField));
+    final fieldRect = tester.getRect(find.byType(TextField));
+    final backTooltip = MaterialLocalizations.of(
+      tester.element(find.byType(MapTopBar)),
+    ).backButtonTooltip;
+    for (var frame = 0; frame < 6; frame++) {
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getRect(find.byType(MapTopBar)), originalBar);
+      expect(tester.getRect(find.byType(TextField)), fieldRect);
+      expect(tester.getCenter(find.byTooltip(backTooltip)), originalButton);
+      expect(field.focusNode!.hasFocus, isFalse);
+      expect(tester.testTextInput.isVisible, isFalse);
+      expect(tester.takeException(), isNull);
+    }
+    await tester.pumpAndSettle();
+    expect(field.focusNode!.hasFocus, isTrue);
+    expect(tester.testTextInput.isVisible, isTrue);
+  });
+
+  testWidgets('closing during expansion cancels pending keyboard focus', (
+    tester,
+  ) async {
+    addTearDown(tester.view.reset);
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    var closed = 0;
+    await _pumpBar(
+      tester,
+      controller: controller,
+      reducedMotion: false,
+      onSearchClosed: () => closed++,
+    );
+    await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 80));
+    final field = tester.widget<TextField>(find.byType(TextField));
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(field.focusNode!.hasFocus, isFalse);
+    expect(tester.testTextInput.isVisible, isFalse);
+    expect(find.byType(TextField), findsNothing);
+    expect(closed, 1);
+    await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsOneWidget);
+    expect(field.focusNode!.hasFocus, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('enabling reduced motion during opening still focuses search', (
+    tester,
+  ) async {
+    addTearDown(tester.view.reset);
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    await _pumpBar(tester, controller: controller, reducedMotion: false);
+    await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 80));
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.focusNode!.hasFocus, isFalse);
+    await _pumpBar(tester, controller: controller);
+    expect(field.focusNode!.hasFocus, isTrue);
+    expect(tester.testTextInput.isVisible, isTrue);
+    expect(tester.binding.transientCallbackCount, 0);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final size in [const Size(320, 420), const Size(640, 320)]) {
     testWidgets('search animation fits $size at 200% text', (tester) async {
       addTearDown(tester.view.reset);

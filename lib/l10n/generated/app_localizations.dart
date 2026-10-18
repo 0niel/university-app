@@ -6536,18 +6536,6 @@ abstract class AppLocalizations {
   /// **'{count} members'**
   String communitiesMembersCount(String count);
 
-  /// No description provided for @friendsMeters.
-  ///
-  /// In en, this message translates to:
-  /// **'{meters} m'**
-  String friendsMeters(int meters);
-
-  /// No description provided for @friendsKm.
-  ///
-  /// In en, this message translates to:
-  /// **'{km} km'**
-  String friendsKm(String km);
-
   /// No description provided for @friendsJustNow.
   ///
   /// In en, this message translates to:
@@ -22490,11 +22478,11 @@ abstract class AppLocalizations {
   /// **'The starting point is set manually. You switch between steps.'**
   String get mapRouteManualStepsHint;
 
-  /// Indoor map route: incomplete metrics
+  /// Indoor map route: missing time estimates
   ///
   /// In en, this message translates to:
-  /// **'Distance or time estimates are not available for part of this route yet.'**
-  String get mapRouteIncompleteMetrics;
+  /// **'Time estimates are not available for part of this route yet.'**
+  String get mapRouteIncompleteDuration;
 
   /// Indoor map route: steps
   ///
