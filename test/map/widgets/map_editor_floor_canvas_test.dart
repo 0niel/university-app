@@ -1,12 +1,192 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
+import 'package:rtu_mirea_app/map/widgets/map_cartographic_layer.dart';
 import 'package:rtu_mirea_app/map/widgets/map_graph_editor_page.dart';
+import 'package:rtu_mirea_app/map/widgets/map_place_editor_page.dart';
 
 void main() {
+  testWidgets('add place opens the actual bundled Pulse plan offline', (
+    tester,
+  ) async {
+    final repository = MapDataRepository(
+      organizationId: 'mirea',
+      bundledCatalogAsset: MapDataRepository.pulseCatalogAsset,
+      cache: _MemoryCache(),
+      rpc: (_, _) async => throw const MapDataException('Offline'),
+      assetLoader: (path) => File(path).readAsString(),
+    );
+    addTearDown(repository.dispose);
+    final campus = (await tester.runAsync(
+      () => repository.loadCampus('v-78'),
+    ))!;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        locale: const Locale('ru'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MapPlaceEditorPage(campus: campus, repository: repository),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('map-editor-floor-plan')), findsOneWidget);
+    expect(find.text('Не удалось загрузить план'), findsNothing);
+    final layer = tester.widget<MapCartographicLayer>(
+      find.byType(MapCartographicLayer),
+    );
+    expect(layer.rooms, isNotEmpty);
+    expect(layer.svgContent, contains('<svg'));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('open editor loads its snapshot after background refresh', (
+    tester,
+  ) async {
+    var revision = 1;
+    final repository = MapDataRepository(
+      organizationId: 'mirea',
+      cache: _MemoryCache(),
+      rpc: (_, _) async => {
+        'id': 'campus',
+        'revision': revision,
+        'floors': [
+          {
+            'id': 'one',
+            'level': 1,
+            'width': 1000,
+            'height': 500,
+            'svg':
+                '<svg viewBox="0 0 1000 500"> '
+                '<title>$revision</title><rect width="1000" height="500"/> '
+                '</svg>',
+          },
+        ],
+      },
+    );
+    addTearDown(repository.dispose);
+    final original = await repository.loadCampus('campus');
+    revision = 2;
+    await repository.refreshCampus('campus');
+    Offset? position;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        locale: const Locale('ru'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MapEditorFloorCanvas(
+          campus: original,
+          floor: original.floors.single,
+          repository: repository,
+          painter: _ProbePainter(),
+          onTap: (point, _) => position = point,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<MapCartographicLayer>(find.byType(MapCartographicLayer))
+          .svgContent,
+      contains('<title>1</title>'),
+    );
+    await tester.tap(find.byKey(const ValueKey('map-editor-floor-plan')));
+    expect(position, const Offset(500, 250));
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final locale in const [Locale('ru'), Locale('en')]) {
+    testWidgets(
+      'failed plan can be retried in ${locale.languageCode} '
+      'before placing a point',
+      (
+        tester,
+      ) async {
+        var loads = 0;
+        final firstLoad = Completer<String>();
+        final repository = MapDataRepository(
+          organizationId: 'mirea',
+          rpc: (_, _) async => throw StateError('No writes are expected'),
+          assetLoader: (_) async {
+            if (++loads == 1) return firstLoad.future;
+            return '<svg viewBox="0 0 1000 500"/>';
+          },
+        );
+        addTearDown(repository.dispose);
+        var taps = 0;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            locale: locale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: MapEditorFloorCanvas(
+              floor: MapFloorData.fromJson({
+                'id': 'one',
+                'level': 1,
+                'width': 1000,
+                'height': 500,
+              }, svgPath: 'editor.svg'),
+              repository: repository,
+              painter: _ProbePainter(),
+              onTap: (_, _) => taps++,
+            ),
+          ),
+        );
+        final russian = locale.languageCode == 'ru';
+        expect(
+          find.bySemanticsLabel(
+            russian ? 'Загружаем план этажа' : 'Loading floor plan',
+          ),
+          findsOneWidget,
+        );
+        firstLoad.completeError(Exception('Unavailable'));
+        await tester.pumpAndSettle();
+        expect(
+          find.text(
+            russian
+                ? 'Не удалось загрузить план'
+                : "Couldn't load the floor plan",
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            russian
+                ? 'Проверьте подключение и попробуйте ещё раз.'
+                : 'Check your connection and try again.',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('map-editor-floor-plan')),
+          findsNothing,
+        );
+        expect(taps, 0);
+        await tester.tap(
+          find.text(russian ? 'Загрузить план повторно' : 'Reload floor plan'),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('map-editor-floor-plan')),
+          findsOneWidget,
+        );
+        await tester.tap(find.byKey(const ValueKey('map-editor-floor-plan')));
+        expect(taps, 1);
+        expect(loads, 2);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   for (final dark in [false, true]) {
     testWidgets(
       'editor ${dark ? 'dark' : 'light'} canvas preserves strokes '
@@ -41,6 +221,9 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: dark ? AppTheme.darkTheme : AppTheme.lightTheme,
+            locale: const Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: RepaintBoundary(
               key: boundaryKey,
               child: MapEditorFloorCanvas(
@@ -149,4 +332,14 @@ class _ProbePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ProbePainter oldDelegate) => false;
+}
+
+class _MemoryCache implements MapDataCache {
+  final _entries = <String, String>{};
+
+  @override
+  Future<String?> read(String key) async => _entries[key];
+
+  @override
+  Future<void> write(String key, String value) async => _entries[key] = value;
 }

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
+import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/services/objects_service.dart';
 
@@ -31,9 +32,9 @@ class _RecordingRepository extends MapDataRepository {
   final svgLoads = <String>[];
 
   @override
-  Future<String> loadSvg(String path) {
+  Future<String> loadSvg(String path, {CampusMapData? campus}) {
     svgLoads.add(path);
-    return super.loadSvg(path);
+    return super.loadSvg(path, campus: campus);
   }
 }
 

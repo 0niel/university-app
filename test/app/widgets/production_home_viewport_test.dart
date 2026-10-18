@@ -111,14 +111,14 @@ void main() {
                 ? find.byType(AppNavigationRail)
                 : find.byType(AppBottomNavigationBar);
             expect(navigation.hitTestable(), findsOneWidget);
-            await tester.tap(
-              find.descendant(
-                of: navigation,
-                matching: size.shortestSide >= 650
-                    ? find.text('Профиль')
-                    : find.bySemanticsLabel('Профиль'),
-              ),
+            final profileDestination = find.descendant(
+              of: navigation,
+              matching: size.shortestSide >= 650
+                  ? find.byTooltip('Профиль')
+                  : find.bySemanticsLabel('Профиль'),
             );
+            expect(profileDestination.hitTestable(), findsOneWidget);
+            await tester.tap(profileDestination);
             await tester.pumpAndSettle();
             expect(router.routeInformationProvider.value.uri.path, '/profile');
 

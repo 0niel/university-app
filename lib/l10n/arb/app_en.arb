@@ -12121,5 +12121,478 @@
   "onboardingStoryCommunityTitle": "Your people.\nYour university.",
   "onboardingStoryScheduleAccent": "planned out.",
   "onboardingStoryScheduleLead": "Classes, changes and deadlines at hand. Less searching, more time for you.",
-  "onboardingStoryScheduleTitle": "Your day.\nAll planned out."
+  "onboardingStoryScheduleTitle": "Your day.\nAll planned out.",
+  "mapCampusesTitle": "Campuses",
+  "@mapCampusesTitle": {
+    "description": "Title of the campus picker on the map."
+  },
+  "mapCampusPlanLoading": "Loading campus plan",
+  "@mapCampusPlanLoading": {
+    "description": "Visible and accessible loading status for the campus map."
+  },
+  "mapFloorPlanLoading": "Loading floor plan",
+  "@mapFloorPlanLoading": {
+    "description": "Accessible loading status while the map editor loads a floor plan."
+  },
+  "mapPlanLoadFailed": "Couldn't load the floor plan",
+  "@mapPlanLoadFailed": {
+    "description": "Error title when loading the map editor floor plan fails."
+  },
+  "mapPlanLoadRetryHint": "Check your connection and try again.",
+  "@mapPlanLoadRetryHint": {
+    "description": "Recovery hint after the map editor floor plan fails to load."
+  },
+  "mapPlanReloadAction": "Reload floor plan",
+  "@mapPlanReloadAction": {
+    "description": "Button to retry loading the map editor floor plan."
+  },
+  "mapRouteCheckingPassages": "Checking available passages…",
+  "mapRouteUnreachableFromStart": "There is no route here from the selected start. You can start a new route from this place.",
+  "mapRouteToPlace": "Route here",
+  "mapRouteFromPlace": "From here",
+  "mapRouteRefreshingPlan": "Updating the plan and passages for your route…",
+  "mapRouteMovedRefreshFailed": "This place has moved. The plan could not be updated; its access routes are still being checked.",
+  "mapRouteRefreshFailed": "The route plan could not be updated. Check your connection and try again.",
+  "mapRefreshMap": "Refresh map",
+  "mapRoutePlaceNeedsReview": "This place has moved. Its access routes are still being checked.",
+  "mapRoutePlaceUnavailable": "This place does not have a verified route on the plan yet.",
+  "mapRouteUnverifiedPassages": "The passages in this building have not been verified yet. Find the place on the floor plan or suggest a route correction.",
+  "@mapRouteUnverifiedPassages": {
+    "description": "Indoor map route: unverified passages"
+  },
+  "mapRouteDestinationUnmapped": "The entrance to this place has not been mapped yet.",
+  "@mapRouteDestinationUnmapped": {
+    "description": "Indoor map route: destination unmapped"
+  },
+  "mapRouteStartUnmapped": "The starting point is not connected to the mapped passages yet.",
+  "@mapRouteStartUnmapped": {
+    "description": "Indoor map route: start unmapped"
+  },
+  "mapRouteInvalidPassages": "The passage data needs to be checked. Refresh the map or report an error.",
+  "@mapRouteInvalidPassages": {
+    "description": "Indoor map route: invalid passages"
+  },
+  "mapRouteRestrictedUnavailable": "No suitable route was found. There is no verified passage between these points for the selected requirements.",
+  "@mapRouteRestrictedUnavailable": {
+    "description": "Indoor map route: restricted unavailable"
+  },
+  "mapRouteUnavailable": "No suitable route was found. A passage may be closed or its accessibility has not been verified yet.",
+  "@mapRouteUnavailable": {
+    "description": "Indoor map route: unavailable"
+  },
+  "mapRouteResetRestrictions": "Reset requirements",
+  "@mapRouteResetRestrictions": {
+    "description": "Indoor map route: reset restrictions"
+  },
+  "mapRouteChooseStartHint": "Select where you are now. The starting point is set manually.",
+  "@mapRouteChooseStartHint": {
+    "description": "Indoor map route: choose start hint"
+  },
+  "mapRouteChooseDestinationHint": "Choose where you want to go.",
+  "@mapRouteChooseDestinationHint": {
+    "description": "Indoor map route: choose destination hint"
+  },
+  "mapRouteCorrectPassages": "Suggest a passage correction",
+  "@mapRouteCorrectPassages": {
+    "description": "Indoor map route: correct passages"
+  },
+  "mapRouteChooseStart": "Choose a starting point",
+  "@mapRouteChooseStart": {
+    "description": "Indoor map route: choose start"
+  },
+  "mapRouteChooseDestination": "Choose a destination",
+  "@mapRouteChooseDestination": {
+    "description": "Indoor map route: choose destination"
+  },
+  "mapRouteFromLabel": "From: {place}",
+  "@mapRouteFromLabel": {
+    "description": "Indoor map route: from label",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRouteToLabel": "To: {place}",
+  "@mapRouteToLabel": {
+    "description": "Indoor map route: to label",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRouteCurrentPointHint": "Where you are on the floor plan",
+  "@mapRouteCurrentPointHint": {
+    "description": "Indoor map route: current point hint"
+  },
+  "mapRoutePlaceSearchHint": "Room, entrance or service",
+  "@mapRoutePlaceSearchHint": {
+    "description": "Indoor map route: place search hint"
+  },
+  "mapRouteSwapPoints": "Swap points",
+  "@mapRouteSwapPoints": {
+    "description": "Indoor map route: swap points"
+  },
+  "mapRouteResetPoints": "Reset points",
+  "@mapRouteResetPoints": {
+    "description": "Indoor map route: reset points"
+  },
+  "mapRouteUnknownFloor": "Unknown floor",
+  "@mapRouteUnknownFloor": {
+    "description": "Indoor map route: unknown floor"
+  },
+  "mapRouteOptions": "Route options",
+  "@mapRouteOptions": {
+    "description": "Indoor map route: options"
+  },
+  "mapRouteWalking": "Walking",
+  "@mapRouteWalking": {
+    "description": "Indoor map route: walking"
+  },
+  "mapRouteStepFree": "No stairs",
+  "@mapRouteStepFree": {
+    "description": "Indoor map route: step free"
+  },
+  "mapRouteWheelchair": "Wheelchair",
+  "@mapRouteWheelchair": {
+    "description": "Indoor map route: wheelchair"
+  },
+  "mapRouteWheelchairHint": "Only passages with verified wheelchair accessibility.",
+  "@mapRouteWheelchairHint": {
+    "description": "Indoor map route: wheelchair hint"
+  },
+  "mapRouteStepFreeHint": "Stairs and escalators are excluded.",
+  "@mapRouteStepFreeHint": {
+    "description": "Indoor map route: step free hint"
+  },
+  "mapRouteWalkingHint": "Stairs, lifts and other passages can be used.",
+  "@mapRouteWalkingHint": {
+    "description": "Indoor map route: walking hint"
+  },
+  "mapRouteFaster": "Faster",
+  "@mapRouteFaster": {
+    "description": "Indoor map route: faster"
+  },
+  "mapRouteShorter": "Shorter",
+  "@mapRouteShorter": {
+    "description": "Indoor map route: shorter"
+  },
+  "mapRouteAlreadyHere": "You are already here",
+  "@mapRouteAlreadyHere": {
+    "description": "Indoor map route: already here"
+  },
+  "mapRouteSamePointHint": "The starting point and destination are the same. Choose another point to plan a route.",
+  "@mapRouteSamePointHint": {
+    "description": "Indoor map route: same point hint"
+  },
+  "mapRouteReady": "Route ready",
+  "@mapRouteReady": {
+    "description": "Indoor map route: ready"
+  },
+  "mapRouteShowPath": "Show route",
+  "@mapRouteShowPath": {
+    "description": "Indoor map route: show path"
+  },
+  "mapRouteManualStepsHint": "The starting point is set manually. You switch between steps.",
+  "@mapRouteManualStepsHint": {
+    "description": "Indoor map route: manual steps hint"
+  },
+  "mapRouteIncompleteMetrics": "Distance or time estimates are not available for part of this route yet.",
+  "@mapRouteIncompleteMetrics": {
+    "description": "Indoor map route: incomplete metrics"
+  },
+  "mapRouteSteps": "Step by step",
+  "@mapRouteSteps": {
+    "description": "Indoor map route: steps"
+  },
+  "mapRouteStepsCount": "Steps: {count}",
+  "@mapRouteStepsCount": {
+    "description": "Indoor map route: steps count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapRoutePickStart": "Where are you starting?",
+  "@mapRoutePickStart": {
+    "description": "Indoor map route: pick start"
+  },
+  "mapRoutePickDestination": "Where are you going?",
+  "@mapRoutePickDestination": {
+    "description": "Indoor map route: pick destination"
+  },
+  "mapRouteAllFloors": "All floors",
+  "@mapRouteAllFloors": {
+    "description": "Indoor map route: all floors"
+  },
+  "mapRouteRestrictedPointsHint": "Only points that meet the selected requirements",
+  "@mapRouteRestrictedPointsHint": {
+    "description": "Indoor map route: restricted points hint"
+  },
+  "mapRouteVerifiedPointsHint": "Only points with verified passages",
+  "@mapRouteVerifiedPointsHint": {
+    "description": "Indoor map route: verified points hint"
+  },
+  "mapRouteReachablePointsHint": "Only points with an available route",
+  "@mapRouteReachablePointsHint": {
+    "description": "Indoor map route: reachable points hint"
+  },
+  "mapRouteNoPoints": "No available points",
+  "@mapRouteNoPoints": {
+    "description": "Indoor map route: no points"
+  },
+  "mapRouteTryQueryOrFloor": "Try another search or floor.",
+  "@mapRouteTryQueryOrFloor": {
+    "description": "Indoor map route: try query or floor"
+  },
+  "mapRouteTryRequirementsOrPoint": "Change the route requirements or choose another point.",
+  "@mapRouteTryRequirementsOrPoint": {
+    "description": "Indoor map route: try requirements or point"
+  },
+  "mapRouteTryPointOrPassages": "Choose another point or suggest a passage correction on the map.",
+  "@mapRouteTryPointOrPassages": {
+    "description": "Indoor map route: try point or passages"
+  },
+  "mapRoutePointSelected": "Selected",
+  "@mapRoutePointSelected": {
+    "description": "Indoor map route: point selected"
+  },
+  "mapRoutePointFallback": "Point on the map",
+  "@mapRoutePointFallback": {
+    "description": "Indoor map route: point fallback"
+  },
+  "mapRouteAnotherFloor": "another floor",
+  "@mapRouteAnotherFloor": {
+    "description": "Indoor map route: another floor"
+  },
+  "mapRouteDepart": "Start your route",
+  "@mapRouteDepart": {
+    "description": "Indoor map route: depart"
+  },
+  "mapRouteStraight": "Continue straight",
+  "@mapRouteStraight": {
+    "description": "Indoor map route: straight"
+  },
+  "mapRouteTurnLeft": "Turn left",
+  "@mapRouteTurnLeft": {
+    "description": "Indoor map route: turn left"
+  },
+  "mapRouteTurnRight": "Turn right",
+  "@mapRouteTurnRight": {
+    "description": "Indoor map route: turn right"
+  },
+  "mapRouteTurnBack": "Turn around",
+  "@mapRouteTurnBack": {
+    "description": "Indoor map route: turn back"
+  },
+  "mapRouteStairsToFloor": "Take the stairs to {floor}",
+  "@mapRouteStairsToFloor": {
+    "description": "Indoor map route: stairs to floor",
+    "placeholders": {
+      "floor": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRouteStairs": "Take the stairs",
+  "@mapRouteStairs": {
+    "description": "Indoor map route: stairs"
+  },
+  "mapRouteElevatorToFloor": "Take the lift to {floor}",
+  "@mapRouteElevatorToFloor": {
+    "description": "Indoor map route: elevator to floor",
+    "placeholders": {
+      "floor": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRouteRampToFloor": "Take the ramp to {floor}",
+  "@mapRouteRampToFloor": {
+    "description": "Indoor map route: ramp to floor",
+    "placeholders": {
+      "floor": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRouteRamp": "Take the ramp",
+  "@mapRouteRamp": {
+    "description": "Indoor map route: ramp"
+  },
+  "mapRouteEscalatorToFloor": "Take the escalator to {floor}",
+  "@mapRouteEscalatorToFloor": {
+    "description": "Indoor map route: escalator to floor",
+    "placeholders": {
+      "floor": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRouteEscalator": "Take the escalator",
+  "@mapRouteEscalator": {
+    "description": "Indoor map route: escalator"
+  },
+  "mapRouteChangeFloor": "Go to {floor}",
+  "@mapRouteChangeFloor": {
+    "description": "Indoor map route: change floor",
+    "placeholders": {
+      "floor": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRouteArrive": "You have arrived",
+  "@mapRouteArrive": {
+    "description": "Indoor map route: arrive"
+  },
+  "mapRouteFloorTransition": "Floors {from} → {to}",
+  "@mapRouteFloorTransition": {
+    "description": "Indoor map route: floor transition",
+    "placeholders": {
+      "from": {
+        "type": "int"
+      },
+      "to": {
+        "type": "int"
+      }
+    }
+  },
+  "mapRouteAscent": "Up",
+  "@mapRouteAscent": {
+    "description": "Indoor map route: ascent"
+  },
+  "mapRouteDescent": "Down",
+  "@mapRouteDescent": {
+    "description": "Indoor map route: descent"
+  },
+  "mapRouteEnd": "End of route",
+  "@mapRouteEnd": {
+    "description": "Indoor map route: end"
+  },
+  "mapRouteCompactStart": "Start",
+  "@mapRouteCompactStart": {
+    "description": "Indoor map route: compact start"
+  },
+  "mapRouteCompactStraight": "Straight",
+  "@mapRouteCompactStraight": {
+    "description": "Indoor map route: compact straight"
+  },
+  "mapRouteCompactLeft": "Left",
+  "@mapRouteCompactLeft": {
+    "description": "Indoor map route: compact left"
+  },
+  "mapRouteCompactRight": "Right",
+  "@mapRouteCompactRight": {
+    "description": "Indoor map route: compact right"
+  },
+  "mapRouteCompactTurnBack": "Turn around",
+  "@mapRouteCompactTurnBack": {
+    "description": "Indoor map route: compact turn back"
+  },
+  "mapRouteCompactStairs": "Stairs",
+  "@mapRouteCompactStairs": {
+    "description": "Indoor map route: compact stairs"
+  },
+  "mapRouteCompactElevator": "Lift",
+  "@mapRouteCompactElevator": {
+    "description": "Indoor map route: compact elevator"
+  },
+  "mapRouteCompactRamp": "Ramp",
+  "@mapRouteCompactRamp": {
+    "description": "Indoor map route: compact ramp"
+  },
+  "mapRouteCompactEscalator": "Escalator",
+  "@mapRouteCompactEscalator": {
+    "description": "Indoor map route: compact escalator"
+  },
+  "mapRouteCompactTransition": "Change floor",
+  "@mapRouteCompactTransition": {
+    "description": "Indoor map route: compact transition"
+  },
+  "mapRouteCompactFinish": "Finish",
+  "@mapRouteCompactFinish": {
+    "description": "Indoor map route: compact finish"
+  },
+  "mapRouteStepAnnouncement": "Step {step} of {count}. {instruction}. {details}",
+  "@mapRouteStepAnnouncement": {
+    "description": "Indoor map route: step announcement",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "instruction": {
+        "type": "String"
+      },
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRouteFinish": "End route",
+  "@mapRouteFinish": {
+    "description": "Indoor map route: finish"
+  },
+  "mapRouteManualStepProgress": "Step {step} of {count} · manual",
+  "@mapRouteManualStepProgress": {
+    "description": "Indoor map route: manual step progress",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapRouteMilestoneAnnouncement": "Step {step}. {label}",
+  "@mapRouteMilestoneAnnouncement": {
+    "description": "Indoor map route: milestone announcement",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRoutePreviousStep": "Previous step",
+  "@mapRoutePreviousStep": {
+    "description": "Indoor map route: previous step"
+  },
+  "mapRouteManualBrowse": "Browse route manually. {instruction}",
+  "@mapRouteManualBrowse": {
+    "description": "Indoor map route: manual browse",
+    "placeholders": {
+      "instruction": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRouteProgressValue": "{step} of {count}",
+  "@mapRouteProgressValue": {
+    "description": "Indoor map route: progress value",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapRouteFinishBrowsing": "Finish viewing route",
+  "@mapRouteFinishBrowsing": {
+    "description": "Indoor map route: finish browsing"
+  },
+  "mapRouteNextStep": "Next step",
+  "@mapRouteNextStep": {
+    "description": "Indoor map route: next step"
+  }
 }

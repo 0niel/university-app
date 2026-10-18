@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 
 String mapRouteInstructionLabel(
   IndoorRouteInstruction instruction,
   CampusMapData campus,
+  AppLocalizations l10n,
 ) {
   final floor = campus
       .floorForId(
@@ -15,26 +17,47 @@ String mapRouteInstructionLabel(
   final changesFloor =
       instruction.toNode != null &&
       instruction.toNode!.floorId != instruction.atNode.floorId;
-  final floorLabel = floor == null ? 'другой' : '$floor';
+  final floorLabel = floor == null
+      ? l10n.mapRouteAnotherFloor
+      : l10n.mapFloorNumber(floor);
   return switch (instruction.maneuver) {
-    IndoorManeuver.depart => 'Начните маршрут',
-    IndoorManeuver.straight => 'Продолжайте прямо',
-    IndoorManeuver.turnLeft => 'Поверните налево',
-    IndoorManeuver.turnRight => 'Поверните направо',
-    IndoorManeuver.turnBack => 'Развернитесь',
+    IndoorManeuver.depart => l10n.mapRouteDepart,
+    IndoorManeuver.straight => l10n.mapRouteStraight,
+    IndoorManeuver.turnLeft => l10n.mapRouteTurnLeft,
+    IndoorManeuver.turnRight => l10n.mapRouteTurnRight,
+    IndoorManeuver.turnBack => l10n.mapRouteTurnBack,
     IndoorManeuver.stairs =>
-      changesFloor ? 'По лестнице на $floorLabel этаж' : 'Пройдите по лестнице',
-    IndoorManeuver.elevator => 'На лифте на $floorLabel этаж',
+      changesFloor
+          ? l10n.mapRouteStairsToFloor(floorLabel)
+          : l10n.mapRouteStairs,
+    IndoorManeuver.elevator => l10n.mapRouteElevatorToFloor(floorLabel),
     IndoorManeuver.ramp =>
-      changesFloor ? 'По пандусу на $floorLabel этаж' : 'Пройдите по пандусу',
+      changesFloor ? l10n.mapRouteRampToFloor(floorLabel) : l10n.mapRouteRamp,
     IndoorManeuver.escalator =>
       changesFloor
-          ? 'На эскалаторе на $floorLabel этаж'
-          : 'Пройдите по эскалатору',
-    IndoorManeuver.floorTransition => 'Перейдите на $floorLabel этаж',
-    IndoorManeuver.arrive => 'Вы на месте',
+          ? l10n.mapRouteEscalatorToFloor(floorLabel)
+          : l10n.mapRouteEscalator,
+    IndoorManeuver.floorTransition => l10n.mapRouteChangeFloor(floorLabel),
+    IndoorManeuver.arrive => l10n.mapRouteArrive,
   };
 }
+
+String mapRouteInstructionCompactLabel(
+  IndoorManeuver maneuver,
+  AppLocalizations l10n,
+) => switch (maneuver) {
+  IndoorManeuver.depart => l10n.mapRouteCompactStart,
+  IndoorManeuver.straight => l10n.mapRouteCompactStraight,
+  IndoorManeuver.turnLeft => l10n.mapRouteCompactLeft,
+  IndoorManeuver.turnRight => l10n.mapRouteCompactRight,
+  IndoorManeuver.turnBack => l10n.mapRouteCompactTurnBack,
+  IndoorManeuver.stairs => l10n.mapRouteCompactStairs,
+  IndoorManeuver.elevator => l10n.mapRouteCompactElevator,
+  IndoorManeuver.ramp => l10n.mapRouteCompactRamp,
+  IndoorManeuver.escalator => l10n.mapRouteCompactEscalator,
+  IndoorManeuver.floorTransition => l10n.mapRouteCompactTransition,
+  IndoorManeuver.arrive => l10n.mapRouteCompactFinish,
+};
 
 IconData mapRouteInstructionIcon(IndoorManeuver maneuver) => switch (maneuver) {
   IndoorManeuver.depart => Icons.trip_origin_rounded,
@@ -50,34 +73,45 @@ IconData mapRouteInstructionIcon(IndoorManeuver maneuver) => switch (maneuver) {
   IndoorManeuver.straight => Icons.straight_rounded,
 };
 
-String mapRouteNodeLabel(IndoorNavigationNode node, CampusMapData campus) =>
+String mapRouteNodeLabel(
+  IndoorNavigationNode node,
+  CampusMapData campus,
+  AppLocalizations l10n,
+) =>
     campus.placeForId(node.roomId ?? '')?.label ??
     node.label ??
-    'Точка на плане';
+    l10n.mapRoutePointFallback;
 
 String mapRouteInstructionContext(
   IndoorRouteInstruction instruction,
   CampusMapData campus,
+  AppLocalizations l10n,
 ) {
   final from = campus.floorForId(instruction.atNode.floorId)?.floor.number;
   final to = campus.floorForId(instruction.toNode?.floorId ?? '')?.floor.number;
   final parts = <String>[];
   if (instruction.maneuver == IndoorManeuver.depart ||
       instruction.maneuver == IndoorManeuver.arrive) {
-    parts.add(mapRouteNodeLabel(instruction.atNode, campus));
+    parts.add(mapRouteNodeLabel(instruction.atNode, campus, l10n));
   }
   if (instruction.toNode != null &&
       instruction.atNode.floorId != instruction.toNode!.floorId &&
       from != null &&
       to != null) {
-    parts.add('$from → $to этаж');
-    if (from != to) parts.add(to > from ? 'Подъём' : 'Спуск');
+    parts.add(l10n.mapRouteFloorTransition(from, to));
+    if (from != to) {
+      parts.add(to > from ? l10n.mapRouteAscent : l10n.mapRouteDescent);
+    }
   } else if (from != null) {
-    parts.add('$from этаж');
+    parts.add(l10n.mapFloorNumber(from));
   }
   final distance = instruction.distanceMeters;
   if (distance != null && distance > 0) {
-    parts.add(distance < 1 ? '<1 м' : '${distance.round()} м');
+    parts.add(
+      distance < 1
+          ? '<${l10n.friendsMeters(1)}'
+          : l10n.friendsMeters(distance.round()),
+    );
   }
   return parts.join(' · ');
 }

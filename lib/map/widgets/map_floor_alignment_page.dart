@@ -240,7 +240,10 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
         _loadingPreview = true;
         _error = null;
       });
-      final svg = await widget.repository.loadSvg(floor.floor.svgPath);
+      final svg = await widget.repository.loadSvg(
+        floor.floor.svgPath,
+        campus: widget.campus,
+      );
       if (!mounted) return;
       final topLeft = reference.pixelToGeographic(0, 0);
       final topRight = reference.pixelToGeographic(floor.width, 0);
@@ -436,6 +439,7 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
                           index: _showMap ? 1 : 0,
                           children: [
                             MapEditorFloorCanvas(
+                              campus: widget.campus,
                               key: ValueKey(floor.floor.id),
                               floor: floor,
                               repository: widget.repository,

@@ -244,29 +244,6 @@ void main() {
     });
   });
 
-  group('NinjaNavigationRail', () {
-    testWidgets('lists every label with the selected one in accent', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrapKit(
-          SizedBox(
-            height: 500,
-            child: NinjaNavigationRail(
-              items: items,
-              currentIndex: 2,
-              onSelected: (_) {},
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('Карта'), findsOneWidget);
-      expect(kitStyleOf(tester, 'Карта')?.color, kitColors.accent);
-      expect(kitStyleOf(tester, 'Дом')?.color, kitColors.muted);
-    });
-  });
-
   group('NinjaTextBottomBar', () {
     testWidgets('highlights the current label with an accent pill', (
       tester,

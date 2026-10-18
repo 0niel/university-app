@@ -12760,4 +12760,368 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingStoryScheduleTitle => 'Your day.\nAll planned out.';
+
+  @override
+  String get mapCampusesTitle => 'Campuses';
+
+  @override
+  String get mapCampusPlanLoading => 'Loading campus plan';
+
+  @override
+  String get mapFloorPlanLoading => 'Loading floor plan';
+
+  @override
+  String get mapPlanLoadFailed => 'Couldn\'t load the floor plan';
+
+  @override
+  String get mapPlanLoadRetryHint => 'Check your connection and try again.';
+
+  @override
+  String get mapPlanReloadAction => 'Reload floor plan';
+
+  @override
+  String get mapRouteCheckingPassages => 'Checking available passages…';
+
+  @override
+  String get mapRouteUnreachableFromStart =>
+      'There is no route here from the selected start. You can start a new route from this place.';
+
+  @override
+  String get mapRouteToPlace => 'Route here';
+
+  @override
+  String get mapRouteFromPlace => 'From here';
+
+  @override
+  String get mapRouteRefreshingPlan =>
+      'Updating the plan and passages for your route…';
+
+  @override
+  String get mapRouteMovedRefreshFailed =>
+      'This place has moved. The plan could not be updated; its access routes are still being checked.';
+
+  @override
+  String get mapRouteRefreshFailed =>
+      'The route plan could not be updated. Check your connection and try again.';
+
+  @override
+  String get mapRefreshMap => 'Refresh map';
+
+  @override
+  String get mapRoutePlaceNeedsReview =>
+      'This place has moved. Its access routes are still being checked.';
+
+  @override
+  String get mapRoutePlaceUnavailable =>
+      'This place does not have a verified route on the plan yet.';
+
+  @override
+  String get mapRouteUnverifiedPassages =>
+      'The passages in this building have not been verified yet. Find the place on the floor plan or suggest a route correction.';
+
+  @override
+  String get mapRouteDestinationUnmapped =>
+      'The entrance to this place has not been mapped yet.';
+
+  @override
+  String get mapRouteStartUnmapped =>
+      'The starting point is not connected to the mapped passages yet.';
+
+  @override
+  String get mapRouteInvalidPassages =>
+      'The passage data needs to be checked. Refresh the map or report an error.';
+
+  @override
+  String get mapRouteRestrictedUnavailable =>
+      'No suitable route was found. There is no verified passage between these points for the selected requirements.';
+
+  @override
+  String get mapRouteUnavailable =>
+      'No suitable route was found. A passage may be closed or its accessibility has not been verified yet.';
+
+  @override
+  String get mapRouteResetRestrictions => 'Reset requirements';
+
+  @override
+  String get mapRouteChooseStartHint =>
+      'Select where you are now. The starting point is set manually.';
+
+  @override
+  String get mapRouteChooseDestinationHint => 'Choose where you want to go.';
+
+  @override
+  String get mapRouteCorrectPassages => 'Suggest a passage correction';
+
+  @override
+  String get mapRouteChooseStart => 'Choose a starting point';
+
+  @override
+  String get mapRouteChooseDestination => 'Choose a destination';
+
+  @override
+  String mapRouteFromLabel(String place) {
+    return 'From: $place';
+  }
+
+  @override
+  String mapRouteToLabel(String place) {
+    return 'To: $place';
+  }
+
+  @override
+  String get mapRouteCurrentPointHint => 'Where you are on the floor plan';
+
+  @override
+  String get mapRoutePlaceSearchHint => 'Room, entrance or service';
+
+  @override
+  String get mapRouteSwapPoints => 'Swap points';
+
+  @override
+  String get mapRouteResetPoints => 'Reset points';
+
+  @override
+  String get mapRouteUnknownFloor => 'Unknown floor';
+
+  @override
+  String get mapRouteOptions => 'Route options';
+
+  @override
+  String get mapRouteWalking => 'Walking';
+
+  @override
+  String get mapRouteStepFree => 'No stairs';
+
+  @override
+  String get mapRouteWheelchair => 'Wheelchair';
+
+  @override
+  String get mapRouteWheelchairHint =>
+      'Only passages with verified wheelchair accessibility.';
+
+  @override
+  String get mapRouteStepFreeHint => 'Stairs and escalators are excluded.';
+
+  @override
+  String get mapRouteWalkingHint =>
+      'Stairs, lifts and other passages can be used.';
+
+  @override
+  String get mapRouteFaster => 'Faster';
+
+  @override
+  String get mapRouteShorter => 'Shorter';
+
+  @override
+  String get mapRouteAlreadyHere => 'You are already here';
+
+  @override
+  String get mapRouteSamePointHint =>
+      'The starting point and destination are the same. Choose another point to plan a route.';
+
+  @override
+  String get mapRouteReady => 'Route ready';
+
+  @override
+  String get mapRouteShowPath => 'Show route';
+
+  @override
+  String get mapRouteManualStepsHint =>
+      'The starting point is set manually. You switch between steps.';
+
+  @override
+  String get mapRouteIncompleteMetrics =>
+      'Distance or time estimates are not available for part of this route yet.';
+
+  @override
+  String get mapRouteSteps => 'Step by step';
+
+  @override
+  String mapRouteStepsCount(int count) {
+    return 'Steps: $count';
+  }
+
+  @override
+  String get mapRoutePickStart => 'Where are you starting?';
+
+  @override
+  String get mapRoutePickDestination => 'Where are you going?';
+
+  @override
+  String get mapRouteAllFloors => 'All floors';
+
+  @override
+  String get mapRouteRestrictedPointsHint =>
+      'Only points that meet the selected requirements';
+
+  @override
+  String get mapRouteVerifiedPointsHint => 'Only points with verified passages';
+
+  @override
+  String get mapRouteReachablePointsHint =>
+      'Only points with an available route';
+
+  @override
+  String get mapRouteNoPoints => 'No available points';
+
+  @override
+  String get mapRouteTryQueryOrFloor => 'Try another search or floor.';
+
+  @override
+  String get mapRouteTryRequirementsOrPoint =>
+      'Change the route requirements or choose another point.';
+
+  @override
+  String get mapRouteTryPointOrPassages =>
+      'Choose another point or suggest a passage correction on the map.';
+
+  @override
+  String get mapRoutePointSelected => 'Selected';
+
+  @override
+  String get mapRoutePointFallback => 'Point on the map';
+
+  @override
+  String get mapRouteAnotherFloor => 'another floor';
+
+  @override
+  String get mapRouteDepart => 'Start your route';
+
+  @override
+  String get mapRouteStraight => 'Continue straight';
+
+  @override
+  String get mapRouteTurnLeft => 'Turn left';
+
+  @override
+  String get mapRouteTurnRight => 'Turn right';
+
+  @override
+  String get mapRouteTurnBack => 'Turn around';
+
+  @override
+  String mapRouteStairsToFloor(String floor) {
+    return 'Take the stairs to $floor';
+  }
+
+  @override
+  String get mapRouteStairs => 'Take the stairs';
+
+  @override
+  String mapRouteElevatorToFloor(String floor) {
+    return 'Take the lift to $floor';
+  }
+
+  @override
+  String mapRouteRampToFloor(String floor) {
+    return 'Take the ramp to $floor';
+  }
+
+  @override
+  String get mapRouteRamp => 'Take the ramp';
+
+  @override
+  String mapRouteEscalatorToFloor(String floor) {
+    return 'Take the escalator to $floor';
+  }
+
+  @override
+  String get mapRouteEscalator => 'Take the escalator';
+
+  @override
+  String mapRouteChangeFloor(String floor) {
+    return 'Go to $floor';
+  }
+
+  @override
+  String get mapRouteArrive => 'You have arrived';
+
+  @override
+  String mapRouteFloorTransition(int from, int to) {
+    return 'Floors $from → $to';
+  }
+
+  @override
+  String get mapRouteAscent => 'Up';
+
+  @override
+  String get mapRouteDescent => 'Down';
+
+  @override
+  String get mapRouteEnd => 'End of route';
+
+  @override
+  String get mapRouteCompactStart => 'Start';
+
+  @override
+  String get mapRouteCompactStraight => 'Straight';
+
+  @override
+  String get mapRouteCompactLeft => 'Left';
+
+  @override
+  String get mapRouteCompactRight => 'Right';
+
+  @override
+  String get mapRouteCompactTurnBack => 'Turn around';
+
+  @override
+  String get mapRouteCompactStairs => 'Stairs';
+
+  @override
+  String get mapRouteCompactElevator => 'Lift';
+
+  @override
+  String get mapRouteCompactRamp => 'Ramp';
+
+  @override
+  String get mapRouteCompactEscalator => 'Escalator';
+
+  @override
+  String get mapRouteCompactTransition => 'Change floor';
+
+  @override
+  String get mapRouteCompactFinish => 'Finish';
+
+  @override
+  String mapRouteStepAnnouncement(
+    int step,
+    int count,
+    String instruction,
+    String details,
+  ) {
+    return 'Step $step of $count. $instruction. $details';
+  }
+
+  @override
+  String get mapRouteFinish => 'End route';
+
+  @override
+  String mapRouteManualStepProgress(int step, int count) {
+    return 'Step $step of $count · manual';
+  }
+
+  @override
+  String mapRouteMilestoneAnnouncement(int step, String label) {
+    return 'Step $step. $label';
+  }
+
+  @override
+  String get mapRoutePreviousStep => 'Previous step';
+
+  @override
+  String mapRouteManualBrowse(String instruction) {
+    return 'Browse route manually. $instruction';
+  }
+
+  @override
+  String mapRouteProgressValue(int step, int count) {
+    return '$step of $count';
+  }
+
+  @override
+  String get mapRouteFinishBrowsing => 'Finish viewing route';
+
+  @override
+  String get mapRouteNextStep => 'Next step';
 }

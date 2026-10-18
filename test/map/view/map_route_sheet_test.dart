@@ -1,10 +1,12 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_guidance.dart';
+import 'package:rtu_mirea_app/map/widgets/map_route_node_picker.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
 
 import '../../helpers/pump_app.dart';
@@ -14,20 +16,24 @@ void main() {
     WidgetTester tester, {
     CampusMapData? campus,
     TextScaler textScaler = TextScaler.noScaling,
+    Size size = const Size(320, 568),
+    String startRoomId = 'room-start',
+    String destinationRoomId = 'room-destination',
+    ValueChanged<IndoorRoute>? onApply,
   }) => tester.pumpApp(
     Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: MapRouteSheet(
           campus: campus ?? _campus(),
-          startRoomId: 'room-start',
-          destinationRoomId: 'room-destination',
-          onApply: (_) {},
+          startRoomId: startRoomId,
+          destinationRoomId: destinationRoomId,
+          onApply: onApply ?? (_) {},
           onContribute: () {},
         ),
       ),
     ),
-    size: const Size(320, 568),
+    size: size,
     textScaler: textScaler,
   );
 
@@ -176,7 +182,7 @@ void main() {
       expect(find.text('По лестнице на 2 этаж'), findsOneWidget);
       expect(find.text('Показать путь'), findsOneWidget);
       expect(find.text('Оптимальный путь'), findsNothing);
-      expect(find.text('2 эт.'), findsOneWidget);
+      expect(find.text('2 этажа'), findsOneWidget);
       expect(find.textContaining('мин'), findsNothing);
       expect(find.text('20 м'), findsNothing);
       expect(find.text('15 м'), findsNothing);
@@ -195,6 +201,7 @@ void main() {
     ) async {
       final campus = _campus();
       final nodes = campus.graph['nodes']! as List;
+      final edges = campus.graph['edges']! as List;
       for (final room in ['А-10', 'А-2']) {
         campus.rooms.add(
           MapPlaceData.fromJson({
@@ -211,6 +218,12 @@ void main() {
           'room_id': room,
           'x': 5,
           'y': 5,
+        });
+        edges.add({
+          'id': 'from-$room',
+          'from_node_id': room,
+          'to_node_id': 'start',
+          'distance_meters': 5,
         });
       }
       nodes.addAll(<Map<String, Object>>[
@@ -236,7 +249,7 @@ void main() {
       final labels = tester
           .widgetList<AppListRow>(
             find.descendant(
-              of: find.byType(ListView),
+              of: find.byType(MapRouteNodePicker),
               matching: find.byType(AppListRow),
             ),
           )
@@ -272,9 +285,208 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('same place explains arrival without starting guidance', (
+    tester,
+  ) async {
+    await pump(tester, destinationRoomId: 'room-start');
+    expect(find.text('Вы уже здесь'), findsOneWidget);
+    expect(find.text('Показать путь'), findsNothing);
+    expect(find.text('По шагам'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('unreachable points are not offered as route starts', (
+    tester,
+  ) async {
+    final campus = _campus();
+    campus.rooms.add(
+      MapPlaceData.fromJson({
+        'id': 'isolated',
+        'floor_id': 'floor-1',
+        'label': 'Изолированная аудитория',
+        'x': 20,
+        'y': 20,
+      }),
+    );
+    (campus.graph['nodes']! as List).add({
+      'id': 'isolated',
+      'room_id': 'isolated',
+      'floor_id': 'floor-1',
+      'x': 20,
+      'y': 20,
+    });
+    await pump(tester, campus: campus);
+    await tester.tap(find.text('Откуда: Вход'));
+    await tester.pumpAndSettle();
+    final picker = tester.widget<MapRouteNodePicker>(
+      find.byType(MapRouteNodePicker),
+    );
+    expect(picker.nodes.map((node) => node.id), isNot(contains('isolated')));
+    expect(picker.nodes.map((node) => node.id), contains('start'));
+    expect(find.text('Изолированная аудитория'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('resetting accessibility restores the preserved endpoint pair', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.ensureVisible(find.text('Параметры маршрута'));
+    await tester.tap(find.text('Параметры маршрута'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('На коляске'));
+    await tester.tap(find.text('На коляске'));
+    await tester.pumpAndSettle();
+    expect(find.text('Показать путь'), findsNothing);
+    expect(find.text('Откуда: Вход'), findsOneWidget);
+    expect(find.text('Куда: А-201'), findsOneWidget);
+    await tester.ensureVisible(find.text('Сбросить ограничения'));
+    await tester.tap(find.text('Сбросить ограничения'));
+    await tester.pumpAndSettle();
+    expect(find.text('Показать путь'), findsOneWidget);
+    expect(find.text('Откуда: Вход'), findsOneWidget);
+    expect(find.text('Куда: А-201'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('resetting points permits a different disconnected route', (
+    tester,
+  ) async {
+    final campus = _campus();
+    for (final entry in {
+      'other-start': 'Другой вход',
+      'other-end': 'Другая аудитория',
+    }.entries) {
+      campus.rooms.add(
+        MapPlaceData.fromJson({
+          'id': entry.key,
+          'floor_id': 'floor-1',
+          'label': entry.value,
+          'x': 20,
+          'y': 20,
+        }),
+      );
+      (campus.graph['nodes']! as List).add({
+        'id': entry.key,
+        'room_id': entry.key,
+        'floor_id': 'floor-1',
+        'x': 20,
+        'y': 20,
+      });
+    }
+    (campus.graph['edges']! as List).add({
+      'id': 'other-route',
+      'from_node_id': 'other-start',
+      'to_node_id': 'other-end',
+      'distance_meters': 5,
+    });
+    await pump(tester, campus: campus);
+    await tester.tap(find.byTooltip('Сбросить точки'));
+    await tester.pumpAndSettle();
+    expect(find.text('Выберите начало'), findsOneWidget);
+    expect(find.text('Выберите назначение'), findsOneWidget);
+    expect(find.text('Показать путь'), findsNothing);
+
+    await tester.tap(find.text('Выберите начало'));
+    await tester.pumpAndSettle();
+    final start = find.byKey(const ValueKey('map-route-point-other-start'));
+    await tester.ensureVisible(start);
+    await tester.tap(start);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Выберите назначение'));
+    await tester.pumpAndSettle();
+    final picker = tester.widget<MapRouteNodePicker>(
+      find.byType(MapRouteNodePicker),
+    );
+    expect(picker.nodes.map((node) => node.id), isNot(contains('start')));
+    final destination = find.byKey(
+      const ValueKey('map-route-point-other-end'),
+    );
+    await tester.ensureVisible(destination);
+    await tester.tap(destination);
+    await tester.pumpAndSettle();
+    expect(find.text('Откуда: Другой вход'), findsOneWidget);
+    expect(find.text('Куда: Другая аудитория'), findsOneWidget);
+    expect(find.text('Маршрут готов'), findsOneWidget);
+    expect(find.text('Показать путь'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('search selects a reachable point without starting guidance', (
+    tester,
+  ) async {
+    var applied = 0;
+    await pump(tester, onApply: (_) => applied++);
+    await tester.tap(find.text('Куда: А-201'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(MapRouteNodePicker),
+        matching: find.byType(TextField),
+      ),
+      'а 201',
+    );
+    await tester.pumpAndSettle();
+    final destination = find.byKey(
+      const ValueKey('map-route-point-destination'),
+    );
+    await tester.ensureVisible(destination);
+    await tester.tap(destination);
+    await tester.pumpAndSettle();
+    expect(find.byType(MapRouteNodePicker), findsNothing);
+    expect(find.text('Куда: А-201'), findsOneWidget);
+    expect(find.text('Маршрут готов'), findsOneWidget);
+    expect(applied, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('landscape preview keeps detailed steps collapsed initially', (
+    tester,
+  ) async {
+    await pump(tester, size: const Size(740, 360));
+    expect(find.text('Маршрут готов'), findsOneWidget);
+    expect(find.text('По лестнице на 2 этаж'), findsNothing);
+    await tester.ensureVisible(find.text('По шагам'));
+    await tester.tap(find.text('По шагам'));
+    await tester.pumpAndSettle();
+    expect(find.text('По лестнице на 2 этаж'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('route picker remains scrollable in short large-text landscape', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      size: const Size(740, 320),
+      textScaler: const TextScaler.linear(2),
+    );
+    await tester.ensureVisible(find.text('Откуда: Вход'));
+    await tester.tap(find.text('Откуда: Вход'));
+    await tester.pumpAndSettle();
+    final picker = find.byType(MapRouteNodePicker);
+    final scrollable = find
+        .descendant(
+          of: picker,
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('map-route-point-start')),
+      100,
+      scrollable: scrollable,
+    );
+    expect(
+      find.byKey(const ValueKey('map-route-point-start')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   test(
     'floor transition label resolves destination floor from the catalog',
-    () {
+    () async {
+      final l10n = await AppLocalizations.delegate.load(const Locale('ru'));
       final campus = _campus();
       final graph = IndoorNavigationGraph.fromJson(campus.graph);
       final route = IndoorRoutePlanner(graph)
@@ -283,12 +495,16 @@ void main() {
       final stairs = route.instructions.firstWhere(
         (instruction) => instruction.maneuver == IndoorManeuver.stairs,
       );
-      expect(mapRouteInstructionLabel(stairs, campus), 'По лестнице на 2 этаж');
+      expect(
+        mapRouteInstructionLabel(stairs, campus, l10n),
+        'По лестнице на 2 этаж',
+      );
     },
   );
   test(
     'instruction context describes ascent and descent using catalog levels',
-    () {
+    () async {
+      final l10n = await AppLocalizations.delegate.load(const Locale('ru'));
       final campus = _campus();
       final graph = IndoorNavigationGraph.fromJson(campus.graph);
       final start = graph.nodes.firstWhere((node) => node.id == 'start');
@@ -304,6 +520,7 @@ void main() {
             distanceMeters: null,
           ),
           campus,
+          l10n,
         ),
         '1 → 2 этаж · Подъём',
       );
@@ -316,6 +533,7 @@ void main() {
             distanceMeters: .4,
           ),
           campus,
+          l10n,
         ),
         '2 → 1 этаж · Спуск · <1 м',
       );

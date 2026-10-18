@@ -18,6 +18,7 @@ import 'package:rtu_mirea_app/map/widgets/map_place_details_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
 
 import '../../helpers/pump_app.dart';
+import '../../helpers/settle_map_navigation.dart';
 
 class _CampusRepository extends Mock implements CampusRepository {}
 
@@ -129,6 +130,8 @@ void main() {
         await tester.pumpAndSettle();
       }
 
+      await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(AppSearchField), destinationLabel);
       await tester.pumpAndSettle();
       await tester.tap(find.text(searchTitle).last);
@@ -140,6 +143,14 @@ void main() {
       });
       await tester.pumpAndSettle();
       expect(find.byType(MapPlaceDetailsSheet), findsOneWidget);
+      await settleMapNavigation(
+        tester,
+        isReady: () =>
+            tester
+                .widget<MapPlaceDetailsSheet>(find.byType(MapPlaceDetailsSheet))
+                .onRouteTo !=
+            null,
+      );
       await tester.tap(find.text('Маршрут сюда'));
       await tester.pumpAndSettle();
       expect(find.byType(MapRouteSheet), findsOneWidget);
@@ -218,8 +229,7 @@ void main() {
                 )
                 as Map<String, dynamic>;
         refreshedCampus['revision'] = campus.revision + 1;
-        for (final edge
-            in (refreshedCampus['graph'] as Map)['edges'] as List) {
+        for (final edge in (refreshedCampus['graph'] as Map)['edges'] as List) {
           (edge as Map)['closed'] = true;
         }
         await tester.runAsync(() async {

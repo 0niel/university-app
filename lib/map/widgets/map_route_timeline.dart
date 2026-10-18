@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_presentation.dart';
@@ -140,21 +141,26 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
   }
 
   String _milestoneLabel(int index) {
-    if (index == 0) return 'Старт';
-    if (index == widget.route.instructions.length - 1) return 'Финиш';
+    final l10n = context.l10n;
+    if (index == 0) return l10n.mapRouteCompactStart;
+    if (index == widget.route.instructions.length - 1) {
+      return l10n.mapRouteCompactFinish;
+    }
     final step = widget.route.instructions[index];
     final from = widget.campus.floorForId(step.atNode.floorId)?.floor.number;
     final to = widget.campus
         .floorForId(step.toNode?.floorId ?? '')
         ?.floor
         .number;
-    if (from != null && to != null && from != to) return '$from → $to этаж';
+    if (from != null && to != null && from != to) {
+      return l10n.mapRouteFloorTransition(from, to);
+    }
     return switch (step.maneuver) {
-      IndoorManeuver.stairs => 'Лестница',
-      IndoorManeuver.elevator => 'Лифт',
-      IndoorManeuver.ramp => 'Пандус',
-      IndoorManeuver.escalator => 'Эскалатор',
-      _ => 'Переход',
+      IndoorManeuver.stairs => l10n.mapRouteCompactStairs,
+      IndoorManeuver.elevator => l10n.mapRouteCompactElevator,
+      IndoorManeuver.ramp => l10n.mapRouteCompactRamp,
+      IndoorManeuver.escalator => l10n.mapRouteCompactEscalator,
+      _ => l10n.mapRouteCompactTransition,
     };
   }
 
@@ -167,10 +173,12 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final count = widget.route.instructions.length;
     final instructionLabel = mapRouteInstructionLabel(
       widget.route.instructions[widget.stepIndex],
       widget.campus,
+      l10n,
     );
     final milestones = _milestones;
     final active = milestones.lastWhere((index) => index <= widget.stepIndex);
@@ -187,7 +195,10 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
                 if (index != milestones.first)
                   const SizedBox(width: AppSpacing.xs),
                 Semantics(
-                  label: 'Шаг ${index + 1}. ${_milestoneLabel(index)}',
+                  label: l10n.mapRouteMilestoneAnnouncement(
+                    index + 1,
+                    _milestoneLabel(index),
+                  ),
                   child: AppChip(
                     key: _milestoneKeys.putIfAbsent(index, GlobalKey.new),
                     label: _milestoneLabel(index),
@@ -211,7 +222,7 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
         Row(
           children: [
             AppIconButton(
-              tooltip: 'Предыдущий шаг',
+              tooltip: l10n.mapRoutePreviousStep,
               shape: AppIconButtonShape.circle,
               size: AppIconButtonSize.compact,
               tone: AppIconButtonTone.surface,
@@ -261,13 +272,19 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
                       slider: true,
                       excludeSemantics: true,
                       enabled: widget.onSelected != null && count > 1,
-                      label: 'Просмотр маршрута вручную. $instructionLabel',
-                      value: '${widget.stepIndex + 1} из $count',
+                      label: l10n.mapRouteManualBrowse(instructionLabel),
+                      value: l10n.mapRouteProgressValue(
+                        widget.stepIndex + 1,
+                        count,
+                      ),
                       increasedValue: widget.stepIndex < count - 1
-                          ? '${widget.stepIndex + 2} из $count'
+                          ? l10n.mapRouteProgressValue(
+                              widget.stepIndex + 2,
+                              count,
+                            )
                           : null,
                       decreasedValue: widget.stepIndex > 0
-                          ? '${widget.stepIndex} из $count'
+                          ? l10n.mapRouteProgressValue(widget.stepIndex, count)
                           : null,
                       onIncrease:
                           widget.onSelected != null &&
@@ -301,8 +318,8 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
             const SizedBox(width: AppSpacing.sm),
             AppIconButton(
               tooltip: widget.stepIndex == count - 1
-                  ? 'Закончить просмотр маршрута'
-                  : 'Следующий шаг',
+                  ? l10n.mapRouteFinishBrowsing
+                  : l10n.mapRouteNextStep,
               shape: AppIconButtonShape.circle,
               size: AppIconButtonSize.compact,
               tone: AppIconButtonTone.primary,

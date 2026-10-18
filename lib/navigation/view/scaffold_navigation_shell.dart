@@ -23,6 +23,9 @@ class ScaffoldNavigationShell extends StatelessWidget {
                           currentIndex: navigationShell.currentIndex,
                           onSelected: _setActiveIndex,
                           scheduleBadge: hasUnread,
+                          extended:
+                              constraints.maxWidth >= 1200 &&
+                              constraints.maxHeight >= 600,
                         ),
                   ),
                   Expanded(child: navigationShell),

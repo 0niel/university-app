@@ -17,6 +17,7 @@ import 'package:rtu_mirea_app/map/widgets/map_place_details_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
 
 import '../../helpers/pump_app.dart';
+import '../../helpers/settle_map_navigation.dart';
 
 class _CampusRepository extends Mock implements CampusRepository {}
 
@@ -189,6 +190,8 @@ class _RefreshFixture {
       size: const Size(390, 844),
     );
     await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(AppSearchField), 'А-102');
     await tester.pumpAndSettle();
     await tester.tap(find.text('А-102').last);
@@ -209,6 +212,10 @@ class _RefreshFixture {
     }
     await tester.pumpAndSettle();
     expect(map.state.status, MapStatus.loaded);
+    await settleMapNavigation(
+      tester,
+      isReady: () => sheet(tester).onRouteTo != null,
+    );
   }
 }
 
@@ -216,7 +223,7 @@ void _expectRouteEnabled(WidgetTester tester, bool enabled) {
   for (final label in ['Маршрут сюда', 'Отсюда']) {
     expect(
       tester.widget<AppButton>(find.widgetWithText(AppButton, label)).onPressed,
-      enabled ? isNotNull : isNull,
+      enabled && label == 'Маршрут сюда' ? isNotNull : isNull,
     );
   }
 }
@@ -252,7 +259,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('А-101'));
     await tester.pumpAndSettle();
-    expect(find.text('42 м · ≈ 1 мин · 1 эт.'), findsOneWidget);
+    expect(find.text('42 м · ≈ 1 мин · 1 этаж'), findsOneWidget);
     await tester.tap(find.text('Показать путь'));
     await tester.pumpAndSettle();
     expect(find.byType(MapRouteSheet), findsNothing);

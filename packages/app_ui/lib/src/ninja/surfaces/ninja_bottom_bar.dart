@@ -4,7 +4,10 @@ import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/widgets.dart';
+
+part 'ninja_navigation_rail.dart';
 
 class NinjaBottomBar extends StatelessWidget {
   const NinjaBottomBar({
@@ -140,69 +143,6 @@ class _NinjaBottomBarViewportData extends InheritedWidget {
       oldWidget.bottomInset != bottomInset;
 }
 
-class NinjaNavigationRail extends StatelessWidget {
-  const NinjaNavigationRail({
-    required this.items,
-    required this.currentIndex,
-    required this.onSelected,
-    super.key,
-  })  : assert(items.length > 1, 'At least two navigation items are required.'),
-        assert(
-          currentIndex >= 0 && currentIndex < items.length,
-          'The selected navigation index must reference an item.',
-        );
-
-  final List<NinjaBottomBarItem> items;
-  final int currentIndex;
-  final ValueChanged<int> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final expanded = MediaQuery.textScalerOf(context).scale(1) >= 1.6;
-    final width = expanded ? 176.0 : 116.0;
-
-    return Semantics(
-      container: true,
-      explicitChildNodes: true,
-      child: ColoredBox(
-        color: colors.surface,
-        child: SizedBox(
-          width: width,
-          child: SafeArea(
-            right: false,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final itemHeight = (constraints.maxHeight / items.length)
-                    .clamp(48, 64)
-                    .toDouble();
-                return Center(
-                  child: SizedBox(
-                    height: itemHeight * items.length,
-                    child: Column(
-                      children: [
-                        for (var index = 0; index < items.length; index++)
-                          SizedBox(
-                            height: itemHeight,
-                            child: _RailItem(
-                              item: items[index],
-                              selected: index == currentIndex,
-                              onTap: () => onSelected(index),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class NinjaBottomBarItem {
   const NinjaBottomBarItem({
     required this.icon,
@@ -284,83 +224,6 @@ class _BottomBarItem extends StatelessWidget {
                     ),
                 ],
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RailItem extends StatelessWidget {
-  const _RailItem({
-    required this.item,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final NinjaBottomBarItem item;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final icon = selected ? (item.activeIcon ?? item.icon) : item.icon;
-    final tint = selected ? colors.accent : colors.muted;
-
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: item.label,
-      onTap: onTap,
-      child: ExcludeSemantics(
-        child: AppPressable(
-          onTap: onTap,
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: AppSpacing.fieldGap),
-            child: Row(
-              children: [
-                SizedBox.square(
-                  dimension: 24,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.center,
-                    children: [
-                      IconTheme(
-                        data: IconThemeData(
-                          color: tint,
-                          size: AppIconSize.navigation,
-                        ),
-                        child: icon,
-                      ),
-                      if (item.hasBadge)
-                        PositionedDirectional(
-                          end: -2,
-                          top: -2,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: item.badgeColor ?? colors.accent,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const SizedBox.square(dimension: 7),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    item.label,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: (selected ? AppText.captionBold : AppText.caption)
-                        .copyWith(color: tint, height: 1.08),
-                  ),
-                ),
-              ],
             ),
           ),
         ),
