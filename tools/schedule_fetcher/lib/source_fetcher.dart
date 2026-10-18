@@ -26,98 +26,186 @@ Future<ScheduleSourceSelection> selectScheduleSource({
   Uri? relayBaseUrl,
   String? relayAuthorization,
   Duration timeout = const Duration(seconds: 10),
+  Duration relayWarmupTimeout = const Duration(seconds: 90),
+  RetryDelay? delay,
+  RetryLog? log,
+  UtcClock? clock,
 }) async {
-  Future<void> probe(Uri baseUrl, String? authorization) async {
-    if (baseUrl.scheme != 'https' ||
-        baseUrl.host.isEmpty ||
-        baseUrl.port != 443 ||
-        baseUrl.userInfo.isNotEmpty ||
-        baseUrl.hasQuery ||
-        baseUrl.hasFragment ||
-        (baseUrl.path.isNotEmpty && baseUrl.path != '/')) {
-      throw const FormatException('Invalid schedule source origin');
-    }
+  if (timeout <= Duration.zero || relayWarmupTimeout <= Duration.zero) {
+    throw ArgumentError('Schedule probe timeouts must be positive');
+  }
+  final wait = delay ?? Future<void>.delayed;
+  final now = clock ?? (() => DateTime.now().toUtc());
 
-    Future<http.Response> get(Uri uri, String accept) async {
-      final request = http.Request('GET', uri)..followRedirects = false;
-      request.headers[HttpHeaders.acceptHeader] = accept;
-      if (authorization != null && authorization.isNotEmpty) {
-        request.headers[HttpHeaders.authorizationHeader] = authorization;
+  Future<void> probe(
+    Uri baseUrl,
+    String? authorization, {
+    DateTime? deadline,
+  }) async {
+    var stage = 'origin';
+    int? status;
+    try {
+      if (baseUrl.scheme != 'https' ||
+          baseUrl.host.isEmpty ||
+          baseUrl.port != 443 ||
+          baseUrl.userInfo.isNotEmpty ||
+          baseUrl.hasQuery ||
+          baseUrl.hasFragment ||
+          (baseUrl.path.isNotEmpty && baseUrl.path != '/')) {
+        throw const FormatException('Invalid schedule source origin');
       }
-      final response = await httpClient
-          .send(request)
-          .then(http.Response.fromStream)
-          .timeout(timeout);
-      if (response.statusCode != HttpStatus.ok) {
-        throw FormatException('Schedule probe returned ${response.statusCode}');
-      }
-      return response;
-    }
 
-    final search = await get(
-      baseUrl.resolve('/schedule/api/search'),
-      'application/json',
-    );
-    final decoded = jsonDecode(search.body);
-    final data = decoded is Map<String, Object?> ? decoded['data'] : null;
-    if (data is! List<Object?> || data.isEmpty) {
-      throw const FormatException('Schedule probe has no targets');
-    }
-    Uri? calendar;
-    for (final target in data) {
-      if (target is! Map<String, Object?>) continue;
-      final link = target['iCalLink'];
-      if (link is! String || link.isEmpty) continue;
-      final uri = Uri.tryParse(link);
-      if (uri == null ||
-          uri.scheme != 'https' ||
-          uri.port != 443 ||
-          uri.userInfo.isNotEmpty ||
-          uri.hasFragment ||
-          (uri.host != baseUrl.host && uri.host != officialScheduleUri.host) ||
-          !uri.path.startsWith('/schedule/api/ical/')) {
+      Future<http.Response> get(
+        Uri uri,
+        String accept,
+        String requestStage,
+      ) async {
+        stage = requestStage;
+        status = null;
+        final remaining = deadline?.difference(now());
+        if (remaining != null && remaining <= Duration.zero) {
+          throw TimeoutException('Schedule probe deadline reached');
+        }
+        final requestTimeout = remaining != null && remaining < timeout
+            ? remaining
+            : timeout;
+        final request = http.Request('GET', uri)..followRedirects = false;
+        request.headers[HttpHeaders.acceptHeader] = accept;
+        if (authorization != null && authorization.isNotEmpty) {
+          request.headers[HttpHeaders.authorizationHeader] = authorization;
+        }
+        final response = await httpClient
+            .send(request)
+            .then(http.Response.fromStream)
+            .timeout(requestTimeout);
+        status = response.statusCode;
+        if (response.statusCode != HttpStatus.ok) {
+          throw _ScheduleProbeFailure(
+            stage: stage,
+            category: 'http',
+            status: status,
+            retryable: isRetryableHttpStatus(response.statusCode),
+          );
+        }
+        return response;
+      }
+
+      final search = await get(
+        baseUrl.resolve('/schedule/api/search'),
+        'application/json',
+        'search',
+      );
+      final decoded = jsonDecode(search.body);
+      final data = decoded is Map<String, Object?> ? decoded['data'] : null;
+      if (data is! List<Object?> || data.isEmpty) {
+        throw const FormatException('Schedule probe has no targets');
+      }
+      Uri? calendar;
+      for (final target in data) {
+        if (target is! Map<String, Object?>) continue;
+        final link = target['iCalLink'];
+        if (link is! String || link.isEmpty) continue;
+        final uri = Uri.tryParse(link);
+        if (uri == null ||
+            uri.scheme != 'https' ||
+            uri.port != 443 ||
+            uri.userInfo.isNotEmpty ||
+            uri.hasFragment ||
+            (uri.host != baseUrl.host &&
+                uri.host != officialScheduleUri.host) ||
+            !uri.path.startsWith('/schedule/api/ical/')) {
+          throw const FormatException(
+            'Schedule probe has an invalid calendar URL',
+          );
+        }
+        calendar = baseUrl.replace(path: uri.path, query: uri.query);
+        break;
+      }
+      if (calendar == null) {
+        throw const FormatException('Schedule probe has no calendar feed');
+      }
+      final response = await get(calendar, 'text/calendar', 'calendar');
+      final content = response.body.replaceFirst(RegExp(r'^\uFEFF'), '').trim();
+      if (!RegExp(r'^BEGIN:VCALENDAR\r?\n').hasMatch(content) ||
+          !RegExp(r'^VERSION:2\.0\r?$', multiLine: true).hasMatch(content) ||
+          !RegExp(r'\r?\nEND:VCALENDAR$').hasMatch(content)) {
         throw const FormatException(
-          'Schedule probe has an invalid calendar URL',
+          'Schedule probe returned an invalid calendar',
         );
       }
-      calendar = baseUrl.replace(path: uri.path, query: uri.query);
-      break;
-    }
-    if (calendar == null) {
-      throw const FormatException('Schedule probe has no calendar feed');
-    }
-    final response = await get(calendar, 'text/calendar');
-    final content = response.body.replaceFirst(RegExp(r'^\uFEFF'), '').trim();
-    if (!RegExp(r'^BEGIN:VCALENDAR\r?\n').hasMatch(content) ||
-        !RegExp(r'^VERSION:2\.0\r?$', multiLine: true).hasMatch(content) ||
-        !RegExp(r'\r?\nEND:VCALENDAR$').hasMatch(content)) {
-      throw const FormatException(
-        'Schedule probe returned an invalid calendar',
+    } on _ScheduleProbeFailure {
+      rethrow;
+    } on Exception catch (error) {
+      throw _ScheduleProbeFailure(
+        stage: stage,
+        category: switch (error) {
+          TimeoutException() => 'timeout',
+          SocketException() || http.ClientException() => 'network',
+          HandshakeException() => 'tls',
+          FormatException() => 'invalid_response',
+          _ => 'unexpected',
+        },
+        status: status,
+        retryable: isRetryableHttpError(error),
       );
     }
   }
 
+  final _ScheduleProbeFailure officialFailure;
   try {
     await probe(officialScheduleUri, null);
     return ScheduleSourceSelection(
       baseUrl: officialScheduleUri,
       usesRelay: false,
     );
-  } on Exception {
+  } on _ScheduleProbeFailure catch (failure) {
+    officialFailure = failure;
+    log?.call('Schedule probe ${failure.describe('official')}');
     if (relayBaseUrl == null || relayBaseUrl.host == officialScheduleUri.host) {
       throw StateError(
-        'Official schedule source is unavailable; no relay configured',
+        'Official schedule source is unavailable; no relay configured; '
+        '${failure.describe('official')}',
       );
     }
   }
-  try {
-    await probe(relayBaseUrl, relayAuthorization);
-    return ScheduleSourceSelection(baseUrl: relayBaseUrl, usesRelay: true);
-  } on Exception {
-    throw StateError(
-      'Neither official schedule source nor relay passed health checks',
-    );
+  final deadline = now().add(relayWarmupTimeout);
+  for (var attempt = 1; ; attempt++) {
+    try {
+      await probe(relayBaseUrl, relayAuthorization, deadline: deadline);
+      return ScheduleSourceSelection(baseUrl: relayBaseUrl, usesRelay: true);
+    } on _ScheduleProbeFailure catch (failure) {
+      log?.call(
+        'Schedule probe ${failure.describe('relay')} attempt=$attempt',
+      );
+      const retryDelay = Duration(seconds: 5);
+      if (!failure.retryable || deadline.difference(now()) <= retryDelay) {
+        throw StateError(
+          'Neither official schedule source nor relay passed health checks; '
+          '${officialFailure.describe('official')}; '
+          '${failure.describe('relay')}',
+        );
+      }
+      await wait(retryDelay);
+    }
   }
+}
+
+class _ScheduleProbeFailure implements Exception {
+  const _ScheduleProbeFailure({
+    required this.stage,
+    required this.category,
+    required this.retryable,
+    this.status,
+  });
+
+  final String stage;
+  final String category;
+  final int? status;
+  final bool retryable;
+
+  String describe(String source) =>
+      'source=$source stage=$stage category=$category'
+      '${status == null ? '' : ' status=$status'}';
 }
 
 class RetryingSourceClient {

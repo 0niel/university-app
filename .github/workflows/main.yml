@@ -234,6 +234,8 @@ jobs:
         run: dart analyze --fatal-warnings
       - name: Test
         run: dart test
+      - name: Test schedule relay
+        run: node --test ../schedule_relay/server.test.mjs
 
   edge-functions:
     needs: changes

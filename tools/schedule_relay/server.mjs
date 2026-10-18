@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 const UPSTREAM = 'https://schedule-of.mirea.ru';
-const FORWARDED_HEADERS = ['content-type', 'cache-control', 'last-modified', 'etag'];
+const FORWARDED_HEADERS = ['content-type', 'cache-control', 'last-modified', 'etag', 'retry-after'];
 
 export function createRelayServer({ authorization, fetchImpl = fetch, timeoutMs = 60_000 }) {
   authorization = authorization?.trim();
