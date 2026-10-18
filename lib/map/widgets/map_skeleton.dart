@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/widgets/map_loading_plan.dart';
 
 class MapSkeleton extends StatelessWidget {
@@ -7,7 +8,7 @@ class MapSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => NinjaSkeletonGroup(
-    semanticsLabel: 'Загружаем план кампуса',
+    semanticsLabel: context.l10n.mapCampusPlanLoading,
     child: ColoredBox(
       color: context.colors.canvas,
       child: LayoutBuilder(
@@ -79,7 +80,7 @@ class MapSkeleton extends StatelessWidget {
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: Text(
-                            'Загружаем план кампуса',
+                            context.l10n.mapCampusPlanLoading,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppText.body.copyWith(

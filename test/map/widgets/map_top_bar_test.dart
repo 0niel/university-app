@@ -18,6 +18,9 @@ Future<void> _pumpBar(
   ValueChanged<String>? onQueryChanged,
   VoidCallback? onFriends,
   VoidCallback? onSearchClosed,
+  ValueChanged<CampusModel>? onCampusSelected,
+  Locale locale = const Locale('ru'),
+  bool hasSelection = true,
   Size size = const Size(320, 420),
   double textScale = 1,
   bool reducedMotion = true,
@@ -30,7 +33,7 @@ Future<void> _pumpBar(
       theme: AppTheme.lightTheme,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('ru'),
+      locale: locale,
       home: Scaffold(
         body: MediaQuery(
           data: MediaQueryData(
@@ -43,9 +46,9 @@ Future<void> _pumpBar(
             child: MapTopBar(
               controller: controller,
               campuses: const [_campus],
-              selectedCampus: _campus,
+              selectedCampus: hasSelection ? _campus : null,
               onQueryChanged: onQueryChanged ?? (_) {},
-              onCampusSelected: (_) {},
+              onCampusSelected: onCampusSelected ?? (_) {},
               onFriends: onFriends ?? () {},
               onSearchClosed: onSearchClosed,
               compact: size.height < 650,
@@ -59,6 +62,36 @@ Future<void> _pumpBar(
 }
 
 void main() {
+  for (final locale in const [Locale('ru'), Locale('en')]) {
+    testWidgets(
+      'campus picker follows ${locale.languageCode} and selects campus',
+      (
+        tester,
+      ) async {
+        addTearDown(tester.view.reset);
+        final controller = TextEditingController();
+        addTearDown(controller.dispose);
+        CampusModel? chosen;
+        await _pumpBar(
+          tester,
+          controller: controller,
+          locale: locale,
+          hasSelection: false,
+          onCampusSelected: (campus) => chosen = campus,
+        );
+        final russian = locale.languageCode == 'ru';
+        await tester.tap(find.text(russian ? 'Корпус' : 'Campus'));
+        await tester.pumpAndSettle();
+        expect(find.text(russian ? 'Кампусы' : 'Campuses'), findsOneWidget);
+        await tester.tap(find.text(_campus.displayName));
+        await tester.pumpAndSettle();
+        expect(chosen, _campus);
+        expect(find.text(russian ? 'Кампусы' : 'Campuses'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('search begins as an icon and opens a focused field', (
     tester,
   ) async {

@@ -1,6 +1,7 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
@@ -181,7 +182,7 @@ void main() {
       expect(find.text('По лестнице на 2 этаж'), findsOneWidget);
       expect(find.text('Показать путь'), findsOneWidget);
       expect(find.text('Оптимальный путь'), findsNothing);
-      expect(find.text('2 эт.'), findsOneWidget);
+      expect(find.text('2 этажа'), findsOneWidget);
       expect(find.textContaining('мин'), findsNothing);
       expect(find.text('20 м'), findsNothing);
       expect(find.text('15 м'), findsNothing);
@@ -484,7 +485,8 @@ void main() {
 
   test(
     'floor transition label resolves destination floor from the catalog',
-    () {
+    () async {
+      final l10n = await AppLocalizations.delegate.load(const Locale('ru'));
       final campus = _campus();
       final graph = IndoorNavigationGraph.fromJson(campus.graph);
       final route = IndoorRoutePlanner(graph)
@@ -493,12 +495,16 @@ void main() {
       final stairs = route.instructions.firstWhere(
         (instruction) => instruction.maneuver == IndoorManeuver.stairs,
       );
-      expect(mapRouteInstructionLabel(stairs, campus), 'По лестнице на 2 этаж');
+      expect(
+        mapRouteInstructionLabel(stairs, campus, l10n),
+        'По лестнице на 2 этаж',
+      );
     },
   );
   test(
     'instruction context describes ascent and descent using catalog levels',
-    () {
+    () async {
+      final l10n = await AppLocalizations.delegate.load(const Locale('ru'));
       final campus = _campus();
       final graph = IndoorNavigationGraph.fromJson(campus.graph);
       final start = graph.nodes.firstWhere((node) => node.id == 'start');
@@ -514,6 +520,7 @@ void main() {
             distanceMeters: null,
           ),
           campus,
+          l10n,
         ),
         '1 → 2 этаж · Подъём',
       );
@@ -526,6 +533,7 @@ void main() {
             distanceMeters: .4,
           ),
           campus,
+          l10n,
         ),
         '2 → 1 этаж · Спуск · <1 м',
       );

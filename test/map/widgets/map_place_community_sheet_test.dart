@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/room_photo_gallery.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
@@ -210,6 +211,48 @@ Future<void> _input(WidgetTester tester, String label, String value) async {
 
 void main() {
   setUpAll(() => initializeDateFormatting('ru'));
+
+  testWidgets('route actions and availability follow the current locale', (
+    tester,
+  ) async {
+    final locale = ValueNotifier(const Locale('ru'));
+    addTearDown(locale.dispose);
+    final page = _page(
+      MapPlaceDetailsSheet(
+        repository: _Repository(),
+        campus: _campus(),
+        room: MapPlaceData.fromJson(_roomJson),
+      ),
+    );
+    await tester.pumpWidget(
+      ValueListenableBuilder(
+        valueListenable: locale,
+        builder: (context, locale, _) => MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: page,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Маршрут сюда'), findsOneWidget);
+    expect(
+      find.text('Для этого места пока нет проверенного пути на плане.'),
+      findsOneWidget,
+    );
+    locale.value = const Locale('en');
+    await tester.pumpAndSettle();
+    expect(find.text('Route here'), findsOneWidget);
+    expect(find.text('From here'), findsOneWidget);
+    expect(
+      find.text('This place does not have a verified route on the plan yet.'),
+      findsOneWidget,
+    );
+    expect(find.text('Маршрут сюда'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'place uses Moscow date and keeps schedule readable at large text',

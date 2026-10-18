@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_presentation.dart';
@@ -54,6 +55,7 @@ class _MapRouteGuidanceState extends State<MapRouteGuidance> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     assert(
       widget.stepIndex < widget.route.instructions.length,
       'Step index must belong to the route',
@@ -66,22 +68,17 @@ class _MapRouteGuidanceState extends State<MapRouteGuidance> {
     final colors = context.colors;
     final compact = MediaQuery.sizeOf(context).height < 600;
     final fullLabel = isLast
-        ? 'Конец маршрута'
-        : mapRouteInstructionLabel(instruction, campus);
-    final instructionContext = mapRouteInstructionContext(instruction, campus);
-    final compactLabel = switch (instruction.maneuver) {
-      IndoorManeuver.depart => 'Старт',
-      IndoorManeuver.straight => 'Прямо',
-      IndoorManeuver.turnLeft => 'Налево',
-      IndoorManeuver.turnRight => 'Направо',
-      IndoorManeuver.turnBack => 'Разворот',
-      IndoorManeuver.stairs => 'Лестница',
-      IndoorManeuver.elevator => 'Лифт',
-      IndoorManeuver.ramp => 'Пандус',
-      IndoorManeuver.escalator => 'Эскалатор',
-      IndoorManeuver.floorTransition => 'Переход',
-      IndoorManeuver.arrive => 'Финиш',
-    };
+        ? l10n.mapRouteEnd
+        : mapRouteInstructionLabel(instruction, campus, l10n);
+    final instructionContext = mapRouteInstructionContext(
+      instruction,
+      campus,
+      l10n,
+    );
+    final compactLabel = mapRouteInstructionCompactLabel(
+      instruction.maneuver,
+      l10n,
+    );
     return AppCard(
       padding: EdgeInsets.all(compact ? AppSpacing.sm : AppSpacing.md),
       child: Column(
@@ -107,8 +104,12 @@ class _MapRouteGuidanceState extends State<MapRouteGuidance> {
                   liveRegion: true,
                   excludeSemantics: compact,
                   label: compact
-                      ? 'Шаг ${stepIndex + 1} из ${route.instructions.length}. '
-                            '$fullLabel. $instructionContext'
+                      ? l10n.mapRouteStepAnnouncement(
+                          stepIndex + 1,
+                          route.instructions.length,
+                          fullLabel,
+                          instructionContext,
+                        )
                       : null,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,7 +152,7 @@ class _MapRouteGuidanceState extends State<MapRouteGuidance> {
                 ),
               ),
               AppIconButton(
-                tooltip: 'Завершить маршрут',
+                tooltip: l10n.mapRouteFinish,
                 shape: AppIconButtonShape.circle,
                 size: AppIconButtonSize.compact,
                 tone: AppIconButtonTone.surface,
@@ -162,8 +163,10 @@ class _MapRouteGuidanceState extends State<MapRouteGuidance> {
           ),
           if (!compact)
             Text(
-              'Шаг ${stepIndex + 1} из '
-              '${route.instructions.length} · вручную',
+              l10n.mapRouteManualStepProgress(
+                stepIndex + 1,
+                route.instructions.length,
+              ),
               style: AppText.caption.copyWith(color: colors.muted),
             ),
           const SizedBox(height: AppSpacing.xs),

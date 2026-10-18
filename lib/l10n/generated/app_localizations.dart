@@ -22195,6 +22195,629 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your day.\nAll planned out.'**
   String get onboardingStoryScheduleTitle;
+
+  /// Title of the campus picker on the map.
+  ///
+  /// In en, this message translates to:
+  /// **'Campuses'**
+  String get mapCampusesTitle;
+
+  /// Visible and accessible loading status for the campus map.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading campus plan'**
+  String get mapCampusPlanLoading;
+
+  /// Accessible loading status while the map editor loads a floor plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading floor plan'**
+  String get mapFloorPlanLoading;
+
+  /// Error title when loading the map editor floor plan fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the floor plan'**
+  String get mapPlanLoadFailed;
+
+  /// Recovery hint after the map editor floor plan fails to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get mapPlanLoadRetryHint;
+
+  /// Button to retry loading the map editor floor plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload floor plan'**
+  String get mapPlanReloadAction;
+
+  /// No description provided for @mapRouteCheckingPassages.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking available passages…'**
+  String get mapRouteCheckingPassages;
+
+  /// No description provided for @mapRouteUnreachableFromStart.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no route here from the selected start. You can start a new route from this place.'**
+  String get mapRouteUnreachableFromStart;
+
+  /// No description provided for @mapRouteToPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Route here'**
+  String get mapRouteToPlace;
+
+  /// No description provided for @mapRouteFromPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'From here'**
+  String get mapRouteFromPlace;
+
+  /// No description provided for @mapRouteRefreshingPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating the plan and passages for your route…'**
+  String get mapRouteRefreshingPlan;
+
+  /// No description provided for @mapRouteMovedRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This place has moved. The plan could not be updated; its access routes are still being checked.'**
+  String get mapRouteMovedRefreshFailed;
+
+  /// No description provided for @mapRouteRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The route plan could not be updated. Check your connection and try again.'**
+  String get mapRouteRefreshFailed;
+
+  /// No description provided for @mapRefreshMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh map'**
+  String get mapRefreshMap;
+
+  /// No description provided for @mapRoutePlaceNeedsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'This place has moved. Its access routes are still being checked.'**
+  String get mapRoutePlaceNeedsReview;
+
+  /// No description provided for @mapRoutePlaceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This place does not have a verified route on the plan yet.'**
+  String get mapRoutePlaceUnavailable;
+
+  /// Indoor map route: unverified passages
+  ///
+  /// In en, this message translates to:
+  /// **'The passages in this building have not been verified yet. Find the place on the floor plan or suggest a route correction.'**
+  String get mapRouteUnverifiedPassages;
+
+  /// Indoor map route: destination unmapped
+  ///
+  /// In en, this message translates to:
+  /// **'The entrance to this place has not been mapped yet.'**
+  String get mapRouteDestinationUnmapped;
+
+  /// Indoor map route: start unmapped
+  ///
+  /// In en, this message translates to:
+  /// **'The starting point is not connected to the mapped passages yet.'**
+  String get mapRouteStartUnmapped;
+
+  /// Indoor map route: invalid passages
+  ///
+  /// In en, this message translates to:
+  /// **'The passage data needs to be checked. Refresh the map or report an error.'**
+  String get mapRouteInvalidPassages;
+
+  /// Indoor map route: restricted unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'No suitable route was found. There is no verified passage between these points for the selected requirements.'**
+  String get mapRouteRestrictedUnavailable;
+
+  /// Indoor map route: unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'No suitable route was found. A passage may be closed or its accessibility has not been verified yet.'**
+  String get mapRouteUnavailable;
+
+  /// Indoor map route: reset restrictions
+  ///
+  /// In en, this message translates to:
+  /// **'Reset requirements'**
+  String get mapRouteResetRestrictions;
+
+  /// Indoor map route: choose start hint
+  ///
+  /// In en, this message translates to:
+  /// **'Select where you are now. The starting point is set manually.'**
+  String get mapRouteChooseStartHint;
+
+  /// Indoor map route: choose destination hint
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where you want to go.'**
+  String get mapRouteChooseDestinationHint;
+
+  /// Indoor map route: correct passages
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest a passage correction'**
+  String get mapRouteCorrectPassages;
+
+  /// Indoor map route: choose start
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a starting point'**
+  String get mapRouteChooseStart;
+
+  /// Indoor map route: choose destination
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a destination'**
+  String get mapRouteChooseDestination;
+
+  /// Indoor map route: from label
+  ///
+  /// In en, this message translates to:
+  /// **'From: {place}'**
+  String mapRouteFromLabel(String place);
+
+  /// Indoor map route: to label
+  ///
+  /// In en, this message translates to:
+  /// **'To: {place}'**
+  String mapRouteToLabel(String place);
+
+  /// Indoor map route: current point hint
+  ///
+  /// In en, this message translates to:
+  /// **'Where you are on the floor plan'**
+  String get mapRouteCurrentPointHint;
+
+  /// Indoor map route: place search hint
+  ///
+  /// In en, this message translates to:
+  /// **'Room, entrance or service'**
+  String get mapRoutePlaceSearchHint;
+
+  /// Indoor map route: swap points
+  ///
+  /// In en, this message translates to:
+  /// **'Swap points'**
+  String get mapRouteSwapPoints;
+
+  /// Indoor map route: reset points
+  ///
+  /// In en, this message translates to:
+  /// **'Reset points'**
+  String get mapRouteResetPoints;
+
+  /// Indoor map route: unknown floor
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown floor'**
+  String get mapRouteUnknownFloor;
+
+  /// Indoor map route: options
+  ///
+  /// In en, this message translates to:
+  /// **'Route options'**
+  String get mapRouteOptions;
+
+  /// Indoor map route: walking
+  ///
+  /// In en, this message translates to:
+  /// **'Walking'**
+  String get mapRouteWalking;
+
+  /// Indoor map route: step free
+  ///
+  /// In en, this message translates to:
+  /// **'No stairs'**
+  String get mapRouteStepFree;
+
+  /// Indoor map route: wheelchair
+  ///
+  /// In en, this message translates to:
+  /// **'Wheelchair'**
+  String get mapRouteWheelchair;
+
+  /// Indoor map route: wheelchair hint
+  ///
+  /// In en, this message translates to:
+  /// **'Only passages with verified wheelchair accessibility.'**
+  String get mapRouteWheelchairHint;
+
+  /// Indoor map route: step free hint
+  ///
+  /// In en, this message translates to:
+  /// **'Stairs and escalators are excluded.'**
+  String get mapRouteStepFreeHint;
+
+  /// Indoor map route: walking hint
+  ///
+  /// In en, this message translates to:
+  /// **'Stairs, lifts and other passages can be used.'**
+  String get mapRouteWalkingHint;
+
+  /// Indoor map route: faster
+  ///
+  /// In en, this message translates to:
+  /// **'Faster'**
+  String get mapRouteFaster;
+
+  /// Indoor map route: shorter
+  ///
+  /// In en, this message translates to:
+  /// **'Shorter'**
+  String get mapRouteShorter;
+
+  /// Indoor map route: already here
+  ///
+  /// In en, this message translates to:
+  /// **'You are already here'**
+  String get mapRouteAlreadyHere;
+
+  /// Indoor map route: same point hint
+  ///
+  /// In en, this message translates to:
+  /// **'The starting point and destination are the same. Choose another point to plan a route.'**
+  String get mapRouteSamePointHint;
+
+  /// Indoor map route: ready
+  ///
+  /// In en, this message translates to:
+  /// **'Route ready'**
+  String get mapRouteReady;
+
+  /// Indoor map route: show path
+  ///
+  /// In en, this message translates to:
+  /// **'Show route'**
+  String get mapRouteShowPath;
+
+  /// Indoor map route: manual steps hint
+  ///
+  /// In en, this message translates to:
+  /// **'The starting point is set manually. You switch between steps.'**
+  String get mapRouteManualStepsHint;
+
+  /// Indoor map route: incomplete metrics
+  ///
+  /// In en, this message translates to:
+  /// **'Distance or time estimates are not available for part of this route yet.'**
+  String get mapRouteIncompleteMetrics;
+
+  /// Indoor map route: steps
+  ///
+  /// In en, this message translates to:
+  /// **'Step by step'**
+  String get mapRouteSteps;
+
+  /// Indoor map route: steps count
+  ///
+  /// In en, this message translates to:
+  /// **'Steps: {count}'**
+  String mapRouteStepsCount(int count);
+
+  /// Indoor map route: pick start
+  ///
+  /// In en, this message translates to:
+  /// **'Where are you starting?'**
+  String get mapRoutePickStart;
+
+  /// Indoor map route: pick destination
+  ///
+  /// In en, this message translates to:
+  /// **'Where are you going?'**
+  String get mapRoutePickDestination;
+
+  /// Indoor map route: all floors
+  ///
+  /// In en, this message translates to:
+  /// **'All floors'**
+  String get mapRouteAllFloors;
+
+  /// Indoor map route: restricted points hint
+  ///
+  /// In en, this message translates to:
+  /// **'Only points that meet the selected requirements'**
+  String get mapRouteRestrictedPointsHint;
+
+  /// Indoor map route: verified points hint
+  ///
+  /// In en, this message translates to:
+  /// **'Only points with verified passages'**
+  String get mapRouteVerifiedPointsHint;
+
+  /// Indoor map route: reachable points hint
+  ///
+  /// In en, this message translates to:
+  /// **'Only points with an available route'**
+  String get mapRouteReachablePointsHint;
+
+  /// Indoor map route: no points
+  ///
+  /// In en, this message translates to:
+  /// **'No available points'**
+  String get mapRouteNoPoints;
+
+  /// Indoor map route: try query or floor
+  ///
+  /// In en, this message translates to:
+  /// **'Try another search or floor.'**
+  String get mapRouteTryQueryOrFloor;
+
+  /// Indoor map route: try requirements or point
+  ///
+  /// In en, this message translates to:
+  /// **'Change the route requirements or choose another point.'**
+  String get mapRouteTryRequirementsOrPoint;
+
+  /// Indoor map route: try point or passages
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another point or suggest a passage correction on the map.'**
+  String get mapRouteTryPointOrPassages;
+
+  /// Indoor map route: point selected
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get mapRoutePointSelected;
+
+  /// Indoor map route: point fallback
+  ///
+  /// In en, this message translates to:
+  /// **'Point on the map'**
+  String get mapRoutePointFallback;
+
+  /// Indoor map route: another floor
+  ///
+  /// In en, this message translates to:
+  /// **'another floor'**
+  String get mapRouteAnotherFloor;
+
+  /// Indoor map route: depart
+  ///
+  /// In en, this message translates to:
+  /// **'Start your route'**
+  String get mapRouteDepart;
+
+  /// Indoor map route: straight
+  ///
+  /// In en, this message translates to:
+  /// **'Continue straight'**
+  String get mapRouteStraight;
+
+  /// Indoor map route: turn left
+  ///
+  /// In en, this message translates to:
+  /// **'Turn left'**
+  String get mapRouteTurnLeft;
+
+  /// Indoor map route: turn right
+  ///
+  /// In en, this message translates to:
+  /// **'Turn right'**
+  String get mapRouteTurnRight;
+
+  /// Indoor map route: turn back
+  ///
+  /// In en, this message translates to:
+  /// **'Turn around'**
+  String get mapRouteTurnBack;
+
+  /// Indoor map route: stairs to floor
+  ///
+  /// In en, this message translates to:
+  /// **'Take the stairs to {floor}'**
+  String mapRouteStairsToFloor(String floor);
+
+  /// Indoor map route: stairs
+  ///
+  /// In en, this message translates to:
+  /// **'Take the stairs'**
+  String get mapRouteStairs;
+
+  /// Indoor map route: elevator to floor
+  ///
+  /// In en, this message translates to:
+  /// **'Take the lift to {floor}'**
+  String mapRouteElevatorToFloor(String floor);
+
+  /// Indoor map route: ramp to floor
+  ///
+  /// In en, this message translates to:
+  /// **'Take the ramp to {floor}'**
+  String mapRouteRampToFloor(String floor);
+
+  /// Indoor map route: ramp
+  ///
+  /// In en, this message translates to:
+  /// **'Take the ramp'**
+  String get mapRouteRamp;
+
+  /// Indoor map route: escalator to floor
+  ///
+  /// In en, this message translates to:
+  /// **'Take the escalator to {floor}'**
+  String mapRouteEscalatorToFloor(String floor);
+
+  /// Indoor map route: escalator
+  ///
+  /// In en, this message translates to:
+  /// **'Take the escalator'**
+  String get mapRouteEscalator;
+
+  /// Indoor map route: change floor
+  ///
+  /// In en, this message translates to:
+  /// **'Go to {floor}'**
+  String mapRouteChangeFloor(String floor);
+
+  /// Indoor map route: arrive
+  ///
+  /// In en, this message translates to:
+  /// **'You have arrived'**
+  String get mapRouteArrive;
+
+  /// Indoor map route: floor transition
+  ///
+  /// In en, this message translates to:
+  /// **'Floors {from} → {to}'**
+  String mapRouteFloorTransition(int from, int to);
+
+  /// Indoor map route: ascent
+  ///
+  /// In en, this message translates to:
+  /// **'Up'**
+  String get mapRouteAscent;
+
+  /// Indoor map route: descent
+  ///
+  /// In en, this message translates to:
+  /// **'Down'**
+  String get mapRouteDescent;
+
+  /// Indoor map route: end
+  ///
+  /// In en, this message translates to:
+  /// **'End of route'**
+  String get mapRouteEnd;
+
+  /// Indoor map route: compact start
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get mapRouteCompactStart;
+
+  /// Indoor map route: compact straight
+  ///
+  /// In en, this message translates to:
+  /// **'Straight'**
+  String get mapRouteCompactStraight;
+
+  /// Indoor map route: compact left
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get mapRouteCompactLeft;
+
+  /// Indoor map route: compact right
+  ///
+  /// In en, this message translates to:
+  /// **'Right'**
+  String get mapRouteCompactRight;
+
+  /// Indoor map route: compact turn back
+  ///
+  /// In en, this message translates to:
+  /// **'Turn around'**
+  String get mapRouteCompactTurnBack;
+
+  /// Indoor map route: compact stairs
+  ///
+  /// In en, this message translates to:
+  /// **'Stairs'**
+  String get mapRouteCompactStairs;
+
+  /// Indoor map route: compact elevator
+  ///
+  /// In en, this message translates to:
+  /// **'Lift'**
+  String get mapRouteCompactElevator;
+
+  /// Indoor map route: compact ramp
+  ///
+  /// In en, this message translates to:
+  /// **'Ramp'**
+  String get mapRouteCompactRamp;
+
+  /// Indoor map route: compact escalator
+  ///
+  /// In en, this message translates to:
+  /// **'Escalator'**
+  String get mapRouteCompactEscalator;
+
+  /// Indoor map route: compact transition
+  ///
+  /// In en, this message translates to:
+  /// **'Change floor'**
+  String get mapRouteCompactTransition;
+
+  /// Indoor map route: compact finish
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get mapRouteCompactFinish;
+
+  /// Indoor map route: step announcement
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {count}. {instruction}. {details}'**
+  String mapRouteStepAnnouncement(
+    int step,
+    int count,
+    String instruction,
+    String details,
+  );
+
+  /// Indoor map route: finish
+  ///
+  /// In en, this message translates to:
+  /// **'End route'**
+  String get mapRouteFinish;
+
+  /// Indoor map route: manual step progress
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {count} · manual'**
+  String mapRouteManualStepProgress(int step, int count);
+
+  /// Indoor map route: milestone announcement
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step}. {label}'**
+  String mapRouteMilestoneAnnouncement(int step, String label);
+
+  /// Indoor map route: previous step
+  ///
+  /// In en, this message translates to:
+  /// **'Previous step'**
+  String get mapRoutePreviousStep;
+
+  /// Indoor map route: manual browse
+  ///
+  /// In en, this message translates to:
+  /// **'Browse route manually. {instruction}'**
+  String mapRouteManualBrowse(String instruction);
+
+  /// Indoor map route: progress value
+  ///
+  /// In en, this message translates to:
+  /// **'{step} of {count}'**
+  String mapRouteProgressValue(int step, int count);
+
+  /// Indoor map route: finish browsing
+  ///
+  /// In en, this message translates to:
+  /// **'Finish viewing route'**
+  String get mapRouteFinishBrowsing;
+
+  /// Indoor map route: next step
+  ///
+  /// In en, this message translates to:
+  /// **'Next step'**
+  String get mapRouteNextStep;
 }
 
 class _AppLocalizationsDelegate

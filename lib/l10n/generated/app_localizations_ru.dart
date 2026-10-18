@@ -12955,4 +12955,369 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboardingStoryScheduleTitle => 'Твой день.\nВсё по плану.';
+
+  @override
+  String get mapCampusesTitle => 'Кампусы';
+
+  @override
+  String get mapCampusPlanLoading => 'Загружаем план кампуса';
+
+  @override
+  String get mapFloorPlanLoading => 'Загружаем план этажа';
+
+  @override
+  String get mapPlanLoadFailed => 'Не удалось загрузить план';
+
+  @override
+  String get mapPlanLoadRetryHint =>
+      'Проверьте подключение и попробуйте ещё раз.';
+
+  @override
+  String get mapPlanReloadAction => 'Загрузить план повторно';
+
+  @override
+  String get mapRouteCheckingPassages => 'Проверяем доступные проходы…';
+
+  @override
+  String get mapRouteUnreachableFromStart =>
+      'Из выбранного начала сюда нет пути. Можно начать новый маршрут отсюда.';
+
+  @override
+  String get mapRouteToPlace => 'Маршрут сюда';
+
+  @override
+  String get mapRouteFromPlace => 'Отсюда';
+
+  @override
+  String get mapRouteRefreshingPlan => 'Обновляем план и проходы для маршрута…';
+
+  @override
+  String get mapRouteMovedRefreshFailed =>
+      'Место перенесено. Не удалось обновить план; проходы к нему ещё проверяются.';
+
+  @override
+  String get mapRouteRefreshFailed =>
+      'Не удалось обновить план для маршрута. Проверьте соединение и попробуйте ещё раз.';
+
+  @override
+  String get mapRefreshMap => 'Обновить карту';
+
+  @override
+  String get mapRoutePlaceNeedsReview =>
+      'Место перенесено. Проходы к нему ещё проверяются.';
+
+  @override
+  String get mapRoutePlaceUnavailable =>
+      'Для этого места пока нет проверенного пути на плане.';
+
+  @override
+  String get mapRouteUnverifiedPassages =>
+      'Проходы этого кампуса ещё не проверены. Можно найти помещение на плане и предложить уточнение маршрутов.';
+
+  @override
+  String get mapRouteDestinationUnmapped =>
+      'Путь ко входу в это помещение ещё не размечен.';
+
+  @override
+  String get mapRouteStartUnmapped =>
+      'Начальная точка пока не соединена с графом проходов.';
+
+  @override
+  String get mapRouteInvalidPassages =>
+      'Данные проходов требуют проверки. Обновите карту или сообщите об ошибке.';
+
+  @override
+  String get mapRouteRestrictedUnavailable =>
+      'Подходящий путь не найден. Для выбранных условий нет подтверждённого прохода между этими точками.';
+
+  @override
+  String get mapRouteUnavailable =>
+      'Подходящий путь не найден. Возможно, проход закрыт или доступность маршрута ещё не подтверждена.';
+
+  @override
+  String get mapRouteResetRestrictions => 'Сбросить ограничения';
+
+  @override
+  String get mapRouteChooseStartHint =>
+      'Укажите, где вы сейчас. Начальная точка задаётся вручную.';
+
+  @override
+  String get mapRouteChooseDestinationHint => 'Выберите, куда хотите пройти.';
+
+  @override
+  String get mapRouteCorrectPassages => 'Уточнить проходы';
+
+  @override
+  String get mapRouteChooseStart => 'Выберите начало';
+
+  @override
+  String get mapRouteChooseDestination => 'Выберите назначение';
+
+  @override
+  String mapRouteFromLabel(String place) {
+    return 'Откуда: $place';
+  }
+
+  @override
+  String mapRouteToLabel(String place) {
+    return 'Куда: $place';
+  }
+
+  @override
+  String get mapRouteCurrentPointHint => 'Где вы сейчас на плане';
+
+  @override
+  String get mapRoutePlaceSearchHint => 'Аудитория, вход или сервис';
+
+  @override
+  String get mapRouteSwapPoints => 'Поменять местами';
+
+  @override
+  String get mapRouteResetPoints => 'Сбросить точки';
+
+  @override
+  String get mapRouteUnknownFloor => 'Неизвестный этаж';
+
+  @override
+  String get mapRouteOptions => 'Параметры маршрута';
+
+  @override
+  String get mapRouteWalking => 'Пешком';
+
+  @override
+  String get mapRouteStepFree => 'Без лестниц';
+
+  @override
+  String get mapRouteWheelchair => 'На коляске';
+
+  @override
+  String get mapRouteWheelchairHint =>
+      'Только проходы с подтверждённой доступностью для коляски.';
+
+  @override
+  String get mapRouteStepFreeHint => 'Лестницы и эскалаторы исключены.';
+
+  @override
+  String get mapRouteWalkingHint =>
+      'Можно использовать лестницы, лифты и другие проходы.';
+
+  @override
+  String get mapRouteFaster => 'Быстрее';
+
+  @override
+  String get mapRouteShorter => 'Короче';
+
+  @override
+  String get mapRouteAlreadyHere => 'Вы уже здесь';
+
+  @override
+  String get mapRouteSamePointHint =>
+      'Начало и назначение совпадают. Выберите другую точку, чтобы построить маршрут.';
+
+  @override
+  String get mapRouteReady => 'Маршрут готов';
+
+  @override
+  String get mapRouteShowPath => 'Показать путь';
+
+  @override
+  String get mapRouteManualStepsHint =>
+      'Начало задано вручную. Шаги переключаете вы.';
+
+  @override
+  String get mapRouteIncompleteMetrics =>
+      'Для части маршрута пока нет оценки расстояния или времени.';
+
+  @override
+  String get mapRouteSteps => 'По шагам';
+
+  @override
+  String mapRouteStepsCount(int count) {
+    return 'Шаги: $count';
+  }
+
+  @override
+  String get mapRoutePickStart => 'Откуда идём';
+
+  @override
+  String get mapRoutePickDestination => 'Куда идём';
+
+  @override
+  String get mapRouteAllFloors => 'Все этажи';
+
+  @override
+  String get mapRouteRestrictedPointsHint =>
+      'Только доступные точки с учётом ограничений';
+
+  @override
+  String get mapRouteVerifiedPointsHint =>
+      'Только точки с проверенными проходами';
+
+  @override
+  String get mapRouteReachablePointsHint =>
+      'Только точки с доступным маршрутом';
+
+  @override
+  String get mapRouteNoPoints => 'Нет доступных точек';
+
+  @override
+  String get mapRouteTryQueryOrFloor => 'Попробуйте другой запрос или этаж.';
+
+  @override
+  String get mapRouteTryRequirementsOrPoint =>
+      'Измените условия маршрута или выберите другую точку.';
+
+  @override
+  String get mapRouteTryPointOrPassages =>
+      'Выберите другую точку или уточните проходы на карте.';
+
+  @override
+  String get mapRoutePointSelected => 'Выбрано';
+
+  @override
+  String get mapRoutePointFallback => 'Точка на плане';
+
+  @override
+  String get mapRouteAnotherFloor => 'другой этаж';
+
+  @override
+  String get mapRouteDepart => 'Начните маршрут';
+
+  @override
+  String get mapRouteStraight => 'Продолжайте прямо';
+
+  @override
+  String get mapRouteTurnLeft => 'Поверните налево';
+
+  @override
+  String get mapRouteTurnRight => 'Поверните направо';
+
+  @override
+  String get mapRouteTurnBack => 'Развернитесь';
+
+  @override
+  String mapRouteStairsToFloor(String floor) {
+    return 'По лестнице на $floor';
+  }
+
+  @override
+  String get mapRouteStairs => 'Пройдите по лестнице';
+
+  @override
+  String mapRouteElevatorToFloor(String floor) {
+    return 'На лифте на $floor';
+  }
+
+  @override
+  String mapRouteRampToFloor(String floor) {
+    return 'По пандусу на $floor';
+  }
+
+  @override
+  String get mapRouteRamp => 'Пройдите по пандусу';
+
+  @override
+  String mapRouteEscalatorToFloor(String floor) {
+    return 'По эскалатору на $floor';
+  }
+
+  @override
+  String get mapRouteEscalator => 'Пройдите по эскалатору';
+
+  @override
+  String mapRouteChangeFloor(String floor) {
+    return 'Перейдите на $floor';
+  }
+
+  @override
+  String get mapRouteArrive => 'Вы на месте';
+
+  @override
+  String mapRouteFloorTransition(int from, int to) {
+    return '$from → $to этаж';
+  }
+
+  @override
+  String get mapRouteAscent => 'Подъём';
+
+  @override
+  String get mapRouteDescent => 'Спуск';
+
+  @override
+  String get mapRouteEnd => 'Конец маршрута';
+
+  @override
+  String get mapRouteCompactStart => 'Старт';
+
+  @override
+  String get mapRouteCompactStraight => 'Прямо';
+
+  @override
+  String get mapRouteCompactLeft => 'Налево';
+
+  @override
+  String get mapRouteCompactRight => 'Направо';
+
+  @override
+  String get mapRouteCompactTurnBack => 'Разворот';
+
+  @override
+  String get mapRouteCompactStairs => 'Лестница';
+
+  @override
+  String get mapRouteCompactElevator => 'Лифт';
+
+  @override
+  String get mapRouteCompactRamp => 'Пандус';
+
+  @override
+  String get mapRouteCompactEscalator => 'Эскалатор';
+
+  @override
+  String get mapRouteCompactTransition => 'Переход';
+
+  @override
+  String get mapRouteCompactFinish => 'Финиш';
+
+  @override
+  String mapRouteStepAnnouncement(
+    int step,
+    int count,
+    String instruction,
+    String details,
+  ) {
+    return 'Шаг $step из $count. $instruction. $details';
+  }
+
+  @override
+  String get mapRouteFinish => 'Завершить маршрут';
+
+  @override
+  String mapRouteManualStepProgress(int step, int count) {
+    return 'Шаг $step из $count · вручную';
+  }
+
+  @override
+  String mapRouteMilestoneAnnouncement(int step, String label) {
+    return 'Шаг $step. $label';
+  }
+
+  @override
+  String get mapRoutePreviousStep => 'Предыдущий шаг';
+
+  @override
+  String mapRouteManualBrowse(String instruction) {
+    return 'Просмотр маршрута вручную. $instruction';
+  }
+
+  @override
+  String mapRouteProgressValue(int step, int count) {
+    return '$step из $count';
+  }
+
+  @override
+  String get mapRouteFinishBrowsing => 'Закончить просмотр маршрута';
+
+  @override
+  String get mapRouteNextStep => 'Следующий шаг';
 }

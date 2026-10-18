@@ -259,7 +259,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('А-101'));
     await tester.pumpAndSettle();
-    expect(find.text('42 м · ≈ 1 мин · 1 эт.'), findsOneWidget);
+    expect(find.text('42 м · ≈ 1 мин · 1 этаж'), findsOneWidget);
     await tester.tap(find.text('Показать путь'));
     await tester.pumpAndSettle();
     expect(find.byType(MapRouteSheet), findsNothing);

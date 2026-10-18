@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 
 class MapRouteOptions extends StatelessWidget {
@@ -26,16 +27,17 @@ class MapRouteOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final accessLabel = options.wheelchair
-        ? 'На коляске'
+        ? l10n.mapRouteWheelchair
         : options.stepFree
-        ? 'Без лестниц'
-        : 'Пешком';
+        ? l10n.mapRouteStepFree
+        : l10n.mapRouteWalking;
     return AppListGroup(
       key: const ValueKey('map-route-options'),
       children: [
         AppDisclosure(
-          title: 'Параметры маршрута',
+          title: l10n.mapRouteOptions,
           subtitle: accessLabel,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -45,19 +47,19 @@ class MapRouteOptions extends StatelessWidget {
                 runSpacing: AppSpacing.xs,
                 children: [
                   AppChip.filter(
-                    label: 'Пешком',
+                    label: l10n.mapRouteWalking,
                     selected: !options.stepFree && !options.wheelchair,
                     onTap: _access,
                   ),
                   AppChip.filter(
-                    label: 'Без лестниц',
+                    label: l10n.mapRouteStepFree,
                     selected: options.stepFree && !options.wheelchair,
                     onTap: () => _access(
                       stepFree: !(options.stepFree && !options.wheelchair),
                     ),
                   ),
                   AppChip.filter(
-                    label: 'На коляске',
+                    label: l10n.mapRouteWheelchair,
                     selected: options.wheelchair,
                     onTap: () => _access(
                       stepFree: !options.wheelchair,
@@ -69,11 +71,10 @@ class MapRouteOptions extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 options.wheelchair
-                    ? 'Только проходы с подтверждённой '
-                          'доступностью для коляски.'
+                    ? l10n.mapRouteWheelchairHint
                     : options.stepFree
-                    ? 'Лестницы и эскалаторы исключены.'
-                    : 'Можно использовать лестницы, лифты и другие проходы.',
+                    ? l10n.mapRouteStepFreeHint
+                    : l10n.mapRouteWalkingHint,
                 style: AppText.caption.copyWith(color: context.colors.muted),
               ),
               if (canEstimateDuration) ...[
@@ -85,8 +86,8 @@ class MapRouteOptions extends StatelessWidget {
                     for (final metric in IndoorRouteMetric.values)
                       AppChip.filter(
                         label: metric == IndoorRouteMetric.duration
-                            ? 'Быстрее'
-                            : 'Короче',
+                            ? l10n.mapRouteFaster
+                            : l10n.mapRouteShorter,
                         selected: options.metric == metric,
                         onTap: () => onChanged(
                           IndoorRouteOptions(

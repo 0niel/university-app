@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/services/map_route_destinations.dart';
@@ -23,7 +24,8 @@ class MapRouteEndpoints extends StatelessWidget {
   final VoidCallback? onSwap;
   final VoidCallback? onReset;
 
-  Widget _endpoint(MapRouteEndpoint endpoint) {
+  Widget _endpoint(BuildContext context, MapRouteEndpoint endpoint) {
+    final l10n = context.l10n;
     final isStart = endpoint == MapRouteEndpoint.start;
     final node = isStart ? start : destination;
     final floor = campus.floorForId(node?.floorId ?? '');
@@ -31,20 +33,21 @@ class MapRouteEndpoints extends StatelessWidget {
       key: ValueKey('map-route-${endpoint.name}'),
       title: node == null
           ? isStart
-                ? 'Выберите начало'
-                : 'Выберите назначение'
-          : '${isStart ? 'Откуда' : 'Куда'}: '
-                '${mapRouteNodeLabel(node, campus)}',
+                ? l10n.mapRouteChooseStart
+                : l10n.mapRouteChooseDestination
+          : isStart
+          ? l10n.mapRouteFromLabel(mapRouteNodeLabel(node, campus, l10n))
+          : l10n.mapRouteToLabel(mapRouteNodeLabel(node, campus, l10n)),
       titleMaxLines: null,
       subtitle: node == null
           ? isStart
-                ? 'Где вы сейчас на плане'
-                : 'Аудитория, вход или сервис'
+                ? l10n.mapRouteCurrentPointHint
+                : l10n.mapRoutePlaceSearchHint
           : floor?.label.isNotEmpty == true
           ? floor!.label
           : floor == null
           ? null
-          : '${floor.floor.number} этаж',
+          : l10n.mapFloorNumber(floor.floor.number),
       leading: AppIconTile(
         child: Icon(
           isStart ? Icons.trip_origin_rounded : Icons.flag_rounded,
@@ -66,8 +69,8 @@ class MapRouteEndpoints extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _endpoint(MapRouteEndpoint.start),
-                _endpoint(MapRouteEndpoint.destination),
+                _endpoint(context, MapRouteEndpoint.start),
+                _endpoint(context, MapRouteEndpoint.destination),
               ],
             ),
           ),
@@ -77,14 +80,14 @@ class MapRouteEndpoints extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 AppIconButton(
-                  tooltip: 'Поменять местами',
+                  tooltip: context.l10n.mapRouteSwapPoints,
                   shape: AppIconButtonShape.circle,
                   size: AppIconButtonSize.compact,
                   onPressed: onSwap,
                   icon: const Icon(Icons.swap_vert_rounded),
                 ),
                 AppIconButton(
-                  tooltip: 'Сбросить точки',
+                  tooltip: context.l10n.mapRouteResetPoints,
                   shape: AppIconButtonShape.circle,
                   size: AppIconButtonSize.compact,
                   onPressed: onReset,

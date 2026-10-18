@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
@@ -92,16 +93,16 @@ class _MapEditorFloorCanvasState extends State<MapEditorFloorCanvas> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Не удалось загрузить план', style: AppText.label),
+                    Text(context.l10n.mapPlanLoadFailed, style: AppText.label),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      'Проверьте подключение и попробуйте ещё раз.',
+                      context.l10n.mapPlanLoadRetryHint,
                       style: AppText.caption,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     AppButton.secondary(
-                      label: 'Загрузить план повторно',
+                      label: context.l10n.mapPlanReloadAction,
                       onPressed: () => setState(() {
                         _plan = _loadPlan();
                       }),
@@ -115,7 +116,7 @@ class _MapEditorFloorCanvasState extends State<MapEditorFloorCanvas> {
           if (plan == null ||
               snapshot.connectionState != ConnectionState.done) {
             return Semantics(
-              label: 'Загружаем план этажа',
+              label: context.l10n.mapFloorPlanLoading,
               liveRegion: true,
               child: const MapLoadingPlan(),
             );

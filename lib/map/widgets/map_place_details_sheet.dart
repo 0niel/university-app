@@ -4,6 +4,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/free_rooms/widgets/room_photo_gallery.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/widgets/map_community_sheet.dart';
@@ -367,12 +368,12 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
                 MediaQuery.textScalerOf(context).scale(16) > 22;
             final actions = [
               AppButton.primary(
-                label: 'Маршрут сюда',
+                label: context.l10n.mapRouteToPlace,
                 expanded: true,
                 onPressed: canRoute ? widget.onRouteTo : null,
               ),
               AppButton.secondary(
-                label: 'Отсюда',
+                label: context.l10n.mapRouteFromPlace,
                 expanded: true,
                 onPressed: canRoute ? widget.onRouteFrom : null,
               ),
@@ -397,10 +398,10 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
         ),
         const SizedBox(height: AppSpacing.sectionGap),
         if (widget.isRefreshing)
-          const Padding(
-            padding: EdgeInsets.only(bottom: AppSpacing.lg),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             child: AppBanner(
-              message: 'Обновляем план и проходы для маршрута…',
+              message: context.l10n.mapRouteRefreshingPlan,
             ),
           )
         else if (staleMap)
@@ -408,22 +409,20 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
             padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             child: AppBanner(
               message: navigationNeedsReview
-                  ? 'Место перенесено. Не удалось обновить план; '
-                        'проходы к нему ещё проверяются.'
-                  : 'Не удалось обновить план для маршрута. '
-                        'Проверьте соединение и попробуйте ещё раз.',
+                  ? context.l10n.mapRouteMovedRefreshFailed
+                  : context.l10n.mapRouteRefreshFailed,
               tone: AppBannerTone.warn,
               actionLabel: widget.onRefreshMap == null
                   ? null
-                  : 'Обновить карту',
+                  : context.l10n.mapRefreshMap,
               onAction: widget.onRefreshMap,
             ),
           )
         else if (navigationNeedsReview)
-          const Padding(
-            padding: EdgeInsets.only(bottom: AppSpacing.lg),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             child: AppBanner(
-              message: 'Место перенесено. Проходы к нему ещё проверяются.',
+              message: context.l10n.mapRoutePlaceNeedsReview,
               tone: AppBannerTone.warn,
             ),
           )
@@ -433,7 +432,7 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
             child: AppBanner(
               message:
                   widget.routeUnavailableMessage ??
-                  'Для этого места пока нет проверенного пути на плане.',
+                  context.l10n.mapRoutePlaceUnavailable,
               tone: AppBannerTone.warn,
             ),
           ),

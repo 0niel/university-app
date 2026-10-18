@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_presentation.dart';
@@ -18,6 +19,7 @@ class MapRoutePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (route.legs.isEmpty) {
       return AppCard(
         tinted: true,
@@ -25,11 +27,10 @@ class MapRoutePreview extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Вы уже здесь', style: AppText.bodyStrong),
+            Text(l10n.mapRouteAlreadyHere, style: AppText.bodyStrong),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Начало и назначение совпадают. '
-              'Выберите другую точку, чтобы построить маршрут.',
+              l10n.mapRouteSamePointHint,
               style: AppText.caption,
             ),
           ],
@@ -37,12 +38,13 @@ class MapRoutePreview extends StatelessWidget {
       );
     }
     final metrics = [
-      if (route.distanceMeters case final distance?) '${distance.round()} м',
+      if (route.distanceMeters case final distance?)
+        l10n.friendsMeters(distance.round()),
       if (route.durationSeconds case final duration?)
         duration == 0
-            ? '<1 мин'
-            : '≈ ${(duration / 60).ceil().clamp(1, 999)} мин',
-      '${route.floorIds.length} эт.',
+            ? '<${l10n.minutesShort(1)}'
+            : '≈ ${l10n.minutesShort((duration / 60).ceil().clamp(1, 999))}',
+      l10n.mapFloorsCount(route.floorIds.length),
     ].join(' · ');
     final expanded =
         MediaQuery.sizeOf(context).height >= 560 &&
@@ -61,7 +63,7 @@ class MapRoutePreview extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Маршрут готов', style: AppText.bodyStrong),
+                    Text(l10n.mapRouteReady, style: AppText.bodyStrong),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(metrics, style: AppText.caption),
                   ],
@@ -72,29 +74,26 @@ class MapRoutePreview extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         AppButton.primary(
-          label: 'Показать путь',
+          label: l10n.mapRouteShowPath,
           expanded: true,
           onPressed: onApply,
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Начало задано вручную. Шаги переключаете вы.',
+          l10n.mapRouteManualStepsHint,
           textAlign: TextAlign.center,
           style: AppText.caption.copyWith(color: context.colors.muted),
         ),
         if (!route.hasCompleteDistance || !route.hasCompleteDuration) ...[
           const SizedBox(height: AppSpacing.md),
-          const AppBanner(
-            message:
-                'Для части маршрута пока нет оценки расстояния или времени.',
-          ),
+          AppBanner(message: l10n.mapRouteIncompleteMetrics),
         ],
         const SizedBox(height: AppSpacing.md),
         AppListGroup(
           children: [
             AppDisclosure(
-              title: 'По шагам',
-              subtitle: 'Шаги: ${route.instructions.length}',
+              title: l10n.mapRouteSteps,
+              subtitle: l10n.mapRouteStepsCount(route.instructions.length),
               initiallyExpanded: expanded,
               contentPadding: EdgeInsets.zero,
               child: Column(
@@ -102,9 +101,17 @@ class MapRoutePreview extends StatelessWidget {
                 children: [
                   for (final instruction in route.instructions)
                     AppListRow(
-                      title: mapRouteInstructionLabel(instruction, campus),
+                      title: mapRouteInstructionLabel(
+                        instruction,
+                        campus,
+                        l10n,
+                      ),
                       titleMaxLines: null,
-                      subtitle: mapRouteInstructionContext(instruction, campus),
+                      subtitle: mapRouteInstructionContext(
+                        instruction,
+                        campus,
+                        l10n,
+                      ),
                       leading: AppIconTile(
                         child: Icon(
                           mapRouteInstructionIcon(instruction.maneuver),

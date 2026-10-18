@@ -88,7 +88,7 @@ class _MapTopBarState extends State<MapTopBar> {
 
   Future<void> _chooseCampus() => showAppSheet<void>(
     context,
-    title: 'Кампусы',
+    title: context.l10n.mapCampusesTitle,
     child: AppListGroup(
       children: [
         for (final campus in widget.campuses)
@@ -200,7 +200,7 @@ class _MapTopBarState extends State<MapTopBar> {
                                     child: AppButton.secondary(
                                       label:
                                           widget.selectedCampus?.displayName ??
-                                          'Кампус',
+                                          l10n.mapCampusFilter,
                                       trailingIcon: const AppLineIconWidget(
                                         AppLineIcon.chevronD,
                                         size: 16,

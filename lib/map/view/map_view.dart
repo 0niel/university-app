@@ -426,10 +426,9 @@ class _MapViewState extends State<MapView> {
                 room: currentPlace ?? place,
                 isRefreshing: state.status == MapStatus.loading,
                 routeUnavailableMessage: destinations == null
-                    ? 'Проверяем доступные проходы…'
+                    ? context.l10n.mapRouteCheckingPassages
                     : _routeStartRoomId != null && !canRouteTo && canRouteFrom
-                    ? 'Из выбранного начала сюда нет пути. '
-                          'Можно начать новый маршрут отсюда.'
+                    ? context.l10n.mapRouteUnreachableFromStart
                     : null,
                 onClose: () => Navigator.of(context, rootNavigator: true).pop(),
                 onRefreshMap: sameCampus

@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/widgets/map_cartographic_layer.dart';
@@ -28,6 +30,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
+        locale: const Locale('ru'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: MapPlaceEditorPage(campus: campus, repository: repository),
       ),
     );
@@ -74,6 +79,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
+        locale: const Locale('ru'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: MapEditorFloorCanvas(
           campus: original,
           floor: original.floors.single,
@@ -95,48 +103,89 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('failed plan can be retried before placing a point', (
-    tester,
-  ) async {
-    var loads = 0;
-    final repository = MapDataRepository(
-      organizationId: 'mirea',
-      rpc: (_, _) async => throw StateError('No writes are expected'),
-      assetLoader: (_) async {
-        if (++loads == 1) throw Exception('Unavailable');
-        return '<svg viewBox="0 0 1000 500"/>';
+  for (final locale in const [Locale('ru'), Locale('en')]) {
+    testWidgets(
+      'failed plan can be retried in ${locale.languageCode} '
+      'before placing a point',
+      (
+        tester,
+      ) async {
+        var loads = 0;
+        final firstLoad = Completer<String>();
+        final repository = MapDataRepository(
+          organizationId: 'mirea',
+          rpc: (_, _) async => throw StateError('No writes are expected'),
+          assetLoader: (_) async {
+            if (++loads == 1) return firstLoad.future;
+            return '<svg viewBox="0 0 1000 500"/>';
+          },
+        );
+        addTearDown(repository.dispose);
+        var taps = 0;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            locale: locale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: MapEditorFloorCanvas(
+              floor: MapFloorData.fromJson({
+                'id': 'one',
+                'level': 1,
+                'width': 1000,
+                'height': 500,
+              }, svgPath: 'editor.svg'),
+              repository: repository,
+              painter: _ProbePainter(),
+              onTap: (_, _) => taps++,
+            ),
+          ),
+        );
+        final russian = locale.languageCode == 'ru';
+        expect(
+          find.bySemanticsLabel(
+            russian ? 'Загружаем план этажа' : 'Loading floor plan',
+          ),
+          findsOneWidget,
+        );
+        firstLoad.completeError(Exception('Unavailable'));
+        await tester.pumpAndSettle();
+        expect(
+          find.text(
+            russian
+                ? 'Не удалось загрузить план'
+                : "Couldn't load the floor plan",
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            russian
+                ? 'Проверьте подключение и попробуйте ещё раз.'
+                : 'Check your connection and try again.',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('map-editor-floor-plan')),
+          findsNothing,
+        );
+        expect(taps, 0);
+        await tester.tap(
+          find.text(russian ? 'Загрузить план повторно' : 'Reload floor plan'),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('map-editor-floor-plan')),
+          findsOneWidget,
+        );
+        await tester.tap(find.byKey(const ValueKey('map-editor-floor-plan')));
+        expect(taps, 1);
+        expect(loads, 2);
+        expect(tester.takeException(), isNull);
       },
     );
-    addTearDown(repository.dispose);
-    var taps = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.lightTheme,
-        home: MapEditorFloorCanvas(
-          floor: MapFloorData.fromJson({
-            'id': 'one',
-            'level': 1,
-            'width': 1000,
-            'height': 500,
-          }, svgPath: 'editor.svg'),
-          repository: repository,
-          painter: _ProbePainter(),
-          onTap: (_, _) => taps++,
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Не удалось загрузить план'), findsOneWidget);
-    expect(find.byKey(const ValueKey('map-editor-floor-plan')), findsNothing);
-    expect(taps, 0);
-    await tester.tap(find.text('Загрузить план повторно'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('map-editor-floor-plan')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('map-editor-floor-plan')));
-    expect(taps, 1);
-    expect(loads, 2);
-    expect(tester.takeException(), isNull);
-  });
+  }
 
   for (final dark in [false, true]) {
     testWidgets(
@@ -172,6 +221,9 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: dark ? AppTheme.darkTheme : AppTheme.lightTheme,
+            locale: const Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: RepaintBoundary(
               key: boundaryKey,
               child: MapEditorFloorCanvas(

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/services/map_route_destinations.dart';
@@ -36,6 +37,14 @@ class MapRouteSheet extends StatefulWidget {
   State<MapRouteSheet> createState() => _MapRouteSheetState();
 }
 
+enum _RouteDataIssue {
+  movedPlace,
+  unverifiedPassages,
+  unmappedDestination,
+  unmappedStart,
+  invalidPassages,
+}
+
 class _MapRouteSheetState extends State<MapRouteSheet> {
   IndoorNavigationGraph? _graph;
   MapRouteDestinations? _destinations;
@@ -44,7 +53,7 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
   IndoorNavigationNode? _destination;
   IndoorRouteResult? _result;
   IndoorRouteOptions _options = const IndoorRouteOptions();
-  String? _error;
+  _RouteDataIssue? _error;
 
   @override
   void initState() {
@@ -69,21 +78,17 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
       _destination = destinations.nodeForRoom(widget.destinationRoomId);
       if (_needsNavigationReview(widget.startRoomId) ||
           _needsNavigationReview(widget.destinationRoomId)) {
-        _error = 'Место перенесено. Проходы к нему ещё проверяются.';
+        _error = _RouteDataIssue.movedPlace;
       } else if (graph.nodes.isEmpty || graph.edges.isEmpty) {
-        _error =
-            'Проходы этого кампуса ещё не проверены. '
-            'Можно найти помещение на плане и предложить уточнение маршрутов.';
+        _error = _RouteDataIssue.unverifiedPassages;
       } else if (widget.destinationRoomId != null && _destination == null) {
-        _error = 'Путь ко входу в это помещение ещё не размечен.';
+        _error = _RouteDataIssue.unmappedDestination;
       } else if (widget.startRoomId != null && _start == null) {
-        _error = 'Начальная точка пока не соединена с графом проходов.';
+        _error = _RouteDataIssue.unmappedStart;
       }
       _calculate();
     } on FormatException {
-      _error =
-          'Данные проходов требуют проверки. '
-          'Обновите карту или сообщите об ошибке.';
+      _error = _RouteDataIssue.invalidPassages;
     }
   }
 
@@ -165,6 +170,15 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final errorMessage = switch (_error) {
+      _RouteDataIssue.movedPlace => l10n.mapRoutePlaceNeedsReview,
+      _RouteDataIssue.unverifiedPassages => l10n.mapRouteUnverifiedPassages,
+      _RouteDataIssue.unmappedDestination => l10n.mapRouteDestinationUnmapped,
+      _RouteDataIssue.unmappedStart => l10n.mapRouteStartUnmapped,
+      _RouteDataIssue.invalidPassages => l10n.mapRouteInvalidPassages,
+      null => null,
+    };
     final route = _result?.route;
     final ready = _destinations != null && (_graph?.edges.isNotEmpty ?? false);
     final restricted = _options.stepFree || _options.wheelchair;
@@ -174,7 +188,9 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
       children: [
         Row(
           children: [
-            Expanded(child: Text('Маршрут', style: AppText.sectionLarge)),
+            Expanded(
+              child: Text(l10n.lessonDetailsRoute, style: AppText.sectionLarge),
+            ),
             if (widget.onClose != null)
               AppSheetCloseButton(onTap: widget.onClose),
           ],
@@ -182,7 +198,7 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
         const SizedBox(height: AppSpacing.xxs),
         Text(widget.campus.campus.displayName, style: AppText.subtext),
         const SizedBox(height: AppSpacing.lg),
-        if (_error case final error?) ...[
+        if (errorMessage case final error?) ...[
           AppBanner(message: error),
           const SizedBox(height: AppSpacing.md),
         ],
@@ -217,14 +233,12 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
         else if (_result != null) ...[
           AppBanner(
             message: restricted
-                ? 'Подходящий путь не найден. Для выбранных условий '
-                      'нет подтверждённого прохода между этими точками.'
-                : 'Подходящий путь не найден. Возможно, проход закрыт '
-                      'или доступность маршрута ещё не подтверждена.',
+                ? l10n.mapRouteRestrictedUnavailable
+                : l10n.mapRouteUnavailable,
           ),
           if (restricted)
             AppButton.text(
-              label: 'Сбросить ограничения',
+              label: l10n.mapRouteResetRestrictions,
               onPressed: () => _changeOptions(
                 IndoorRouteOptions(metric: _options.metric),
               ),
@@ -232,13 +246,13 @@ class _MapRouteSheetState extends State<MapRouteSheet> {
         ] else if (ready)
           Text(
             _start == null
-                ? 'Укажите, где вы сейчас. Начальная точка задаётся вручную.'
-                : 'Выберите, куда хотите пройти.',
+                ? l10n.mapRouteChooseStartHint
+                : l10n.mapRouteChooseDestinationHint,
             style: AppText.caption.copyWith(color: context.colors.muted),
           ),
         const SizedBox(height: AppSpacing.md),
         AppButton.text(
-          label: 'Уточнить проходы',
+          label: l10n.mapRouteCorrectPassages,
           onPressed: () {
             Navigator.of(context).pop();
             widget.onContribute();
