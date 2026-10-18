@@ -3,6 +3,7 @@ services:
     build: .
     image: mirea-schedule-relay:local
     restart: unless-stopped
+    stop_grace_period: 30s
     env_file: relay.env
     read_only: true
     cap_drop: [ALL]
