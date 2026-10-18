@@ -8,7 +8,6 @@ environment:
 
 resolution: workspace
 dependencies:
-  collection: any
   flutter:
     sdk: flutter
   flutter_inappwebview: ^6.2.0-beta.3
