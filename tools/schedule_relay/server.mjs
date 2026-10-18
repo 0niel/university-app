@@ -62,7 +62,12 @@ export function createRelayServer({ authorization, fetchImpl = fetch, timeoutMs 
         return;
       }
       await pipeline(Readable.fromWeb(upstream.body), response);
-    } catch {
+    } catch (error) {
+      const code = error?.cause?.code ?? error?.code;
+      const category = typeof code === 'string' && /^[A-Z_]{1,40}$/.test(code)
+        ? code
+        : controller.signal.aborted ? 'TIMEOUT' : 'NETWORK';
+      console.error(`Schedule upstream request failed: ${category}`);
       if (!response.headersSent) {
         response.writeHead(controller.signal.aborted ? 504 : 502);
       }
