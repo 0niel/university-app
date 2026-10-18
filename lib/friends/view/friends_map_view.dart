@@ -185,8 +185,6 @@ class _FriendsMapViewState extends State<FriendsMapView>
                 unawaited(context.read<FriendsMapCubit>().refreshStudents());
               }
             },
-            myLatitude: state.myLatitude,
-            myLongitude: state.myLongitude,
             loading: loading,
             failed: failed,
             onRetry: () => unawaited(

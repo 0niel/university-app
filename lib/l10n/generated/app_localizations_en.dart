@@ -3678,16 +3678,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String friendsMeters(int meters) {
-    return '$meters m';
-  }
-
-  @override
-  String friendsKm(String km) {
-    return '$km km';
-  }
-
-  @override
   String get friendsJustNow => 'now';
 
   @override
@@ -12930,8 +12920,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'The starting point is set manually. You switch between steps.';
 
   @override
-  String get mapRouteIncompleteMetrics =>
-      'Distance or time estimates are not available for part of this route yet.';
+  String get mapRouteIncompleteDuration =>
+      'Time estimates are not available for part of this route yet.';
 
   @override
   String get mapRouteSteps => 'Step by step';

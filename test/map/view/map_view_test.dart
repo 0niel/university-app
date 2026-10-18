@@ -192,6 +192,18 @@ void main() {
     expect(search.center.dy, lessThan(size.height * .2));
   });
 
+  testWidgets('keyboard does not shift the open search bar', (tester) async {
+    addTearDown(tester.view.resetViewInsets);
+    await pumpMap(tester);
+    await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+    await tester.pumpAndSettle();
+    final field = tester.getRect(find.byType(AppSearchField));
+    tester.view.viewInsets = const FakeViewPadding(bottom: 340);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byType(AppSearchField)), field);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final scale in [1.0, 2.0]) {
     testWidgets('search can close back to friends at 320px and $scale text', (
       tester,
@@ -564,15 +576,16 @@ void main() {
     expect(find.byType(MapFreeRoomsPanel), findsOneWidget);
   });
 
-  testWidgets('loading state mirrors the map composition with one pulse', (
+  testWidgets('loading state shows one status without fake map controls', (
     tester,
   ) async {
     await pumpMap(tester, initialize: false);
 
     expect(find.byType(MapSkeleton), findsOneWidget);
-    expect(find.byType(NinjaSkeletonGroup), findsWidgets);
-    expect(find.byType(NinjaSkeleton), findsWidgets);
-    expect(find.byType(NinjaSpinner), findsNothing);
+    expect(find.byType(NinjaSkeletonGroup), findsNothing);
+    expect(find.byType(NinjaSkeleton), findsNothing);
+    expect(find.byType(AppSpinner), findsOneWidget);
+    expect(find.bySemanticsLabel('Загружаем план кампуса'), findsOneWidget);
     expect(find.byType(SvgInteractiveMap), findsNothing);
   });
 

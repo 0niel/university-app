@@ -3665,22 +3665,6 @@
       }
     }
   },
-  "friendsMeters": "{meters} m",
-  "@friendsMeters": {
-    "placeholders": {
-      "meters": {
-        "type": "int"
-      }
-    }
-  },
-  "friendsKm": "{km} km",
-  "@friendsKm": {
-    "placeholders": {
-      "km": {
-        "type": "String"
-      }
-    }
-  },
   "friendsJustNow": "now",
   "@friendsJustNow": {},
   "friendsMinutesShort": "{minutes} min",
@@ -12298,9 +12282,9 @@
   "@mapRouteManualStepsHint": {
     "description": "Indoor map route: manual steps hint"
   },
-  "mapRouteIncompleteMetrics": "Distance or time estimates are not available for part of this route yet.",
-  "@mapRouteIncompleteMetrics": {
-    "description": "Indoor map route: incomplete metrics"
+  "mapRouteIncompleteDuration": "Time estimates are not available for part of this route yet.",
+  "@mapRouteIncompleteDuration": {
+    "description": "Indoor map route: missing time estimates"
   },
   "mapRouteSteps": "Step by step",
   "@mapRouteSteps": {

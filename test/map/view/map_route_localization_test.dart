@@ -43,9 +43,7 @@ void main() {
       );
       expect(
         find.text(
-          language == 'en'
-              ? '15 m · ≈ 1 min · 2 floors'
-              : '15 м · ≈ 1 мин · 2 этажа',
+          language == 'en' ? '≈ 1 min · 2 floors' : '≈ 1 мин · 2 этажа',
         ),
         findsOneWidget,
       );
@@ -82,7 +80,32 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('guidance and timeline semantics use $language', (
+    testWidgets('unknown distance keeps the available time in $language', (
+      tester,
+    ) async {
+      final l10n = await AppLocalizations.delegate.load(locale);
+      await _pump(
+        tester,
+        locale: locale,
+        child: MapRouteSheet(
+          campus: _campus(knownDistance: false),
+          startRoomId: 'entrance',
+          destinationRoomId: 'room',
+          onApply: (_) {},
+          onContribute: () {},
+        ),
+      );
+      expect(
+        find.text(
+          language == 'en' ? '≈ 1 min · 2 floors' : '≈ 1 мин · 2 этажа',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text(l10n.mapRouteIncompleteDuration), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('guidance and timeline use $language without distances', (
       tester,
     ) async {
       final l10n = await AppLocalizations.delegate.load(locale);
@@ -90,19 +113,29 @@ void main() {
       final route = IndoorRoutePlanner(
         IndoorNavigationGraph.fromJson(campus.graph),
       ).findRoute(startNodeId: 'start', destinationNodeId: 'end').route!;
+      final stepIndex = route.instructions.indexWhere(
+        (instruction) => instruction.maneuver == IndoorManeuver.stairs,
+      );
+      expect(route.distanceMeters, 15);
+      expect(route.instructions[stepIndex].distanceMeters, 15);
       await _pump(
         tester,
         locale: locale,
         child: MapRouteGuidance(
           campus: campus,
           route: route,
-          stepIndex: 0,
+          stepIndex: stepIndex,
           onClose: () {},
           onNext: () {},
           onStepSelected: (_) {},
         ),
       );
-      expect(find.text(l10n.mapRouteDepart), findsOneWidget);
+      expect(
+        find.text(
+          mapRouteInstructionLabel(route.instructions[stepIndex], campus, l10n),
+        ),
+        findsOneWidget,
+      );
       expect(find.byTooltip(l10n.mapRouteFinish), findsOneWidget);
       expect(find.byTooltip(l10n.mapRouteNextStep), findsOneWidget);
       expect(find.text(l10n.mapRouteCompactStart), findsOneWidget);
@@ -111,10 +144,15 @@ void main() {
       await tester.pump();
       expect(
         find.semantics.byValue(
-          l10n.mapRouteProgressValue(1, route.instructions.length),
+          l10n.mapRouteProgressValue(stepIndex + 1, route.instructions.length),
         ),
         findsOneWidget,
       );
+      final distance = RegExp(
+        r'\d+(?:[.,]\d+)?\s+(?:м|км|m|km)(?:$|[\s·,])',
+      );
+      expect(find.textContaining(distance), findsNothing);
+      expect(find.semantics.byLabel(distance), findsNothing);
       semantics.dispose();
       expect(tester.takeException(), isNull);
     });
@@ -229,7 +267,7 @@ Future<void> _pump(
   await tester.pumpAndSettle();
 }
 
-CampusMapData _campus() {
+CampusMapData _campus({bool knownDistance = true}) {
   final floors = [
     for (final number in [1, 2])
       MapFloorData.fromJson({
@@ -285,7 +323,7 @@ CampusMapData _campus() {
           'from_node_id': 'start',
           'to_node_id': 'end',
           'kind': 'stairs',
-          'distance_meters': 15,
+          if (knownDistance) 'distance_meters': 15 else 'traversal_cost': 15,
           'duration_seconds': 30,
         },
       ],

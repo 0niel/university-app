@@ -166,30 +166,39 @@ void main() {
       expect(find.text('Наруто Узумаки'), findsOneWidget);
     });
 
-    testWidgets('renders a distance pill when my position is known', (
+    testWidgets('live friend metadata has no visible or spoken distance', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        _wrap(
-          NinjaFriendsPanel(
-            friends: [
-              _friend.copyWith(
-                locationUpdatedAt: DateTime.now().subtract(
-                  const Duration(minutes: 1),
+      final semantics = tester.ensureSemantics();
+      try {
+        await tester.pumpWidget(
+          _wrap(
+            NinjaFriendsPanel(
+              friends: [
+                _friend.copyWith(
+                  locationUpdatedAt: DateTime.now().subtract(
+                    const Duration(minutes: 1),
+                  ),
                 ),
-              ),
-            ],
-            loading: false,
-            myLatitude: 55.6699,
-            myLongitude: 37.4803,
-            onFriendTap: (_) {},
-            onAddFriend: () {},
+              ],
+              loading: false,
+              onFriendTap: (_) {},
+              onAddFriend: () {},
+            ),
           ),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 400));
+        );
+        await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.text('22 м'), findsOneWidget);
+        final distance = RegExp(
+          r'\d+(?:[.,]\d+)?\s+(?:м|км|m|km)(?:$|[\s·,])',
+        );
+        expect(find.text('Наруто Узумаки'), findsOneWidget);
+        expect(find.textContaining(distance), findsNothing);
+        expect(find.semantics.byLabel(distance), findsNothing);
+        expect(tester.takeException(), isNull);
+      } finally {
+        semantics.dispose();
+      }
     });
 
     testWidgets('does not expose distance for private or invalid locations', (
@@ -198,35 +207,21 @@ void main() {
       final updatedAt = DateTime.now().subtract(const Duration(minutes: 1));
       final visible = _friend.copyWith(locationUpdatedAt: updatedAt);
       final cases = [
-        (friend: _friend, latitude: 55.6699, longitude: 37.4803),
-        (
-          friend: visible.copyWith(isGhost: true),
-          latitude: 55.6699,
-          longitude: 37.4803,
-        ),
-        (friend: visible, latitude: 91.0, longitude: 37.4803),
-        (friend: visible, latitude: 55.6699, longitude: double.nan),
-        (
-          friend: visible.copyWith(latitude: 91),
-          latitude: 55.6699,
-          longitude: 37.4803,
-        ),
-        (
-          friend: visible.copyWith(
-            locationUpdatedAt: DateTime.now().add(const Duration(days: 1)),
-          ),
-          latitude: 55.6699,
-          longitude: 37.4803,
+        _friend,
+        visible,
+        visible.copyWith(isGhost: true),
+        visible.copyWith(latitude: 91),
+        visible.copyWith(longitude: double.nan),
+        visible.copyWith(
+          locationUpdatedAt: DateTime.now().add(const Duration(days: 1)),
         ),
       ];
       for (final item in cases) {
         await tester.pumpWidget(
           _wrap(
             NinjaFriendsPanel(
-              friends: [item.friend],
+              friends: [item],
               loading: false,
-              myLatitude: item.latitude,
-              myLongitude: item.longitude,
               onFriendTap: (_) {},
               onAddFriend: () {},
             ),

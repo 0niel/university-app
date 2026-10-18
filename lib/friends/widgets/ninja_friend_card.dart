@@ -5,11 +5,9 @@ class _NinjaFriendCard extends StatelessWidget {
     required this.friend,
     required this.onTap,
     super.key,
-    this.distance,
   });
 
   final Friend friend;
-  final String? distance;
   final VoidCallback onTap;
 
   @override
@@ -40,7 +38,7 @@ class _NinjaFriendCard extends StatelessWidget {
       ),
       child: AppPressable(
         onTap: onTap,
-        semanticsLabel: [friend.fullName, meta, ?distance].join(', '),
+        semanticsLabel: [friend.fullName, meta].join(', '),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: colors.surface,
@@ -95,29 +93,6 @@ class _NinjaFriendCard extends StatelessWidget {
                   crossAxisAlignment: .end,
                   spacing: 5,
                   children: [
-                    if (distance case final distanceText?)
-                      Container(
-                        padding: const .symmetric(
-                          horizontal: AppSpacing.gap,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colors.surface2,
-                          borderRadius: .circular(AppRadius.full),
-                        ),
-                        child: Text(
-                          distanceText,
-                          style: AppText.captionSmall
-                              .copyWith(
-                                color: colors.muted,
-                              )
-                              .copyWith(
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
-                        ),
-                      ),
                     if (friend.battery case final battery?)
                       Row(
                         mainAxisSize: .min,

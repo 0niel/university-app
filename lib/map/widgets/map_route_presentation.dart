@@ -105,13 +105,5 @@ String mapRouteInstructionContext(
   } else if (from != null) {
     parts.add(l10n.mapFloorNumber(from));
   }
-  final distance = instruction.distanceMeters;
-  if (distance != null && distance > 0) {
-    parts.add(
-      distance < 1
-          ? '<${l10n.friendsMeters(1)}'
-          : l10n.friendsMeters(distance.round()),
-    );
-  }
   return parts.join(' · ');
 }

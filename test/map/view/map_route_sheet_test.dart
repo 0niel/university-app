@@ -187,7 +187,7 @@ void main() {
       expect(find.text('20 м'), findsNothing);
       expect(find.text('15 м'), findsNothing);
       expect(
-        find.textContaining('нет оценки расстояния или времени'),
+        find.textContaining('нет оценки времени'),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
@@ -535,7 +535,7 @@ void main() {
           campus,
           l10n,
         ),
-        '2 → 1 этаж · Спуск · <1 м',
+        '2 → 1 этаж · Спуск',
       );
     },
   );

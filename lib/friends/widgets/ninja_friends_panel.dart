@@ -2,7 +2,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:friends_repository/friends_repository.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_list_cubit.dart';
 import 'package:rtu_mirea_app/friends/friends_layout.dart';
 import 'package:rtu_mirea_app/friends/widgets/friends_pill_button.dart';
@@ -22,8 +21,6 @@ class NinjaFriendsPanel extends StatelessWidget {
     super.key,
     this.failed = false,
     this.onRetry,
-    this.myLatitude,
-    this.myLongitude,
     this.controller,
     this.showingStudents = false,
     this.onShowStudentsChanged,
@@ -35,38 +32,10 @@ class NinjaFriendsPanel extends StatelessWidget {
   final VoidCallback? onRetry;
   final ValueChanged<Friend> onFriendTap;
   final VoidCallback onAddFriend;
-  final double? myLatitude;
-  final double? myLongitude;
   final bool showingStudents;
   final ValueChanged<bool>? onShowStudentsChanged;
 
   final DraggableScrollableController? controller;
-
-  String? _distanceTo(Friend friend, AppLocalizations l10n) {
-    final myLat = myLatitude;
-    final myLng = myLongitude;
-    final friendLat = friend.latitude;
-    final friendLng = friend.longitude;
-    if (myLat == null ||
-        myLng == null ||
-        !myLat.isFinite ||
-        !myLng.isFinite ||
-        myLat.abs() > 90 ||
-        myLng.abs() > 180 ||
-        friendPresence(friend, DateTime.now()) == FriendPresence.off ||
-        friend.isGhost ||
-        friendLat == null ||
-        friendLng == null) {
-      return null;
-    }
-    final meters = const Distance().as(
-      .Meter,
-      LatLng(myLat, myLng),
-      LatLng(friendLat, friendLng),
-    );
-    if (meters < 1000) return l10n.friendsMeters(meters.round());
-    return l10n.friendsKm((meters / 1000).toStringAsFixed(1));
-  }
 
   Widget _content(AppLocalizations l10n) {
     if (loading) {
@@ -154,7 +123,6 @@ class NinjaFriendsPanel extends StatelessWidget {
                   return _NinjaFriendCard(
                     key: ValueKey(friend.userId),
                     friend: friend,
-                    distance: _distanceTo(friend, l10n),
                     onTap: () => onFriendTap(friend),
                   );
                 }

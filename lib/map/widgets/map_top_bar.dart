@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
+import 'package:rtu_mirea_app/map/widgets/map_search_transition.dart';
 
 class MapTopBar extends StatefulWidget {
   const MapTopBar({
@@ -13,7 +16,6 @@ class MapTopBar extends StatefulWidget {
     required this.onCampusSelected,
     required this.onFriends,
     this.onSearchClosed,
-    this.compact = false,
     this.showCampusSelector = true,
     super.key,
   });
@@ -25,22 +27,38 @@ class MapTopBar extends StatefulWidget {
   final ValueChanged<CampusModel> onCampusSelected;
   final VoidCallback onFriends;
   final VoidCallback? onSearchClosed;
-  final bool compact;
   final bool showCampusSelector;
 
   @override
   State<MapTopBar> createState() => _MapTopBarState();
 }
 
-class _MapTopBarState extends State<MapTopBar> {
+class _MapTopBarState extends State<MapTopBar>
+    with SingleTickerProviderStateMixin {
   final _focus = FocusNode();
+  late final AnimationController _motion;
+  late final CurvedAnimation _expansion;
   late bool _searching;
 
   @override
   void initState() {
     super.initState();
     _searching = widget.controller.text.isNotEmpty;
+    _motion = AnimationController(vsync: this, value: _searching ? 1 : 0);
+    _expansion = CurvedAnimation(
+      parent: _motion,
+      curve: NinjaMotion.enter,
+      reverseCurve: NinjaMotion.exit,
+    );
     widget.controller.addListener(_syncQuery);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final duration = NinjaMotion.of(context, NinjaMotion.slow);
+    _motion.duration = duration;
+    if (duration == Duration.zero) _motion.value = _searching ? 1 : 0;
   }
 
   @override
@@ -50,6 +68,7 @@ class _MapTopBarState extends State<MapTopBar> {
       oldWidget.controller.removeListener(_syncQuery);
       widget.controller.addListener(_syncQuery);
       _searching = widget.controller.text.isNotEmpty;
+      _motion.value = _searching ? 1 : 0;
     }
   }
 
@@ -57,31 +76,42 @@ class _MapTopBarState extends State<MapTopBar> {
     final hasQuery = widget.controller.text.isNotEmpty;
     if (hasQuery && !_searching) {
       setState(() => _searching = true);
+      unawaited(_motion.forward());
     } else if (!hasQuery && _searching && !_focus.hasFocus) {
       setState(() => _searching = false);
+      unawaited(_motion.reverse());
     }
   }
 
-  void _openSearch() {
+  Future<void> _openSearch() async {
     setState(() => _searching = true);
+    try {
+      await _motion.forward().orCancel;
+    } on TickerCanceled {
+      if (!mounted || !_searching || !_motion.isCompleted) return;
+    }
+    if (!mounted || !_searching) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _searching) _focus.requestFocus();
+      if (mounted && _searching && _motion.isCompleted) _focus.requestFocus();
     });
   }
 
   void _closeSearch() {
     if (!_searching) return;
+    setState(() => _searching = false);
     _focus.unfocus();
     final hadQuery = widget.controller.text.isNotEmpty;
     widget.controller.clear();
     if (hadQuery) widget.onQueryChanged('');
-    setState(() => _searching = false);
+    unawaited(_motion.reverse());
     widget.onSearchClosed?.call();
   }
 
   @override
   void dispose() {
     widget.controller.removeListener(_syncQuery);
+    _expansion.dispose();
+    _motion.dispose();
     _focus.dispose();
     super.dispose();
   }
@@ -127,103 +157,58 @@ class _MapTopBarState extends State<MapTopBar> {
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             AppSpacing.lg,
-            MediaQuery.paddingOf(context).top +
-                (widget.compact ? AppSpacing.xs : AppSpacing.sm),
+            MediaQuery.paddingOf(context).top + AppSpacing.sm,
             AppSpacing.lg,
             0,
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) => AnimatedSwitcher(
-              duration: NinjaMotion.of(context, NinjaMotion.slow),
-              reverseDuration: NinjaMotion.of(context, NinjaMotion.fast),
-              switchInCurve: NinjaMotion.enter,
-              switchOutCurve: NinjaMotion.exit,
-              transitionBuilder: (child, animation) => ClipRect(
-                child: SizeTransition(
-                  sizeFactor: animation,
-                  axis: Axis.horizontal,
-                  alignment: AlignmentDirectional.topStart,
-                  child: FadeTransition(opacity: animation, child: child),
-                ),
-              ),
-              layoutBuilder: (current, previous) => Stack(
-                alignment: AlignmentDirectional.centerStart,
-                children: [
-                  for (final child in previous)
-                    ExcludeSemantics(child: IgnorePointer(child: child)),
-                  ?current,
-                ],
-              ),
-              child: SizedBox(
-                key: ValueKey(_searching),
-                width: constraints.maxWidth,
-                child: _searching
-                    ? Row(
-                        children: [
-                          AppIconButton(
-                            icon: const AppLineIconWidget(AppLineIcon.chevronL),
-                            tooltip: MaterialLocalizations.of(
-                              context,
-                            ).backButtonTooltip,
-                            tone: AppIconButtonTone.surface,
-                            shape: AppIconButtonShape.circle,
-                            onPressed: _closeSearch,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: AppSearchField(
-                              controller: widget.controller,
-                              focusNode: _focus,
-                              height: searchHeight,
-                              hintText: l10n.mapSearchPlaceholder,
-                              onCanvas: true,
-                              onChanged: widget.onQueryChanged,
-                              onSubmitted: (_) => _focus.unfocus(),
+          child: MapSearchTransition(
+            animation: _expansion,
+            searching: _searching,
+            height: searchHeight,
+            tooltip: _searching
+                ? MaterialLocalizations.of(context).backButtonTooltip
+                : l10n.mapSearchPlaceholder,
+            onToggle: _searching ? _closeSearch : _openSearch,
+            search: AppSearchField(
+              controller: widget.controller,
+              focusNode: _focus,
+              height: searchHeight,
+              hintText: l10n.mapSearchPlaceholder,
+              onCanvas: true,
+              onChanged: widget.onQueryChanged,
+              onSubmitted: (_) => _focus.unfocus(),
+            ),
+            actions: Row(
+              children: [
+                Expanded(
+                  child: widget.showCampusSelector
+                      ? Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: AppButton.secondary(
+                            label:
+                                widget.selectedCampus?.displayName ??
+                                l10n.mapCampusFilter,
+                            trailingIcon: const AppLineIconWidget(
+                              AppLineIcon.chevronD,
+                              size: 16,
                             ),
+                            size: AppButtonSize.small,
+                            onPressed: widget.campuses.isEmpty
+                                ? null
+                                : _chooseCampus,
                           ),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          AppIconButton(
-                            icon: const AppLineIconWidget(AppLineIcon.search),
-                            tooltip: l10n.mapSearchPlaceholder,
-                            tone: AppIconButtonTone.surface,
-                            shape: AppIconButtonShape.circle,
-                            onPressed: _openSearch,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: widget.showCampusSelector
-                                ? Align(
-                                    alignment: AlignmentDirectional.centerStart,
-                                    child: AppButton.secondary(
-                                      label:
-                                          widget.selectedCampus?.displayName ??
-                                          l10n.mapCampusFilter,
-                                      trailingIcon: const AppLineIconWidget(
-                                        AppLineIcon.chevronD,
-                                        size: 16,
-                                      ),
-                                      size: AppButtonSize.small,
-                                      onPressed: widget.campuses.isEmpty
-                                          ? null
-                                          : _chooseCampus,
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          AppIconButton(
-                            icon: const AppLineIconWidget(AppLineIcon.people),
-                            tooltip: l10n.mapFriendsToggle,
-                            tone: AppIconButtonTone.surface,
-                            shape: AppIconButtonShape.circle,
-                            onPressed: widget.onFriends,
-                          ),
-                        ],
-                      ),
-              ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                AppIconButton(
+                  icon: const AppLineIconWidget(AppLineIcon.people),
+                  tooltip: l10n.mapFriendsToggle,
+                  tone: AppIconButtonTone.surface,
+                  shape: AppIconButtonShape.circle,
+                  onPressed: widget.onFriends,
+                ),
+              ],
             ),
           ),
         ),
