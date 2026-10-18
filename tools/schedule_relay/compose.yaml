@@ -1,0 +1,32 @@
+services:
+  relay:
+    build: .
+    image: mirea-schedule-relay:local
+    restart: unless-stopped
+    stop_grace_period: 30s
+    env_file: relay.env
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: '3'
+    networks: [application]
+    labels:
+      traefik.enable: 'true'
+      traefik.constraint-label-stack: api
+      traefik.docker.network: application
+      traefik.http.routers.schedule_relay.rule: Host(`${RELAY_PUBLIC_HOST:-app-api.mirea.ninja}`) && PathPrefix(`/schedule/api/`)
+      traefik.http.routers.schedule_relay.entrypoints: api_websecure
+      traefik.http.routers.schedule_relay.tls.certresolver: letsencrypt
+      traefik.http.routers.schedule_relay.service: schedule_relay
+      traefik.http.services.schedule_relay.loadbalancer.server.port: '8787'
+
+networks:
+  application:
+    external: true

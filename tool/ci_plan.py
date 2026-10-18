@@ -138,7 +138,7 @@ def plan_changes(root, changed_paths=None):
             jobs["wear"] = True
             if path.startswith("wear/android/"):
                 jobs["flutter"] = True
-        elif path.startswith("tools/schedule_fetcher/"):
+        elif path.startswith(("tools/schedule_fetcher/", "tools/schedule_relay/")):
             jobs["schedule-fetcher"] = True
         elif path.startswith("tools/social_media_fetcher/") or path == "docker-compose.social-media.yml":
             jobs["content-fetcher"] = True

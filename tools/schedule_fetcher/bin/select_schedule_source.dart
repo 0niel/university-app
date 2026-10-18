@@ -15,6 +15,7 @@ Future<void> main() async {
           : Uri.tryParse(configured),
       relayAuthorization: Platform.environment['SCHEDULE_SOURCE_AUTHORIZATION']
           ?.trim(),
+      log: stderr.writeln,
     );
     stdout.writeln(
       jsonEncode({

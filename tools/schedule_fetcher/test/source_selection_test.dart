@@ -180,6 +180,280 @@ void main() {
   });
 
   test(
+    'waits for relay warmup without retrying the official source',
+    () async {
+      final started = DateTime.utc(2026);
+      var now = started;
+      var officialRequests = 0;
+      var relayRequests = 0;
+      final delays = <Duration>[];
+      final diagnostics = <String>[];
+      final selected = await selectScheduleSource(
+        relayBaseUrl: _relay,
+        relayAuthorization: _authorization,
+        clock: () => now,
+        delay: (duration) async {
+          delays.add(duration);
+          now = now.add(duration);
+        },
+        log: diagnostics.add,
+        httpClient: MockClient((request) async {
+          expect(request.followRedirects, isFalse);
+          if (request.url.host == officialScheduleUri.host) {
+            officialRequests++;
+            expect(request.headers[HttpHeaders.authorizationHeader], isNull);
+            return http.Response('blocked', 403);
+          }
+          relayRequests++;
+          expect(
+            request.headers[HttpHeaders.authorizationHeader],
+            _authorization,
+          );
+          if (now.difference(started) < const Duration(seconds: 50)) {
+            return http.Response('Starting service $_authorization', 503);
+          }
+          return request.url.path.endsWith('search')
+              ? _search()
+              : http.Response(_calendar, 200);
+        }),
+      );
+      expect(selected.usesRelay, isTrue);
+      expect(officialRequests, 1);
+      expect(relayRequests, 12);
+      expect(delays, List.filled(10, const Duration(seconds: 5)));
+      expect(
+        diagnostics.first,
+        'Schedule probe source=official stage=search category=http status=403',
+      );
+      expect(diagnostics.join(), isNot(contains(_authorization)));
+    },
+  );
+
+  test(
+    'retries transient calendar errors within the same warmup budget',
+    () async {
+      var now = DateTime.utc(2026);
+      var searches = 0;
+      var calendars = 0;
+      final diagnostics = <String>[];
+      final selected = await selectScheduleSource(
+        relayBaseUrl: _relay,
+        clock: () => now,
+        delay: (duration) async => now = now.add(duration),
+        log: diagnostics.add,
+        httpClient: MockClient((request) async {
+          if (request.url.host == officialScheduleUri.host) {
+            return http.Response('blocked', 403);
+          }
+          if (request.url.path.endsWith('search')) {
+            searches++;
+            return _search();
+          }
+          calendars++;
+          return calendars == 1
+              ? http.Response('unavailable', 502)
+              : http.Response(_calendar, 200);
+        }),
+      );
+      expect(selected.usesRelay, isTrue);
+      expect(searches, 2);
+      expect(calendars, 2);
+      expect(
+        diagnostics.last,
+        contains(
+          'source=relay stage=calendar category=http status=502 attempt=1',
+        ),
+      );
+    },
+  );
+
+  test(
+    'bounds persistent relay failures to the shared warmup budget',
+    () async {
+      final started = DateTime.utc(2026);
+      var now = started;
+      var relayRequests = 0;
+      await expectLater(
+        selectScheduleSource(
+          relayBaseUrl: _relay,
+          clock: () => now,
+          delay: (duration) async => now = now.add(duration),
+          httpClient: MockClient((request) async {
+            if (request.url.host == officialScheduleUri.host) {
+              return http.Response('blocked', 403);
+            }
+            relayRequests++;
+            return http.Response(_authorization, 503);
+          }),
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            allOf(
+              contains('source=official stage=search category=http status=403'),
+              contains('source=relay stage=search category=http status=503'),
+              isNot(contains(_authorization)),
+            ),
+          ),
+        ),
+      );
+      expect(relayRequests, 18);
+      expect(now.difference(started), const Duration(seconds: 85));
+    },
+  );
+
+  test('caps a hanging request at the remaining warmup deadline', () async {
+    final elapsed = Stopwatch()..start();
+    await expectLater(
+      selectScheduleSource(
+        relayBaseUrl: _relay,
+        timeout: const Duration(seconds: 5),
+        relayWarmupTimeout: const Duration(milliseconds: 20),
+        httpClient: MockClient((request) {
+          if (request.url.host == officialScheduleUri.host) {
+            return Future.value(http.Response('blocked', 403));
+          }
+          return Completer<http.Response>().future;
+        }),
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          contains('source=relay stage=search category=timeout'),
+        ),
+      ),
+    );
+    expect(elapsed.elapsed, lessThan(const Duration(seconds: 1)));
+  });
+
+  test('calendar failures do not restart the relay warmup budget', () async {
+    var now = DateTime.utc(2026);
+    var calendars = 0;
+    await expectLater(
+      selectScheduleSource(
+        relayBaseUrl: _relay,
+        relayWarmupTimeout: const Duration(seconds: 6),
+        clock: () => now,
+        delay: (duration) async => now = now.add(duration),
+        httpClient: MockClient((request) async {
+          if (request.url.host == officialScheduleUri.host) {
+            return http.Response('blocked', 403);
+          }
+          if (request.url.path.endsWith('search')) return _search();
+          calendars++;
+          return http.Response('unavailable', 503);
+        }),
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          contains('source=relay stage=calendar category=http status=503'),
+        ),
+      ),
+    );
+    expect(calendars, 2);
+  });
+
+  for (final status in [301, 401, 403, 404]) {
+    test('does not retry permanent relay HTTP $status', () async {
+      var relayRequests = 0;
+      await expectLater(
+        selectScheduleSource(
+          relayBaseUrl: _relay,
+          delay: (_) async => fail('Permanent failures must not wait'),
+          httpClient: MockClient((request) async {
+            if (request.url.host == _relay.host) relayRequests++;
+            return http.Response(_authorization, status);
+          }),
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            contains('source=relay stage=search category=http status=$status'),
+          ),
+        ),
+      );
+      expect(relayRequests, 1);
+    });
+  }
+
+  for (final category in ['network', 'tls', 'invalid_response']) {
+    test('redacts relay $category errors and diagnostics', () async {
+      var now = DateTime.utc(2026);
+      final diagnostics = <String>[];
+      await expectLater(
+        selectScheduleSource(
+          relayBaseUrl: _relay,
+          relayWarmupTimeout: const Duration(seconds: 6),
+          clock: () => now,
+          delay: (duration) async => now = now.add(duration),
+          log: diagnostics.add,
+          httpClient: MockClient((request) async {
+            if (request.url.host == officialScheduleUri.host) {
+              return http.Response('blocked', 403);
+            }
+            switch (category) {
+              case 'network':
+                throw http.ClientException(
+                  _authorization,
+                  Uri.https('secret.example', '/', {'token': _authorization}),
+                );
+              case 'tls':
+                throw const HandshakeException(_authorization);
+              default:
+                return http.Response('$_authorization invalid json', 200);
+            }
+          }),
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            allOf(
+              contains('source=relay stage=search category=$category'),
+              isNot(contains(_authorization)),
+              isNot(contains('secret.example')),
+            ),
+          ),
+        ),
+      );
+      expect(diagnostics.join(), isNot(contains(_authorization)));
+      expect(diagnostics.join(), isNot(contains('secret.example')));
+    });
+  }
+
+  test(
+    'reports invalid relay origin before any authenticated request',
+    () async {
+      var requests = 0;
+      await expectLater(
+        selectScheduleSource(
+          relayBaseUrl: Uri.parse('https://$_authorization@relay.example'),
+          httpClient: MockClient((request) async {
+            requests++;
+            return http.Response('blocked', 403);
+          }),
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            allOf(
+              contains('source=relay stage=origin category=invalid_response'),
+              isNot(contains(_authorization)),
+            ),
+          ),
+        ),
+      );
+      expect(requests, 1);
+    },
+  );
+
+  test(
     'runtime client strips relay authorization on official origin',
     () async {
       final client = RetryingSourceClient(

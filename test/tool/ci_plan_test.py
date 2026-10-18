@@ -84,6 +84,7 @@ class CiPlanTest(unittest.TestCase):
             "wear/lib/main.dart": {"wear"},
             "wear/android/app/src/main/res/mipmap-hdpi/ic_launcher.png": {"wear", "flutter"},
             "tools/schedule_fetcher/lib/main.dart": {"schedule-fetcher"},
+            "tools/schedule_relay/server.mjs": {"schedule-fetcher"},
             "tools/social_media_fetcher/fetcher.py": {"content-fetcher"},
             "tool/app_store_build_status.py": {"release-tools"},
             "tool/decrypt_release_symbols.ps1": {"release-tools", "flutter"},
