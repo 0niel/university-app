@@ -1,24 +1,160 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web_oauth_interceptor_client/web_oauth_interceptor_client.dart';
 
 class _TestInAppBrowser extends PlatformInAppBrowser {
-  _TestInAppBrowser(super.params) : super.implementation();
+  _TestInAppBrowser(super.params, this.owner) : super.implementation();
+
+  final _TestInAppWebViewPlatform owner;
 
   @override
-  Future<void> close() async {}
+  Future<void> openUrlRequest({
+    required URLRequest urlRequest,
+    Object? options,
+    InAppBrowserClassSettings? settings,
+  }) async {
+    if (owner.failOpening) throw Exception('Opening failed');
+  }
+
+  @override
+  Future<void> close() async {
+    owner.closes++;
+    if (owner.closing case final closing?) await closing.future;
+    eventHandler?.onExit();
+  }
+}
+
+class _TestCookies extends PlatformCookieManager {
+  _TestCookies(super.params, this.owner) : super.implementation();
+
+  final _TestInAppWebViewPlatform owner;
+
+  @override
+  Future<List<Cookie>> getCookies({
+    required WebUri url,
+    PlatformInAppWebViewController? iosBelow11WebViewController,
+    PlatformInAppWebViewController? webViewController,
+  }) =>
+      owner.readCookies(url);
 }
 
 class _TestInAppWebViewPlatform extends InAppWebViewPlatform {
+  Future<List<Cookie>> Function(WebUri) readCookies = (_) async => [];
+  _TestInAppBrowser? browser;
+  Completer<void>? closing;
+  int closes = 0;
+  bool failOpening = false;
+
   @override
   PlatformInAppBrowser createPlatformInAppBrowser(
     PlatformInAppBrowserCreationParams params,
   ) =>
-      _TestInAppBrowser(params);
+      browser = _TestInAppBrowser(params, this);
+
+  @override
+  PlatformCookieManager createPlatformCookieManager(
+    PlatformCookieManagerCreationParams params,
+  ) =>
+      _TestCookies(params, this);
 }
 
 void main() {
+  final platform = _TestInAppWebViewPlatform();
   setUpAll(() {
-    InAppWebViewPlatform.instance = _TestInAppWebViewPlatform();
+    InAppWebViewPlatform.instance = platform;
+  });
+  setUp(() {
+    platform
+      ..closes = 0
+      ..closing = null
+      ..failOpening = false
+      ..readCookies = (_) async => [];
+  });
+
+  const loginUrl = 'https://pulse.example/api/auth/login';
+  const returnUrl = 'https://pulse.example/services';
+  OAuthInterceptorClient client() => const OAuthInterceptorClient(
+        oauthUrl: loginUrl,
+        expectedRedirectUrls: [returnUrl],
+        specialCookieName: '.AspNetCore.Cookies',
+      );
+
+  WebOAuthInterceptorClient handler() =>
+      platform.browser!.eventHandler! as WebOAuthInterceptorClient;
+
+  testWidgets('native history callback returns the session and closes once', (
+    tester,
+  ) async {
+    final paths = <String>[];
+    platform.readCookies = (url) async {
+      paths.add(url.path);
+      return [Cookie(name: '.AspNetCore.Cookies', value: 'provider-session')];
+    };
+    final login = client().initiateOAuthFlow();
+    await tester.pump();
+    final browser = handler();
+    await browser.onUpdateVisitedHistory(WebUri(returnUrl), false);
+    expect((await login).specialCookieValue, 'provider-session');
+    await browser.onLoadStop(WebUri(returnUrl));
+    await tester.pump();
+    expect(paths, ['/services']);
+    expect(platform.closes, 1);
+  });
+
+  testWidgets('late cookie returns without another document navigation', (
+    tester,
+  ) async {
+    var ready = false;
+    platform.readCookies = (_) async => ready
+        ? [Cookie(name: '.AspNetCore.Cookies', value: 'late-session')]
+        : [];
+    final login = client().initiateOAuthFlow();
+    var returned = false;
+    unawaited(login.then((_) => returned = true));
+    await tester.pump();
+    await handler().onLoadStop(WebUri(returnUrl));
+    await tester.pump(const Duration(seconds: 1));
+    expect(returned, isFalse);
+    ready = true;
+    await tester.pump(const Duration(milliseconds: 500));
+    expect((await login).specialCookieValue, 'late-session');
+    expect(platform.closes, 1);
+  });
+
+  testWidgets('exiting cancels the flow and ignores a pending cookie read', (
+    tester,
+  ) async {
+    final cookies = Completer<List<Cookie>>();
+    platform.readCookies = (_) => cookies.future;
+    final login = client().initiateOAuthFlow();
+    final cancelled = expectLater(login, throwsA(isA<OAuthFlowCancelled>()));
+    await tester.pump();
+    final browser = handler();
+    final loaded = browser.onLoadStop(WebUri(returnUrl));
+    browser.onExit();
+    await cancelled;
+    cookies.complete([
+      Cookie(name: '.AspNetCore.Cookies', value: 'cancelled-session'),
+    ]);
+    await loaded;
+    await tester.pump(const Duration(seconds: 30));
+    expect(platform.closes, 0);
+  });
+
+  testWidgets('opening errors propagate while browser cleanup is pending', (
+    tester,
+  ) async {
+    platform
+      ..failOpening = true
+      ..closing = Completer<void>();
+    await expectLater(
+      client().initiateOAuthFlow(),
+      throwsA('Unable to open OAuth browser.'),
+    );
+    expect(platform.closes, 1);
+    platform.closing!.complete();
+    await tester.pump();
   });
 
   test('ignores HTTP failures from subresources', () {

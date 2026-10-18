@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:web_oauth_interceptor_client/src/auto_fill_config.dart';
 import 'package:web_oauth_interceptor_client/src/login_success_data.dart';
-import 'package:web_oauth_interceptor_client/src/oauth_redirect_matcher.dart';
+import 'package:web_oauth_interceptor_client/src/oauth_session_observer.dart';
 
 class WebOAuthInterceptorClient extends InAppBrowser {
   WebOAuthInterceptorClient({
@@ -20,15 +19,15 @@ class WebOAuthInterceptorClient extends InAppBrowser {
     this.extraHeaders = const {},
     this.waitForSpecialCookie = false,
   }) {
-    // Extract unique domains from expectedRedirectUrls
-    for (final url in expectedRedirectUrls) {
-      final uri = Uri.parse(url);
-      _targetDomains.add(uri.origin);
-    }
-
-    // Also add the domain of oauthUrl
-    final oauthUri = Uri.parse(oauthUrl);
-    _targetDomains.add(oauthUri.origin);
+    _session = OAuthSessionObserver(
+      oauthUrl: oauthUrl,
+      expectedRedirectUrls: expectedRedirectUrls,
+      specialCookieName: specialCookieName,
+      waitForSpecialCookie: waitForSpecialCookie,
+      readCookies: _readCookies,
+      onSuccess: (result) => unawaited(_completeSuccess(result)),
+      onError: () => _reportError('Unable to complete OAuth login.'),
+    );
   }
 
   /// URL to initiate the OAuth authorization process.
@@ -60,66 +59,40 @@ class WebOAuthInterceptorClient extends InAppBrowser {
 
   final bool waitForSpecialCookie;
 
-  /// Set of target domains extracted from expectedRedirectUrls and oauthUrl.
-  final Set<String> _targetDomains = {};
+  late final OAuthSessionObserver _session;
   var _didComplete = false;
 
   @override
   Future<void> onLoadStart(WebUri? url) async {
     super.onLoadStart(url);
     if (url == null) return;
-    final currentUrl = url.toString();
-    if (_isRedirectUrl(currentUrl)) {
-      await _handleOAuthRedirect(currentUrl);
-    }
+    await _session.observe(url.toString());
   }
 
   @override
   Future<void> onLoadStop(WebUri? url) async {
     super.onLoadStop(url);
-    if (url == null) return;
-
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-
-    final currentUri = Uri.parse(url.toString());
-    final currentDomain = currentUri.origin;
-
-    final domainsToCheck = {..._targetDomains, currentDomain};
-
-    var specialCookieFound = false;
-    String? specialCookieValue;
-    final allCookies = <String, String>{};
-
-    for (final domain in domainsToCheck) {
-      final domainUri = Uri.parse(domain);
-      final domainCookies = await CookieManager.instance()
-          .getCookies(url: WebUri(domainUri.toString()));
-      for (final cookie in domainCookies) {
-        final value = cookie.value;
-        if (value is! String) continue;
-        allCookies[cookie.name] = value;
-        if (cookie.name == specialCookieName) {
-          specialCookieFound = true;
-          specialCookieValue = value;
-        }
-      }
-    }
-
-    if (specialCookieFound &&
-        (!waitForSpecialCookie ||
-            (specialCookieValue != null && specialCookieValue.isNotEmpty))) {
-      await _completeSuccess(
-        LoginSuccessData(
-          allCookies: allCookies,
-          specialCookieValue: specialCookieValue,
-        ),
-      );
-      return;
-    }
-
-    if (autoFillConfig != null) {
+    if (url == null || _didComplete) return;
+    await _session.observe(url.toString(), loaded: true);
+    if (!_didComplete && autoFillConfig != null) {
       await _tryAutoFillForm();
     }
+  }
+
+  @override
+  Future<void> onUpdateVisitedHistory(WebUri? url, bool? isReload) async {
+    super.onUpdateVisitedHistory(url, isReload);
+    if (url == null || _didComplete) return;
+    await _session.observe(url.toString(), loaded: true);
+  }
+
+  Future<Map<String, String>> _readCookies(Uri uri) async {
+    final cookies =
+        await CookieManager.instance().getCookies(url: WebUri(uri.toString()));
+    return {
+      for (final cookie in cookies)
+        if (cookie.value case final String value) cookie.name: value,
+    };
   }
 
   @override
@@ -145,57 +118,16 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   @override
   void onExit() {
     super.onExit();
-    if (!_didComplete) onBrowserExit?.call();
+    _session.close();
+    if (_didComplete) return;
+    _didComplete = true;
+    onBrowserExit?.call();
   }
 
-  /// Checks if the given URL is one of the expected redirect URLs.
-  bool _isRedirectUrl(String url) {
-    return OAuthRedirectMatcher.matches(url, expectedRedirectUrls);
-  }
-
-  /// Handles the OAuth redirect by extracting tokens and cookies.
-  Future<void> _handleOAuthRedirect(String url) async {
-    try {
-      final uri = Uri.parse(url);
-      final cookies = await CookieManager.instance()
-          .getCookies(url: WebUri(uri.toString()));
-
-      final token = _extractTokenFromUrl(url);
-
-      final specialCookie = cookies
-          .firstWhereOrNull((cookie) => cookie.name == specialCookieName)
-          ?.value;
-      final specialCookieValue = specialCookie is String ? specialCookie : null;
-
-      final isBasicSuccess = (token != null && token.isNotEmpty) ||
-          (specialCookieValue != null && specialCookieValue.isNotEmpty);
-
-      final isSpecialCookieValid = !waitForSpecialCookie ||
-          (specialCookieValue != null && specialCookieValue.isNotEmpty);
-
-      if (isBasicSuccess && isSpecialCookieValid) {
-        final allCookies = <String, String>{};
-        for (final cookie in cookies) {
-          final value = cookie.value;
-          if (value is String) allCookies[cookie.name] = value;
-        }
-
-        await _completeSuccess(
-          LoginSuccessData(
-            accessToken: token,
-            allCookies: allCookies,
-            specialCookieValue: specialCookieValue,
-          ),
-        );
-      }
-    } on Exception {
-      _reportError('Unable to complete OAuth login.');
-    }
-  }
-
-  String? _extractTokenFromUrl(String url) {
-    final uri = Uri.parse(url);
-    return uri.queryParameters['access_token'];
+  @override
+  Future<void> close() async {
+    _session.close();
+    await super.close();
   }
 
   Future<void> _tryAutoFillForm() async {
@@ -246,6 +178,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   Future<void> _completeSuccess(LoginSuccessData successData) async {
     if (_didComplete) return;
     _didComplete = true;
+    _session.close();
     try {
       onLoginSuccess?.call(successData);
     } finally {
@@ -256,6 +189,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   void _reportError(String message) {
     if (_didComplete) return;
     _didComplete = true;
+    _session.close();
     onLoginError?.call(message);
     unawaited(_closeSafely());
   }
@@ -344,11 +278,14 @@ class OAuthInterceptorClient {
       waitForSpecialCookie: waitForSpecialCookie,
       extraHeaders: extraHeaders,
       autoFillConfig: autoFillConfig,
-      onLoginSuccess: completer.complete,
-      onLoginError: (error) => completer.completeError(
-        error,
-        StackTrace.current,
-      ),
+      onLoginSuccess: (result) {
+        if (!completer.isCompleted) completer.complete(result);
+      },
+      onLoginError: (error) {
+        if (!completer.isCompleted) {
+          completer.completeError(error, StackTrace.current);
+        }
+      },
       onBrowserExit: () {
         if (!completer.isCompleted) {
           completer.completeError(
@@ -376,6 +313,7 @@ class OAuthInterceptorClient {
       if (!completer.isCompleted) {
         completer.completeError('Unable to open OAuth browser.', stackTrace);
       }
+      unawaited(browser._closeSafely());
     }
 
     return completer.future;
