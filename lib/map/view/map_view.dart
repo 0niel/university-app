@@ -1239,7 +1239,6 @@ class _MapViewState extends State<MapView> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           MapTopBar(
-                            compact: constraints.maxHeight < 650,
                             showCampusSelector:
                                 _route == null || constraints.maxHeight >= 600,
                             controller: _query,

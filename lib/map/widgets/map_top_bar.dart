@@ -16,7 +16,6 @@ class MapTopBar extends StatefulWidget {
     required this.onCampusSelected,
     required this.onFriends,
     this.onSearchClosed,
-    this.compact = false,
     this.showCampusSelector = true,
     super.key,
   });
@@ -28,7 +27,6 @@ class MapTopBar extends StatefulWidget {
   final ValueChanged<CampusModel> onCampusSelected;
   final VoidCallback onFriends;
   final VoidCallback? onSearchClosed;
-  final bool compact;
   final bool showCampusSelector;
 
   @override
@@ -159,8 +157,7 @@ class _MapTopBarState extends State<MapTopBar>
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             AppSpacing.lg,
-            MediaQuery.paddingOf(context).top +
-                (widget.compact ? AppSpacing.xs : AppSpacing.sm),
+            MediaQuery.paddingOf(context).top + AppSpacing.sm,
             AppSpacing.lg,
             0,
           ),

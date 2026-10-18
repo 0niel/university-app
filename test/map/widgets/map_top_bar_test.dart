@@ -51,7 +51,6 @@ Future<void> _pumpBar(
               onCampusSelected: onCampusSelected ?? (_) {},
               onFriends: onFriends ?? () {},
               onSearchClosed: onSearchClosed,
-              compact: size.height < 650,
             ),
           ),
         ),
