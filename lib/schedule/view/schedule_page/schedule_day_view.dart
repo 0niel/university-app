@@ -325,7 +325,10 @@ class ScheduleDayView extends StatelessWidget {
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        rows[index].$3,
+                        RepaintBoundary(
+                          key: ValueKey('schedule-day-row-$index'),
+                          child: rows[index].$3,
+                        ),
                         if (showNow && currentIndex == index)
                           Positioned(
                             left: -8,
