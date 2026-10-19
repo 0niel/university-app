@@ -698,6 +698,82 @@ class AppStoreReviewNotesTest(unittest.TestCase):
         self.assertEqual(self.detail["attributes"]["notes"], original)
         self.client.patch.assert_not_called()
 
+    def location_note(self, build):
+        from app_store_review_notes import create_location_review_note
+        return create_location_review_note("5.4.0", build)
+
+    def test_replaces_older_location_clarifications_and_rerun_is_idempotent(self):
+        old = self.location_note("2442.12.0")
+        self.note = self.location_note("2483.12.49")
+        self.detail["attributes"]["notes"] = "Login instructions.\n\n" + old
+        self.append()
+        self.append()
+        self.assertEqual(self.detail["attributes"]["notes"], "Login instructions.\n\n" + self.note)
+        self.assertEqual(self.detail["attributes"]["demoAccountPassword"], "private")
+        self.client.patch.assert_called_once()
+
+    def test_replaces_multiple_clarifications_before_checking_byte_limit(self):
+        manual = "я" * 800
+        old = self.location_note("2442.12.0")
+        older = self.location_note("2440")
+        self.note = self.location_note("2483.12.49")
+        self.detail["attributes"]["notes"] = "\n\n".join([manual, older, old])
+        self.assertGreater(len((self.detail["attributes"]["notes"] + self.note).encode()), 4000)
+        self.append()
+        self.assertEqual(self.detail["attributes"]["notes"], manual + "\n\n" + self.note)
+
+    def test_preserves_manual_notes_after_a_location_clarification(self):
+        old = self.location_note("2442.12.0")
+        self.note = self.location_note("2483.12.49")
+        self.detail["attributes"]["notes"] = old + "\n\nManual review instructions."
+        self.append()
+        self.assertEqual(self.detail["attributes"]["notes"], "Manual review instructions.\n\n" + self.note)
+
+    def test_incomplete_or_custom_location_notes_are_not_removed(self):
+        self.note = self.location_note("2483.12.49")
+        for original in (
+            self.location_note("2442.12.0").replace("The signed IPA", "Our signed IPA"),
+            self.location_note("2442.12.0").replace(
+                "The permission prompt", "Manual instruction: use the test tenant. The permission prompt"
+            ),
+            self.location_note("2442.12.0").removesuffix(
+                "Please review the build number above for this submission."
+            ),
+        ):
+            with self.subTest(original=original):
+                self.detail["attributes"]["notes"] = original
+                self.append()
+                self.assertEqual(self.detail["attributes"]["notes"], original + "\n\n" + self.note)
+
+    def test_generic_note_keeps_existing_location_clarifications(self):
+        original = self.location_note("2442.12.0")
+        self.detail["attributes"]["notes"] = original
+        self.append()
+        self.assertEqual(self.detail["attributes"]["notes"], original + "\n\n" + self.note)
+
+    def test_replaces_exact_legacy_location_note_and_preserves_manual_instructions(self):
+        old = (
+            "Location clarification for version 5.2.1 (build 2442.12.0), guideline 2.5.4:\n"
+            "The signed IPA for this build has been inspected before this submission. "
+            "The main application's Info.plist does not declare location in UIBackgroundModes. "
+            "No embedded bundle declares the location background mode or an Always location usage description. "
+            "Location is used only while the app is open, for the map and optional location sharing. "
+            "Location updates stop when the app enters the background. "
+            "The permission prompt requests When In Use access only. "
+            "Please review the build number above for this submission."
+        )
+        self.note = self.location_note("2483.12.49")
+        self.detail["attributes"]["notes"] = "Manual instructions.\n\n" + old
+        self.append()
+        self.assertEqual(self.detail["attributes"]["notes"], "Manual instructions.\n\n" + self.note)
+
+    def test_replaces_known_location_note_with_crlf(self):
+        old = self.location_note("2442.12.0").replace("\n", "\r\n")
+        self.note = self.location_note("2483.12.49")
+        self.detail["attributes"]["notes"] = old
+        self.append()
+        self.assertEqual(self.detail["attributes"]["notes"], self.note)
+
     def test_incomplete_ambiguous_missing_and_foreign_target_cannot_mutate_notes(self):
         original_get = self.client.get.side_effect
         for path, response in (
