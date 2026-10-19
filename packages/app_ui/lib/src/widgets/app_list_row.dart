@@ -65,7 +65,7 @@ class AppListRow extends StatelessWidget {
       semanticsButton: onTap != null,
       child: AppControlSurface(
         color: const Color(0x00000000),
-        borderRadius: 0,
+        borderRadius: AppRadius.none,
         tone: AppControlSurfaceTone.quiet,
         enabled: onTap != null,
         child: ConstrainedBox(

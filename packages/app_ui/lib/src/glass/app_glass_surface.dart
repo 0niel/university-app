@@ -1,6 +1,7 @@
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/glass/app_glass_lens.dart';
 import 'package:app_ui/src/glass/app_glass_style.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:flutter/material.dart';
 
 export 'app_glass_style.dart' show AppGlassRole, AppGlassTone;
@@ -8,7 +9,7 @@ export 'app_glass_style.dart' show AppGlassRole, AppGlassTone;
 class AppGlassSurface extends StatelessWidget {
   const AppGlassSurface({
     required this.child,
-    this.borderRadius = 28,
+    this.borderRadius = AppRadius.dialog,
     this.padding = EdgeInsets.zero,
     this.tint,
     this.color,

@@ -26,7 +26,11 @@ class _CatalogSkeleton extends StatelessWidget {
                   width: _RecentMiniApps.width(context),
                   child: Column(
                     children: [
-                      const NinjaSkeleton(width: 52, height: 52, radius: 18),
+                      const NinjaSkeleton(
+                        width: 52,
+                        height: 52,
+                        radius: AppRadius.field,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       NinjaSkeleton(
                         width: 60,

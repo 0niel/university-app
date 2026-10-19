@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/design_preview/pages/preview_home_page.dart';
@@ -73,53 +75,76 @@ class _DesignPreviewAppState extends State<DesignPreviewApp> {
           PreviewServicesPage(onTab: _select),
           PreviewProfilePage(onTab: _select),
         ];
+        final toolbarHeight = math.max(
+          AppControlSize.buttonHero,
+          MediaQuery.textScalerOf(context).scale(14) * 2.6,
+        );
         return Scaffold(
           extendBody: true,
           backgroundColor: context.colors.canvas,
-          appBar: AppBar(
-            backgroundColor: context.colors.canvas,
-            title: Text(l10n.settingsAppearance, style: AppText.label),
-            actions: [
-              Semantics(
-                toggled: _glassEnabled,
-                child: AppIconButton(
-                  tooltip: l10n.settingsGlassEffectTitle,
-                  icon: AppLineIconWidget(
-                    AppLineIcon.spark,
-                    color: _glassEnabled
-                        ? context.colors.accent
-                        : context.colors.muted,
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(toolbarHeight),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screen,
+                ),
+                child: SizedBox(
+                  height: toolbarHeight,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.settingsAppearance,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.label,
+                        ),
+                      ),
+                      Semantics(
+                        toggled: _glassEnabled,
+                        child: AppIconButton(
+                          tooltip: l10n.settingsGlassEffectTitle,
+                          icon: AppLineIconWidget(
+                            AppLineIcon.spark,
+                            color: _glassEnabled
+                                ? context.colors.accent
+                                : context.colors.muted,
+                          ),
+                          onPressed: () =>
+                              setState(() => _glassEnabled = !_glassEnabled),
+                        ),
+                      ),
+                      AppIconButton(
+                        tooltip: l10n.settingsLanguage,
+                        icon: const Icon(Icons.translate_rounded),
+                        onPressed: () => setState(
+                          () => _locale = _locale.languageCode == 'ru'
+                              ? const Locale('en')
+                              : const Locale('ru'),
+                        ),
+                      ),
+                      AppIconButton(
+                        tooltip: _theme == ThemeMode.dark
+                            ? l10n.settingsThemeLight
+                            : l10n.settingsThemeDark,
+                        icon: Icon(
+                          _theme == ThemeMode.dark
+                              ? Icons.light_mode_outlined
+                              : Icons.dark_mode_outlined,
+                        ),
+                        onPressed: () => setState(
+                          () => _theme = _theme == ThemeMode.dark
+                              ? ThemeMode.light
+                              : ThemeMode.dark,
+                        ),
+                      ),
+                    ],
                   ),
-                  onPressed: () =>
-                      setState(() => _glassEnabled = !_glassEnabled),
                 ),
               ),
-              AppIconButton(
-                tooltip: l10n.settingsLanguage,
-                icon: const Icon(Icons.translate_rounded),
-                onPressed: () => setState(
-                  () => _locale = _locale.languageCode == 'ru'
-                      ? const Locale('en')
-                      : const Locale('ru'),
-                ),
-              ),
-              AppIconButton(
-                tooltip: _theme == ThemeMode.dark
-                    ? l10n.settingsThemeLight
-                    : l10n.settingsThemeDark,
-                icon: Icon(
-                  _theme == ThemeMode.dark
-                      ? Icons.light_mode_outlined
-                      : Icons.dark_mode_outlined,
-                ),
-                onPressed: () => setState(
-                  () => _theme = _theme == ThemeMode.dark
-                      ? ThemeMode.light
-                      : ThemeMode.dark,
-                ),
-              ),
-              const SizedBox(width: 12),
-            ],
+            ),
           ),
           body: AppAmbientBackground(
             child: LayoutBuilder(

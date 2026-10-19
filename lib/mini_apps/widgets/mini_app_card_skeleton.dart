@@ -13,11 +13,15 @@ class MiniAppCardSkeleton extends StatelessWidget {
     final detailHeight = 17 * textScale;
     return AppGlassSurface(
       tone: featured ? AppGlassTone.accent : AppGlassTone.subtle,
-      borderRadius: 24,
+      borderRadius: AppRadius.card,
       padding: const EdgeInsets.all(14),
       child: Row(
         children: [
-          const NinjaSkeleton(width: 48, height: 48, radius: 15),
+          const NinjaSkeleton(
+            width: 48,
+            height: 48,
+            radius: AppRadius.iconTileLarge,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -32,7 +36,11 @@ class MiniAppCardSkeleton extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          const NinjaSkeleton(width: 18, height: 18, radius: 6),
+          const NinjaSkeleton(
+            width: 18,
+            height: 18,
+            radius: AppRadius.focusOutline,
+          ),
         ],
       ),
     );

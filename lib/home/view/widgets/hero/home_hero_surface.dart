@@ -20,7 +20,7 @@ class HomeHeroSurface extends StatelessWidget {
       gradient: AppGlassTheme.of(context).enabled
           ? RadialGradient(
               center: Alignment.topRight,
-              radius: 1.6,
+              radius: AppGradientRadius.hero,
               colors: [
                 context.colors.accent.withValues(alpha: .18),
                 context.colors.accent.withValues(alpha: 0),

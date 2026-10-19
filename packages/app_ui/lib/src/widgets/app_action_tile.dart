@@ -32,7 +32,11 @@ class AppActionTile extends StatelessWidget {
        ),
        title = const AppSkeletonText(widthFactor: .8),
        subtitle = const AppSkeletonText(widthFactor: .85),
-       trailing = const NinjaSkeleton(width: 15, height: 15, radius: 4),
+       trailing = const NinjaSkeleton(
+         width: 15,
+         height: 15,
+         radius: AppRadius.xs,
+       ),
        onTap = null,
        onLongPress = null,
        semanticsLabel = null;

@@ -47,7 +47,7 @@ class _RecentMiniApps extends StatelessWidget {
                       role: AppGlassRole.control,
                       tone: AppGlassTone.accent,
                       tint: accent,
-                      borderRadius: 18,
+                      borderRadius: AppRadius.field,
                       child: SizedBox.square(
                         dimension: 52,
                         child: Center(

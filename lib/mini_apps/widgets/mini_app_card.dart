@@ -37,7 +37,7 @@ class MiniAppCard extends StatelessWidget {
       child: AppGlassSurface(
         tone: app.isFeatured ? AppGlassTone.accent : AppGlassTone.subtle,
         tint: accent,
-        borderRadius: 24,
+        borderRadius: AppRadius.card,
         padding: const EdgeInsets.all(14),
         child: Opacity(
           opacity: app.isHidden ? 0.55 : 1,

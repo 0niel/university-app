@@ -1,12 +1,13 @@
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/glass/app_glass_lens.dart';
 import 'package:app_ui/src/glass/app_glass_style.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:flutter/material.dart';
 
 class AppGlassHighlight extends StatelessWidget {
   const AppGlassHighlight({
     required this.child,
-    this.borderRadius = 999,
+    this.borderRadius = AppRadius.full,
     super.key,
   });
 

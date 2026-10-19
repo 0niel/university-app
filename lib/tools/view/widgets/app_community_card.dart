@@ -26,7 +26,7 @@ class AppCommunityCard extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: colors.accent.withValues(alpha: .12),
-        borderRadius: .circular(18),
+        borderRadius: .circular(AppRadius.field),
       ),
       child: IconTheme.merge(
         data: IconThemeData(color: colors.accent, size: AppIconSize.md),
@@ -63,7 +63,7 @@ class AppCommunityCard extends StatelessWidget {
         onTap: onTap,
         child: AppGlassSurface(
           tone: featured ? AppGlassTone.accent : AppGlassTone.subtle,
-          borderRadius: featured ? 30 : 26,
+          borderRadius: featured ? AppRadius.featuredCard : AppRadius.hero,
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: featured ? 112 : 94),
             child: Padding(

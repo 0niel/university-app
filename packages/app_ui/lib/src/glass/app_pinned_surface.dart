@@ -1,4 +1,5 @@
 import 'package:app_ui/src/glass/app_glass_surface.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:flutter/widgets.dart';
 
 class AppPinnedSurface extends StatelessWidget {
@@ -21,7 +22,7 @@ class AppPinnedSurface extends StatelessWidget {
             child: elevated
                 ? const AppGlassSurface(
                     role: AppGlassRole.navigation,
-                    borderRadius: 0,
+                    borderRadius: AppRadius.none,
                     child: SizedBox.expand(),
                   )
                 : const SizedBox.expand(),

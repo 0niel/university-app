@@ -1,5 +1,6 @@
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/glass/app_glass_theme.dart';
+import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:flutter/material.dart';
 
 class AppAmbientBackground extends StatelessWidget {
@@ -23,7 +24,7 @@ class AppAmbientBackground extends StatelessWidget {
             ? null
             : RadialGradient(
                 center: const Alignment(.7, -1.05),
-                radius: 1.25,
+                radius: AppGradientRadius.ambient,
                 colors: [
                   Color.alphaBlend(
                     accent.withValues(alpha: colors.isDark ? .13 : .075),
