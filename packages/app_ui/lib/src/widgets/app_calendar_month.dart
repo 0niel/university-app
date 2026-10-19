@@ -17,11 +17,12 @@ class AppCalendarMonth extends StatelessWidget {
     super.key,
     this.selectedDay,
     this.today,
-    this.dotsBuilder,
+    List<Color> Function(DateTime day)? dotsBuilder,
+    List<Color> Function(DateTime day)? dotsForDay,
     this.headerLabelBuilder,
     this.weekdayLabelBuilder,
     this.firstDayOfWeek = DateTime.monday,
-  });
+  }) : dotsBuilder = dotsBuilder ?? dotsForDay;
 
   final DateTime month;
   final ValueChanged<DateTime> onMonthChanged;
@@ -32,6 +33,8 @@ class AppCalendarMonth extends StatelessWidget {
   final String Function(DateTime month)? headerLabelBuilder;
   final String Function(DateTime day)? weekdayLabelBuilder;
   final int firstDayOfWeek;
+
+  List<Color> Function(DateTime day)? get dotsForDay => dotsBuilder;
 
   @override
   Widget build(BuildContext context) {

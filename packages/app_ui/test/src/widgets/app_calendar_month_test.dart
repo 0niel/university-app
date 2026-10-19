@@ -89,4 +89,31 @@ void main() {
       findsNWidgets(2),
     );
   });
+
+  testWidgets('supports day markers from the university provider API', (
+    tester,
+  ) async {
+    final calendar = AppCalendarMonth(
+      month: month,
+      onMonthChanged: (_) {},
+      onDaySelected: (_) {},
+      dotsForDay: (day) => day.day == 10 ? [Colors.red, Colors.blue] : const [],
+    );
+    await tester.pumpWidget(
+      wrapKit(SizedBox(width: 360, child: calendar)),
+    );
+    await tester.pumpAndSettle();
+
+    final cell = find.byKey(
+      const ValueKey('app-calendar-month-day-2026-9-10'),
+    );
+    expect(
+      find.descendant(of: cell, matching: find.byType(AppDot)),
+      findsNWidgets(2),
+    );
+    expect(calendar.dotsForDay!(DateTime(2026, 9, 10)), [
+      Colors.red,
+      Colors.blue,
+    ]);
+  });
 }

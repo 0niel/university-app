@@ -22,7 +22,8 @@ class AppSearchField extends StatelessWidget {
     this.height = AppControlSize.search,
     this.borderRadius = AppRadius.full,
     this.fillColor,
-    this.isOnCanvas = false,
+    bool? isOnCanvas,
+    bool onCanvas = false,
     this.tone = AppSearchFieldTone.filled,
     this.accentIconWhenEmpty = false,
     this.trailing,
@@ -33,7 +34,7 @@ class AppSearchField extends StatelessWidget {
     this.focusNode,
     this.textCapitalization = TextCapitalization.none,
     this.keyboardType,
-  });
+  }) : isOnCanvas = isOnCanvas ?? onCanvas;
 
   final TextEditingController controller;
   final String? hintText;
@@ -55,6 +56,8 @@ class AppSearchField extends StatelessWidget {
   final FocusNode? focusNode;
   final TextCapitalization textCapitalization;
   final TextInputType? keyboardType;
+
+  bool get onCanvas => isOnCanvas;
 
   @override
   Widget build(BuildContext context) {

@@ -77,6 +77,8 @@ dcm:
           - lib/tour/app_tour_controller.dart
           - "**/src/colors/colors.dart"
           - "**/src/ninja/ninja_colors.dart"
+          - "**/src/widgets/app_calendar_month.dart"
+          - "**/src/widgets/forms/app_search_field.dart"
     - prefer-correct-callback-field-name:
         exclude:
           - "**/src/colors/colors.dart"
