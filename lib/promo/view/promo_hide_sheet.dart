@@ -2,8 +2,9 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:promo_repository/promo_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+import 'package:rtu_mirea_app/promo/view/promo_hide_choice.dart';
 
-enum PromoHideChoice { snooze, forever }
+export 'promo_hide_choice.dart';
 
 String promoSnoozeLabel(AppLocalizations l10n, int hours) {
   if (hours >= 24 && hours % 24 == 0) {

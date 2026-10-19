@@ -80,6 +80,49 @@ void main() {
 
   group('LessonReactionsCubit', () {
     test(
+      'missing summaries return null before and after loading other slots',
+      () {
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+
+        expect(
+          cubit.summaryFor(
+            subjectName: 'Матан',
+            lessonDate: lessonDate,
+            lessonBells: bells,
+          ),
+          isNull,
+        );
+
+        cubit.updateSummary(
+          subjectName: 'Матан',
+          lessonDate: lessonDate,
+          lessonBells: bells,
+          response: const LessonReactionResponse(counts: {'brain': 2}),
+        );
+        final before = cubit.state;
+
+        expect(
+          cubit.summaryFor(
+            subjectName: 'Физика',
+            lessonDate: lessonDate,
+            lessonBells: bells,
+          ),
+          isNull,
+        );
+        expect(
+          cubit.summaryFor(
+            subjectName: 'Матан',
+            lessonDate: lessonDate.add(const Duration(days: 1)),
+            lessonBells: bells,
+          ),
+          isNull,
+        );
+        expect(cubit.state, same(before));
+      },
+    );
+
+    test(
       'rebuilding cards shares the summary request including empty counts',
       () async {
         final cubit = buildCubit();

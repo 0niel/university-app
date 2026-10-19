@@ -84,10 +84,10 @@ class GradesSubjectCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Text(
                 average == null ? '—' : formatGrade(average),
-                style: AppText.serif(24).copyWith(
-                  color: averageColor(colors, average),
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
+                style: AppText.sans(24, FontWeight.w700, tabular: true)
+                    .copyWith(
+                      color: averageColor(colors, average),
+                    ),
               ),
             ],
           ),

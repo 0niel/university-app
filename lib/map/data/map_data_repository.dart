@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:rtu_mirea_app/map/data/map_data_cache.dart';
+import 'package:rtu_mirea_app/map/data/map_data_exception.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/data/map_preferences_data_cache.dart'
     if (dart.library.io) 'package:rtu_mirea_app/map/data/map_file_data_cache.dart'
@@ -15,6 +16,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:xml/xml.dart';
 
 export 'package:rtu_mirea_app/map/data/map_data_cache.dart';
+
+export 'map_data_exception.dart';
 
 typedef MapDataRpc =
     Future<Object?> Function(
@@ -63,16 +66,6 @@ bool _largeMapDocument(Map<String, Object?> json) {
       (rooms is List && rooms.length > 128);
 }
 
-class MapDataException implements Exception {
-  const MapDataException(this.message, {this.code});
-
-  final String message;
-  final String? code;
-
-  @override
-  String toString() => message;
-}
-
 class MapDataRepository {
   MapDataRepository({
     required this.organizationId,
@@ -85,15 +78,15 @@ class MapDataRepository {
     this.bundledCatalogAsset,
   }) : assert(supabase != null || rpc != null, 'A map API client is required'),
        _supabase = supabase,
-       _rpc =
+       _onRpc =
            rpc ??
            ((name, parameters) =>
                supabase!.rpc<Object?>(name, params: parameters)),
        _cache = cache ?? platform_cache.createMapDataCache(),
        _http = httpClient ?? http.Client(),
        _ownsHttp = httpClient == null,
-       _assetLoader = assetLoader ?? rootBundle.loadString,
-       _clock = clock ?? DateTime.now;
+       _onLoadAsset = assetLoader ?? rootBundle.loadString,
+       _onNow = clock ?? DateTime.now;
 
   static const int maximumSvgBytes = 8 * 1024 * 1024;
   static const pulseCatalogAsset =
@@ -106,12 +99,12 @@ class MapDataRepository {
   final String organizationId;
   final String? bundledCatalogAsset;
   final SupabaseClient? _supabase;
-  final MapDataRpc _rpc;
+  final MapDataRpc _onRpc;
   final MapDataCache _cache;
   final http.Client _http;
   final bool _ownsHttp;
-  final Future<String> Function(String) _assetLoader;
-  final DateTime Function() _clock;
+  final Future<String> Function(String) _onLoadAsset;
+  final DateTime Function() _onNow;
   final _cacheStoredAt = <String, DateTime>{};
   final _svg = <String, String>{};
   final _inlineSvg = <String, String>{};
@@ -171,7 +164,7 @@ class MapDataRepository {
   bool _isCacheFresh(String key) {
     final saved = _cacheStoredAt[key];
     if (saved == null) return false;
-    final age = _clock().difference(saved);
+    final age = _onNow().difference(saved);
     return !age.isNegative && age <= _cacheFreshness;
   }
 
@@ -277,7 +270,6 @@ class MapDataRepository {
   bool isSvgOffline(String path) => _offlineSvg.contains(path);
 
   Future<MapCatalogData> loadCatalog() async {
-    const warning = 'Нет связи с каталогом. Показана сохранённая карта.';
     final key = '$organizationId:catalog';
     try {
       final json = _object(
@@ -302,6 +294,7 @@ class MapDataRepository {
       final cached = await _read(key);
       final bundled = await _tryBundledCatalog();
       if (cached != null) {
+        const warning = 'Нет связи с каталогом. Показана сохранённая карта.';
         final cachedEntries = _catalogEntries(cached);
         final bundledEntries = bundled?.entries ?? const <MapCatalogEntry>[];
         final usesCache = cachedEntries.isNotEmpty;
@@ -430,8 +423,8 @@ class MapDataRepository {
                 ? _bundledCatalog?.warning
                 : 'Офлайн-копия. Актуальность изменений не проверена.',
           );
-        } on Exception {
-          continue;
+        } on Exception catch (error) {
+          debugPrint('Map cache update failed: $error');
         }
       }
       rethrow;
@@ -467,7 +460,8 @@ class MapDataRepository {
     final revision = _number(document['revision'])?.toInt() ?? 0;
     final floors = <Map<String, Object?>>[];
     var changed = false;
-    for (final floor in mapJsonRows(document['floors'])) {
+    final floorDocuments = mapJsonRows(document['floors']);
+    for (final floor in floorDocuments) {
       final inline = _string(floor['svg']);
       final url = _string(floor['image_url']);
       if ((inline != null && inline.isNotEmpty) || url == null || url.isEmpty) {
@@ -638,9 +632,10 @@ class MapDataRepository {
     if (_bundledCatalog != null) return _bundledCatalog;
     final asset = bundledCatalogAsset;
     if (asset == null) return null;
-    final json = await _decodeMapDocument(await _assetLoader(asset));
+    final json = await _decodeMapDocument(await _onLoadAsset(asset));
     final entries = _catalogEntries(json);
-    for (final entry in mapJsonRows(json['campuses'])) {
+    final campusDocuments = mapJsonRows(json['campuses']);
+    for (final entry in campusDocuments) {
       final id = _string(entry['id']);
       if (id == null || id.isEmpty) continue;
       _bundledCampusMetadata[id] = entry;
@@ -664,7 +659,7 @@ class MapDataRepository {
       await _loadBundledCatalog();
       final asset = _bundledCampusAssets[campusId];
       if (asset == null) return null;
-      final json = await _decodeMapDocument(await _assetLoader(asset));
+      final json = await _decodeMapDocument(await _onLoadAsset(asset));
       if (_string(json['id']) != campusId) return null;
       return json;
     } on Exception {
@@ -675,7 +670,7 @@ class MapDataRepository {
   Future<String> loadSvg(String path, {CampusMapData? campus}) async {
     if (campus != null) {
       final floor = campus.floors
-          .where((floor) => floor.floor.svgPath == path)
+          .where((candidate) => candidate.floor.svgPath == path)
           .firstOrNull;
       if (floor == null) {
         throw const FormatException('Floor plan does not belong to the campus');
@@ -701,7 +696,9 @@ class MapDataRepository {
         final content = await _loadSvg(path);
         _svg[path] = content;
         while (_svg.length > 12) {
-          _svg.remove(_svg.keys.first);
+          final oldest = _svg.keys.firstOrNull;
+          if (oldest == null) break;
+          _svg.remove(oldest);
         }
         return content;
       } finally {
@@ -712,7 +709,7 @@ class MapDataRepository {
 
   Future<String> _loadSvg(String path) async {
     final uri = Uri.tryParse(_remoteSvgUrls[path] ?? path);
-    if (uri == null || !uri.hasScheme) return _assetLoader(path);
+    if (uri == null || !uri.hasScheme) return _onLoadAsset(path);
     if (uri.scheme != 'https' || uri.host.isEmpty || uri.userInfo.isNotEmpty) {
       throw const FormatException('Floor plan requires a valid HTTPS URL');
     }
@@ -764,28 +761,37 @@ class MapDataRepository {
     final viewBox = document.rootElement.getAttribute('viewBox');
     if (viewBox == null) {
       throw const FormatException('Floor plan requires an explicit viewBox');
-    } else {
-      final bounds = viewBox
-          .trim()
-          .split(RegExp(r'[\s,]+'))
-          .map(double.tryParse)
-          .toList();
-      if (bounds.length != 4 ||
-          bounds.any((value) => value == null || !value.isFinite) ||
-          bounds[0] != 0 ||
-          bounds[1] != 0 ||
-          bounds[2]! <= 0 ||
-          bounds[3]! <= 0) {
-        throw const FormatException(
-          'Floor-plan coordinates require a finite zero-origin viewBox',
-        );
-      }
-      if ((width != null && (bounds[2]! - width).abs() > 0.01) ||
-          (height != null && (bounds[3]! - height).abs() > 0.01)) {
+    }
+    final bounds = viewBox
+        .trim()
+        .split(RegExp(r'[\s,]+'))
+        .map(double.tryParse)
+        .toList();
+    if (bounds
+        case [
+          final double x,
+          final double y,
+          final double planWidth,
+          final double planHeight,
+        ]
+        when x.isFinite &&
+            y.isFinite &&
+            planWidth.isFinite &&
+            planHeight.isFinite &&
+            x == 0 &&
+            y == 0 &&
+            planWidth > 0 &&
+            planHeight > 0) {
+      if ((width != null && (planWidth - width).abs() > 0.01) ||
+          (height != null && (planHeight - height).abs() > 0.01)) {
         throw const FormatException(
           'Floor-plan dimensions do not match campus metadata',
         );
       }
+    } else {
+      throw const FormatException(
+        'Floor-plan coordinates require a finite zero-origin viewBox',
+      );
     }
     for (final element in document.descendants.whereType<XmlElement>()) {
       if (element.name.local == 'style' && _externalCss(element.innerText)) {
@@ -832,7 +838,7 @@ class MapDataRepository {
       await _call('get_map_room', {
         'p_campus_id': campusId,
         'p_room_id': roomId,
-        if (date != null) 'p_date': date.toIso8601String().substring(0, 10),
+        'p_date': ?date?.toIso8601String().substring(0, 10),
       }),
     ),
   );
@@ -942,15 +948,18 @@ class MapDataRepository {
 
   Future<Object?> _call(String name, Map<String, Object?> parameters) async {
     try {
-      return await _rpc(name, parameters).timeout(_requestTimeout);
-    } on PostgrestException catch (error) {
-      throw MapDataException(error.message, code: error.code);
+      return await _onRpc(name, parameters).timeout(_requestTimeout);
+    } on PostgrestException catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        MapDataException(error.message, code: error.code),
+        stackTrace,
+      );
     }
   }
 
   static Map<String, Object?> _object(Object? value) {
     if (value is! Map) throw const FormatException('Invalid map API response');
-    return value.cast<String, Object?>();
+    return value.cast();
   }
 
   static List<MapCatalogEntry> _catalogEntries(Map<String, Object?> json) =>
@@ -994,7 +1003,8 @@ class MapDataRepository {
     final floors = <MapFloorData>[];
     final newInline = <String, String>{};
     final newRemote = <String, String>{};
-    for (final floorJson in mapJsonRows(json['floors'])) {
+    final floorDocuments = mapJsonRows(json['floors']);
+    for (final floorJson in floorDocuments) {
       final floorId =
           _string(floorJson['id']) ??
           (throw const FormatException('Missing floor id'));
@@ -1098,7 +1108,7 @@ class MapDataRepository {
   }
 
   Future<void> _store(String key, Map<String, Object?> json) async {
-    final saved = _clock();
+    final saved = _onNow();
     _cacheStoredAt[key] = saved;
     try {
       final document = {

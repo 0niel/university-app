@@ -4,6 +4,7 @@ import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/services/svg_room_parser.dart';
 
 class _NoCache implements MapDataCache {
+  const _NoCache();
   @override
   Future<String?> read(String key) async => null;
   @override
@@ -18,7 +19,7 @@ void main() {
     () async {
       final repository = MapDataRepository(
         organizationId: 'mirea',
-        cache: _NoCache(),
+        cache: const _NoCache(),
         bundledCatalogAsset: MapDataRepository.pulseCatalogAsset,
         rpc: (_, _) async => throw const MapDataException('API not deployed'),
       );

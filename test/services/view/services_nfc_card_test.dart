@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_ui/app_ui.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -49,6 +50,36 @@ void main() {
     ],
     child: const Center(child: ServicesNfcCard()),
   );
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets('pass card stays compact and readable at $scale', (
+      tester,
+    ) async {
+      await tester.pumpApp(
+        subject(),
+        size: const Size(320, 1000),
+        textScaler: TextScaler.linear(scale),
+      );
+      final card = find.byKey(const ValueKey('services-nfc-card'));
+      if (scale == 1) {
+        expect(tester.getSize(card).height, lessThanOrEqualTo(100));
+      } else {
+        final labels = tester.widgetList<Text>(
+          find.descendant(of: card, matching: find.byType(Text)),
+        );
+        expect(labels, hasLength(2));
+        for (final label in labels) {
+          expect(label.maxLines, isNull);
+          expect(label.overflow, TextOverflow.visible);
+        }
+      }
+      expect(
+        tester.getSize(card).height,
+        greaterThanOrEqualTo(AppControlSize.touchTarget),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('denied biometrics never claim turnstile priority', (
     tester,

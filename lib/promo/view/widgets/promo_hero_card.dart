@@ -70,9 +70,10 @@ class PromoHeroCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           AppBalancedText(
             title,
-            style: AppText.serif(
-              30,
-              height: 1.08,
+            style: AppText.sans(
+              28,
+              FontWeight.w700,
+              height: 1.16,
               letterSpacingEm: -.02,
             ).copyWith(color: white),
           ),

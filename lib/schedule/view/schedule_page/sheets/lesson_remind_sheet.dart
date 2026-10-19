@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,40 +21,40 @@ Future<void> showLessonRemindSheet(
     context,
     title: context.l10n.reminderSheetTitle,
     subtitle: '${lesson.subject} · ${timeRangeText(lesson)}',
-    child: _Reminder(
+    child: _LessonRemindSheet(
       lesson: lesson,
       day: day,
-      repository: context.read<ScheduleRepository>(),
-      reminders: context.read<LessonRemindersCubit>(),
-      notifications: context.read<LocalNotificationsRepository>(),
+      repository: context.read(),
+      reminders: context.read(),
+      notifications: context.read(),
       timePicker: timePicker,
     ),
   );
 }
 
-class _Reminder extends StatefulWidget {
-  const _Reminder({
+class _LessonRemindSheet extends StatefulWidget {
+  const _LessonRemindSheet({
     required this.lesson,
     required this.day,
     required this.repository,
     required this.reminders,
     required this.notifications,
-    this.timePicker,
-  });
+    Future<PickedTime?> Function(PickedTime initial)? timePicker,
+  }) : onPickTime = timePicker;
   final LessonSchedulePart lesson;
   final DateTime day;
   final ScheduleRepository repository;
   final LessonRemindersCubit reminders;
   final LocalNotificationsRepository notifications;
-  final Future<PickedTime?> Function(PickedTime initial)? timePicker;
+  final Future<PickedTime?> Function(PickedTime initial)? onPickTime;
 
   @override
-  State<_Reminder> createState() => _ReminderState();
+  State<_LessonRemindSheet> createState() => _LessonRemindSheetState();
 }
 
 enum _ReminderTime { lead, morning, custom }
 
-class _ReminderState extends State<_Reminder> {
+class _LessonRemindSheetState extends State<_LessonRemindSheet> {
   late int _minutes =
       widget.reminders.minutesFor(widget.lesson, widget.day) ?? 15;
   bool _saving = false;
@@ -87,7 +89,7 @@ class _ReminderState extends State<_Reminder> {
   Future<void> _pickCustomTime() async {
     final initial = _customTime ?? (hour: _start.hour, minute: _start.minute);
     final picked =
-        await (widget.timePicker?.call(initial) ??
+        await (widget.onPickTime?.call(initial) ??
             showAppTimePicker(context, initial: initial));
     if (picked == null || !mounted) return;
     setState(() {
@@ -165,7 +167,11 @@ class _ReminderState extends State<_Reminder> {
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Row(
               children: [
-                for (var column = 0; column < 2; column++)
+                for (final (column, minutes)
+                    in LessonRemindersCubit.options
+                        .skip(row * 2)
+                        .take(2)
+                        .indexed)
                   Expanded(
                     child: Padding(
                       padding: EdgeInsets.only(
@@ -174,25 +180,18 @@ class _ReminderState extends State<_Reminder> {
                             : AppSpacing.sm,
                       ),
                       child: AppButton(
-                        label:
-                            LessonRemindersCubit.options[row * 2 + column] == 60
+                        label: minutes == 60
                             ? l10n.scheduleRemindHour
                             : l10n.scheduleRemindIn(
-                                LessonRemindersCubit.options[row * 2 + column],
+                                minutes,
                               ),
                         variant:
-                            _time == _ReminderTime.lead &&
-                                _minutes ==
-                                    LessonRemindersCubit.options[row * 2 +
-                                        column]
+                            _time == _ReminderTime.lead && _minutes == minutes
                             ? AppButtonVariant.primary
                             : AppButtonVariant.secondary,
                         borderRadius: AppRadius.button,
                         backgroundColor:
-                            _time == _ReminderTime.lead &&
-                                _minutes ==
-                                    LessonRemindersCubit.options[row * 2 +
-                                        column]
+                            _time == _ReminderTime.lead && _minutes == minutes
                             ? context.colors.accent
                             : context.colors.surface,
                         size: AppButtonSize.large,
@@ -200,8 +199,7 @@ class _ReminderState extends State<_Reminder> {
                             ? null
                             : () => setState(() {
                                 _time = _ReminderTime.lead;
-                                _minutes = LessonRemindersCubit
-                                    .options[row * 2 + column];
+                                _minutes = minutes;
                                 _error = null;
                               }),
                       ),
@@ -246,7 +244,7 @@ class _ReminderState extends State<_Reminder> {
                           formatPickedTime(_customTime!),
                         ),
                   selected: _time == _ReminderTime.custom,
-                  onTap: _saving ? null : _pickCustomTime,
+                  onTap: _saving ? null : () => unawaited(_pickCustomTime()),
                 ),
                 AppListRow(
                   title: l10n.reminderRoute,
@@ -280,7 +278,7 @@ class _ReminderState extends State<_Reminder> {
           expanded: true,
           loading: _saving,
           size: AppButtonSize.large,
-          onPressed: _saving ? null : _save,
+          onPressed: _saving ? null : () => unawaited(_save()),
         ),
       ],
     );

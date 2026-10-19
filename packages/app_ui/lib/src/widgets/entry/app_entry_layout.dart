@@ -2,10 +2,11 @@ import 'dart:math' as math;
 
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/entry/app_entry_presentation.dart';
 import 'package:app_ui/src/widgets/entry/app_entry_stage_layout.dart';
 import 'package:flutter/widgets.dart';
 
-enum AppEntryPresentation { scroll, staged }
+export 'app_entry_presentation.dart';
 
 class AppEntryLayout extends StatelessWidget {
   const AppEntryLayout({
@@ -37,7 +38,7 @@ class AppEntryLayout extends StatelessWidget {
 
   static const horizontalPadding = 24.0;
   static const topPadding = 16.0;
-  static const bottomPadding = 24.0;
+  static const double bottomPadding = horizontalPadding;
   static const maxWidth = 480.0;
 
   @override
@@ -111,7 +112,7 @@ class AppEntryLayout extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (header != null) header!,
+                    ?header,
                     if (visual != null) ...[
                       const SizedBox(height: 16),
                       visual!,
@@ -176,11 +177,10 @@ class AppEntryTitle extends StatelessWidget {
           TextSpan(text: text.substring(0, index)),
           TextSpan(
             text: word,
-            style: AppText.serif(
-              style.fontSize!,
-              height: style.height!,
-              italic: true,
-            ).copyWith(color: context.colors.ink),
+            style: style.copyWith(
+              color: context.colors.accent,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           TextSpan(text: text.substring(index + word.length)),
         ],

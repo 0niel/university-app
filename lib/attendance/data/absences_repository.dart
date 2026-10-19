@@ -27,8 +27,7 @@ class LocalAbsencesRepository implements AbsencesRepository {
     final json = jsonDecode(raw);
     if (json is! List) throw const FormatException('Absences are invalid');
     return [
-      for (final item in json)
-        Absence.fromJson(Map<String, dynamic>.from(item as Map)),
+      for (final item in json) Absence.fromJson(Map.from(item as Map)),
     ];
   }
 

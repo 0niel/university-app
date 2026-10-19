@@ -32,6 +32,7 @@ class _LostFoundViewState extends State<LostFoundView> {
       context,
       title: context.l10n.lostFoundReportTitle,
       subtitle: context.l10n.lostFoundReportSub,
+      contentPadding: EdgeInsets.zero,
       child: BlocProvider.value(
         value: cubit,
         child: const LostFoundReportSheet(),
@@ -43,6 +44,7 @@ class _LostFoundViewState extends State<LostFoundView> {
     final cubit = context.read<LostFoundCubit>();
     return showAppSheet<void>(
       context,
+      contentPadding: EdgeInsets.zero,
       child: BlocProvider.value(
         value: cubit,
         child: LostFoundItemSheet(
@@ -128,7 +130,7 @@ class _LostFoundViewState extends State<LostFoundView> {
                       children: [
                         AppSegmentedControl<LostFoundTab>(
                           value: _tab,
-                          onCanvas: true,
+                          isOnCanvas: true,
                           onChanged: (value) => setState(() => _tab = value),
                           options: [
                             AppSegmentedOption(

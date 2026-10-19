@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(body: Center(child: child)),
+  );
 
   group('AppPressable', () {
     testWidgets('tap fires onTap', (tester) async {
@@ -24,8 +24,9 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('owned semantics node exposes label, flags, and tap action',
-        (tester) async {
+    testWidgets('owned semantics node exposes label, flags, and tap action', (
+      tester,
+    ) async {
       final handle = tester.ensureSemantics();
       var tapped = false;
       await tester.pumpWidget(
@@ -60,8 +61,9 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('disabled pressable with semantics reads as disabled button',
-        (tester) async {
+    testWidgets('disabled pressable with semantics reads as disabled button', (
+      tester,
+    ) async {
       final handle = tester.ensureSemantics();
       await tester.pumpWidget(
         wrap(
@@ -105,8 +107,9 @@ void main() {
       expect(tapped, isFalse);
     });
 
-    testWidgets('null onTap and onLongPress renders inert (no gesture)',
-        (tester) async {
+    testWidgets('null onTap and onLongPress renders inert (no gesture)', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrap(const AppPressable(child: SizedBox(width: 40, height: 40))),
       );
@@ -114,8 +117,9 @@ void main() {
       expect(find.byType(GestureDetector), findsNothing);
     });
 
-    testWidgets('scales down while pressed and springs back on release',
-        (tester) async {
+    testWidgets('scales down while pressed and springs back on release', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrap(
           AppPressable(
@@ -127,8 +131,8 @@ void main() {
       );
 
       AnimatedScale scale() => tester.widget<AnimatedScale>(
-            find.byType(AnimatedScale),
-          );
+        find.byType(AnimatedScale),
+      );
 
       expect(scale().scale, 1);
 
@@ -143,8 +147,7 @@ void main() {
       expect(scale().scale, 1);
     });
 
-    testWidgets(
-        'fires haptics-guarded onTap without throwing when haptics '
+    testWidgets('fires haptics-guarded onTap without throwing when haptics '
         'is enabled', (tester) async {
       var tapped = false;
       await tester.pumpWidget(

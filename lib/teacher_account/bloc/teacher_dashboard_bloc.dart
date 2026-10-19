@@ -26,7 +26,7 @@ class TeacherDashboardBloc
     required Stream<AccountPersonaState> accountChanges,
     DateTime Function()? clock,
   }) : _repository = repository,
-       _clock = clock ?? DateTime.now,
+       _onClock = clock ?? DateTime.now,
        super(_initialState(repository, account, (clock ?? DateTime.now)())) {
     on<TeacherDashboardAccountChanged>(_onAccountChanged);
     on<TeacherDashboardScheduleRequested>(
@@ -46,7 +46,7 @@ class TeacherDashboardBloc
       (event, emit) => _selectDay(event.day, emit),
     );
     on<TeacherDashboardTodayRequested>(
-      (event, emit) => _selectDay(_clock(), emit),
+      (event, emit) => _selectDay(_onClock(), emit),
     );
     on<TeacherDashboardClockTicked>(
       (event, emit) => emit(state.copyWith(now: event.now)),
@@ -54,7 +54,7 @@ class TeacherDashboardBloc
     on<TeacherDashboardActivityChanged>((event, emit) {
       _timer?.cancel();
       if (event.active) {
-        emit(state.copyWith(now: _clock()));
+        emit(state.copyWith(now: _onClock()));
         _startClock();
       }
     });
@@ -67,8 +67,8 @@ class TeacherDashboardBloc
         state.copyWith(navigation: const TeacherScheduleNavigation.idle()),
       ),
     );
-    _accountSubscription = accountChanges.listen((account) {
-      if (!isClosed) add(TeacherDashboardEvent.accountChanged(account));
+    _accountSubscription = accountChanges.listen((updatedAccount) {
+      if (!isClosed) add(TeacherDashboardEvent.accountChanged(updatedAccount));
     });
     _startClock();
     final query = state.query;
@@ -80,7 +80,7 @@ class TeacherDashboardBloc
 
   final TeacherDashboardRepository _repository;
   final TeacherScheduleActivator _activator;
-  final DateTime Function() _clock;
+  final DateTime Function() _onClock;
   late final StreamSubscription<AccountPersonaState> _accountSubscription;
   Timer? _timer;
 
@@ -118,7 +118,7 @@ class TeacherDashboardBloc
   void _startClock() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (!isClosed) add(TeacherDashboardEvent.clockTicked(_clock()));
+      if (!isClosed) add(TeacherDashboardEvent.clockTicked(_onClock()));
     });
   }
 
@@ -243,13 +243,12 @@ class TeacherDashboardBloc
   ) async {
     try {
       final snapshot = await _repository.loadSchedule(query);
-      if (_accepts(query, emit)) {
-        emit(
-          _withWorkload(
-            state.copyWith(schedule: TeacherResource.ready(snapshot)),
-          ),
-        );
-      }
+      if (!_accepts(query, emit)) return;
+      emit(
+        _withWorkload(
+          state.copyWith(schedule: TeacherResource.ready(snapshot)),
+        ),
+      );
     } on Exception {
       if (_accepts(query, emit)) {
         emit(
@@ -267,13 +266,10 @@ class TeacherDashboardBloc
   ) async {
     try {
       final changes = await _repository.loadChanges(query);
-      if (_accepts(query, emit)) {
-        emit(
-          _withWorkload(
-            state.copyWith(changes: TeacherResource.ready(changes)),
-          ),
-        );
-      }
+      if (!_accepts(query, emit)) return;
+      emit(
+        _withWorkload(state.copyWith(changes: TeacherResource.ready(changes))),
+      );
     } on Exception {
       if (_accepts(query, emit)) {
         emit(
@@ -297,9 +293,8 @@ class TeacherDashboardBloc
     );
     try {
       final profile = await _repository.loadRating(event.teacher);
-      if (!emit.isDone && state.teacher == event.teacher) {
-        emit(state.copyWith(rating: TeacherResource.ready(profile)));
-      }
+      if (emit.isDone || state.teacher != event.teacher) return;
+      emit(state.copyWith(rating: TeacherResource.ready(profile)));
     } on Exception {
       if (!emit.isDone && state.teacher == event.teacher) {
         emit(

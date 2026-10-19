@@ -23,6 +23,16 @@ Future<void> bootstrap(AppBuilder builder) async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
+      try {
+        await AppGlass.warmUp().timeout(const Duration(seconds: 3));
+      } on Object catch (error, stackTrace) {
+        Logger().w(
+          'Glass shader preload failed',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
       Widget wrapWithSentry(Widget child) {
         return SentryScreenshotWidget(
           child: DefaultAssetBundle(bundle: SentryAssetBundle(), child: child),

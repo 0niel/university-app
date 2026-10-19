@@ -3,112 +3,16 @@ import 'dart:math' as math;
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_control_surface.dart';
+import 'package:app_ui/src/widgets/app_header_action.dart';
+import 'package:app_ui/src/widgets/app_header_text_action.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
 
-class AppHeaderAction {
-  const AppHeaderAction({
-    this.icon,
-    this.child,
-    this.onTap,
-    this.badge = false,
-    this.badgeColor,
-    this.semanticsLabel,
-  });
-
-  final AppLineIcon? icon;
-  final Widget? child;
-  final VoidCallback? onTap;
-  final bool badge;
-  final Color? badgeColor;
-  final String? semanticsLabel;
-}
-
-class AppHeaderTextAction {
-  const AppHeaderTextAction({
-    required this.label,
-    required this.onTap,
-    this.key,
-  });
-
-  final String label;
-  final VoidCallback? onTap;
-  final Key? key;
-}
-
-class AppHeaderCircleButton extends StatelessWidget {
-  const AppHeaderCircleButton({
-    required this.action,
-    super.key,
-    this.size = AppControlSize.iconButtonCompact,
-    this.background,
-    this.foreground,
-    this.iconSize = AppIconSize.md,
-    this.visualAlignment = Alignment.center,
-  });
-
-  final AppHeaderAction action;
-  final double size;
-  final Color? background;
-  final Color? foreground;
-  final double iconSize;
-  final AlignmentGeometry visualAlignment;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final fg = foreground ?? colors.ink;
-
-    return AppPressable(
-      onTap: action.onTap,
-      enabled: action.onTap != null,
-      semanticsLabel: action.semanticsLabel,
-      semanticsButton: true,
-      child: SizedBox.square(
-        dimension: math.max(size, AppControlSize.touchTarget),
-        child: Align(
-          alignment: visualAlignment,
-          child: Container(
-            width: size,
-            height: size,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: background ?? colors.surface,
-              shape: BoxShape.circle,
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              fit: StackFit.expand,
-              children: [
-                Center(
-                  child: action.child ??
-                      AppLineIconWidget(
-                        action.icon ?? AppLineIcon.more,
-                        size: iconSize,
-                        color: fg,
-                      ),
-                ),
-                if (action.badge)
-                  Positioned(
-                    top: size * .18,
-                    right: size * .18,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: action.badgeColor ?? colors.accent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const SizedBox.square(dimension: 7),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+export 'app_control_surface_tone.dart';
+export 'app_header_action.dart';
+export 'app_header_text_action.dart';
 
 class AppScreenHeader extends StatelessWidget {
   const AppScreenHeader({
@@ -122,10 +26,11 @@ class AppScreenHeader extends StatelessWidget {
     this.padding,
     this.applyTopInset = true,
     this.titleStyle,
+    this.controlTone = AppControlSurfaceTone.neutral,
   }) : assert(
-          trailing == null || textAction == null,
-          'Use either trailing or textAction.',
-        );
+         trailing == null || textAction == null,
+         'Use either trailing or textAction.',
+       );
 
   final String title;
   final String? overline;
@@ -136,6 +41,7 @@ class AppScreenHeader extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final bool applyTopInset;
   final TextStyle? titleStyle;
+  final AppControlSurfaceTone controlTone;
 
   @override
   Widget build(BuildContext context) {
@@ -149,14 +55,15 @@ class AppScreenHeader extends StatelessWidget {
 
     final overline = this.overline;
     final subtitle = this.subtitle;
-    final insets = (padding ??
-            EdgeInsets.fromLTRB(
-              AppSpacing.screen,
-              top,
-              AppSpacing.screen,
-              AppSpacing.zero,
-            ))
-        .resolve(Directionality.of(context));
+    final insets =
+        (padding ??
+                EdgeInsets.fromLTRB(
+                  AppSpacing.screen,
+                  top,
+                  AppSpacing.screen,
+                  AppSpacing.zero,
+                ))
+            .resolve(Directionality.of(context));
 
     final textAction = this.textAction;
     Widget buildHeader({double labelWidth = 0, double labelHeight = 0}) {
@@ -183,8 +90,9 @@ class AppScreenHeader extends StatelessWidget {
                         if (overline != null) ...[
                           Text(
                             overline.toUpperCase(),
-                            style:
-                                AppText.overline.copyWith(color: colors.muted),
+                            style: AppText.overline.copyWith(
+                              color: colors.muted,
+                            ),
                           ),
                           const SizedBox(height: AppSpacing.xsm),
                         ],
@@ -192,15 +100,18 @@ class AppScreenHeader extends StatelessWidget {
                           title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: (titleStyle ?? AppText.display)
-                              .copyWith(color: colors.ink),
+                          style: (titleStyle ?? AppText.display).copyWith(
+                            color: colors.ink,
+                          ),
                         ),
                         if (subtitle != null) ...[
                           const SizedBox(height: AppSpacing.xsm),
                           Text(
                             subtitle,
-                            style: AppText.sans(13, FontWeight.w500)
-                                .copyWith(color: colors.muted),
+                            style: AppText.sans(
+                              13,
+                              FontWeight.w500,
+                            ).copyWith(color: colors.muted),
                           ),
                         ],
                       ],
@@ -227,7 +138,8 @@ class AppScreenHeader extends StatelessWidget {
           if (textAction != null)
             PositionedDirectional(
               bottom: insets.bottom,
-              end: (Directionality.of(context) == TextDirection.ltr
+              end:
+                  (Directionality.of(context) == TextDirection.ltr
                       ? insets.right
                       : insets.left) +
                   actions.length *
@@ -244,8 +156,9 @@ class AppScreenHeader extends StatelessWidget {
                 child: Align(
                   alignment: AlignmentDirectional.bottomEnd,
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.sm,
+                    ),
                     child: Text(
                       textAction.label,
                       maxLines: 2,
@@ -263,6 +176,7 @@ class AppScreenHeader extends StatelessWidget {
                 action: action,
                 index: actions.length - index - 1,
                 padding: insets,
+                controlTone: controlTone,
               ),
             ),
         ],
@@ -272,7 +186,7 @@ class AppScreenHeader extends StatelessWidget {
     if (textAction == null) return buildHeader();
     return LayoutBuilder(
       builder: (context, constraints) {
-        final availableWidth = math.max<double>(
+        final availableWidth = math.max(
           0,
           constraints.maxWidth -
               insets.horizontal -
@@ -287,7 +201,7 @@ class AppScreenHeader extends StatelessWidget {
           maxLines: 2,
           ellipsis: '…',
         )..layout(maxWidth: availableWidth * .45);
-        final labelWidth = math.max<double>(
+        final labelWidth = math.max(
           AppControlSize.touchTarget,
           textPainter.width,
         );
@@ -299,16 +213,94 @@ class AppScreenHeader extends StatelessWidget {
   }
 }
 
+class AppHeaderCircleButton extends StatelessWidget {
+  const AppHeaderCircleButton({
+    required this.action,
+    super.key,
+    this.size = AppControlSize.iconButtonCompact,
+    this.background,
+    this.foreground,
+    this.iconSize = AppIconSize.md,
+    this.visualAlignment = Alignment.center,
+    this.controlTone = AppControlSurfaceTone.neutral,
+  });
+
+  final AppHeaderAction action;
+  final double size;
+  final Color? background;
+  final Color? foreground;
+  final double iconSize;
+  final AlignmentGeometry visualAlignment;
+  final AppControlSurfaceTone controlTone;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final fg = foreground ?? colors.ink;
+
+    return AppPressable(
+      onTap: action.onTap,
+      enabled: action.onTap != null,
+      semanticsLabel: action.semanticsLabel,
+      semanticsButton: true,
+      child: SizedBox.square(
+        dimension: math.max(size, AppControlSize.touchTarget),
+        child: Align(
+          alignment: visualAlignment,
+          child: AppControlSurface(
+            color: background ?? colors.surface,
+            borderRadius: AppRadius.full,
+            tone: controlTone,
+            enabled: action.onTap != null,
+            child: SizedBox.square(
+              dimension: size,
+              child: Stack(
+                clipBehavior: Clip.none,
+                fit: StackFit.expand,
+                children: [
+                  Center(
+                    child:
+                        action.child ??
+                        AppLineIconWidget(
+                          action.icon ?? AppLineIcon.more,
+                          size: iconSize,
+                          color: fg,
+                        ),
+                  ),
+                  if (action.badge)
+                    Positioned(
+                      top: size * .18,
+                      right: size * .18,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: action.badgeColor ?? colors.accent,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const SizedBox.square(dimension: 7),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _HeaderActionOverlay extends StatelessWidget {
   const _HeaderActionOverlay({
     required this.action,
     required this.index,
     required this.padding,
+    required this.controlTone,
   });
 
   final AppHeaderAction action;
   final int index;
   final EdgeInsets padding;
+  final AppControlSurfaceTone controlTone;
 
   @override
   Widget build(BuildContext context) {
@@ -321,12 +313,12 @@ class _HeaderActionOverlay extends StatelessWidget {
         final rowHeight = constraints.maxHeight - padding.vertical;
         final visualTop = padding.top + (rowHeight - visualSize) / 2;
         final targetTop = (visualTop - spare / 2)
-            .clamp(0.0, math.max(0.0, constraints.maxHeight - targetSize))
+            .clamp(0.0, math.max(0, constraints.maxHeight - targetSize))
             .toDouble();
         final visualEnd =
             (direction == TextDirection.ltr ? padding.right : padding.left) +
-                index * (visualSize + AppSpacing.sm);
-        final targetEnd = math.max<double>(0, visualEnd - spare / 2);
+            index * (visualSize + AppSpacing.sm);
+        final double targetEnd = math.max(0, visualEnd - spare / 2);
         return Stack(
           children: [
             PositionedDirectional(
@@ -336,6 +328,7 @@ class _HeaderActionOverlay extends StatelessWidget {
               height: targetSize,
               child: AppHeaderCircleButton(
                 action: action,
+                controlTone: controlTone,
                 visualAlignment: AlignmentDirectional(
                   1 - 2 * (visualEnd - targetEnd) / spare,
                   2 * (visualTop - targetTop) / spare - 1,

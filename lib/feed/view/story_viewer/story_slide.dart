@@ -70,7 +70,11 @@ class StorySlide extends StatelessWidget {
                 fit: BoxFit.contain,
                 imageBuilder: (context, provider) {
                   onMediaReady?.call();
-                  return Image(image: provider, fit: BoxFit.contain);
+                  return Image(
+                    image: provider,
+                    fit: BoxFit.contain,
+                    excludeFromSemantics: true,
+                  );
                 },
                 placeholder: (_, _) => const SizedBox.shrink(),
                 errorWidget: (_, _, _) {

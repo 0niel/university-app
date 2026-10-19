@@ -25,41 +25,41 @@ class AppEntryStageLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (header != null)
-              Padding(
-                key: const ValueKey('entry-stage-header'),
-                padding: EdgeInsets.fromLTRB(inset, top, inset, 12),
-                child: header,
-              ),
-            Expanded(
-              child: ClipRect(
-                child: AppEntryBodyTransition(
-                  identity: contentIdentity,
-                  child: SingleChildScrollView(
-                    key: ValueKey(('entry-stage-body', contentIdentity)),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: EdgeInsets.fromLTRB(inset, 12, inset, 24),
-                    child: child,
-                  ),
-                ),
+    builder: (context, constraints) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (header != null)
+          Padding(
+            key: const ValueKey('entry-stage-header'),
+            padding: EdgeInsets.fromLTRB(inset, top, inset, 12),
+            child: header,
+          ),
+        Expanded(
+          child: ClipRect(
+            child: AppEntryBodyTransition(
+              identity: contentIdentity,
+              child: SingleChildScrollView(
+                key: ValueKey(('entry-stage-body', contentIdentity)),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: EdgeInsets.fromLTRB(inset, 12, inset, 24),
+                child: child,
               ),
             ),
-            if (actions != null)
-              ConstrainedBox(
-                key: const ValueKey('entry-stage-footer'),
-                constraints: BoxConstraints(
-                  maxHeight: math.max(0, constraints.maxHeight / 2),
-                ),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(inset, 16, inset, bottom),
-                  child: actions,
-                ),
-              ),
-          ],
+          ),
         ),
-      );
+        if (actions != null)
+          ConstrainedBox(
+            key: const ValueKey('entry-stage-footer'),
+            constraints: BoxConstraints(
+              maxHeight: math.max(0, constraints.maxHeight / 2),
+            ),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(inset, 16, inset, bottom),
+              child: actions,
+            ),
+          ),
+      ],
+    ),
+  );
 }

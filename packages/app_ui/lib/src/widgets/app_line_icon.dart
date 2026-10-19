@@ -1,8 +1,8 @@
-// ignore_for_file: missing_whitespace_between_adjacent_strings
-
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+// ignore_for_file: missing_whitespace_between_adjacent_strings
 
 enum AppLineIcon {
   user('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'),

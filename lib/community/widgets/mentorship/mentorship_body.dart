@@ -113,7 +113,7 @@ class _MentorshipBodyState extends State<MentorshipBody> {
         child: AppSearchField(
           controller: _search,
           hintText: context.l10n.mentorshipSearchHint,
-          onCanvas: true,
+          isOnCanvas: true,
           onChanged: _onSearchChanged,
           onClear: () {
             _debounce?.cancel();
@@ -400,6 +400,6 @@ class _MentorshipBodyState extends State<MentorshipBody> {
 
   bool _isAcceptedOrLater(MentorRequestStatus status) => switch (status) {
     .accepted || .completionPending || .completed => true,
-    _ => false,
+    .pending || .declined || .cancelled => false,
   };
 }

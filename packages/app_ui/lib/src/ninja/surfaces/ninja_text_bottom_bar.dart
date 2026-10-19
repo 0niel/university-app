@@ -80,14 +80,15 @@ class _NinjaTextBottomBarTabState extends State<_NinjaTextBottomBarTab> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     final selected = widget.selected;
     final background = selected
         ? colors.accent
         : _focused
-            ? colors.surface2
-            : const Color(0x00000000);
+        ? colors.surface2
+        : const Color(0x00000000);
 
     return Semantics(
       button: true,

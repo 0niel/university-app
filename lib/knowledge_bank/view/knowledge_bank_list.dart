@@ -19,13 +19,13 @@ class KnowledgeBankList extends StatelessWidget {
     required this.onUpload,
     required this.onResetFilter,
     this.previewUrls = const {},
-    this.heroTagForMaterial,
+    Object? Function(StudyMaterial)? heroTagForMaterial,
     this.onLike,
     this.onLongPress,
     this.gridView = false,
     this.footer,
     super.key,
-  });
+  }) : _heroTagBuilder = heroTagForMaterial;
 
   final bool isLoading;
   final bool isFailure;
@@ -39,7 +39,7 @@ class KnowledgeBankList extends StatelessWidget {
   final VoidCallback onUpload;
   final VoidCallback onResetFilter;
   final Map<String, String> previewUrls;
-  final Object? Function(StudyMaterial)? heroTagForMaterial;
+  final Object? Function(StudyMaterial)? _heroTagBuilder;
   final ValueChanged<StudyMaterial>? onLike;
   final ValueChanged<StudyMaterial>? onLongPress;
   final bool gridView;
@@ -107,9 +107,12 @@ class KnowledgeBankList extends StatelessWidget {
                       for (var column = 0; column < columns; column++) ...[
                         if (column > 0) const SizedBox(width: AppSpacing.md),
                         Expanded(
-                          child: row * columns + column < materials.length
-                              ? _gridCard(materials[row * columns + column])
-                              : const SizedBox.shrink(),
+                          child: switch (materials.elementAtOrNull(
+                            row * columns + column,
+                          )) {
+                            final material? => _gridCard(material),
+                            null => const SizedBox.shrink(),
+                          },
                         ),
                       ],
                     ],
@@ -128,7 +131,7 @@ class KnowledgeBankList extends StatelessWidget {
                   child: MaterialRow(
                     key: ValueKey(material.id),
                     material: material,
-                    heroTag: heroTagForMaterial?.call(material),
+                    heroTag: _heroTagBuilder?.call(material),
                     loading: openingMaterialIds.contains(material.id),
                     onOpen: () => onOpen(material),
                     onDownload: () => onDownload(material),
@@ -173,7 +176,7 @@ class KnowledgeBankList extends StatelessWidget {
   Widget _gridCard(StudyMaterial material) => MaterialGridCard(
     key: ValueKey(material.id),
     material: material,
-    heroTag: heroTagForMaterial?.call(material),
+    heroTag: _heroTagBuilder?.call(material),
     loading: openingMaterialIds.contains(material.id),
     onOpen: () => onOpen(material),
     onDownload: () => onDownload(material),

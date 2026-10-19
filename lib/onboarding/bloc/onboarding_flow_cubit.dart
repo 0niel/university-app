@@ -16,10 +16,11 @@ class OnboardingFlowCubit extends Cubit<OnboardingFlowState> {
     required this._organizationId,
     required String? Function() currentUserId,
     required bool Function() isGuest,
-    required this._selectedGroup,
+    required Group? Function() selectedGroup,
     AccountPersonaCubit? persona,
-  }) : _currentUserId = currentUserId,
-       _isGuest = isGuest,
+  }) : _onCurrentUserId = currentUserId,
+       _onIsGuest = isGuest,
+       _onSelectedGroup = selectedGroup,
        _persona = persona,
        _userId = currentUserId(),
        super(
@@ -36,14 +37,14 @@ class OnboardingFlowCubit extends Cubit<OnboardingFlowState> {
 
   final GamificationRepository _repository;
   final String _organizationId;
-  final String? Function() _currentUserId;
-  final bool Function() _isGuest;
-  final Group? Function() _selectedGroup;
+  final String? Function() _onCurrentUserId;
+  final bool Function() _onIsGuest;
+  final Group? Function() _onSelectedGroup;
   final AccountPersonaCubit? _persona;
   final String? _userId;
   Future<bool>? _restoring;
 
-  bool get ownsSession => !isClosed && _currentUserId() == _userId;
+  bool get ownsSession => !isClosed && _onCurrentUserId() == _userId;
 
   Future<bool> restore({required bool onboardingShown}) =>
       _restoring ??= _restore(onboardingShown: onboardingShown);
@@ -87,7 +88,7 @@ class OnboardingFlowCubit extends Cubit<OnboardingFlowState> {
       }
       if (state.groupOrigin == OnboardingDraftOrigin.initial) {
         final savedGroup = overview.academic.group?.trim();
-        final selected = _selectedGroup();
+        final selected = _onSelectedGroup();
         final group =
             selected != null &&
                 (savedGroup == null ||
@@ -107,7 +108,7 @@ class OnboardingFlowCubit extends Cubit<OnboardingFlowState> {
           state.stage == OnboardingStage.group ||
           state.stage == OnboardingStage.teacher) {
         restored = restored.copyWith(
-          identityRequirement: _isGuest() || restored.identity.complete
+          identityRequirement: _onIsGuest() || restored.identity.complete
               ? OnboardingIdentityRequirement.skipped
               : OnboardingIdentityRequirement.required,
         );
@@ -122,7 +123,7 @@ class OnboardingFlowCubit extends Cubit<OnboardingFlowState> {
               : (overview.academic.group?.trim().isNotEmpty ?? false)) &&
           _userId != null &&
           !onboardingShown &&
-          !_isGuest();
+          !_onIsGuest();
     } on Exception catch (error, stackTrace) {
       log(
         'Onboarding identity preload failed',

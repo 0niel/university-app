@@ -471,8 +471,8 @@ class ScheduleBloc extends HydratedBloc<ScheduleEvent, ScheduleState> {
       _pendingLoads.remove(loadToken);
       emit(next);
       if (ownerChanged) _persistSelectionOwner();
-      if (next.selectedSchedule case final selected?) {
-        await _widgetUpdater.updateWidgetsFromSelectedSchedule(selected);
+      if (next.selectedSchedule case final widgetSelection?) {
+        await _widgetUpdater.updateWidgetsFromSelectedSchedule(widgetSelection);
       }
     } on Exception catch (error, stackTrace) {
       if (generation != _userGeneration ||

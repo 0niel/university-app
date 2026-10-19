@@ -1,5 +1,7 @@
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/theme/app_surface_style.dart';
+import 'package:app_ui/src/widgets/app_divider.dart';
 import 'package:flutter/widgets.dart';
 
 class AppListGroup extends StatelessWidget {
@@ -32,9 +34,11 @@ class AppListGroup extends StatelessWidget {
       rows.add(visible[i]);
       if (showDividers && i != visible.length - 1) {
         rows.add(
-          Padding(
-            padding: EdgeInsets.only(left: dividerIndent),
-            child: SizedBox(height: 1, child: ColoredBox(color: colors.line)),
+          AppDivider(
+            indent: dividerIndent,
+            color: colors.line.withValues(
+              alpha: colors.line.a * (colors.isDark ? .62 : .75),
+            ),
           ),
         );
       }
@@ -44,6 +48,19 @@ class AppListGroup extends StatelessWidget {
       decoration: BoxDecoration(
         color: color ?? colors.surface,
         borderRadius: BorderRadius.circular(radius),
+        gradient: color == null
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.alphaBlend(
+                    colors.white.withValues(alpha: colors.isDark ? .025 : .22),
+                    colors.surface,
+                  ),
+                  colors.surface,
+                ],
+              )
+            : null,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius),
@@ -55,6 +72,14 @@ class AppListGroup extends StatelessWidget {
       ),
     );
 
+    group = DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        border: AppSurfaceStyle.outline(context),
+      ),
+      child: group,
+    );
     if (margin != null) {
       group = Padding(padding: margin!, child: group);
     }

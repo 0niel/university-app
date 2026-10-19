@@ -28,7 +28,7 @@ class StacSetStateActionParser implements StacActionParser<StateActionModel> {
     if (store == null) return null;
     final values = model['values'];
     if (values is Map<Object?, Object?>) {
-      store.setAll(Map<String, Object?>.from(values));
+      store.setAll(Map.from(values));
       return runMiniAppAction(context, model['action']);
     }
     if (key.isEmpty) return null;

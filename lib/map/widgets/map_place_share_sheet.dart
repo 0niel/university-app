@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -105,7 +107,7 @@ class _MapPlaceShareSheetState extends State<MapPlaceShareSheet> {
       AppButton.secondary(
         label: 'Копировать',
         expanded: true,
-        onPressed: _copy,
+        onPressed: () => unawaited(_copy()),
       ),
       const SizedBox(height: AppSpacing.lg),
       SelectableText(_link.toString(), style: AppText.subtext),

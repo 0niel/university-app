@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
@@ -32,7 +33,7 @@ class TeacherDashboardContent extends StatelessWidget {
         $extra: (occurrence.lesson, occurrence.date),
         teacherId: teacher?.uid,
         teacherName: teacher?.name,
-      ).push<void>(context),
+      ).push(context),
     );
   }
 
@@ -51,7 +52,7 @@ class TeacherDashboardContent extends StatelessWidget {
   }
 
   void _search(BuildContext context, String query) =>
-      unawaited(GlobalSearchRoute(query: query).push<void>(context));
+      unawaited(GlobalSearchRoute(query: query).push(context));
 
   @override
   Widget build(BuildContext context) => Column(
@@ -66,20 +67,27 @@ class TeacherDashboardContent extends StatelessWidget {
             previous.navigation != current.navigation,
         builder: (context, state) => state.teacher == null
             ? const SizedBox.shrink()
-            : TeacherDashboardIdentitySection(
-                teacher: state.teacher!,
-                rating: state.rating,
-                preview: state.preview,
-                now: state.now,
-                navigationBusy: state.navigation.isBusy,
-                onChangeTeacher: () =>
-                    unawaited(showAccountPersonaSheet(context)),
-                onOpenReviews: () => _openReviews(context),
-                onRetryRating: () =>
-                    _refresh(context, TeacherDashboardRefreshScope.rating),
-                onOpenSchedule: () =>
-                    _openSchedule(context, TeacherScheduleDestination.schedule),
-                onOpenLesson: (lesson) => _openLesson(context, lesson),
+            : Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screen,
+                ),
+                child: TeacherDashboardIdentitySection(
+                  teacher: state.teacher!,
+                  rating: state.rating,
+                  preview: state.preview,
+                  now: state.now,
+                  navigationBusy: state.navigation.isBusy,
+                  onChangeTeacher: () =>
+                      unawaited(showAccountPersonaSheet(context)),
+                  onOpenReviews: () => _openReviews(context),
+                  onRetryRating: () =>
+                      _refresh(context, TeacherDashboardRefreshScope.rating),
+                  onOpenSchedule: () => _openSchedule(
+                    context,
+                    TeacherScheduleDestination.schedule,
+                  ),
+                  onOpenLesson: (lesson) => _openLesson(context, lesson),
+                ),
               ),
       ),
       BlocBuilder<TeacherDashboardBloc, TeacherDashboardState>(
@@ -109,20 +117,27 @@ class TeacherDashboardContent extends StatelessWidget {
       ),
       BlocBuilder<TeacherDashboardBloc, TeacherDashboardState>(
         buildWhen: (previous, current) => previous.rating != current.rating,
-        builder: (context, state) => TeacherDashboardRatingSection(
-          resource: state.rating,
-          onRetry: () => _refresh(context, TeacherDashboardRefreshScope.rating),
-          onReviews: () => _openReviews(context),
+        builder: (context, state) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: TeacherDashboardRatingSection(
+            resource: state.rating,
+            onRetry: () =>
+                _refresh(context, TeacherDashboardRefreshScope.rating),
+            onReviews: () => _openReviews(context),
+          ),
         ),
       ),
       BlocSelector<TeacherDashboardBloc, TeacherDashboardState, bool>(
         selector: (state) => state.navigation.isBusy,
-        builder: (context, busy) => TeacherDashboardServicesSection(
-          navigationBusy: busy,
-          onOpenChanges: () =>
-              _openSchedule(context, TeacherScheduleDestination.changes),
-          onExport: () =>
-              _openSchedule(context, TeacherScheduleDestination.calendar),
+        builder: (context, busy) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: TeacherDashboardServicesSection(
+            navigationBusy: busy,
+            onOpenChanges: () =>
+                _openSchedule(context, TeacherScheduleDestination.changes),
+            onExport: () =>
+                _openSchedule(context, TeacherScheduleDestination.calendar),
+          ),
         ),
       ),
     ],

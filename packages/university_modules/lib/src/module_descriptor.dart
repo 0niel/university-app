@@ -5,8 +5,8 @@ final class ModuleDescriptor {
     required this.description,
     required this.organizationIds,
     this.apiVersion = currentApiVersion,
-    this.localize,
-  });
+    ModulePresentation Function(String languageCode)? localize,
+  }) : _presentationBuilder = localize;
 
   static const currentApiVersion = 1;
 
@@ -15,10 +15,10 @@ final class ModuleDescriptor {
   final String description;
   final Set<String> organizationIds;
   final int apiVersion;
-  final ModulePresentation Function(String languageCode)? localize;
+  final ModulePresentation Function(String languageCode)? _presentationBuilder;
 
   ModulePresentation presentationFor(String languageCode) =>
-      localize?.call(languageCode) ??
+      _presentationBuilder?.call(languageCode) ??
       ModulePresentation(title: title, description: description);
 
   bool supports(String organizationId) =>
@@ -32,7 +32,8 @@ final class ModuleDescriptor {
       title.trim().isNotEmpty &&
       organizationIds.isNotEmpty &&
       organizationIds.every(
-        (id) => RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(id),
+        (organizationId) =>
+            RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(organizationId),
       );
 }
 

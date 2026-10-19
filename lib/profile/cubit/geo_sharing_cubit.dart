@@ -8,42 +8,6 @@ import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
 
 const kGeoSharingPrefsKey = 'geo_sharing';
 
-class GeoSharingState extends Equatable {
-  const GeoSharingState({
-    this.settings = const GeoSharingSettings(
-      visibility: GeoVisibility.none,
-      privacyForcedGhost: true,
-    ),
-    this.loaded = false,
-    this.busy = false,
-    this.failed = false,
-  });
-
-  final GeoSharingSettings settings;
-  final bool busy;
-  final bool failed;
-  final bool loaded;
-
-  bool get sharing => settings.sharing;
-
-  GeoSharingState copyWith({
-    GeoSharingSettings? settings,
-    bool? busy,
-    bool? failed,
-    bool? loaded,
-  }) {
-    return GeoSharingState(
-      settings: settings ?? this.settings,
-      busy: busy ?? this.busy,
-      failed: failed ?? this.failed,
-      loaded: loaded ?? this.loaded,
-    );
-  }
-
-  @override
-  List<Object?> get props => [settings, busy, failed, loaded];
-}
-
 class GeoSharingCubit extends Cubit<GeoSharingState> {
   GeoSharingCubit({
     required PreferencesRepository preferencesRepository,
@@ -142,9 +106,10 @@ class GeoSharingCubit extends Cubit<GeoSharingState> {
       visibility: GeoVisibility.none,
       privacyForcedGhost: true,
     );
+    final currentSettings = state.settings;
     emit(
       state.copyWith(
-        settings: enabled ? state.settings : safe,
+        settings: enabled ? currentSettings : safe,
         busy: true,
         failed: false,
       ),
@@ -183,4 +148,40 @@ class GeoSharingCubit extends Cubit<GeoSharingState> {
       return false;
     }
   }
+}
+
+class GeoSharingState extends Equatable {
+  const GeoSharingState({
+    this.settings = const GeoSharingSettings(
+      visibility: GeoVisibility.none,
+      privacyForcedGhost: true,
+    ),
+    this.loaded = false,
+    this.busy = false,
+    this.failed = false,
+  });
+
+  final GeoSharingSettings settings;
+  final bool busy;
+  final bool failed;
+  final bool loaded;
+
+  bool get sharing => settings.sharing;
+
+  GeoSharingState copyWith({
+    GeoSharingSettings? settings,
+    bool? busy,
+    bool? failed,
+    bool? loaded,
+  }) {
+    return GeoSharingState(
+      settings: settings ?? this.settings,
+      busy: busy ?? this.busy,
+      failed: failed ?? this.failed,
+      loaded: loaded ?? this.loaded,
+    );
+  }
+
+  @override
+  List<Object?> get props => [settings, busy, failed, loaded];
 }

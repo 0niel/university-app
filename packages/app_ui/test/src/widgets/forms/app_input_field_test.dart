@@ -6,14 +6,14 @@ import '../../kit_harness.dart';
 
 void main() {
   BoxDecoration fillOf(WidgetTester tester) => kitDecoration(
-        tester,
-        find
-            .descendant(
-              of: find.byType(AppInputField),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
+    tester,
+    find
+        .descendant(
+          of: find.byType(AppInputField),
+          matching: find.byType(Container),
+        )
+        .first,
+  );
 
   testWidgets('default fill is surface2 with an 18px radius and 48 height', (
     tester,

@@ -6,5 +6,6 @@ abstract class ServiceCatalogState with _$ServiceCatalogState {
     ServiceCatalog? catalog,
     @Default(false) bool isLoading,
     @Default(false) bool isRefreshing,
+    @Default(false) bool hasError,
   }) = _ServiceCatalogState;
 }

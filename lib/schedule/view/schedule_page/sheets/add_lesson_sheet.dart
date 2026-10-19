@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,25 +37,25 @@ Future<bool> showAddLessonSheet(
     context,
     title: context.l10n.scheduleAddTitle,
     subtitle: context.l10n.scheduleAddSubtitle,
-    child: _AddLesson(
+    child: _AddLessonSheet(
       day: day ?? DateTime.now(),
       slot: bell == null
-          ? slot ?? 0
+          ? (slot ?? 0)
           : bells.indexWhere(
               (item) =>
                   item.startMinutes == bell.startMinutes &&
                   item.endMinutes == bell.endMinutes,
             ),
       bells: bells,
-      repository: context.read<ScheduleRepository>(),
-      activities: context.read<UserActivitiesCubit>(),
+      repository: context.read(),
+      activities: context.read(),
     ),
   );
   return saved ?? false;
 }
 
-class _AddLesson extends StatefulWidget {
-  const _AddLesson({
+class _AddLessonSheet extends StatefulWidget {
+  const _AddLessonSheet({
     required this.day,
     required this.slot,
     required this.bells,
@@ -66,10 +68,10 @@ class _AddLesson extends StatefulWidget {
   final ScheduleRepository repository;
   final UserActivitiesCubit activities;
   @override
-  State<_AddLesson> createState() => _AddLessonState();
+  State<_AddLessonSheet> createState() => _AddLessonSheetState();
 }
 
-class _AddLessonState extends State<_AddLesson> {
+class _AddLessonSheetState extends State<_AddLessonSheet> {
   final _name = TextEditingController();
   final _place = TextEditingController();
   late DateTime _day = dateOnly(widget.day);
@@ -79,6 +81,7 @@ class _AddLessonState extends State<_AddLesson> {
   );
   UserActivityType _type = UserActivityType.personal;
   bool _saving = false;
+  bool _nameValid = false;
   String? _error;
 
   @override
@@ -94,7 +97,11 @@ class _AddLessonState extends State<_AddLesson> {
       _saving = true;
       _error = null;
     });
-    final bell = widget.bells[_slot];
+    final bell = widget.bells.elementAtOrNull(_slot);
+    if (bell == null) {
+      setState(() => _saving = false);
+      return;
+    }
     try {
       await widget.repository.upsertUserActivity(
         UpsertUserActivityRequest(
@@ -133,7 +140,8 @@ class _AddLessonState extends State<_AddLesson> {
           height: AppControlSize.search,
           enabled: !_saving,
           maxLength: 200,
-          onChanged: (_) => setState(() {}),
+          onChanged: (value) =>
+              setState(() => _nameValid = value.trim().length >= 2),
         ),
         const SizedBox(height: AppSpacing.md),
         AppInputField(
@@ -199,7 +207,7 @@ class _AddLessonState extends State<_AddLesson> {
           expanded: true,
           size: AppButtonSize.large,
           loading: _saving,
-          onPressed: !_saving && _name.text.trim().length >= 2 ? _save : null,
+          onPressed: !_saving && _nameValid ? () => unawaited(_save()) : null,
         ),
       ],
     );

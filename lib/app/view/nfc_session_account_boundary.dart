@@ -6,13 +6,13 @@ import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 
 class NfcSessionAccountBoundary extends StatefulWidget {
   const NfcSessionAccountBoundary({
-    required this.synchronizeSessionAccount,
+    required Future<void> Function(String? accountId) synchronizeSessionAccount,
     required this.organizationId,
     required this.child,
     super.key,
-  });
+  }) : _onSynchronizeSessionAccount = synchronizeSessionAccount;
 
-  final Future<void> Function(String? accountId) synchronizeSessionAccount;
+  final Future<void> Function(String? accountId) _onSynchronizeSessionAccount;
   final String organizationId;
   final Widget child;
 
@@ -32,8 +32,8 @@ class _NfcSessionAccountBoundaryState extends State<NfcSessionAccountBoundary> {
   void didUpdateWidget(NfcSessionAccountBoundary oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.organizationId != widget.organizationId ||
-        oldWidget.synchronizeSessionAccount !=
-            widget.synchronizeSessionAccount) {
+        oldWidget._onSynchronizeSessionAccount !=
+            widget._onSynchronizeSessionAccount) {
       _synchronizeAccount(context.read<AppBloc>().state);
     }
   }
@@ -45,7 +45,7 @@ class _NfcSessionAccountBoundaryState extends State<NfcSessionAccountBoundary> {
               '${Uri.encodeComponent(state.user.id)}';
     unawaited(
       Future<void>.sync(
-        () => widget.synchronizeSessionAccount(accountId),
+        () => widget._onSynchronizeSessionAccount(accountId),
       ).onError((_, stackTrace) {
         FlutterError.reportError(
           FlutterErrorDetails(

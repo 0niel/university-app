@@ -42,92 +42,89 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
       }),
       child: Scaffold(
         backgroundColor: colors.canvas,
-        body: SafeArea(
-          top: false,
-          bottom: false,
-          child: Column(
-            children: [
-              AppInnerHeader(
-                title: l10n.settingsManageAccount,
-                backSemanticsLabel: l10n.back,
-                onBack: () => Navigator.of(context).pop(),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.only(
-                    bottom: ninjaBottomInset(context) + AppSpacing.lg,
-                  ),
-                  children: [
-                    if (_error case final message?)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.screen,
-                        ),
-                        child: AppErrorState.compact(title: message),
-                      ),
-                    SettingsSection(
-                      label: l10n.profileAccount,
-                      children: [
-                        SettingsRow(
-                          title: l10n.accountEmailLabel,
-                          lineIcon: AppLineIcon.at,
-                          subtitle: email ?? l10n.accountGuest,
-                          showChevron: false,
-                        ),
-                        if (user.isGuest)
-                          SettingsRow(
-                            title: l10n.authGuestUpgradeTitle,
-                            subtitle: l10n.authGuestUpgradeSubtitle,
-                            lineIcon: AppLineIcon.at,
-                            enabled: !_busy,
-                            onTap: () =>
-                                unawaited(showGuestUpgradeSheet(context)),
+        body: AppAmbientBackground(
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            child: Column(
+              children: [
+                AppInnerHeader(
+                  title: l10n.settingsManageAccount,
+                  backSemanticsLabel: l10n.back,
+                  onBack: () => Navigator.of(context).pop(),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.only(
+                      bottom: ninjaBottomInset(context) + AppSpacing.lg,
+                    ),
+                    children: [
+                      if (_error case final message?)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.screen,
                           ),
-                        if (email != null)
-                          SettingsRow(
-                            title: l10n.accountChangePassword,
-                            lineIcon: AppLineIcon.lock,
-                            subtitle: l10n.accountChangePasswordSub,
-                            valueColor: colors.accent,
-                            enabled: !_busy,
-                            onTap: () => unawaited(
-                              PasswordResetRoute(email: email).push<void>(
-                                context,
+                          child: AppErrorState.compact(title: message),
+                        ),
+                      if (user.isGuest || email != null)
+                        SettingsSection(
+                          label: l10n.profileAccount,
+                          children: [
+                            if (user.isGuest)
+                              SettingsRow(
+                                title: l10n.authGuestUpgradeTitle,
+                                subtitle: l10n.authGuestUpgradeSubtitle,
+                                lineIcon: AppLineIcon.at,
+                                enabled: !_busy,
+                                onTap: () =>
+                                    unawaited(showGuestUpgradeSheet(context)),
                               ),
-                            ),
+                            if (email != null)
+                              SettingsRow(
+                                title: l10n.accountChangePassword,
+                                lineIcon: AppLineIcon.lock,
+                                subtitle: l10n.accountChangePasswordSub,
+                                valueColor: colors.accent,
+                                enabled: !_busy,
+                                onTap: () => unawaited(
+                                  PasswordResetRoute(email: email).push(
+                                    context,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      SettingsSection(
+                        label: l10n.settingsManageAccount,
+                        children: [
+                          SettingsRow(
+                            title: l10n.profileSignOut,
+                            lineIcon: AppLineIcon.logout,
+                            danger: true,
+                            enabled: !_busy,
+                            showChevron: false,
+                            onTap: () => unawaited(_confirmSignOut()),
                           ),
-                      ],
-                    ),
-                    SettingsSection(
-                      label: l10n.settingsManageAccount,
-                      children: [
-                        SettingsRow(
-                          title: l10n.profileSignOut,
-                          lineIcon: AppLineIcon.logout,
-                          danger: true,
-                          enabled: !_busy,
-                          showChevron: false,
-                          onTap: () => unawaited(_confirmSignOut()),
-                        ),
-                        SettingsRow(
-                          title: l10n.accountDelete,
-                          lineIcon: AppLineIcon.trash,
-                          danger: true,
-                          enabled: !_busy && user.id.isNotEmpty,
-                          showChevron: false,
-                          onTap: () => unawaited(_confirmDelete(context)),
-                        ),
-                      ],
-                    ),
-                    if (_busy)
-                      const Padding(
-                        padding: EdgeInsets.all(AppSpacing.screen),
-                        child: Center(child: NinjaSpinner(size: 24)),
+                          SettingsRow(
+                            title: l10n.accountDelete,
+                            lineIcon: AppLineIcon.trash,
+                            danger: true,
+                            enabled: !_busy && user.id.isNotEmpty,
+                            showChevron: false,
+                            onTap: () => unawaited(_confirmDelete(context)),
+                          ),
+                        ],
                       ),
-                  ],
-                ).animatePageEntrance(),
-              ),
-            ],
+                      if (_busy)
+                        const Padding(
+                          padding: EdgeInsets.all(AppSpacing.screen),
+                          child: Center(child: NinjaSpinner(size: 24)),
+                        ),
+                    ],
+                  ).animatePageEntrance(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -194,11 +191,11 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
         stackTrace: stackTrace,
         name: 'AccountManagementPage',
       );
-      if (_current(userId)) {
+      if (mounted && _current(userId)) {
         setState(() => _error = errorMessage);
       }
     } finally {
-      if (_current(userId)) setState(() => _busy = false);
+      if (mounted && _current(userId)) setState(() => _busy = false);
     }
   }
 }

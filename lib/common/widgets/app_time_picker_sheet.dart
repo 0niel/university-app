@@ -109,7 +109,11 @@ class _AppTimePickerSheetState extends State<AppTimePickerSheet> {
               for (final (index, slot) in widget.quickSlots.indexed)
                 AppChipRowItem(value: index, label: slot.label),
             ],
-            onChanged: (index) => _applySlot(widget.quickSlots[index]),
+            onChanged: (index) {
+              if (widget.quickSlots.elementAtOrNull(index) case final slot?) {
+                _applySlot(slot);
+              }
+            },
           ),
         ],
         const SizedBox(height: 20),

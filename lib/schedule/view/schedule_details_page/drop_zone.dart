@@ -70,8 +70,9 @@ class _PickedPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final picked = this.picked;
-    final isImage = picked.mimeType?.startsWith('image/') ?? false;
+    final accent = colors.lecture;
+    final material = picked;
+    final isImage = material.mimeType?.startsWith('image/') ?? false;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.gap),
@@ -85,18 +86,19 @@ class _PickedPreview extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.field),
               child: Image.memory(
-                picked.bytes,
+                material.bytes,
                 width: AppControlSize.iconTileMedium,
                 height: AppControlSize.iconTileMedium,
                 fit: BoxFit.cover,
+                excludeFromSemantics: true,
               ),
             )
           else
             AppIconTile(
               size: AppControlSize.iconTileMedium,
-              background: colors.tintOf(colors.lecture),
+              background: colors.tintOf(accent),
               child: Text(
-                fileTypeBadge(picked.name, picked.mimeType),
+                fileTypeBadge(material.name, material.mimeType),
                 style: AppText.sans(
                   10,
                   FontWeight.w800,
@@ -110,14 +112,14 @@ class _PickedPreview extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  picked.name,
+                  material.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppText.subtextBold.copyWith(color: colors.ink),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  _formatFileSize(context.l10n, picked.bytes.length),
+                  _formatFileSize(context.l10n, material.bytes.length),
                   style: AppText.caption.copyWith(color: colors.muted),
                 ),
               ],

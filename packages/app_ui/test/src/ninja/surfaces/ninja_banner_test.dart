@@ -6,6 +6,46 @@ import '../../kit_harness.dart';
 
 void main() {
   group('NinjaBanner', () {
+    for (final width in [280.0, 430.0, 900.0]) {
+      for (final scale in [1.0, 2.0]) {
+        testWidgets('body and action fit at $width and $scale text', (
+          tester,
+        ) async {
+          tester.view.physicalSize = const Size(1000, 900);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.reset);
+          var taps = 0;
+          await tester.pumpWidget(
+            wrapKit(
+              MediaQuery(
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: Center(
+                  child: SizedBox(
+                    width: width,
+                    child: NinjaBanner(
+                      title: 'Поддержите развитие приложения',
+                      body: 'Сообщайте об ошибках и предлагайте улучшения.',
+                      actionLabel: 'Открыть репозиторий',
+                      onAction: () => taps++,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final bounds = tester.getRect(find.byType(NinjaBanner));
+          final action = find.text('Открыть репозиторий');
+          expect(bounds.height, lessThan(600));
+          expect(bounds.contains(tester.getTopLeft(action)), isTrue);
+          expect(bounds.contains(tester.getBottomRight(action)), isTrue);
+          await tester.tap(action);
+          expect(taps, 1);
+          expect(tester.takeException(), isNull);
+        });
+      }
+    }
+
     testWidgets('info tone paints the tint with an 8px accent dot', (
       tester,
     ) async {

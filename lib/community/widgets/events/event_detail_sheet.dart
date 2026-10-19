@@ -7,11 +7,12 @@ import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/community/models/event_category.dart';
 import 'package:rtu_mirea_app/community/widgets/emoji_tile.dart';
 import 'package:rtu_mirea_app/community/widgets/event_category_style.dart';
+import 'package:rtu_mirea_app/community/widgets/events/event_detail_action.dart';
 import 'package:rtu_mirea_app/community/widgets/events/event_layout.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:share_plus/share_plus.dart';
 
-enum EventDetailAction { edit, delete }
+export 'event_detail_action.dart';
 
 Future<EventDetailAction?> showEventDetailSheet(
   BuildContext context, {
@@ -20,7 +21,7 @@ Future<EventDetailAction?> showEventDetailSheet(
   return showAppSheet<EventDetailAction>(
     context,
     title: event.title,
-    child: _EventDetailBody(event: event),
+    child: _EventDetailSheet(event: event),
   );
 }
 
@@ -33,8 +34,8 @@ Future<void> _shareEvent(BuildContext context, CampusEvent event) {
   return SharePlus.instance.share(ShareParams(text: parts.join(' · ')));
 }
 
-class _EventDetailBody extends StatelessWidget {
-  const _EventDetailBody({required this.event});
+class _EventDetailSheet extends StatelessWidget {
+  const _EventDetailSheet({required this.event});
 
   final CampusEvent event;
 

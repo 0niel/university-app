@@ -74,9 +74,13 @@ void main() {
               body: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppSpacing.screen),
                 child: TeacherPicker(
-                  selected: scene == _Scene.empty || scene == _Scene.failure
-                      ? null
-                      : teacher,
+                  selected: switch (scene) {
+                    _Scene.empty || _Scene.failure => null,
+                    _Scene.selected ||
+                    _Scene.narrow ||
+                    _Scene.keyboard ||
+                    _Scene.disabled => teacher,
+                  },
                   enabled: scene != _Scene.disabled,
                   onSelected: (_) {},
                 ),

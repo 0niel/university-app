@@ -8,8 +8,8 @@ class AppStepIndicator extends StatelessWidget {
     required this.total,
     required this.semanticsLabel,
     super.key,
-  })  : assert(total > 0, 'total must be positive'),
-        assert(step > 0 && step <= total, 'step must be within total');
+  }) : assert(total > 0, 'total must be positive'),
+       assert(step > 0 && step <= total, 'step must be within total');
 
   final int step;
   final int total;
@@ -18,7 +18,8 @@ class AppStepIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final reduced = MediaQuery.disableAnimationsOf(context) ||
+    final reduced =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     return Semantics(
       container: true,
@@ -30,8 +31,9 @@ class AppStepIndicator extends StatelessWidget {
             for (var index = 0; index < total; index++) ...[
               if (index > 0) const SizedBox(width: 5),
               AnimatedContainer(
-                duration:
-                    reduced ? Duration.zero : const Duration(milliseconds: 220),
+                duration: reduced
+                    ? Duration.zero
+                    : const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
                 height: 5,
                 width: index == step - 1 ? 22 : 5,

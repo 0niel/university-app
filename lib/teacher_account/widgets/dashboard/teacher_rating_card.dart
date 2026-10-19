@@ -40,7 +40,11 @@ class TeacherRatingCard extends StatelessWidget {
             children: [
               Text(
                 formatRating(profile?.overall),
-                style: AppText.serif(36).copyWith(color: colors.ink),
+                style: AppText.sans(
+                  36,
+                  FontWeight.w600,
+                  tabular: true,
+                ).copyWith(color: colors.ink),
               ),
               Text(
                 '${l10n.scheduleTeacherReviews}: ${profile?.reviewsCount ?? 0}',

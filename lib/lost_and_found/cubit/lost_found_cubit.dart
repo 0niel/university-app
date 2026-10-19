@@ -142,6 +142,7 @@ class LostFoundCubit extends Cubit<LostFoundState> {
       return false;
     }
     final index = state.items.indexWhere((entry) => entry.id == id);
+    if (index < 0) return false;
     final item = state.items.elementAtOrNull(index);
     if (item == null) return false;
     _revision++;

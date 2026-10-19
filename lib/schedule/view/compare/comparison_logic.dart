@@ -1,6 +1,8 @@
+import 'package:rtu_mirea_app/schedule/view/compare/comparison_day_occupancy.dart';
 import 'package:rtu_mirea_app/schedule/view/compare/comparison_slot.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
+export 'comparison_day_occupancy.dart';
 export 'comparison_slot.dart';
 
 const kComparisonMinWindowMinutes = 30;
@@ -28,7 +30,7 @@ List<LessonSchedulePart> lessonsOnDay(
 List<ComparisonSlot> buildComparisonSlots(
   List<LessonSchedulePart> mine,
   List<LessonSchedulePart> friends, {
-  Iterable<(int start, int end)> busyRanges = const [],
+  Iterable<(int, int)> busyRanges = const [],
   Iterable<int> uncertainFrom = const [],
 }) {
   final starts = <int>{
@@ -101,7 +103,7 @@ List<ComparisonSlot> buildComparisonSlots(
   return slots..sort((a, b) => a.minute.compareTo(b.minute));
 }
 
-Iterable<(int start, int end)> comparisonBusyRangesForDay({
+Iterable<(int, int)> comparisonBusyRangesForDay({
   required DateTime day,
   required Iterable<SchedulePart> schedule,
   required Iterable<UserActivity> activities,
@@ -111,27 +113,6 @@ Iterable<(int start, int end)> comparisonBusyRangesForDay({
   activities: activities,
   includeLessons: false,
 ).ranges;
-
-class ComparisonDayOccupancy {
-  const ComparisonDayOccupancy({
-    required this.ranges,
-    required this.uncertainFrom,
-  });
-
-  final List<(int start, int end)> ranges;
-  final List<int> uncertainFrom;
-
-  bool get hasEntries => ranges.isNotEmpty || uncertainFrom.isNotEmpty;
-
-  bool isBusy(int start, int end) =>
-      ranges.any((range) => range.$1 < end && range.$2 > start);
-
-  bool isUncertain(int start, int end) =>
-      uncertainFrom.any((minute) => minute < end);
-
-  bool isFree(int start, int end) =>
-      !isBusy(start, end) && !isUncertain(start, end);
-}
 
 ComparisonDayOccupancy comparisonOccupancyForDay({
   required DateTime day,

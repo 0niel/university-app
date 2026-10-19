@@ -25,31 +25,31 @@ final class SupabaseGroupSpaceRealtimeSession
   void _subscribe() {
     _channel
         .onPostgresChanges(
-          event: PostgresChangeEvent.all,
+          event: .all,
           schema: 'core',
           table: 'group_posts',
           filter: PostgresChangeFilter(
-            type: PostgresChangeFilterType.eq,
+            type: .eq,
             column: 'group_id',
             value: _groupId,
           ),
           callback: (_) => _emit(),
         )
         .onPostgresChanges(
-          event: PostgresChangeEvent.all,
+          event: .all,
           schema: 'core',
           table: 'group_post_likes',
           callback: (_) => _emit(),
         )
         .onPostgresChanges(
-          event: PostgresChangeEvent.all,
+          event: .all,
           schema: 'core',
           table: 'group_post_comments',
           callback: (_) => _emit(),
         )
         .subscribe((status, error) {
           if (_closed) return;
-          if (status == RealtimeSubscribeStatus.channelError) {
+          if (status == .channelError) {
             _changes.addError(
               error ?? StateError('Could not join group space channel'),
             );

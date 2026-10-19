@@ -18,7 +18,6 @@ import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_hce_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/pass_security_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/profile_cubit.dart';
-import 'package:rtu_mirea_app/profile/utils/settings_search_filter.dart';
 import 'package:rtu_mirea_app/profile/view/profile_page.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings/settings_privacy_section.dart';
 import 'package:rtu_mirea_app/services/data/services_directory.dart';
@@ -131,7 +130,7 @@ void main() {
     );
 
     testWidgets(
-      'privacy pass settings and search respect $platform',
+      'privacy pass settings respect $platform',
       (tester) async {
         final pass = _Pass();
         final hce = _Hce();
@@ -169,13 +168,6 @@ void main() {
           supported ? findsOneWidget : findsNothing,
         );
         expect(find.text(l10n.settingsAnonymousReactions), findsOneWidget);
-        expect(
-          SettingsSearchFilter(
-            query: l10n.settingsBiometricsPass,
-            l10n: l10n,
-          ).hasResults,
-          supported,
-        );
         expect(tester.takeException(), isNull);
       },
       variant: TargetPlatformVariant.only(platform),

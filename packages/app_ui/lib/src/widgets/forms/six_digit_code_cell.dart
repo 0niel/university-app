@@ -25,15 +25,17 @@ class SixDigitCodeCell extends StatelessWidget {
     final colors = context.colors;
     final digit = this.digit;
     final filled = digit != null && digit.isNotEmpty;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
 
     return AppPressState(
       onTap: onTap,
       semanticsButton: onTap != null,
       builder: (context, {required pressed}) => AnimatedContainer(
-        duration:
-            reduceMotion ? Duration.zero : const Duration(milliseconds: 150),
+        duration: reduceMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 150),
         curve: Curves.easeOut,
         height: height,
         decoration: BoxDecoration(
@@ -78,19 +80,11 @@ class AppCodeKeypad extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final keys = [...digits, backspaceLabel];
-        final compact = constraints.maxWidth.isFinite &&
+        final compact =
+            constraints.maxWidth.isFinite &&
             constraints.maxWidth <
                 AppControlSize.touchTarget * keys.length +
                     spacing * (keys.length - 1);
-        final columns = compact
-            ? ((constraints.maxWidth + spacing) /
-                    (AppControlSize.touchTarget + spacing))
-                .floor()
-                .clamp(1, 3)
-            : keys.length;
-        final width = compact
-            ? (constraints.maxWidth - spacing * (columns - 1)) / columns
-            : null;
         final buttons = [
           for (final key in keys)
             _KeypadKey(
@@ -101,6 +95,14 @@ class AppCodeKeypad extends StatelessWidget {
             ),
         ];
         if (compact) {
+          final columns =
+              ((constraints.maxWidth + spacing) /
+                      (AppControlSize.touchTarget + spacing))
+                  .floor()
+                  .clamp(1, 3);
+
+          final width =
+              (constraints.maxWidth - spacing * (columns - 1)) / columns;
           return Wrap(
             spacing: spacing,
             runSpacing: spacing,
@@ -142,7 +144,8 @@ class _KeypadKey extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     return AppPressState(
       onTap: enabled ? onTap : null,
@@ -169,8 +172,10 @@ class _KeypadKey extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               label,
-              style: AppText.sans(14, FontWeight.w700)
-                  .copyWith(color: enabled ? colors.ink : colors.muted2),
+              style: AppText.sans(
+                14,
+                FontWeight.w700,
+              ).copyWith(color: enabled ? colors.ink : colors.muted2),
             ),
           ),
         ),

@@ -25,6 +25,17 @@ abstract final class ServicesDirectory {
     ];
   }
 
+  static List<ServiceEntry> orderedEntries(
+    Iterable<ServiceEntry> entries,
+    Iterable<String> ids,
+  ) {
+    final byId = {for (final entry in _unique(entries)) entry.id: entry};
+    return [
+      for (final id in ids)
+        if (byId[id] case final ServiceEntry entry) entry,
+    ];
+  }
+
   static ServiceEntry _entry(
     BuildContext context, {
     required String title,

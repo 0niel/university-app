@@ -3,18 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-class ScheduleChangeDetail {
-  const ScheduleChangeDetail({
-    required this.label,
-    required this.before,
-    required this.after,
-  });
-
-  final String label;
-  final String before;
-  final String after;
-}
-
 class ScheduleChangePresentation {
   const ScheduleChangePresentation._({
     required this.subject,
@@ -223,4 +211,16 @@ class ScheduleChangePresentation {
   final List<String> context;
   final String summary;
   final bool isSingleSnapshot;
+}
+
+class ScheduleChangeDetail {
+  const ScheduleChangeDetail({
+    required this.label,
+    required this.before,
+    required this.after,
+  });
+
+  final String label;
+  final String before;
+  final String after;
 }

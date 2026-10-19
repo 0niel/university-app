@@ -37,7 +37,7 @@ int intStateOf(BuildContext context, KitModel model, String key, int fallback) {
   if (model.containsKey(key)) return intOf(model, key) ?? fallback;
   final value = stateValueOf(context, model);
   if (value is num) return value.toInt();
-  return value is String ? int.tryParse(value) ?? fallback : fallback;
+  return value is String ? (int.tryParse(value) ?? fallback) : fallback;
 }
 
 double doubleStateOf(
@@ -49,5 +49,5 @@ double doubleStateOf(
   if (model.containsKey(key)) return doubleOf(model, key) ?? fallback;
   final value = stateValueOf(context, model);
   if (value is num) return value.toDouble();
-  return value is String ? double.tryParse(value) ?? fallback : fallback;
+  return value is String ? (double.tryParse(value) ?? fallback) : fallback;
 }

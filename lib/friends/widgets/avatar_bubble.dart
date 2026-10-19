@@ -8,12 +8,12 @@ class _AvatarBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const .all(friendMarkerRingWidth),
+      padding: const .all(kFriendMarkerRingWidth),
       decoration: BoxDecoration(
         color: context.colors.surface,
         shape: .circle,
       ),
-      child: AppAvatar(name: name, size: friendMarkerAvatarSize),
+      child: AppAvatar(name: name, size: kFriendMarkerAvatarSize),
     );
   }
 }

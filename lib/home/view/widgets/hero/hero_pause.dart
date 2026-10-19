@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/home/view/home_day_lessons.dart';
 import 'package:rtu_mirea_app/home/view/widgets/hero/hero_parts.dart';
+import 'package:rtu_mirea_app/home/view/widgets/hero/home_hero_surface.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class HeroPause extends StatelessWidget {
@@ -21,9 +22,7 @@ class HeroPause extends StatelessWidget {
   final VoidCallback onFreeRooms;
 
   @override
-  Widget build(BuildContext context) => AppCard(
-    radius: AppRadius.hero,
-    padding: const EdgeInsets.all(18),
+  Widget build(BuildContext context) => HomeHeroSurface(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -45,25 +44,15 @@ class HeroPause extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 8),
         HeroSubject(subject: entry.lesson.subject, meta: meta, onTap: onOpen),
-        const SizedBox(height: 14),
-        AppListGroup(
-          radius: AppRadius.field,
-          color: context.colors.canvas,
-          children: [
-            AppListRow(
-              title: context.l10n.freeClassrooms,
-              subtitle: context.l10n.homeFreeRoomsSub,
-              strong: true,
-              leading: AppIconTile(
-                icon: AppLineIcon.door,
-                background: context.colors.lectureTint,
-                foreground: context.colors.lecture,
-              ),
-              onTap: onFreeRooms,
-            ),
-          ],
+        const SizedBox(height: 8),
+        AppButton.secondary(
+          label: context.l10n.freeClassrooms,
+          icon: const AppLineIconWidget(AppLineIcon.door),
+          size: AppButtonSize.small,
+          expanded: true,
+          onPressed: onFreeRooms,
         ),
       ],
     ),

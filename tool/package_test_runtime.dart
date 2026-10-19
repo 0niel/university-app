@@ -21,7 +21,7 @@ String packageTestRuntime(String packageName, Map<String, Object?> graph) {
     }
     packages[name] = entry;
   }
-  final pending = <String>[packageName];
+  final pending = [packageName];
   final visited = <String>{};
   while (pending.isNotEmpty) {
     final name = pending.removeLast();
@@ -40,7 +40,7 @@ String packageTestRuntime(String packageName, Map<String, Object?> graph) {
           dependencies.any((dependency) => dependency is! String)) {
         throw FormatException('Invalid $key for $name');
       }
-      pending.addAll(dependencies.cast<String>());
+      pending.addAll(dependencies.cast());
     }
   }
   return 'dart';
@@ -54,7 +54,7 @@ void main(List<String> arguments) {
     exitCode = 64;
     return;
   }
-  final directory = Directory(arguments.single).absolute;
+  final directory = Directory(arguments.singleOrNull!).absolute;
   final pubspec = loadYaml(
     File('${directory.path}/pubspec.yaml').readAsStringSync(),
   );

@@ -452,7 +452,7 @@ void main() {
       findsNothing,
     );
     expect(tester.widget<AppCard>(shortcut).onTap, isNull);
-    pending.completeError(Exception('offline'));
+    pending.completeError(Exception('offline'), StackTrace.current);
     await tester.pumpAndSettle();
     expect(
       find.descendant(
@@ -587,7 +587,13 @@ void main() {
       await tester.ensureVisible(pager);
       await tester.pumpAndSettle();
       expect(tester.getSize(pager).height, greaterThanOrEqualTo(88));
-      await tester.drag(pager, const Offset(-310, 0));
+      final viewport = tester.getRect(pager);
+      expect(viewport.left, 0);
+      expect(viewport.right, 390);
+      await tester.dragFrom(
+        Offset(388, viewport.center.dy),
+        const Offset(-310, 0),
+      );
       await tester.pumpAndSettle();
       expect(
         tester.widget<TeacherDaySchedule>(find.byType(TeacherDaySchedule)).day,
@@ -719,17 +725,29 @@ void main() {
     await tester.ensureVisible(weeks);
     await tester.pumpAndSettle();
     final pagerState = tester.state(days);
+    final weekPage = find.descendant(
+      of: weeks,
+      matching: find.byType(PageView),
+    );
+    final weekScrollable = tester.state<ScrollableState>(
+      find.descendant(of: weekPage, matching: find.byType(Scrollable)),
+    );
     await tester.drag(weeks, const Offset(-310, 0));
-    for (var frame = 0; frame < 12; frame++) {
+    for (
+      var frame = 0;
+      frame < 40 && weekScrollable.position.isScrollingNotifier.value;
+      frame++
+    ) {
       await tester.pump(const Duration(milliseconds: 50));
     }
+    expect(weekScrollable.position.isScrollingNotifier.value, isFalse);
     expect(
       tester.widget<TeacherDaySchedule>(find.byType(TeacherDaySchedule)).day,
       nextMonday.add(const Duration(days: 3)),
     );
     expect(tester.state(days), same(pagerState));
     expect(find.text('Занятий в этот день нет'), findsNothing);
-    pending.completeError(Exception('offline'));
+    pending.completeError(Exception('offline'), StackTrace.current);
     await tester.pumpAndSettle();
     expect(find.byType(AppErrorState), findsOneWidget);
     expect(tester.state(days), same(pagerState));
@@ -1013,8 +1031,8 @@ void main() {
     );
     expect(find.byType(AppSkeletonGroup), findsNothing);
     expect(find.byType(LinearProgressIndicator), findsNWidgets(2));
-    refreshSchedule.completeError(Exception('network'));
-    refreshRating.completeError(Exception('network'));
+    refreshSchedule.completeError(Exception('network'), StackTrace.current);
+    refreshRating.completeError(Exception('network'), StackTrace.current);
     await refresh;
     await tester.pumpAndSettle();
     expect(find.textContaining('Математика'), findsWidgets);

@@ -16,9 +16,12 @@ class AccountEntryIntentCubit extends HydratedCubit<AccountRole?> {
   }
 
   @override
-  AccountRole? fromJson(Map<String, dynamic> json) =>
-      AccountRole.values.where((role) => role.name == json['role']).firstOrNull;
+  AccountRole? fromJson(Map<String, dynamic> json) => switch (json['role']) {
+    'student' => AccountRole.student,
+    'teacher' => AccountRole.teacher,
+    _ => null,
+  };
 
   @override
-  Map<String, dynamic>? toJson(AccountRole? state) => {'role': state?.name};
+  Map<String, dynamic> toJson(AccountRole? state) => {'role': state?.name};
 }

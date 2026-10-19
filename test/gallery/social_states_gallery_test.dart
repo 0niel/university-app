@@ -423,8 +423,14 @@ Widget _sheet(String form, {bool pending = false}) {
   when(() => market.state).thenReturn(MarketplaceState(isSaving: pending));
   final contactPrefs = _ContactPrefs();
   when(() => contactPrefs.state).thenReturn('');
+  Widget pollCreator() {
+    final polls = _Polls();
+    addTearDown(polls.close);
+    return PollCreatorSheet(cubit: polls);
+  }
+
   final (title, child) = switch (form) {
-    'poll' => ('Создать опрос', PollCreatorSheet(cubit: _Polls())),
+    'poll' => ('Создать опрос', pollCreator()),
     'event' => (
       'Новое событие',
       CreateEventSheet(

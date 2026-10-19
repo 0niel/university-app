@@ -14,9 +14,10 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
     required this.userId,
     required this.organizationId,
     required this._repository,
-    required this._currentUserId,
+    required String? Function() currentUserId,
     AccountRole? entryRole,
-  }) : super(const AccountPersonaState()) {
+  }) : _onCurrentUserId = currentUserId,
+       super(const AccountPersonaState()) {
     if (entryRole != null) {
       _editRevision++;
       emit(
@@ -32,7 +33,7 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
   final String userId;
   final String organizationId;
   final GamificationRepository _repository;
-  final String? Function() _currentUserId;
+  final String? Function() _onCurrentUserId;
   Future<bool>? _restore;
   Future<bool>? _save;
   int _editRevision = 0;
@@ -46,7 +47,7 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
   String get storagePrefix => 'AccountPersonaCubit';
 
   bool get _ownsSession =>
-      !isClosed && userId.isNotEmpty && _currentUserId() == userId;
+      !isClosed && userId.isNotEmpty && _onCurrentUserId() == userId;
 
   Future<void> restore() async {
     await (_restore ??= _restorePersona());
@@ -143,11 +144,13 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
         teacherAvailable: false,
       );
     } else if (teacher != null) {
-      final id = teacher.uid?.trim();
+      final teacherId = teacher.uid?.trim();
       final name = teacher.name.trim();
-      if (id == null || id.isEmpty || name.isEmpty) return Future.value(false);
+      if (teacherId == null || teacherId.isEmpty || name.isEmpty) {
+        return Future.value(false);
+      }
       persona = persona.copyWith(
-        teacherId: id,
+        teacherId: teacherId,
         teacherName: name,
         teacherAvailable: true,
       );
@@ -167,7 +170,7 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
         loaded: true,
         pendingEdit: teacherEdited
             ? AccountPersonaEdit.teacherSelection
-            : state.pendingEdit ?? AccountPersonaEdit.roleOnly,
+            : (state.pendingEdit ?? AccountPersonaEdit.roleOnly),
         operation: state.syncError
             ? AccountPersonaOperation.idle
             : state.operation,
@@ -188,7 +191,7 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
       if (!state.loading) _restore = null;
       await restore();
       if (_ownsSession && state.pendingSync) await _persist();
-      return;
+      break;
     }
   }
 
@@ -315,11 +318,12 @@ class AccountPersonaCubit extends HydratedCubit<AccountPersonaState> {
       }
       final AccountPersonaEdit? pendingEdit;
       if (json.containsKey('pendingEdit')) {
-        final value = json['pendingEdit'];
-        pendingEdit = AccountPersonaEdit.values
-            .where((edit) => edit.name == value)
-            .firstOrNull;
-        if (value != null && pendingEdit == null) return null;
+        pendingEdit = switch (json['pendingEdit']) {
+          'roleOnly' => AccountPersonaEdit.roleOnly,
+          'teacherSelection' => AccountPersonaEdit.teacherSelection,
+          _ => null,
+        };
+        if (json['pendingEdit'] != null && pendingEdit == null) return null;
       } else {
         pendingEdit = json['pendingSync'] == true
             ? json['teacherSelectionPending'] == true

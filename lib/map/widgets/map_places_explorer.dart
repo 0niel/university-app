@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/services/room_key.dart';
@@ -203,45 +206,58 @@ class _MapPlacesExplorerState extends State<MapPlacesExplorer> {
     final currentCount = _index
         .where((entry) => entry.place.floorId == widget.currentFloorId)
         .length;
+    final firstFloor = currentFloor == null
+        ? null
+        : _floorLabel(currentFloor.floor.number).toLowerCase();
     final sourceUri = Uri.tryParse(widget.campus.sourceUrl);
     final hasSource =
         sourceUri?.scheme == 'https' && (sourceUri?.host.isNotEmpty ?? false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Места и сервисы', style: AppText.sectionLarge),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          query.isNotEmpty
-              ? 'Найдено мест: ${places.length}'
-              : currentFloor == null
-              ? '${places.length} мест на карте'
-              : '${places.length} мест · '
-                    'сначала '
-                    '${_floorLabel(currentFloor.floor.number).toLowerCase()}',
-          style: AppText.subtext.copyWith(color: context.colors.muted),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Места и сервисы', style: AppText.sectionLarge),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                query.isNotEmpty
+                    ? 'Найдено мест: ${places.length}'
+                    : currentFloor == null
+                    ? '${places.length} мест на карте'
+                    : '${places.length} мест · '
+                          'сначала '
+                          '${firstFloor ?? currentFloor}',
+                style: AppText.subtext.copyWith(color: context.colors.muted),
+              ),
+              if (hasSource)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: AppButton.text(
+                    label: widget.campus.sourceLabel.isEmpty
+                        ? 'Источник планов'
+                        : '${widget.campus.sourceLabel} · источник',
+                    size: AppButtonSize.small,
+                    onPressed: () => unawaited(_openSource()),
+                  ),
+                ),
+              if (_sourceFailed) ...[
+                const AppBanner(
+                  message: 'Не удалось открыть источник. Ссылка доступна ниже.',
+                  tone: AppBannerTone.warn,
+                ),
+                SelectableText(widget.campus.sourceUrl, style: AppText.subtext),
+              ],
+              const SizedBox(height: AppSpacing.md),
+            ],
+          ),
         ),
-        if (hasSource)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: AppButton.text(
-              label: widget.campus.sourceLabel.isEmpty
-                  ? 'Источник планов'
-                  : '${widget.campus.sourceLabel} · источник',
-              size: AppButtonSize.small,
-              onPressed: _openSource,
-            ),
-          ),
-        if (_sourceFailed) ...[
-          const AppBanner(
-            message: 'Не удалось открыть источник. Ссылка доступна ниже.',
-            tone: AppBannerTone.warn,
-          ),
-          SelectableText(widget.campus.sourceUrl, style: AppText.subtext),
-        ],
-        const SizedBox(height: AppSpacing.md),
         SingleChildScrollView(
+          key: const ValueKey('map-place-categories'),
           scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
           child: Row(
             children: [
               if (currentFloor != null) ...[
@@ -279,69 +295,77 @@ class _MapPlacesExplorerState extends State<MapPlacesExplorer> {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        if (places.isEmpty)
-          const AppBanner(
-            message:
-                'Совпадений нет. Попробуйте номер '
-                'аудитории, название сервиса или оснащение.',
-          )
-        else
-          AppListGroup(
-            dividerIndent:
-                AppSpacing.lg + AppControlSize.iconTile + AppSpacing.md,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final entry in places.take(_limit))
-                AppListRow(
-                  key: ValueKey(entry.place.id),
-                  title: _placeTitle(entry.place),
-                  titleMaxLines: 2,
-                  subtitle: _subtitle(entry.place),
-                  strong: true,
-                  leading: AppIconTile(
-                    background: context.colors.tintOf(
-                      _categoryColor(context, entry.place.kind),
-                    ),
-                    child: Icon(
-                      mapPlaceKindIcon(entry.place.kind),
-                      size: AppIconSize.md,
-                      color: _categoryColor(context, entry.place.kind),
-                    ),
-                  ),
-                  onTap: () => widget.onPlace(entry.place),
+              if (places.isEmpty)
+                const AppBanner(
+                  message:
+                      'Совпадений нет. Попробуйте номер '
+                      'аудитории, название сервиса или оснащение.',
+                )
+              else
+                AppListGroup(
+                  dividerIndent:
+                      AppSpacing.lg + AppControlSize.iconTile + AppSpacing.md,
+                  children: [
+                    for (final entry in places.take(_limit))
+                      AppListRow(
+                        key: ValueKey(entry.place.id),
+                        title: _placeTitle(entry.place),
+                        titleMaxLines: 2,
+                        subtitle: _subtitle(entry.place),
+                        strong: true,
+                        leading: AppIconTile(
+                          background: context.colors.tintOf(
+                            _categoryColor(context, entry.place.kind),
+                          ),
+                          child: Icon(
+                            mapPlaceKindIcon(entry.place.kind),
+                            size: AppIconSize.md,
+                            color: _categoryColor(context, entry.place.kind),
+                          ),
+                        ),
+                        onTap: () => widget.onPlace(entry.place),
+                      ),
+                  ],
                 ),
+              if (places.length > _limit)
+                AppButton.text(
+                  label: 'Ещё ${places.length - _limit} мест',
+                  onPressed: () => setState(() => _limit += 30),
+                ),
+              const SizedBox(height: AppSpacing.lg),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  AppButton.secondary(
+                    label: 'Улучшить карту',
+                    size: AppButtonSize.small,
+                    onPressed: widget.onCommunity,
+                  ),
+                  AppButton.text(
+                    label: 'Обновить данные',
+                    size: AppButtonSize.small,
+                    onPressed: widget.onRefresh,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Версия ${widget.campus.revision} · '
+                '${switch (widget.campus.origin) {
+                  MapDataOrigin.remote => 'Загружена с сервера',
+                  MapDataOrigin.cache => 'Сохранённая карта',
+                  MapDataOrigin.bundled => 'Карта из приложения',
+                }}',
+                style: AppText.caption.copyWith(color: context.colors.muted),
+              ),
             ],
           ),
-        if (places.length > _limit)
-          AppButton.text(
-            label: 'Ещё ${places.length - _limit} мест',
-            onPressed: () => setState(() => _limit += 30),
-          ),
-        const SizedBox(height: AppSpacing.lg),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            AppButton.secondary(
-              label: 'Улучшить карту',
-              size: AppButtonSize.small,
-              onPressed: widget.onCommunity,
-            ),
-            AppButton.text(
-              label: 'Обновить данные',
-              size: AppButtonSize.small,
-              onPressed: widget.onRefresh,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          'Версия ${widget.campus.revision} · '
-          '${switch (widget.campus.origin) {
-            MapDataOrigin.remote => 'Загружена с сервера',
-            MapDataOrigin.cache => 'Сохранённая карта',
-            MapDataOrigin.bundled => 'Карта из приложения',
-          }}',
-          style: AppText.caption.copyWith(color: context.colors.muted),
         ),
         const SizedBox(height: AppSpacing.lg),
       ],
@@ -361,11 +385,11 @@ class _PlaceEntry {
 }
 
 int _metadataScore(MapPlaceData place) =>
-    (place.description?.isNotEmpty ?? false ? 4 : 0) +
-    (place.scheduleClassroomId?.isNotEmpty ?? false ? 8 : 0) +
+    ((place.description?.isNotEmpty ?? false) ? 4 : 0) +
+    ((place.scheduleClassroomId?.isNotEmpty ?? false) ? 8 : 0) +
     place.equipment.length +
     place.menu.length +
-    (place.openingHours?.isNotEmpty ?? false ? 2 : 0) +
+    ((place.openingHours?.isNotEmpty ?? false) ? 2 : 0) +
     (place.capacity == null ? 0 : 1);
 
 String _floorLabel(int number) => switch (number) {
@@ -399,9 +423,8 @@ List<(String, int?)> _naturalParts(String label) =>
     }).toList();
 
 int _compareNatural(List<(String, int?)> a, List<(String, int?)> b) {
-  for (var index = 0; index < a.length && index < b.length; index++) {
-    final (partA, numberA) = a[index];
-    final (partB, numberB) = b[index];
+  for (final pair in IterableZip([a, b])) {
+    final [(partA, numberA), (partB, numberB)] = pair;
     final order = numberA != null && numberB != null
         ? numberA.compareTo(numberB)
         : partA.compareTo(partB);

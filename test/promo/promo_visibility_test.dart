@@ -80,7 +80,7 @@ void main() {
     expect(promoAccentColor('#FC3F1D', Colors.black), const Color(0xFFFC3F1D));
     expect(promoAccentColor('nope', Colors.black), Colors.black);
     expect(
-      promoTelegramUri('@i_am_oniel').toString(),
+      promoTelegramUri('@i_am_oniel')?.toString(),
       'https://t.me/i_am_oniel',
     );
     expect(promoTelegramUri(' '), isNull);

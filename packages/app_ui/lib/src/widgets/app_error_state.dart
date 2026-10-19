@@ -29,16 +29,16 @@ class AppErrorState extends StatelessWidget {
     super.key,
     this.message,
     this.messageMaxWidth = 260,
-  })  : compact = true,
-        icon = null,
-        lineIcon = AppLineIcon.wifiOff,
-        primaryLabel = '',
-        onPrimary = null,
-        primaryIcon = null,
-        secondaryLabel = null,
-        onSecondary = null,
-        secondaryIcon = null,
-        footnote = null;
+  }) : compact = true,
+       icon = null,
+       lineIcon = AppLineIcon.wifiOff,
+       primaryLabel = '',
+       onPrimary = null,
+       primaryIcon = null,
+       secondaryLabel = null,
+       onSecondary = null,
+       secondaryIcon = null,
+       footnote = null;
 
   final IconData? icon;
   final AppLineIcon lineIcon;

@@ -115,7 +115,7 @@ class CampusRepository {
   }
 
   Future<List<Poll>> getPolls({
-    PollFilter filter = PollFilter.all,
+    PollFilter filter = .all,
     PollCategory? category,
     String? query,
     int limit = 20,
@@ -144,7 +144,7 @@ class CampusRepository {
     String description = '',
     PollCategory? category,
     bool isAnonymous = false,
-    PollResultsVisibility resultsVisibility = PollResultsVisibility.always,
+    PollResultsVisibility resultsVisibility = .always,
     DateTime? expiresAt,
     bool allowChange = false,
   }) async {
@@ -819,7 +819,7 @@ class CampusRepository {
     if (response is! List || response.any((value) => value is! String)) {
       throw const FormatException('Material subjects must be a JSON array');
     }
-    return response.cast<String>();
+    return response.cast();
   }
 
   Future<String> createPublicMaterial({
@@ -841,12 +841,10 @@ class CampusRepository {
     String? batchId,
   }) async {
     final trimmedTitle = title.trim();
-    final subjects = <String>[
-      ...{
-        for (final value in subjectNames.isEmpty ? [subjectName] : subjectNames)
-          if (value.trim().isNotEmpty) value.trim(),
-      },
-    ];
+    final subjects = {
+      for (final value in subjectNames.isEmpty ? [subjectName] : subjectNames)
+        if (value.trim().isNotEmpty) value.trim(),
+    }.toList();
     if (trimmedTitle.isEmpty || trimmedTitle.length > 200) {
       throw ArgumentError(
         'A material title of up to 200 characters is required',
@@ -1059,12 +1057,15 @@ class CampusRepository {
           !MaterialAccess.fromJson(response.cast()).canDownload) {
         throw const FormatException('Material purchase was not confirmed');
       }
-    } on PostgrestException catch (error) {
-      throw MaterialPurchaseException(switch (error.message) {
-        'MATERIAL_INSUFFICIENT_BALANCE' => .insufficientBalance,
-        'MATERIAL_PRICE_CHANGED' => .priceChanged,
-        _ => .unavailable,
-      });
+    } on PostgrestException catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        MaterialPurchaseException(switch (error.message) {
+          'MATERIAL_INSUFFICIENT_BALANCE' => .insufficientBalance,
+          'MATERIAL_PRICE_CHANGED' => .priceChanged,
+          _ => .unavailable,
+        }),
+        stackTrace,
+      );
     }
   }
 
@@ -1245,7 +1246,7 @@ class CampusRepository {
     final controller = StreamController<void>.broadcast();
     final channel = _supabase.channel('group-notes-list:$_organizationId')
       ..onPostgresChanges(
-        event: PostgresChangeEvent.all,
+        event: .all,
         schema: 'core',
         table: 'group_notes',
         callback: (payload) => controller.add(null),

@@ -476,7 +476,7 @@ class _Selection extends StatelessWidget {
         'Segmented · на canvas',
         AppSegmentedControl(
           value: 0,
-          onCanvas: true,
+          isOnCanvas: true,
           onChanged: (_) {},
           options: const [
             AppSegmentedOption(

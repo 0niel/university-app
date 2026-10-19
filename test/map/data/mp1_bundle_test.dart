@@ -8,6 +8,7 @@ import 'package:rtu_mirea_app/map/services/svg_room_parser.dart';
 import 'package:rtu_mirea_app/map/widgets/map_structure_layer.dart';
 
 class _NoCache implements MapDataCache {
+  const _NoCache();
   @override
   Future<String?> read(String key) async => null;
   @override
@@ -25,7 +26,7 @@ void main() {
       );
       final repository = MapDataRepository(
         organizationId: 'mirea',
-        cache: _NoCache(),
+        cache: const _NoCache(),
         rpc: (_, _) async => jsonDecode(source),
       );
       addTearDown(repository.dispose);

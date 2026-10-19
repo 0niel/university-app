@@ -38,13 +38,17 @@ class DeadlinesHero extends StatelessWidget {
                     children: [
                       TextSpan(
                         text: l10n.deadlinesOfTotal(total),
-                        style: AppText.serif(16).copyWith(color: colors.muted),
+                        style: AppText.sans(
+                          16,
+                          FontWeight.w500,
+                        ).copyWith(color: colors.muted),
                       ),
                     ],
                   ),
-                  style: AppText.serif(28, height: 1.1).copyWith(
-                    color: colors.ink,
-                  ),
+                  style: AppText.sans(28, FontWeight.w700, height: 1.2)
+                      .copyWith(
+                        color: colors.ink,
+                      ),
                 ),
               ],
             ),

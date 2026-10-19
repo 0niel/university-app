@@ -32,8 +32,9 @@ void main() {
     );
   });
   for (final legacy in [false, true]) {
-    testWidgets('ring uses reference radius27 and no zero-value cap $legacy',
-        (tester) async {
+    testWidgets('ring uses reference radius27 and no zero-value cap $legacy', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrapKit(
           legacy
@@ -77,8 +78,9 @@ void main() {
     expect(kitStyleOf(tester, '66%')?.fontSize, 14);
   });
 
-  testWidgets('busy hatch uses135deg and5px perpendicular period',
-      (tester) async {
+  testWidgets('busy hatch uses135deg and5px perpendicular period', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         const SizedBox(
@@ -115,8 +117,9 @@ void main() {
   });
 
   for (final dark in [false, true]) {
-    testWidgets('feedback states remain readable at200percent $dark',
-        (tester) async {
+    testWidgets('feedback states remain readable at200percent $dark', (
+      tester,
+    ) async {
       const action = 'Просмотреть все изменения';
       await tester.pumpWidget(
         wrapKit(
@@ -160,8 +163,9 @@ void main() {
     });
   }
 
-  testWidgets('toast action is40px inside44px target and64px surface',
-      (tester) async {
+  testWidgets('toast action is40px inside44px target and64px surface', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         SizedBox(

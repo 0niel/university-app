@@ -1,7 +1,7 @@
 part of 'poll_creator_sheet.dart';
 
-class _PreviewStep extends StatelessWidget {
-  const _PreviewStep({
+class _CreatorPreviewStep extends StatelessWidget {
+  const _CreatorPreviewStep({
     required this.title,
     required this.description,
     required this.category,

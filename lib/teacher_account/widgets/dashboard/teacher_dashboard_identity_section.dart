@@ -39,14 +39,19 @@ class TeacherDashboardIdentitySection extends StatelessWidget {
     final l10n = context.l10n;
     final colors = context.colors;
     final compactIdentity =
-        MediaQuery.sizeOf(context).width < 360 ||
+        (MediaQuery.maybeWidthOf(context) ?? double.infinity) < 360 ||
         MediaQuery.textScalerOf(context).scale(1) > 1.4 ||
         teacher.name.length > 45;
     final nameStyle = teacher.name.length > 45 && compactIdentity
         ? AppText.sans(17, FontWeight.w700)
         : compactIdentity
         ? AppText.title
-        : AppText.serif(28, height: 1.2);
+        : AppText.sans(
+            28,
+            FontWeight.w600,
+            height: 1.2,
+            letterSpacingEm: -.035,
+          );
     final name = Text(
       teacher.name.length > 45 && compactIdentity
           ? teacher.name.replaceAll('-', '-\n')

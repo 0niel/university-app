@@ -87,27 +87,29 @@ class _LessonMaterialsPageState extends State<LessonMaterialsPage> {
   }
 
   Future<void> _openViewer(LessonMaterial material) async {
-    final materials = List<LessonMaterial>.of(_materials);
+    final materials = List.of(_materials);
     final index = materials.indexWhere((m) => m.id == material.id);
     if (index < 0 || _openingId != null) return;
     setState(() => _openingId = material.id);
     try {
       final repository = context.read<ScheduleRepository>();
-      final urls = await Future.wait(
-        materials.map((m) => _urlFor(repository, m)),
+      final items = await Future.wait(
+        materials.map((item) async {
+          final url = await _urlFor(repository, item);
+          return MediaItem(
+            url: url,
+            kind: MediaItem.kindOf(
+              mimeType: item.mimeType,
+              fileName: item.fileName,
+            ),
+            title: item.title,
+            fileName: item.fileName,
+            mimeType: item.mimeType,
+            sizeBytes: item.fileSize,
+          );
+        }),
       );
       if (!mounted) return;
-      final items = [
-        for (final (i, m) in materials.indexed)
-          MediaItem(
-            url: urls[i],
-            kind: MediaItem.kindOf(mimeType: m.mimeType, fileName: m.fileName),
-            title: m.title,
-            fileName: m.fileName,
-            mimeType: m.mimeType,
-            sizeBytes: m.fileSize,
-          ),
-      ];
       await showMediaViewer(context, items: items, initialIndex: index);
     } on Exception catch (_) {
       if (!mounted) return;

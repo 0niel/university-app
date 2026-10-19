@@ -128,7 +128,10 @@ class CommunityRepository {
       final posts = await _discourse.getTopicPosts(topicId);
       final first = posts.firstWhere(
         (p) => p.postNumber == 1,
-        orElse: () => posts.first,
+        orElse:
+            () =>
+                posts.firstOrNull ??
+                (throw StateError('The topic has no posts')),
       );
       return DiscoursePost(
         id: first.id,

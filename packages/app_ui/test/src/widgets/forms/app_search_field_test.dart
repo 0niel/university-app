@@ -5,6 +5,57 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../kit_harness.dart';
 
 void main() {
+  for (final dark in [false, true]) {
+    testWidgets('focus decoration preserves search input, dark=$dark', (
+      tester,
+    ) async {
+      final controller = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focus.dispose);
+      final changes = <String>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: dark ? AppTheme.darkTheme : AppTheme.lightTheme,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 280,
+                child: AppSearchField(
+                  controller: controller,
+                  focusNode: focus,
+                  onChanged: changes.add,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final field = find.byType(EditableText);
+      final element = tester.element(field);
+      final bounds = tester.getRect(find.byType(AppSearchField));
+      final inputOrigin = tester.getTopLeft(field);
+      await tester.enterText(field, 'Алгебра');
+      await tester.pumpAndSettle();
+      expect(tester.element(field), same(element));
+      expect(tester.getRect(find.byType(AppSearchField)), bounds);
+      expect(tester.getTopLeft(field), inputOrigin);
+      expect(controller.text, 'Алгебра');
+      expect(focus.hasFocus, isTrue);
+      expect(changes, ['Алгебра']);
+      focus.unfocus();
+      await tester.pumpAndSettle();
+      expect(tester.element(field), same(element));
+      await tester.enterText(field, 'Физика');
+      await tester.pumpAndSettle();
+      expect(controller.text, 'Физика');
+      expect(changes, ['Алгебра', 'Физика']);
+      expect(focus.hasFocus, isTrue);
+      expect(tester.element(field), same(element));
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('search does not register an autofill client on Android', (
     tester,
   ) async {
@@ -49,14 +100,14 @@ void main() {
     expect(find.text('Поиск по всему приложению'), findsOneWidget);
   });
 
-  testWidgets('onCanvas swaps the fill to surface', (tester) async {
+  testWidgets('isOnCanvas swaps the fill to surface', (tester) async {
     final controller = TextEditingController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       wrapKit(
         SizedBox(
           width: 320,
-          child: AppSearchField(controller: controller, onCanvas: true),
+          child: AppSearchField(controller: controller, isOnCanvas: true),
         ),
       ),
     );

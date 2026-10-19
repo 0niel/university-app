@@ -10,14 +10,14 @@ import 'package:rtu_mirea_schedule_api_client/rtu_mirea_schedule_api_client.dart
 import 'package:schedule_fetcher/source_fetcher.dart';
 
 const kScheduleBaseUrl = 'https://schedule-of.mirea.ru';
-const _minimumFullSyncTargetCounts = {
+const _kMinimumFullSyncTargetCounts = {
   'group': 750,
   'teacher': 1100,
   'classroom': 550,
 };
-const _minimumFullSyncDatedParts = 10000;
-const _maximumFullSyncUndatedRatio = 0.05;
-const _fullReingestInterval = Duration(hours: 24);
+const _kMinimumFullSyncDatedParts = 10000;
+const _kMaximumFullSyncUndatedRatio = 0.05;
+const _kFullReingestInterval = Duration(hours: 24);
 
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
@@ -224,7 +224,7 @@ class SyncMireaSchedule {
           !fullSync ||
           lastFullReingestAt == null ||
           DateTime.now().toUtc().difference(lastFullReingestAt) >=
-              _fullReingestInterval;
+              _kFullReingestInterval;
     }
 
     try {
@@ -239,15 +239,15 @@ class SyncMireaSchedule {
         throw StateError('Schedule sync incomplete: ${result.failed} failures');
       }
       if (fullSync) {
-        if (result.datedParts < _minimumFullSyncDatedParts) {
+        if (result.datedParts < _kMinimumFullSyncDatedParts) {
           throw StateError(
             'Schedule dated part coverage is below threshold: '
-            '${result.datedParts} minimum=$_minimumFullSyncDatedParts',
+            '${result.datedParts} minimum=$_kMinimumFullSyncDatedParts',
           );
         }
         final totalParts = result.datedParts + result.undatedParts;
         if (totalParts > 0 &&
-            result.undatedParts / totalParts > _maximumFullSyncUndatedRatio) {
+            result.undatedParts / totalParts > _kMaximumFullSyncUndatedRatio) {
           throw StateError(
             'Schedule undated part ratio is above threshold: '
             '${result.undatedParts}/$totalParts',
@@ -332,15 +332,15 @@ class SyncMireaSchedule {
     }
 
     final targetCounts = {
-      for (final type in _minimumFullSyncTargetCounts.keys)
+      for (final type in _kMinimumFullSyncTargetCounts.keys)
         type: targets.where((target) => target.targetType == type).length,
     };
     if (enforceCoverage) {
-      for (final entry in _minimumFullSyncTargetCounts.entries) {
+      for (final entry in _kMinimumFullSyncTargetCounts.entries) {
         if (targetCounts[entry.key]! < entry.value) {
           throw StateError(
             'Schedule target coverage is below threshold: '
-            '${entry.key}=${targetCounts[entry.key]} minimum=${entry.value}',
+            '${entry.key}=${targetCounts[entry.key]!} minimum=${entry.value}',
           );
         }
       }
@@ -375,7 +375,7 @@ class SyncMireaSchedule {
           }
           final metadata = normalized['metadata'];
           final currentUndated = metadata is Map<String, Object?>
-              ? metadata['undated_parts'] as int? ?? 0
+              ? (metadata['undated_parts'] as int? ?? 0)
               : 0;
           datedParts += parts.length;
           undatedParts += currentUndated;

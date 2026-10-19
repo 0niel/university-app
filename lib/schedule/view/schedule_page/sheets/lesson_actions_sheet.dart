@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,9 +19,9 @@ Future<void> showLessonActionsSheet(
 }) {
   final l10n = context.l10n;
   final navigator = Navigator.of(context, rootNavigator: true);
-  void run(VoidCallback action) {
+  void run(FutureOr<void> Function() onAction) {
     navigator.pop();
-    if (context.mounted) action();
+    if (context.mounted) unawaited(Future.sync(onAction));
   }
 
   return showAppSheet<void>(

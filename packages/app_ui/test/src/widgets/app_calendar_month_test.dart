@@ -73,7 +73,7 @@ void main() {
             month: month,
             onMonthChanged: (_) {},
             onDaySelected: (_) {},
-            dotsForDay: (day) =>
+            dotsBuilder: (day) =>
                 day.day == 10 ? [Colors.red, Colors.blue] : const [],
           ),
         ),

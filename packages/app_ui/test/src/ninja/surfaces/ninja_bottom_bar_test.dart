@@ -34,7 +34,7 @@ void main() {
       .toList();
 
   group('NinjaBottomBar', () {
-    testWidgets('paints a 64px surface pill with 46px circles', (
+    testWidgets('keeps the glass bar compact with one moving selection', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -43,25 +43,20 @@ void main() {
         ),
       );
 
-      final pill = tester.widget<Container>(
-        find
-            .descendant(
-              of: find.byType(NinjaBottomBar),
-              matching: find.byType(Container),
-            )
-            .first,
+      final pill = find.byType(AppGlassSurface);
+      expect(tester.getSize(pill).height, AppControlSize.bottomBar);
+      expect(find.byType(AppGlassHighlight), findsNothing);
+      expect(
+        find.byKey(const ValueKey('navigation-selection')),
+        findsOneWidget,
       );
-      expect(pill.constraints?.maxHeight, AppControlSize.bottomBar);
-      final decoration = pill.decoration! as BoxDecoration;
-      expect(decoration.color, kitColors.surface);
-      expect(decoration.borderRadius, BorderRadius.circular(AppRadius.full));
 
       final all = circles(tester);
       expect(all, hasLength(5));
       expect(all.first.constraints?.maxWidth, AppControlSize.navCircle);
       expect(
         (all[1].decoration! as BoxDecoration).color,
-        kitColors.accent,
+        const Color(0x00000000),
       );
       expect(
         (all[0].decoration! as BoxDecoration).color,
@@ -69,7 +64,7 @@ void main() {
       );
     });
 
-    testWidgets('fades the canvas behind the bar and reserves 84px', (
+    testWidgets('reserves 84px without an opaque canvas behind glass', (
       tester,
     ) async {
       late BuildContext captured;
@@ -88,22 +83,23 @@ void main() {
         ),
       );
 
-      final fade = tester.widget<DecoratedBox>(
-        find
-            .descendant(
-              of: find.byType(NinjaBottomBar),
-              matching: find.byType(DecoratedBox),
-            )
-            .first,
+      final boxes = tester.widgetList<DecoratedBox>(
+        find.descendant(
+          of: find.byType(NinjaBottomBar),
+          matching: find.byType(DecoratedBox),
+        ),
       );
-      final gradient = (fade.decoration as BoxDecoration).gradient;
-      expect(gradient, isA<LinearGradient>());
-      expect((gradient! as LinearGradient).colors.first, kitColors.canvas);
+      expect(
+        boxes.where(
+          (box) => (box.decoration as BoxDecoration).color == kitColors.canvas,
+        ),
+        isEmpty,
+      );
       expect(NinjaBottomBar.extentOf(captured), 84);
       expect(tester.getSize(find.byType(NinjaBottomBar)).height, 84);
     });
 
-    testWidgets('badge dots flip to onAccent on the selected item', (
+    testWidgets('badge dots stay visible on the translucent selection', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -120,10 +116,10 @@ void main() {
           )
           .map((box) => (box.decoration as BoxDecoration).color)
           .toList();
-      expect(dots, [kitColors.onAccent, kitColors.accent]);
+      expect(dots, [kitColors.accent, kitColors.accent]);
     });
 
-    testWidgets('icons are tinted onAccent / muted and taps select', (
+    testWidgets('icons retain contrast on glass and taps select', (
       tester,
     ) async {
       int? picked;
@@ -146,7 +142,7 @@ void main() {
           )
           .map((theme) => theme.data)
           .toList();
-      expect(themes[1].color, kitColors.onAccent);
+      expect(themes[1].color, kitColors.ink);
       expect(themes[0].color, kitColors.muted);
       expect(themes[0].size, 23);
 
@@ -180,36 +176,38 @@ void main() {
     });
 
     for (final scale in [1.0, 2.0]) {
-      testWidgets('outside extent matches the bar with safe area at ${scale}x',
-          (
-        tester,
-      ) async {
-        late double extent;
-        await tester.pumpWidget(
-          host(
-            MediaQuery(
-              data: MediaQueryData(
-                padding: const EdgeInsets.only(bottom: 34),
-                viewPadding: const EdgeInsets.only(bottom: 34),
-                textScaler: TextScaler.linear(scale),
-              ),
-              child: Builder(
-                builder: (context) {
-                  extent = AppBottomBar.extentOf(context);
-                  return NinjaBottomBar(
-                    items: items,
-                    currentIndex: 0,
-                    onSelected: (_) {},
-                  );
-                },
+      testWidgets(
+        'outside extent matches the bar with safe area at ${scale}x',
+        (
+          tester,
+        ) async {
+          late double extent;
+          await tester.pumpWidget(
+            host(
+              MediaQuery(
+                data: MediaQueryData(
+                  padding: const EdgeInsets.only(bottom: 34),
+                  viewPadding: const EdgeInsets.only(bottom: 34),
+                  textScaler: TextScaler.linear(scale),
+                ),
+                child: Builder(
+                  builder: (context) {
+                    extent = AppBottomBar.extentOf(context);
+                    return NinjaBottomBar(
+                      items: items,
+                      currentIndex: 0,
+                      onSelected: (_) {},
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        );
-        expect(extent, scale == 1 ? 118 : 130);
-        expect(tester.getSize(find.byType(NinjaBottomBar)).height, extent);
-        expect(tester.takeException(), isNull);
-      });
+          );
+          expect(extent, scale == 1 ? 118 : 130);
+          expect(tester.getSize(find.byType(NinjaBottomBar)).height, extent);
+          expect(tester.takeException(), isNull);
+        },
+      );
     }
 
     testWidgets('viewport extent updates without adding another bar height', (

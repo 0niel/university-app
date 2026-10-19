@@ -3,6 +3,323 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:rtu_mirea_app/map/navigation/indoor_navigation_graph.dart';
 
+class IndoorRoutePlanner {
+  IndoorRoutePlanner(this.graph) {
+    for (final edge in graph.edges) {
+      final from = graph.nodesById[edge.fromNodeId]!;
+      final to = graph.nodesById[edge.toNodeId]!;
+      _addLeg(IndoorRouteLeg(from: from, to: to, edge: edge));
+      if (edge.bidirectional) {
+        _addLeg(IndoorRouteLeg(from: to, to: from, edge: edge));
+      }
+    }
+  }
+
+  final IndoorNavigationGraph graph;
+  final _adjacency = <String, List<IndoorRouteLeg>>{};
+  final _reverseAdjacency = <String, List<IndoorRouteLeg>>{};
+
+  void _addLeg(IndoorRouteLeg leg) {
+    (_adjacency[leg.from.id] ??= []).add(leg);
+    (_reverseAdjacency[leg.to.id] ??= []).add(leg);
+  }
+
+  Set<String> reachableNodeIds({
+    required Iterable<String> nodeIds,
+    IndoorRouteDirection direction = IndoorRouteDirection.forward,
+    IndoorRouteOptions options = const IndoorRouteOptions(),
+  }) => Set.unmodifiable(
+    _reachableLabels({'': nodeIds}, direction, options).keys,
+  );
+
+  Map<String, Set<String>> connectedEndpointNodeIds({
+    required Map<String, Iterable<String>> endpoints,
+    required IndoorRouteDirection direction,
+    IndoorRouteOptions options = const IndoorRouteOptions(),
+  }) {
+    final labels = _reachableLabels(endpoints, direction, options);
+    return Map.unmodifiable({
+      for (final endpoint in endpoints.entries)
+        endpoint.key: Set.unmodifiable(
+          endpoint.value.where(
+            (nodeId) =>
+                labels[nodeId]?.any((key) => key != endpoint.key) ?? false,
+          ),
+        ),
+    });
+  }
+
+  Map<String, Set<String>> _reachableLabels(
+    Map<String, Iterable<String>> endpoints,
+    IndoorRouteDirection direction,
+    IndoorRouteOptions options,
+  ) {
+    final labels = <String, Set<String>>{};
+    final queue = <(IndoorNavigationNode, String)>[];
+    void enqueue(IndoorNavigationNode node, String key) {
+      if (_nodeClosed(node, options) ||
+          (options.wheelchair && !node.wheelchairAccessible)) {
+        return;
+      }
+      final owners = labels.putIfAbsent(node.id, () => {});
+      if (owners.length < 2 && owners.add(key)) queue.add((node, key));
+    }
+
+    for (final endpoint in endpoints.entries) {
+      for (final nodeId in endpoint.value) {
+        final node = graph.nodesById[nodeId];
+        if (node != null) enqueue(node, endpoint.key);
+      }
+    }
+    final adjacency = direction == IndoorRouteDirection.forward
+        ? _adjacency
+        : _reverseAdjacency;
+    for (var index = 0; index < queue.length; index++) {
+      final (node, key) = queue[index];
+      for (final leg in adjacency[node.id] ?? <IndoorRouteLeg>[]) {
+        if (!_allowed(leg, options)) continue;
+        enqueue(
+          direction == IndoorRouteDirection.forward ? leg.to : leg.from,
+          key,
+        );
+      }
+    }
+    return labels;
+  }
+
+  IndoorRouteResult findRoute({
+    required String startNodeId,
+    required String destinationNodeId,
+    IndoorRouteOptions options = const IndoorRouteOptions(),
+  }) => findRouteBetween(
+    startNodeIds: [startNodeId],
+    destinationNodeIds: [destinationNodeId],
+    options: options,
+  );
+
+  IndoorRouteResult findRouteBetween({
+    required Iterable<String> startNodeIds,
+    required Iterable<String> destinationNodeIds,
+    IndoorRouteOptions options = const IndoorRouteOptions(),
+  }) {
+    final starts = startNodeIds
+        .toSet()
+        .map((id) => graph.nodesById[id])
+        .nonNulls
+        .toList();
+    final destinations = destinationNodeIds
+        .toSet()
+        .map((id) => graph.nodesById[id])
+        .nonNulls
+        .toList();
+    if (starts.isEmpty) {
+      return const IndoorRouteResult._(IndoorRouteStatus.unknownStart);
+    }
+    if (destinations.isEmpty) {
+      return const IndoorRouteResult._(IndoorRouteStatus.unknownDestination);
+    }
+    final openStarts = starts
+        .where((node) => !_nodeClosed(node, options))
+        .toList();
+    final openDestinations = destinations
+        .where((node) => !_nodeClosed(node, options))
+        .toList();
+    if (openStarts.isEmpty || openDestinations.isEmpty) {
+      return const IndoorRouteResult._(IndoorRouteStatus.closedEndpoint);
+    }
+    final availableStarts = openStarts
+        .where((node) => !options.wheelchair || node.wheelchairAccessible)
+        .toList();
+    final availableDestinationIds = openDestinations
+        .where((node) => !options.wheelchair || node.wheelchairAccessible)
+        .map((node) => node.id)
+        .toSet();
+    if (availableStarts.isEmpty || availableDestinationIds.isEmpty) {
+      return const IndoorRouteResult._(IndoorRouteStatus.inaccessibleEndpoint);
+    }
+    final costs = <String, double>{
+      for (final start in availableStarts) start.id: 0,
+    };
+    final previous = <String, IndoorRouteLeg>{};
+    var sequence = 0;
+    final queue = HeapPriorityQueue<_QueueEntry>((a, b) {
+      final comparison = a.cost.compareTo(b.cost);
+      return comparison == 0 ? a.sequence.compareTo(b.sequence) : comparison;
+    });
+    for (final start in availableStarts) {
+      queue.add(_QueueEntry(start.id, 0, sequence++));
+    }
+
+    while (queue.isNotEmpty) {
+      final current = queue.removeFirst();
+      if (current.cost != costs[current.nodeId]) continue;
+      if (availableDestinationIds.contains(current.nodeId)) {
+        return _buildRoute(graph.nodesById[current.nodeId]!, previous);
+      }
+      for (final leg in _adjacency[current.nodeId] ?? <IndoorRouteLeg>[]) {
+        if (!_allowed(leg, options)) continue;
+        final weight = options.metric == IndoorRouteMetric.distance
+            ? leg.edge.routingCost
+            : (leg.durationSeconds ?? leg.edge.routingCost);
+        final cost = current.cost + weight;
+        if (!cost.isFinite || cost >= (costs[leg.to.id] ?? double.infinity)) {
+          continue;
+        }
+        costs[leg.to.id] = cost;
+        previous[leg.to.id] = leg;
+        queue.add(_QueueEntry(leg.to.id, cost, sequence++));
+      }
+    }
+    return const IndoorRouteResult._(IndoorRouteStatus.unreachable);
+  }
+
+  bool _allowed(IndoorRouteLeg leg, IndoorRouteOptions options) {
+    if (leg.edge.closed ||
+        options.closedEdgeIds.contains(leg.edge.id) ||
+        _nodeClosed(leg.to, options)) {
+      return false;
+    }
+    if ((options.stepFree || options.wheelchair) && leg.edge.hasSteps) {
+      return false;
+    }
+    if (options.wheelchair &&
+        (!leg.edge.wheelchairAccessible || !leg.to.wheelchairAccessible)) {
+      return false;
+    }
+    return true;
+  }
+
+  bool _nodeClosed(IndoorNavigationNode node, IndoorRouteOptions options) =>
+      node.closed || options.closedNodeIds.contains(node.id);
+
+  IndoorRouteResult _buildRoute(
+    IndoorNavigationNode destination,
+    Map<String, IndoorRouteLeg> previous,
+  ) {
+    final reversed = <IndoorRouteLeg>[];
+    var start = destination;
+    while (true) {
+      final leg = previous[start.id];
+      if (leg == null) break;
+      reversed.add(leg);
+      start = leg.from;
+    }
+    final legs = reversed.reversed.toList();
+    final distanceMeters = legs.every((leg) => leg.distanceMeters != null)
+        ? legs.fold<double>(0, (sum, leg) => sum + leg.distanceMeters!)
+        : null;
+    final durationSeconds = legs.every((leg) => leg.durationSeconds != null)
+        ? legs.fold<double>(0, (sum, leg) => sum + leg.durationSeconds!)
+        : null;
+    if ((distanceMeters != null && !distanceMeters.isFinite) ||
+        (durationSeconds != null && !durationSeconds.isFinite)) {
+      return const IndoorRouteResult._(IndoorRouteStatus.unreachable);
+    }
+    final nodes = [start, ...legs.map((leg) => leg.to)];
+    final instructions = <IndoorRouteInstruction>[];
+    if (legs.isNotEmpty) {
+      instructions.add(
+        IndoorRouteInstruction(maneuver: IndoorManeuver.depart, atNode: start),
+      );
+    }
+    IndoorRouteLeg? previousBearing;
+    for (final leg in legs) {
+      final maneuver = _maneuver(previousBearing, leg);
+      final previousInstruction = instructions.lastOrNull;
+      if (maneuver == IndoorManeuver.straight &&
+          previousInstruction != null &&
+          _isWalkingManeuver(previousInstruction.maneuver) &&
+          previousInstruction.toNode?.id == leg.from.id &&
+          previousInstruction.atNode.floorId == leg.to.floorId) {
+        instructions[instructions.length - 1] = IndoorRouteInstruction(
+          maneuver: previousInstruction.maneuver,
+          atNode: previousInstruction.atNode,
+          toNode: leg.to,
+          distanceMeters:
+              previousInstruction.distanceMeters == null ||
+                  leg.distanceMeters == null
+              ? null
+              : previousInstruction.distanceMeters! + leg.distanceMeters!,
+        );
+      } else {
+        instructions.add(
+          IndoorRouteInstruction(
+            maneuver: maneuver,
+            atNode: leg.from,
+            toNode: leg.to,
+            distanceMeters: leg.distanceMeters,
+          ),
+        );
+      }
+      if (leg.changesFloor) {
+        previousBearing = null;
+      } else if (leg.from.x != leg.to.x || leg.from.y != leg.to.y) {
+        previousBearing = leg;
+      }
+    }
+    instructions.add(
+      IndoorRouteInstruction(
+        maneuver: IndoorManeuver.arrive,
+        atNode: destination,
+      ),
+    );
+    return IndoorRouteResult._(
+      IndoorRouteStatus.found,
+      IndoorRoute._(
+        nodes: nodes,
+        legs: legs,
+        instructions: instructions,
+        distanceMeters: distanceMeters,
+        durationSeconds: durationSeconds,
+      ),
+    );
+  }
+
+  IndoorManeuver _maneuver(IndoorRouteLeg? previous, IndoorRouteLeg current) {
+    if (current.changesFloor || current.edge.hasSteps) {
+      return switch (current.edge.kind) {
+        IndoorEdgeKind.stairs => IndoorManeuver.stairs,
+        IndoorEdgeKind.elevator => IndoorManeuver.elevator,
+        IndoorEdgeKind.ramp => IndoorManeuver.ramp,
+        IndoorEdgeKind.escalator => IndoorManeuver.escalator,
+        IndoorEdgeKind.corridor ||
+        IndoorEdgeKind.door ||
+        IndoorEdgeKind.outdoor => IndoorManeuver.floorTransition,
+      };
+    }
+    if (previous == null || previous.changesFloor) {
+      return IndoorManeuver.straight;
+    }
+    final beforeX = previous.to.x - previous.from.x;
+    final beforeY = previous.to.y - previous.from.y;
+    final afterX = current.to.x - current.from.x;
+    final afterY = current.to.y - current.from.y;
+    if ((beforeX == 0 && beforeY == 0) || (afterX == 0 && afterY == 0)) {
+      return IndoorManeuver.straight;
+    }
+    var angle = math.atan2(afterY, afterX) - math.atan2(beforeY, beforeX);
+    if (angle > math.pi) angle -= 2 * math.pi;
+    if (angle < -math.pi) angle += 2 * math.pi;
+    if (angle.abs() >= math.pi * 5 / 6) return IndoorManeuver.turnBack;
+    if (angle.abs() < math.pi / 6) return IndoorManeuver.straight;
+    return angle > 0 ? IndoorManeuver.turnRight : IndoorManeuver.turnLeft;
+  }
+
+  bool _isWalkingManeuver(IndoorManeuver maneuver) => switch (maneuver) {
+    IndoorManeuver.straight ||
+    IndoorManeuver.turnLeft ||
+    IndoorManeuver.turnRight ||
+    IndoorManeuver.turnBack => true,
+    IndoorManeuver.depart ||
+    IndoorManeuver.stairs ||
+    IndoorManeuver.elevator ||
+    IndoorManeuver.ramp ||
+    IndoorManeuver.escalator ||
+    IndoorManeuver.floorTransition ||
+    IndoorManeuver.arrive => false,
+  };
+}
+
 enum IndoorRouteMetric { distance, duration }
 
 enum IndoorRouteDirection { forward, reverse }
@@ -142,315 +459,6 @@ class IndoorRouteResult {
   final IndoorRoute? route;
 
   bool get hasRoute => status == IndoorRouteStatus.found;
-}
-
-class IndoorRoutePlanner {
-  IndoorRoutePlanner(this.graph) {
-    for (final edge in graph.edges) {
-      final from = graph.nodesById[edge.fromNodeId]!;
-      final to = graph.nodesById[edge.toNodeId]!;
-      _addLeg(IndoorRouteLeg(from: from, to: to, edge: edge));
-      if (edge.bidirectional) {
-        _addLeg(IndoorRouteLeg(from: to, to: from, edge: edge));
-      }
-    }
-  }
-
-  final IndoorNavigationGraph graph;
-  final _adjacency = <String, List<IndoorRouteLeg>>{};
-  final _reverseAdjacency = <String, List<IndoorRouteLeg>>{};
-
-  void _addLeg(IndoorRouteLeg leg) {
-    (_adjacency[leg.from.id] ??= []).add(leg);
-    (_reverseAdjacency[leg.to.id] ??= []).add(leg);
-  }
-
-  Set<String> reachableNodeIds({
-    required Iterable<String> nodeIds,
-    IndoorRouteDirection direction = IndoorRouteDirection.forward,
-    IndoorRouteOptions options = const IndoorRouteOptions(),
-  }) => Set.unmodifiable(
-    _reachableLabels({'': nodeIds}, direction, options).keys,
-  );
-
-  Map<String, Set<String>> connectedEndpointNodeIds({
-    required Map<String, Iterable<String>> endpoints,
-    required IndoorRouteDirection direction,
-    IndoorRouteOptions options = const IndoorRouteOptions(),
-  }) {
-    final labels = _reachableLabels(endpoints, direction, options);
-    return Map.unmodifiable({
-      for (final endpoint in endpoints.entries)
-        endpoint.key: Set<String>.unmodifiable(
-          endpoint.value.where(
-            (nodeId) =>
-                labels[nodeId]?.any((key) => key != endpoint.key) ?? false,
-          ),
-        ),
-    });
-  }
-
-  Map<String, Set<String>> _reachableLabels(
-    Map<String, Iterable<String>> endpoints,
-    IndoorRouteDirection direction,
-    IndoorRouteOptions options,
-  ) {
-    final labels = <String, Set<String>>{};
-    final queue = <(IndoorNavigationNode, String)>[];
-    void enqueue(IndoorNavigationNode node, String key) {
-      if (_nodeClosed(node, options) ||
-          (options.wheelchair && !node.wheelchairAccessible)) {
-        return;
-      }
-      final owners = labels.putIfAbsent(node.id, () => {});
-      if (owners.length < 2 && owners.add(key)) queue.add((node, key));
-    }
-
-    for (final endpoint in endpoints.entries) {
-      for (final nodeId in endpoint.value) {
-        final node = graph.nodesById[nodeId];
-        if (node != null) enqueue(node, endpoint.key);
-      }
-    }
-    final adjacency = direction == IndoorRouteDirection.forward
-        ? _adjacency
-        : _reverseAdjacency;
-    for (var index = 0; index < queue.length; index++) {
-      final (node, key) = queue[index];
-      for (final leg in adjacency[node.id] ?? <IndoorRouteLeg>[]) {
-        if (!_allowed(leg, options)) continue;
-        enqueue(
-          direction == IndoorRouteDirection.forward ? leg.to : leg.from,
-          key,
-        );
-      }
-    }
-    return labels;
-  }
-
-  IndoorRouteResult findRoute({
-    required String startNodeId,
-    required String destinationNodeId,
-    IndoorRouteOptions options = const IndoorRouteOptions(),
-  }) => findRouteBetween(
-    startNodeIds: [startNodeId],
-    destinationNodeIds: [destinationNodeId],
-    options: options,
-  );
-
-  IndoorRouteResult findRouteBetween({
-    required Iterable<String> startNodeIds,
-    required Iterable<String> destinationNodeIds,
-    IndoorRouteOptions options = const IndoorRouteOptions(),
-  }) {
-    final starts = startNodeIds
-        .toSet()
-        .map((id) => graph.nodesById[id])
-        .nonNulls
-        .toList();
-    final destinations = destinationNodeIds
-        .toSet()
-        .map((id) => graph.nodesById[id])
-        .nonNulls
-        .toList();
-    if (starts.isEmpty) {
-      return const IndoorRouteResult._(IndoorRouteStatus.unknownStart);
-    }
-    if (destinations.isEmpty) {
-      return const IndoorRouteResult._(IndoorRouteStatus.unknownDestination);
-    }
-    final openStarts = starts
-        .where((node) => !_nodeClosed(node, options))
-        .toList();
-    final openDestinations = destinations
-        .where((node) => !_nodeClosed(node, options))
-        .toList();
-    if (openStarts.isEmpty || openDestinations.isEmpty) {
-      return const IndoorRouteResult._(IndoorRouteStatus.closedEndpoint);
-    }
-    final availableStarts = openStarts
-        .where((node) => !options.wheelchair || node.wheelchairAccessible)
-        .toList();
-    final availableDestinationIds = openDestinations
-        .where((node) => !options.wheelchair || node.wheelchairAccessible)
-        .map((node) => node.id)
-        .toSet();
-    if (availableStarts.isEmpty || availableDestinationIds.isEmpty) {
-      return const IndoorRouteResult._(IndoorRouteStatus.inaccessibleEndpoint);
-    }
-    final costs = <String, double>{
-      for (final start in availableStarts) start.id: 0,
-    };
-    final previous = <String, IndoorRouteLeg>{};
-    var sequence = 0;
-    final queue = HeapPriorityQueue<_QueueEntry>((a, b) {
-      final comparison = a.cost.compareTo(b.cost);
-      return comparison == 0 ? a.sequence.compareTo(b.sequence) : comparison;
-    });
-    for (final start in availableStarts) {
-      queue.add(_QueueEntry(start.id, 0, sequence++));
-    }
-
-    while (queue.isNotEmpty) {
-      final current = queue.removeFirst();
-      if (current.cost != costs[current.nodeId]) continue;
-      if (availableDestinationIds.contains(current.nodeId)) {
-        return _buildRoute(graph.nodesById[current.nodeId]!, previous);
-      }
-      for (final leg in _adjacency[current.nodeId] ?? <IndoorRouteLeg>[]) {
-        if (!_allowed(leg, options)) continue;
-        final weight = options.metric == IndoorRouteMetric.distance
-            ? leg.edge.routingCost
-            : leg.durationSeconds ?? leg.edge.routingCost;
-        final cost = current.cost + weight;
-        if (!cost.isFinite || cost >= (costs[leg.to.id] ?? double.infinity)) {
-          continue;
-        }
-        costs[leg.to.id] = cost;
-        previous[leg.to.id] = leg;
-        queue.add(_QueueEntry(leg.to.id, cost, sequence++));
-      }
-    }
-    return const IndoorRouteResult._(IndoorRouteStatus.unreachable);
-  }
-
-  bool _allowed(IndoorRouteLeg leg, IndoorRouteOptions options) {
-    if (leg.edge.closed ||
-        options.closedEdgeIds.contains(leg.edge.id) ||
-        _nodeClosed(leg.to, options)) {
-      return false;
-    }
-    if ((options.stepFree || options.wheelchair) && leg.edge.hasSteps) {
-      return false;
-    }
-    if (options.wheelchair &&
-        (!leg.edge.wheelchairAccessible || !leg.to.wheelchairAccessible)) {
-      return false;
-    }
-    return true;
-  }
-
-  bool _nodeClosed(IndoorNavigationNode node, IndoorRouteOptions options) =>
-      node.closed || options.closedNodeIds.contains(node.id);
-
-  IndoorRouteResult _buildRoute(
-    IndoorNavigationNode destination,
-    Map<String, IndoorRouteLeg> previous,
-  ) {
-    final reversed = <IndoorRouteLeg>[];
-    var start = destination;
-    while (true) {
-      final leg = previous[start.id];
-      if (leg == null) break;
-      reversed.add(leg);
-      start = leg.from;
-    }
-    final legs = reversed.reversed.toList();
-    final distanceMeters = legs.every((leg) => leg.distanceMeters != null)
-        ? legs.fold<double>(0, (sum, leg) => sum + leg.distanceMeters!)
-        : null;
-    final durationSeconds = legs.every((leg) => leg.durationSeconds != null)
-        ? legs.fold<double>(0, (sum, leg) => sum + leg.durationSeconds!)
-        : null;
-    if ((distanceMeters != null && !distanceMeters.isFinite) ||
-        (durationSeconds != null && !durationSeconds.isFinite)) {
-      return const IndoorRouteResult._(IndoorRouteStatus.unreachable);
-    }
-    final nodes = [start, ...legs.map((leg) => leg.to)];
-    final instructions = <IndoorRouteInstruction>[];
-    if (legs.isNotEmpty) {
-      instructions.add(
-        IndoorRouteInstruction(maneuver: IndoorManeuver.depart, atNode: start),
-      );
-    }
-    IndoorRouteLeg? previousBearing;
-    for (final leg in legs) {
-      final maneuver = _maneuver(previousBearing, leg);
-      final previousInstruction = instructions.lastOrNull;
-      if (maneuver == IndoorManeuver.straight &&
-          previousInstruction != null &&
-          _isWalkingManeuver(previousInstruction.maneuver) &&
-          previousInstruction.toNode?.id == leg.from.id &&
-          previousInstruction.atNode.floorId == leg.to.floorId) {
-        instructions[instructions.length - 1] = IndoorRouteInstruction(
-          maneuver: previousInstruction.maneuver,
-          atNode: previousInstruction.atNode,
-          toNode: leg.to,
-          distanceMeters:
-              previousInstruction.distanceMeters == null ||
-                  leg.distanceMeters == null
-              ? null
-              : previousInstruction.distanceMeters! + leg.distanceMeters!,
-        );
-      } else {
-        instructions.add(
-          IndoorRouteInstruction(
-            maneuver: maneuver,
-            atNode: leg.from,
-            toNode: leg.to,
-            distanceMeters: leg.distanceMeters,
-          ),
-        );
-      }
-      if (leg.changesFloor) {
-        previousBearing = null;
-      } else if (leg.from.x != leg.to.x || leg.from.y != leg.to.y) {
-        previousBearing = leg;
-      }
-    }
-    instructions.add(
-      IndoorRouteInstruction(
-        maneuver: IndoorManeuver.arrive,
-        atNode: destination,
-      ),
-    );
-    return IndoorRouteResult._(
-      IndoorRouteStatus.found,
-      IndoorRoute._(
-        nodes: nodes,
-        legs: legs,
-        instructions: instructions,
-        distanceMeters: distanceMeters,
-        durationSeconds: durationSeconds,
-      ),
-    );
-  }
-
-  IndoorManeuver _maneuver(IndoorRouteLeg? previous, IndoorRouteLeg current) {
-    if (current.changesFloor || current.edge.hasSteps) {
-      return switch (current.edge.kind) {
-        IndoorEdgeKind.stairs => IndoorManeuver.stairs,
-        IndoorEdgeKind.elevator => IndoorManeuver.elevator,
-        IndoorEdgeKind.ramp => IndoorManeuver.ramp,
-        IndoorEdgeKind.escalator => IndoorManeuver.escalator,
-        _ => IndoorManeuver.floorTransition,
-      };
-    }
-    if (previous == null || previous.changesFloor) {
-      return IndoorManeuver.straight;
-    }
-    final beforeX = previous.to.x - previous.from.x;
-    final beforeY = previous.to.y - previous.from.y;
-    final afterX = current.to.x - current.from.x;
-    final afterY = current.to.y - current.from.y;
-    if ((beforeX == 0 && beforeY == 0) || (afterX == 0 && afterY == 0)) {
-      return IndoorManeuver.straight;
-    }
-    var angle = math.atan2(afterY, afterX) - math.atan2(beforeY, beforeX);
-    if (angle > math.pi) angle -= 2 * math.pi;
-    if (angle < -math.pi) angle += 2 * math.pi;
-    if (angle.abs() >= math.pi * 5 / 6) return IndoorManeuver.turnBack;
-    if (angle.abs() < math.pi / 6) return IndoorManeuver.straight;
-    return angle > 0 ? IndoorManeuver.turnRight : IndoorManeuver.turnLeft;
-  }
-
-  bool _isWalkingManeuver(IndoorManeuver maneuver) => switch (maneuver) {
-    IndoorManeuver.straight ||
-    IndoorManeuver.turnLeft ||
-    IndoorManeuver.turnRight ||
-    IndoorManeuver.turnBack => true,
-    _ => false,
-  };
 }
 
 class _QueueEntry {

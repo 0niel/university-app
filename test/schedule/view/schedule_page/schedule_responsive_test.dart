@@ -184,22 +184,29 @@ void main() {
     (tester) async {
       await tester.pumpApp(subject(), size: const Size(420, 900));
       await tester.pumpAndSettle();
+      final selectedDay = tester
+          .widget<ScheduleDayView>(
+            find.byType(ScheduleDayView),
+          )
+          .day;
       await tester.tap(find.text('Месяц').first);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 80));
       expect(find.byType(ScheduleMonthView), findsOneWidget);
+      expect(find.byType(ScheduleDayView, skipOffstage: false), findsNothing);
       expect(
-        find.ancestor(
-          of: find.byType(ScheduleDayView),
-          matching: find.byType(IgnorePointer),
-        ),
-        findsWidgets,
+        tester.widget<ScheduleMonthView>(find.byType(ScheduleMonthView)).day,
+        selectedDay,
       );
       await tester.tap(find.text('Неделя').first);
       await tester.pumpAndSettle();
       expect(find.byType(ScheduleWeekView), findsOneWidget);
       expect(find.byType(ScheduleDayView), findsNothing);
       expect(find.byType(ScheduleMonthView), findsNothing);
+      expect(
+        tester.widget<ScheduleWeekView>(find.byType(ScheduleWeekView)).day,
+        selectedDay,
+      );
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
     },

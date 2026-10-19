@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
@@ -30,19 +32,19 @@ Future<void> showLessonNoteSheet(
     context,
     title: context.l10n.noteEditorTitle,
     subtitle: context.l10n.scheduleNoteSubtitle,
-    child: _NoteEditor(
+    child: _LessonNoteSheet(
       lesson: lesson,
       day: day,
       comments: comments,
       existing: existing,
-      campus: context.read<CampusRepository>(),
-      repository: context.read<ScheduleRepository>(),
+      campus: context.read(),
+      repository: context.read(),
     ),
   );
 }
 
-class _NoteEditor extends StatefulWidget {
-  const _NoteEditor({
+class _LessonNoteSheet extends StatefulWidget {
+  const _LessonNoteSheet({
     required this.lesson,
     required this.day,
     required this.comments,
@@ -57,10 +59,10 @@ class _NoteEditor extends StatefulWidget {
   final CampusRepository campus;
   final ScheduleRepository repository;
   @override
-  State<_NoteEditor> createState() => _NoteEditorState();
+  State<_LessonNoteSheet> createState() => _LessonNoteSheetState();
 }
 
-class _NoteEditorState extends State<_NoteEditor> {
+class _LessonNoteSheetState extends State<_LessonNoteSheet> {
   static const _defaultMaxLength = 1000;
   late final _text = _NoteTextController(text: widget.existing?.text ?? '');
   late final int _maxLength = math.max(
@@ -192,12 +194,12 @@ class _NoteEditorState extends State<_NoteEditor> {
             AppButton.secondary(
               label: l10n.scheduleNoteAddFile,
               size: AppButtonSize.small,
-              onPressed: _saving ? null : _materials,
+              onPressed: _saving ? null : () => unawaited(_materials()),
             ),
             AppButton.secondary(
               label: l10n.scheduleNoteAddBoard,
               size: AppButtonSize.small,
-              onPressed: _saving ? null : _materials,
+              onPressed: _saving ? null : () => unawaited(_materials()),
             ),
             AppButton.secondary(
               key: const ValueKey('lesson-note-tag'),
@@ -240,7 +242,7 @@ class _NoteEditorState extends State<_NoteEditor> {
           expanded: true,
           size: AppButtonSize.large,
           loading: _saving,
-          onPressed: _saving ? null : _save,
+          onPressed: _saving ? null : () => unawaited(_save()),
         ),
       ],
     );

@@ -63,7 +63,11 @@ class _PushHistoryListenerState extends State<PushHistoryListener>
       final stream = widget.messages ?? FirebaseMessaging.onMessage;
       _subscription = stream.listen(
         (message) => _record(message, foreground: true),
-        onError: (Object _) {},
+        onError: (Object error, StackTrace stackTrace) => log(
+          'Push message stream failed',
+          error: error,
+          stackTrace: stackTrace,
+        ),
       );
     } on Object catch (_) {
       _subscription = null;
@@ -118,7 +122,10 @@ class _PushHistoryListenerState extends State<PushHistoryListener>
 
   bool _rememberDisplayed(String identity) {
     if (!_displayed.add(identity)) return false;
-    if (_displayed.length > 100) _displayed.remove(_displayed.first);
+    if (_displayed.length > 100) {
+      final oldest = _displayed.firstOrNull;
+      if (oldest != null) _displayed.remove(oldest);
+    }
     return true;
   }
 
@@ -131,11 +138,18 @@ class _PushHistoryListenerState extends State<PushHistoryListener>
     if (_canRecord) unawaited(_notifications.refresh());
   }
 
+  bool get _isForeground => switch (WidgetsBinding.instance.lifecycleState) {
+    null || AppLifecycleState.resumed => true,
+    AppLifecycleState.inactive ||
+    AppLifecycleState.hidden ||
+    AppLifecycleState.paused ||
+    AppLifecycleState.detached => false,
+  };
+
   void _startRefresh() {
     _refreshTimer?.cancel();
     if (!_canRecord || !_notifications.hasInbox) return;
-    final lifecycle = WidgetsBinding.instance.lifecycleState;
-    if (lifecycle != null && lifecycle != AppLifecycleState.resumed) return;
+    if (!_isForeground) return;
     _refresh();
     _refreshTimer = Timer.periodic(
       const Duration(minutes: 1),
@@ -187,7 +201,9 @@ class _PushHistoryListenerState extends State<PushHistoryListener>
         : messageId == null
         ? null
         : 'push:$messageId';
-    final identity = historyId ?? '${message.sentTime}:$title:$body';
+    final identity =
+        historyId ??
+        '${message.sentTime?.toString() ?? 'null'}:$title:${body ?? 'null'}';
     if (!foreground) _rememberDisplayed(identity);
     _notifications.recordPush(
       id: historyId,
@@ -225,8 +241,7 @@ class _PushHistoryListenerState extends State<PushHistoryListener>
       if (repository == null) return;
       await repository.initialize();
       if (!await repository.hasPermission() || !_canRecord) return;
-      final lifecycle = WidgetsBinding.instance.lifecycleState;
-      if (lifecycle != null && lifecycle != AppLifecycleState.resumed) return;
+      if (!_isForeground) return;
       await repository.showPush(
         id:
             identity.codeUnits.fold<int>(

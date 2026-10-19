@@ -5,8 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../kit_harness.dart';
 
 void main() {
-  testWidgets('horizontal dividers fill loose column constraints',
-      (tester) async {
+  testWidgets('horizontal dividers fill loose column constraints', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         const SizedBox(
@@ -22,11 +23,18 @@ void main() {
       of: find.byType(AppDivider),
       matching: find.byType(ColoredBox),
     );
-    expect(tester.getSize(line), const Size(296, 1));
+    expect(tester.getSize(line).width, 296);
+    expect(
+      tester.getSize(line).height *
+          MediaQuery.devicePixelRatioOf(tester.element(line)),
+      closeTo(1, .001),
+    );
+    expect(tester.getSize(find.byType(AppDivider)).height, 1);
   });
 
-  testWidgets('settings rows keep their inset separator visible',
-      (tester) async {
+  testWidgets('settings rows keep their inset separator visible', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         const SizedBox(
@@ -40,6 +48,11 @@ void main() {
       matching: find.byType(ColoredBox),
     );
     expect(tester.getSize(line).width, greaterThan(200));
-    expect(tester.getSize(line).height, 1);
+    expect(
+      tester.getSize(line).height *
+          MediaQuery.devicePixelRatioOf(tester.element(line)),
+      closeTo(1, .001),
+    );
+    expect(tester.getSize(find.byType(AppDivider)).height, 1);
   });
 }

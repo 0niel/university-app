@@ -12,8 +12,8 @@ class AccentTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final base = (style ?? AppText.displayHero).copyWith(color: colors.ink);
-    final accent = this.accent ?? '';
-    final index = accent.isEmpty ? -1 : text.lastIndexOf(accent);
+    final accentText = accent ?? '';
+    final index = accentText.isEmpty ? -1 : text.lastIndexOf(accentText);
     if (index < 0) return Text(text, style: base);
     return Text.rich(
       TextSpan(
@@ -21,13 +21,13 @@ class AccentTitle extends StatelessWidget {
         children: [
           TextSpan(text: text.substring(0, index)),
           TextSpan(
-            text: accent,
+            text: accentText,
             style: base.copyWith(
               color: colors.accent,
-              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          TextSpan(text: text.substring(index + accent.length)),
+          TextSpan(text: text.substring(index + accentText.length)),
         ],
       ),
     );

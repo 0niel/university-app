@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-enum AbsenceReason { sick, noReason }
-
 class Absence extends Equatable {
   const Absence({
     required this.id,
@@ -26,11 +24,16 @@ class Absence extends Equatable {
 
   bool get isUnexcused => reason == AbsenceReason.noReason;
 
-  Absence copyWith({AbsenceReason? reason}) => Absence(
-    id: id,
-    subject: subject,
-    date: date,
+  Absence copyWith({
+    AbsenceReason? reason,
+    String? id,
+    String? subject,
+    DateTime? date,
+  }) => Absence(
     reason: reason ?? this.reason,
+    id: id ?? this.id,
+    subject: subject ?? this.subject,
+    date: date ?? this.date,
   );
 
   Map<String, dynamic> toJson() => {
@@ -43,3 +46,5 @@ class Absence extends Equatable {
   @override
   List<Object?> get props => [id, subject, date, reason];
 }
+
+enum AbsenceReason { sick, noReason }

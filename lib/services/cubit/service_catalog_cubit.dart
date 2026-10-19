@@ -18,6 +18,7 @@ class ServiceCatalogCubit extends Cubit<ServiceCatalogState> {
       state.copyWith(
         isLoading: coldLoad,
         isRefreshing: !coldLoad,
+        hasError: false,
       ),
     );
     try {
@@ -33,7 +34,13 @@ class ServiceCatalogCubit extends Cubit<ServiceCatalogState> {
     } on Object catch (error, stackTrace) {
       if (isClosed || requestId != _requestId) return;
       addError(error, stackTrace);
-      emit(state.copyWith(isLoading: false, isRefreshing: false));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isRefreshing: false,
+          hasError: true,
+        ),
+      );
     }
   }
 }

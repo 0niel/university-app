@@ -57,7 +57,8 @@ class NinjaErrorState extends StatelessWidget {
             ),
             child: IconTheme(
               data: IconThemeData(size: AppIconSize.lg, color: accent),
-              child: icon ??
+              child:
+                  icon ??
                   AppLineIconWidget(
                     tone.icon,
                     size: AppIconSize.lg,
@@ -115,20 +116,20 @@ enum NinjaErrorTone {
   info;
 
   Color accentOf(AppColors colors) => switch (this) {
-        NinjaErrorTone.danger => colors.danger,
-        NinjaErrorTone.warn => colors.warn,
-        NinjaErrorTone.info => colors.accent,
-      };
+    NinjaErrorTone.danger => colors.danger,
+    NinjaErrorTone.warn => colors.warn,
+    NinjaErrorTone.info => colors.accent,
+  };
 
   Color tintOf(AppColors colors) => switch (this) {
-        NinjaErrorTone.danger => colors.examTint,
-        NinjaErrorTone.warn => colors.warnTint,
-        NinjaErrorTone.info => colors.tint,
-      };
+    NinjaErrorTone.danger => colors.examTint,
+    NinjaErrorTone.warn => colors.warnTint,
+    NinjaErrorTone.info => colors.tint,
+  };
 
   AppLineIcon get icon => switch (this) {
-        NinjaErrorTone.danger => AppLineIcon.cloudOff,
-        NinjaErrorTone.warn => AppLineIcon.alert,
-        NinjaErrorTone.info => AppLineIcon.info,
-      };
+    NinjaErrorTone.danger => AppLineIcon.cloudOff,
+    NinjaErrorTone.warn => AppLineIcon.alert,
+    NinjaErrorTone.info => AppLineIcon.info,
+  };
 }

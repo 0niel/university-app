@@ -6,14 +6,14 @@ import '../kit_harness.dart';
 
 void main() {
   BoxDecoration boxOf(WidgetTester tester) => kitDecoration(
-        tester,
-        find
-            .descendant(
-              of: find.byType(AppCheckbox),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
+    tester,
+    find
+        .descendant(
+          of: find.byType(AppCheckbox),
+          matching: find.byType(Container),
+        )
+        .first,
+  );
 
   testWidgets('off state is a 24px transparent box with a muted2 border', (
     tester,

@@ -229,37 +229,47 @@ class _MiniAppSubmitViewState extends State<MiniAppSubmitView> {
                 ),
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
-                    AppSpacing.screen,
+                    0,
                     AppSpacing.lg,
-                    AppSpacing.screen,
+                    0,
                     ninjaBottomInset(context) + AppSpacing.lg,
                   ),
                   sliver: SliverList.list(
                     children: [
-                      Text(
-                        l10n.miniAppsSubmitSubtitle,
-                        style: AppText.body.copyWith(color: colors.muted),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      NinjaListCell(
-                        title: 'docs.mirea.ninja',
-                        horizontalPadding: 0,
-                        leading: const AppLineIconWidget(
-                          .link,
-                          size: AppIconSize.md,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screen,
                         ),
-                        onTap: () => unawaited(_openDocumentation()),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              l10n.miniAppsSubmitSubtitle,
+                              style: AppText.body.copyWith(color: colors.muted),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            NinjaListCell(
+                              title: 'docs.mirea.ninja',
+                              horizontalPadding: 0,
+                              leading: const AppLineIconWidget(
+                                .link,
+                                size: AppIconSize.md,
+                              ),
+                              onTap: () => unawaited(_openDocumentation()),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            _MetadataSection(
+                              nameController: _nameController,
+                              slugController: _slugController,
+                              descriptionController: _descriptionController,
+                              emojiController: _emojiController,
+                              onNameChanged: _syncSlug,
+                              onSlugEdited: () => _slugEdited = true,
+                            ),
+                            const SizedBox(height: 18),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _MetadataSection(
-                        nameController: _nameController,
-                        slugController: _slugController,
-                        descriptionController: _descriptionController,
-                        emojiController: _emojiController,
-                        onNameChanged: _syncSlug,
-                        onSlugEdited: () => _slugEdited = true,
-                      ),
-                      const SizedBox(height: 18),
                       _CategorySection(
                         category: _category,
                         onChanged: (value) => setState(() => _category = value),
@@ -278,35 +288,45 @@ class _MiniAppSubmitViewState extends State<MiniAppSubmitView> {
                             unawaited(_applyTemplate(template)),
                         onRemoveScreen: _removeScreen,
                       ),
-                      if (_sourceKind == .remote) ...[
-                        const SizedBox(height: 18),
-                        _PermissionsSection(
-                          permissions: _permissions,
-                          onToggled: (permission) => setState(() {
-                            if (!_permissions.remove(permission)) {
-                              _permissions.add(permission);
-                            }
-                          }),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screen,
                         ),
-                      ],
-                      const SizedBox(height: AppSpacing.xlg),
-                      NinjaButton.primary(
-                        label: submitting
-                            ? l10n.miniAppsSubmitSending
-                            : l10n.miniAppsSubmitSend,
-                        expanded: true,
-                        loading: submitting,
-                        onPressed: submitting
-                            ? null
-                            : () => unawaited(_submit(asDraft: false)),
-                      ),
-                      const SizedBox(height: AppSpacing.gap),
-                      NinjaButton.text(
-                        label: l10n.miniAppsSubmitDraft,
-                        expanded: true,
-                        onPressed: submitting
-                            ? null
-                            : () => unawaited(_submit(asDraft: true)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (_sourceKind == .remote) ...[
+                              const SizedBox(height: 18),
+                              _PermissionsSection(
+                                permissions: _permissions,
+                                onToggled: (permission) => setState(() {
+                                  if (!_permissions.remove(permission)) {
+                                    _permissions.add(permission);
+                                  }
+                                }),
+                              ),
+                            ],
+                            const SizedBox(height: AppSpacing.xlg),
+                            NinjaButton.primary(
+                              label: submitting
+                                  ? l10n.miniAppsSubmitSending
+                                  : l10n.miniAppsSubmitSend,
+                              expanded: true,
+                              loading: submitting,
+                              onPressed: submitting
+                                  ? null
+                                  : () => unawaited(_submit(asDraft: false)),
+                            ),
+                            const SizedBox(height: AppSpacing.gap),
+                            NinjaButton.text(
+                              label: l10n.miniAppsSubmitDraft,
+                              expanded: true,
+                              onPressed: submitting
+                                  ? null
+                                  : () => unawaited(_submit(asDraft: true)),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

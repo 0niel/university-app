@@ -5,8 +5,8 @@ import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_press_state.dart';
 import 'package:flutter/material.dart';
 
-const _stepperButtonSize = 40.0;
-const _stepperValueWidth = 28.0;
+const _kStepperButtonSize = 40.0;
+const _kStepperValueWidth = 28.0;
 
 class AppStepper extends StatelessWidget {
   const AppStepper({
@@ -49,7 +49,7 @@ class AppStepper extends StatelessWidget {
             onTap: canDecrement ? () => onChanged?.call(value - 1) : null,
           ),
           ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: _stepperValueWidth),
+            constraints: const BoxConstraints(minWidth: _kStepperValueWidth),
             child: Text(
               '$value',
               textAlign: TextAlign.center,
@@ -86,7 +86,8 @@ class _StepButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     return AppPressState(
       onTap: onTap,
@@ -101,8 +102,8 @@ class _StepButton extends StatelessWidget {
                 ? Duration.zero
                 : const Duration(milliseconds: 100),
             curve: Curves.easeOut,
-            width: _stepperButtonSize,
-            height: _stepperButtonSize,
+            width: _kStepperButtonSize,
+            height: _kStepperButtonSize,
             decoration: BoxDecoration(
               color: pressed ? colors.canvas : Colors.transparent,
               shape: BoxShape.circle,

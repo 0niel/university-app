@@ -72,7 +72,7 @@ void main() {
     await pump(tester);
     expect(find.byType(AppSpinner), findsOneWidget);
     expect(find.byType(AppEmptyState), findsNothing);
-    response.completeError(StateError('offline'));
+    response.completeError(StateError('offline'), StackTrace.current);
     await refresh;
     await tester.pump();
     expect(find.byType(AppSpinner), findsNothing);

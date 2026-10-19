@@ -90,9 +90,19 @@ String mapRouteInstructionContext(
   final from = campus.floorForId(instruction.atNode.floorId)?.floor.number;
   final to = campus.floorForId(instruction.toNode?.floorId ?? '')?.floor.number;
   final parts = <String>[];
-  if (instruction.maneuver == IndoorManeuver.depart ||
-      instruction.maneuver == IndoorManeuver.arrive) {
-    parts.add(mapRouteNodeLabel(instruction.atNode, campus, l10n));
+  switch (instruction.maneuver) {
+    case IndoorManeuver.depart || IndoorManeuver.arrive:
+      parts.add(mapRouteNodeLabel(instruction.atNode, campus, l10n));
+    case IndoorManeuver.straight ||
+        IndoorManeuver.turnLeft ||
+        IndoorManeuver.turnRight ||
+        IndoorManeuver.turnBack ||
+        IndoorManeuver.stairs ||
+        IndoorManeuver.elevator ||
+        IndoorManeuver.ramp ||
+        IndoorManeuver.escalator ||
+        IndoorManeuver.floorTransition:
+      break;
   }
   if (instruction.toNode != null &&
       instruction.atNode.floorId != instruction.toNode!.floorId &&

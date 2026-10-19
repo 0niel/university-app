@@ -1,4 +1,5 @@
 export 'config/catalog_service_mapper.dart';
+export 'config/home_service_defaults.dart';
 export 'config/services_config.dart';
 export 'cubit/cubit.dart';
 export 'data/favorite_services_repository.dart';

@@ -3,10 +3,11 @@ import 'dart:math' as math;
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_tooltip_arrow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-enum AppTooltipArrow { up, down }
+export 'app_tooltip_arrow.dart';
 
 abstract final class _TooltipMetrics {
   static const double horizontalPadding = AppSpacing.md;
@@ -104,22 +105,24 @@ class _AppTooltipAnchorState extends State<AppTooltipAnchor> {
     final box = context.findRenderObject();
     if (box is! RenderBox || !box.hasSize) return;
     final media = MediaQuery.of(context);
-    final painter = TextPainter(
-      text: TextSpan(text: widget.message, style: AppText.subtextStrong),
-      textDirection: Directionality.of(context),
-      textScaler: media.textScaler,
-    )..layout(
-        maxWidth: math.max(
-          1,
-          media.size.width -
-              2 *
-                  (_TooltipMetrics.screenMargin +
-                      _TooltipMetrics.horizontalPadding),
-        ),
-      );
+    final painter =
+        TextPainter(
+          text: TextSpan(text: widget.message, style: AppText.subtextStrong),
+          textDirection: Directionality.of(context),
+          textScaler: media.textScaler,
+        )..layout(
+          maxWidth: math.max(
+            1,
+            media.size.width -
+                2 *
+                    (_TooltipMetrics.screenMargin +
+                        _TooltipMetrics.horizontalPadding),
+          ),
+        );
     final overlay = Overlay.of(context).context.findRenderObject();
     final top = box.localToGlobal(Offset.zero, ancestor: overlay).dy;
-    final below = top - media.padding.top <
+    final below =
+        top - media.padding.top <
         painter.height +
             _TooltipMetrics.verticalPadding * 2 +
             _TooltipMetrics.tailSpace +
@@ -139,7 +142,8 @@ class _AppTooltipAnchorState extends State<AppTooltipAnchor> {
     if (widget.message.isEmpty || !TooltipVisibility.of(context)) {
       return widget.child;
     }
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     return Focus(
       canRequestFocus: false,
@@ -159,10 +163,7 @@ class _AppTooltipAnchorState extends State<AppTooltipAnchor> {
         child: Actions(
           actions: {
             DismissIntent: CallbackAction<DismissIntent>(
-              onInvoke: (_) {
-                Tooltip.dismissAllToolTips();
-                return null;
-              },
+              onInvoke: (_) => Tooltip.dismissAllToolTips(),
             ),
           },
           child: MouseRegion(
@@ -194,7 +195,7 @@ class _AppTooltipAnchorState extends State<AppTooltipAnchor> {
                     constraints: BoxConstraints(
                       maxWidth: math.max(
                         1,
-                        MediaQuery.sizeOf(context).width -
+                        MediaQuery.widthOf(context) -
                             _TooltipMetrics.screenMargin * 2,
                       ),
                     ),

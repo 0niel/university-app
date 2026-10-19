@@ -4,11 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: ThemeData(extensions: const [AppColors.light]),
-        home: Scaffold(
-          body: Center(child: SizedBox(width: 64, child: child)),
-        ),
-      );
+    theme: ThemeData(extensions: const [AppColors.light]),
+    home: Scaffold(
+      body: Center(child: SizedBox(width: 64, child: child)),
+    ),
+  );
 
   group('AppWeekGridCell', () {
     testWidgets('schedule empty cell retains its plain border and add action', (
@@ -38,29 +38,31 @@ void main() {
     });
 
     testWidgets(
-        'schedule selected cancellation uses one-pixel border without strike', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(
-          const AppWeekGridCell(
-            scheduleStyle: true,
-            selected: true,
-            variant: AppWeekGridCellVariant.cancelled,
-            bottomLabel: 'А-201',
+      'schedule selected cancellation uses one-pixel border without strike',
+      (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          wrap(
+            const AppWeekGridCell(
+              scheduleStyle: true,
+              selected: true,
+              variant: AppWeekGridCellVariant.cancelled,
+              bottomLabel: 'А-201',
+            ),
           ),
-        ),
-      );
-      final label = tester.widget<Text>(find.text('А-201'));
-      expect(label.style?.decoration, TextDecoration.none);
-      expect(label.style?.height, 1.1);
-      final surface = tester
-          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-          .map((box) => box.decoration)
-          .whereType<BoxDecoration>()
-          .firstWhere((box) => box.border != null);
-      expect(surface.border, Border.all(color: AppColors.light.accent));
-    });
+        );
+        final label = tester.widget<Text>(find.text('А-201'));
+        expect(label.style?.decoration, TextDecoration.none);
+        expect(label.style?.height, 1.1);
+        final surface = tester
+            .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+            .map((box) => box.decoration)
+            .whereType<BoxDecoration>()
+            .firstWhere((box) => box.border != null);
+        expect(surface.border, Border.all(color: AppColors.light.accent));
+      },
+    );
 
     testWidgets('filled shows both labels at 54px height', (tester) async {
       var tapped = false;

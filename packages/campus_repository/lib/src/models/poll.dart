@@ -77,11 +77,12 @@ enum PollCategory {
 
   final String wire;
 
-  static PollCategory? fromWire(String? wire) =>
-      values.cast<PollCategory?>().firstWhere(
-        (value) => value?.wire == wire,
-        orElse: () => null,
-      );
+  static PollCategory? fromWire(String? wire) {
+    for (final value in values) {
+      if (value.wire == wire) return value;
+    }
+    return null;
+  }
 }
 
 enum PollFilter {
@@ -183,8 +184,8 @@ abstract class PollAnswer with _$PollAnswer {
   Map<String, Object?> toJson() => {
     'questionId': questionId,
     'optionIds': optionIds,
-    if (text != null) 'text': text,
-    if (rating != null) 'rating': rating,
+    'text': ?text,
+    'rating': ?rating,
   };
 }
 
@@ -205,7 +206,7 @@ abstract class PollQuestionDraft with _$PollQuestionDraft {
     'kind': kind.wire,
     'isRequired': isRequired,
     'options': options,
-    if (correctIndex != null) 'correctIndex': correctIndex,
+    'correctIndex': ?correctIndex,
   };
 }
 

@@ -92,7 +92,7 @@ LessonPreview? nextLessonPreview(List<SchedulePart> parts, DateTime now) {
   if (bestPart == null) return null;
   return (
     subject: bestPart.subject,
-    room: bestPart.classrooms.isEmpty ? '' : bestPart.classrooms.first.name,
+    room: bestPart.classrooms.firstOrNull?.name ?? '',
     start: bestPart.lessonBells.startTime,
     type: bestPart.lessonType,
   );
@@ -105,5 +105,9 @@ Color lessonTypeColor(AppColors colors, LessonType type) => switch (type) {
   LessonType.credit ||
   LessonType.courseWork ||
   LessonType.courseProject => colors.exam,
-  _ => colors.practice,
+  LessonType.practice ||
+  LessonType.individualWork ||
+  LessonType.physicalEducation ||
+  LessonType.consultation ||
+  LessonType.unknown => colors.practice,
 };

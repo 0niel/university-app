@@ -4,7 +4,6 @@ import 'package:rtu_mirea_app/map/services/room_key.dart';
 bool freeRoomMatchesCampus(
   FreeRoom room,
   String campus,
-  Map<String, int> roomFloors,
 ) {
   if (campus.isEmpty) return true;
   final roomCampus = room.campus;
@@ -32,7 +31,7 @@ List<FreeRoom> filterFreeRooms(
   final queryLower = query.trim().toLowerCase();
   return [
     for (final room in rooms)
-      if (freeRoomMatchesCampus(room, campus, roomFloors) &&
+      if (freeRoomMatchesCampus(room, campus) &&
           (floor == null || roomFloors[roomKey(room.room)] == floor) &&
           (queryKey.isEmpty ||
               roomKey(room.room).contains(queryKey) ||

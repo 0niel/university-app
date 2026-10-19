@@ -102,21 +102,27 @@ void main() {
       await tester.pumpAndSettle();
       final marker = find.byType(ScheduleNowLine);
       expect(tester.widget<ScheduleNowLine>(marker).label, '09:00');
-      final lesson = find.byType(AppLessonRow);
-      expect(tester.widget<AppLessonRow>(lesson).state, LessonRowState.current);
+      final lesson = find.byType(AppLessonCard);
+      expect(
+        tester.widget<AppLessonCard>(lesson).state,
+        LessonRowState.current,
+      );
       final line = find.byKey(const ValueKey('schedule-now-line'));
       final initialLineTop = tester.getTopLeft(line).dy;
       now = DateTime(2026, 9, 2, 9, 1);
       await tester.pump(const Duration(seconds: 30));
       await tester.pumpAndSettle();
       expect(tester.widget<ScheduleNowLine>(marker).label, '09:01');
-      expect(tester.widget<AppLessonRow>(lesson).progress, .5);
+      expect(tester.widget<AppLessonCard>(lesson).progress, .5);
       expect(tester.getTopLeft(line).dy, greaterThan(initialLineTop));
       now = DateTime(2026, 9, 2, 9, 2);
       await tester.pump(const Duration(minutes: 1));
       await tester.pumpAndSettle();
       expect(tester.widget<ScheduleNowLine>(marker).label, '09:02');
-      expect(tester.widget<AppLessonRow>(lesson).state, LessonRowState.past);
+      expect(
+        tester.widget<AppLessonCard>(lesson).state,
+        LessonRowState.past,
+      );
       await tester.pumpWidget(const SizedBox());
       expect(tester.takeException(), isNull);
     });

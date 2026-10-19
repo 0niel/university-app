@@ -8,7 +8,7 @@ import 'package:rtu_mirea_app/promo/cubit/promo_dismissals_cubit.dart';
 
 class _Storage extends Mock implements Storage {}
 
-class _Repository extends Fake implements PromoRepository {
+class FakePromoRepository extends Fake implements PromoRepository {
   final records = <String, List<PromoDismissal>>{};
   final writes = <(String, PromoDismissal)>[];
   bool offline = false;
@@ -46,12 +46,12 @@ const _banner = PromoBanner(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  late _Repository repository;
+  late FakePromoRepository repository;
   late Map<String, dynamic> cache;
   final now = DateTime(2026, 9, 5);
 
   setUp(() {
-    repository = _Repository();
+    repository = FakePromoRepository();
     cache = {};
     final storage = _Storage();
     when(() => storage.read(any())).thenAnswer(

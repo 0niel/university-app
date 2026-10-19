@@ -17,9 +17,9 @@ class ScheduleChangesReadScope extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<NotificationsCubit?>();
-    final userId = cubit?.state.userId;
     final ids = changes.map(scheduleChangeNotificationId).toList();
     if (cubit != null && cubit.state.hasUnread(ids)) {
+      final userId = cubit.state.userId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted &&
             !cubit.isClosed &&

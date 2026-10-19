@@ -46,8 +46,8 @@ class ArticleHtml extends StatelessWidget {
       color: colors.ink,
       height: 1.55,
     );
-    Style text(TextStyle style) => Style.fromTextStyle(
-      style,
+    Style text(TextStyle textStyle) => Style.fromTextStyle(
+      textStyle,
     ).copyWith(margin: Margins.zero, padding: HtmlPaddings.zero);
     Style heading(double size) => text(
       AppText.sans(

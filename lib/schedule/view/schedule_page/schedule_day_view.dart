@@ -12,6 +12,7 @@ import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_dates.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_strip.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_overlap_switcher.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/sheets.dart';
+import 'package:rtu_mirea_app/schedule/widgets/lesson_card.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 class ScheduleDayView extends StatelessWidget {
@@ -44,13 +45,13 @@ class ScheduleDayView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toString();
-    final now = this.now ?? DateTime.now();
+    final currentTime = now ?? DateTime.now();
     final lessons = applyPreferences(lessonsForDay(schedule, day), preferences);
     final timeline = buildDayTimeline(
       lessons: lessons,
       changes: changes,
       day: day,
-      now: now,
+      now: currentTime,
       showPast: display.showPast,
       showCancelled: display.showCancelled,
       showGaps: preferences.showGaps && !comparing,
@@ -62,51 +63,51 @@ class ScheduleDayView extends StatelessWidget {
                   isSameDate(a.startsAt, day) &&
                   (display.showPast ||
                       (a.endsAt ?? a.startsAt.add(const Duration(hours: 1)))
-                          .isAfter(now)),
+                          .isAfter(currentTime)),
             )
             .toList()
           ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
     final rows = <(DateTime, DateTime, Widget, List<(DateTime, DateTime)>)>[
       for (final group in groupTimelineLessons(timeline.entries))
-        (
-          atTime(day, group.first.lesson.lessonBells.startTime),
-          group
-              .map((entry) => atTime(day, entry.lesson.lessonBells.endTime))
-              .reduce((a, b) => a.isAfter(b) ? a : b),
-          ScheduleOverlapSwitcher(
-            key: ValueKey(
-              'schedule-overlap-${group.first.lesson.lessonBells.startTime}',
+        if (group case [final firstEntry, ...])
+          (
+            atTime(day, firstEntry.lesson.lessonBells.startTime),
+            group
+                .map((entry) => atTime(day, entry.lesson.lessonBells.endTime))
+                .reduce((a, b) => a.isAfter(b) ? a : b),
+            ScheduleOverlapSwitcher(
+              key: ValueKey(
+                'schedule-overlap-${firstEntry.lesson.lessonBells.startTime}',
+              ),
+              labels: [for (final entry in group) entry.lesson.subject],
+              initialIndex: group
+                  .indexWhere(
+                    (entry) => entry.status.live && !entry.cancelled,
+                  )
+                  .clamp(0, group.length - 1),
+              colors: [
+                for (final entry in group)
+                  lessonAccentOf(context, entry.lesson),
+              ],
+              children: [
+                for (final entry in group)
+                  ScheduleTimelineLesson(entry: entry, day: day),
+              ],
             ),
-            labels: [for (final entry in group) entry.lesson.subject],
-            initialIndex: group
-                .indexWhere(
-                  (entry) => entry.status.live && !entry.cancelled,
-                )
-                .clamp(0, group.length - 1),
-            colors: [
-              for (final entry in group) lessonAccentOf(context, entry.lesson),
-            ],
-            children: [
+            [
               for (final entry in group)
-                ScheduleTimelineLesson(entry: entry, day: day),
+                if (!entry.cancelled)
+                  (
+                    atTime(day, entry.lesson.lessonBells.startTime),
+                    atTime(day, entry.lesson.lessonBells.endTime),
+                  ),
             ],
           ),
-          [
-            for (final entry in group)
-              if (!entry.cancelled)
-                (
-                  atTime(day, entry.lesson.lessonBells.startTime),
-                  atTime(day, entry.lesson.lessonBells.endTime),
-                ),
-          ],
-        ),
       for (final activity in own)
         (
           activity.startsAt,
           activity.endsAt ?? activity.startsAt.add(const Duration(hours: 1)),
-          AppLessonRow(
-            outerVerticalInset: 0,
-            scheduleStyle: true,
+          AppLessonCard(
             title: activity.title,
             time: DateFormat.Hm(locale).format(activity.startsAt),
             endTime: activity.endsAt == null
@@ -114,10 +115,9 @@ class ScheduleDayView extends StatelessWidget {
                 : DateFormat.Hm(locale).format(activity.endsAt!),
             typeLabel:
                 activity.subtitle ?? activityTypeLabel(l10n, activity.type),
-            meta: activity.place,
+            location: activity.place,
             color: context.colors.ink,
             state: LessonRowState.own,
-            inset: 0,
           ),
           [
             (
@@ -133,26 +133,21 @@ class ScheduleDayView extends StatelessWidget {
             event.startsAt != null &&
             (display.showPast ||
                 (event.endsAt ?? event.startsAt!.add(const Duration(hours: 1)))
-                    .isAfter(now)))
+                    .isAfter(currentTime)))
           (
             event.startsAt!,
             event.endsAt ?? event.startsAt!.add(const Duration(hours: 1)),
-            AppLessonRow(
-              outerVerticalInset: 0,
-              scheduleStyle: true,
+            AppLessonCard(
               title: event.title,
               time: DateFormat.Hm(locale).format(event.startsAt!),
               endTime: event.endsAt == null
                   ? null
                   : DateFormat.Hm(locale).format(event.endsAt!),
               typeLabel: l10n.activityTypeEvent,
-              meta: [
-                if (event.location != null) event.location!,
-                if (event.description != null) event.description!,
-              ].join(' · '),
+              location: event.location,
+              meta: event.description,
               color: context.colors.accent,
               state: LessonRowState.own,
-              inset: 0,
             ),
             [
               (
@@ -164,25 +159,28 @@ class ScheduleDayView extends StatelessWidget {
     ]..sort((a, b) => a.$1.compareTo(b.$1));
     final currentIndex = rows.indexWhere(
       (row) => row.$4.any(
-        (interval) => !now.isBefore(interval.$1) && now.isBefore(interval.$2),
+        (interval) =>
+            !currentTime.isBefore(interval.$1) &&
+            currentTime.isBefore(interval.$2),
       ),
     );
     final nextIndex = rows.indexWhere(
-      (row) => row.$4.any((interval) => interval.$1.isAfter(now)),
+      (row) => row.$4.any((interval) => interval.$1.isAfter(currentTime)),
     );
-    final currentProgress = currentIndex < 0
+    final currentRow = currentIndex < 0
+        ? null
+        : rows.elementAtOrNull(currentIndex);
+    final currentProgress = currentRow == null
         ? 0.0
-        : (now.difference(rows[currentIndex].$1).inMilliseconds /
-                  rows[currentIndex].$2
-                      .difference(rows[currentIndex].$1)
-                      .inMilliseconds)
+        : (currentTime.difference(currentRow.$1).inMilliseconds /
+                  currentRow.$2.difference(currentRow.$1).inMilliseconds)
               .clamp(0.0, 1.0);
     final showNow =
-        isSameDate(day, now) &&
-        now.hour * 60 + now.minute >= 540 &&
-        now.hour * 60 + now.minute <= 1170;
+        isSameDate(day, currentTime) &&
+        currentTime.hour * 60 + currentTime.minute >= 540 &&
+        currentTime.hour * 60 + currentTime.minute <= 1170;
     final nowLine = ScheduleNowLine(
-      label: DateFormat.Hm(locale).format(now),
+      label: DateFormat.Hm(locale).format(currentTime),
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -190,7 +188,7 @@ class ScheduleDayView extends StatelessWidget {
         if (showDayStrip) ...[
           ScheduleDayStrip(
             day: day,
-            now: now,
+            now: currentTime,
             schedule: schedule,
             preferences: preferences,
             display: display,
@@ -202,7 +200,7 @@ class ScheduleDayView extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final title = Text(
-              isSameDate(day, now)
+              isSameDate(day, currentTime)
                   ? l10n.today
                   : capitalizeFirst(
                       DateFormat('EEEE, d', locale).format(day),
@@ -243,7 +241,7 @@ class ScheduleDayView extends StatelessWidget {
                   l10n.schedulePrevWeek,
                   () => onDay(day.subtract(const Duration(days: 7))),
                 ),
-                nav(l10n.todayLower, () => onDay(now), accent: true),
+                nav(l10n.todayLower, () => onDay(currentTime), accent: true),
                 nav(
                   l10n.scheduleNextWeek,
                   () => onDay(day.add(const Duration(days: 7))),
@@ -441,11 +439,8 @@ class ScheduleTimelineLesson extends StatelessWidget {
           singleClassroomText(l10n, lesson),
           entry.previousRoom!,
         )
-      else ...[
-        type,
-        singleClassroomText(l10n, lesson),
-        if (status.past) l10n.lessonMetaPast,
-      ],
+      else if (status.past)
+        l10n.lessonMetaPast,
       if (lesson.teachers.isNotEmpty)
         lesson.teachers.map((teacher) => teacher.name).join(', '),
     ].join(' · ');
@@ -466,15 +461,14 @@ class ScheduleTimelineLesson extends StatelessWidget {
     return LessonActivityBuilder(
       lesson: lesson,
       day: day,
-      builder: (context, annotations) => AppLessonRow(
+      builder: (context, annotations) => AppLessonCard(
         annotations: annotations,
-        outerVerticalInset: 0,
-        scheduleStyle: true,
         title: lesson.subject,
         time: '${lesson.lessonBells.startTime}',
         endTime: '${lesson.lessonBells.endTime}',
         state: state,
         color: lessonAccentOf(context, lesson),
+        icon: LessonCard.getIconByType(lesson.lessonType),
         typeLabel: lessonShortLabel(l10n, lesson.lessonType),
         chipLabel: entry.cancelled
             ? l10n.lessonTagCancelled
@@ -492,15 +486,11 @@ class ScheduleTimelineLesson extends StatelessWidget {
             : entry.moved
             ? context.colors.warn
             : context.colors.accent,
-        meta: meta,
+        location: entry.moved && entry.previousRoom != null
+            ? null
+            : singleClassroomText(l10n, lesson),
+        meta: meta.isEmpty ? null : meta,
         progress: status.live && !entry.cancelled ? status.progress : null,
-        inset: 0,
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.fieldGap,
-          AppSpacing.lg,
-          AppSpacing.xsm,
-          AppSpacing.lg,
-        ),
         onTap: () =>
             ScheduleDetailsRoute($extra: (lesson, day)).push<void>(context),
         onLongPress: () =>

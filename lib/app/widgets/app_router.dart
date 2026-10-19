@@ -32,6 +32,7 @@ class AppRouter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      scrollBehavior: const AppScrollBehavior(),
       restorationScopeId: 'app',
       localizationsDelegates: const [
         AppLocalizations.delegate,

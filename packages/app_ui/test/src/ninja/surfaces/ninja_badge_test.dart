@@ -6,14 +6,14 @@ import '../../kit_harness.dart';
 
 void main() {
   BoxDecoration decorationOf(WidgetTester tester, Type type) => kitDecoration(
-        tester,
-        find
-            .descendant(
-              of: find.byType(type),
-              matching: find.byType(DecoratedBox),
-            )
-            .first,
-      );
+    tester,
+    find
+        .descendant(
+          of: find.byType(type),
+          matching: find.byType(DecoratedBox),
+        )
+        .first,
+  );
 
   group('NinjaBadge', () {
     testWidgets('lime tone is accent on onAccent with 11.5/600 text', (

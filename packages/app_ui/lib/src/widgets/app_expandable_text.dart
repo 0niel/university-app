@@ -56,8 +56,9 @@ class _AppExpandableTextState extends State<AppExpandableText> {
             AppPressable(
               onTap: () => setState(() => _expanded = !_expanded),
               semanticsButton: true,
-              semanticsLabel:
-                  _expanded ? widget.collapseLabel : widget.expandLabel,
+              semanticsLabel: _expanded
+                  ? widget.collapseLabel
+                  : widget.expandLabel,
               child: Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(

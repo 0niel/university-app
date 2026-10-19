@@ -33,13 +33,12 @@ class PromoClient {
   );
 
   Future<List<PromoDismissal>> getDismissals(String userId) async {
-    final response = await _supabase.rpc<List<dynamic>>(
+    final response = await _supabase.rpc<List<Object?>>(
       'get_promo_banner_dismissals',
       params: {'p_expected_user_id': userId},
     );
     return [
-      for (final row in response)
-        PromoDismissal.fromJson((row as Map).cast<String, dynamic>()),
+      for (final row in response) PromoDismissal.fromJson((row! as Map).cast()),
     ];
   }
 

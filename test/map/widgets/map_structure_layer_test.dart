@@ -119,8 +119,9 @@ void main() {
                   ),
                 )
                 as Map<String, dynamic>;
-        for (final floor in data['floors'] as List<dynamic>) {
-          final json = floor as Map<String, dynamic>;
+        final {'floors': List<Object?> floors} = data;
+        for (final floor in floors) {
+          final json = floor! as Map<String, dynamic>;
           final svg = json['svg'] as String;
           bool outsideRoom(XmlElement element) => !element.ancestors
               .whereType<XmlElement>()

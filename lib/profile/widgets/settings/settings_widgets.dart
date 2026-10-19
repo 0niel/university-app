@@ -7,5 +7,4 @@ export 'settings_home_section.dart';
 export 'settings_notifications_section.dart';
 export 'settings_privacy_section.dart';
 export 'settings_schedule_section.dart';
-export 'settings_search_empty.dart';
 export 'settings_skeleton.dart';

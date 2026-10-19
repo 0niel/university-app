@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppState {
 
- AppStatus get status; User get user; bool get isAmoled; int? get discoursePostIdToOpen; String? get routeToOpen; int get notificationNavigationId;
+ AppStatus get status; User get user; int? get discoursePostIdToOpen; String? get routeToOpen; int get notificationNavigationId;
 /// Create a copy of AppState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $AppStateCopyWith<AppState> get copyWith => _$AppStateCopyWithImpl<AppState>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.isAmoled, isAmoled) || other.isAmoled == isAmoled)&&(identical(other.discoursePostIdToOpen, discoursePostIdToOpen) || other.discoursePostIdToOpen == discoursePostIdToOpen)&&(identical(other.routeToOpen, routeToOpen) || other.routeToOpen == routeToOpen)&&(identical(other.notificationNavigationId, notificationNavigationId) || other.notificationNavigationId == notificationNavigationId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.discoursePostIdToOpen, discoursePostIdToOpen) || other.discoursePostIdToOpen == discoursePostIdToOpen)&&(identical(other.routeToOpen, routeToOpen) || other.routeToOpen == routeToOpen)&&(identical(other.notificationNavigationId, notificationNavigationId) || other.notificationNavigationId == notificationNavigationId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,user,isAmoled,discoursePostIdToOpen,routeToOpen,notificationNavigationId);
+int get hashCode => Object.hash(runtimeType,status,user,discoursePostIdToOpen,routeToOpen,notificationNavigationId);
 
 @override
 String toString() {
-  return 'AppState(status: $status, user: $user, isAmoled: $isAmoled, discoursePostIdToOpen: $discoursePostIdToOpen, routeToOpen: $routeToOpen, notificationNavigationId: $notificationNavigationId)';
+  return 'AppState(status: $status, user: $user, discoursePostIdToOpen: $discoursePostIdToOpen, routeToOpen: $routeToOpen, notificationNavigationId: $notificationNavigationId)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $AppStateCopyWith<$Res>  {
   factory $AppStateCopyWith(AppState value, $Res Function(AppState) _then) = _$AppStateCopyWithImpl;
 @useResult
 $Res call({
- AppStatus status, User user, bool isAmoled, int? discoursePostIdToOpen, String? routeToOpen, int notificationNavigationId
+ AppStatus status, User user, int? discoursePostIdToOpen, String? routeToOpen, int notificationNavigationId
 });
 
 
@@ -62,12 +62,11 @@ class _$AppStateCopyWithImpl<$Res>
 
 /// Create a copy of AppState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? user = null,Object? isAmoled = null,Object? discoursePostIdToOpen = freezed,Object? routeToOpen = freezed,Object? notificationNavigationId = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? user = null,Object? discoursePostIdToOpen = freezed,Object? routeToOpen = freezed,Object? notificationNavigationId = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AppStatus,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as User,isAmoled: null == isAmoled ? _self.isAmoled : isAmoled // ignore: cast_nullable_to_non_nullable
-as bool,discoursePostIdToOpen: freezed == discoursePostIdToOpen ? _self.discoursePostIdToOpen : discoursePostIdToOpen // ignore: cast_nullable_to_non_nullable
+as User,discoursePostIdToOpen: freezed == discoursePostIdToOpen ? _self.discoursePostIdToOpen : discoursePostIdToOpen // ignore: cast_nullable_to_non_nullable
 as int?,routeToOpen: freezed == routeToOpen ? _self.routeToOpen : routeToOpen // ignore: cast_nullable_to_non_nullable
 as String?,notificationNavigationId: null == notificationNavigationId ? _self.notificationNavigationId : notificationNavigationId // ignore: cast_nullable_to_non_nullable
 as int,
@@ -164,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppStatus status,  User user,  bool isAmoled,  int? discoursePostIdToOpen,  String? routeToOpen,  int notificationNavigationId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppStatus status,  User user,  int? discoursePostIdToOpen,  String? routeToOpen,  int notificationNavigationId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppState() when $default != null:
-return $default(_that.status,_that.user,_that.isAmoled,_that.discoursePostIdToOpen,_that.routeToOpen,_that.notificationNavigationId);case _:
+return $default(_that.status,_that.user,_that.discoursePostIdToOpen,_that.routeToOpen,_that.notificationNavigationId);case _:
   return orElse();
 
 }
@@ -185,10 +184,10 @@ return $default(_that.status,_that.user,_that.isAmoled,_that.discoursePostIdToOp
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppStatus status,  User user,  bool isAmoled,  int? discoursePostIdToOpen,  String? routeToOpen,  int notificationNavigationId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppStatus status,  User user,  int? discoursePostIdToOpen,  String? routeToOpen,  int notificationNavigationId)  $default,) {final _that = this;
 switch (_that) {
 case _AppState():
-return $default(_that.status,_that.user,_that.isAmoled,_that.discoursePostIdToOpen,_that.routeToOpen,_that.notificationNavigationId);case _:
+return $default(_that.status,_that.user,_that.discoursePostIdToOpen,_that.routeToOpen,_that.notificationNavigationId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +204,10 @@ return $default(_that.status,_that.user,_that.isAmoled,_that.discoursePostIdToOp
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppStatus status,  User user,  bool isAmoled,  int? discoursePostIdToOpen,  String? routeToOpen,  int notificationNavigationId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppStatus status,  User user,  int? discoursePostIdToOpen,  String? routeToOpen,  int notificationNavigationId)?  $default,) {final _that = this;
 switch (_that) {
 case _AppState() when $default != null:
-return $default(_that.status,_that.user,_that.isAmoled,_that.discoursePostIdToOpen,_that.routeToOpen,_that.notificationNavigationId);case _:
+return $default(_that.status,_that.user,_that.discoursePostIdToOpen,_that.routeToOpen,_that.notificationNavigationId);case _:
   return null;
 
 }
@@ -220,12 +219,11 @@ return $default(_that.status,_that.user,_that.isAmoled,_that.discoursePostIdToOp
 
 
 class _AppState extends AppState {
-  const _AppState({this.status = AppStatus.unauthenticated, this.user = User.anonymous, this.isAmoled = false, this.discoursePostIdToOpen, this.routeToOpen, this.notificationNavigationId = 0}): super._();
+  const _AppState({this.status = AppStatus.unauthenticated, this.user = User.anonymous, this.discoursePostIdToOpen, this.routeToOpen, this.notificationNavigationId = 0}): super._();
 
 
 @override@JsonKey() final  AppStatus status;
 @override@JsonKey() final  User user;
-@override@JsonKey() final  bool isAmoled;
 @override final  int? discoursePostIdToOpen;
 @override final  String? routeToOpen;
 @override@JsonKey() final  int notificationNavigationId;
@@ -240,16 +238,16 @@ _$AppStateCopyWith<_AppState> get copyWith => __$AppStateCopyWithImpl<_AppState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.isAmoled, isAmoled) || other.isAmoled == isAmoled)&&(identical(other.discoursePostIdToOpen, discoursePostIdToOpen) || other.discoursePostIdToOpen == discoursePostIdToOpen)&&(identical(other.routeToOpen, routeToOpen) || other.routeToOpen == routeToOpen)&&(identical(other.notificationNavigationId, notificationNavigationId) || other.notificationNavigationId == notificationNavigationId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppState&&(identical(other.status, status) || other.status == status)&&(identical(other.user, user) || other.user == user)&&(identical(other.discoursePostIdToOpen, discoursePostIdToOpen) || other.discoursePostIdToOpen == discoursePostIdToOpen)&&(identical(other.routeToOpen, routeToOpen) || other.routeToOpen == routeToOpen)&&(identical(other.notificationNavigationId, notificationNavigationId) || other.notificationNavigationId == notificationNavigationId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,user,isAmoled,discoursePostIdToOpen,routeToOpen,notificationNavigationId);
+int get hashCode => Object.hash(runtimeType,status,user,discoursePostIdToOpen,routeToOpen,notificationNavigationId);
 
 @override
 String toString() {
-  return 'AppState(status: $status, user: $user, isAmoled: $isAmoled, discoursePostIdToOpen: $discoursePostIdToOpen, routeToOpen: $routeToOpen, notificationNavigationId: $notificationNavigationId)';
+  return 'AppState(status: $status, user: $user, discoursePostIdToOpen: $discoursePostIdToOpen, routeToOpen: $routeToOpen, notificationNavigationId: $notificationNavigationId)';
 }
 
 
@@ -260,7 +258,7 @@ abstract mixin class _$AppStateCopyWith<$Res> implements $AppStateCopyWith<$Res>
   factory _$AppStateCopyWith(_AppState value, $Res Function(_AppState) _then) = __$AppStateCopyWithImpl;
 @override @useResult
 $Res call({
- AppStatus status, User user, bool isAmoled, int? discoursePostIdToOpen, String? routeToOpen, int notificationNavigationId
+ AppStatus status, User user, int? discoursePostIdToOpen, String? routeToOpen, int notificationNavigationId
 });
 
 
@@ -277,12 +275,11 @@ class __$AppStateCopyWithImpl<$Res>
 
 /// Create a copy of AppState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? user = null,Object? isAmoled = null,Object? discoursePostIdToOpen = freezed,Object? routeToOpen = freezed,Object? notificationNavigationId = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? user = null,Object? discoursePostIdToOpen = freezed,Object? routeToOpen = freezed,Object? notificationNavigationId = null,}) {
   return _then(_AppState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AppStatus,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as User,isAmoled: null == isAmoled ? _self.isAmoled : isAmoled // ignore: cast_nullable_to_non_nullable
-as bool,discoursePostIdToOpen: freezed == discoursePostIdToOpen ? _self.discoursePostIdToOpen : discoursePostIdToOpen // ignore: cast_nullable_to_non_nullable
+as User,discoursePostIdToOpen: freezed == discoursePostIdToOpen ? _self.discoursePostIdToOpen : discoursePostIdToOpen // ignore: cast_nullable_to_non_nullable
 as int?,routeToOpen: freezed == routeToOpen ? _self.routeToOpen : routeToOpen // ignore: cast_nullable_to_non_nullable
 as String?,notificationNavigationId: null == notificationNavigationId ? _self.notificationNavigationId : notificationNavigationId // ignore: cast_nullable_to_non_nullable
 as int,

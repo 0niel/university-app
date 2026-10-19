@@ -47,7 +47,7 @@ class _CollabNotesBodyState extends State<CollabNotesBody> {
           SliverToBoxAdapter(
             child: Column(
               children: [
-                if (widget.header != null) widget.header!,
+                ?widget.header,
                 const SizedBox(height: AppSpacing.screen),
                 Padding(
                   padding: const EdgeInsets.symmetric(

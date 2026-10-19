@@ -51,8 +51,10 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   late SvgInteractiveMapController _mapController;
   final _panelController = DraggableScrollableController();
-  final _panelExtent = ValueNotifier<double>(0);
-  final _mapViewportPadding = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
+  final ValueNotifier<double> _panelExtent = ValueNotifier(0);
+  final ValueNotifier<EdgeInsets> _mapViewportPadding = ValueNotifier(
+    EdgeInsets.zero,
+  );
   final _query = TextEditingController();
   Timer? _clock;
   String? _pendingRoom;
@@ -106,7 +108,6 @@ class _MapViewState extends State<MapView> {
     _query.text = context.read<FreeRoomsCubit>().state.query;
     _clock = Timer.periodic(const Duration(minutes: 1), (_) {
       if (!mounted) return;
-      setState(() {});
       unawaited(context.read<FreeRoomsCubit>().load());
     });
   }
@@ -306,13 +307,14 @@ class _MapViewState extends State<MapView> {
     if (_pendingRoom == null && _pendingPlaceId == null) return;
     final pendingPlaceId = _pendingPlaceId == null
         ? null
-        : state.campusData?.placeForId(_pendingPlaceId!)?.id ?? _pendingPlaceId;
+        : (state.campusData?.placeForId(_pendingPlaceId!)?.id ??
+              _pendingPlaceId);
     final room = state.rooms
         .where(
-          (room) => pendingPlaceId != null
-              ? room.roomId == pendingPlaceId ||
-                    room.roomId.endsWith('__r__$pendingPlaceId')
-              : roomKey(room.name) == roomKey(_pendingRoom!),
+          (candidate) => pendingPlaceId != null
+              ? candidate.roomId == pendingPlaceId ||
+                    candidate.roomId.endsWith('__r__$pendingPlaceId')
+              : roomKey(candidate.name) == roomKey(_pendingRoom!),
         )
         .firstOrNull;
     if (room == null) return;
@@ -530,6 +532,8 @@ class _MapViewState extends State<MapView> {
           onContribute: _community,
           onApply: (route) {
             if (!mounted) return;
+            final start = route.nodes.firstOrNull;
+            if (start == null) return;
             final current = context.read<MapBloc>().state;
             if (current.status != MapStatus.loaded ||
                 !identical(current.campusData, campus)) {
@@ -543,7 +547,7 @@ class _MapViewState extends State<MapView> {
               _route = route;
               _routeStep = 0;
               _routeSnapshot = campus;
-              _routeStartRoomId = route.nodes.first.roomId;
+              _routeStartRoomId = start.roomId;
             });
             _query.clear();
             context.read<FreeRoomsCubit>().queryChanged('');
@@ -552,7 +556,7 @@ class _MapViewState extends State<MapView> {
             }
             _pendingRoom = null;
             _pendingPlaceId = null;
-            final firstFloorId = route.nodes.first.floorId;
+            final firstFloorId = start.floorId;
             _pendingNavigationFocus = (
               snapshot: campus,
               revision: ++_navigationFocusRevision,
@@ -562,7 +566,7 @@ class _MapViewState extends State<MapView> {
                   for (final node in segment.nodes) Offset(node.x, node.y),
               ],
             );
-            final floor = campus.floorForId(route.nodes.first.floorId)?.floor;
+            final floor = campus.floorForId(start.floorId)?.floor;
             if (floor != null &&
                 context.read<MapBloc>().state.selectedFloor?.id != floor.id) {
               _floor(floor);
@@ -573,6 +577,12 @@ class _MapViewState extends State<MapView> {
         ),
       ),
     );
+  }
+
+  Offset? _routeInstructionPoint(String floorId) {
+    final step = _route?.instructions.elementAtOrNull(_routeStep);
+    if (step == null || step.floorId != floorId) return null;
+    return Offset(step.atNode.x, step.atNode.y);
   }
 
   List<List<Offset>> _routeSegments(String floorId) {
@@ -690,7 +700,7 @@ class _MapViewState extends State<MapView> {
                 AppButton.secondary(
                   label: 'Открыть источник',
                   expanded: true,
-                  onPressed: () async {
+                  onPressed: () => unawaited(() async {
                     try {
                       final opened = await launchUrl(
                         source!,
@@ -709,7 +719,7 @@ class _MapViewState extends State<MapView> {
                         message: 'Не удалось открыть ссылку',
                       );
                     }
-                  },
+                  }()),
                 ),
               const SizedBox(height: AppSpacing.lg),
             ],
@@ -771,7 +781,7 @@ class _MapViewState extends State<MapView> {
     }
     if (index == _routeStep &&
         context.read<MapBloc>().state.selectedFloor?.id ==
-            route.instructions[index].atNode.floorId) {
+            route.instructions.elementAtOrNull(index)?.atNode.floorId) {
       return;
     }
     _moveRouteStep(index - _routeStep);
@@ -798,7 +808,8 @@ class _MapViewState extends State<MapView> {
       return;
     }
     setState(() => _routeStep = index);
-    final step = route.instructions[index];
+    final step = route.instructions.elementAtOrNull(index);
+    if (step == null) return;
     final floor = campus.floorForId(step.atNode.floorId)?.floor;
     if (floor == null) return;
     _pendingNavigationFocus = (
@@ -848,7 +859,8 @@ class _MapViewState extends State<MapView> {
   }
 
   void _openNavigationLandmark(MapNavigationLandmark landmark) {
-    final current = context.read<MapBloc>().state;
+    final mapBloc = context.read<MapBloc>();
+    final current = mapBloc.state;
     final campus = current.campusData;
     final graph = _landmarkGraph;
     if (current.status != MapStatus.loaded ||
@@ -862,7 +874,9 @@ class _MapViewState extends State<MapView> {
     }
     final floor = campus.floorForId(landmark.place.floorId);
     final targets = campus.floors
-        .where((floor) => landmark.outgoingFloorIds.contains(floor.floor.id))
+        .where(
+          (candidate) => landmark.outgoingFloorIds.contains(candidate.floor.id),
+        )
         .toList();
     unawaited(
       showAppSheet<void>(
@@ -891,9 +905,8 @@ class _MapViewState extends State<MapView> {
                 leading: Icon(mapPlaceKindIcon(landmark.place.kind)),
                 onTap: () {
                   Navigator.of(context, rootNavigator: true).pop();
-                  final state = context.read<MapBloc>().state;
-                  if (state.status != MapStatus.loaded ||
-                      !identical(state.campusData, campus)) {
+                  if (mapBloc.state.status != MapStatus.loaded ||
+                      !identical(mapBloc.state.campusData, campus)) {
                     return;
                   }
                   IndoorNavigationNode? destination;
@@ -982,10 +995,11 @@ class _MapViewState extends State<MapView> {
           bottomLeft: position(0, floor.height),
         );
         for (final place in campus.rooms.where(
-          (place) =>
-              place.floorId == floor.floor.id &&
-              (floor.georeference?.isReliableAt(place.x, place.y) ?? true) &&
-              mapPlaceKindLabel(place.kind) != 'Аудитория',
+          (candidate) =>
+              candidate.floorId == floor.floor.id &&
+              (floor.georeference?.isReliableAt(candidate.x, candidate.y) ??
+                  true) &&
+              mapPlaceKindLabel(candidate.kind) != 'Аудитория',
         )) {
           places.add(
             GeographicMapPlace(
@@ -1158,9 +1172,6 @@ class _MapViewState extends State<MapView> {
             final compactContentExtent =
                 MapFreeRoomsPanel.compactContentExtentOf(
                   context,
-                  width: constraints.maxWidth,
-                  campusName: state.selectedCampus?.displayName ?? '',
-                  discoveryMode: state.campusData != null,
                 );
             _collapsedPanelSize =
                 ((bottomInset + compactContentExtent) / constraints.maxHeight)
@@ -1203,17 +1214,11 @@ class _MapViewState extends State<MapView> {
                       floor.id,
                     ),
                     onNavigationLandmarkTap: _openNavigationLandmark,
-                    showRouteStart: _route?.nodes.first.floorId == floor.id,
+                    showRouteStart:
+                        _route?.nodes.firstOrNull?.floorId == floor.id,
                     showRouteDestination:
-                        _route?.nodes.last.floorId == floor.id,
-                    routeInstructionPoint:
-                        _route != null &&
-                            _route!.instructions[_routeStep].floorId == floor.id
-                        ? Offset(
-                            _route!.instructions[_routeStep].atNode.x,
-                            _route!.instructions[_routeStep].atNode.y,
-                          )
-                        : null,
+                        _route?.nodes.lastOrNull?.floorId == floor.id,
+                    routeInstructionPoint: _routeInstructionPoint(floor.id),
                     places: [
                       for (final place
                           in state.campusData?.rooms ?? <MapPlaceData>[])
@@ -1357,7 +1362,7 @@ class _MapViewState extends State<MapView> {
                     children: [
                       if (state.campusData != null) ...[
                         AppButton.primary(
-                          label: 'Маршрут',
+                          label: context.l10n.lessonDetailsRoute,
                           icon: const Icon(
                             Icons.directions_walk_rounded,
                             size: 20,
@@ -1368,9 +1373,9 @@ class _MapViewState extends State<MapView> {
                       ],
                       AppIconButton(
                         icon: const AppLineIconWidget(AppLineIcon.more),
-                        tooltip: 'Действия с картой',
+                        tooltip: context.l10n.mapActions,
                         shape: AppIconButtonShape.circle,
-                        tone: AppIconButtonTone.surface,
+                        tone: AppIconButtonTone.glass,
                         onPressed: _more,
                       ),
                     ],

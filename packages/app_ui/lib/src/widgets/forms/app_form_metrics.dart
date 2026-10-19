@@ -9,7 +9,7 @@ abstract final class AppFormMetrics {
   static const double clearVisualSize = AppIconSize.xl;
   static const double searchTrailingSize = AppControlSize.iconButtonSmall;
   static const double searchIcon = 18;
-  static const double searchInset = 18;
+  static const double searchInset = searchIcon;
   static const double multilineHeight = 84;
   static const double multilineInset = 13;
   static const double multilineFontSize = 13.5;
@@ -20,9 +20,9 @@ abstract final class AppFormMetrics {
   static const double hintFontSize = 14;
   static const double messageFontSize = 11.5;
   static const double messageLineHeight = 1.35;
-  static const double messageIcon = 13;
+  static const double messageIcon = multilineInset;
   static const double messageGap = 5;
   static const double iconStroke = 2.2;
-  static const double successIcon = 15;
+  static const double successIcon = passwordFontSize;
   static const double successStroke = 2.6;
 }

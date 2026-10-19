@@ -59,7 +59,7 @@ class _NinjaPathViewState extends State<NinjaPathView> {
                 const SizedBox(height: AppSpacing.fieldGap),
                 AppSegmentedControl<int>(
                   value: _tab,
-                  onCanvas: true,
+                  isOnCanvas: true,
                   options: [
                     AppSegmentedOption(
                       value: 0,

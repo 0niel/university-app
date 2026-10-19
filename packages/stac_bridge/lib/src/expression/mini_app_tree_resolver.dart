@@ -133,7 +133,7 @@ class MiniAppTreeResolver {
       return MiniAppTreeResolver(
         _engine,
         deferActions: deferActions,
-      ).resolveAction(Map<String, Object?>.from(node), context);
+      ).resolveAction(Map.from(node), context);
     }
     final deferredKey = _deferredKey(node);
     final out = <String, Object?>{};

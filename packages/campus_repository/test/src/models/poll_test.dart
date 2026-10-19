@@ -54,11 +54,14 @@ void main() {
     final poll = Poll.fromJson(payload);
     expect(poll.title, 'Campus survey');
     expect(poll.questions, hasLength(3));
-    expect(poll.questions.first.kind, PollQuestionKind.quiz);
-    expect(poll.questions.first.totalVotes, 3);
-    expect(poll.questions.first.options.first.share(3), closeTo(2 / 3, .001));
-    expect(poll.questions.first.options.first.isCorrect, isTrue);
-    expect(poll.questions.last.ratingAverage, 4.5);
+    expect(poll.questions.firstOrNull!.kind, PollQuestionKind.quiz);
+    expect(poll.questions.firstOrNull!.totalVotes, 3);
+    expect(
+      poll.questions.firstOrNull!.options.firstOrNull!.share(3),
+      closeTo(2 / 3, .001),
+    );
+    expect(poll.questions.firstOrNull!.options.firstOrNull!.isCorrect, isTrue);
+    expect(poll.questions.lastOrNull!.ratingAverage, 4.5);
     expect(poll.isFullyAnswered, isTrue);
     expect(poll.requiredQuestionCount, 2);
     expect(poll.resultsVisibility, PollResultsVisibility.afterVote);
@@ -115,18 +118,18 @@ void main() {
     expect(poll.participantsCount, 3);
     expect(poll.iParticipated, isTrue);
     expect(poll.isMine, isTrue);
-    expect(poll.questions.first.position, 2);
-    expect(poll.questions.first.options.first.position, 1);
-    expect(poll.questions.first.options.first.votedByMe, isTrue);
-    expect(poll.questions.first.hasMyAnswer, isTrue);
-    expect(poll.questions.last.hasMyAnswer, isFalse);
-    expect(poll.questions.last.textAnswers, ['Нравится синтаксис']);
+    expect(poll.questions.firstOrNull!.position, 2);
+    expect(poll.questions.firstOrNull!.options.firstOrNull!.position, 1);
+    expect(poll.questions.firstOrNull!.options.firstOrNull!.votedByMe, isTrue);
+    expect(poll.questions.firstOrNull!.hasMyAnswer, isTrue);
+    expect(poll.questions.lastOrNull!.hasMyAnswer, isFalse);
+    expect(poll.questions.lastOrNull!.textAnswers, ['Нравится синтаксис']);
     expect(poll.requiredQuestionCount, 1);
     expect(poll.isFullyAnswered, isTrue);
     final encoded = poll.toJson();
     expect(encoded, containsPair('resultsVisibility', 'after_vote'));
     expect(
-      (encoded['questions']! as List).first,
+      (encoded['questions']! as List).firstOrNull,
       containsPair('kind', 'single'),
     );
     expect(Poll.fromJson(encoded), poll);
@@ -143,7 +146,7 @@ void main() {
     expect(PollCategory.fromWire('nope'), isNull);
     const draft = PollQuestionDraft(
       text: 'Язык',
-      kind: PollQuestionKind.multiple,
+      kind: .multiple,
       options: ['Dart', 'Rust'],
     );
     expect(draft.toJson(), {
@@ -165,7 +168,7 @@ void main() {
   test('quiz draft preserves correct option index through copyWith', () {
     const draft = PollQuestionDraft(
       text: 'Quiz',
-      kind: PollQuestionKind.quiz,
+      kind: .quiz,
       options: ['A', 'B'],
       correctIndex: 1,
     );
@@ -174,7 +177,7 @@ void main() {
     expect(
       const PollQuestionDraft(
         text: 'Text',
-        kind: PollQuestionKind.text,
+        kind: .text,
       ).toJson().containsKey('correctIndex'),
       isFalse,
     );
@@ -199,7 +202,9 @@ void main() {
       expect(
         poll
             .copyWith(
-              questions: [poll.questions.first.copyWith(myOptionIds: [])],
+              questions: [
+                poll.questions.firstOrNull!.copyWith(myOptionIds: []),
+              ],
             )
             .isFullyAnswered,
         isFalse,

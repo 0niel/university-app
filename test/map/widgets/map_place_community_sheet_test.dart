@@ -20,13 +20,13 @@ import 'package:rtu_mirea_app/map/widgets/map_place_share_sheet.dart';
 
 import '../../helpers/pump_app.dart';
 
-class _Repository extends Fake implements MapDataRepository {
+class FakeMapCommunityRepository extends Fake implements MapDataRepository {
   bool authenticated = true;
   Exception? failure;
   DateTime? requestedDate;
   Map<String, Object?>? submitted;
   bool reviewed = false;
-  Future<MapProposal> Function(String)? proposalLoader;
+  Future<MapProposal> Function(String)? onLoadProposal;
   int? confirmedRevision;
   List<MapBookmark> bookmarks = [];
   (String, bool)? bookmarkChange;
@@ -121,14 +121,14 @@ class _Repository extends Fake implements MapDataRepository {
     };
     if (failure != null) throw failure!;
     return MapProposal.fromJson({
-      ...submitted!,
+      ...?submitted,
       'id': 'proposal',
       'status': 'pending',
     });
   }
 
   @override
-  Future<MapProposal> getProposal(String id) => proposalLoader!(id);
+  Future<MapProposal> getProposal(String id) => onLoadProposal!(id);
 
   @override
   Future<MapProposal> reviewProposal(
@@ -219,7 +219,7 @@ void main() {
     addTearDown(locale.dispose);
     final page = _page(
       MapPlaceDetailsSheet(
-        repository: _Repository(),
+        repository: FakeMapCommunityRepository(),
         campus: _campus(),
         room: MapPlaceData.fromJson(_roomJson),
       ),
@@ -257,7 +257,7 @@ void main() {
   testWidgets(
     'place uses Moscow date and keeps schedule readable at large text',
     (tester) async {
-      final repository = _Repository();
+      final repository = FakeMapCommunityRepository();
       await tester.pumpApp(
         _page(
           MapPlaceDetailsSheet(
@@ -283,7 +283,7 @@ void main() {
   testWidgets('unknown schedule never claims that the room is free', (
     tester,
   ) async {
-    final repository = _Repository()
+    final repository = FakeMapCommunityRepository()
       ..details = MapRoomDetails.fromJson({
         'room': _roomJson,
         'schedule_linked': false,
@@ -306,7 +306,7 @@ void main() {
   testWidgets('photos disclose in place and load lazily at 320px double text', (
     tester,
   ) async {
-    final repository = _Repository();
+    final repository = FakeMapCommunityRepository();
     final photos = _PhotoRepository();
     await tester.pumpApp(
       RepositoryProvider<CampusRepository>.value(
@@ -361,9 +361,9 @@ void main() {
       'patch': {'description': 'Есть проектор'},
     };
     final proposal = MapProposal.fromJson(proposalJson);
-    final repository = _Repository()
+    final repository = FakeMapCommunityRepository()
       ..proposals = [proposalJson]
-      ..proposalLoader = (_) async => proposal;
+      ..onLoadProposal = (_) async => proposal;
     await tester.pumpApp(
       _page(MapCommunitySheet(repository: repository, campus: _campus())),
       size: const Size(320, 568),
@@ -380,7 +380,7 @@ void main() {
   testWidgets('saved legacy room toggles the canonical bookmark at 320px', (
     tester,
   ) async {
-    final repository = _Repository()
+    final repository = FakeMapCommunityRepository()
       ..bookmarks = [
         MapBookmark.fromJson({
           'campus_id': 'campus-1',
@@ -418,7 +418,7 @@ void main() {
         {'name': 'Борщ', 'price': 120, 'currency': 'RUB'},
       ],
     });
-    final repository = _Repository()
+    final repository = FakeMapCommunityRepository()
       ..failure = const MapDataException('offline');
     await tester.pumpApp(
       _page(
@@ -440,7 +440,7 @@ void main() {
     tester,
   ) async {
     final room = {..._roomJson, 'navigation_needs_review': true};
-    final repository = _Repository()
+    final repository = FakeMapCommunityRepository()
       ..details = MapRoomDetails.fromJson({
         'room': room,
         'revision': 2,
@@ -472,7 +472,7 @@ void main() {
       ) async {
         var routes = 0;
         var refreshes = 0;
-        final repository = _Repository()
+        final repository = FakeMapCommunityRepository()
           ..details = MapRoomDetails.fromJson({
             'room': {..._roomJson, 'navigation_needs_review': moved},
             'revision': 3,
@@ -519,7 +519,7 @@ void main() {
       for (final remoteLoaded in [false, true]) {
         var routes = 0;
         var refreshes = 0;
-        final repository = _Repository()
+        final repository = FakeMapCommunityRepository()
           ..failure = remoteLoaded ? null : const MapDataException('offline');
         await tester.pumpApp(
           _page(
@@ -569,7 +569,7 @@ void main() {
   testWidgets('room contribution previews and submits at 320px double text', (
     tester,
   ) async {
-    final repository = _Repository();
+    final repository = FakeMapCommunityRepository();
     var complete = false;
     await tester.pumpApp(
       _page(
@@ -613,7 +613,7 @@ void main() {
   testWidgets('failed submission preserves draft and never reports success', (
     tester,
   ) async {
-    final repository = _Repository()
+    final repository = FakeMapCommunityRepository()
       ..failure = const MapDataException('stale', code: '40001');
     var complete = false;
     await tester.pumpApp(
@@ -640,7 +640,7 @@ void main() {
   });
 
   testWidgets('unauthenticated draft cannot be submitted', (tester) async {
-    final repository = _Repository()..authenticated = false;
+    final repository = FakeMapCommunityRepository()..authenticated = false;
     await tester.pumpApp(
       _page(
         MapContributionForm(
@@ -668,7 +668,7 @@ void main() {
   testWidgets('menu proposal records price and date at 320px double text', (
     tester,
   ) async {
-    final repository = _Repository();
+    final repository = FakeMapCommunityRepository();
     await tester.pumpApp(
       _page(
         MapContributionForm(
@@ -717,7 +717,7 @@ void main() {
   testWidgets('plan report preserves the target without fabricating geometry', (
     tester,
   ) async {
-    final repository = _Repository();
+    final repository = FakeMapCommunityRepository();
     await tester.pumpApp(
       _page(
         MapContributionForm(
@@ -751,7 +751,7 @@ void main() {
   testWidgets('community verification confirms only the displayed revision', (
     tester,
   ) async {
-    final repository = _Repository();
+    final repository = FakeMapCommunityRepository();
     await tester.pumpApp(
       _page(
         MapPlaceDetailsSheet(
@@ -771,7 +771,7 @@ void main() {
   testWidgets('review rejects own approval even if API flag is incorrect', (
     tester,
   ) async {
-    final repository = _Repository();
+    final repository = FakeMapCommunityRepository();
     await tester.pumpApp(
       _page(
         MapProposalReview(
@@ -798,7 +798,7 @@ void main() {
   testWidgets('moderator must explain rejection and conflict stays visible', (
     tester,
   ) async {
-    final repository = _Repository()
+    final repository = FakeMapCommunityRepository()
       ..failure = const MapDataException('stale', code: '40001');
     await tester.pumpApp(
       _page(
@@ -832,8 +832,8 @@ void main() {
     final first = Completer<MapProposal>();
     final second = Completer<MapProposal>();
     var loads = 0;
-    final repository = _Repository()
-      ..proposalLoader = (id) {
+    final repository = FakeMapCommunityRepository()
+      ..onLoadProposal = (id) {
         expect(id, 'proposal');
         return ++loads == 1 ? first.future : second.future;
       };
@@ -859,7 +859,7 @@ void main() {
     expect(loads, 1);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text('Принять и опубликовать'), findsNothing);
-    first.completeError(const MapDataException('Offline'));
+    first.completeError(const MapDataException('Offline'), StackTrace.current);
     await tester.pumpAndSettle();
     expect(find.text('Повторить загрузку изменений'), findsOneWidget);
     expect(repository.reviewed, isFalse);
@@ -885,8 +885,8 @@ void main() {
   testWidgets('detail permissions replace stale summary permissions', (
     tester,
   ) async {
-    final repository = _Repository()
-      ..proposalLoader = (_) async => MapProposal.fromJson({
+    final repository = FakeMapCommunityRepository()
+      ..onLoadProposal = (_) async => MapProposal.fromJson({
         'id': 'proposal',
         'status': 'approved',
         'can_review': false,

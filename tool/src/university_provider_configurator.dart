@@ -22,10 +22,10 @@ bool gitRepositoryReachable(Uri repository) {
 final class UniversityProviderConfigurator {
   const UniversityProviderConfigurator({
     required this.root,
-    this.canReach = gitRepositoryReachable,
+    this.onRepositoryAccessCheck = gitRepositoryReachable,
   });
   final Directory root;
-  final RepositoryAccess canReach;
+  final RepositoryAccess onRepositoryAccessCheck;
 
   void configure(UniversityProviderSource source) {
     final manifest = File(path.join(root.path, 'pubspec.yaml'));
@@ -95,7 +95,7 @@ final class UniversityProviderConfigurator {
     final pin = UniversityProviderPin.read(
       File(path.join(root.path, UniversityProviderPin.fileName)),
     );
-    if (canReach(pin.url)) return pin.source;
+    if (onRepositoryAccessCheck(pin.url)) return pin.source;
     stdout.writeln('Provider repository ${pin.url} is not accessible.');
     return const DefaultUniversityProvider();
   }

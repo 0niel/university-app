@@ -7,7 +7,7 @@ import 'package:http/testing.dart';
 import 'package:supabase/supabase.dart';
 import 'package:test/test.dart';
 
-const _sellerId = '00000000-0000-4000-8000-000000000020';
+const _kSellerId = '00000000-0000-4000-8000-000000000020';
 
 void main() {
   test('getListings resolves public media urls and telegram handle', () async {
@@ -37,7 +37,7 @@ void main() {
     final [listing] = listings;
     expect(listing.telegramHandle, 'seller_user');
     expect(
-      listing.media.single.url,
+      listing.media.singleOrNull!.url,
       'https://project.supabase.co/storage/v1/object/public/'
       'marketplace-media/seller-1/a.jpg',
     );
@@ -164,13 +164,13 @@ void main() {
         media: const [
           MarketMediaItem(
             path: 'seller-1/a.jpg',
-            kind: MarketMediaKind.image,
+            kind: .image,
             width: 800,
             height: 600,
           ),
           MarketMediaItem(
             path: 'seller-1/b.mp4',
-            kind: MarketMediaKind.video,
+            kind: .video,
             duration: 12,
           ),
         ],
@@ -259,7 +259,7 @@ void main() {
       extension: 'jpg',
     );
 
-    expect(path, startsWith('$_sellerId/'));
+    expect(path, startsWith('$_kSellerId/'));
     expect(path, endsWith('.jpg'));
     expect(
       uploadPath,
@@ -268,7 +268,7 @@ void main() {
   });
 }
 
-CampusRepository _repository(http.Client client) => CampusRepository(
+CampusRepository _repository(http.Client client) => .new(
   supabase: SupabaseClient(
     'https://project.supabase.co',
     'key',
@@ -289,7 +289,7 @@ Future<CampusRepository> _signedInRepository(http.Client client) async {
     jsonEncode({
       'access_token': 'test-access-token',
       'token_type': 'bearer',
-      'user': {'id': _sellerId},
+      'user': {'id': _kSellerId},
     }),
   );
   return CampusRepository(supabase: supabase, organizationId: 'university');

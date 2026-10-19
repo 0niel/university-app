@@ -13,8 +13,6 @@ import 'package:rtu_mirea_app/teacher_account/domain/teacher_workload.dart';
 import 'package:rtu_mirea_app/teacher_account/widgets/dashboard/teacher_lesson_tile.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-enum EntryFeature { schedule, teacherSchedule, campus, community }
-
 class EntryFeaturePreview extends StatelessWidget {
   const EntryFeaturePreview({required this.feature, super.key});
 
@@ -35,6 +33,8 @@ class EntryFeaturePreview extends StatelessWidget {
     ),
   );
 }
+
+enum EntryFeature { schedule, teacherSchedule, campus, community }
 
 class _SchedulePreview extends StatelessWidget {
   const _SchedulePreview({this.feature = EntryFeature.schedule});
@@ -125,27 +125,27 @@ class _SchedulePreview extends StatelessWidget {
               name: null,
               topInset: AppSpacing.screenTop,
             ),
+          ScheduleDayStrip(
+            day: day,
+            now: now,
+            schedule: lessons,
+            preferences: const SchedulePreferencesState(),
+            display: const ScheduleDisplayState(),
+            changes: const [],
+            onDay: (_) => (),
+          ),
+          const SizedBox(height: AppSpacing.lg),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
             child: Column(
               children: [
-                ScheduleDayStrip(
-                  day: day,
-                  now: now,
-                  schedule: lessons,
-                  preferences: const SchedulePreferencesState(),
-                  display: const ScheduleDisplayState(),
-                  changes: const [],
-                  onDay: (_) {},
-                ),
-                const SizedBox(height: AppSpacing.lg),
                 if (feature == EntryFeature.teacherSchedule)
                   for (final occurrence in workload.occurrences) ...[
                     TeacherLessonTile(
                       occurrence: occurrence,
                       now: now,
                       isNext: occurrence == workload.nextAt(now),
-                      onTap: () {},
+                      onTap: () => (),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                   ]
@@ -187,7 +187,7 @@ class _CommunityPreview extends StatelessWidget {
             child: AppListGroup(
               children: [
                 for (final entry in entries.take(4))
-                  ServiceRow(entry: entry, onTap: () {}),
+                  ServiceRow(entry: entry, onTap: () => ()),
               ],
             ),
           ),

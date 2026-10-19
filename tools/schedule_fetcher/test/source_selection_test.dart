@@ -25,6 +25,14 @@ http.Response _search({String? link}) => http.Response(
   200,
 );
 
+void expectRelayAuthorization(http.Request request) {
+  final isRelay = request.url.host == _relay.host;
+  expect(
+    request.headers[HttpHeaders.authorizationHeader],
+    isRelay ? _authorization : isNull,
+  );
+}
+
 void main() {
   test(
     'selects official once after search and calendar without relay auth',
@@ -66,10 +74,7 @@ void main() {
           httpClient: MockClient((request) async {
             requests.add(request);
             final isRelay = request.url.host == _relay.host;
-            expect(
-              request.headers[HttpHeaders.authorizationHeader],
-              isRelay ? _authorization : isNull,
-            );
+            expectRelayAuthorization(request);
             expect(request.followRedirects, isFalse);
             if (!isRelay &&
                 (!invalidCalendar || !request.url.path.endsWith('search'))) {
@@ -192,9 +197,10 @@ void main() {
         relayBaseUrl: _relay,
         relayAuthorization: _authorization,
         clock: () => now,
-        delay: (duration) async {
+        delay: (duration) {
           delays.add(duration);
           now = now.add(duration);
+          return .value();
         },
         log: diagnostics.add,
         httpClient: MockClient((request) async {

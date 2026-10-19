@@ -72,7 +72,6 @@ class CommunityCard extends StatelessWidget {
                             l10n,
                             entry,
                             categoryTitle: categoryTitle,
-                            joined: joined,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

@@ -34,6 +34,7 @@ class _EventsViewState extends State<EventsView> {
       context,
       title: l10n.eventsCreateSheetTitle,
       subtitle: l10n.eventsCreateSheetSubtitle,
+      contentPadding: EdgeInsets.zero,
       child: CreateEventSheet(onSubmit: cubit.createEvent),
     );
     if (!mounted) return;
@@ -50,6 +51,7 @@ class _EventsViewState extends State<EventsView> {
       context,
       title: l10n.eventsEditSheetTitle,
       subtitle: l10n.eventsCreateSheetSubtitle,
+      contentPadding: EdgeInsets.zero,
       child: CreateEventSheet(
         existing: event,
         onSubmit: (draft) => cubit.updateEvent(event.id, draft),
@@ -94,13 +96,14 @@ class _EventsViewState extends State<EventsView> {
 
   Future<void> _toggleRsvp(CampusEvent event) async {
     final l10n = context.l10n;
-    final going = event.isGoing;
     final succeeded = await context.read<EventsCubit>().toggleRsvp(event.id);
     if (!mounted) return;
     if (succeeded) {
       showNinjaToast(
         context,
-        message: going ? l10n.eventsToastRemoved : l10n.eventsToastGoing,
+        message: event.isGoing
+            ? l10n.eventsToastRemoved
+            : l10n.eventsToastGoing,
       );
     } else {
       showNinjaToast(context, showCheck: false, message: l10n.eventsRsvpError);
@@ -162,12 +165,7 @@ class _EventsViewState extends State<EventsView> {
             ),
             if (_viewMode == .list)
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.screen,
-                  14,
-                  AppSpacing.screen,
-                  0,
-                ),
+                padding: const EdgeInsets.only(top: 14),
                 sliver: SliverToBoxAdapter(
                   child: EventsFilters(
                     value: _filter,
@@ -204,7 +202,6 @@ class _EventsViewState extends State<EventsView> {
   }
 
   Widget _calendarContent(BuildContext context, EventsState state) {
-    final l10n = context.l10n;
     if (state.status == .loading && state.events.isEmpty) {
       return const EventsCalendarSkeleton(
         key: ValueKey('events-calendar-loading'),
@@ -213,9 +210,9 @@ class _EventsViewState extends State<EventsView> {
     if (state.status == .failure && state.events.isEmpty) {
       return AppErrorState(
         key: const ValueKey('events-calendar-failure'),
-        title: l10n.eventsLoadError,
-        message: l10n.eventsLoadErrorSub,
-        primaryLabel: l10n.retry,
+        title: context.l10n.eventsLoadError,
+        message: context.l10n.eventsLoadErrorSub,
+        primaryLabel: context.l10n.retry,
         onPrimary: () => unawaited(context.read<EventsCubit>().load()),
       );
     }

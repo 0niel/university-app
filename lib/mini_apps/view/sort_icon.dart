@@ -1,4 +1,4 @@
-part of 'mini_apps_page.dart';
+part of 'mini_apps_catalog.dart';
 
 class _SortIcon extends StatelessWidget {
   const _SortIcon({required this.sort});

@@ -1,14 +1,13 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rtu_mirea_app/home/view/widgets/hero/home_hero_surface.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class HeroFree extends StatelessWidget {
   const HeroFree({super.key});
 
   @override
-  Widget build(BuildContext context) => AppCard(
-    radius: AppRadius.hero,
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+  Widget build(BuildContext context) => HomeHeroSurface(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -18,14 +17,15 @@ class HeroFree extends StatelessWidget {
               TextSpan(text: '${context.l10n.homeHeroFreeTitle}\n'),
               TextSpan(
                 text: context.l10n.scheduleFreeDayTitle,
-                style: AppText.serif(
-                  24,
-                  italic: true,
-                ).copyWith(color: context.colors.accent),
+                style: AppText.sans(
+                  20,
+                  FontWeight.w700,
+                  height: 1.15,
+                ).copyWith(color: context.colors.accent, letterSpacing: -.7),
               ),
             ],
           ),
-          style: AppText.sectionLarge.copyWith(color: context.colors.ink),
+          style: AppText.title.copyWith(color: context.colors.ink),
         ),
         const SizedBox(height: 8),
         Text(

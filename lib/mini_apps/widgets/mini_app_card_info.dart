@@ -1,6 +1,7 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:mini_apps_repository/mini_apps_repository.dart';
+import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_card_meta.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_status_pill.dart';
 
 class MiniAppCardInfo extends StatelessWidget {
@@ -34,20 +35,28 @@ class MiniAppCardInfo extends StatelessWidget {
                 app.name,
                 maxLines: 2,
                 overflow: .ellipsis,
-                style: AppText.headline.copyWith(color: colors.ink),
+                style: AppText.sans(
+                  17,
+                  FontWeight.w600,
+                  height: 1.2,
+                ).copyWith(color: colors.ink, letterSpacing: -.25),
               ),
             ),
           ],
         ),
         if (app.description.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.xxs),
+          const SizedBox(height: 3),
           Text(
             app.description,
             maxLines: 2,
             overflow: .ellipsis,
-            style: AppText.subtext.copyWith(color: colors.muted),
+            style: AppText.sans(13, FontWeight.w400).copyWith(
+              color: colors.muted,
+            ),
           ),
         ],
+        const SizedBox(height: 6),
+        MiniAppCardMeta(app: app),
         if (showStatus) ...[
           const SizedBox(height: AppSpacing.sm),
           MiniAppStatusPill(status: app.status),

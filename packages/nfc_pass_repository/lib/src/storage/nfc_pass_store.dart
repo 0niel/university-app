@@ -31,15 +31,15 @@ final class NfcPassStore {
       throw ArgumentError.value(accountId, 'accountId');
     }
     if (_accountManaged && _accountReady && _accountId == accountId) {
-      return Future<void>.value();
+      return Future.value();
     }
     final forceClear = _accountManaged && _accountId != accountId;
     _accountManaged = true;
     _accountReady = false;
     _accountId = accountId;
     _sessionAllowed = false;
-    final accountRevision = ++_accountRevision;
-    final sessionRevision = ++_sessionRevision;
+    final capturedAccountRevision = ++_accountRevision;
+    final capturedSessionRevision = ++_sessionRevision;
     _sessionChangeRequest++;
     return _serializeStorage(() async {
       final storedAccount = await _secureStorage.read(key: _kKeySessionAccount);
@@ -48,17 +48,17 @@ final class NfcPassStore {
         await _secureStorage.delete(key: _kKeyCookie);
         await _secureStorage.delete(key: _kKeyJwt);
       }
-      if (_accountRevision != accountRevision) return;
+      if (_accountRevision != capturedAccountRevision) return;
       if (accountId != null && (forceClear || storedAccount != accountId)) {
         await _secureStorage.write(
           key: _kKeySessionAccount,
           value: accountId,
         );
       }
-      if (_accountRevision != accountRevision) return;
+      if (_accountRevision != capturedAccountRevision) return;
       _accountReady = true;
       _sessionAllowed =
-          accountId != null && _sessionRevision == sessionRevision;
+          accountId != null && _sessionRevision == capturedSessionRevision;
     });
   }
 
@@ -72,7 +72,10 @@ final class NfcPassStore {
 
   Future<T> _serializeStorage<T>(Future<T> Function() operation) {
     final result = _storageOperation.then((_) => operation());
-    _storageOperation = result.then<void>((_) {}, onError: (Object _) {});
+    _storageOperation = result.then<void>(
+      (_) => null,
+      onError: (Object error, StackTrace stackTrace) => null,
+    );
     return result;
   }
 

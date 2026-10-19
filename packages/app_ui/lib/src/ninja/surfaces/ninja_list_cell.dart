@@ -24,10 +24,10 @@ class NinjaListCell extends StatelessWidget {
     this.onTap,
     this.onDelete,
     this.dismissibleKey,
-  })  : _subject = false,
-        time = null,
-        meta = null,
-        color = null;
+  }) : _subject = false,
+       time = null,
+       meta = null,
+       color = null;
 
   const NinjaListCell.subject({
     required this.title,
@@ -39,17 +39,17 @@ class NinjaListCell extends StatelessWidget {
     this.onTap,
     this.onDelete,
     this.dismissibleKey,
-  })  : _subject = true,
-        subtitle = null,
-        trailingLabel = null,
-        trailingColor = null,
-        titleColor = null,
-        leading = null,
-        trailing = null,
-        strong = false,
-        destructive = false,
-        horizontalPadding = 16,
-        showChevron = false;
+  }) : _subject = true,
+       subtitle = null,
+       trailingLabel = null,
+       trailingColor = null,
+       titleColor = null,
+       leading = null,
+       trailing = null,
+       strong = false,
+       destructive = false,
+       horizontalPadding = 16,
+       showChevron = false;
 
   final String title;
   final String? subtitle;
@@ -128,10 +128,11 @@ class NinjaListCell extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: (strong || destructive
-                          ? AppText.bodyStrong
-                          : AppText.body)
-                      .copyWith(color: foreground),
+                  style:
+                      (strong || destructive
+                              ? AppText.bodyStrong
+                              : AppText.body)
+                          .copyWith(color: foreground),
                 ),
                 if (subtitleText != null) ...[
                   const SizedBox(height: AppSpacing.xxs),

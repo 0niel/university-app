@@ -9,9 +9,14 @@ import 'package:rtu_mirea_app/profile/widgets/about_section.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_section.dart';
 
 class SettingsAboutSection extends StatelessWidget {
-  const SettingsAboutSection({required this.version, super.key});
+  const SettingsAboutSection({
+    required this.version,
+    required this.onOpenRepository,
+    super.key,
+  });
 
   final String? version;
+  final VoidCallback onOpenRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +26,7 @@ class SettingsAboutSection extends StatelessWidget {
         AboutSection(
           appName: context.read<UniversityConfig>().appName,
           version: version,
+          onOpenRepository: onOpenRepository,
           onTap: () => unawaited(context.push('/profile/about')),
         ),
       ],

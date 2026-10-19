@@ -50,7 +50,6 @@ class NotificationsSheet extends StatelessWidget {
           l10n: l10n,
           pushes: state.pushes,
           changes: changes,
-          now: now,
         );
         final unread = [
           for (final item in feed)
@@ -112,9 +111,14 @@ class NotificationsSheet extends StatelessWidget {
 
   Future<void> _open(BuildContext context, AppNotification item) async {
     context.read<NotificationsCubit>().markRead(item.id);
+    final navigator = Navigator.of(context);
     final route = item.route;
-    final router = GoRouter.maybeOf(context);
-    await Navigator.of(context).maybePop();
-    if (route != null) router?.go(route);
+    if (route != null) {
+      final router = GoRouter.maybeOf(context);
+      await navigator.maybePop();
+      router?.go(route);
+    } else {
+      await navigator.maybePop();
+    }
   }
 }

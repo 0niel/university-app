@@ -131,6 +131,10 @@ void main() {
       expect(digJson(root, 'data.items.9'), isNull);
       expect(digJson(root, 'data.items.title'), isNull);
     });
+
+    test('returns null for negative list indices', () {
+      expect(digJson(root, 'data.items.-1.title'), isNull);
+    });
   });
 
   group('primeMiniAppStorage', () {

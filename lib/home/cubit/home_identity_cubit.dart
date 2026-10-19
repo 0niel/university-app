@@ -1,24 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 
-enum HomeIdentityStatus { initial, loaded }
-
-class HomeIdentityState {
-  const HomeIdentityState({
-    this.status = HomeIdentityStatus.initial,
-    this.fullName,
-    this.handle,
-  });
-
-  final HomeIdentityStatus status;
-  final String? fullName;
-  final String? handle;
-
-  bool get isLoaded => status == HomeIdentityStatus.loaded;
-
-  static const initial = HomeIdentityState();
-}
-
 class HomeIdentityCubit extends Cubit<HomeIdentityState> {
   HomeIdentityCubit(this._repository, this._organizationId)
     : super(HomeIdentityState.initial);
@@ -49,4 +31,22 @@ class HomeIdentityCubit extends Cubit<HomeIdentityState> {
       );
     }
   }
+}
+
+enum HomeIdentityStatus { initial, loaded }
+
+class HomeIdentityState {
+  const HomeIdentityState({
+    this.status = HomeIdentityStatus.initial,
+    this.fullName,
+    this.handle,
+  });
+
+  final HomeIdentityStatus status;
+  final String? fullName;
+  final String? handle;
+
+  bool get isLoaded => status == HomeIdentityStatus.loaded;
+
+  static const initial = HomeIdentityState();
 }

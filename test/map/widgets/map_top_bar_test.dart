@@ -24,13 +24,18 @@ Future<void> _pumpBar(
   Size size = const Size(320, 420),
   double textScale = 1,
   bool reducedMotion = true,
+  bool glassEnabled = true,
 }) async {
   tester.view
     ..physicalSize = size
     ..devicePixelRatio = 1;
   await tester.pumpWidget(
     MaterialApp(
-      theme: AppTheme.lightTheme,
+      theme: AppTheme.generateTheme(
+        AppColors.light,
+        Brightness.light,
+        glassEnabled: glassEnabled,
+      ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: locale,
@@ -61,6 +66,117 @@ Future<void> _pumpBar(
 }
 
 void main() {
+  for (final glassEnabled in [true, false]) {
+    testWidgets(
+      'floating search keeps optics and editing with glass $glassEnabled',
+      (tester) async {
+        addTearDown(tester.view.reset);
+        final controller = TextEditingController();
+        addTearDown(controller.dispose);
+        await _pumpBar(
+          tester,
+          controller: controller,
+          glassEnabled: glassEnabled,
+          reducedMotion: false,
+        );
+        final lenses = find.byWidgetPredicate(
+          (widget) => widget.runtimeType.toString() == 'LiquidGlassLens',
+        );
+        expect(lenses, glassEnabled ? findsWidgets : findsNothing);
+        await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+        await tester.pump();
+        final fieldElement = tester.element(find.byType(TextField));
+        for (var frame = 0; frame < 8; frame++) {
+          await tester.pump(const Duration(milliseconds: 40));
+          expect(tester.element(find.byType(TextField)), same(fieldElement));
+          for (final surface in find.byType(AppGlassSurface).evaluate()) {
+            var isolated = false;
+            surface.visitAncestorElements((ancestor) {
+              if (ancestor.widget is MapTopBar) return false;
+              final ancestorWidget = ancestor.widget;
+              if ((ancestorWidget is Opacity && ancestorWidget.opacity < 1) ||
+                  (ancestorWidget is FadeTransition &&
+                      ancestorWidget.opacity.value < 1) ||
+                  ancestorWidget is ShaderMask ||
+                  ancestorWidget is ColorFiltered) {
+                isolated = true;
+              }
+              return true;
+            });
+            expect(isolated, isFalse);
+          }
+          expect(tester.takeException(), isNull);
+        }
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), 'А-101');
+        await tester.pumpAndSettle();
+        expect(controller.text, 'А-101');
+        expect(tester.element(find.byType(TextField)), same(fieldElement));
+        expect(
+          tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus,
+          isTrue,
+        );
+        expect(lenses, glassEnabled ? findsOneWidget : findsNothing);
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await tester.pumpAndSettle();
+        expect(find.byType(TextField), findsNothing);
+        expect(controller.text, isEmpty);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets(
+    'expanded search shows one back glyph without a second search icon',
+    (tester) async {
+      addTearDown(tester.view.reset);
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await _pumpBar(tester, controller: controller);
+      int visibleGlyphs(AppLineIcon icon) => find
+          .byWidgetPredicate(
+            (widget) => widget is AppLineIconWidget && widget.icon == icon,
+          )
+          .evaluate()
+          .where((element) {
+            var visible = true;
+            element.visitAncestorElements((ancestor) {
+              final widget = ancestor.widget;
+              if ((widget is Opacity && widget.opacity == 0) ||
+                  (widget is FadeTransition && widget.opacity.value == 0) ||
+                  (widget is Offstage && widget.offstage)) {
+                visible = false;
+              }
+              return true;
+            });
+            return visible;
+          })
+          .length;
+      expect(visibleGlyphs(AppLineIcon.search), 1);
+      await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+      await tester.pumpAndSettle();
+      expect(visibleGlyphs(AppLineIcon.search), 0);
+      expect(visibleGlyphs(AppLineIcon.chevronL), 1);
+      expect(
+        find.descendant(
+          of: find.byType(AppSearchField),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is AppLineIconWidget &&
+                widget.icon == AppLineIcon.search,
+          ),
+        ),
+        findsNothing,
+      );
+      await tester.enterText(find.byType(TextField), 'А-101');
+      await tester.pumpAndSettle();
+      expect(controller.text, 'А-101');
+      expect(visibleGlyphs(AppLineIcon.search), 0);
+      expect(visibleGlyphs(AppLineIcon.chevronL), 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   for (final locale in const [Locale('ru'), Locale('en')]) {
     testWidgets(
       'campus picker follows ${locale.languageCode} and selects campus',

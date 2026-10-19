@@ -88,15 +88,19 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
     if (identical(mode, _tickerMode)) return;
     _tickerMode?.removeListener(_syncClock);
     _tickerMode = mode;
-    mode.addListener(_syncClock);
-    _syncClock();
+    _tickerMode?.addListener(_syncClock);
+    _restartClock();
   }
 
   void _syncClock() {
+    if (mounted) setState(_restartClock);
+  }
+
+  void _restartClock() {
     _clock?.cancel();
     _clock = null;
     if (_tickerMode?.value.enabled != true) return;
-    setState(_updateClock);
+    _updateClock();
     _clock = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted) setState(_updateClock);
     });
@@ -112,12 +116,14 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _syncClock();
-    } else if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.hidden) {
-      _clock?.cancel();
-      _clock = null;
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _syncClock();
+      case AppLifecycleState.paused || AppLifecycleState.hidden:
+        _clock?.cancel();
+        _clock = null;
+      case AppLifecycleState.detached || AppLifecycleState.inactive:
+        break;
     }
   }
 
@@ -144,8 +150,8 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
 
   Future<void> _refresh() async {
     final schedule = context.read<ScheduleBloc>();
-    final waits = <Future<void>>[
-      _deadlines.load().then((_) {}),
+    final waits = [
+      _deadlines.load().then<void>((_) => null),
       _gamification.load(),
       _identity.load(),
       _loadChanges(force: true),
@@ -155,7 +161,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
                 state.status == DiscourseStatus.loaded ||
                 state.status == DiscourseStatus.failure,
           )
-          .then((_) {}),
+          .then<void>((_) => null),
       if (homeWaitsForScheduleRefresh(schedule.state.selectedSchedule))
         schedule.stream
             .firstWhere(
@@ -163,15 +169,17 @@ class _HomeDashboardPageState extends State<HomeDashboardPage>
                   state.status == ScheduleStatus.loaded ||
                   state.status == ScheduleStatus.failure,
             )
-            .then((_) {}),
+            .then<void>((_) => null),
     ];
     schedule.add(const SelectedScheduleRefreshRequested(manual: true));
     _discourse.add(const DiscourseTopTopicsRequested());
     await Future.wait(
       waits.map(
         (future) => future
-            .timeout(const Duration(seconds: 15), onTimeout: () {})
-            .catchError((Object _) {}),
+            .timeout(const Duration(seconds: 15), onTimeout: () => null)
+            .catchError((Object error) {
+              debugPrint('Home refresh failed: $error');
+            }),
       ),
     );
   }

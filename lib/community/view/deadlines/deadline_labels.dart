@@ -1,8 +1,11 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:rtu_mirea_app/community/view/deadlines/deadline_urgency_tier.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:schedule_repository/schedule_repository.dart';
+
+export 'deadline_urgency_tier.dart';
 
 bool sameDay(DateTime first, DateTime second) =>
     first.year == second.year &&
@@ -65,8 +68,6 @@ String deadlineLeftLabel(
   if (left.inDays < 14) return l10n.deadlineDueInDays(left.inDays);
   return l10n.deadlineDueInWeeks((left.inDays / 7).round());
 }
-
-enum DeadlineUrgencyTier { danger, warn, normal, done }
 
 DeadlineUrgencyTier deadlineUrgencyTierAt(Deadline deadline, DateTime now) {
   if (deadline.isDone) return DeadlineUrgencyTier.done;

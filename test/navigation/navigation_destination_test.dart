@@ -98,10 +98,24 @@ void main() {
         .toList();
     expect(fills, hasLength(5));
     expect(fills.every((fill) => fill.shape == BoxShape.circle), isTrue);
-    expect(fills[2].color, AppColors.light.accent);
+    expect(fills.every((fill) => fill.color == Colors.transparent), isTrue);
+    final highlight = find.descendant(
+      of: find.byType(AppBottomNavigationBar),
+      matching: find.byKey(const ValueKey('navigation-selection')),
+    );
+    expect(highlight, findsOneWidget);
+    expect(find.byType(AppGlassHighlight), findsNothing);
+    final selection = tester.widget<DecoratedBox>(highlight);
     expect(
-      fills.where((fill) => fill.color == AppColors.light.accent),
-      hasLength(1),
+      (selection.decoration as BoxDecoration).color,
+      tester.element(find.byType(AppBottomNavigationBar)).colors.tint,
+    );
+    final mapGlyph = find.byWidgetPredicate(
+      (widget) => widget is AppLineIconWidget && widget.icon == AppLineIcon.map,
+    );
+    expect(
+      tester.getCenter(highlight).dx,
+      closeTo(tester.getCenter(mapGlyph).dx, .01),
     );
   });
 
@@ -178,59 +192,59 @@ void main() {
       ),
     );
 
-    final opacity = tester.widgetList<AnimatedOpacity>(
-      find.byType(AnimatedOpacity),
+    expect(find.byType(AnimatedOpacity), findsNothing);
+    final slides = tester.widgetList<AnimatedSlide>(
+      find.byType(AnimatedSlide, skipOffstage: false),
     );
-    expect(opacity.map((widget) => widget.opacity), [0, 0, 0, 0, 1]);
-    expect(opacity.every((widget) => widget.duration == Duration.zero), isTrue);
-    expect(
-      tester
-          .widgetList<AnimatedSlide>(find.byType(AnimatedSlide))
-          .every((widget) => widget.duration == Duration.zero),
-      isTrue,
-    );
-    expect(find.text('Feed'), findsOneWidget);
-    expect(find.text('Profile'), findsOneWidget);
+    expect(slides, hasLength(5));
+    expect(slides.every((widget) => widget.duration == Duration.zero), isTrue);
+    expect(find.text('Schedule'), findsOneWidget);
+    expect(find.text('Feed'), findsNothing);
+    expect(find.text('Profile'), findsNothing);
+    expect(find.text('Feed', skipOffstage: false), findsOneWidget);
+    expect(find.text('Profile', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgets('outgoing branch completes its transition', (tester) async {
-    var feedTaps = 0;
+  testWidgets(
+    'only the active branch remains interactive during entry motion',
+    (tester) async {
+      var feedTaps = 0;
 
-    Widget build(int currentIndex) {
-      return MaterialApp(
-        home: NavigationBranchContainer(
-          currentIndex: currentIndex,
-          children: [
-            ColoredBox(
-              color: Colors.red,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => feedTaps++,
-                child: const Text('Feed'),
+      Widget build(int currentIndex) {
+        return MaterialApp(
+          home: NavigationBranchContainer(
+            currentIndex: currentIndex,
+            children: [
+              ColoredBox(
+                color: Colors.red,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => feedTaps++,
+                  child: const Text('Feed'),
+                ),
               ),
-            ),
-            const ColoredBox(color: Colors.blue, child: Text('Profile')),
-          ],
-        ),
-      );
-    }
+              const ColoredBox(color: Colors.blue, child: Text('Profile')),
+            ],
+          ),
+        );
+      }
 
-    await tester.pumpWidget(build(1));
-    await tester.pumpAndSettle();
-    await tester.pumpWidget(build(0));
-    await tester.pump(const Duration(milliseconds: 110));
+      await tester.pumpWidget(build(1));
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(build(0));
+      await tester.pump(const Duration(milliseconds: 110));
 
-    final opacity = tester.widgetList<AnimatedOpacity>(
-      find.byType(AnimatedOpacity),
-    );
-    expect(opacity.map((widget) => widget.opacity), [0, 1]);
+      expect(find.byType(AnimatedOpacity), findsNothing);
+      expect(find.text('Profile'), findsNothing);
+      expect(find.text('Feed'), findsOneWidget);
 
-    await tester.tapAt(tester.getCenter(find.text('Feed')));
-    expect(feedTaps, 1);
+      await tester.tapAt(tester.getCenter(find.text('Feed')));
+      expect(feedTaps, 1);
 
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('inactive branch releases and excludes keyboard focus', (
     tester,

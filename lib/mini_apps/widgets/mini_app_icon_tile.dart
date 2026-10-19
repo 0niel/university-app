@@ -13,11 +13,19 @@ class MiniAppIconTile extends StatelessWidget {
   final Color accent;
   final double size;
 
+  static Color resolveAccent(String value, {required Color fallback}) {
+    final hex = value.replaceFirst('#', '');
+    if (hex.length != 6) return fallback;
+    final rgb = int.tryParse(hex, radix: 16);
+    return rgb == null ? fallback : Color(0xff000000 | rgb);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppIconTile(
       size: size,
-      background: context.colors.tintOf(accent),
+      radius: size * .32,
+      background: context.colors.tintOf(accent, .2),
       child: Text(
         emoji,
         style: AppText.sans(size * .5, FontWeight.w400, height: 1),

@@ -1,7 +1,7 @@
 part of 'poll_creator_sheet.dart';
 
-class _SettingsStep extends StatelessWidget {
-  const _SettingsStep({
+class _CreatorSettingsStep extends StatelessWidget {
+  const _CreatorSettingsStep({
     required this.anonymous,
     required this.onAnonymousChanged,
     required this.resultsVisibility,

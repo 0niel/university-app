@@ -24,7 +24,7 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
                 AuthenticationUser.anonymous,
           );
         },
-        onDone: controller.close,
+        onDone: () => unawaited(controller.close()),
       );
       controller
         ..onCancel = subscription.cancel
@@ -110,8 +110,10 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
     required String email,
   }) async {
     try {
-      final user = _supabaseAuth.currentUser;
-      if (user == null || user.id != userId || !user.isAnonymous) {
+      final currentUser = _supabaseAuth.currentUser;
+      if (currentUser == null ||
+          currentUser.id != userId ||
+          !currentUser.isAnonymous) {
         throw StateError('The guest session is no longer active.');
       }
       await _supabaseAuth.updateUser(UserAttributes(email: email));
@@ -127,17 +129,17 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
     required String code,
   }) async {
     try {
-      final user = _supabaseAuth.currentUser;
-      if (user?.id != userId) {
+      final currentUser = _supabaseAuth.currentUser;
+      if (currentUser?.id != userId) {
         throw StateError('The guest session is no longer active.');
       }
-      if (user != null &&
-          !user.isAnonymous &&
-          user.emailConfirmedAt != null &&
-          user.email?.toLowerCase() == email.toLowerCase()) {
+      if (currentUser != null &&
+          !currentUser.isAnonymous &&
+          currentUser.emailConfirmedAt != null &&
+          currentUser.email?.toLowerCase() == email.toLowerCase()) {
         return;
       }
-      if (user?.isAnonymous != true) {
+      if (currentUser?.isAnonymous != true) {
         throw StateError('The account does not match this email verification.');
       }
       final result = await _supabaseAuth.verifyOTP(
@@ -165,11 +167,11 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
     required String password,
   }) async {
     try {
-      final user = _supabaseAuth.currentUser;
-      if (user == null ||
-          user.id != userId ||
-          user.isAnonymous ||
-          user.emailConfirmedAt == null) {
+      final currentUser = _supabaseAuth.currentUser;
+      if (currentUser == null ||
+          currentUser.id != userId ||
+          currentUser.isAnonymous ||
+          currentUser.emailConfirmedAt == null) {
         throw StateError(
           'A verified email is required before setting a password.',
         );
@@ -212,12 +214,12 @@ class SupabaseAuthenticationClient implements AuthenticationClient {
       final session = response.session;
       final currentSession = _supabaseAuth.currentSession;
       final current = _supabaseAuth.currentUser;
-      bool matches(User? user) =>
-          user != null &&
-          user.id == verified?.id &&
-          !user.isAnonymous &&
-          (user.emailConfirmedAt?.isNotEmpty ?? false) &&
-          user.email?.trim().toLowerCase() == expectedEmail;
+      bool matches(User? candidate) =>
+          candidate != null &&
+          candidate.id == verified?.id &&
+          !candidate.isAnonymous &&
+          (candidate.emailConfirmedAt?.isNotEmpty ?? false) &&
+          candidate.email?.trim().toLowerCase() == expectedEmail;
       if (verified == null ||
           verified.id.trim().isEmpty ||
           session == null ||

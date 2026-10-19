@@ -36,6 +36,7 @@ class _Free extends MockCubit<FreeRoomsState> implements FreeRoomsCubit {}
 class _Photos extends Mock implements CampusRepository {}
 
 class _Cache implements MapDataCache {
+  const _Cache();
   @override
   Future<String?> read(String key) async => null;
   @override
@@ -60,7 +61,7 @@ void main() {
         addTearDown(textScale.dispose);
         final repository = MapDataRepository(
           organizationId: 'mirea',
-          cache: _Cache(),
+          cache: const _Cache(),
           bundledCatalogAsset: MapDataRepository.pulseCatalogAsset,
           rpc: (_, _) async => throw const MapDataException('offline'),
         );

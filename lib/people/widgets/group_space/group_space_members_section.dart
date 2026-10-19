@@ -35,7 +35,7 @@ class GroupSpaceMembersSection extends StatelessWidget {
                     Text(
                       member.isMe
                           ? context.l10n.studyGroupYouTag
-                          : member.fullName.split(' ').first,
+                          : (member.fullName.split(' ').firstOrNull ?? ''),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,

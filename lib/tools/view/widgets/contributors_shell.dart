@@ -17,12 +17,8 @@ class _ContributorsShell extends StatelessWidget {
     final l10n = context.l10n;
     final onBecomeContributor = this.onBecomeContributor;
 
-    return Container(
-      padding: const .all(16),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: .circular(AppRadius.card),
-      ),
+    return AppGlassSurface(
+      padding: const .all(22),
       child: Column(
         crossAxisAlignment: .start,
         spacing: 12,

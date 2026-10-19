@@ -5,11 +5,11 @@ import 'package:rtu_mirea_app/university_modules/module_scoped_storage.dart';
 import 'package:storage/storage.dart';
 
 void main() {
-  late _MemoryStorage underlying;
+  late FakeModuleMemoryStorage underlying;
   late bool active;
 
   setUp(() {
-    underlying = _MemoryStorage();
+    underlying = FakeModuleMemoryStorage();
     active = true;
   });
 
@@ -93,7 +93,7 @@ void main() {
   });
 }
 
-class _MemoryStorage implements Storage {
+class FakeModuleMemoryStorage implements Storage {
   final values = <String, String>{};
   int operations = 0;
   Completer<void>? readGate;

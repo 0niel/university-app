@@ -30,7 +30,6 @@ class HomeStoriesRail extends StatelessWidget {
             ? ListView.separated(
                 key: const Key('homeStoriesRail_skeleton'),
                 scrollDirection: .horizontal,
-                clipBehavior: .none,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.screen,
                 ),
@@ -41,7 +40,6 @@ class HomeStoriesRail extends StatelessWidget {
               )
             : ListView.separated(
                 scrollDirection: .horizontal,
-                clipBehavior: .none,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.screen,
                 ),
@@ -168,6 +166,7 @@ class HomeStoryItem extends StatelessWidget {
                           )
                         : Image.network(
                             avatar,
+                            excludeFromSemantics: true,
                             fit: .cover,
                             errorBuilder: (_, _, _) =>
                                 const AppStripePlaceholder(

@@ -200,7 +200,7 @@ void main() {
     const {'role': 'admin'},
     const {'revision': 'one'},
   ]) {
-    test('getter rejects malformed persona $payload', () {
+    test('getter rejects malformed persona ${payload ?? 'null'}', () {
       final repository = repositoryWith(
         (request) async => response(payload, request),
       );

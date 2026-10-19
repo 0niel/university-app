@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stac_bridge/src/actions/fetch_action.dart';
@@ -232,13 +234,13 @@ void main() {
     final context = await _pumpScope(tester, store);
     const parser = StacFetchActionParser();
     const model = {'path': '/search', 'saveAs': 'items', 'loadingKey': 'busy'};
-    final older = parser.onCall(context, model);
+    final older = parser.onCall(context, {...model});
     final newer = parser.onCall(context, model);
-    host.requests.first.complete(['old']);
+    host.requests.firstOrNull!.complete(['old']);
     await older;
     expect(store.get('items'), isNull);
     expect(store.get('busy'), isTrue);
-    host.requests.last.complete(['new']);
+    host.requests.lastOrNull!.complete(['new']);
     await newer;
     expect(store.get('items'), ['new']);
     expect(store.get('busy'), isFalse);
@@ -269,7 +271,7 @@ void main() {
         'expression': 'state.handled && !state.busy',
       },
     });
-    host.requests.single.completeError(Exception('offline'));
+    host.requests.singleOrNull!.completeError(Exception('offline'), .current);
     await request;
     expect(store.get('items'), ['cached']);
     expect(store.get('busy'), isFalse);

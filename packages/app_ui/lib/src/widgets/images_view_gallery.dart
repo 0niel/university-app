@@ -24,26 +24,26 @@ class ImagesViewGallery extends StatefulWidget {
     String? title,
     Map<int, Object> heroTags = const {},
     bool reducedMotion = false,
-  }) =>
-      PageRouteBuilder<void>(
-        opaque: false,
-        transitionDuration:
-            reducedMotion ? Duration.zero : const Duration(milliseconds: 240),
-        reverseTransitionDuration:
-            reducedMotion ? Duration.zero : const Duration(milliseconds: 200),
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            ImagesViewGallery(
-          imageUrls: imageUrls,
-          initialIndex: initialIndex,
-          title: title,
-          heroTags: heroTags,
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            FadeTransition(
+  }) => PageRouteBuilder<void>(
+    opaque: false,
+    transitionDuration: reducedMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 240),
+    reverseTransitionDuration: reducedMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 200),
+    pageBuilder: (context, animation, secondaryAnimation) => ImagesViewGallery(
+      imageUrls: imageUrls,
+      initialIndex: initialIndex,
+      title: title,
+      heroTags: heroTags,
+    ),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+        FadeTransition(
           opacity: animation,
           child: child,
         ),
-      );
+  );
 
   @override
   State<ImagesViewGallery> createState() => _ImagesViewGalleryState();
@@ -77,7 +77,7 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
     final next = _clampIndex(
       widget.initialIndex != oldWidget.initialIndex ||
               (oldWidget.imageUrls.isEmpty && widget.imageUrls.isNotEmpty)
-          ? widget.initialIndex ?? 0
+          ? (widget.initialIndex ?? 0)
           : _index,
     );
     if (next != _index) {
@@ -163,10 +163,13 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
                     child: HeroMode(
                       enabled: index == _index,
                       child: AppZoomableImage(
+                        semanticLabel: widget.title,
                         key: ValueKey('$index:${widget.imageUrls[index]}'),
-                        imageProvider:
-                            CachedNetworkImageProvider(widget.imageUrls[index]),
-                        heroTag: widget.heroTags[index] ??
+                        imageProvider: CachedNetworkImageProvider(
+                          widget.imageUrls[index],
+                        ),
+                        heroTag:
+                            widget.heroTags[index] ??
                             (_heroScope, index, widget.imageUrls[index]),
                         onTap: _toggleAppBarVisibility,
                         onDismissed: () => unawaited(_close()),
@@ -180,11 +183,11 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
                         onHorizontalDragUpdate: _pageController.updateImageDrag,
                         onHorizontalDragEnd: (velocity) =>
                             _pageController.endImageDrag(
-                          velocity,
-                          reducedMotion:
-                              MediaQuery.disableAnimationsOf(context) ||
+                              velocity,
+                              reducedMotion:
+                                  MediaQuery.disableAnimationsOf(context) ||
                                   MediaQuery.accessibleNavigationOf(context),
-                        ),
+                            ),
                         onDismissProgress: (progress) {
                           if (mounted && index == _index) {
                             _dismissProgress.value = progress;
@@ -214,11 +217,13 @@ class _ImagesViewGalleryState extends State<ImagesViewGallery> {
                     child: Opacity(opacity: 1 - progress, child: child),
                   ),
                   child: AppInnerHeader(
-                    title: widget.title ??
+                    title:
+                        widget.title ??
                         '${widget.imageUrls.isEmpty ? 0 : _index + 1} / '
                             '${widget.imageUrls.length}',
-                    backSemanticsLabel:
-                        MaterialLocalizations.of(context).backButtonTooltip,
+                    backSemanticsLabel: MaterialLocalizations.of(
+                      context,
+                    ).backButtonTooltip,
                     onBack: () => unawaited(_close()),
                   ),
                 ),

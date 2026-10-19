@@ -1,42 +1,25 @@
 import 'dart:math' as math;
 
-class FloorPoint {
-  const FloorPoint(this.x, this.y);
+import 'package:rtu_mirea_app/map/navigation/floor_point.dart';
+import 'package:rtu_mirea_app/map/navigation/geographic_coordinate.dart';
 
-  final double x;
-  final double y;
-}
-
-class GeographicCoordinate {
-  const GeographicCoordinate(this.latitude, this.longitude);
-
-  final double latitude;
-  final double longitude;
-}
-
-class FloorGeoAnchor {
-  const FloorGeoAnchor({
-    required this.x,
-    required this.y,
-    required this.latitude,
-    required this.longitude,
-  });
-
-  factory FloorGeoAnchor.fromJson(Map<String, dynamic> json) => FloorGeoAnchor(
-    x: _finiteNumber(json, 'x'),
-    y: _finiteNumber(json, 'y'),
-    latitude: _finiteNumber(json, 'latitude'),
-    longitude: _finiteNumber(json, 'longitude'),
-  );
-
-  final double x;
-  final double y;
-  final double latitude;
-  final double longitude;
-}
+export 'floor_point.dart';
+export 'geographic_coordinate.dart';
 
 class FloorGeoreference {
   factory FloorGeoreference(List<FloorGeoAnchor> anchors) {
+    if (anchors case [final first, final second, final third]) {
+      return FloorGeoreference._fromAnchors(anchors, first, second, third);
+    }
+    throw const FormatException('A floor georeference needs three anchors');
+  }
+
+  factory FloorGeoreference._fromAnchors(
+    List<FloorGeoAnchor> anchors,
+    FloorGeoAnchor first,
+    FloorGeoAnchor second,
+    FloorGeoAnchor third,
+  ) {
     if (anchors.length != 3) {
       throw const FormatException('A floor georeference needs three anchors');
     }
@@ -50,14 +33,13 @@ class FloorGeoreference {
     if (longitudes.reduce(math.max) - longitudes.reduce(math.min) > 180) {
       throw const FormatException('Floor anchors must not cross the date line');
     }
-    final first = anchors[0];
-    final p1 = FloorPoint(anchors[1].x - first.x, anchors[1].y - first.y);
-    final p2 = FloorPoint(anchors[2].x - first.x, anchors[2].y - first.y);
+    final p1 = FloorPoint(second.x - first.x, second.y - first.y);
+    final p2 = FloorPoint(third.x - first.x, third.y - first.y);
     final pixelDeterminant = _determinant(p1, p2);
     _validateBasis(p1, p2, pixelDeterminant);
     final origin = _project(first.latitude, first.longitude);
-    final projected1 = _project(anchors[1].latitude, anchors[1].longitude);
-    final projected2 = _project(anchors[2].latitude, anchors[2].longitude);
+    final projected1 = _project(second.latitude, second.longitude);
+    final projected2 = _project(third.latitude, third.longitude);
     final q1 = FloorPoint(projected1.x - origin.x, projected1.y - origin.y);
     final q2 = FloorPoint(projected2.x - origin.x, projected2.y - origin.y);
     _validateBasis(q1, q2, _determinant(q1, q2));
@@ -184,4 +166,25 @@ double _finiteNumber(Map<String, dynamic> json, String key) {
     throw FormatException('Expected a finite number for $key');
   }
   return value.toDouble();
+}
+
+class FloorGeoAnchor {
+  const FloorGeoAnchor({
+    required this.x,
+    required this.y,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  factory FloorGeoAnchor.fromJson(Map<String, dynamic> json) => FloorGeoAnchor(
+    x: _finiteNumber(json, 'x'),
+    y: _finiteNumber(json, 'y'),
+    latitude: _finiteNumber(json, 'latitude'),
+    longitude: _finiteNumber(json, 'longitude'),
+  );
+
+  final double x;
+  final double y;
+  final double latitude;
+  final double longitude;
 }

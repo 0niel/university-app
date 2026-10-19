@@ -7,13 +7,15 @@ import 'package:share_plus/share_plus.dart';
 class NoteTextActions {
   NoteTextActions({
     ProcessTextService? processTextService,
-    this.copyText,
-    this.shareText,
-  }) : _processText = processTextService ?? DefaultProcessTextService();
+    Future<void> Function(String)? copyText,
+    Future<void> Function(String, Rect?)? shareText,
+  }) : _processText = processTextService ?? DefaultProcessTextService(),
+       _onCopyText = copyText,
+       _onShareText = shareText;
 
   final ProcessTextService _processText;
-  final Future<void> Function(String)? copyText;
-  final Future<void> Function(String, Rect?)? shareText;
+  final Future<void> Function(String)? _onCopyText;
+  final Future<void> Function(String, Rect?)? _onShareText;
 
   Future<List<ProcessTextAction>> availableActions() async {
     final actions = await _processText.queryTextActions();
@@ -34,10 +36,10 @@ class NoteTextActions {
   }) => _processText.processTextAction(action.id, text, readOnly);
 
   Future<void> copy(String text) =>
-      copyText?.call(text) ?? Clipboard.setData(ClipboardData(text: text));
+      _onCopyText?.call(text) ?? Clipboard.setData(ClipboardData(text: text));
 
   Future<void> share(String text, {Rect? origin}) async {
-    final callback = shareText;
+    final callback = _onShareText;
     if (callback != null) {
       await callback(text, origin);
       return;
@@ -49,7 +51,12 @@ class NoteTextActions {
 }
 
 class NoteTextSelectionSnapshot {
-  NoteTextSelectionSnapshot._(this.start, this.end, this.text, this._document);
+  const NoteTextSelectionSnapshot._(
+    this.start,
+    this.end,
+    this.text,
+    this._document,
+  );
 
   static NoteTextSelectionSnapshot? capture(QuillController controller) {
     final selection = controller.selection;

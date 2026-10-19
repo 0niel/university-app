@@ -35,6 +35,7 @@ class _Reminders extends MockCubit<Map<String, int>>
 void main() {
   setUpAll(loadGalleryFonts);
 
+  final lesson = scheduleGalleryLessons()[1];
   for (final dark in [false, true]) {
     for (final sheet in ['actions', 'add', 'remind', 'teacher']) {
       testWidgets('schedule sheet $sheet ${dark ? 'dark' : 'light'}', (
@@ -49,7 +50,6 @@ void main() {
         final notifications = _Notifications();
         final activities = _Activities();
         final reminders = _Reminders();
-        final lesson = scheduleGalleryLessons()[1];
         when(() => activities.state).thenReturn(const UserActivitiesState());
         when(() => reminders.state).thenReturn({});
         when(

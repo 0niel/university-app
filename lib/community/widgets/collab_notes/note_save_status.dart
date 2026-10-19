@@ -26,7 +26,12 @@ class NoteSaveStatus extends StatelessWidget {
     final color = switch (state.status) {
       .failure || .readOnly => colors.exam,
       .offline => colors.warn,
-      _ => colors.muted,
+      .clean ||
+      .dirty ||
+      .saving ||
+      .saved ||
+      .conflict ||
+      .deleted => colors.muted,
     };
     final pulsing = state.status == .dirty || state.status == .saving;
     return Semantics(

@@ -1,6 +1,4 @@
-import 'dart:async';
-import 'dart:typed_data';
-
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,32 +7,7 @@ import 'package:stac_bridge/src/widgets/mini_app_state_scope.dart';
 import 'package:stac_bridge/src/widgets/mini_app_state_store.dart';
 import 'package:stac_bridge/stac_bridge.dart';
 
-class _PendingRequests implements HttpClientAdapter {
-  final responses = <Completer<ResponseBody>>[];
-  Completer<void> _arrival = Completer<void>();
-
-  Future<void> waitFor(int count) async {
-    while (responses.length < count) {
-      await _arrival.future;
-    }
-  }
-
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) {
-    final response = Completer<ResponseBody>();
-    responses.add(response);
-    _arrival.complete();
-    _arrival = Completer<void>();
-    return response.future;
-  }
-
-  @override
-  void close({bool force = false}) {}
-}
+import 'support/pending_requests.dart';
 
 void main() {
   setUpAll(
@@ -47,12 +20,12 @@ void main() {
     ),
   );
 
-  late _PendingRequests adapter;
+  late PendingRequests adapter;
   late MiniAppStateStore store;
   const parser = StacNetworkRequestActionParser();
 
   setUp(() {
-    adapter = _PendingRequests();
+    adapter = PendingRequests();
     final client = Dio(BaseOptions(baseUrl: 'https://example.test'))
       ..httpClientAdapter = adapter;
     StacNetworkRequestActionParser.client = client;
@@ -77,7 +50,7 @@ void main() {
     return captured;
   }
 
-  ResponseBody response(int revision) => ResponseBody.fromString(
+  ResponseBody response(int revision) => .fromString(
     '{"revision":$revision}',
     200,
     headers: {
@@ -112,23 +85,28 @@ void main() {
   ) async {
     final context = await pumpScope(tester);
     await tester.runAsync(() async {
-      final older = parser.onCall(context, request);
+      final older = parser.onCall(context, {...request});
       await adapter.waitFor(1);
       final newer = parser.onCall(context, request);
       await adapter.waitFor(2);
 
-      adapter.responses[1].complete(response(2));
+      adapter.responses.elementAtOrNull(1)!.complete(response(2));
       await newer;
       expect(store.get('results'), {'revision': 2});
       expect(store.get('searchLoading'), false);
       expect(store.get('successCount'), 1);
       expect(store.get('finallyCount'), 1);
 
-      adapter.responses[0].complete(response(1));
+      adapter.responses.elementAtOrNull(0)!.complete(response(1));
       await older;
-      expect(store.get('results'), {'revision': 2});
-      expect(store.get('successCount'), 1);
-      expect(store.get('finallyCount'), 1);
+      expect(
+        [
+          store.get('results'),
+          store.get('successCount'),
+          store.get('finallyCount'),
+        ],
+        [{'revision': 2}, 1, 1],
+      );
     });
     expect(tester.takeException(), isNull);
   });
@@ -138,19 +116,21 @@ void main() {
   ) async {
     final context = await pumpScope(tester);
     await tester.runAsync(() async {
-      final older = parser.onCall(context, request);
+      final older = parser.onCall(context, {...request});
       await adapter.waitFor(1);
       final newer = parser.onCall(context, request);
       await adapter.waitFor(2);
 
-      adapter.responses[0].complete(ResponseBody.fromString('{}', 500));
+      adapter.responses
+          .elementAtOrNull(0)!
+          .complete(ResponseBody.fromString('{}', 500));
       await older;
       expect(store.get('searchLoading'), true);
       expect(store.get('searchError'), isNull);
       expect(store.get('errorCount'), isNull);
       expect(store.get('finallyCount'), isNull);
 
-      adapter.responses[1].complete(response(2));
+      adapter.responses.elementAtOrNull(1)!.complete(response(2));
       await newer;
       expect(store.get('searchLoading'), false);
       expect(store.get('results'), {'revision': 2});
@@ -162,18 +142,18 @@ void main() {
     tester,
   ) async {
     final context = await pumpScope(tester);
-    final mutation = Map<String, Object?>.from(request)
+    final mutation = Map<String, Object?>.of(request)
       ..remove('saveAs')
       ..remove('loadingKey')
       ..remove('errorKey')
       ..['method'] = 'post';
     await tester.runAsync(() async {
-      final first = parser.onCall(context, mutation);
+      final first = parser.onCall(context, {...mutation});
       final second = parser.onCall(context, mutation);
       await adapter.waitFor(2);
 
-      adapter.responses[1].complete(response(2));
-      adapter.responses[0].complete(response(1));
+      adapter.responses.elementAtOrNull(1)!.complete(response(2));
+      adapter.responses.elementAtOrNull(0)!.complete(response(1));
       await Future.wait([first, second]);
       expect(store.get('successCount'), 2);
       expect(store.get('finallyCount'), 2);
@@ -187,13 +167,13 @@ void main() {
     final context = await pumpScope(tester);
     late Future<Object?> pending;
     await tester.runAsync(() async {
-      pending = parser.onCall(context, request);
+      pending = parser.onCall(context, {...request});
       await adapter.waitFor(1);
     });
     await tester.pumpWidget(const SizedBox.shrink());
 
     await tester.runAsync(() async {
-      adapter.responses.single.complete(response(1));
+      adapter.responses.singleOrNull!.complete(response(1));
       await pending;
     });
     expect(store.get('results'), isNull);

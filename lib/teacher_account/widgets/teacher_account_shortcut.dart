@@ -42,7 +42,7 @@ class TeacherAccountShortcut extends StatelessWidget {
       semanticsLabel: '${l10n.teacherCabinetTitle}, $label, $description',
       onTap: restoring
           ? null
-          : () => unawaited(context.push<void>('/profile/teacher')),
+          : () => unawaited(context.push('/profile/teacher')),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -52,7 +52,7 @@ class TeacherAccountShortcut extends StatelessWidget {
               AppIconTile(
                 icon: AppLineIcon.clipboard,
                 size: AppControlSize.touchTarget,
-                background: colors.tintOf(colors.accent),
+                background: colors.tint,
                 foreground: colors.accent,
               ),
               const SizedBox(width: AppSpacing.md),

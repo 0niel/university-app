@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -58,18 +60,9 @@ class AttendanceContent extends StatelessWidget {
               subject: subject,
               expanded: state.expandedSubject == subject.subject,
               onToggle: () => cubit.toggleSubject(subject.subject),
-              onCertificate: (id) async {
-                final saved = await cubit.attachCertificate(id);
-                if (!saved && context.mounted) {
-                  ToastManager.showError(context, message: l10n.error);
-                }
-              },
-              onRemove: (id) async {
-                final saved = await cubit.removeAbsence(id);
-                if (!saved && context.mounted) {
-                  ToastManager.showError(context, message: l10n.error);
-                }
-              },
+              onCertificate: (id) =>
+                  unawaited(_attachCertificate(context, cubit, id)),
+              onRemove: (id) => unawaited(_removeAbsence(context, cubit, id)),
             ),
           ],
         const SizedBox(height: AppSpacing.lg),
@@ -84,5 +77,27 @@ class AttendanceContent extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _attachCertificate(
+    BuildContext context,
+    AttendanceCubit cubit,
+    String id,
+  ) async {
+    final saved = await cubit.attachCertificate(id);
+    if (!saved && context.mounted) {
+      ToastManager.showError(context, message: context.l10n.error);
+    }
+  }
+
+  Future<void> _removeAbsence(
+    BuildContext context,
+    AttendanceCubit cubit,
+    String id,
+  ) async {
+    final saved = await cubit.removeAbsence(id);
+    if (!saved && context.mounted) {
+      ToastManager.showError(context, message: context.l10n.error);
+    }
   }
 }

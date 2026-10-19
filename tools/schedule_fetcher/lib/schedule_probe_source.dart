@@ -1,0 +1,1 @@
+enum ScheduleProbeSource { official, relay }

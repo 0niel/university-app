@@ -20,14 +20,14 @@ class AppEntryBodyTransition extends StatefulWidget {
 class _AppEntryBodyTransitionState extends State<AppEntryBodyTransition>
     with SingleTickerProviderStateMixin {
   late final _controller = AnimationController(vsync: this);
-  late final _opacity = CurvedAnimation(
+  late final _progress = CurvedAnimation(
     parent: _controller,
     curve: NinjaMotion.enter,
   );
-  late final Animation<Offset> _offset = Tween<Offset>(
-    begin: const Offset(0, .025),
-    end: Offset.zero,
-  ).animate(_opacity);
+  late final Animation<double> _scale = Tween(
+    begin: .985,
+    end: _controller.upperBound,
+  ).animate(_progress);
 
   @override
   void didChangeDependencies() {
@@ -55,14 +55,15 @@ class _AppEntryBodyTransitionState extends State<AppEntryBodyTransition>
 
   @override
   void dispose() {
-    _opacity.dispose();
+    _progress.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => FadeTransition(
-        opacity: _opacity,
-        child: SlideTransition(position: _offset, child: widget.child),
-      );
+  Widget build(BuildContext context) => ScaleTransition(
+    scale: _scale,
+    alignment: Alignment.topCenter,
+    child: widget.child,
+  );
 }

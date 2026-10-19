@@ -94,18 +94,23 @@ class _RoomHeading extends StatelessWidget {
     final l10n = context.l10n;
     final colors = context.colors;
     final floor = room.floor;
+    final kindLabel = l10n.freeRoomsKind;
     final heading = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           room.name,
-          style: AppText.serif(28, height: 1).copyWith(color: colors.ink),
+          style: AppText.sans(
+            26,
+            FontWeight.w700,
+            height: 1.2,
+          ).copyWith(color: colors.ink),
         ),
         const SizedBox(height: 6),
         Text(
           floor == null || room.campus.isEmpty
               ? room.subtitle(l10n)
-              : l10n.roomMetaFloor(l10n.freeRoomsKind, room.campus, floor),
+              : l10n.roomMetaFloor(kindLabel, room.campus, floor),
           style: AppText.sans(
             13,
             FontWeight.w500,

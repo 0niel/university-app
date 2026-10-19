@@ -369,14 +369,14 @@ class GroupSpaceCubit extends Cubit<GroupSpaceState> {
     _presenceSession = presence;
     _realtimeSub = realtime.changes.listen(
       (_) => unawaited(load()),
-      onError: (Object _, StackTrace _) {},
+      onError: addError,
     );
     _presenceSub = presence.onlineCount.listen(
       (count) {
         if (isClosed) return;
         emit(state.copyWith(onlineCount: count < 1 ? 1 : count));
       },
-      onError: (Object _, StackTrace _) {},
+      onError: addError,
     );
   }
 

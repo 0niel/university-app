@@ -1,18 +1,10 @@
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_badge_tone.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:flutter/widgets.dart';
 
-enum NinjaBadgeTone {
-  lime,
-  ink,
-  dangerOutline,
-  warnTint,
-  successTint,
-  labTint,
-  practiceTint,
-  neutral,
-}
+export 'ninja_badge_tone.dart';
 
 class NinjaBadge extends StatelessWidget {
   const NinjaBadge(this.label, {super.key, this.tone = NinjaBadgeTone.lime});
@@ -27,22 +19,22 @@ class NinjaBadge extends StatelessWidget {
       NinjaBadgeTone.lime => (colors.accent, colors.onAccent, null),
       NinjaBadgeTone.ink => (colors.ink, colors.canvas, null),
       NinjaBadgeTone.dangerOutline => (
-          colors.examTint,
-          colors.ink,
-          colors.danger,
-        ),
+        colors.examTint,
+        colors.ink,
+        colors.danger,
+      ),
       NinjaBadgeTone.warnTint => (colors.warnTint, colors.ink, colors.warn),
       NinjaBadgeTone.successTint => (
-          colors.lectureTint,
-          colors.ink,
-          colors.lecture,
-        ),
+        colors.lectureTint,
+        colors.ink,
+        colors.lecture,
+      ),
       NinjaBadgeTone.labTint => (colors.labTint, colors.ink, colors.lab),
       NinjaBadgeTone.practiceTint => (
-          colors.practiceTint,
-          colors.ink,
-          colors.practice,
-        ),
+        colors.practiceTint,
+        colors.ink,
+        colors.practice,
+      ),
       NinjaBadgeTone.neutral => (colors.surface2, colors.muted, null),
     };
 
@@ -82,10 +74,7 @@ class NinjaBadge extends StatelessWidget {
 class NinjaCountBadge extends StatelessWidget {
   const NinjaCountBadge(this.count, {super.key, this.max = 99}) : _dot = false;
 
-  const NinjaCountBadge.dot({super.key})
-      : count = 0,
-        max = 99,
-        _dot = true;
+  const NinjaCountBadge.dot({super.key}) : count = 0, max = 99, _dot = true;
 
   final int count;
   final int max;
@@ -109,8 +98,9 @@ class NinjaCountBadge extends StatelessWidget {
           height: 22,
           constraints: const BoxConstraints(minWidth: 22),
           padding: EdgeInsets.symmetric(
-            horizontal:
-                label.length > 2 ? AppSpacing.compactGap : AppSpacing.xsm,
+            horizontal: label.length > 2
+                ? AppSpacing.compactGap
+                : AppSpacing.xsm,
           ),
           decoration: BoxDecoration(
             color: colors.danger,

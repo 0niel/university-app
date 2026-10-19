@@ -1,6 +1,7 @@
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_control_surface.dart';
 import 'package:app_ui/src/widgets/app_icon_tile.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
@@ -46,7 +47,8 @@ class AppListRow extends StatelessWidget {
     final trailingWidget = trailing;
     final tight = subtitleText != null || leading != null;
     final vertical = dense ? 10.0 : (tight ? 13.0 : 15.0);
-    final withChevron = showChevron ??
+    final withChevron =
+        showChevron ??
         (!destructive && trailingWidget == null && onTap != null);
     final titleColor = destructive ? colors.danger : colors.ink;
 
@@ -61,66 +63,72 @@ class AppListRow extends StatelessWidget {
     Widget row = AppPressable(
       onTap: onTap,
       semanticsButton: onTap != null,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 48),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: vertical,
-          ),
-          child: Row(
-            children: [
-              if (leadingWidget != null) ...[
-                leadingWidget,
-                const SizedBox(width: AppSpacing.md),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: titleMaxLines,
-                      overflow: titleMaxLines == null
-                          ? TextOverflow.clip
-                          : TextOverflow.ellipsis,
-                      style: (strong ? AppText.bodyStrong : AppText.body)
-                          .copyWith(color: titleColor),
-                    ),
-                    if (subtitleText != null) ...[
-                      const SizedBox(height: AppSpacing.xxs),
+      child: AppControlSurface(
+        color: const Color(0x00000000),
+        borderRadius: AppRadius.none,
+        tone: AppControlSurfaceTone.quiet,
+        enabled: onTap != null,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: vertical,
+            ),
+            child: Row(
+              children: [
+                if (leadingWidget != null) ...[
+                  leadingWidget,
+                  const SizedBox(width: AppSpacing.md),
+                ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       Text(
-                        subtitleText,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.caption.copyWith(color: colors.muted),
+                        title,
+                        maxLines: titleMaxLines,
+                        overflow: titleMaxLines == null
+                            ? TextOverflow.clip
+                            : TextOverflow.ellipsis,
+                        style: (strong ? AppText.bodyStrong : AppText.body)
+                            .copyWith(color: titleColor),
                       ),
+                      if (subtitleText != null) ...[
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          subtitleText,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.caption.copyWith(color: colors.muted),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              if (metaText != null) ...[
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  metaText,
-                  style: AppText.subtext.copyWith(color: colors.muted),
-                ),
+                if (metaText != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    metaText,
+                    style: AppText.subtext.copyWith(color: colors.muted),
+                  ),
+                ],
+                if (trailingWidget != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  trailingWidget,
+                ],
+                if (withChevron) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  AppLineIconWidget(
+                    AppLineIcon.chevronR,
+                    size: AppIconSize.xs,
+                    color: colors.muted2,
+                    strokeWidth: 2.5,
+                  ),
+                ],
               ],
-              if (trailingWidget != null) ...[
-                const SizedBox(width: AppSpacing.sm),
-                trailingWidget,
-              ],
-              if (withChevron) ...[
-                const SizedBox(width: AppSpacing.sm),
-                AppLineIconWidget(
-                  AppLineIcon.chevronR,
-                  size: AppIconSize.xs,
-                  color: colors.muted2,
-                  strokeWidth: 2.5,
-                ),
-              ],
-            ],
+            ),
           ),
         ),
       ),

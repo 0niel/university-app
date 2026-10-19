@@ -9,7 +9,6 @@ class AppPressable extends StatelessWidget {
     this.onLongPress,
     this.enabled = true,
     this.pressedScale = 0.97,
-    this.pressedOpacity = 0.85,
     this.haptics = false,
     this.behavior = HitTestBehavior.opaque,
     this.semanticsLabel,
@@ -24,7 +23,6 @@ class AppPressable extends StatelessWidget {
 
   final bool enabled;
   final double pressedScale;
-  final double pressedOpacity;
   final bool haptics;
   final HitTestBehavior behavior;
   final String? semanticsLabel;
@@ -34,9 +32,6 @@ class AppPressable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reduceMotion =
-        (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
-            (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
     return AppPressState(
       onTap: onTap,
       onLongPress: onLongPress,
@@ -48,14 +43,7 @@ class AppPressable extends StatelessWidget {
       semanticsButton: semanticsButton,
       semanticsSelected: semanticsSelected,
       semanticsToggled: semanticsToggled,
-      builder: (context, {required pressed}) => AnimatedOpacity(
-        opacity: pressed ? pressedOpacity : 1,
-        duration: reduceMotion
-            ? Duration.zero
-            : Duration(milliseconds: pressed ? 80 : 160),
-        curve: Curves.easeOut,
-        child: child,
-      ),
+      builder: (context, {required pressed}) => child,
     );
   }
 }

@@ -36,5 +36,5 @@ abstract class TeacherDashboardState with _$TeacherDashboardState {
       : TeacherScheduleQuery(teacher: teacher!, week: week);
   TeacherLessonOccurrence? get preview => schedule.data == null
       ? null
-      : workload.currentAt(now) ?? workload.nextAt(now);
+      : (workload.currentAt(now) ?? workload.nextAt(now));
 }

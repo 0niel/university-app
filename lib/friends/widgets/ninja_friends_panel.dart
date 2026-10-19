@@ -119,7 +119,8 @@ class NinjaFriendsPanel extends StatelessWidget {
                   if (loading || failed || friends.isEmpty) {
                     return NinjaStateSwitcher(child: _content(l10n));
                   }
-                  final friend = friends[index - 1];
+                  final friend = friends.elementAtOrNull(index - 1);
+                  if (friend == null) return const SizedBox.shrink();
                   return _NinjaFriendCard(
                     key: ValueKey(friend.userId),
                     friend: friend,

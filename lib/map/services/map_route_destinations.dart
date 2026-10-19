@@ -1,7 +1,9 @@
+import 'package:collection/collection.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
+import 'package:rtu_mirea_app/map/services/map_route_endpoint.dart';
 
-enum MapRouteEndpoint { start, destination }
+export 'map_route_endpoint.dart';
 
 class MapRouteDestinations {
   MapRouteDestinations({required this.campus, required this.planner}) {
@@ -12,7 +14,7 @@ class MapRouteDestinations {
       if (place == null &&
           (node.roomId != null ||
               (node.label?.trim().isEmpty ?? true) ||
-              _technicalKinds.contains(node.kind))) {
+              _kTechnicalKinds.contains(node.kind))) {
         continue;
       }
       final key = place == null ? 'node:${node.id}' : 'place:${place.id}';
@@ -107,10 +109,9 @@ class MapRouteDestinations {
       );
       return List.unmodifiable([
         for (final entry in available.entries)
-          if (connected[entry.key]?.isNotEmpty ?? false)
-            entry.value.firstWhere(
-              (node) => connected[entry.key]!.contains(node.id),
-            ),
+          ?entry.value.firstWhereOrNull(
+            (node) => connected[entry.key]?.contains(node.id) ?? false,
+          ),
       ]);
     }
     final reachable = planner.reachableNodeIds(
@@ -120,8 +121,7 @@ class MapRouteDestinations {
     );
     return List.unmodifiable([
       for (final nodes in available.values)
-        if (nodes.any((node) => reachable.contains(node.id)))
-          nodes.firstWhere((node) => reachable.contains(node.id)),
+        ?nodes.firstWhereOrNull((node) => reachable.contains(node.id)),
     ]);
   }
 
@@ -131,7 +131,7 @@ class MapRouteDestinations {
       (!options.wheelchair || node.wheelchairAccessible);
 }
 
-const _technicalKinds = {
+const _kTechnicalKinds = {
   'door',
   'stairs',
   'elevator',

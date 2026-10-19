@@ -22,7 +22,7 @@ Future<void> showMaterialDetailSheet(
   final action = await showAppSheet<String>(
     context,
     title: l10n.knowledgeMaterialDetailTitle,
-    child: _MaterialDetailContent(material: material, previewUrl: previewUrl),
+    child: _MaterialDetailSheet(material: material, previewUrl: previewUrl),
   );
   if (!context.mounted || action == null) return;
   switch (action) {
@@ -64,8 +64,8 @@ Future<void> showMaterialDetailSheet(
   }
 }
 
-class _MaterialDetailContent extends StatelessWidget {
-  const _MaterialDetailContent({required this.material, this.previewUrl});
+class _MaterialDetailSheet extends StatelessWidget {
+  const _MaterialDetailSheet({required this.material, this.previewUrl});
 
   final StudyMaterial material;
   final String? previewUrl;

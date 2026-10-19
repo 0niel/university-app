@@ -3,7 +3,7 @@ import 'package:news_blocks/news_blocks.dart';
 import 'package:news_repository/news_repository.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
 
-const feedAllCategoryId = 'all';
+const kFeedAllCategoryId = 'all';
 
 String feedSourceKey(NewsSourceItem source) =>
     newsCategoryKey(source.sourceType, source.sourceId);
@@ -28,4 +28,4 @@ Category feedCategoryFor(
     Category(id: id, name: name);
 
 List<PostBlock> feedPosts(Iterable<NewsBlock>? blocks) =>
-    blocks?.whereType<PostBlock>().toList() ?? const <PostBlock>[];
+    blocks?.whereType<PostBlock>().toList() ?? const [];

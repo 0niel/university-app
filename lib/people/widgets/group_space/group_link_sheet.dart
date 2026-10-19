@@ -102,43 +102,59 @@ class _GroupLinkSheetState extends State<GroupLinkSheet> {
         mainAxisSize: .min,
         crossAxisAlignment: .stretch,
         children: [
-          NinjaInput(
-            controller: _urlController,
-            autofocus: true,
-            keyboardType: .url,
-            onChanged: (value) => setState(() => _url = value),
-            label: widget.telegram
-                ? l10n.groupSpaceLinkSheetHandleLabel
-                : l10n.groupSpaceLinkSheetUrlLabel,
-            placeholder: widget.telegram
-                ? l10n.groupSpaceLinkSheetTgHint
-                : l10n.groupSpaceLinkSheetUrlHint,
-            errorText: _submitted && _address == null ? l10n.error : null,
-          ),
-          if (recognized != null)
-            Text(
-              '${l10n.groupSpaceLinkRecognized}: $recognized',
-              style: AppText.captionSmall.copyWith(
-                color: context.colors.muted,
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: Column(
+              spacing: 12,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                NinjaInput(
+                  controller: _urlController,
+                  autofocus: true,
+                  keyboardType: .url,
+                  onChanged: (value) => setState(() => _url = value),
+                  label: widget.telegram
+                      ? l10n.groupSpaceLinkSheetHandleLabel
+                      : l10n.groupSpaceLinkSheetUrlLabel,
+                  placeholder: widget.telegram
+                      ? l10n.groupSpaceLinkSheetTgHint
+                      : l10n.groupSpaceLinkSheetUrlHint,
+                  errorText: _submitted && _address == null ? l10n.error : null,
+                ),
+                if (recognized != null)
+                  Text(
+                    '${l10n.groupSpaceLinkRecognized}: $recognized',
+                    style: AppText.captionSmall.copyWith(
+                      color: context.colors.muted,
+                    ),
+                  ),
+                NinjaInput(
+                  controller: _titleController,
+                  onChanged: (value) => setState(() => _title = value),
+                  label: l10n.groupSpaceLinkSheetTitleLabel,
+                  placeholder: widget.telegram
+                      ? l10n.groupSpaceLinkSheetTitleHintTg
+                      : l10n.groupSpaceLinkSheetTitleHint,
+                  errorText: _submitted && _title.trim().isEmpty
+                      ? l10n.error
+                      : null,
+                ),
+                if (!widget.telegram)
+                  Text(
+                    l10n.groupSpaceLinkSheetCategoryLabel,
+                    style: AppText.captionSmall.copyWith(
+                      color: context.colors.muted,
+                    ),
+                  ),
+              ],
             ),
-          NinjaInput(
-            controller: _titleController,
-            onChanged: (value) => setState(() => _title = value),
-            label: l10n.groupSpaceLinkSheetTitleLabel,
-            placeholder: widget.telegram
-                ? l10n.groupSpaceLinkSheetTitleHintTg
-                : l10n.groupSpaceLinkSheetTitleHint,
-            errorText: _submitted && _title.trim().isEmpty ? l10n.error : null,
           ),
-          if (!widget.telegram) ...[
-            Text(
-              l10n.groupSpaceLinkSheetCategoryLabel,
-              style: AppText.captionSmall.copyWith(
-                color: context.colors.muted,
-              ),
-            ),
+          if (!widget.telegram)
             AppChipRow<_LinkCategory>(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screen,
+              ),
               value: _category,
               onChanged: (value) => setState(() => _category = value),
               items: [
@@ -149,15 +165,17 @@ class _GroupLinkSheetState extends State<GroupLinkSheet> {
                   ),
               ],
             ),
-          ],
-          NinjaButton.primary(
-            label: _saving
-                ? l10n.groupSpaceSaving
-                : widget.telegram
-                ? l10n.groupSpaceSaveTelegram
-                : l10n.groupSpaceSaveLink,
-            expanded: true,
-            onPressed: _saving ? null : () => unawaited(_save()),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: NinjaButton.primary(
+              label: _saving
+                  ? l10n.groupSpaceSaving
+                  : widget.telegram
+                  ? l10n.groupSpaceSaveTelegram
+                  : l10n.groupSpaceSaveLink,
+              expanded: true,
+              onPressed: _saving ? null : () => unawaited(_save()),
+            ),
           ),
         ],
       ),

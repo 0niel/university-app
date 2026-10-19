@@ -51,9 +51,14 @@ void main() {
     ).thenAnswer((_) async {});
   });
 
-  Future<void> pump(WidgetTester tester, double width, double scale) async {
+  Future<void> pump(
+    WidgetTester tester,
+    double width,
+    double scale, {
+    double height = 900,
+  }) async {
     tester.view
-      ..physicalSize = Size(width, 900)
+      ..physicalSize = Size(width, height)
       ..devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final router = GoRouter(
@@ -159,6 +164,19 @@ void main() {
       );
     }
   }
+
+  testWidgets('short landscape viewport prioritizes the catalog', (
+    tester,
+  ) async {
+    final landscapeState = catalog.state.copyWith(myApps: const []);
+    when(() => catalog.state).thenReturn(landscapeState);
+    await pump(tester, 844, 1, height: 390);
+    expect(find.byKey(const ValueKey('mini-apps-recents')), findsNothing);
+    final firstCard = find.byKey(const ValueKey('catalog-0'));
+    expect(firstCard.hitTestable(), findsOneWidget);
+    expect(tester.getRect(firstCard).bottom, lessThan(390 - 34));
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('inline create opens editor without covering catalog cards', (
     tester,

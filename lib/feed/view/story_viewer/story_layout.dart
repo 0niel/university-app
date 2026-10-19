@@ -4,7 +4,7 @@ abstract final class StoryLayout {
   static const avatarSize = 36.0;
   static const contentTopClearance = 128.0;
   static const safeHeaderClearance = 88.0;
-  static const bottomInset = 40.0;
+  static const double bottomInset = closeSize;
   static const navigationBottomInset = 120.0;
   static const stripeWidth = 12.0;
   static const wideBreakpoint = 720.0;

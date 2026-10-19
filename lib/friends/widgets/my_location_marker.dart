@@ -11,7 +11,7 @@ class MyLocationMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final tone = isGhost ? colors.muted2 : colors.accent;
-    const ringSize = dotSize + friendMarkerRingWidth * 2;
+    const ringSize = dotSize + kFriendMarkerRingWidth * 2;
     return _MarkerPop(
       child: Column(
         mainAxisSize: .min,

@@ -134,19 +134,32 @@ void main() {
     await tester.pumpAndSettle();
 
     final colors = tester.element(find.byType(SettingsCard)).colors;
-    final card = tester.widget<DecoratedBox>(
-      find
-          .descendant(
-            of: find.byType(SettingsCard),
-            matching: find.byType(DecoratedBox),
-          )
-          .first,
+    final group = find.descendant(
+      of: find.byType(SettingsCard),
+      matching: find.byType(AppListGroup),
     );
-    final decoration = card.decoration as BoxDecoration;
+    expect(group, findsOneWidget);
+    expect(
+      find.descendant(of: group, matching: find.byType(SettingsRow)),
+      findsNWidgets(2),
+    );
+    final surface = find.descendant(
+      of: group,
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is DecoratedBox &&
+            widget.position == DecorationPosition.background &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration as BoxDecoration).color == colors.surface,
+      ),
+    );
+    expect(surface, findsOneWidget);
+    final decoration =
+        tester.widget<DecoratedBox>(surface).decoration as BoxDecoration;
     expect(decoration.color, colors.surface);
     expect(decoration.border, isNull);
     expect(decoration.boxShadow, isNull);
-    expect(decoration.gradient, isNull);
+    expect(decoration.gradient, isA<LinearGradient>());
     expect(
       decoration.borderRadius,
       BorderRadius.circular(AppRadius.card),

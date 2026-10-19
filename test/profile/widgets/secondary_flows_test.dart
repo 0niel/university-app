@@ -161,16 +161,19 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       verifyNever(repository.deleteAccount);
       expect(find.text(l10n.accountDeleteConfirmTitle), findsOneWidget);
-      await tester.tap(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is NinjaPillButton &&
-              widget.label == l10n.accountDeleteAction,
-        ),
+      final confirm = find.descendant(
+        of: find.byType(NinjaDialog),
+        matching: find.text(l10n.accountDeleteAction),
       );
+      expect(confirm, findsOneWidget);
+      await tester.ensureVisible(confirm);
+      await tester.tap(confirm);
       await tester.pump(const Duration(milliseconds: 400));
       verify(repository.deleteAccount).called(1);
-      deleted.completeError(Exception('reauthentication required'));
+      deleted.completeError(
+        Exception('reauthentication required'),
+        StackTrace.current,
+      );
       await tester.pumpAndSettle();
       expect(find.text(l10n.accountDeleteError), findsOneWidget);
       final row = tester.widget<SettingsRow>(
@@ -191,7 +194,8 @@ void main() {
     when(() => app.state).thenReturn(const AppState());
     await tester.pumpWidget(accountApp(app, repository));
     await tester.pumpAndSettle();
-    expect(find.text(l10n.accountGuest), findsOneWidget);
+    expect(find.text(l10n.accountGuest), findsNothing);
+    expect(find.text(l10n.accountEmailLabel), findsNothing);
     expect(find.text(l10n.accountChangePassword), findsNothing);
     final row = tester.widget<SettingsRow>(
       find.ancestor(
@@ -217,7 +221,8 @@ void main() {
       await tester.pumpWidget(accountApp(app, repository));
       await tester.pumpAndSettle();
       expect(find.text(l10n.authGuestUpgradeTitle), findsOneWidget);
-      expect(find.text(l10n.accountGuest), findsOneWidget);
+      expect(find.text(l10n.accountGuest), findsNothing);
+      expect(find.text(l10n.accountEmailLabel), findsNothing);
       expect(find.text(l10n.accountChangePassword), findsNothing);
     },
   );
@@ -395,6 +400,8 @@ void main() {
         () => repository.sendPasswordResetEmail(email: 'anna@example.org'),
       ).thenAnswer((_) async {});
       await pumpAccountRecovery(tester, app, repository);
+      expect(find.text(l10n.accountEmailLabel), findsNothing);
+      expect(find.text('anna@example.org'), findsNothing);
       await tester.tap(find.text(l10n.accountChangePassword));
       await tester.pumpAndSettle();
       expect(find.byType(PasswordResetPage), findsOneWidget);

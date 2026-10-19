@@ -67,7 +67,7 @@ class AccountPersonaFormCubit extends Cubit<AccountPersonaFormState> {
         role: role,
         teacher: switch (selection) {
           TeacherSelectionSelect(:final teacher) => teacher,
-          _ => null,
+          TeacherSelectionKeep() || TeacherSelectionClear() => null,
         },
         clearTeacher: selection is TeacherSelectionClear,
       );

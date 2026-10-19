@@ -18,7 +18,7 @@ Map<String, String>? completeOAuthSessionCookies(
   for (final entry in cookies.entries) {
     final match = pattern.firstMatch(entry.key);
     if (match == null ||
-        (int.tryParse(match.group(1)!) ?? count + 1) <= count) {
+        (int.tryParse(match.group(1)!) ?? (count + 1)) <= count) {
       result[entry.key] = entry.value;
     }
   }

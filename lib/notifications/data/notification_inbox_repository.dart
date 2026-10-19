@@ -2,6 +2,11 @@ import 'package:rtu_mirea_app/navigation/deep_links.dart';
 import 'package:rtu_mirea_app/notifications/model/app_notification.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+abstract interface class NotificationInboxRepository {
+  Future<NotificationInboxSnapshot> load(String userId);
+  Future<void> markRead(String userId, Set<String> ids);
+}
+
 class NotificationInboxSnapshot {
   const NotificationInboxSnapshot({
     required this.items,
@@ -71,11 +76,6 @@ bool isScheduleChangeNotificationId(String id) {
 
 bool isCloudNotificationId(String id) =>
     isInboxNotificationId(id) || isScheduleChangeNotificationId(id);
-
-abstract interface class NotificationInboxRepository {
-  Future<NotificationInboxSnapshot> load(String userId);
-  Future<void> markRead(String userId, Set<String> ids);
-}
 
 class SupabaseNotificationInboxRepository
     implements NotificationInboxRepository {

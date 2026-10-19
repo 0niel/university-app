@@ -36,9 +36,7 @@ class PostOverviewBloc extends Bloc<PostOverviewEvent, PostOverviewState> {
           post: post,
           comments:
               comments ??
-              (state.post?.topicId == post.topicId
-                  ? state.comments
-                  : const <DiscoursePostComment>[]),
+              (state.post?.topicId == post.topicId ? state.comments : const []),
           status: comments == null ? .commentsFailure : .loaded,
         ),
       );

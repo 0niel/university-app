@@ -25,7 +25,7 @@ class StudyGroupPage extends StatelessWidget {
   const StudyGroupPage({super.key});
 
   static Route<void> route() {
-    return MaterialPageRoute<void>(builder: (_) => const StudyGroupPage());
+    return MaterialPageRoute<void>(builder: _buildStudyGroupPage);
   }
 
   @override
@@ -40,3 +40,5 @@ class StudyGroupPage extends StatelessWidget {
     );
   }
 }
+
+Widget _buildStudyGroupPage(BuildContext context) => const StudyGroupPage();

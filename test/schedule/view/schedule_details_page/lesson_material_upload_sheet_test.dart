@@ -18,25 +18,38 @@ import 'mock_schedule_repository.dart';
 class _FakeMaterialRequest extends Fake
     implements CreateLessonMaterialRequest {}
 
+@immutable
 class _StreamFile extends PlatformFile {
   _StreamFile({
     super.name = 'lecture.notes.pdf',
     super.size = 1,
-    this.reader,
+    this.onRead,
   });
 
-  final Stream<Uint8List> Function()? reader;
-  int reads = 0;
+  final Stream<Uint8List> Function()? onRead;
+  final _readCounter = _ReadCounter();
+
+  int get reads => _readCounter.value;
+
+  @override
+  bool operator ==(Object other) => identical(this, other);
+
+  @override
+  int get hashCode => identityHashCode(this);
 
   @override
   Stream<Uint8List> readAsByteStream() {
-    reads++;
-    return reader?.call() ?? Stream.value(Uint8List.fromList([1]));
+    _readCounter.value++;
+    return onRead?.call() ?? Stream.value(Uint8List.fromList([1]));
   }
 
   @override
   Future<Uint8List> readAsBytes() =>
       throw StateError('Native file bytes were not preloaded');
+}
+
+class _ReadCounter {
+  int value = 0;
 }
 
 const _kTransparentPng =
@@ -153,7 +166,7 @@ void main() {
           ? _StreamFile()
           : _StreamFile(
               name: 'unavailable.pdf',
-              reader: () => Stream.error(Exception('file became unavailable')),
+              onRead: () => Stream.error(Exception('file became unavailable')),
             ),
     );
     await pick(tester);
@@ -212,7 +225,10 @@ void main() {
       await pick(tester);
       await upload(tester);
       expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
-      pending.completeError(UploadLessonMaterialFailure(Exception('offline')));
+      pending.completeError(
+        UploadLessonMaterialFailure(Exception('offline')),
+        StackTrace.current,
+      );
       await tester.pump();
       expect(
         find.text('Не удалось загрузить материал. Попробуйте ещё раз.'),

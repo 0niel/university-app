@@ -116,9 +116,10 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
     final title = _title.text.trim();
     final fileName = _fileName;
     final fileBytes = _fileBytes;
+    final subject = _subjects.firstOrNull;
     if (title.isEmpty ||
         title.length > 200 ||
-        _subjects.isEmpty ||
+        subject == null ||
         fileName == null ||
         fileBytes == null ||
         _saving) {
@@ -132,7 +133,7 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
     try {
       await widget.repository.createPublicMaterial(
         title: title,
-        subjectName: _subjects.first,
+        subjectName: subject,
         subjectNames: _subjects.toList(growable: false),
         materialType: _type,
         price: _price,
@@ -206,6 +207,7 @@ class _MaterialUploadSheetState extends State<MaterialUploadSheet> {
                     borderRadius: BorderRadius.circular(AppRadius.iconTile),
                     child: Image.memory(
                       _previewBytes!,
+                      excludeFromSemantics: true,
                       width: 56,
                       height: 56,
                       fit: BoxFit.cover,

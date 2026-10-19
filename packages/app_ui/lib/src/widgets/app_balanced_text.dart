@@ -44,8 +44,10 @@ class AppBalancedText extends StatelessWidget {
         try {
           final lines = painter.computeLineMetrics().length;
           if (lines < 2 || lines > 6) return text;
-          var lower = painter.minIntrinsicWidth
-              .clamp(constraints.maxWidth / lines, constraints.maxWidth);
+          var lower = painter.minIntrinsicWidth.clamp(
+            constraints.maxWidth / lines,
+            constraints.maxWidth,
+          );
           var upper = constraints.maxWidth;
           for (var i = 0; i < 12; i++) {
             final middle = (lower + upper) / 2;

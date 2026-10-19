@@ -20,6 +20,7 @@ class CollabNotesView extends StatelessWidget {
       context,
       title: context.l10n.collabNotesCreateTitle,
       subtitle: context.l10n.collabNotesCreateSubtitle,
+      contentPadding: EdgeInsets.zero,
       child: BlocProvider.value(
         value: cubit,
         child: const CreateCollabNoteSheet(),

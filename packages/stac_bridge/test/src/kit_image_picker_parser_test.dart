@@ -10,41 +10,7 @@ import 'package:stac_bridge/src/widgets/mini_app_state_store.dart';
 import 'package:stac_bridge/stac_bridge.dart';
 
 import 'kit_harness.dart';
-
-class ImagePickerHost extends MiniAppHost {
-  ImagePickerHost(this.pick);
-
-  final Future<String?> Function() pick;
-  final List<bool> sources = [];
-  int reloads = 0;
-
-  @override
-  Future<String?> pickImage({required bool fromCamera}) {
-    sources.add(fromCamera);
-    return pick();
-  }
-
-  @override
-  void closeMiniApp() {}
-
-  @override
-  void openLocation(String location) {}
-
-  @override
-  void openExternalUrl(Uri url) {}
-
-  @override
-  void openPage({required String path, String? title}) {}
-
-  @override
-  void openMiniApp({required String slug, String? path}) {}
-
-  @override
-  void reload() => reloads++;
-
-  @override
-  void setStorage(String key, Object? value) {}
-}
+import 'support/image_picker_host.dart';
 
 void main() {
   setUpAll(
@@ -122,8 +88,10 @@ void main() {
       {...model, 'helperText': 'Новая подсказка'},
       store: store,
     );
-    expect(find.text('Выбрано'), findsOneWidget);
-    expect(store.get('photo'), 'https://example.test/selected.jpg');
+    expect(
+      (find.text('Выбрано').evaluate().length, store.get('photo')),
+      (1, 'https://example.test/selected.jpg'),
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -218,11 +186,16 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
     await pumpKit(tester, parser, withInitial, store: store);
-    expect(find.byType(KitNetworkImage), findsNothing);
+    expect(find.byType(KitNetworkImage).evaluate(), isEmpty);
     await tester.tap(find.text('Галерея'));
     await tester.pumpAndSettle();
-    expect(store.get('photoStatus'), 'removed');
-    expect(find.byType(KitNetworkImage), findsNothing);
+    expect(
+      (
+        store.get('photoStatus'),
+        find.byType(KitNetworkImage).evaluate().length,
+      ),
+      ('removed', 0),
+    );
   });
 
   testWidgets('clearing a draft restores the saved photo by default', (
@@ -311,8 +284,10 @@ void main() {
 
     pending.complete('https://example.test/old-scope.jpg');
     await tester.pumpAndSettle();
-    expect(original.get('photo'), isNull);
-    expect(replacement.get('photo'), 'https://example.test/new-scope.jpg');
+    expect(
+      (original.get('photo'), replacement.get('photo')),
+      (null, 'https://example.test/new-scope.jpg'),
+    );
     expect(tester.takeException(), isNull);
   });
 

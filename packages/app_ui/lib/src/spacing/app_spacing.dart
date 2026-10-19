@@ -50,6 +50,7 @@ abstract final class AppRadius {
   static const double compact = 13;
   static const double tile = 14;
   static const double md = 14;
+  static const double iconTileLarge = 15;
   static const double banner = 16;
   static const double field = 18;
   static const double button = 18;
@@ -61,12 +62,18 @@ abstract final class AppRadius {
   static const double xl = 24;
   static const double hero = 26;
   static const double dialog = 28;
+  static const double featuredCard = 30;
   static const double sheet = 32;
   static const double spotlight = 40;
   static const double full = 999;
   static const double tooltipBubble = iconTile;
   static const double tooltipTail = xxs;
   static const double keypad = iconTile;
+}
+
+abstract final class AppGradientRadius {
+  static const double ambient = 1.25;
+  static const double hero = 1.6;
 }
 
 abstract final class AppIconSize {

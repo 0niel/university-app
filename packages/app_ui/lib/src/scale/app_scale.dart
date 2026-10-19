@@ -9,9 +9,7 @@ import 'package:flutter/material.dart';
 class AppScale extends StatelessWidget {
   const AppScale({required this.child, super.key});
 
-  factory AppScale.create({required Widget child}) {
-    return AppScale(child: child);
-  }
+  const factory AppScale.create({required Widget child}) = AppScale;
 
   final Widget child;
 
@@ -25,7 +23,10 @@ class AppScale extends StatelessWidget {
     final media = MediaQuery.of(context);
     final mobile = switch (defaultTargetPlatform) {
       TargetPlatform.android || TargetPlatform.iOS => true,
-      _ => false,
+      TargetPlatform.fuchsia ||
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows => false,
     };
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -169,9 +170,9 @@ class AppScaledText {
   TextStyle get buttonLarge => _style(AppText.buttonLarge);
   TextStyle get tab => _style(AppText.tab);
   TextStyle get overline => _style(
-        AppText.overline,
-        color: _colors.deactiveDarker,
-      );
+    AppText.overline,
+    color: _colors.deactiveDarker,
+  );
   TextStyle get chip => _style(AppText.chip);
   TextStyle get tabular => AppText.tabular(bodyStrong);
 

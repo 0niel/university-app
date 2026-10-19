@@ -10,7 +10,6 @@ class ProfileQuestsGroup extends StatelessWidget {
     final colors = context.colors;
     final l10n = context.l10n;
     final daily = quests.isNotEmpty && quests.every((quest) => quest.isDaily);
-    final bars = [colors.accent, colors.lecture, colors.lab];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -23,11 +22,22 @@ class ProfileQuestsGroup extends StatelessWidget {
         if (quests.isEmpty)
           AppEmptyState.compact(title: l10n.profileQuestsEmpty)
         else
-          AppListGroup(
-            children: [
-              for (final (index, quest) in quests.indexed)
-                _QuestRow(quest: quest, barColor: bars[index % bars.length]),
-            ],
+          AppGlassSurface(
+            tone: AppGlassTone.subtle,
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              children: [
+                for (final (index, quest) in quests.indexed)
+                  _QuestRow(
+                    quest: quest,
+                    barColor: switch (index % 3) {
+                      0 => colors.accent,
+                      1 => colors.lecture,
+                      _ => colors.lab,
+                    },
+                  ),
+              ],
+            ),
           ),
       ],
     );

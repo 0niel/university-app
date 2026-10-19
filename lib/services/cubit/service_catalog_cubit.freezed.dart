@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ServiceCatalogState {
 
- ServiceCatalog? get catalog; bool get isLoading; bool get isRefreshing;
+ ServiceCatalog? get catalog; bool get isLoading; bool get isRefreshing; bool get hasError;
 /// Create a copy of ServiceCatalogState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ServiceCatalogStateCopyWith<ServiceCatalogState> get copyWith => _$ServiceCatal
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServiceCatalogState&&(identical(other.catalog, catalog) || other.catalog == catalog)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServiceCatalogState&&(identical(other.catalog, catalog) || other.catalog == catalog)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&(identical(other.hasError, hasError) || other.hasError == hasError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,catalog,isLoading,isRefreshing);
+int get hashCode => Object.hash(runtimeType,catalog,isLoading,isRefreshing,hasError);
 
 @override
 String toString() {
-  return 'ServiceCatalogState(catalog: $catalog, isLoading: $isLoading, isRefreshing: $isRefreshing)';
+  return 'ServiceCatalogState(catalog: $catalog, isLoading: $isLoading, isRefreshing: $isRefreshing, hasError: $hasError)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ServiceCatalogStateCopyWith<$Res>  {
   factory $ServiceCatalogStateCopyWith(ServiceCatalogState value, $Res Function(ServiceCatalogState) _then) = _$ServiceCatalogStateCopyWithImpl;
 @useResult
 $Res call({
- ServiceCatalog? catalog, bool isLoading, bool isRefreshing
+ ServiceCatalog? catalog, bool isLoading, bool isRefreshing, bool hasError
 });
 
 
@@ -62,11 +62,12 @@ class _$ServiceCatalogStateCopyWithImpl<$Res>
 
 /// Create a copy of ServiceCatalogState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? catalog = freezed,Object? isLoading = null,Object? isRefreshing = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? catalog = freezed,Object? isLoading = null,Object? isRefreshing = null,Object? hasError = null,}) {
   return _then(_self.copyWith(
 catalog: freezed == catalog ? _self.catalog : catalog // ignore: cast_nullable_to_non_nullable
 as ServiceCatalog?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isRefreshing: null == isRefreshing ? _self.isRefreshing : isRefreshing // ignore: cast_nullable_to_non_nullable
+as bool,hasError: null == hasError ? _self.hasError : hasError // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -164,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ServiceCatalog? catalog,  bool isLoading,  bool isRefreshing)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ServiceCatalog? catalog,  bool isLoading,  bool isRefreshing,  bool hasError)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ServiceCatalogState() when $default != null:
-return $default(_that.catalog,_that.isLoading,_that.isRefreshing);case _:
+return $default(_that.catalog,_that.isLoading,_that.isRefreshing,_that.hasError);case _:
   return orElse();
 
 }
@@ -185,10 +186,10 @@ return $default(_that.catalog,_that.isLoading,_that.isRefreshing);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ServiceCatalog? catalog,  bool isLoading,  bool isRefreshing)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ServiceCatalog? catalog,  bool isLoading,  bool isRefreshing,  bool hasError)  $default,) {final _that = this;
 switch (_that) {
 case _ServiceCatalogState():
-return $default(_that.catalog,_that.isLoading,_that.isRefreshing);case _:
+return $default(_that.catalog,_that.isLoading,_that.isRefreshing,_that.hasError);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +206,10 @@ return $default(_that.catalog,_that.isLoading,_that.isRefreshing);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ServiceCatalog? catalog,  bool isLoading,  bool isRefreshing)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ServiceCatalog? catalog,  bool isLoading,  bool isRefreshing,  bool hasError)?  $default,) {final _that = this;
 switch (_that) {
 case _ServiceCatalogState() when $default != null:
-return $default(_that.catalog,_that.isLoading,_that.isRefreshing);case _:
+return $default(_that.catalog,_that.isLoading,_that.isRefreshing,_that.hasError);case _:
   return null;
 
 }
@@ -220,12 +221,13 @@ return $default(_that.catalog,_that.isLoading,_that.isRefreshing);case _:
 
 
 class _ServiceCatalogState implements ServiceCatalogState {
-  const _ServiceCatalogState({this.catalog, this.isLoading = false, this.isRefreshing = false});
+  const _ServiceCatalogState({this.catalog, this.isLoading = false, this.isRefreshing = false, this.hasError = false});
 
 
 @override final  ServiceCatalog? catalog;
 @override@JsonKey() final  bool isLoading;
 @override@JsonKey() final  bool isRefreshing;
+@override@JsonKey() final  bool hasError;
 
 /// Create a copy of ServiceCatalogState
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +239,16 @@ _$ServiceCatalogStateCopyWith<_ServiceCatalogState> get copyWith => __$ServiceCa
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServiceCatalogState&&(identical(other.catalog, catalog) || other.catalog == catalog)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServiceCatalogState&&(identical(other.catalog, catalog) || other.catalog == catalog)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&(identical(other.hasError, hasError) || other.hasError == hasError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,catalog,isLoading,isRefreshing);
+int get hashCode => Object.hash(runtimeType,catalog,isLoading,isRefreshing,hasError);
 
 @override
 String toString() {
-  return 'ServiceCatalogState(catalog: $catalog, isLoading: $isLoading, isRefreshing: $isRefreshing)';
+  return 'ServiceCatalogState(catalog: $catalog, isLoading: $isLoading, isRefreshing: $isRefreshing, hasError: $hasError)';
 }
 
 
@@ -257,7 +259,7 @@ abstract mixin class _$ServiceCatalogStateCopyWith<$Res> implements $ServiceCata
   factory _$ServiceCatalogStateCopyWith(_ServiceCatalogState value, $Res Function(_ServiceCatalogState) _then) = __$ServiceCatalogStateCopyWithImpl;
 @override @useResult
 $Res call({
- ServiceCatalog? catalog, bool isLoading, bool isRefreshing
+ ServiceCatalog? catalog, bool isLoading, bool isRefreshing, bool hasError
 });
 
 
@@ -274,11 +276,12 @@ class __$ServiceCatalogStateCopyWithImpl<$Res>
 
 /// Create a copy of ServiceCatalogState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? catalog = freezed,Object? isLoading = null,Object? isRefreshing = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? catalog = freezed,Object? isLoading = null,Object? isRefreshing = null,Object? hasError = null,}) {
   return _then(_ServiceCatalogState(
 catalog: freezed == catalog ? _self.catalog : catalog // ignore: cast_nullable_to_non_nullable
 as ServiceCatalog?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isRefreshing: null == isRefreshing ? _self.isRefreshing : isRefreshing // ignore: cast_nullable_to_non_nullable
+as bool,hasError: null == hasError ? _self.hasError : hasError // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

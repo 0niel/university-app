@@ -15,9 +15,9 @@ class AppIconTile extends StatelessWidget {
     this.iconSize,
     this.strokeWidth = 2,
   }) : assert(
-          icon != null || child != null,
-          'AppIconTile needs an icon or a child',
-        );
+         icon != null || child != null,
+         'AppIconTile needs an icon or a child',
+       );
 
   final AppLineIcon? icon;
   final Widget? child;
@@ -40,11 +40,23 @@ class AppIconTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: background ?? colors.surface2,
         borderRadius: BorderRadius.circular(radius),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.alphaBlend(
+              colors.white.withValues(alpha: colors.isDark ? .07 : .3),
+              background ?? colors.surface2,
+            ),
+            background ?? colors.surface2,
+          ],
+        ),
       ),
-      child: child ??
+      child:
+          child ??
           AppLineIconWidget(
             icon!,
-            size: iconSize ?? size / 2,
+            size: iconSize ?? (size / 2),
             color: fg,
             strokeWidth: strokeWidth,
           ),

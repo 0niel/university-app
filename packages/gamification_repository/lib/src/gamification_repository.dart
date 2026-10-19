@@ -50,7 +50,7 @@ class GamificationRepository {
             },
           )
           .timeout(const Duration(seconds: 8));
-      return _decodeModel(
+      return await _decodeModel(
         _decodeObject(response, operation: 'set account persona'),
         operation: 'set account persona',
         factory: AccountPersona.fromJson,

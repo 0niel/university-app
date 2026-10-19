@@ -24,6 +24,7 @@ class NfcPassVerificationBody extends StatefulWidget {
 
 class _NfcPassVerificationBodyState extends State<NfcPassVerificationBody> {
   Timer? _retryTimer;
+  DateTime _now = DateTime.now();
 
   @override
   void initState() {
@@ -42,12 +43,13 @@ class _NfcPassVerificationBodyState extends State<NfcPassVerificationBody> {
 
   void _scheduleRetry() {
     _retryTimer?.cancel();
+    _now = DateTime.now();
     final retryAt = widget.state.verificationRetryAt;
     if (retryAt == null) return;
-    final delay = retryAt.difference(DateTime.now());
+    final delay = retryAt.difference(_now);
     if (delay <= Duration.zero) return;
     _retryTimer = Timer(delay, () {
-      if (mounted) setState(() {});
+      if (mounted) setState(() => _now = DateTime.now());
     });
   }
 
@@ -62,7 +64,7 @@ class _NfcPassVerificationBodyState extends State<NfcPassVerificationBody> {
     final l10n = context.l10n;
     final state = widget.state;
     final retryAt = state.verificationRetryAt?.toLocal();
-    final waiting = retryAt?.isAfter(DateTime.now()) ?? false;
+    final waiting = retryAt?.isAfter(_now) ?? false;
     final message = switch (state.verificationIssue) {
       .wrongCode => l10n.nfcPassWrongCode,
       .nfcError => l10n.nfcPassIssuanceFailed,

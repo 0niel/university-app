@@ -99,7 +99,7 @@ class NoteEditorCubit extends Cubit<NoteEditorState> {
         )) {
       throw const FormatException('Invalid note document');
     }
-    final last = (document.last! as Map)['insert'];
+    final last = (document.lastOrNull! as Map)['insert'];
     if (last is! String || !last.endsWith('\n')) {
       throw const FormatException('Note document must end with a newline');
     }
@@ -272,7 +272,10 @@ class NoteEditorCubit extends Cubit<NoteEditorState> {
         ),
         expectedToken: previousToken,
       );
-      _localTask = task.then<void>((_) {}, onError: (Object _) {});
+      _localTask = task.then(
+        (_) => Future<void>.value(),
+        onError: (Object _) => Future<void>.value(),
+      );
       if (!await task) {
         if (_draftToken == token) _draftToken = previousToken;
         throw StateError('A newer editor owns the local note draft');
@@ -296,7 +299,10 @@ class NoteEditorCubit extends Cubit<NoteEditorState> {
     if (token == null || store == null || userId == null) return;
     try {
       final task = store.remove(userId: userId, noteId: _noteId, token: token);
-      _localTask = task.then<void>((_) {}, onError: (Object _) {});
+      _localTask = task.then(
+        (_) => Future<void>.value(),
+        onError: (Object _) => Future<void>.value(),
+      );
       await task;
       if (_draftToken == token) _draftToken = null;
     } on Object catch (error, stackTrace) {
@@ -322,9 +328,10 @@ class NoteEditorCubit extends Cubit<NoteEditorState> {
     final server = _recoveryServerDocument;
     if (server != null) {
       if (!keepLocal) {
+        final selection = controller.selection;
         controller.compose(
           controller.document.toDelta().diff(server),
-          controller.selection,
+          selection,
           ChangeSource.remote,
         );
       }
@@ -447,8 +454,8 @@ class NoteEditorCubit extends Cubit<NoteEditorState> {
           updatedAt: result.updatedAt,
         ),
       );
-    } on Exception {
-      return;
+    } on Exception catch (error, stackTrace) {
+      addError(error, stackTrace);
     }
   }
 
@@ -684,7 +691,8 @@ class NoteEditorCubit extends Cubit<NoteEditorState> {
             server: serverDoc,
           );
     if (patch.isNotEmpty) {
-      controller.compose(patch, controller.selection, ChangeSource.remote);
+      final selection = controller.selection;
+      controller.compose(patch, selection, ChangeSource.remote);
     }
     _syncedDelta = serverDoc;
     _baseRevision = revision;

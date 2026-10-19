@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:storage/storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide StorageException;
 
+import 'fakes/fake_rpc_builder.dart';
 import 'fakes/fake_storage.dart';
 import 'mocks/mock_supabase_client.dart';
 
@@ -171,8 +172,6 @@ void main() {
           final url = await buildRepository().uploadImage(
             appId: 'app-1',
             bytes: bytes,
-            fileName: 'camera-file.heic',
-            contentType: 'application/octet-stream',
           );
 
           final captured = verify(
@@ -197,7 +196,6 @@ void main() {
         buildRepository().uploadImage(
           appId: 'app-1',
           bytes: Uint8List.fromList([1, 2, 3, 4]),
-          contentType: 'image/jpeg',
         ),
         throwsA(isA<MiniAppUploadFailure>()),
       );
@@ -331,7 +329,7 @@ void main() {
       when(
         () => supabase.rpc<Object?>(any(), params: any(named: 'params')),
       ).thenAnswer(
-        (_) => _FakeRpcBuilder({
+        (_) => FakeRpcBuilder({
           'reported': [
             {'id': 'app-1', 'slug': 'notes', 'name': 'Notes'},
           ],
@@ -344,17 +342,4 @@ void main() {
       );
     });
   });
-}
-
-class _FakeRpcBuilder extends Fake
-    implements PostgrestFilterBuilder<Object?> {
-  _FakeRpcBuilder(this._value);
-
-  final Object? _value;
-
-  @override
-  Future<R> then<R>(
-    FutureOr<R> Function(Object? value) onValue, {
-    Function? onError,
-  }) => Future<Object?>.value(_value).then(onValue, onError: onError);
 }

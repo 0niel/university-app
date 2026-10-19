@@ -15,8 +15,6 @@ import 'package:rtu_mirea_app/free_rooms/widgets/room_photo_gallery_body.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/services/room_key.dart';
 
-enum RoomPhotoGalleryStatus { loading, loaded, error, offline }
-
 class RoomPhotoGallery extends StatefulWidget {
   const RoomPhotoGallery({
     required this.campus,
@@ -30,6 +28,8 @@ class RoomPhotoGallery extends StatefulWidget {
   @override
   State<RoomPhotoGallery> createState() => _RoomPhotoGalleryState();
 }
+
+enum RoomPhotoGalleryStatus { loading, loaded, error, offline }
 
 class _RoomPhotoGalleryState extends State<RoomPhotoGallery> {
   final _heroScope = Object();
@@ -46,7 +46,7 @@ class _RoomPhotoGalleryState extends State<RoomPhotoGallery> {
   String get _roomKey => roomKey(widget.roomName);
   bool get _uploading => _uploadTotal > 0;
 
-  CampusRepository get _repository => context.read<CampusRepository>();
+  CampusRepository get _repository => context.read();
 
   @override
   void initState() {
@@ -251,11 +251,11 @@ class _RoomPhotoGalleryState extends State<RoomPhotoGallery> {
     context,
     initialIndex: index,
     items: [
-      for (final (index, photo) in _photos.indexed)
+      for (final (photoIndex, photo) in _photos.indexed)
         MediaItem(
           url: photo.url,
           kind: MediaKind.image,
-          heroTag: (_heroScope, index, photo.id),
+          heroTag: (_heroScope, photoIndex, photo.id),
         ),
     ],
   );

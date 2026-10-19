@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:logger/logger.dart';
 import 'package:rtu_mirea_app/navigation/deep_links.dart';
 import 'package:user_repository/user_repository.dart';
@@ -14,7 +14,7 @@ part 'app_bloc.freezed.dart';
 part 'app_state.dart';
 part 'app_status.dart';
 
-class AppBloc extends HydratedBloc<AppEvent, AppState> {
+class AppBloc extends Bloc<AppEvent, AppState> {
   AppBloc({
     required this._firebaseMessaging,
     required this._userRepository,
@@ -28,7 +28,6 @@ class AppBloc extends HydratedBloc<AppEvent, AppState> {
     _onBeforeLogout = onBeforeLogout;
     on<AppOpened>(_onAppOpened);
     on<InteractedMessageReceived>(_onInteractedMessageReceived);
-    on<ThemeChanged>(_onThemeChanged);
     on<AppUserChanged>(_onUserChanged);
     on<AppLogoutRequested>(_onLogoutRequested);
 
@@ -65,7 +64,7 @@ class AppBloc extends HydratedBloc<AppEvent, AppState> {
         userId != state.user.id) {
       return const [];
     }
-    final messages = List<RemoteMessage>.of(_pendingPushMessages);
+    final messages = List.of(_pendingPushMessages);
     _pendingPushMessages.clear();
     return messages;
   }
@@ -170,23 +169,4 @@ class AppBloc extends HydratedBloc<AppEvent, AppState> {
   Future<void> _onAppOpened(AppOpened _, Emitter<AppState> _) async {
     await setupInteractedMessage();
   }
-
-  void _onThemeChanged(
-    ThemeChanged event,
-    Emitter<AppState> emit,
-  ) {
-    emit(state.copyWith(isAmoled: event.isAmoled));
-  }
-
-  @override
-  AppState? fromJson(Map<String, dynamic> json) {
-    final isAmoled = json['isAmoled'];
-    if (isAmoled is! bool) return null;
-    return state.copyWith(isAmoled: isAmoled);
-  }
-
-  @override
-  Map<String, dynamic> toJson(AppState state) => {
-    'isAmoled': state.isAmoled,
-  };
 }

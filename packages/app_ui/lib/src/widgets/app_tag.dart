@@ -56,15 +56,15 @@ class AppTag extends StatelessWidget {
   }
 
   ({Color bg, Color fg}) _resolve(AppColors c) => switch (tone) {
-        AppTagTone.accent => (bg: c.tint, fg: c.accent),
-        AppTagTone.live => (bg: c.lectureTint, fg: c.lecture),
-        AppTagTone.warn => (bg: c.warnTint, fg: c.warn),
-        AppTagTone.danger => (bg: c.examTint, fg: c.exam),
-        AppTagTone.info => (bg: c.practiceTint, fg: c.practice),
-        AppTagTone.pink => (bg: c.labTint, fg: c.lab),
-        AppTagTone.mute => (bg: c.surface2, fg: c.muted),
-        AppTagTone.solid => (bg: c.accent, fg: c.onAccent),
-      };
+    AppTagTone.accent => (bg: c.tint, fg: c.accent),
+    AppTagTone.live => (bg: c.lectureTint, fg: c.lecture),
+    AppTagTone.warn => (bg: c.warnTint, fg: c.warn),
+    AppTagTone.danger => (bg: c.examTint, fg: c.exam),
+    AppTagTone.info => (bg: c.practiceTint, fg: c.practice),
+    AppTagTone.pink => (bg: c.labTint, fg: c.lab),
+    AppTagTone.mute => (bg: c.surface2, fg: c.muted),
+    AppTagTone.solid => (bg: c.accent, fg: c.onAccent),
+  };
 }
 
 class AppLiveDot extends StatelessWidget {

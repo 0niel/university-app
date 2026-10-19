@@ -1,28 +1,23 @@
-part of 'mini_apps_page.dart';
+part of 'mini_apps_catalog.dart';
 
 class _CategoryChips extends StatelessWidget {
-  const _CategoryChips({required this.category});
+  const _CategoryChips({required this.category, required this.onChanged});
 
   final MiniAppCategory? category;
+  final ValueChanged<MiniAppCategory?> onChanged;
 
   @override
-  Widget build(BuildContext context) {
-    final cubit = context.read<MiniAppsCatalogCubit>();
-    return ClipRect(
-      child: NinjaChipRow(
-        key: const ValueKey('mini-apps-categories'),
-        children: [
-          for (final value in <MiniAppCategory?>[
-            null,
-            ...MiniAppCategory.values,
-          ])
-            NinjaChip(
-              label: miniAppCategoryLabel(context, value),
-              selected: category == value,
-              onTap: () => cubit.categoryChanged(value),
-            ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => AppChipRow<MiniAppCategory?>(
+    key: const ValueKey('mini-apps-categories'),
+    value: category,
+    onChanged: onChanged,
+    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+    items: [
+      for (final value in <MiniAppCategory?>[null, ...MiniAppCategory.values])
+        AppChipRowItem(
+          value: value,
+          label: miniAppCategoryLabel(context, value),
+        ),
+    ],
+  );
 }

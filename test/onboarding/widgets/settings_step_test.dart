@@ -20,9 +20,9 @@ class _MockLocalNotificationsRepository extends Mock
 
 class _MockPermissionClient extends Mock implements PermissionClient {}
 
-class _TestGeoSharingCubit extends Cubit<GeoSharingState>
+class TestGeoSharingCubit extends Cubit<GeoSharingState>
     implements GeoSharingCubit {
-  _TestGeoSharingCubit() : super(const GeoSharingState(loaded: true));
+  TestGeoSharingCubit() : super(const GeoSharingState(loaded: true));
   bool fails = false;
   bool? requested;
 
@@ -44,7 +44,7 @@ void main() {
   late _MockGamificationRepository gamification;
   late _MockLocalNotificationsRepository notifications;
   late _MockPermissionClient permissions;
-  late _TestGeoSharingCubit sharing;
+  late TestGeoSharingCubit sharing;
   late int finished;
   late int backs;
 
@@ -58,7 +58,7 @@ void main() {
     gamification = _MockGamificationRepository();
     notifications = _MockLocalNotificationsRepository();
     permissions = _MockPermissionClient();
-    sharing = _TestGeoSharingCubit();
+    sharing = TestGeoSharingCubit();
     addTearDown(sharing.close);
     when(
       () => gamification.getSettings(),

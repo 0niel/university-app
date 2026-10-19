@@ -318,9 +318,10 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
             Expanded(
               child: Text(
                 room.label,
-                style: AppText.serif(
-                  30,
-                  height: 1.12,
+                style: AppText.sans(
+                  28,
+                  FontWeight.w700,
+                  height: 1.2,
                 ).copyWith(color: colors.ink),
               ),
             ),
@@ -341,7 +342,9 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
               tone: _saved == true
                   ? AppIconButtonTone.primary
                   : AppIconButtonTone.surface,
-              onPressed: _bookmarkBusy ? null : _toggleBookmark,
+              onPressed: _bookmarkBusy
+                  ? null
+                  : () => unawaited(_toggleBookmark()),
             ),
             const SizedBox(width: AppSpacing.xs),
             AppIconButton(
@@ -366,32 +369,30 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
             final stacked =
                 constraints.maxWidth < 350 ||
                 MediaQuery.textScalerOf(context).scale(16) > 22;
-            final actions = [
-              AppButton.primary(
-                label: context.l10n.mapRouteToPlace,
-                expanded: true,
-                onPressed: canRoute ? widget.onRouteTo : null,
-              ),
-              AppButton.secondary(
-                label: context.l10n.mapRouteFromPlace,
-                expanded: true,
-                onPressed: canRoute ? widget.onRouteFrom : null,
-              ),
-            ];
+            final routeTo = AppButton.primary(
+              label: context.l10n.mapRouteToPlace,
+              expanded: true,
+              onPressed: canRoute ? widget.onRouteTo : null,
+            );
+            final routeFrom = AppButton.secondary(
+              label: context.l10n.mapRouteFromPlace,
+              expanded: true,
+              onPressed: canRoute ? widget.onRouteFrom : null,
+            );
             return stacked
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      actions[0],
+                      routeTo,
                       const SizedBox(height: AppSpacing.sm),
-                      actions[1],
+                      routeFrom,
                     ],
                   )
                 : Row(
                     children: [
-                      Expanded(child: actions[0]),
+                      Expanded(child: routeTo),
                       const SizedBox(width: AppSpacing.sm),
-                      Expanded(child: actions[1]),
+                      Expanded(child: routeFrom),
                     ],
                   );
           },
@@ -527,7 +528,7 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
             children: [
               AppButton.secondary(
                 label: '${_formatDate(_date)} · МСК',
-                onPressed: _pickDate,
+                onPressed: () => unawaited(_pickDate()),
               ),
               const SizedBox(height: AppSpacing.lg),
               if (_loading)
@@ -542,7 +543,7 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
                   message: 'Не удалось обновить данные и расписание.',
                   tone: AppBannerTone.warn,
                   actionLabel: 'Повторить',
-                  onAction: _load,
+                  onAction: () => unawaited(_load()),
                 )
               else if (!(_details?.scheduleLinked ?? false))
                 const Text(
@@ -624,14 +625,14 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
               const Text('Подтверждайте сведения после личной проверки места.'),
               const SizedBox(height: AppSpacing.md),
               AppButton.tonal(
-                label: _verification?.confirmedByMe ?? false
+                label: (_verification?.confirmedByMe ?? false)
                     ? 'Отозвать подтверждение'
                     : 'Подтверждаю сведения',
                 expanded: true,
                 loading: _verificationBusy,
                 onPressed: _verificationBusy || _verification == null
                     ? null
-                    : _confirm,
+                    : () => unawaited(_confirm()),
               ),
             ],
           ),
@@ -661,7 +662,7 @@ class _MapPlaceDetailsSheetState extends State<MapPlaceDetailsSheet> {
           label:
               '${Uri.tryParse(widget.campus.sourceUrl)?.host ?? 'Планы'}'
               ' · источник',
-          onPressed: _openSource,
+          onPressed: () => unawaited(_openSource()),
         ),
         if (_sourceFailed)
           SelectableText(

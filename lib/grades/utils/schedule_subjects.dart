@@ -11,7 +11,7 @@ List<SubjectGrades> scheduleSubjectsFor(
     if (!part.dates.any(term.contains)) continue;
     final subject = part.subject.trim();
     if (subject.isEmpty) continue;
-    final teacher = part.teachers.isEmpty ? '' : part.teachers.first.name;
+    final teacher = part.teachers.firstOrNull?.name ?? '';
     final existing = byName[subject];
     if (existing == null) {
       byName[subject] = SubjectGrades(subject: subject, teacher: teacher);

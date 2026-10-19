@@ -3,19 +3,11 @@ import 'dart:math' as math;
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_badge_tone.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:flutter/widgets.dart';
 
-enum AppBadgeTone {
-  accent,
-  ink,
-  exam,
-  warn,
-  lecture,
-  lab,
-  practice,
-  neutral,
-}
+export 'app_badge_tone.dart';
 
 class AppBadge extends StatelessWidget {
   const AppBadge({
@@ -42,7 +34,8 @@ class AppBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (:bg, :fg) = _resolve(context.colors);
     final icon = this.icon;
-    final tinted = tone != AppBadgeTone.accent &&
+    final tinted =
+        tone != AppBadgeTone.accent &&
         tone != AppBadgeTone.ink &&
         tone != AppBadgeTone.neutral;
 
@@ -71,7 +64,8 @@ class AppBadge extends StatelessWidget {
             child: Text(
               label,
               style: (textStyle ?? AppText.badge).copyWith(
-                color: textStyle?.color ??
+                color:
+                    textStyle?.color ??
                     (dot && tinted ? context.colors.ink : fg),
               ),
             ),
@@ -82,15 +76,15 @@ class AppBadge extends StatelessWidget {
   }
 
   ({Color bg, Color fg}) _resolve(AppColors c) => switch (tone) {
-        AppBadgeTone.accent => (bg: c.accent, fg: c.onAccent),
-        AppBadgeTone.ink => (bg: c.ink, fg: c.canvas),
-        AppBadgeTone.exam => (bg: c.examTint, fg: c.exam),
-        AppBadgeTone.warn => (bg: c.warnTint, fg: c.warn),
-        AppBadgeTone.lecture => (bg: c.lectureTint, fg: c.lecture),
-        AppBadgeTone.lab => (bg: c.labTint, fg: c.lab),
-        AppBadgeTone.practice => (bg: c.practiceTint, fg: c.practice),
-        AppBadgeTone.neutral => (bg: c.surface2, fg: c.muted),
-      };
+    AppBadgeTone.accent => (bg: c.accent, fg: c.onAccent),
+    AppBadgeTone.ink => (bg: c.ink, fg: c.canvas),
+    AppBadgeTone.exam => (bg: c.examTint, fg: c.exam),
+    AppBadgeTone.warn => (bg: c.warnTint, fg: c.warn),
+    AppBadgeTone.lecture => (bg: c.lectureTint, fg: c.lecture),
+    AppBadgeTone.lab => (bg: c.labTint, fg: c.lab),
+    AppBadgeTone.practice => (bg: c.practiceTint, fg: c.practice),
+    AppBadgeTone.neutral => (bg: c.surface2, fg: c.muted),
+  };
 }
 
 class AppCountBadge extends StatelessWidget {
@@ -103,7 +97,7 @@ class AppCountBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Container(
-      height: math.max<double>(
+      height: math.max(
         22,
         MediaQuery.textScalerOf(context).scale(11.5) *
             (AppText.badge.height ?? 1.3),

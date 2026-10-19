@@ -27,61 +27,29 @@ class HomeQuickActions extends StatelessWidget {
           onActionTap: onAll,
         ),
         if (services.isEmpty && loading)
-          const _HomeQuickActionsSkeleton()
+          AppSkeletonGroup(
+            semanticsLabel: context.l10n.loadingContent,
+            child: AppShortcutGrid(
+              children: List.generate(
+                HomeServiceDefaults.routes.length,
+                (_) => const AppServiceTile.skeleton(),
+              ),
+            ),
+          )
         else if (services.isEmpty)
           AppEmptyState.compact(title: context.l10n.homeFavoritesEmpty)
         else
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final scale = MediaQuery.textScalerOf(context).scale(1);
-              final columns = scale > 1.5 || constraints.maxWidth < 300 ? 3 : 5;
-              final width =
-                  (constraints.maxWidth - 4 * (columns - 1)) / columns;
-              return Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: [
-                  for (final entry in services)
-                    AppPressable(
-                      onTap: () => entry.open(context),
-                      semanticsLabel: entry.title,
-                      child: SizedBox(
-                        width: width,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 2,
-                            vertical: 8,
-                          ),
-                          child: Column(
-                            children: [
-                              AppIconTile(
-                                icon: entry.model.icon,
-                                size: 48,
-                                radius: AppRadius.banner,
-                                background: context.colors.surface,
-                                foreground: entry.tone ?? entry.model.color,
-                                iconSize: 22,
-                              ),
-                              const SizedBox(height: 7),
-                              Text(
-                                _shortTitle(entry, context.l10n),
-                                textAlign: TextAlign.center,
-                                maxLines: scale > 1.5 ? 3 : 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppText.sans(
-                                  10.5,
-                                  FontWeight.w600,
-                                  height: 1.2,
-                                ).copyWith(color: context.colors.muted),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
+          AppShortcutGrid(
+            children: [
+              for (final entry in services)
+                AppServiceTile.compact(
+                  icon: AppLineIconWidget(entry.model.icon),
+                  color: entry.tone ?? entry.model.color,
+                  label: _shortTitle(entry, context.l10n),
+                  semanticsLabel: entry.title,
+                  onTap: () => entry.open(context),
+                ),
+            ],
           ),
       ],
     ),
@@ -93,28 +61,7 @@ class HomeQuickActions extends StatelessWidget {
         '/services/free-rooms' => l10n.classrooms,
         '/services/nfc' => l10n.homePass,
         '/schedule/session' => l10n.serviceExamsTitle,
+        '/services/communities' => l10n.servicesSectionCommunity,
         _ => entry.title,
       };
-}
-
-class _HomeQuickActionsSkeleton extends StatelessWidget {
-  const _HomeQuickActionsSkeleton();
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      for (var i = 0; i < 5; i++) ...[
-        if (i > 0) const SizedBox(width: 4),
-        const Expanded(
-          child: Column(
-            children: [
-              AppSkeleton(height: 48, radius: AppRadius.banner),
-              SizedBox(height: 7),
-              AppSkeleton(height: 10, widthFactor: .6),
-            ],
-          ),
-        ),
-      ],
-    ],
-  );
 }

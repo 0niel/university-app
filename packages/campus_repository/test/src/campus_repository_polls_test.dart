@@ -23,13 +23,13 @@ void main() {
       ]);
     });
     final polls = await repository.getPolls(
-      filter: PollFilter.participated,
-      category: PollCategory.academic,
+      filter: .participated,
+      category: .academic,
       query: 'Exam',
       limit: 10,
       offset: 20,
     );
-    expect(polls.single.iParticipated, isTrue);
+    expect(polls.singleOrNull!.iParticipated, isTrue);
   });
 
   for (final payload in <Object?>[
@@ -37,7 +37,7 @@ void main() {
     {},
     [false],
   ]) {
-    test('rejects malformed poll list $payload', () async {
+    test('rejects malformed poll list ${payload ?? 'null'}', () async {
       final repository = _repository(
         (request) async => _response(request, payload),
       );
@@ -65,7 +65,7 @@ void main() {
               'kind': kind.wire,
               'isRequired': true,
               'options': ['One', 'Two'],
-              if (kind == PollQuestionKind.quiz) 'correctIndex': 1,
+              if (kind == .quiz) 'correctIndex': 1,
             },
         ]);
         return _response(request, {'id': 'poll', 'title': 'Feedback'});
@@ -74,14 +74,14 @@ void main() {
         title: 'Feedback',
         isAnonymous: true,
         allowChange: true,
-        resultsVisibility: PollResultsVisibility.afterClose,
+        resultsVisibility: .afterClose,
         questions: [
           for (final kind in PollQuestionKind.values)
             PollQuestionDraft(
               text: kind.wire,
               kind: kind,
               options: const ['One', 'Two'],
-              correctIndex: kind == PollQuestionKind.quiz ? 1 : null,
+              correctIndex: kind == .quiz ? 1 : null,
             ),
         ],
       );
@@ -141,7 +141,7 @@ void main() {
   test('close and delete retain their exact RPC contracts', () async {
     final calls = <String>[];
     final repository = _repository((request) async {
-      calls.add(request.url.pathSegments.last);
+      calls.add(request.url.pathSegments.lastOrNull!);
       expect(jsonDecode(request.body), {'p_poll_id': 'poll'});
       return _response(request, {
         'id': 'poll',

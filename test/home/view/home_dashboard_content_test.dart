@@ -6,6 +6,7 @@ import 'package:gamification_repository/gamification_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/home/view/widgets/home_greeting.dart';
 import 'package:rtu_mirea_app/home/view/widgets/home_hero.dart';
+import 'package:rtu_mirea_app/home/view/widgets/home_week_pills.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:rtu_mirea_app/teacher_account/widgets/teacher_account_shortcut.dart';
 
@@ -65,6 +66,49 @@ void main() {
     expect(tester.takeException(), isNull);
     controller.jumpTo(controller.position.maxScrollExtent);
     await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('dashboard week pager receives edge swipes at 200% text', (
+    tester,
+  ) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    DateTime? selected;
+    await tester.pumpApp(
+      Scaffold(
+        body: homeDashboardFixture(
+          controller: controller,
+          onSelectedDay: (value) => selected = value,
+        ),
+      ),
+      size: const Size(320, 900),
+      textScaler: const TextScaler.linear(2),
+    );
+    await tester.pump();
+    final weeks = find.byType(HomeWeekPills);
+    await tester.scrollUntilVisible(
+      weeks,
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    final pager = find.descendant(of: weeks, matching: find.byType(PageView));
+    final viewport = tester.getRect(pager);
+    expect(viewport.left, 0);
+    expect(viewport.right, 320);
+    final today = tester.widget<HomeWeekPills>(weeks).days;
+    await tester.flingFrom(
+      Offset(318, viewport.center.dy),
+      const Offset(-250, 0),
+      800,
+    );
+    await tester.pumpAndSettle();
+    expect(selected, isNotNull);
+    expect(selected!.isAfter(today.last), isTrue);
     expect(tester.takeException(), isNull);
   });
 

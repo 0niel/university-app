@@ -1,0 +1,1 @@
+enum AppChipStyle { tinted, filter }

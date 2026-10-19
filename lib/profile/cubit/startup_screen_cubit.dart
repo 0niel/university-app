@@ -1,17 +1,5 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
-enum StartupScreen {
-  home('/feed'),
-  schedule('/schedule'),
-  map('/services/map'),
-  services('/services'),
-  profile('/profile');
-
-  const StartupScreen(this.location);
-
-  final String location;
-}
-
 class StartupScreenCubit extends HydratedCubit<StartupScreen> {
   StartupScreenCubit({required this.userId}) : super(StartupScreen.home);
 
@@ -26,12 +14,25 @@ class StartupScreenCubit extends HydratedCubit<StartupScreen> {
   void select(StartupScreen screen) => emit(screen);
 
   @override
-  StartupScreen fromJson(Map<String, dynamic> json) =>
-      StartupScreen.values
-          .where((screen) => screen.name == json['screen'])
-          .firstOrNull ??
-      StartupScreen.home;
+  StartupScreen fromJson(Map<String, dynamic> json) {
+    final screen = json['screen'];
+    if (screen is! String) return StartupScreen.home;
+    final names = StartupScreen.values.asNameMap();
+    return names[screen] ?? StartupScreen.home;
+  }
 
   @override
   Map<String, dynamic> toJson(StartupScreen state) => {'screen': state.name};
+}
+
+enum StartupScreen {
+  home('/feed'),
+  schedule('/schedule'),
+  map('/services/map'),
+  services('/services'),
+  profile('/profile');
+
+  const StartupScreen(this.location);
+
+  final String location;
 }

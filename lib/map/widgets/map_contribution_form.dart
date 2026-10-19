@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -210,7 +212,7 @@ class _MapContributionFormState extends State<MapContributionForm> {
         baseRevision: widget.campus.revision,
         entityType: _field == 'report' ? 'report' : 'room',
         entityId: _field == 'report'
-            ? widget.room?.id ?? widget.floorId ?? widget.campus.campus.id
+            ? (widget.room?.id ?? widget.floorId ?? widget.campus.campus.id)
             : widget.room!.id,
         patch: patch,
         reason:
@@ -272,7 +274,7 @@ class _MapContributionFormState extends State<MapContributionForm> {
           loading: _busy,
           onPressed: _busy || !widget.repository.isAuthenticated
               ? null
-              : _submit,
+              : () => unawaited(_submit()),
         ),
         const SizedBox(height: AppSpacing.sm),
         AppButton.secondary(
@@ -414,7 +416,7 @@ class _MapContributionFormState extends State<MapContributionForm> {
     children: [
       AppButton.secondary(
         label: 'Меню на ${DateFormat('dd.MM.yyyy').format(_menuDate)}',
-        onPressed: _selectMenuDate,
+        onPressed: () => unawaited(_selectMenuDate()),
       ),
       const SizedBox(height: AppSpacing.md),
       const Text(

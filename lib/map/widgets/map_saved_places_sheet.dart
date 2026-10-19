@@ -171,7 +171,9 @@ class _MapSavedPlacesSheetState extends State<MapSavedPlacesSheet> {
         AppButton.secondary(
           label: _error == null ? 'Обновить список' : 'Повторить',
           expanded: true,
-          onPressed: _loading || _removing.isNotEmpty ? null : _load,
+          onPressed: _loading || _removing.isNotEmpty
+              ? null
+              : () => unawaited(_load()),
         ),
       ],
     );

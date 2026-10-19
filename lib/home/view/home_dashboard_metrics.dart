@@ -12,5 +12,5 @@ bool homeWaitsForScheduleRefresh(SelectedSchedule? selected) =>
         ScheduleTargetType.classroom,
         selected.name,
       ),
-      _ => null,
+      SelectedCustomSchedule() || null => null,
     };

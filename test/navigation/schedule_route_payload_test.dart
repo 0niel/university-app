@@ -165,7 +165,9 @@ void main() {
     when(() => app.stream).thenAnswer((_) => states.stream);
     final refresh = GoRouterRefreshStream.auth(app);
     var notifications = 0;
-    refresh.addListener(() => notifications++);
+    void onRefresh() => notifications++;
+    refresh.addListener(onRefresh);
+    addTearDown(() => refresh.removeListener(onRefresh));
     states.add(const AppState(status: AppStatus.authenticated));
     expect(notifications, 0);
     states.add(const AppState());

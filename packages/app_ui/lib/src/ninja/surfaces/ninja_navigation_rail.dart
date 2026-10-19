@@ -7,11 +7,11 @@ class NinjaNavigationRail extends StatelessWidget {
     required this.onSelected,
     this.extended = false,
     super.key,
-  })  : assert(items.length > 1, 'At least two navigation items are required.'),
-        assert(
-          currentIndex >= 0 && currentIndex < items.length,
-          'The selected navigation index must reference an item.',
-        );
+  }) : assert(items.length > 1, 'At least two navigation items are required.'),
+       assert(
+         currentIndex >= 0 && currentIndex < items.length,
+         'The selected navigation index must reference an item.',
+       );
 
   final List<NinjaBottomBarItem> items;
   final int currentIndex;
@@ -39,11 +39,9 @@ class NinjaNavigationRail extends StatelessWidget {
                 vertical: AppSpacing.md,
               ),
               child: Center(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.sheet),
-                  ),
+                child: AppGlassSurface(
+                  role: AppGlassRole.navigation,
+                  borderRadius: AppRadius.sheet,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(AppRadius.sheet),
                     child: SingleChildScrollView(
@@ -100,7 +98,7 @@ class _RailItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final tint = selected ? colors.onAccent : colors.muted;
+    final tint = selected ? colors.ink : colors.muted;
     final icon = SizedBox.square(
       dimension: AppIconSize.lg,
       child: Stack(
@@ -117,9 +115,7 @@ class _RailItem extends StatelessWidget {
               top: -AppSpacing.xxs,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: selected
-                      ? colors.onAccent
-                      : (item.badgeColor ?? colors.accent),
+                  color: item.badgeColor ?? colors.accent,
                   shape: BoxShape.circle,
                 ),
                 child: const SizedBox.square(dimension: AppSpacing.compactGap),
@@ -150,7 +146,9 @@ class _RailItem extends StatelessWidget {
             vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
-            color: selected ? colors.accent : const Color(0x00000000),
+            color: selected
+                ? colors.accent.withValues(alpha: .17)
+                : const Color(0x00000000),
             borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: showLabel

@@ -105,7 +105,10 @@ class LocalNotificationsRepository {
           .toList();
       var removed = 0;
       Future<void> removeStale() async {
-        final id = stale[removed];
+        final id = stale.elementAtOrNull(removed);
+        if (id == null) {
+          throw StateError('No stale notification can be removed');
+        }
         await _client.cancel(id);
         pendingIds.remove(id);
         removed++;

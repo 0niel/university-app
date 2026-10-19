@@ -56,7 +56,7 @@ class _NotificationsToggleRowState extends State<NotificationsToggleRow>
     final request = ++_permissionRead;
     try {
       final granted = await hasNotificationPermission(
-        context.read<LocalNotificationsRepository>(),
+        context.read(),
       );
       if (!mounted || request != _permissionRead) return;
       setState(() => _permissionGranted = granted);

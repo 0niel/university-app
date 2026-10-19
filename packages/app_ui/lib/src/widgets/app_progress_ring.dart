@@ -57,14 +57,15 @@ class AppProgressRing extends StatelessWidget {
                     if (label != null)
                       Text(
                         label,
-                        style: (labelStyle ??
-                                AppText.sans(
-                                  size * 14 / 64,
-                                  FontWeight.w800,
-                                  height: 1,
-                                  tabular: true,
-                                ))
-                            .copyWith(color: colors.ink),
+                        style:
+                            (labelStyle ??
+                                    AppText.sans(
+                                      size * 14 / 64,
+                                      FontWeight.w800,
+                                      height: 1,
+                                      tabular: true,
+                                    ))
+                                .copyWith(color: colors.ink),
                       ),
                     if (sublabel != null)
                       Text(
@@ -100,7 +101,7 @@ class _RingPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = math.max<double>(
+    final double radius = math.max(
       0,
       (size.shortestSide - strokeWidth) / 2 - size.shortestSide / 32,
     );

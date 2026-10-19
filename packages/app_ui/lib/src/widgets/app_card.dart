@@ -1,5 +1,6 @@
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/theme/app_surface_style.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
 
@@ -43,9 +44,24 @@ class AppCard extends StatelessWidget {
       height: height,
       alignment: alignment,
       padding: padding,
+      foregroundDecoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        border: AppSurfaceStyle.outline(context),
+      ),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(radius),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.alphaBlend(
+              colors.white.withValues(alpha: colors.isDark ? .025 : .24),
+              background,
+            ),
+            background,
+          ],
+        ),
       ),
       child: child,
     );

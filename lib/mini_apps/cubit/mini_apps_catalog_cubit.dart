@@ -13,9 +13,12 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
 
   final MiniAppsRepository _repository;
   var _appsRequestId = 0;
+  var _loadRequestId = 0;
 
   Future<void> load() async {
+    if (isClosed) return;
     final appsRequestId = ++_appsRequestId;
+    final loadRequestId = ++_loadRequestId;
     emit(state.copyWith(status: .loading));
     try {
       final responses = await Future.wait<Object?>([
@@ -45,7 +48,7 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
         _ => throw const FormatException('Invalid mini apps response types'),
       };
       final (apps, myApps, isModerator, recents) = result;
-      if (isClosed) return;
+      if (isClosed || loadRequestId != _loadRequestId) return;
       final hasLatestApps = appsRequestId == _appsRequestId;
       emit(
         state.copyWith(
@@ -57,23 +60,31 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
         ),
       );
     } on Exception catch (error, stackTrace) {
-      if (appsRequestId != _appsRequestId || isClosed) return;
+      if (isClosed ||
+          appsRequestId != _appsRequestId ||
+          loadRequestId != _loadRequestId) {
+        return;
+      }
       emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
     }
   }
 
   Future<void> queryChanged(String query) async {
-    emit(state.copyWith(query: query.trim()));
+    final trimmed = query.trim();
+    if (isClosed || state.query == trimmed) return;
+    emit(state.copyWith(query: trimmed));
     await _refetchApps();
   }
 
   Future<void> categoryChanged(MiniAppCategory? category) async {
+    if (isClosed || state.category == category) return;
     emit(state.copyWith(category: category));
     await _refetchApps();
   }
 
   Future<void> searchToggled() async {
+    if (isClosed) return;
     final isSearching = !state.isSearching;
     final hadQuery = state.query.isNotEmpty;
     emit(
@@ -86,22 +97,33 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
   }
 
   Future<void> sortChanged(MiniAppSort sort) async {
+    if (isClosed || state.sort == sort) return;
     emit(state.copyWith(sort: sort));
     await _refetchApps();
   }
 
+  Future<void> resetFilters() async {
+    if (isClosed || (state.query.isEmpty && state.category == null)) return;
+    emit(state.copyWith(query: '', category: null));
+    await _refetchApps();
+  }
+
   Future<void> toggleFeatured(MiniApp app) async {
+    if (isClosed) return;
     try {
       await _repository.setFeatured(appId: app.id, featured: !app.isFeatured);
       await _refetchApps();
     } on Exception catch (error, stackTrace) {
+      if (isClosed) return;
       addError(error, stackTrace);
     }
   }
 
   Future<void> setHidden(MiniApp app, {required bool hidden}) async {
+    if (isClosed) return;
     try {
       await _repository.setHidden(appId: app.id, hidden: hidden);
+      if (isClosed) return;
       final apps = state.showHidden
           ? [
               for (final a in state.apps)
@@ -110,6 +132,7 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
           : state.apps.where((a) => a.id != app.id || !hidden).toList();
       emit(state.copyWith(apps: apps));
     } on Exception catch (error, stackTrace) {
+      if (isClosed) return;
       addError(error, stackTrace);
     }
   }
@@ -119,12 +142,14 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
     MiniAppReportReason reason,
     String details,
   ) async {
+    if (isClosed) return false;
     try {
       await _repository.reportApp(
         appId: app.id,
         reason: reason,
         details: details,
       );
+      if (isClosed) return false;
       emit(
         state.copyWith(
           apps: [
@@ -135,14 +160,17 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
       );
       return true;
     } on Exception catch (error, stackTrace) {
+      if (isClosed) return false;
       addError(error, stackTrace);
       return false;
     }
   }
 
   Future<void> rate(MiniApp app, int rating) async {
+    if (isClosed) return;
     try {
       await _repository.rateApp(appId: app.id, rating: rating);
+      if (isClosed) return;
       emit(
         state.copyWith(
           apps: [
@@ -152,13 +180,16 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
         ),
       );
     } on Exception catch (error, stackTrace) {
+      if (isClosed) return;
       addError(error, stackTrace);
     }
   }
 
   Future<void> setConsents(MiniApp app, List<MiniAppPermission> scopes) async {
+    if (isClosed) return;
     try {
       await _repository.setConsents(appId: app.id, scopes: scopes);
+      if (isClosed) return;
       emit(
         state.copyWith(
           apps: [
@@ -168,13 +199,16 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
         ),
       );
     } on Exception catch (error, stackTrace) {
+      if (isClosed) return;
       addError(error, stackTrace);
     }
   }
 
   Future<void> deleteMyApp(MiniApp app) async {
+    if (isClosed) return;
     try {
       await _repository.deleteApp(app.id);
+      if (isClosed) return;
       emit(
         state.copyWith(
           myApps: state.myApps.where((a) => a.id != app.id).toList(),
@@ -182,16 +216,19 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
         ),
       );
     } on Exception catch (error, stackTrace) {
+      if (isClosed) return;
       addError(error, stackTrace);
     }
   }
 
   Future<void> _refetchApps() async {
+    if (isClosed) return;
     final requestId = ++_appsRequestId;
     final query = state.query.isEmpty ? null : state.query;
     final category = state.category;
     final sort = state.sort;
     final includeHidden = state.showHidden;
+    emit(state.copyWith(status: .loading));
     try {
       final apps = await _repository.getApps(
         query: query,
@@ -206,5 +243,12 @@ class MiniAppsCatalogCubit extends Cubit<MiniAppsCatalogState> {
       emit(state.copyWith(status: .failure));
       addError(error, stackTrace);
     }
+  }
+
+  @override
+  Future<void> close() {
+    _appsRequestId++;
+    _loadRequestId++;
+    return super.close();
   }
 }

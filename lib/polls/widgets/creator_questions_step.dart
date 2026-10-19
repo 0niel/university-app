@@ -1,7 +1,7 @@
 part of 'poll_creator_sheet.dart';
 
-class _QuestionsStep extends StatelessWidget {
-  const _QuestionsStep({
+class _CreatorQuestionsStep extends StatelessWidget {
+  const _CreatorQuestionsStep({
     required this.questions,
     required this.showError,
     required this.onAdd,

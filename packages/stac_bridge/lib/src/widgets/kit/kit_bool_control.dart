@@ -1,0 +1,1 @@
+enum KitBoolControl { toggle, checkbox }

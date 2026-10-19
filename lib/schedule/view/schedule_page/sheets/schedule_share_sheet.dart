@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'dart:convert';
 
 import 'package:app_ui/app_ui.dart';
@@ -29,7 +31,7 @@ Future<void> showScheduleShareSheet(
     context,
     scrollable: false,
     contentPadding: EdgeInsets.zero,
-    child: _ScheduleShare(
+    child: _ScheduleShareSheet(
       day: day ?? DateTime.now(),
       single: lesson != null,
       name:
@@ -37,13 +39,13 @@ Future<void> showScheduleShareSheet(
           selected?.name ??
           context.l10n.scheduleLessonsTitle,
       lessons: lesson == null
-          ? selected?.schedule.whereType<LessonSchedulePart>().toList() ?? []
+          ? (selected?.schedule.whereType<LessonSchedulePart>().toList() ?? [])
           : [lesson],
-      config: context.read<UniversityConfig>(),
-      exporter: context.read<ScheduleExporterCubit>(),
-      schedule: lesson == null ? selected?.schedule ?? [] : [],
+      config: context.read(),
+      exporter: context.read(),
+      schedule: lesson == null ? (selected?.schedule ?? []) : [],
       activities: lesson == null
-          ? context.read<UserActivitiesCubit?>()?.state.activities ?? []
+          ? (context.read<UserActivitiesCubit?>()?.state.activities ?? [])
           : [],
       preferences:
           context.read<SchedulePreferencesCubit?>()?.state ??
@@ -64,8 +66,8 @@ Future<void> showScheduleShareSheet(
 Future<void> showScheduleExportSheet(BuildContext context) =>
     showScheduleShareSheet(context);
 
-class _ScheduleShare extends StatefulWidget {
-  const _ScheduleShare({
+class _ScheduleShareSheet extends StatefulWidget {
+  const _ScheduleShareSheet({
     required this.day,
     required this.single,
     required this.name,
@@ -90,10 +92,10 @@ class _ScheduleShare extends StatefulWidget {
   final ScheduleDisplayState display;
   final List<ScheduleChange> changes;
   @override
-  State<_ScheduleShare> createState() => _ScheduleShareState();
+  State<_ScheduleShareSheet> createState() => _ScheduleShareSheetState();
 }
 
-class _ScheduleShareState extends State<_ScheduleShare> {
+class _ScheduleShareSheetState extends State<_ScheduleShareSheet> {
   int _period = 1;
   bool _busy = false;
   bool _reminders = true;
@@ -380,7 +382,7 @@ class _ScheduleShareState extends State<_ScheduleShare> {
                               ),
                               onTap: _busy
                                   ? null
-                                  : () async {
+                                  : () => unawaited(() async {
                                       final date = await showAppDatePicker(
                                         context,
                                         initial: _day,
@@ -388,7 +390,7 @@ class _ScheduleShareState extends State<_ScheduleShare> {
                                       if (date != null && mounted) {
                                         setState(() => _day = date);
                                       }
-                                    },
+                                    }()),
                             ),
                             const SizedBox(height: AppSpacing.sectionGap),
                           ],
@@ -532,10 +534,16 @@ class _ScheduleShareState extends State<_ScheduleShare> {
                             (!_supportsCalendar || _hasIncompleteTime))
                     ? null
                     : switch (_format) {
-                        _ScheduleExportFormat.image => _image,
-                        _ScheduleExportFormat.calendar => _calendar,
-                        _ScheduleExportFormat.ics => _ics,
-                        _ScheduleExportFormat.text => _textShare,
+                        _ScheduleExportFormat.image => () => unawaited(
+                          _image(),
+                        ),
+                        _ScheduleExportFormat.calendar => () => unawaited(
+                          _calendar(),
+                        ),
+                        _ScheduleExportFormat.ics => () => unawaited(_ics()),
+                        _ScheduleExportFormat.text => () => unawaited(
+                          _textShare(),
+                        ),
                       },
               ),
             ],
@@ -633,11 +641,11 @@ class _ScheduleImagePreviewState extends State<_ScheduleImagePreview> {
           controller: _controller,
           itemCount: widget.pages.length,
           onPageChanged: (value) => setState(() => _page = value),
-          itemBuilder: (_, index) => Image.memory(
+          itemBuilder: (pageContext, index) => Image.memory(
             widget.pages[index],
             fit: BoxFit.contain,
             semanticLabel:
-                '${context.l10n.exportPng} ${index + 1}/${widget.pages.length}',
+                '${pageContext.l10n.exportPng} ${index + 1}/${widget.pages.length}',
           ),
         ),
       ),
@@ -682,7 +690,7 @@ class _ScheduleImagePreviewState extends State<_ScheduleImagePreview> {
         label: context.l10n.share,
         expanded: true,
         loading: _busy,
-        onPressed: _busy ? null : _share,
+        onPressed: _busy ? null : () => unawaited(_share()),
       ),
     ],
   );

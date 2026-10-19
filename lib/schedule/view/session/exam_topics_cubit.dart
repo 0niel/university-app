@@ -1,42 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
-class ExamTopic extends Equatable {
-  const ExamTopic({required this.title, this.done = false});
-
-  final String title;
-  final bool done;
-
-  @override
-  List<Object> get props => [title, done];
-}
-
-class ExamTopicsState extends Equatable {
-  const ExamTopicsState({this.topics = const {}, this.revisions = const {}});
-
-  final Map<String, List<ExamTopic>> topics;
-  final Map<String, int> revisions;
-
-  List<ExamTopic> forExam(String key) => topics[key] ?? const [];
-
-  double? readiness(String key) {
-    final list = forExam(key);
-    return list.isEmpty
-        ? null
-        : list.where((topic) => topic.done).length / list.length;
-  }
-
-  List<ExamTopic> plan(String key) {
-    final remaining = forExam(key).where((topic) => !topic.done).toList();
-    if (remaining.isEmpty) return remaining;
-    final offset = (revisions[key] ?? 0) % remaining.length;
-    return [...remaining.skip(offset), ...remaining.take(offset)];
-  }
-
-  @override
-  List<Object> get props => [topics, revisions];
-}
-
 class ExamTopicsCubit extends HydratedCubit<ExamTopicsState> {
   ExamTopicsCubit() : super(const ExamTopicsState());
 
@@ -85,7 +49,7 @@ class ExamTopicsCubit extends HydratedCubit<ExamTopicsState> {
   );
 
   @override
-  ExamTopicsState? fromJson(Map<String, dynamic> json) {
+  ExamTopicsState fromJson(Map<String, dynamic> json) {
     final raw = json['topics'];
     final revisions = json['revisions'];
     return ExamTopicsState(
@@ -128,4 +92,40 @@ class ExamTopicsCubit extends HydratedCubit<ExamTopicsState> {
     },
     'revisions': state.revisions,
   };
+}
+
+class ExamTopic extends Equatable {
+  const ExamTopic({required this.title, this.done = false});
+
+  final String title;
+  final bool done;
+
+  @override
+  List<Object> get props => [title, done];
+}
+
+class ExamTopicsState extends Equatable {
+  const ExamTopicsState({this.topics = const {}, this.revisions = const {}});
+
+  final Map<String, List<ExamTopic>> topics;
+  final Map<String, int> revisions;
+
+  List<ExamTopic> forExam(String key) => topics[key] ?? const [];
+
+  double? readiness(String key) {
+    final list = forExam(key);
+    return list.isEmpty
+        ? null
+        : list.where((topic) => topic.done).length / list.length;
+  }
+
+  List<ExamTopic> plan(String key) {
+    final remaining = forExam(key).where((topic) => !topic.done).toList();
+    if (remaining.isEmpty) return remaining;
+    final offset = (revisions[key] ?? 0) % remaining.length;
+    return [...remaining.skip(offset), ...remaining.take(offset)];
+  }
+
+  @override
+  List<Object> get props => [topics, revisions];
 }

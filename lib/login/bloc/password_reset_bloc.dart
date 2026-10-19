@@ -20,7 +20,7 @@ class PasswordResetBloc extends Bloc<PasswordResetEvent, PasswordResetState> {
     List<String> allowedEmailDomains = const [],
     DateTime Function()? now,
   }) : _allowedEmailDomains = allowedEmailDomains,
-       _now = now ?? DateTime.now,
+       _onNow = now ?? DateTime.now,
        super(
          PasswordResetState(
            email: initialEmail.trim().isEmpty
@@ -54,7 +54,7 @@ class PasswordResetBloc extends Bloc<PasswordResetEvent, PasswordResetState> {
     on<_PasswordResetCooldownTicked>((event, emit) {
       final deadline = _resendAvailableAt;
       if (deadline == null) return;
-      final seconds = (deadline.difference(_now()).inMilliseconds / 1000)
+      final seconds = (deadline.difference(_onNow()).inMilliseconds / 1000)
           .ceil()
           .clamp(0, resendCooldown.inSeconds);
       emit(state.copyWith(resendSeconds: seconds));
@@ -66,7 +66,7 @@ class PasswordResetBloc extends Bloc<PasswordResetEvent, PasswordResetState> {
 
   final UserRepository userRepository;
   final List<String> _allowedEmailDomains;
-  final DateTime Function() _now;
+  final DateTime Function() _onNow;
   DateTime? _resendAvailableAt;
   Timer? _cooldownTimer;
 
@@ -255,7 +255,7 @@ class PasswordResetBloc extends Bloc<PasswordResetEvent, PasswordResetState> {
 
   void _startCooldown() {
     _cooldownTimer?.cancel();
-    _resendAvailableAt = _now().add(resendCooldown);
+    _resendAvailableAt = _onNow().add(resendCooldown);
     _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!isClosed) add(const _PasswordResetCooldownTicked());
     });

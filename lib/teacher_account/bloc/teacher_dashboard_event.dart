@@ -6,11 +6,6 @@ import 'package:schedule_repository/schedule_repository.dart';
 
 part 'teacher_dashboard_event.freezed.dart';
 
-enum TeacherDashboardRefreshScope { all, schedule, rating }
-
-sealed class TeacherDashboardNavigationCommand
-    implements TeacherDashboardEvent {}
-
 @freezed
 sealed class TeacherDashboardEvent with _$TeacherDashboardEvent {
   const factory TeacherDashboardEvent.accountChanged(
@@ -45,3 +40,8 @@ sealed class TeacherDashboardEvent with _$TeacherDashboardEvent {
   const factory TeacherDashboardEvent.navigationHandled() =
       TeacherDashboardNavigationHandled;
 }
+
+enum TeacherDashboardRefreshScope { all, schedule, rating }
+
+sealed class TeacherDashboardNavigationCommand
+    implements TeacherDashboardEvent {}

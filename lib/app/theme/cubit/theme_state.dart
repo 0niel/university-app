@@ -8,7 +8,7 @@ part 'theme_state.g.dart';
 abstract class ThemeState with _$ThemeState {
   const factory ThemeState({
     @Default(AppColorScheme.blue) AppColorScheme colorScheme,
-    @Default(false) bool isAmoled,
+    @Default(true) bool glassEnabled,
   }) = _ThemeState;
 
   factory ThemeState.fromJson(Map<String, dynamic> json) =>

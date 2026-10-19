@@ -32,9 +32,11 @@ class ImagesHorizontalSlider extends StatelessWidget {
         itemCount: images.length - 1,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
         itemBuilder: (context, index) {
+          final image = images.elementAtOrNull(index + 1);
+          if (image == null) return const SizedBox.shrink();
           return GalleryImageItem(
-            key: ValueKey('${index + 1}:${images[index + 1]}'),
-            imageUrl: images[index + 1],
+            key: ValueKey('${index + 1}:$image'),
+            imageUrl: image,
             galleryImageUrls: images,
             galleryIndex: index + 1,
             semanticLabel: semanticLabel,
@@ -86,14 +88,16 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
       } else {
         final images = widget.galleryImageUrls;
         final hasGallery = images != null && images.isNotEmpty;
-        final index =
-            hasGallery ? widget.galleryIndex.clamp(0, images.length - 1) : 0;
+        final index = hasGallery
+            ? widget.galleryIndex.clamp(0, images.length - 1)
+            : 0;
         await Navigator.of(context).push(
           ImagesViewGallery.route(
             imageUrls: hasGallery ? images : [widget.imageUrl],
             initialIndex: index,
             heroTags: {index: _heroTag},
-            reducedMotion: MediaQuery.disableAnimationsOf(context) ||
+            reducedMotion:
+                MediaQuery.disableAnimationsOf(context) ||
                 MediaQuery.accessibleNavigationOf(context),
           ),
         );
@@ -108,7 +112,8 @@ class _GalleryImageItemState extends State<GalleryImageItem> {
       if (context.mounted) {
         ToastManager.showError(
           context,
-          message: widget.errorMessage ??
+          message:
+              widget.errorMessage ??
               MaterialLocalizations.of(context).alertDialogLabel,
         );
       }

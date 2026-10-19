@@ -222,7 +222,7 @@ void main() {
       ),
     );
     await tester.pump();
-    previous.completeError(Exception('offline'));
+    previous.completeError(Exception('offline'), StackTrace.current);
     await tester.pump();
     expect(bloc.state.teachers, const [_other]);
     expect(bloc.state.results.hasError, isFalse);

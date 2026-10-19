@@ -31,8 +31,12 @@ ServiceEntry catalogServiceEntry(
 
 Color catalogServiceTone(BuildContext context, ServiceCatalogEntry entry) {
   final colors = context.colors;
-  final tones = [colors.lecture, colors.practice, colors.lab, colors.exam];
-  return tones[entry.id.hashCode.abs() % tones.length];
+  return switch (entry.id.hashCode.abs() % 4) {
+    0 => colors.lecture,
+    1 => colors.practice,
+    2 => colors.lab,
+    _ => colors.exam,
+  };
 }
 
 AppLineIcon _iconFor(String iconKey) => switch (iconKey) {

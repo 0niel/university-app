@@ -54,7 +54,7 @@ class LeaderboardSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppSegmentedControl<LeaderboardScope>(
-              onCanvas: true,
+              isOnCanvas: true,
               value: state.leaderboardScope,
               onChanged: (scope) => unawaited(
                 context.read<NinjaPathCubit>().loadLeaderboard(scope),
@@ -120,8 +120,10 @@ class _LeaderboardList extends StatelessWidget {
     final me = entries.indexWhere((entry) => entry.isCurrentUser);
     if (me < 0) return null;
     if (me < 3) return l10n.leaderboardHintTop;
-    final target = entries[2];
-    final gap = target.xp - entries[me].xp;
+    final target = entries.elementAtOrNull(2);
+    final current = entries.elementAtOrNull(me);
+    if (target == null || current == null) return null;
+    final gap = target.xp - current.xp;
     return l10n.leaderboardHintGap(3, profileNumber(gap < 0 ? 0 : gap));
   }
 

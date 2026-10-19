@@ -49,10 +49,10 @@ class MaterialThumbnail extends StatelessWidget {
             : CachedNetworkImage(
                 imageUrl: url,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => DecoratedBox(
+                placeholder: (context, _) => DecoratedBox(
                   decoration: BoxDecoration(color: colors.surface2),
                 ),
-                errorWidget: (context, url, error) => DecoratedBox(
+                errorWidget: (context, _, _) => DecoratedBox(
                   decoration: BoxDecoration(color: colors.tintOf(color)),
                   child: Center(
                     child: AppLineIconWidget(

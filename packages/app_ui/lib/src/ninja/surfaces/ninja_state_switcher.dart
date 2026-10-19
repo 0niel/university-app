@@ -21,24 +21,19 @@ class NinjaStateSwitcher extends StatelessWidget {
       duration: NinjaMotion.of(context, duration),
       switchInCurve: NinjaMotion.enter,
       switchOutCurve: NinjaMotion.exit,
-      transitionBuilder: (transitionChild, animation) => FadeTransition(
-        opacity: animation,
-        child: slideOffset == 0
-            ? transitionChild
-            : SlideTransition(
-                position: Tween(
-                  begin: Offset(0, slideOffset),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: transitionChild,
-              ),
-      ),
-      layoutBuilder: (currentChild, previousChildren) => Stack(
+      transitionBuilder: (transitionChild, animation) => slideOffset == 0
+          ? transitionChild
+          : SlideTransition(
+              position: Tween(
+                begin: Offset(0, slideOffset),
+                end: Offset.zero,
+              ).animate(animation),
+              child: transitionChild,
+            ),
+      layoutBuilder: (currentChild, _) => Stack(
         alignment: alignment,
         children: [
-          for (final previous in previousChildren)
-            ExcludeSemantics(child: IgnorePointer(child: previous)),
-          if (currentChild != null) currentChild,
+          ?currentChild,
         ],
       ),
       child: child,

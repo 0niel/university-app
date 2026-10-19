@@ -26,7 +26,10 @@ class ScheduleChangeCard extends StatelessWidget {
               tone: switch (presentation.effectiveKind) {
                 ScheduleChangeKind.cancel => AppBadgeTone.exam,
                 ScheduleChangeKind.add => AppBadgeTone.lecture,
-                _ => AppBadgeTone.neutral,
+                ScheduleChangeKind.room ||
+                ScheduleChangeKind.move ||
+                ScheduleChangeKind.teacher ||
+                ScheduleChangeKind.update => AppBadgeTone.neutral,
               },
             ),
           ),

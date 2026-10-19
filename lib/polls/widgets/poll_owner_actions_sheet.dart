@@ -48,13 +48,12 @@ class _PollOwnerActionsSheetState extends State<PollOwnerActionsSheet> {
     );
     if (!confirmed || !mounted) return;
     setState(() => _closing = true);
-    final navigator = Navigator.of(context);
     final ok = await widget.cubit.closePoll(widget.poll);
     if (!mounted) return;
     setState(() => _closing = false);
     if (ok) {
       ToastManager.showSuccess(context, message: l10n.pollsCloseSuccess);
-      navigator.pop();
+      Navigator.of(context).pop();
     } else {
       ToastManager.showError(context, message: l10n.pollsCloseError);
     }
@@ -73,13 +72,12 @@ class _PollOwnerActionsSheetState extends State<PollOwnerActionsSheet> {
     );
     if (!confirmed || !mounted) return;
     setState(() => _deleting = true);
-    final navigator = Navigator.of(context);
     final ok = await widget.cubit.deletePoll(widget.poll);
     if (!mounted) return;
     setState(() => _deleting = false);
     if (ok) {
       ToastManager.showSuccess(context, message: l10n.pollsDeleteSuccess);
-      navigator.pop();
+      Navigator.of(context).pop();
     } else {
       ToastManager.showError(context, message: l10n.error);
     }

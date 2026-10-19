@@ -2,6 +2,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/config/config.dart';
+import 'package:rtu_mirea_app/login/widgets/auth_content_reveal.dart';
 import 'package:rtu_mirea_app/login/widgets/auth_progress.dart';
 
 class AuthPageLayout extends StatelessWidget {
@@ -24,6 +25,7 @@ class AuthPageLayout extends StatelessWidget {
     this.large = false,
     this.presentation = AppEntryPresentation.scroll,
     this.contentIdentity,
+    this.surfaceBody = true,
   });
 
   final String title;
@@ -43,6 +45,7 @@ class AuthPageLayout extends StatelessWidget {
   final bool large;
   final AppEntryPresentation presentation;
   final Object? contentIdentity;
+  final bool surfaceBody;
 
   static const double horizontalPadding = AppEntryLayout.horizontalPadding;
   static const double topPadding = AppEntryLayout.topPadding;
@@ -50,61 +53,83 @@ class AuthPageLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppEntryLayout(
-      title: title,
-      titleAccent: titleAccent,
-      subtitle: subtitle,
-      eyebrow: eyebrow,
-      hero: large,
-      presentation: presentation,
-      contentIdentity: contentIdentity,
-      visual:
-          visual ??
-          (leading == null
-              ? null
-              : Padding(
-                  padding: const EdgeInsets.only(top: 12),
+    return AppAmbientBackground(
+      accentColor: context.colors.accent,
+      child: AppEntryLayout(
+        title: title,
+        titleAccent: titleAccent,
+        subtitle: subtitle,
+        eyebrow: eyebrow,
+        hero: large,
+        presentation: presentation,
+        contentIdentity: contentIdentity,
+        visual: visual == null
+            ? (leading == null
+                  ? null
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: leading,
+                      ),
+                    ))
+            : AuthContentReveal(identity: contentIdentity, child: visual!),
+        header: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                if (showBack)
+                  AppBackButton(onPressed: onBack)
+                else
+                  Flexible(
+                    child: AppEntryBrand(
+                      label:
+                          context.read<UniversityConfig?>()?.appName ??
+                          UniversityConfig.current.appName,
+                    ),
+                  ),
+                const SizedBox(width: 16),
+                Expanded(
                   child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: leading,
-                  ),
-                )),
-      header: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              if (showBack)
-                AppBackButton(onPressed: onBack)
-              else
-                Flexible(
-                  child: AppEntryBrand(
-                    label:
-                        context.read<UniversityConfig?>()?.appName ??
-                        UniversityConfig.current.appName,
+                    alignment: AlignmentDirectional.centerEnd,
+                    child:
+                        headerTrailing ??
+                        (step != null && totalSteps != null
+                            ? AuthProgress(step: step!, total: totalSteps!)
+                            : const SizedBox.shrink()),
                   ),
                 ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child:
-                      headerTrailing ??
-                      (step != null && totalSteps != null
-                          ? AuthProgress(step: step!, total: totalSteps!)
-                          : const SizedBox.shrink()),
-                ),
+              ],
+            ),
+            if (headerContent != null) ...[
+              const SizedBox(height: 16),
+              AppGlassSurface(
+                borderRadius: AppRadius.card,
+                tone: AppGlassTone.subtle,
+                padding: const EdgeInsets.all(AppSpacing.xs),
+                child: headerContent!,
               ),
             ],
-          ),
-          if (headerContent != null) ...[
-            const SizedBox(height: 16),
-            headerContent!,
           ],
-        ],
+        ),
+        actions: actions == null
+            ? null
+            : AppGlassSurface(
+                tone: AppGlassTone.subtle,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: actions!,
+              ),
+        child: surfaceBody
+            ? AuthContentReveal(
+                identity: contentIdentity,
+                child: AppGlassSurface(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: child,
+                ),
+              )
+            : child,
       ),
-      actions: actions,
-      child: child,
     );
   }
 }

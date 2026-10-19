@@ -3,8 +3,6 @@ import 'dart:math' as math;
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 
-enum TourCoachArrow { none, up, down }
-
 class TourCoachCard extends StatelessWidget {
   const TourCoachCard({
     required this.title,
@@ -159,6 +157,8 @@ class TourCoachCard extends StatelessWidget {
     );
   }
 }
+
+enum TourCoachArrow { none, up, down }
 
 class _TextAction extends StatelessWidget {
   const _TextAction({

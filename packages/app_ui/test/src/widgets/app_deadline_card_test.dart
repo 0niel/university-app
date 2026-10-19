@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: ThemeData(extensions: const [AppColors.light]),
-        home: Scaffold(body: Center(child: SizedBox(width: 360, child: child))),
-      );
+    theme: ThemeData(extensions: const [AppColors.light]),
+    home: Scaffold(
+      body: Center(child: SizedBox(width: 360, child: child)),
+    ),
+  );
 
   group('AppDeadlineCard', () {
     testWidgets('renders task, subject·due and the left label', (tester) async {

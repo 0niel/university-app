@@ -9,11 +9,11 @@ class GradesCubit extends Cubit<GradesState> {
   GradesCubit({
     required this._repository,
     DateTime Function()? now,
-  }) : _now = now ?? DateTime.now,
+  }) : _onNow = now ?? DateTime.now,
        super(const GradesState());
 
   final GradesRepository _repository;
-  final DateTime Function() _now;
+  final DateTime Function() _onNow;
 
   var _loadRevision = 0;
   Future<void> _saveOperation = Future.value();
@@ -22,20 +22,22 @@ class GradesCubit extends Cubit<GradesState> {
     final revision = ++_loadRevision;
     await _saveOperation;
     if (isClosed || revision != _loadRevision) return;
-    final now = _now();
+    final now = _onNow();
     final terms = GradesTerm.recent(now);
     emit(
       state.copyWith(
         status: .loading,
         terms: terms,
-        termId: state.termId.isEmpty ? terms.first.id : state.termId,
+        termId: state.termId.isEmpty
+            ? (terms.firstOrNull?.id ?? '')
+            : state.termId,
         now: now,
       ),
     );
     try {
       final book = await _repository.load();
       if (isClosed || revision != _loadRevision) return;
-      emit(state.copyWith(status: .ready, book: book, now: _now()));
+      emit(state.copyWith(status: .ready, book: book, now: _onNow()));
     } on Object catch (error, stackTrace) {
       if (isClosed || revision != _loadRevision) return;
       emit(state.copyWith(status: .failure));
@@ -49,7 +51,7 @@ class GradesCubit extends Cubit<GradesState> {
   }
 
   void scheduleSubjectsChanged(List<SubjectGrades> subjects) {
-    if (subjects == state.scheduleSubjects) return;
+    if (identical(subjects, state.scheduleSubjects)) return;
     emit(state.copyWith(scheduleSubjects: subjects));
   }
 
@@ -64,16 +66,17 @@ class GradesCubit extends Cubit<GradesState> {
         value > 5) {
       return Future.value(false);
     }
-    final now = _now();
+    final now = _onNow();
     final termId = state.termId;
     final subjectName = subject.trim();
     return _persist(termId, (existing) {
       final index = existing.indexWhere(
         (entry) => entry.subject == subjectName,
       );
-      final target = index >= 0
-          ? existing[index]
-          : SubjectGrades(subject: subjectName, teacher: teacher.trim());
+      final storedSubject = index < 0 ? null : existing.elementAtOrNull(index);
+      final target =
+          storedSubject ??
+          SubjectGrades(subject: subjectName, teacher: teacher.trim());
       final updated = target.copyWith(
         marks: [
           ...target.marks,
@@ -82,8 +85,8 @@ class GradesCubit extends Cubit<GradesState> {
       );
       return [
         if (index >= 0)
-          for (var i = 0; i < existing.length; i++)
-            i == index ? updated : existing[i]
+          for (final (i, entry) in existing.indexed)
+            i == index ? updated : entry
         else ...[...existing, updated],
       ];
     });
@@ -92,14 +95,14 @@ class GradesCubit extends Cubit<GradesState> {
   Future<bool> removeLastMark(String subject) {
     return _persist(state.termId, (existing) {
       final index = existing.indexWhere((entry) => entry.subject == subject);
-      if (index < 0 || existing[index].marks.isEmpty) return existing;
-      final target = existing[index];
+      if (index < 0) return existing;
+      final target = existing.elementAtOrNull(index);
+      if (target == null || target.marks.isEmpty) return existing;
       final updated = target.copyWith(
         marks: target.marks.sublist(0, target.marks.length - 1),
       );
       return [
-        for (var i = 0; i < existing.length; i++)
-          i == index ? updated : existing[i],
+        for (final (i, entry) in existing.indexed) i == index ? updated : entry,
       ];
     });
   }
@@ -110,11 +113,11 @@ class GradesCubit extends Cubit<GradesState> {
   ) {
     final save = _saveOperation.then((_) async {
       if (isClosed || state.status != GradesStatus.ready) return false;
-      final now = _now();
+      final now = _onNow();
       final book = state.book.withTerm(
         termId,
         update(state.book.of(termId)),
-        savedAt: now,
+        updatedAt: now,
       );
       try {
         await _repository.save(book);
@@ -125,7 +128,7 @@ class GradesCubit extends Cubit<GradesState> {
         return false;
       }
     });
-    _saveOperation = save.then((_) {});
+    _saveOperation = save.then<void>((_) => null);
     return save;
   }
 }

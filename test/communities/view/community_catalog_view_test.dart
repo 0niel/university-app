@@ -206,7 +206,6 @@ void main() {
       communityMembers(
         tester.element(find.byType(AllCommunitiesView)).l10n,
         entry,
-        joined: true,
       ),
       '25 участников',
     );

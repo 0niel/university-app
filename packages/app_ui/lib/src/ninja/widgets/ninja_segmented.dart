@@ -8,14 +8,14 @@ class NinjaSegmented<T> extends StatelessWidget {
     super.key,
     this.onChanged,
     this.expanded = true,
-    this.onCanvas = false,
+    this.isOnCanvas = false,
   });
 
   final List<NinjaSegment<T>> segments;
   final T value;
   final ValueChanged<T>? onChanged;
   final bool expanded;
-  final bool onCanvas;
+  final bool isOnCanvas;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class NinjaSegmented<T> extends StatelessWidget {
       value: value,
       onChanged: onChanged,
       expanded: expanded,
-      onCanvas: onCanvas,
+      isOnCanvas: isOnCanvas,
       options: [
         for (final segment in segments)
           AppSegmentedOption(value: segment.value, label: segment.label),

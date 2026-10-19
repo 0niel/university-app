@@ -81,9 +81,7 @@ class _LocalNotificationListenerState extends State<LocalNotificationListener>
       }
       final route = DeepLinks.normalizeLocation(data['route'] as String?);
       if (route != null) widget.router.go(route);
-    } on Object catch (_) {
-      return;
-    }
+    } on Object catch (_) {}
   }
 
   @override

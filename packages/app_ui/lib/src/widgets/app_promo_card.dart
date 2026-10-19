@@ -41,7 +41,10 @@ class AppPromoCard extends StatelessWidget {
     final muted = solid ? colors.white.withValues(alpha: .78) : colors.muted;
     final tile = solid
         ? colors.white.withValues(alpha: .18)
-        : colors.tintOf(accent, colors.tint2Mix);
+        : Color.alphaBlend(
+            accent.withValues(alpha: colors.tint2Mix),
+            colors.surface,
+          );
     final pillBackground = solid ? colors.white : accent;
     final pillForeground = solid ? accent : colors.white;
     final kicker = this.kicker;

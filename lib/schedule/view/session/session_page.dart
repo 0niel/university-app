@@ -86,9 +86,10 @@ class _SessionViewState extends State<_SessionView> {
               title: l10n.examsTitle,
               onBack: () => Navigator.of(context).maybePop(),
               backSemanticsLabel: l10n.back,
-              trailingLabel: exams.isEmpty
-                  ? null
-                  : l10n.examsSessionIn(exams.first.days),
+              trailingLabel: switch (exams.firstOrNull) {
+                final firstExam? => l10n.examsSessionIn(firstExam.days),
+                null => null,
+              },
             ),
           ),
           SliverPadding(
@@ -133,14 +134,14 @@ class _SessionViewState extends State<_SessionView> {
                       ],
                     ),
                   )
-                else if (selected == null) ...[
-                  if (schedule.status != ScheduleStatus.failure)
-                    AppEmptyState(
-                      title: l10n.sessionNoExamsTitle,
-                      subtitle: l10n.sessionNoExams,
-                      lineIcon: AppLineIcon.check,
-                    ),
-                ] else ...[
+                else if (selected == null &&
+                    schedule.status != ScheduleStatus.failure)
+                  AppEmptyState(
+                    title: l10n.sessionNoExamsTitle,
+                    subtitle: l10n.sessionNoExams,
+                    lineIcon: AppLineIcon.check,
+                  )
+                else if (selected != null) ...[
                   CountdownHero(
                     exam: selected,
                     readiness: ready(selected),

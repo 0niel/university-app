@@ -9,12 +9,14 @@ class AboutSection extends StatelessWidget {
   const AboutSection({
     required this.appName,
     required this.onTap,
+    required this.onOpenRepository,
     this.version,
     super.key,
   });
 
   final String appName;
   final VoidCallback onTap;
+  final VoidCallback onOpenRepository;
   final String? version;
 
   @override
@@ -32,17 +34,23 @@ class AboutSection extends StatelessWidget {
         ),
         Padding(
           padding: const .fromLTRB(8, 4, 8, 10),
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: l10n.settingsAboutDescription),
-                TextSpan(
-                  text: kGithubRepoLabel,
-                  style: TextStyle(color: colors.accent),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.settingsAboutDescription,
+                style: AppText.caption.copyWith(
+                  height: 1.5,
+                  color: colors.muted,
                 ),
-              ],
-            ),
-            style: AppText.caption.copyWith(height: 1.5, color: colors.muted),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              AppButton.text(
+                key: const ValueKey('about-repository-link'),
+                label: kGithubRepoLabel,
+                onPressed: onOpenRepository,
+              ),
+            ],
           ),
         ),
       ],

@@ -138,7 +138,12 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: _customTopic,
+    builder: (context, _) => _buildContent(context),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final config = UniversityConfig.current;
     final stateSaving = context.select<MentorshipCubit, bool>(
       (cubit) => cubit.state.isSavingProfile,
@@ -199,7 +204,6 @@ class _MentorProfileSheetState extends State<MentorProfileSheet> {
         enabled: !saving,
         maxLength: 60,
         textInputAction: TextInputAction.done,
-        onChanged: (_) => setState(() {}),
         onSubmitted: (_) => _addTopic(),
         trailing: AppIconButton(
           icon: const AppLineIconWidget(AppLineIcon.plus),

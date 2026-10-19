@@ -4,7 +4,9 @@ DateTime? dateTimeFromJson(Object? value) =>
 String? dateTimeToJson(DateTime? value) => value?.toUtc().toIso8601String();
 
 DateTime dateOnlyFromJson(Object? value) =>
-    value is String ? DateTime.parse(value) : DateTime(1970);
+    value is String ? DateTime.parse(value) : .new(1970);
 
-String dateOnlyToJson(DateTime value) =>
-    value.toIso8601String().split('T').first;
+String dateOnlyToJson(DateTime value) {
+  final isoDate = value.toIso8601String();
+  return isoDate.substring(0, isoDate.indexOf('T'));
+}

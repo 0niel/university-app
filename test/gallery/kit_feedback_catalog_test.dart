@@ -138,8 +138,7 @@ List<Widget> _feedback(BuildContext context) {
               selected: variant == AppWeekGridCellVariant.filled,
             ),
           ),
-          if (variant != AppWeekGridCellVariant.values.last)
-            const SizedBox(width: 6),
+          if (variant != AppWeekGridCellVariant.empty) const SizedBox(width: 6),
         ],
       ],
     ),

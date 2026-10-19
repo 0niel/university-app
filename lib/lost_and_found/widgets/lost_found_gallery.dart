@@ -27,11 +27,12 @@ class LostFoundGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final heroScope = context;
+    final heroScope = ObjectKey(context);
     return SizedBox(
       height: 180,
       child: LayoutBuilder(
         builder: (context, constraints) => ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           itemCount: images.length,
@@ -39,7 +40,9 @@ class LostFoundGallery extends StatelessWidget {
           itemBuilder: (context, index) {
             final url = images[index];
             return SizedBox(
-              width: constraints.maxWidth * 0.88,
+              width: constraints.maxWidth > AppSpacing.screen * 2
+                  ? (constraints.maxWidth - AppSpacing.screen * 2) * 0.88
+                  : 0,
               child: AppPressable(
                 onTap: () => _open(context, index, heroScope),
                 semanticsButton: true,

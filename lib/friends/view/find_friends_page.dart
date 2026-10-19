@@ -17,10 +17,7 @@ class FindFriendsPage extends StatelessWidget {
 
   static Route<void> route({String initialQuery = '', String? initialUserId}) {
     return MaterialPageRoute<void>(
-      builder: (_) => FindFriendsPage(
-        initialQuery: initialQuery,
-        initialUserId: initialUserId,
-      ),
+      builder: (_) => _findFriendsDestination(initialQuery, initialUserId),
       fullscreenDialog: true,
     );
   }
@@ -44,3 +41,6 @@ class FindFriendsPage extends StatelessWidget {
     );
   }
 }
+
+Widget _findFriendsDestination(String query, String? userId) =>
+    FindFriendsPage(initialQuery: query, initialUserId: userId);

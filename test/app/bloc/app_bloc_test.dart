@@ -3,14 +3,11 @@ import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:user_repository/user_repository.dart';
 
 class MockUserRepository extends Mock implements UserRepository {}
-
-class MockStorage extends Mock implements Storage {}
 
 class MockFirebaseMessaging extends Mock implements FirebaseMessaging {}
 
@@ -23,17 +20,10 @@ void main() {
   );
   const newUser = User(id: '2', email: 'new@mirea.ru');
 
-  late Storage storage;
   late UserRepository userRepository;
   late StreamController<User> userController;
 
   setUp(() {
-    storage = MockStorage();
-    when(() => storage.read(any())).thenReturn(null);
-    when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
-    when(() => storage.delete(any())).thenAnswer((_) async {});
-    HydratedBloc.storage = storage;
-
     userRepository = MockUserRepository();
     userController = StreamController<User>.broadcast();
     when(() => userRepository.user).thenAnswer((_) => userController.stream);
@@ -108,17 +98,21 @@ void main() {
       );
 
       blocTest<AppBloc, AppState>(
-        'preserves the AMOLED preference across auth changes',
-        build: buildBloc,
+        'updates live user metadata without losing notification state',
+        build: () => buildBloc(initialUser: user),
         seed: () => const AppState(
-          isAmoled: true,
+          status: AppStatus.authenticated,
+          user: user,
+          routeToOpen: '/profile',
+          notificationNavigationId: 2,
         ),
-        act: (bloc) => bloc.add(const AppUserChanged(user)),
-        expect: () => const [
+        act: (bloc) => bloc.add(AppUserChanged(user.copyWith(name: 'Updated'))),
+        expect: () => [
           AppState(
             status: AppStatus.authenticated,
-            user: user,
-            isAmoled: true,
+            user: user.copyWith(name: 'Updated'),
+            routeToOpen: '/profile',
+            notificationNavigationId: 2,
           ),
         ],
       );
@@ -357,54 +351,52 @@ void main() {
       );
     });
 
-    group('ThemeChanged', () {
-      blocTest<AppBloc, AppState>(
-        'emits new isAmoled flag',
-        build: buildBloc,
-        act: (bloc) => bloc.add(const ThemeChanged(isAmoled: true)),
-        expect: () => [
-          isA<AppState>().having((s) => s.isAmoled, 'isAmoled', true),
-        ],
-      );
-    });
+    test(
+      'a new instance uses the current session without prior runtime data',
+      () async {
+        final previous = buildBloc(initialUser: user);
+        final navigated = previous.stream.firstWhere(
+          (state) => state.notificationNavigationId == 1,
+        );
+        previous.add(
+          const InteractedMessageReceived(
+            RemoteMessage(data: {'route': '/profile'}),
+          ),
+        );
+        await navigated;
+        await previous.close();
 
-    group('hydration', () {
-      test('fromJson restores only theme and preserves live auth', () async {
-        final bloc = buildBloc(initialUser: user);
-        final restored = bloc.fromJson({
-          'isAmoled': true,
-          'status': AppStatus.authenticated.name,
-        });
-        expect(restored?.isAmoled, true);
-        expect(restored?.status, AppStatus.authenticated);
-        expect(restored?.user, user);
-        await bloc.close();
-      });
+        final signedOut = buildBloc();
+        expect(signedOut.state, const AppState());
+        expect(signedOut.takePendingPushMessages(user.id), isEmpty);
+        await signedOut.close();
 
-      test('toJson never persists authentication state', () async {
-        final bloc = buildBloc(initialUser: user);
-        final json = bloc.toJson(bloc.state);
-        expect(json, isNot(contains('status')));
-        expect(json['isAmoled'], false);
-        await bloc.close();
-      });
+        final signedIn = buildBloc(initialUser: user);
+        expect(
+          signedIn.state,
+          const AppState(status: AppStatus.authenticated, user: user),
+        );
+        expect(signedIn.takePendingPushMessages(user.id), isEmpty);
+        await signedIn.close();
+      },
+    );
 
-      test('fromJson returns null on corrupt data', () async {
-        final bloc = buildBloc();
-        expect(bloc.fromJson({'isAmoled': 'oops'}), isNull);
-        await bloc.close();
+    for (final status in [
+      AppStatus.authenticated,
+      AppStatus.onboardingRequired,
+    ]) {
+      test('notification destinations preserve the live $status session', () {
+        final initial = AppState(status: status, user: newUser);
+        final post = initial.withNotificationDestination(discoursePostId: 42);
+        final route = post.withNotificationDestination(route: '/profile');
+        expect(post.status, status);
+        expect(post.user, newUser);
+        expect(route.status, status);
+        expect(route.user, newUser);
+        expect(route.discoursePostIdToOpen, isNull);
+        expect(route.routeToOpen, '/profile');
+        expect(route.notificationNavigationId, 2);
       });
-
-      test('fromJson ignores persisted authentication status', () async {
-        final bloc = buildBloc();
-        final restored = bloc.fromJson({
-          'isAmoled': true,
-          'status': AppStatus.authenticated.index,
-        });
-        expect(restored?.status, AppStatus.unauthenticated);
-        expect(restored?.user, User.anonymous);
-        await bloc.close();
-      });
-    });
+    }
   });
 }

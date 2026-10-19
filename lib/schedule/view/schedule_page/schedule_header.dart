@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
-import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_dates.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_picker_button.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/sheets.dart';
 
 class ScheduleHeader extends StatelessWidget {
@@ -25,26 +25,30 @@ class ScheduleHeader extends StatelessWidget {
     final l10n = context.l10n;
     final colors = context.colors;
     final week = studyWeekNumber(day);
+    final parity = week.isEven
+        ? l10n.weekParityEvenFull
+        : l10n.weekParityOddFull;
     final title = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.scheduleWeekOverline(
             week,
-            week.isEven ? l10n.weekParityEvenFull : l10n.weekParityOddFull,
+            parity,
           ),
           style: AppText.sans(
-            13,
-            FontWeight.w500,
-          ).copyWith(color: colors.muted),
+            12,
+            FontWeight.w600,
+          ).copyWith(color: colors.accent),
         ),
         const SizedBox(height: AppSpacing.xsm),
         Text(
           l10n.scheduleLessonsTitle,
-          style: AppText.serif(
-            34,
-            height: 1.05,
-            letterSpacingEm: -.02,
+          style: AppText.sans(
+            35,
+            FontWeight.w800,
+            height: 1.1,
+            letterSpacingEm: -.045,
           ).copyWith(color: colors.ink),
         ),
       ],
@@ -53,45 +57,9 @@ class ScheduleHeader extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Flexible(
-          child: AppPressable(
-            onTap: () => const ScheduleManagementRoute().push<void>(context),
-            semanticsLabel: nameSemanticsLabel ?? name ?? l10n.schedules,
-            child: Container(
-              constraints: const BoxConstraints(
-                minHeight: AppControlSize.touchTarget,
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sectionGap,
-                vertical: AppSpacing.gap,
-              ),
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.full),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        name ?? l10n.schedules,
-                        maxLines: 1,
-                        softWrap: false,
-                        style: AppText.labelStrong.copyWith(color: colors.ink),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.xsm),
-                  AppLineIconWidget(
-                    AppLineIcon.chevronD,
-                    size: 14,
-                    color: colors.muted,
-                  ),
-                ],
-              ),
-            ),
+          child: SchedulePickerButton(
+            name: name,
+            semanticsLabel: nameSemanticsLabel,
           ),
         ),
         const SizedBox(width: AppSpacing.sm),

@@ -16,6 +16,7 @@ abstract interface class MapDataCache {
 }
 
 class PreferencesMapDataCache implements MapDataCache {
+  const PreferencesMapDataCache();
   static const _prefix = 'campus_map_v1:';
   static const int _maximumBytes = 32 * 1024 * 1024;
   static Future<void> _writeTail = Future<void>.value();
@@ -31,7 +32,9 @@ class PreferencesMapDataCache implements MapDataCache {
         await preferences.setStringList('${_prefix}index', entries);
       }
     });
-    _writeTail = operation.catchError((Object _) {});
+    _writeTail = operation.catchError((Object error) {
+      debugPrint('Map cache operation failed: $error');
+    });
     return operation;
   }
 
@@ -44,7 +47,9 @@ class PreferencesMapDataCache implements MapDataCache {
   @override
   Future<void> write(String key, String value) {
     final operation = _writeTail.then((_) => _write(key, value));
-    _writeTail = operation.catchError((Object _) {});
+    _writeTail = operation.catchError((Object error) {
+      debugPrint('Map cache operation failed: $error');
+    });
     return operation;
   }
 

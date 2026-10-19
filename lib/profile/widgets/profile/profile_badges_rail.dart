@@ -96,14 +96,13 @@ class _BadgeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
-    final tones = [
-      (colors.practiceTint, colors.practice),
-      (colors.lectureTint, colors.lecture),
-      (colors.labTint, colors.lab),
-    ];
-    final (bg, fg) = badge.isEarned
-        ? tones[index % tones.length]
-        : (colors.surface, colors.muted2);
+    final (bg, fg) = !badge.isEarned
+        ? (colors.surface, colors.muted2)
+        : switch (index % 3) {
+            0 => (colors.practiceTint, colors.practice),
+            1 => (colors.lectureTint, colors.lecture),
+            _ => (colors.labTint, colors.lab),
+          };
     final sub = badge.isEarned
         ? badge.description
         : l10n.profileBadgeSoon((badge.progress * 100).round());

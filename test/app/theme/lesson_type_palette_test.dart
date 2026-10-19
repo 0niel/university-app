@@ -30,14 +30,14 @@ void main() {
   test('explicit custom colors survive theme and accent changes', () {
     const custom = 0xFFCC33AA;
     final overrides = {...kDefaultLessonTypeColors, 'lecture': custom};
+    final original = {...overrides};
     for (final base in [AppColors.light, AppColors.dark]) {
       final colors = base.withAccent(AppAccent.green);
       final palette = LessonTypePalette.resolve(colors, overrides);
       expect(palette['lecture'], custom);
       expect(palette['practice'], colors.practice.toARGB32());
-      expect(overrides['lecture'], custom);
-      expect(overrides['practice'], kDefaultLessonTypeColors['practice']);
     }
+    expect(overrides, original);
   });
 
   test(

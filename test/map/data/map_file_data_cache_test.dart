@@ -8,20 +8,21 @@ import 'package:rtu_mirea_app/map/data/map_file_data_cache.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-class _LegacyCache implements MapDataCache {
+class FakeLegacyMapCache implements MapDataCache {
   String? value = 'saved plan';
   Completer<String?>? pending;
   final removed = <String>[];
 
   @override
-  Future<String?> read(String key) async => pending?.future ?? value;
+  Future<String?> read(String key) => pending?.future ?? Future.value(value);
 
   @override
   Future<void> write(String key, String value) async => this.value = value;
 
-  Future<void> remove(String key) async {
+  Future<void> remove(String key) {
     removed.add(key);
     value = null;
+    return Future.value();
   }
 }
 
@@ -160,7 +161,7 @@ void main() {
         'campus_map_v1:tenant:campus:b',
       ],
     });
-    final legacy = PreferencesMapDataCache();
+    const legacy = PreferencesMapDataCache();
     final cache = FileMapDataCache(
       directory: directory,
       legacyCache: legacy,
@@ -183,7 +184,7 @@ void main() {
   test('failed file migration leaves the old cache usable', () async {
     final blocked = File(path.join(directory.path, 'blocked'));
     await blocked.writeAsString('file, not a directory');
-    final legacy = _LegacyCache();
+    final legacy = FakeLegacyMapCache();
     final cache = FileMapDataCache(
       directory: Directory(blocked.path),
       legacyCache: legacy,
@@ -197,7 +198,7 @@ void main() {
   test(
     'a delayed legacy migration cannot replace a newer native write',
     () async {
-      final legacy = _LegacyCache()..pending = Completer<String?>();
+      final legacy = FakeLegacyMapCache()..pending = Completer<String?>();
       final cache = FileMapDataCache(
         directory: directory,
         legacyCache: legacy,

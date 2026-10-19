@@ -303,6 +303,7 @@ void main() {
     when(() => feed.state).thenReturn(const FeedState(status: .loading));
     await tester.pumpApp(subject());
     await tester.tap(find.text('Open'));
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.byKey(const Key('storyViewer_pending')), findsOneWidget);
     expect(find.byType(NinjaSpinner), findsNothing);
@@ -322,6 +323,7 @@ void main() {
     ).thenReturn(const FeedState(status: .failure, feed: {'science': []}));
     await tester.pumpApp(subject());
     await tester.tap(find.text('Open'));
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.byKey(const Key('storyViewer_failure')), findsOneWidget);
     expect(find.byKey(const Key('storyViewer_empty')), findsNothing);

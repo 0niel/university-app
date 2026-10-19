@@ -45,9 +45,16 @@ class ScheduleManagementView extends StatelessWidget {
             child: AppInnerHeader(
               title: l10n.schedulesTitle,
               onBack: () => Navigator.of(context).maybePop(),
-              trailingLabel: hasSaved ? l10n.edit : null,
-              onTrailingLabelTap: hasSaved ? () => _openEdit(context) : null,
               actions: [
+                if (hasSaved)
+                  AppHeaderAction(
+                    child: AppTooltipAnchor(
+                      message: l10n.edit,
+                      child: const AppLineIconWidget(AppLineIcon.pencil),
+                    ),
+                    semanticsLabel: l10n.edit,
+                    onTap: () => _openEdit(context),
+                  ),
                 AppHeaderAction(
                   icon: AppLineIcon.search,
                   semanticsLabel: l10n.addScheduleTitle,

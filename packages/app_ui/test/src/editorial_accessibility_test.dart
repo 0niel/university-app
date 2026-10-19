@@ -15,16 +15,20 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('list rows expose their independent trailing switch',
-      (tester) async {
+  testWidgets('list rows expose their independent trailing switch', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         AppListRow(
           title: 'Уведомления',
           meta: '3',
           onTap: () {},
-          trailing:
-              AppSwitch(value: true, onChanged: (_) {}, label: 'Получать'),
+          trailing: AppSwitch(
+            value: true,
+            onChanged: (_) {},
+            label: 'Получать',
+          ),
         ),
       ),
     );
@@ -78,8 +82,9 @@ void main() {
     expect(accessibleControls, hasLength(2));
   });
 
-  testWidgets('inner header contains long trailing text at 200 percent',
-      (tester) async {
+  testWidgets('inner header contains long trailing text at 200 percent', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(320, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -97,13 +102,15 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  test('text uses package-qualified font families', () {
+  test('body and display use the shared package-qualified sans family', () {
     expect(AppText.body.fontFamily, 'packages/app_ui/Onest');
-    expect(AppText.display.fontFamily, 'packages/app_ui/Literata');
+    expect(AppText.display.fontFamily, 'packages/app_ui/Onest');
+    expect(AppText.display.fontWeight, FontWeight.w600);
   });
 
-  testWidgets('week stays usable at 320px and double text size',
-      (tester) async {
+  testWidgets('week stays usable at 320px and double text size', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(320, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);

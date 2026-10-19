@@ -116,9 +116,9 @@ class NinjaColors extends ThemeExtension<NinjaColors> {
   Color get onBrand => contrastForeground(brand);
   Color get brandTint => infoTint;
   Color get accentSoft => Color.alphaBlend(
-        brand.withValues(alpha: isDark ? 0.34 : 0.28),
-        surface,
-      );
+    brand.withValues(alpha: isDark ? 0.34 : 0.28),
+    surface,
+  );
   Color get onAccentSoft => ink;
   Color get onAccentSoftMuted => muted;
   Color get onScarlet => isDark ? onInk : ink;
@@ -131,19 +131,19 @@ class NinjaColors extends ThemeExtension<NinjaColors> {
   }
 
   List<Color> get mireaAccentPalette => const [
-        Color(0xFFB26497),
-        Color(0xFFEB7225),
-        Color(0xFFB4462A),
-        Color(0xFF731E6C),
-        Color(0xFFEBB804),
-        Color(0xFF086A81),
-        Color(0xFF047A35),
-        Color(0xFF706F6F),
-      ];
+    Color(0xFFB26497),
+    Color(0xFFEB7225),
+    Color(0xFFB4462A),
+    Color(0xFF731E6C),
+    Color(0xFFEBB804),
+    Color(0xFF086A81),
+    Color(0xFF047A35),
+    Color(0xFF706F6F),
+  ];
 
   List<Color> get subjectPalette => [
-        for (final accent in mireaAccentPalette) accentInk(accent),
-      ];
+    for (final accent in mireaAccentPalette) accentInk(accent),
+  ];
 
   Color accentInk(Color accent) {
     for (var step = 0; step <= 24; step++) {
@@ -297,7 +297,7 @@ double _contrastRatio(Color foreground, Color background) {
 extension NinjaColorsX on BuildContext {
   NinjaColors get ninja {
     final theme = Theme.of(this);
-    return theme.extension<NinjaColors>() ??
+    return theme.extension() ??
         NinjaColors.fromAppColors(
           theme.colors,
           isDark: theme.brightness == Brightness.dark,

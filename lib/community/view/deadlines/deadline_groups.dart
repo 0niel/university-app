@@ -1,8 +1,9 @@
+import 'package:rtu_mirea_app/community/view/deadlines/deadline_group_kind.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-enum DeadlineGroupKind { overdue, today, tomorrow, week, later, done }
+export 'deadline_group_kind.dart';
 
-const List<DeadlineGroupKind> deadlineGroupOrder = [
+List<DeadlineGroupKind> get deadlineGroupOrder => const [
   DeadlineGroupKind.overdue,
   DeadlineGroupKind.today,
   DeadlineGroupKind.tomorrow,

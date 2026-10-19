@@ -28,7 +28,7 @@ class TeacherPickerRow extends StatelessWidget {
         ? l10n.teacherPickerUnavailable
         : ambiguous
         ? l10n.teacherPickerIdentity(teacher.uid!)
-        : teacher.department ?? teacher.post;
+        : (teacher.department ?? teacher.post);
     return AppPressable(
       key: ValueKey('teacher-picker-${teacher.pickerKey}'),
       onTap: () => onSelected(teacher),

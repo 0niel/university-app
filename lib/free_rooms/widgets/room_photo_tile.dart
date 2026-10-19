@@ -5,38 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/free_rooms/utils/relative_time.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-class RoomPhotoLoadingStripe extends StatelessWidget {
-  const RoomPhotoLoadingStripe({required this.height, super.key});
-
-  final double height;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    height: height,
-    child: AppStripePlaceholder(
-      borderRadius: BorderRadius.circular(AppRadius.card),
-    ),
-  );
-}
-
-class RoomPhotoUploadProgress extends StatelessWidget {
-  const RoomPhotoUploadProgress({
-    required this.done,
-    required this.total,
-    super.key,
-  });
-
-  final int done;
-  final int total;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: context.l10n.loadingContent,
-    liveRegion: true,
-    child: AppProgressBar(value: total == 0 ? 0 : done / total),
-  );
-}
-
 class RoomPhotoTile extends StatelessWidget {
   const RoomPhotoTile({
     required this.photo,
@@ -79,6 +47,38 @@ class RoomPhotoTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class RoomPhotoLoadingStripe extends StatelessWidget {
+  const RoomPhotoLoadingStripe({required this.height, super.key});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: height,
+    child: AppStripePlaceholder(
+      borderRadius: BorderRadius.circular(AppRadius.card),
+    ),
+  );
+}
+
+class RoomPhotoUploadProgress extends StatelessWidget {
+  const RoomPhotoUploadProgress({
+    required this.done,
+    required this.total,
+    super.key,
+  });
+
+  final int done;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: context.l10n.loadingContent,
+    liveRegion: true,
+    child: AppProgressBar(value: total == 0 ? 0 : done / total),
+  );
 }
 
 class RoomPhotoDots extends StatelessWidget {

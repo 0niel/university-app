@@ -5,28 +5,7 @@ import 'package:stac_bridge/src/expression/json_equality.dart';
 import 'package:stac_bridge/src/expression/tree_resolver.dart';
 import 'package:stac_bridge/src/widgets/mini_app_state_scope.dart';
 
-class StacReactiveNodeParser extends StacParser<Map<String, Object?>> {
-  const StacReactiveNodeParser();
-
-  @override
-  String get type => 'appReactiveNode';
-
-  @override
-  Map<String, Object?> getModel(Map<String, dynamic> json) => json;
-
-  @override
-  Widget parse(BuildContext context, Map<String, Object?> model) {
-    final node = model['node'];
-    if (node is! Map<Object?, Object?>) return const SizedBox.shrink();
-    final bindings = model['bindings'];
-    return ReactiveMiniAppNode(
-      node: Map<String, Object?>.from(node),
-      bindings: bindings is Map<Object?, Object?>
-          ? Map<String, Object?>.from(bindings)
-          : const {},
-    );
-  }
-}
+export 'stac_reactive_node_parser.dart';
 
 class ReactiveMiniAppNode extends StatefulWidget {
   ReactiveMiniAppNode({required this.node, this.bindings = const {}})
@@ -72,7 +51,7 @@ class _ReactiveMiniAppNodeState extends State<ReactiveMiniAppNode> {
         _boundValue = boundValue;
         _child = resolved == null
             ? const SizedBox.shrink()
-            : Stac.fromJson(resolved, context) ?? const SizedBox.shrink();
+            : (Stac.fromJson(resolved, context) ?? const SizedBox.shrink());
       }
       return _child!;
     }

@@ -1,4 +1,10 @@
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/widgets/ninja_button_size.dart';
+import 'package:app_ui/src/ninja/widgets/ninja_button_size_x.dart';
+import 'package:app_ui/src/ninja/widgets/ninja_button_variant.dart';
+import 'package:app_ui/src/ninja/widgets/ninja_button_variant_x.dart';
+import 'package:app_ui/src/ninja/widgets/ninja_icon_button_variant.dart';
+import 'package:app_ui/src/ninja/widgets/ninja_icon_button_variant_x.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/widgets/app_fab.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
@@ -7,42 +13,12 @@ import 'package:app_ui/src/widgets/app_tooltip.dart';
 import 'package:app_ui/src/widgets/buttons/app_button.dart';
 import 'package:flutter/material.dart';
 
-enum NinjaButtonVariant {
-  primary,
-  secondary,
-  tonal,
-  outline,
-  text,
-  destructive,
-  destructiveOutline,
-}
-
-enum NinjaButtonSize { small, medium, large, hero, standard }
-
-extension NinjaButtonSizeX on NinjaButtonSize {
-  AppButtonSize get app => switch (this) {
-        NinjaButtonSize.small => AppButtonSize.small,
-        NinjaButtonSize.medium => AppButtonSize.medium,
-        NinjaButtonSize.standard => AppButtonSize.medium,
-        NinjaButtonSize.large => AppButtonSize.large,
-        NinjaButtonSize.hero => AppButtonSize.hero,
-      };
-
-  double get height => app.height;
-}
-
-extension NinjaButtonVariantX on NinjaButtonVariant {
-  AppButtonVariant get app => switch (this) {
-        NinjaButtonVariant.primary => AppButtonVariant.primary,
-        NinjaButtonVariant.secondary => AppButtonVariant.secondary,
-        NinjaButtonVariant.outline => AppButtonVariant.secondary,
-        NinjaButtonVariant.tonal => AppButtonVariant.tonal,
-        NinjaButtonVariant.text => AppButtonVariant.text,
-        NinjaButtonVariant.destructive => AppButtonVariant.destructive,
-        NinjaButtonVariant.destructiveOutline =>
-          AppButtonVariant.destructiveOutline,
-      };
-}
+export 'ninja_button_size.dart';
+export 'ninja_button_size_x.dart';
+export 'ninja_button_variant.dart';
+export 'ninja_button_variant_x.dart';
+export 'ninja_icon_button_variant.dart';
+export 'ninja_icon_button_variant_x.dart';
 
 class NinjaButton extends StatelessWidget {
   const NinjaButton({
@@ -148,18 +124,6 @@ class NinjaButton extends StatelessWidget {
   }
 }
 
-enum NinjaIconButtonVariant { outline, filled, surface, tonal, plain }
-
-extension NinjaIconButtonVariantX on NinjaIconButtonVariant {
-  AppIconButtonTone get tone => switch (this) {
-        NinjaIconButtonVariant.outline => AppIconButtonTone.secondary,
-        NinjaIconButtonVariant.filled => AppIconButtonTone.primary,
-        NinjaIconButtonVariant.surface => AppIconButtonTone.surface,
-        NinjaIconButtonVariant.tonal => AppIconButtonTone.tonal,
-        NinjaIconButtonVariant.plain => AppIconButtonTone.plain,
-      };
-}
-
 class NinjaIconButton extends StatelessWidget {
   const NinjaIconButton({
     required this.icon,
@@ -217,7 +181,8 @@ class NinjaFab extends StatelessWidget {
       );
     }
     final colors = context.colors;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     final enabled = onPressed != null;
     final background = enabled ? colors.accent : colors.canvas;
@@ -230,8 +195,9 @@ class NinjaFab extends StatelessWidget {
       semanticsLabel: tooltip,
       semanticsButton: true,
       builder: (context, {required pressed}) => AnimatedContainer(
-        duration:
-            reduceMotion ? Duration.zero : const Duration(milliseconds: 120),
+        duration: reduceMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 120),
         curve: Curves.easeOut,
         width: AppControlSize.fab,
         height: AppControlSize.fab,

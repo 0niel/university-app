@@ -72,20 +72,19 @@ class AppSourceBadge extends StatelessWidget {
   }
 
   Color _toneOf(AppColors c) => switch (type) {
-        SourceType.official => c.accent,
-        SourceType.telegram => c.practice,
-        SourceType.community => c.lab,
-        SourceType.rss => c.warn,
-        SourceType.vk => c.accent,
-        SourceType.app => c.lecture,
-      };
+    SourceType.official || SourceType.vk => c.accent,
+    SourceType.telegram => c.practice,
+    SourceType.community => c.lab,
+    SourceType.rss => c.warn,
+    SourceType.app => c.lecture,
+  };
 
   static AppLineIcon _iconOf(SourceType type) => switch (type) {
-        SourceType.official => AppLineIcon.shield,
-        SourceType.telegram => AppLineIcon.send,
-        SourceType.community => AppLineIcon.people,
-        SourceType.rss => AppLineIcon.globe,
-        SourceType.vk => AppLineIcon.message,
-        SourceType.app => AppLineIcon.spark,
-      };
+    SourceType.official => AppLineIcon.shield,
+    SourceType.telegram => AppLineIcon.send,
+    SourceType.community => AppLineIcon.people,
+    SourceType.rss => AppLineIcon.globe,
+    SourceType.vk => AppLineIcon.message,
+    SourceType.app => AppLineIcon.spark,
+  };
 }

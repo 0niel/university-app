@@ -99,7 +99,7 @@ class _TeamFinderBodyState extends State<TeamFinderBody> {
           SliverToBoxAdapter(
             child: Column(
               children: [
-                if (widget.header != null) widget.header!,
+                ?widget.header,
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSpacing.screen,

@@ -166,7 +166,7 @@ void main() {
     tester.view.physicalSize = const Size(800, 360) * 3;
     await tester.pumpAndSettle();
     final context = tester.element(find.byType(AlertDialog));
-    expect(MediaQuery.sizeOf(context).height, closeTo(390, .001));
+    expect(MediaQuery.maybeHeightOf(context), closeTo(390, .001));
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
     expect(find.text('Dialog'), findsNothing);

@@ -91,7 +91,8 @@ class RoomPhotoGalleryBody extends StatelessWidget {
         ],
       );
     }
-    final current = photos[index.clamp(0, photos.length - 1)];
+    final current = photos.elementAtOrNull(index.clamp(0, photos.length - 1));
+    if (current == null) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

@@ -66,14 +66,10 @@ class PeopleView extends StatelessWidget {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const .symmetric(
-                    horizontal: AppSpacing.screen,
-                    vertical: 8,
-                  ),
+                  padding: const .symmetric(vertical: 8),
                   child: NinjaTabs<PeopleTab>(
                     value: state.tab,
                     onChanged: context.read<PeopleCubit>().tabChanged,
-                    padding: EdgeInsets.zero,
                     spacing: 18,
                     tabs: [
                       NinjaTab(

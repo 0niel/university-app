@@ -17,16 +17,16 @@ class UserRepository {
     required this._packageInfoClient,
     required this._deepLinkService,
     required this._storage,
-    this.initializeUser,
+    Future<void> Function(String userId)? initializeUser,
     this.onInitializationError,
     this.initializationTimeout = const Duration(seconds: 8),
-  });
+  }) : _onInitializeUser = initializeUser;
 
   final AuthenticationClient _authenticationClient;
   final UserStorage _storage;
   final PackageInfoClient _packageInfoClient;
   final DeepLinkService _deepLinkService;
-  final Future<void> Function(String userId)? initializeUser;
+  final Future<void> Function(String userId)? _onInitializeUser;
   final void Function(Object error, StackTrace stackTrace)?
   onInitializationError;
   final Duration initializationTimeout;
@@ -44,7 +44,7 @@ class UserRepository {
 
   Future<User> _initializeUser(AuthenticationUser authenticationUser) async {
     try {
-      await initializeUser
+      await _onInitializeUser
           ?.call(authenticationUser.id)
           .timeout(initializationTimeout);
     } on Object catch (error, stackTrace) {

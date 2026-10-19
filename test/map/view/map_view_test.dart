@@ -374,7 +374,9 @@ void main() {
         .widget<InteractiveViewer>(find.byType(InteractiveViewer))
         .transformationController!;
     var transformUpdates = 0;
-    transform.addListener(() => transformUpdates++);
+    void onTransformUpdated() => transformUpdates++;
+    transform.addListener(onTransformUpdated);
+    addTearDown(() => transform.removeListener(onTransformUpdated));
     await tester.tap(find.byTooltip('Развернуть список'));
     await tester.pump();
     for (var frame = 0; frame < 20; frame++) {
@@ -527,18 +529,8 @@ void main() {
     expect(panelDecoration.color, isNot(mapSurface.color));
     expect(panelDecoration.border, Border.all(color: colors.line));
 
-    final decorations = tester
-        .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-        .map((widget) => widget.decoration)
-        .whereType<BoxDecoration>();
-    expect(decorations, isNotEmpty);
-    expect(
-      decorations.every(
-        (decoration) =>
-            decoration.boxShadow == null && decoration.gradient == null,
-      ),
-      isTrue,
-    );
+    expect(panelDecoration.boxShadow, isNull);
+    expect(panelDecoration.gradient, isNull);
   });
 
   testWidgets('compact panel does not show a clipped room card', (

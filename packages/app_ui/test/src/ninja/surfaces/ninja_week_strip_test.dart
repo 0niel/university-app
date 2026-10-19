@@ -151,6 +151,38 @@ void main() {
       expect(kitStyleOf(tester, 'ЧТ')?.fontSize, 9.5);
     });
 
+    testWidgets('gutters scroll with the days and accept edge gestures', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapKit(
+          SizedBox(
+            width: 280,
+            child: NinjaWeekStrip(days: days, selectedIndex: 0),
+          ),
+          textScale: 2,
+        ),
+      );
+      final strip = tester.getRect(find.byType(NinjaWeekStrip));
+      final scroll = find.byType(SingleChildScrollView);
+      expect(tester.getRect(scroll).left, strip.left);
+      expect(tester.getRect(scroll).right, strip.right);
+      expect(
+        tester.getTopLeft(find.byType(NinjaDayPill).first).dx,
+        strip.left + AppSpacing.screen,
+      );
+      final position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
+      await tester.dragFrom(
+        Offset(strip.right - 2, strip.center.dy),
+        const Offset(-180, 0),
+      );
+      await tester.pumpAndSettle();
+      expect(position.pixels, greaterThan(100));
+      expect(tester.takeException(), isNull);
+    });
+
     test('App aliases point at the Ninja widgets', () {
       expect(AppWeekStrip, NinjaWeekStrip);
       expect(AppDayPill, NinjaDayPill);
@@ -195,12 +227,12 @@ void main() {
       );
     });
 
-    testWidgets('onCanvas pads the label on a canvas chip', (tester) async {
+    testWidgets('isOnCanvas pads the label on a canvas chip', (tester) async {
       await tester.pumpWidget(
         wrapKit(
           const SizedBox(
             width: 320,
-            child: NinjaNowLine(label: '11:22', onCanvas: true),
+            child: NinjaNowLine(label: '11:22', isOnCanvas: true),
           ),
         ),
       );
@@ -247,7 +279,7 @@ void main() {
   });
 
   group('NinjaDisplayHeader', () {
-    testWidgets('renders a serif display title with muted summary', (
+    testWidgets('renders a sans display title with muted summary', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -265,7 +297,8 @@ void main() {
 
       final title = kitStyleOf(tester, 'Среда, 13 августа');
       expect(title?.fontSize, 34);
-      expect(title?.fontFamily, AppText.serifFamily);
+      expect(title?.fontFamily, AppText.sansFamily);
+      expect(title?.fontWeight, FontWeight.w600);
       final summary = kitStyleOf(tester, '4 пары · 2 корпуса');
       expect(summary?.fontSize, 13);
       expect(summary?.color, kitColors.muted);

@@ -1,6 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/glass/app_glass_surface.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_control_surface.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/material.dart';
@@ -79,21 +83,18 @@ class AppSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return SheetKeyboardDismissible(
       dismissBehavior: const SheetKeyboardDismissBehavior.onDragDown(
         isContentScrollAware: true,
       ),
       child: Sheet(
         scrollConfiguration: const SheetScrollConfiguration(),
-        decoration: MaterialSheetDecoration(
+        decoration: SheetDecorationBuilder(
           size: SheetSize.fit,
-          color: backgroundColor ?? colors.canvas,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppRadius.sheet),
+          builder: (context, sheetChild) => _AppSheetSurface(
+            backgroundColor: backgroundColor,
+            child: sheetChild,
           ),
-          clipBehavior: Clip.antiAlias,
         ),
         child: _AppSheetBody(
           title: title,
@@ -108,6 +109,40 @@ class AppSheet extends StatelessWidget {
           onPrimaryAction: onPrimaryAction,
           child: child,
         ),
+      ),
+    );
+  }
+}
+
+class _AppSheetSurface extends StatelessWidget {
+  const _AppSheetSurface({required this.child, this.backgroundColor});
+
+  final Widget child;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: backgroundColor ?? context.colors.surface,
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(AppRadius.sheet),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          const Positioned.fill(
+            bottom: -AppRadius.sheet,
+            child: IgnorePointer(
+              child: AppGlassSurface(
+                role: AppGlassRole.overlay,
+                borderRadius: AppRadius.sheet,
+                tone: AppGlassTone.subtle,
+                child: SizedBox.expand(),
+              ),
+            ),
+          ),
+          child,
+        ],
       ),
     );
   }
@@ -147,7 +182,8 @@ class _AppSheetBody extends StatelessWidget {
     final keyboardInset = mediaQuery.viewInsets.bottom;
     final bottomSafe = keyboardInset > 0 ? 0.0 : mediaQuery.viewPadding.bottom;
 
-    final padding = contentPadding ??
+    final padding =
+        contentPadding ??
         const EdgeInsets.symmetric(horizontal: AppSpacing.screen);
     final action = primaryAction;
 
@@ -155,7 +191,9 @@ class _AppSheetBody extends StatelessWidget {
         ? Flexible(
             child: SingleChildScrollView(padding: padding, child: child),
           )
-        : Flexible(child: Padding(padding: padding, child: child));
+        : Flexible(
+            child: Padding(padding: padding, child: child),
+          );
 
     final column = Column(
       mainAxisSize: MainAxisSize.min,
@@ -190,16 +228,29 @@ class _AppSheetBody extends StatelessWidget {
             ),
             child: AppSheetAction(label: action, onTap: onPrimaryAction),
           ),
-        SizedBox(height: bottomSafe + 28),
+        SizedBox(height: bottomSafe + AppSpacing.sheetBottom),
       ],
     );
 
-    final maxHeight = screenHeight * maxHeightFraction;
+    final double availableHeight = math.max(
+      0,
+      screenHeight - keyboardInset - mediaQuery.viewPadding.top,
+    );
+    final maxHeight = math.min(
+      screenHeight * maxHeightFraction,
+      availableHeight,
+    );
     final fraction = heightFraction;
-    final fixedHeight = fraction == null ? null : screenHeight * fraction;
+    final fixedHeight = fraction == null
+        ? null
+        : math.min(screenHeight * fraction, availableHeight);
+    final reduceMotion =
+        mediaQuery.disableAnimations || mediaQuery.accessibleNavigation;
 
     return AnimatedPadding(
-      duration: const Duration(milliseconds: 120),
+      duration: reduceMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 120),
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: keyboardInset),
       child: ConstrainedBox(
@@ -223,11 +274,24 @@ class AppSheetGrabber extends StatelessWidget {
       child: Container(
         width: 40,
         height: 4,
-        margin:
-            const EdgeInsets.only(top: AppSpacing.gap, bottom: AppSpacing.lg),
+        margin: const EdgeInsets.only(
+          top: AppSpacing.gap,
+          bottom: AppSpacing.lg,
+        ),
         decoration: BoxDecoration(
           color: colors.muted2,
           borderRadius: BorderRadius.circular(AppRadius.xxs),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.alphaBlend(
+                colors.white.withValues(alpha: .18),
+                colors.muted2,
+              ),
+              colors.muted2,
+            ],
+          ),
         ),
       ),
     );
@@ -273,8 +337,10 @@ class AppSheetTitle extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             subtitleText,
-            style:
-                AppText.sans(13, FontWeight.w500).copyWith(color: colors.muted),
+            style: AppText.sans(
+              13,
+              FontWeight.w500,
+            ).copyWith(color: colors.muted),
           ),
         ],
       ],
@@ -299,19 +365,19 @@ class AppSheetCloseButton extends StatelessWidget {
         child: SizedBox.square(
           dimension: 44,
           child: Center(
-            child: Container(
-              width: AppControlSize.iconButtonSmall,
-              height: AppControlSize.iconButtonSmall,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: colors.surface,
-                shape: BoxShape.circle,
-              ),
-              child: AppLineIconWidget(
-                AppLineIcon.close,
-                size: AppIconSize.sm,
-                strokeWidth: 2.2,
-                color: colors.ink,
+            child: AppControlSurface(
+              color: colors.surface,
+              borderRadius: AppRadius.full,
+              child: SizedBox.square(
+                dimension: AppControlSize.iconButtonSmall,
+                child: Center(
+                  child: AppLineIconWidget(
+                    AppLineIcon.close,
+                    size: AppIconSize.sm,
+                    strokeWidth: 2.2,
+                    color: colors.ink,
+                  ),
+                ),
               ),
             ),
           ),
@@ -342,17 +408,20 @@ class AppSheetAction extends StatelessWidget {
       onTap: onTap,
       semanticsLabel: label,
       semanticsButton: true,
-      child: Container(
-        height: AppControlSize.buttonLarge,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: background ?? colors.accent,
-          borderRadius: BorderRadius.circular(AppRadius.full),
-        ),
-        child: Text(
-          label,
-          style: AppText.buttonLarge.copyWith(
-            color: foreground ?? colors.onAccent,
+      child: AppControlSurface(
+        color: background ?? colors.accent,
+        borderRadius: AppRadius.full,
+        tone: AppControlSurfaceTone.accent,
+        enabled: onTap != null,
+        child: SizedBox(
+          height: AppControlSize.buttonLarge,
+          child: Center(
+            child: Text(
+              label,
+              style: AppText.buttonLarge.copyWith(
+                color: foreground ?? colors.onAccent,
+              ),
+            ),
           ),
         ),
       ),

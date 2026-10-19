@@ -2,10 +2,11 @@ import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_badge.dart';
+import 'package:app_ui/src/widgets/app_banner_tone.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
 
-enum AppBannerTone { accent, warn, danger, success }
+export 'app_banner_tone.dart';
 
 class AppBanner extends StatelessWidget {
   const AppBanner({
@@ -51,8 +52,9 @@ class AppBanner extends StatelessWidget {
             if (actionLabel != null) ...[
               const SizedBox(width: AppSpacing.md),
               ConstrainedBox(
-                constraints:
-                    BoxConstraints(maxWidth: constraints.maxWidth * .45),
+                constraints: BoxConstraints(
+                  maxWidth: constraints.maxWidth * .45,
+                ),
                 child: Text(
                   actionLabel,
                   style: AppText.subtextBold.copyWith(color: fg),
@@ -74,9 +76,9 @@ class AppBanner extends StatelessWidget {
   }
 
   ({Color bg, Color fg}) _resolve(AppColors c) => switch (tone) {
-        AppBannerTone.accent => (bg: c.tint, fg: c.accent),
-        AppBannerTone.warn => (bg: c.warnTint, fg: c.warn),
-        AppBannerTone.danger => (bg: c.examTint, fg: c.exam),
-        AppBannerTone.success => (bg: c.lectureTint, fg: c.lecture),
-      };
+    AppBannerTone.accent => (bg: c.tint, fg: c.accent),
+    AppBannerTone.warn => (bg: c.warnTint, fg: c.warn),
+    AppBannerTone.danger => (bg: c.examTint, fg: c.exam),
+    AppBannerTone.success => (bg: c.lectureTint, fg: c.lecture),
+  };
 }

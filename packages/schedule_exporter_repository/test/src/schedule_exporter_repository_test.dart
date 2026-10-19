@@ -67,7 +67,6 @@ void main() {
         await repository.exportScheduleToCalendar(
           calendarName: 'Schedule',
           lessons: [lesson, lesson],
-          deleteExistingCalendar: true,
         );
         final event =
             verify(

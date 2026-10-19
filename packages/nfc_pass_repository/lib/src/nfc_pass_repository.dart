@@ -161,8 +161,9 @@ class NfcPassRepository {
       _store.checkSession(revision);
       _verificationRevision = revision;
       _verificationRetryAt = switch (result) {
-        NfcVerificationCodeSent(:final retryAt) => retryAt,
-        NfcVerificationCooldown(:final retryAt) => retryAt,
+        NfcVerificationCodeSent(retryAt: final DateTime? retryAfter) ||
+        NfcVerificationCooldown(retryAt: final DateTime? retryAfter) =>
+          retryAfter,
         NfcVerificationUnavailable() => null,
       };
       return result;

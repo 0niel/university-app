@@ -4,13 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(body: Center(child: child)),
+  );
 
   group('AppPrivacyChip', () {
-    testWidgets('renders the emoji+label and a line check icon',
-        (tester) async {
+    testWidgets('renders the emoji+label and a line check icon', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrap(const AppPrivacyChip(icon: '📍', label: 'геолокация')),
       );

@@ -8,24 +8,25 @@ class TeacherDashboardRepository {
   const TeacherDashboardRepository({
     required this._schedules,
     required this._campus,
-    required this._cache,
-    required this._clock,
-  });
+    required ScheduleState Function() cache,
+    required DateTime Function() clock,
+  }) : _onClock = clock,
+       _onCache = cache;
 
   final ScheduleRepository _schedules;
   final CampusRepository _campus;
-  final ScheduleState Function() _cache;
-  final DateTime Function() _clock;
+  final ScheduleState Function() _onCache;
+  final DateTime Function() _onClock;
 
   TeacherScheduleSnapshot? cachedSchedule(TeacherScheduleQuery query) {
     final uid = query.teacher.uid;
     if (uid == null) return null;
-    final cache = _cache();
+    final cache = _onCache();
     final fetchedAt = cache.scheduleSyncedAt[uid];
     if (fetchedAt == null) return null;
     final entry = cache.teachersSchedule
         .where(
-          (entry) => entry.$1 == uid && entry.$2.uid == uid,
+          (cached) => cached.$1 == uid && cached.$2.uid == uid,
         )
         .firstOrNull;
     if (entry == null) return null;
@@ -46,7 +47,7 @@ class TeacherDashboardRepository {
     );
     return TeacherScheduleSnapshot(
       schedule: response.data,
-      fetchedAt: _clock(),
+      fetchedAt: _onClock(),
     );
   }
 

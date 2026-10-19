@@ -75,7 +75,7 @@ class ArticleContentModel {
 
     final resolvedTitle = (title ?? '').trim().isEmpty
         ? (fallbackTitle ?? '')
-        : title ?? '';
+        : (title ?? '');
     return ArticleContentModel(
       title: resolvedTitle,
       source: (source ?? '').trim().isEmpty ? null : source,

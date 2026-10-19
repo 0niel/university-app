@@ -1,32 +1,36 @@
-part of 'mini_apps_page.dart';
+part of 'mini_apps_catalog.dart';
 
 class _MiniAppsSearchField extends StatelessWidget {
-  const _MiniAppsSearchField({required this.controller});
+  const _MiniAppsSearchField({
+    required this.controller,
+    required this.focusNode,
+    required this.onChanged,
+    required this.onSubmitted,
+  });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmitted;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final l10n = context.l10n;
     return Padding(
       padding: const .fromLTRB(
         AppSpacing.screen,
-        4,
-        AppSpacing.screen,
         0,
+        AppSpacing.screen,
+        AppSpacing.sm,
       ),
-      child: NinjaInput(
+      child: AppSearchField(
         controller: controller,
-        autofocus: true,
-        placeholder: l10n.miniAppsSearchHint,
-        leadingIcon: AppLineIconWidget(
-          .search,
-          size: 17,
-          color: colors.muted,
-        ),
-        onChanged: (query) =>
-            context.read<MiniAppsCatalogCubit>().queryChanged(query),
+        focusNode: focusNode,
+        hintText: l10n.miniAppsSearchHint,
+        tone: AppSearchFieldTone.glass,
+        isOnCanvas: true,
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
       ),
     );
   }

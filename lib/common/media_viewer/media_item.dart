@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-enum MediaKind { image, video, pdf, file }
-
 @immutable
 class MediaItem {
   const MediaItem({
@@ -48,3 +46,5 @@ class MediaItem {
   @override
   int get hashCode => Object.hash(url, kind);
 }
+
+enum MediaKind { image, video, pdf, file }

@@ -27,14 +27,14 @@ class AppEmptyState extends StatelessWidget {
     super.key,
     this.subtitle,
     this.subtitleMaxWidth = 260,
-  })  : compact = true,
-        emoji = null,
-        icon = null,
-        lineIcon = AppLineIcon.inbox,
-        actionLabel = null,
-        onAction = null,
-        emojiSize = 26,
-        child = null;
+  }) : compact = true,
+       emoji = null,
+       icon = null,
+       lineIcon = AppLineIcon.inbox,
+       actionLabel = null,
+       onAction = null,
+       emojiSize = 26,
+       child = null;
 
   final String title;
   final String? subtitle;
@@ -165,7 +165,8 @@ class _EmptyStateTile extends StatelessWidget {
         color: colors.tint,
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
-      child: iconWidget ??
+      child:
+          iconWidget ??
           (emojiText != null
               ? Text(
                   emojiText,

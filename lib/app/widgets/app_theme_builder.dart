@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rtu_mirea_app/app/theme/cubit/theme_cubit.dart';
-import 'package:rtu_mirea_app/app/theme/cubit/theme_state.dart';
 import 'package:rtu_mirea_app/app/theme/lesson_type_palette.dart';
 import 'package:rtu_mirea_app/app/utils/system_ui_configurator.dart';
 import 'package:rtu_mirea_app/app/widgets/app_router.dart';
@@ -13,14 +12,12 @@ import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
 class AppThemeBuilder extends StatelessWidget {
   const AppThemeBuilder({
     required this.theme,
-    required this.themeState,
     required this.themeCubit,
     required this.router,
     super.key,
   });
 
   final ThemeData theme;
-  final ThemeState themeState;
   final ThemeCubit themeCubit;
   final GoRouter router;
 
@@ -36,10 +33,7 @@ class AppThemeBuilder extends StatelessWidget {
     final themeMode = theme.brightness == .light
         ? ThemeMode.light
         : ThemeMode.dark;
-    final themeKey = [
-      themeState.isAmoled,
-      theme.brightness,
-    ].join('-');
+    final themeKey = theme.brightness.name;
     final lessonTypeColors = context
         .watch<UiPreferencesCubit>()
         .state
@@ -64,7 +58,11 @@ class AppThemeBuilder extends StatelessWidget {
   ) {
     final manager = AdaptiveTheme.of(context);
     if (manager.lightTheme.colors != lightTheme.colors ||
-        manager.darkTheme.colors != currentDarkTheme.colors) {
+        manager.darkTheme.colors != currentDarkTheme.colors ||
+        manager.lightTheme.extension<AppGlassTheme>()?.enabled !=
+            lightTheme.extension<AppGlassTheme>()?.enabled ||
+        manager.darkTheme.extension<AppGlassTheme>()?.enabled !=
+            currentDarkTheme.extension<AppGlassTheme>()?.enabled) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted || themeCubit.isClosed) return;
         manager.setTheme(

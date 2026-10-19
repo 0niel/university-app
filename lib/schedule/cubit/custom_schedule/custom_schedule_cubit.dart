@@ -193,6 +193,7 @@ class CustomScheduleCubit extends HydratedCubit<CustomScheduleState>
     int oldIndex,
     int newIndex,
   ) {
+    if (oldIndex < 0 || newIndex < 0) return;
     _mutate(scheduleId, (schedule) {
       final dayLessons = _customLessonsOn(schedule, weekday);
       final target = newIndex;
@@ -271,6 +272,7 @@ class CustomScheduleCubit extends HydratedCubit<CustomScheduleState>
     final index = state.customSchedules.indexWhere(
       (schedule) => schedule.id == scheduleId,
     );
+    if (index < 0) return false;
     final current = state.customSchedules.elementAtOrNull(index);
     if (current == null) return false;
     final updated = transform(current);

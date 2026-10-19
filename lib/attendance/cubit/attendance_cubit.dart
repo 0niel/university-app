@@ -10,11 +10,11 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   AttendanceCubit({
     required this._repository,
     DateTime Function()? now,
-  }) : _now = now ?? DateTime.now,
+  }) : _onNow = now ?? DateTime.now,
        super(const AttendanceState());
 
   final AbsencesRepository _repository;
-  final DateTime Function() _now;
+  final DateTime Function() _onNow;
 
   var _loadRevision = 0;
   var _nextId = 0;
@@ -24,11 +24,11 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     final revision = ++_loadRevision;
     await _saveOperation;
     if (isClosed || revision != _loadRevision) return;
-    emit(state.copyWith(status: .loading, now: _now()));
+    emit(state.copyWith(status: .loading, now: _onNow()));
     try {
       final absences = await _repository.load();
       if (isClosed || revision != _loadRevision) return;
-      emit(state.copyWith(status: .ready, absences: absences, now: _now()));
+      emit(state.copyWith(status: .ready, absences: absences, now: _onNow()));
     } on Object catch (error, stackTrace) {
       if (isClosed || revision != _loadRevision) return;
       emit(state.copyWith(status: .failure));
@@ -37,8 +37,8 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   }
 
   void lessonsChanged(List<LessonSchedulePart> lessons) {
-    if (lessons == state.lessons) return;
-    emit(state.copyWith(lessons: lessons, now: _now()));
+    if (identical(lessons, state.lessons)) return;
+    emit(state.copyWith(lessons: lessons, now: _onNow()));
   }
 
   void toggleSubject(String subject) {
@@ -57,7 +57,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         DateTime(date.year, date.month, date.day).isAfter(state.today)) {
       return Future.value(false);
     }
-    final now = _now();
+    final now = _onNow();
     final absence = Absence(
       id: '${now.microsecondsSinceEpoch}-${_nextId++}',
       subject: subject.trim(),
@@ -87,14 +87,14 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       final absences = update(state.absences);
       try {
         await _repository.save(absences);
-        if (!isClosed) emit(state.copyWith(absences: absences, now: _now()));
+        if (!isClosed) emit(state.copyWith(absences: absences, now: _onNow()));
         return true;
       } on Object catch (error, stackTrace) {
         if (!isClosed) addError(error, stackTrace);
         return false;
       }
     });
-    _saveOperation = save.then((_) {});
+    _saveOperation = save.then<void>((_) => null);
     return save;
   }
 }

@@ -7,100 +7,16 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:rtu_mirea_app/common/widgets/app_map_tiles.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
-import 'package:rtu_mirea_app/map/models/models.dart';
-import 'package:rtu_mirea_app/map/navigation/floor_georeference.dart';
+import 'package:rtu_mirea_app/map/widgets/geographic_floor_plan.dart';
+import 'package:rtu_mirea_app/map/widgets/geographic_map_place.dart';
 import 'package:rtu_mirea_app/map/widgets/map_cartographic_layer.dart';
 import 'package:rtu_mirea_app/map/widgets/map_svg_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class GeographicFloorPlan {
-  const GeographicFloorPlan({
-    required this.svg,
-    required this.size,
-    required this.topLeft,
-    required this.topRight,
-    required this.bottomLeft,
-    this.rooms = const [],
-    this.places = const [],
-    this.syntheticRoomIds = const {},
-    this.georeference,
-  });
-
-  final String svg;
-  final Size size;
-  final LatLng topLeft;
-  final LatLng topRight;
-  final LatLng bottomLeft;
-  final List<RoomModel> rooms;
-  final List<MapPlaceData> places;
-  final Set<String> syntheticRoomIds;
-  final MapGeoreferenceData? georeference;
-
-  String get alignmentNote => switch (georeference?.status) {
-    'community' => 'Привязка сообщества',
-    'needs_review' => 'Привязка ожидает проверки',
-    _ => 'Привязка приблизительная',
-  };
-
-  LatLngBounds get geographicBounds {
-    final reference = FloorGeoreference([
-      FloorGeoAnchor(
-        x: 0,
-        y: 0,
-        latitude: topLeft.latitude,
-        longitude: topLeft.longitude,
-      ),
-      FloorGeoAnchor(
-        x: size.width,
-        y: 0,
-        latitude: topRight.latitude,
-        longitude: topRight.longitude,
-      ),
-      FloorGeoAnchor(
-        x: 0,
-        y: size.height,
-        latitude: bottomLeft.latitude,
-        longitude: bottomLeft.longitude,
-      ),
-    ]);
-    final visibleRooms = rooms.where((room) {
-      final center = room.path.getBounds().center;
-      return georeference?.isReliableAt(center.dx, center.dy) ?? true;
-    }).toList();
-    final bounds = visibleRooms.isEmpty
-        ? Offset.zero & size
-        : visibleRooms
-              .map((room) => room.path.getBounds())
-              .reduce(
-                (bounds, next) => bounds.expandToInclude(next),
-              );
-    return LatLngBounds.fromPoints([
-      for (final point in [
-        bounds.topLeft,
-        bounds.topRight,
-        bounds.bottomLeft,
-        bounds.bottomRight,
-      ])
-        (() {
-          final location = reference.pixelToGeographic(point.dx, point.dy);
-          return LatLng(location.latitude, location.longitude);
-        })(),
-    ]);
-  }
-}
-
-class GeographicMapPlace {
-  const GeographicMapPlace({
-    required this.label,
-    required this.position,
-    required this.onTap,
-  });
-
-  final String label;
-  final LatLng position;
-  final VoidCallback onTap;
-}
+export 'geographic_floor_plan.dart';
+export 'geographic_map_place.dart';
 
 class MapGeographicView extends StatefulWidget {
   const MapGeographicView({
@@ -207,7 +123,7 @@ class _MapGeographicViewState extends State<MapGeographicView> {
                                     tooltip: place.label,
                                     onPressed: place.onTap,
                                     icon: const Icon(Icons.place_outlined),
-                                    tone: AppIconButtonTone.surface,
+                                    tone: AppIconButtonTone.glass,
                                   ),
                                 ),
                             ],
@@ -219,8 +135,8 @@ class _MapGeographicViewState extends State<MapGeographicView> {
                         bottom: 16,
                         child: AppIconButton(
                           icon: const Icon(Icons.center_focus_strong_rounded),
-                          tooltip: 'Показать кампус',
-                          tone: AppIconButtonTone.surface,
+                          tooltip: context.l10n.mapShowCampus,
+                          tone: AppIconButtonTone.glass,
                           shape: AppIconButtonShape.circle,
                           onPressed: () {
                             final plan = widget.floorPlan;
@@ -459,5 +375,5 @@ class MapGeoreferenceClipper extends CustomClipper<ui.Path> {
 
   @override
   bool shouldReclip(MapGeoreferenceClipper oldClipper) =>
-      excludedRegions != oldClipper.excludedRegions;
+      !identical(excludedRegions, oldClipper.excludedRegions);
 }

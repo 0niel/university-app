@@ -6,7 +6,7 @@ void main() {
   group('NewsRepository.getFeed', () {
     test('video-only items preserve article identity in the feed', () async {
       final repository = NewsRepository(
-        dataSource: _FakeNewsRemoteDataSource(
+        dataSource: FakeNewsRemoteDataSource(
           feed: [
             {
               ..._feedItem(),
@@ -39,7 +39,7 @@ void main() {
           'https://cdn.example/story.mp4',
         ]) {
           final repository = NewsRepository(
-            dataSource: _FakeNewsRemoteDataSource(
+            dataSource: FakeNewsRemoteDataSource(
               feed: [
                 {
                   ..._feedItem(),
@@ -58,7 +58,7 @@ void main() {
     );
 
     test('uses the total count returned by the RPC', () async {
-      final dataSource = _FakeNewsRemoteDataSource(
+      final dataSource = FakeNewsRemoteDataSource(
         feed: [_feedItem(totalCount: 42)],
       );
       final repository = NewsRepository(
@@ -78,7 +78,7 @@ void main() {
 
     test('falls back to the observed count for an old RPC response', () async {
       final repository = NewsRepository(
-        dataSource: _FakeNewsRemoteDataSource(feed: [_feedItem()]),
+        dataSource: FakeNewsRemoteDataSource(feed: [_feedItem()]),
         organizationId: 'university',
       );
 
@@ -89,7 +89,7 @@ void main() {
 
     test('wraps invalid wire data without losing its type', () async {
       final repository = NewsRepository(
-        dataSource: _FakeNewsRemoteDataSource(
+        dataSource: FakeNewsRemoteDataSource(
           feed: [
             {'id': 'invalid'},
           ],
@@ -102,7 +102,7 @@ void main() {
 
     test('does not hide an unexpected top-level RPC response', () async {
       final repository = NewsRepository(
-        dataSource: _FakeNewsRemoteDataSource(feed: {'items': <Object?>[]}),
+        dataSource: FakeNewsRemoteDataSource(feed: {'items': <Object?>[]}),
         organizationId: 'university',
       );
 
@@ -112,7 +112,7 @@ void main() {
 
   test('getCategories skips the type tab for a single source type', () async {
     final repository = NewsRepository(
-      dataSource: _FakeNewsRemoteDataSource(
+      dataSource: FakeNewsRemoteDataSource(
         categories: [
           {
             'sourceType': 'telegram',
@@ -141,7 +141,7 @@ void main() {
 
   test('getCategories adds de-duplicated type tabs for mixed types', () async {
     final repository = NewsRepository(
-      dataSource: _FakeNewsRemoteDataSource(
+      dataSource: FakeNewsRemoteDataSource(
         categories: [
           {
             'sourceType': 'telegram',
@@ -193,8 +193,11 @@ Map<String, Object?> _feedItem({int? totalCount}) {
   };
 }
 
-final class _FakeNewsRemoteDataSource implements NewsRemoteDataSource {
-  _FakeNewsRemoteDataSource({this.feed = const [], this.categories = const []});
+final class FakeNewsRemoteDataSource implements NewsRemoteDataSource {
+  FakeNewsRemoteDataSource({
+    this.feed = const [],
+    this.categories = const [],
+  });
 
   final Object? feed;
   final Object? categories;

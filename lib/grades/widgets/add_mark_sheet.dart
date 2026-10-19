@@ -55,8 +55,8 @@ class _AddMarkSheetState extends State<AddMarkSheet> {
       });
       return;
     }
-    final l10n = context.l10n;
     if (value != null) {
+      final l10n = context.l10n;
       ToastManager.showSuccess(context, message: l10n.gradesMarkAdded(value));
     }
     Navigator.of(context).pop();

@@ -51,6 +51,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       state.campusData?.floorForId(state.selectedFloor?.id ?? '');
   Set<String> get syntheticRoomIds {
     final floorPath = state.selectedFloor?.svgPath;
+    if (floorPath == null) return const {};
     final revision = state.campusData?.revision ?? 0;
     return _syntheticRooms['$floorPath:$revision'] ?? const {};
   }
@@ -227,7 +228,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       final revision = _selectionRevision;
       final floor =
           updated.campus.floors.firstWhereOrNull(
-            (floor) => floor.id == state.selectedFloor?.id,
+            (candidate) => candidate.id == state.selectedFloor?.id,
           ) ??
           _firstFloor(updated.campus);
       _floorCache.clear();
@@ -395,7 +396,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       final campus = campusData.campus;
       final floor =
           campus.floors.firstWhereOrNull(
-            (floor) => floor.id == selectedFloor?.id,
+            (candidate) => candidate.id == selectedFloor?.id,
           ) ??
           _firstFloor(campus);
       _floorCache.clear();
@@ -460,7 +461,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           campusData?.campus ?? _localCampusFor(event.campus) ?? event.campus;
       final floor =
           campus.floors.firstWhereOrNull(
-            (floor) => floor.id == event.floor.id,
+            (candidate) => candidate.id == event.floor.id,
           ) ??
           _firstFloor(campus);
       final (rooms, rect) = await _parseFloor(floor, campusData: campusData);
@@ -651,9 +652,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     final result = (rooms, boundingRect);
     _floorCache[cacheKey] = result;
     if (_floorCache.length > 24) {
-      final oldest = _floorCache.keys.first;
-      _floorCache.remove(oldest);
-      _syntheticRooms.remove(oldest);
+      final oldest = _floorCache.keys.firstOrNull;
+      if (oldest != null) {
+        _floorCache.remove(oldest);
+        _syntheticRooms.remove(oldest);
+      }
     }
     return result;
   }

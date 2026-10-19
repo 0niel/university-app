@@ -2,6 +2,75 @@ import 'dart:convert';
 
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
+class NoteDraftStore {
+  NoteDraftStore({required Storage storage})
+    : _storage = storage,
+      _queue = _queues[storage] ??= _DraftQueue();
+
+  static final _queues = Expando<_DraftQueue>();
+  final Storage _storage;
+  final _DraftQueue _queue;
+
+  String _key(String userId, String noteId) {
+    final identity = base64Url.encode(
+      utf8.encode(jsonEncode([userId, noteId])),
+    );
+    return 'note_draft.v1.$identity';
+  }
+
+  NoteDraft? read({required String userId, required String noteId}) {
+    final key = _key(userId, noteId);
+    try {
+      final draft = NoteDraft.fromJson(
+        _queue.cache.containsKey(key) ? _queue.cache[key] : _storage.read(key),
+      );
+      return draft?.userId == userId && draft?.noteId == noteId ? draft : null;
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<void> write(NoteDraft draft) {
+    final key = _key(draft.userId, draft.noteId);
+    final payload = jsonDecode(jsonEncode(draft.toJson())) as Object?;
+    _queue.cache[key] = payload;
+    return _queue.append(key, () => _storage.write(key, payload));
+  }
+
+  Future<bool> writeIfCurrent(
+    NoteDraft draft, {
+    required String? expectedToken,
+  }) async {
+    if (read(userId: draft.userId, noteId: draft.noteId)?.token !=
+        expectedToken) {
+      return false;
+    }
+    await write(draft);
+    return true;
+  }
+
+  Future<void> remove({
+    required String userId,
+    required String noteId,
+    required String token,
+  }) {
+    final key = _key(userId, noteId);
+    if (read(userId: userId, noteId: noteId)?.token != token) {
+      return Future.value();
+    }
+    final previous = _queue.cache[key] ?? _storage.read(key);
+    _queue.cache[key] = null;
+    return _queue.append(key, () async {
+      try {
+        await _storage.delete(key);
+      } on Object {
+        if (_queue.cache[key] == null) _queue.cache[key] = previous;
+        rethrow;
+      }
+    });
+  }
+}
+
 class NoteDraft {
   const NoteDraft({
     required this.noteId,
@@ -69,75 +138,6 @@ class NoteDraft {
   }
 }
 
-class NoteDraftStore {
-  NoteDraftStore({required Storage storage})
-    : _storage = storage,
-      _queue = _queues[storage] ??= _DraftQueue();
-
-  static final _queues = Expando<_DraftQueue>();
-  final Storage _storage;
-  final _DraftQueue _queue;
-
-  String _key(String userId, String noteId) {
-    final identity = base64Url.encode(
-      utf8.encode(jsonEncode([userId, noteId])),
-    );
-    return 'note_draft.v1.$identity';
-  }
-
-  NoteDraft? read({required String userId, required String noteId}) {
-    final key = _key(userId, noteId);
-    try {
-      final draft = NoteDraft.fromJson(
-        _queue.cache.containsKey(key) ? _queue.cache[key] : _storage.read(key),
-      );
-      return draft?.userId == userId && draft?.noteId == noteId ? draft : null;
-    } on Object {
-      return null;
-    }
-  }
-
-  Future<void> write(NoteDraft draft) {
-    final key = _key(draft.userId, draft.noteId);
-    final payload = jsonDecode(jsonEncode(draft.toJson())) as Object?;
-    _queue.cache[key] = payload;
-    return _queue.append(key, () => _storage.write(key, payload));
-  }
-
-  Future<bool> writeIfCurrent(
-    NoteDraft draft, {
-    required String? expectedToken,
-  }) async {
-    if (read(userId: draft.userId, noteId: draft.noteId)?.token !=
-        expectedToken) {
-      return false;
-    }
-    await write(draft);
-    return true;
-  }
-
-  Future<void> remove({
-    required String userId,
-    required String noteId,
-    required String token,
-  }) {
-    final key = _key(userId, noteId);
-    if (read(userId: userId, noteId: noteId)?.token != token) {
-      return Future<void>.value();
-    }
-    final previous = _queue.cache[key] ?? _storage.read(key);
-    _queue.cache[key] = null;
-    return _queue.append(key, () async {
-      try {
-        await _storage.delete(key);
-      } on Object {
-        if (_queue.cache[key] == null) _queue.cache[key] = previous;
-        rethrow;
-      }
-    });
-  }
-}
-
 class _DraftQueue {
   final cache = <String, Object?>{};
   final _tails = <String, Future<void>>{};
@@ -148,7 +148,10 @@ class _DraftQueue {
       (_) => action(),
       onError: (Object _) => action(),
     );
-    _tails[key] = next.then<void>((_) {}, onError: (Object _) {});
+    _tails[key] = next.then(
+      (_) => Future<void>.value(),
+      onError: (Object _) => Future<void>.value(),
+    );
     return next;
   }
 }

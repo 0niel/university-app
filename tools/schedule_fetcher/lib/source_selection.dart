@@ -1,17 +1,10 @@
 import 'package:http/http.dart' as http;
+import 'package:schedule_fetcher/schedule_source_selection.dart';
 import 'package:schedule_fetcher/source_probe.dart';
 import 'package:schedule_fetcher/source_probe_failure.dart';
 import 'package:schedule_fetcher/source_transport.dart';
 
-class ScheduleSourceSelection {
-  const ScheduleSourceSelection({
-    required this.baseUrl,
-    required this.usesRelay,
-  });
-
-  final Uri baseUrl;
-  final bool usesRelay;
-}
+export 'package:schedule_fetcher/schedule_source_selection.dart';
 
 Future<ScheduleSourceSelection> selectScheduleSource({
   required http.Client httpClient,
@@ -40,15 +33,18 @@ Future<ScheduleSourceSelection> selectScheduleSource({
       baseUrl: officialScheduleUri,
       usesRelay: false,
     );
-  } on ScheduleProbeFailure catch (failure) {
+  } on ScheduleProbeFailure catch (failure, stackTrace) {
     officialFailure = failure;
     log?.call(
       'Schedule probe ${failure.describe(ScheduleProbeSource.official)}',
     );
     if (relayBaseUrl == null || relayBaseUrl.host == officialScheduleUri.host) {
-      throw StateError(
-        'Official schedule source is unavailable; no relay configured; '
-        '${failure.describe(ScheduleProbeSource.official)}',
+      Error.throwWithStackTrace(
+        StateError(
+          'Official schedule source is unavailable; no relay configured; '
+          '${failure.describe(ScheduleProbeSource.official)}',
+        ),
+        stackTrace,
       );
     }
   }
@@ -58,17 +54,20 @@ Future<ScheduleSourceSelection> selectScheduleSource({
     try {
       await probe.check(relayBaseUrl, relayAuthorization, deadline: deadline);
       return ScheduleSourceSelection(baseUrl: relayBaseUrl, usesRelay: true);
-    } on ScheduleProbeFailure catch (failure) {
+    } on ScheduleProbeFailure catch (failure, stackTrace) {
       log?.call(
         'Schedule probe ${failure.describe(ScheduleProbeSource.relay)} '
         'attempt=$attempt',
       );
       const retryDelay = Duration(seconds: 5);
       if (!failure.retryable || deadline.difference(now()) <= retryDelay) {
-        throw StateError(
-          'Neither official schedule source nor relay passed health checks; '
-          '${officialFailure.describe(ScheduleProbeSource.official)}; '
-          '${failure.describe(ScheduleProbeSource.relay)}',
+        Error.throwWithStackTrace(
+          StateError(
+            'Neither official schedule source nor relay passed health checks; '
+            '${officialFailure.describe(ScheduleProbeSource.official)}; '
+            '${failure.describe(ScheduleProbeSource.relay)}',
+          ),
+          stackTrace,
         );
       }
       await wait(retryDelay);

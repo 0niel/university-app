@@ -1,12 +1,8 @@
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/widgets/app_segmented_bar_part.dart';
 import 'package:flutter/widgets.dart';
 
-class AppSegmentedBarPart {
-  const AppSegmentedBarPart({required this.flex, required this.color});
-
-  final int flex;
-  final Color color;
-}
+export 'app_segmented_bar_part.dart';
 
 class AppSegmentedBar extends StatelessWidget {
   const AppSegmentedBar({

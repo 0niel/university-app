@@ -24,7 +24,7 @@ class AttendanceView extends StatelessWidget {
             AttendanceHeader(
               onAdd: () => showAddAbsenceSheet(
                 context,
-                cubit: context.read<AttendanceCubit>(),
+                cubit: context.read(),
               ),
             ),
             Padding(

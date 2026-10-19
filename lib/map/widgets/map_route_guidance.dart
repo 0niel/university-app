@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
@@ -63,10 +64,12 @@ class _MapRouteGuidanceState extends State<MapRouteGuidance> {
     final stepIndex = _previewStep ?? widget.stepIndex;
     final route = widget.route;
     final campus = widget.campus;
-    final instruction = route.instructions[stepIndex];
+    if (stepIndex < 0) return const SizedBox.shrink();
+    final instruction = route.instructions.elementAtOrNull(stepIndex);
+    if (instruction == null) return const SizedBox.shrink();
     final isLast = stepIndex == route.instructions.length - 1;
     final colors = context.colors;
-    final compact = MediaQuery.sizeOf(context).height < 600;
+    final compact = MediaQuery.heightOf(context) < 600;
     final fullLabel = isLast
         ? l10n.mapRouteEnd
         : mapRouteInstructionLabel(instruction, campus, l10n);

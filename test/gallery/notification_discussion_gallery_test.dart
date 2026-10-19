@@ -131,7 +131,7 @@ void main() {
                 home: switch (scene) {
                   _Scene.discussion || _Scene.discussionCommentsFailure =>
                     const DiscoursePostOverviewPageView(postId: 1),
-                  _ => Builder(
+                  _Scene.history || _Scene.historyEmpty => Builder(
                     builder: (context) => Scaffold(
                       backgroundColor: context.colors.canvas,
                       body: Center(
@@ -160,8 +160,11 @@ void main() {
             ),
           ),
         );
-        if (scene == _Scene.history || scene == _Scene.historyEmpty) {
-          await tester.tap(find.text('Открыть'));
+        switch (scene) {
+          case _Scene.history || _Scene.historyEmpty:
+            await tester.tap(find.text('Открыть'));
+          case _Scene.discussion || _Scene.discussionCommentsFailure:
+            break;
         }
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);

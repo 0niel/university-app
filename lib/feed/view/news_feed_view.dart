@@ -32,10 +32,10 @@ class NewsFeedView extends StatelessWidget {
     final categoriesState = context.watch<CategoriesBloc>().state;
     final category =
         categoriesState.selectedCategory ??
-        Category(id: feedAllCategoryId, name: l10n.all);
+        Category(id: kFeedAllCategoryId, name: l10n.all);
     final items = [
       FeedSourceRailItem(
-        id: feedAllCategoryId,
+        id: kFeedAllCategoryId,
         name: l10n.all,
         abbr: l10n.newsSourceAllAbbr,
       ),

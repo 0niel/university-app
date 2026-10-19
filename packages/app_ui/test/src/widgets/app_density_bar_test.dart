@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: SizedBox(width: 240, child: child))),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(
+      body: Center(child: SizedBox(width: 240, child: child)),
+    ),
+  );
 
   group('AppDensityBar', () {
     testWidgets('maps every colour onto a segmented bar part', (tester) async {

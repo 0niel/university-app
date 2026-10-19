@@ -156,7 +156,7 @@ class _FindFriendsViewState extends State<FindFriendsView> {
                       controller: _controller,
                       onChanged: _onQueryChanged,
                       hintText: context.l10n.friendsSearchHint,
-                      onCanvas: true,
+                      isOnCanvas: true,
                     ),
                   ),
                 ),

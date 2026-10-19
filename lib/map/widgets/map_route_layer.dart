@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/map/services/map_planar_scale.dart';
@@ -74,7 +75,9 @@ class _RoutePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (parts.isEmpty) return;
+    final routeStart = parts.firstOrNull?.points.firstOrNull;
+    final routeEnd = parts.lastOrNull?.points.lastOrNull;
+    if (routeStart == null || routeEnd == null) return;
     final rawScale = transform == null ? 1.0 : mapPlanarScale(transform!.value);
     final scale = rawScale.isFinite && rawScale > 0
         ? rawScale.clamp(.01, 100.0)
@@ -140,7 +143,7 @@ class _RoutePainter extends CustomPainter {
     }
 
     if (showStart) {
-      final start = parts.first.points.first;
+      final start = routeStart;
       canvas
         ..drawCircle(start, 8 / scale, Paint()..color = colors.surface)
         ..drawCircle(
@@ -152,7 +155,7 @@ class _RoutePainter extends CustomPainter {
         );
     }
     if (showDestination) {
-      final end = parts.last.points.last;
+      final end = routeEnd;
       final marker = RRect.fromRectAndRadius(
         Rect.fromCenter(center: end, width: 19 / scale, height: 19 / scale),
         Radius.circular(AppRadius.focusOutline / scale),
@@ -193,12 +196,12 @@ class _RoutePainter extends CustomPainter {
       final overlapsStart =
           showStart &&
           instructionBounds.overlaps(
-            screenBounds(parts.first.points.first, 8).inflate(2),
+            screenBounds(routeStart, 8).inflate(2),
           );
       final overlapsDestination =
           showDestination &&
           instructionBounds.overlaps(
-            screenBounds(parts.last.points.last, 11.5).inflate(2),
+            screenBounds(routeEnd, 11.5).inflate(2),
           );
       if (overlapsStart || overlapsDestination) return;
       canvas
@@ -216,7 +219,7 @@ class _RoutePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RoutePainter oldDelegate) =>
-      oldDelegate.segments != segments ||
+      !identical(oldDelegate.segments, segments) ||
       oldDelegate.colors != colors ||
       oldDelegate.transform != transform ||
       oldDelegate.instructionPoint != instructionPoint ||
@@ -238,10 +241,11 @@ List<_RoutePart> _routeParts(List<List<Offset>> segments) {
         flush();
         continue;
       }
-      if (points.isEmpty) {
+      final previous = points.lastOrNull;
+      if (previous == null) {
         points.add(point);
       } else {
-        final distance = (point - points.last).distance;
+        final distance = (point - previous).distance;
         if (!distance.isFinite) {
           flush();
           points.add(point);
@@ -257,14 +261,17 @@ List<_RoutePart> _routeParts(List<List<Offset>> segments) {
 
 class _RoutePart {
   _RoutePart(this.points) {
-    path.moveTo(points.first.dx, points.first.dy);
-    for (var i = 1; i < points.length; i++) {
-      final start = points[i - 1];
-      final delta = points[i] - start;
+    final first = points.firstOrNull;
+    if (first == null) return;
+    path.moveTo(first.dx, first.dy);
+    var previous = first;
+    for (final point in points.skip(1)) {
+      final delta = point - previous;
       final distance = delta.distance;
-      edges.add(_RouteEdge(start, delta / distance, distance));
+      edges.add(_RouteEdge(previous, delta / distance, distance));
       length += distance;
-      path.lineTo(points[i].dx, points[i].dy);
+      path.lineTo(point.dx, point.dy);
+      previous = point;
     }
   }
 

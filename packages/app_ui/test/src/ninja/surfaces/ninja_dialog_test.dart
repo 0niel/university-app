@@ -1,12 +1,30 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 import '../../kit_harness.dart';
 
 void main() {
+  Finder action(String label) => find
+      .ancestor(of: find.text(label), matching: find.byType(AppPressable))
+      .first;
+
+  BoxDecoration actionDecoration(WidgetTester tester, String label) =>
+      tester
+              .widget<AnimatedContainer>(
+                find
+                    .ancestor(
+                      of: find.text(label),
+                      matching: find.byType(AnimatedContainer),
+                    )
+                    .first,
+              )
+              .decoration!
+          as BoxDecoration;
+
   group('NinjaDialog', () {
-    testWidgets('paints a canvas r28 card with 17/700 title and 13.5 body', (
+    testWidgets('paints a glass r28 card with 17/700 title and 13.5 body', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -24,17 +42,19 @@ void main() {
         ),
       );
 
-      final card = kitDecoration(
-        tester,
-        find
-            .descendant(
-              of: find.byType(NinjaDialog),
-              matching: find.byType(DecoratedBox),
-            )
-            .first,
+      final card = tester.widget<AppGlassSurface>(
+        find.descendant(
+          of: find.byType(NinjaDialog),
+          matching: find.byType(AppGlassSurface),
+        ),
       );
-      expect(card.color, kitColors.canvas);
-      expect(card.borderRadius, BorderRadius.circular(AppRadius.dialog));
+      expect(card.borderRadius, AppRadius.dialog);
+      expect(card.tone, AppGlassTone.regular);
+      final lens = tester.widget<LiquidGlassLens>(find.byType(LiquidGlassLens));
+      expect(lens.style.color.withValues(alpha: 1), kitColors.surface);
+      expect(lens.style.color.a, greaterThan(.9));
+      expect(card.role, AppGlassRole.overlay);
+      expect(lens.style.specular, AppGlassStyle.rim);
 
       final title = kitStyleOf(tester, 'Удалить своё расписание?');
       expect(title?.fontSize, 17);
@@ -44,16 +64,22 @@ void main() {
       expect(body?.height, 1.45);
       expect(body?.color, kitColors.muted);
 
-      final buttons = tester
-          .widgetList<NinjaPillButton>(find.byType(NinjaPillButton))
-          .toList();
-      expect(buttons, hasLength(2));
-      expect(buttons[0].tone, NinjaPillTone.surface);
-      expect(buttons[0].height, AppControlSize.buttonMedium);
-      expect(buttons[1].tone, NinjaPillTone.danger);
+      expect(
+        tester.getSize(action('Отмена')).height,
+        AppControlSize.buttonMedium,
+      );
+      expect(
+        tester.getSize(action('Удалить')).height,
+        AppControlSize.buttonMedium,
+      );
+      expect(actionDecoration(tester, 'Отмена').color, kitColors.surface);
+      expect(actionDecoration(tester, 'Удалить').color, kitColors.danger);
+      expect(
+        tester.getCenter(action('Отмена')).dy,
+        tester.getCenter(action('Удалить')).dy,
+      );
       expect(kitStyleOf(tester, 'Удалить')?.color, kitColors.white);
       expect(kitStyleOf(tester, 'Удалить')?.fontSize, 14);
-      expect(kitDecorationOf(tester, NinjaPillButton).color, kitColors.surface);
     });
 
     testWidgets('non-destructive confirm is accent and stacks at large text', (
@@ -73,10 +99,16 @@ void main() {
         ),
       );
 
-      final confirm = tester.widget<NinjaPillButton>(
-        find.widgetWithText(NinjaPillButton, 'Выйти'),
+      expect(actionDecoration(tester, 'Выйти').color, kitColors.accent);
+      expect(kitStyleOf(tester, 'Выйти')?.color, kitColors.onAccent);
+      expect(
+        tester.getRect(action('Выйти')).bottom,
+        lessThan(tester.getRect(action('Отмена')).top),
       );
-      expect(confirm.tone, NinjaPillTone.primary);
+      expect(
+        tester.getSize(action('Выйти')).height,
+        greaterThanOrEqualTo(AppControlSize.buttonMedium),
+      );
       expect(
         find.descendant(
           of: find.byType(NinjaDialog),
@@ -104,13 +136,13 @@ void main() {
 
   group('showNinjaConfirmDialog', () {
     Widget host(Future<void> Function(BuildContext) onTap) => wrapKit(
-          Builder(
-            builder: (context) => AppPressable(
-              onTap: () => onTap(context),
-              child: const Text('open'),
-            ),
-          ),
-        );
+      Builder(
+        builder: (context) => AppPressable(
+          onTap: () => onTap(context),
+          child: const Text('open'),
+        ),
+      ),
+    );
 
     testWidgets('resolves true on confirm under a scrim barrier', (
       tester,

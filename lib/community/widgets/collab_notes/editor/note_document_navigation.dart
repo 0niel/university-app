@@ -1,16 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:rtu_mirea_app/community/widgets/collab_notes/editor/note_heading.dart';
 
-class NoteHeading {
-  const NoteHeading({
-    required this.title,
-    required this.offset,
-    required this.level,
-  });
-  final String title;
-  final int offset;
-  final int level;
-}
+export 'note_heading.dart';
 
 List<NoteHeading> noteHeadings(Document document) {
   final headings = <NoteHeading>[];

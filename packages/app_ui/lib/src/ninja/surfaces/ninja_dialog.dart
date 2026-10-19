@@ -1,7 +1,10 @@
+import 'package:app_ui/src/animations/ninja_motion.dart';
 import 'package:app_ui/src/colors/colors.dart';
-import 'package:app_ui/src/ninja/surfaces/ninja_pill_button.dart';
+import 'package:app_ui/src/glass/app_glass_surface.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_control_surface.dart';
+import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/material.dart';
 
 class NinjaDialog extends StatelessWidget {
@@ -36,11 +39,8 @@ class NinjaDialog extends StatelessWidget {
     final hasActions = confirmLabel != null || cancelLabel != null;
     final iconWidget = icon;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.canvas,
-        borderRadius: BorderRadius.circular(AppRadius.dialog),
-      ),
+    return AppGlassSurface(
+      role: AppGlassRole.overlay,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.xl,
@@ -58,8 +58,11 @@ class NinjaDialog extends StatelessWidget {
             ],
             Text(
               title,
-              style: AppText.sans(17, FontWeight.w700, height: 1.2)
-                  .copyWith(color: colors.ink),
+              style: AppText.sans(
+                17,
+                FontWeight.w700,
+                height: 1.2,
+              ).copyWith(color: colors.ink),
             ),
             if (messageText != null) ...[
               const SizedBox(height: AppSpacing.sm),
@@ -116,33 +119,27 @@ class _NinjaDialogActions extends StatelessWidget {
 
     final cancelButton = cancel == null
         ? null
-        : NinjaPillButton(
+        : _NinjaDialogAction(
             label: cancel,
             onPressed: onCancel,
-            tone: NinjaPillTone.surface,
-            height: AppControlSize.buttonMedium,
-            expanded: true,
-            textStyle: AppText.bodyStrong,
           );
     final confirmButton = confirm == null
         ? null
-        : NinjaPillButton(
+        : _NinjaDialogAction(
             label: confirm,
             onPressed: onConfirm,
-            tone: destructive ? NinjaPillTone.danger : NinjaPillTone.primary,
-            height: AppControlSize.buttonMedium,
-            expanded: true,
-            textStyle: AppText.bodyStrong,
+            primary: true,
+            destructive: destructive,
           );
 
     if (largeText) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (confirmButton != null) confirmButton,
+          ?confirmButton,
           if (confirmButton != null && cancelButton != null)
             const SizedBox(height: AppSpacing.sm),
-          if (cancelButton != null) cancelButton,
+          ?cancelButton,
         ],
       );
     }
@@ -158,6 +155,64 @@ class _NinjaDialogActions extends StatelessWidget {
   }
 }
 
+class _NinjaDialogAction extends StatelessWidget {
+  const _NinjaDialogAction({
+    required this.label,
+    required this.onPressed,
+    this.primary = false,
+    this.destructive = false,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool primary;
+  final bool destructive;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final background = primary
+        ? (destructive ? colors.danger : colors.accent)
+        : colors.surface;
+    final foreground = primary
+        ? (destructive ? colors.white : colors.onAccent)
+        : colors.ink;
+    return AppPressable(
+      onTap: onPressed,
+      enabled: onPressed != null,
+      semanticsLabel: label,
+      semanticsButton: true,
+      child: AppControlSurface(
+        color: background,
+        borderRadius: AppRadius.full,
+        tone: primary
+            ? AppControlSurfaceTone.accent
+            : AppControlSurfaceTone.neutral,
+        enabled: onPressed != null,
+        child: Container(
+          constraints: const BoxConstraints(
+            minHeight: AppControlSize.buttonMedium,
+          ),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.fieldGap,
+            vertical: AppSpacing.sm,
+          ),
+          child: Center(
+            widthFactor: 1,
+            heightFactor: 1,
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: AppText.bodyStrong.copyWith(color: foreground),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 Future<T?> showNinjaDialog<T>(
   BuildContext context, {
   required WidgetBuilder builder,
@@ -166,26 +221,98 @@ Future<T?> showNinjaDialog<T>(
   bool useRootNavigator = true,
 }) {
   final colors = context.colors;
-  return showDialog(
+  final navigator = Navigator.of(context, rootNavigator: useRootNavigator);
+  final themes = InheritedTheme.capture(from: context, to: navigator.context);
+  final mediaQuery = MediaQuery.of(context);
+  final navigatorMediaQuery = MediaQuery.of(navigator.context);
+  final direction = Directionality.of(context);
+  final duration = NinjaMotion.of(context, NinjaMotion.fast);
+  return showRawDialog(
     context: context,
-    barrierDismissible: barrierDismissible,
     useRootNavigator: useRootNavigator,
-    barrierColor: colors.scrim,
-    builder: (dialogContext) => Material(
-      type: MaterialType.transparency,
-      child: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.xlg),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxWidth),
-              child: builder(dialogContext),
+    routeBuilder: (routeContext, dialogBuilder) => _NinjaDialogRoute<T>(
+      context: routeContext,
+      builder: dialogBuilder,
+      themes: themes,
+      barrierColor: colors.scrim,
+      barrierDismissible: barrierDismissible,
+      duration: duration,
+    ),
+    builder: (routeContext) => MediaQuery(
+      data: MediaQuery.of(routeContext).copyWith(
+        textScaler: mediaQuery.textScaler == navigatorMediaQuery.textScaler
+            ? null
+            : mediaQuery.textScaler,
+        disableAnimations:
+            mediaQuery.disableAnimations ==
+                navigatorMediaQuery.disableAnimations
+            ? null
+            : mediaQuery.disableAnimations,
+        accessibleNavigation:
+            mediaQuery.accessibleNavigation ==
+                navigatorMediaQuery.accessibleNavigation
+            ? null
+            : mediaQuery.accessibleNavigation,
+        boldText: mediaQuery.boldText == navigatorMediaQuery.boldText
+            ? null
+            : mediaQuery.boldText,
+      ),
+      child: Directionality(
+        textDirection: direction,
+        child: Builder(
+          builder: (dialogContext) => Material(
+            type: MaterialType.transparency,
+            child: SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSpacing.xlg),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: builder(dialogContext),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
       ),
     ),
   );
+}
+
+class _NinjaDialogRoute<T> extends DialogRoute<T> {
+  _NinjaDialogRoute({
+    required super.context,
+    required super.builder,
+    required super.themes,
+    required super.barrierColor,
+    required super.barrierDismissible,
+    required Duration duration,
+  }) : super(
+         traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+         animationStyle: AnimationStyle(duration: duration),
+       );
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (transitionDuration == Duration.zero ||
+        NinjaMotion.of(context) == Duration.zero) {
+      return child;
+    }
+    return ScaleTransition(
+      scale: animation
+          .drive(CurveTween(curve: NinjaMotion.enter))
+          .drive(
+            Tween<double>(begin: .96, end: 1),
+          ),
+      child: child,
+    );
+  }
 }
 
 Future<bool> showNinjaConfirmDialog(

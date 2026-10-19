@@ -56,7 +56,7 @@ class _MapCartographicLayerState extends State<MapCartographicLayer> {
     super.initState();
     _strokeScale = MapScaleRepaint(widget.transform);
     _index();
-    _readScale();
+    _scale = _currentScale();
     widget.transform?.addListener(_zoomChanged);
   }
 
@@ -109,22 +109,22 @@ class _MapCartographicLayerState extends State<MapCartographicLayer> {
     ];
   }
 
-  void _readScale() {
+  double _currentScale() {
     final matrix = widget.transform?.value;
     final raw = matrix == null ? 1.0 : mapPlanarScale(matrix);
     if (raw.isFinite && raw > 0) {
-      _scale = math
+      return math
           .pow(1.12, (math.log(raw) / math.log(1.12)).floor())
           .toDouble();
     }
+    return _scale;
   }
 
   void _zoomChanged() {
-    final before = _scale;
-    _readScale();
-    if (_scale != before) {
+    final scale = _currentScale();
+    if (_scale != scale) {
       widget.hitIndex?.clear();
-      setState(() {});
+      setState(() => _scale = scale);
     }
   }
 
@@ -153,7 +153,7 @@ class _MapCartographicLayerState extends State<MapCartographicLayer> {
     if (oldWidget.transform != widget.transform) {
       oldWidget.transform?.removeListener(_zoomChanged);
       widget.transform?.addListener(_zoomChanged);
-      _readScale();
+      _scale = _currentScale();
     }
   }
 
@@ -337,7 +337,7 @@ class _RoomsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RoomsPainter old) =>
-      old.features != features ||
+      !identical(old.features, features) ||
       old.colors != colors ||
       old.selectedId != selectedId ||
       old.scale != scale;
@@ -408,7 +408,6 @@ class _LabelsPainter extends CustomPainter {
       final selected = selectedId == feature.room.roomId;
       final service = feature.service;
       final landmark = feature.landmarkPriority > 0;
-      final detail = width >= 130 && height >= 55;
       if (!service && feature.label.isEmpty) continue;
       if (!selected && !service && (width < 34 || height < fontSize + 7)) {
         continue;
@@ -433,6 +432,7 @@ class _LabelsPainter extends CustomPainter {
               (!overview && width >= 80 && height >= 44));
       TextPainter? text;
       if (withText) {
+        final detail = width >= 130 && height >= 55;
         text =
             TextPainter(
               text: TextSpan(
@@ -606,7 +606,7 @@ class _LabelsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_LabelsPainter old) =>
-      old.features != features ||
+      !identical(old.features, features) ||
       old.colors != colors ||
       old.scale != scale ||
       old.selectedId != selectedId ||

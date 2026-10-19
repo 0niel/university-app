@@ -6,14 +6,14 @@ import '../kit_harness.dart';
 
 void main() {
   Finder surface() => find.descendant(
-        of: find.byType(AppPillButton),
-        matching: find.byType(Container),
-      );
+    of: find.byType(AppPillButton),
+    matching: find.byType(Container),
+  );
 
   Finder pressable() => find.descendant(
-        of: find.byType(AppPillButton),
-        matching: find.byType(AppPressable),
-      );
+    of: find.byType(AppPillButton),
+    matching: find.byType(AppPressable),
+  );
 
   testWidgets('default pill keeps compact 44px reference visuals', (
     tester,

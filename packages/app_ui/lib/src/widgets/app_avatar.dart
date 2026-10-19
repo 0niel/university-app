@@ -26,17 +26,17 @@ class AppAvatar extends StatelessWidget {
   final bool? online;
 
   static List<Color> _palette(AppColors colors) => [
-        colors.accent,
-        colors.lecture,
-        colors.lab,
-        colors.exam,
-        colors.warn,
-        colors.practice,
-      ];
+    colors.accent,
+    colors.lecture,
+    colors.lab,
+    colors.exam,
+    colors.warn,
+    colors.practice,
+  ];
 
   static Color _pick(List<Color> palette, String name) {
     final hash = name.codeUnits.fold(0, (sum, unit) => sum + unit);
-    return palette[hash % palette.length];
+    return palette.elementAtOrNull(hash % palette.length)!;
   }
 
   static Color colorFor(String name) => _pick(_palette(AppColors.light), name);
@@ -57,7 +57,7 @@ class AppAvatar extends StatelessWidget {
         .split(RegExp(r'\s+'))
         .where((part) => part.isNotEmpty)
         .take(2)
-        .map((part) => part.characters.first.toUpperCase());
+        .map((part) => part.characters.firstOrNull?.toUpperCase() ?? '?');
     final initials = parts.join();
     return initials.isEmpty ? '?' : initials;
   }
@@ -190,12 +190,12 @@ class AppAvatarStack extends StatelessWidget {
     final count = visible.length + (hidden > 0 ? 1 : 0);
 
     Widget ringed(Widget child) => Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: colors.surface, width: _ring),
-          ),
-          child: child,
-        );
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: colors.surface, width: _ring),
+      ),
+      child: child,
+    );
 
     return SizedBox(
       height: diameter,

@@ -185,7 +185,7 @@ void main() {
       await finish(tester);
       verifyUpload();
       final before = controller.document.toDelta().toJson();
-      upload.completeError(StateError('Upload failed'));
+      upload.completeError(StateError('Upload failed'), StackTrace.current);
       await tester.pumpAndSettle();
       expect(find.text('Не удалось загрузить изображение'), findsOneWidget);
       expect(controller.document.toDelta().toJson(), before);

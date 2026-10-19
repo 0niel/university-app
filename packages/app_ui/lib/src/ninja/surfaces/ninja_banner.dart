@@ -1,11 +1,12 @@
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_banner_tone.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_banner.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
 
-enum NinjaBannerTone { danger, warn, success, info }
+export 'ninja_banner_tone.dart';
 
 class NinjaBanner extends StatelessWidget {
   const NinjaBanner({
@@ -54,68 +55,99 @@ class NinjaBanner extends StatelessWidget {
         color: tone.tintOf(colors),
         borderRadius: BorderRadius.circular(AppRadius.banner),
       ),
-      child: Row(
-        crossAxisAlignment: bodyText == null
-            ? CrossAxisAlignment.center
-            : CrossAxisAlignment.start,
-        children: [
-          if (icon != null)
-            IconTheme(
-              data: IconThemeData(size: AppIconSize.compact, color: accent),
-              child: icon!,
-            )
-          else
-            Padding(
-              padding: EdgeInsets.only(
-                top: bodyText == null ? AppSpacing.zero : AppSpacing.xs,
-              ),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: accent,
-                  shape: BoxShape.circle,
-                ),
-                child: const SizedBox.square(dimension: 8),
-              ),
-            ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AppText.label.copyWith(color: colors.ink)),
-                if (bodyText != null) ...[
-                  const SizedBox(height: AppSpacing.micro),
-                  Text(
-                    bodyText,
-                    style: AppText.subtext.copyWith(color: colors.muted),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (action != null) ...[
-            const SizedBox(width: AppSpacing.md),
-            AppPressable(
-              onTap: onAction,
-              semanticsLabel: action,
-              semanticsButton: true,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 44),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-                  child: Center(
-                    child: Text(
-                      action,
-                      style: AppText.subtextBold.copyWith(color: accent),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final stacked =
+              constraints.maxWidth < 360 ||
+              MediaQuery.textScalerOf(context).scale(14) > 18;
+          final actionWidget = action == null
+              ? null
+              : AppPressable(
+                  onTap: onAction,
+                  semanticsLabel: action,
+                  semanticsButton: true,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 44),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xxs,
+                      ),
+                      child: Center(
+                        widthFactor: 1,
+                        heightFactor: 1,
+                        child: Text(
+                          action,
+                          style: AppText.subtextBold.copyWith(color: accent),
+                        ),
+                      ),
                     ),
                   ),
+                );
+          final content = Row(
+            crossAxisAlignment: bodyText == null
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.start,
+            children: [
+              if (icon != null)
+                IconTheme(
+                  data: IconThemeData(size: AppIconSize.compact, color: accent),
+                  child: icon!,
+                )
+              else
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: bodyText == null ? AppSpacing.zero : AppSpacing.xs,
+                  ),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: accent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const SizedBox.square(dimension: 8),
+                  ),
+                ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppText.label.copyWith(color: colors.ink),
+                    ),
+                    if (bodyText != null) ...[
+                      const SizedBox(height: AppSpacing.micro),
+                      Text(
+                        bodyText,
+                        style: AppText.subtext.copyWith(color: colors.muted),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ),
-          ],
-        ],
+              if (!stacked && actionWidget != null) ...[
+                const SizedBox(width: AppSpacing.md),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: constraints.maxWidth * .4,
+                  ),
+                  child: actionWidget,
+                ),
+              ],
+            ],
+          );
+          if (!stacked || actionWidget == null) return content;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              content,
+              const SizedBox(height: AppSpacing.xs),
+              Align(alignment: Alignment.centerRight, child: actionWidget),
+            ],
+          );
+        },
       ),
     );
   }
@@ -123,16 +155,16 @@ class NinjaBanner extends StatelessWidget {
 
 extension NinjaBannerToneX on NinjaBannerTone {
   Color accentOf(AppColors colors) => switch (this) {
-        NinjaBannerTone.danger => colors.danger,
-        NinjaBannerTone.warn => colors.warn,
-        NinjaBannerTone.success => colors.lecture,
-        NinjaBannerTone.info => colors.accent,
-      };
+    NinjaBannerTone.danger => colors.danger,
+    NinjaBannerTone.warn => colors.warn,
+    NinjaBannerTone.success => colors.lecture,
+    NinjaBannerTone.info => colors.accent,
+  };
 
   Color tintOf(AppColors colors) => switch (this) {
-        NinjaBannerTone.danger => colors.examTint,
-        NinjaBannerTone.warn => colors.warnTint,
-        NinjaBannerTone.success => colors.lectureTint,
-        NinjaBannerTone.info => colors.tint,
-      };
+    NinjaBannerTone.danger => colors.examTint,
+    NinjaBannerTone.warn => colors.warnTint,
+    NinjaBannerTone.success => colors.lectureTint,
+    NinjaBannerTone.info => colors.tint,
+  };
 }

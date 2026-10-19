@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:rtu_mirea_app/friends/services/friends_location_service.dart';
 
-class _Geolocator extends GeolocatorPlatform {
+class FakeFriendsGeolocator extends GeolocatorPlatform {
   final positions = StreamController<Position>.broadcast();
   final services = StreamController<ServiceStatus>.broadcast();
   LocationPermission permission = LocationPermission.whileInUse;
@@ -27,8 +27,8 @@ class _Geolocator extends GeolocatorPlatform {
   }
 
   @override
-  Future<LocationPermission> checkPermission() async =>
-      permissionResult?.future ?? permission;
+  Future<LocationPermission> checkPermission() =>
+      permissionResult?.future ?? Future.value(permission);
 
   @override
   Future<LocationPermission> requestPermission() async {
@@ -49,10 +49,10 @@ class _Geolocator extends GeolocatorPlatform {
   @override
   Future<Position> getCurrentPosition({
     LocationSettings? locationSettings,
-  }) async {
+  }) {
     currentRequests++;
     if (!currentStarted.isCompleted) currentStarted.complete();
-    return currentResult?.future ?? _position();
+    return currentResult?.future ?? Future.value(_position());
   }
 
   @override
@@ -83,12 +83,12 @@ Position _position({double latitude = 55.67, DateTime? timestamp}) => Position(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  late _Geolocator geolocator;
+  late FakeFriendsGeolocator geolocator;
   late FriendsLocationService service;
   late List<bool> backgroundSharing;
 
   setUp(() {
-    geolocator = _Geolocator();
+    geolocator = FakeFriendsGeolocator();
     backgroundSharing = [];
     service = FriendsLocationService(
       geolocator: geolocator,

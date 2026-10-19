@@ -23,6 +23,7 @@ import '../../helpers/settle_map_navigation.dart';
 class _CampusRepository extends Mock implements CampusRepository {}
 
 class _NoCache implements MapDataCache {
+  const _NoCache();
   @override
   Future<String?> read(String key) async => null;
 
@@ -45,7 +46,7 @@ void main() {
       late final Completer<void> releaseRefresh;
       final repository = MapDataRepository(
         organizationId: 'mirea',
-        cache: _NoCache(),
+        cache: const _NoCache(),
         bundledCatalogAsset: MapDataRepository.pulseCatalogAsset,
         rpc: (name, _) async {
           if (refreshedCampus != null) {
@@ -229,8 +230,10 @@ void main() {
                 )
                 as Map<String, dynamic>;
         refreshedCampus['revision'] = campus.revision + 1;
-        for (final edge in (refreshedCampus['graph'] as Map)['edges'] as List) {
-          (edge as Map)['closed'] = true;
+        final {'graph': graph} = refreshedCampus;
+        final {'edges': edges} = graph as Map;
+        for (final edge in edges! as List) {
+          (edge! as Map)['closed'] = true;
         }
         await tester.runAsync(() async {
           map.add(const MapEvent.refreshRequested());

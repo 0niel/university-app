@@ -258,8 +258,7 @@ void main() {
     when(() => cubit.state).thenReturn(
       const MiniAppsCatalogState(status: .populated, query: 'physics'),
     );
-    when(() => cubit.queryChanged('')).thenAnswer((_) async {});
-    when(() => cubit.categoryChanged(null)).thenAnswer((_) async {});
+    when(cubit.resetFilters).thenAnswer((_) async {});
     await _pump(
       tester,
       BlocProvider<MiniAppsCatalogCubit>.value(
@@ -283,8 +282,7 @@ void main() {
       isFalse,
     );
     await tester.tap(find.text('Сбросить фильтр'));
-    verify(() => cubit.queryChanged('')).called(1);
-    verify(() => cubit.categoryChanged(null)).called(1);
+    verify(cubit.resetFilters).called(1);
     expect(tester.takeException(), isNull);
   });
 

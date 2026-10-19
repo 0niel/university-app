@@ -85,7 +85,7 @@ class _AppPressStateState extends State<AppPressState> {
   Widget build(BuildContext context) {
     final reduceMotion =
         (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
-            (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
+        (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
     final pressed = _pressed && _interactive;
 
     var child = widget.builder(context, pressed: pressed);
@@ -128,14 +128,7 @@ class _AppPressStateState extends State<AppPressState> {
         SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
         SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
       },
-      actions: {
-        ActivateIntent: CallbackAction<ActivateIntent>(
-          onInvoke: (_) {
-            _handleTap();
-            return null;
-          },
-        ),
-      },
+      actions: {ActivateIntent: _PressAction(_handleTap)},
       child: CustomPaint(
         foregroundPainter: _showFocus && _interactive
             ? _FocusOutline(context.colors.accent)
@@ -146,7 +139,8 @@ class _AppPressStateState extends State<AppPressState> {
     return Semantics(
       container: true,
       label: widget.semanticsLabel,
-      button: widget.semanticsButton ??
+      button:
+          widget.semanticsButton ??
           (_interactive || widget.semanticsLabel != null),
       selected: widget.semanticsSelected,
       toggled: widget.semanticsToggled,
@@ -160,11 +154,24 @@ class _AppPressStateState extends State<AppPressState> {
           ? _focusNode.requestFocus
           : null,
       onTap: _interactive && widget.onTap != null ? _handleTap : null,
-      onLongPress:
-          _interactive && widget.onLongPress != null ? _handleLongPress : null,
+      onLongPress: _interactive && widget.onLongPress != null
+          ? _handleLongPress
+          : null,
       excludeSemantics: widget.semanticsLabel != null,
       child: child,
     );
+  }
+}
+
+class _PressAction extends Action<ActivateIntent> {
+  _PressAction(this.onActivate);
+
+  final VoidCallback onActivate;
+
+  @override
+  Object? invoke(ActivateIntent intent) {
+    onActivate();
+    return null;
   }
 }
 

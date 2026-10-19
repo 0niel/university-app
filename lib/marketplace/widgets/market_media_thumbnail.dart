@@ -14,7 +14,7 @@ class MarketMediaThumbnail extends StatelessWidget {
 
   final MarketMediaDraftItem item;
   final bool isCover;
-  final VoidCallback onRemove;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +101,7 @@ class MarketMediaThumbnail extends StatelessWidget {
               top: 2,
               child: AppPressState(
                 onTap: onRemove,
+                enabled: onRemove != null,
                 pressedScale: 0.9,
                 semanticsLabel: l10n.marketRemoveMediaItem,
                 semanticsButton: true,
@@ -142,14 +143,16 @@ class _MediaPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bytes = item.bytes;
-    if (bytes != null) return Image.memory(bytes, fit: BoxFit.cover);
+    if (bytes != null) {
+      return Image.memory(bytes, fit: BoxFit.cover, excludeFromSemantics: true);
+    }
     final url = item.previewUrl;
     if (url != null && url.isNotEmpty) {
       return CachedNetworkImage(
         imageUrl: url,
         fit: BoxFit.cover,
-        placeholder: (context, url) => const AppStripePlaceholder(),
-        errorWidget: (context, url, error) => const AppStripePlaceholder(),
+        placeholder: (_, _) => const AppStripePlaceholder(),
+        errorWidget: (_, _, _) => const AppStripePlaceholder(),
       );
     }
     return const AppStripePlaceholder();

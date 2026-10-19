@@ -339,13 +339,17 @@ void main() {
     },
   );
 
-  testWidgets('theme sync replaces stale surfaces in both modes', (
+  testWidgets('theme and glass sync preserve navigation and user scopes', (
     tester,
   ) async {
     initialize();
     final router = GoRouter(
       routes: [
         GoRoute(path: '/', builder: (_, _) => const Text('Theme probe')),
+        GoRoute(
+          path: '/details',
+          builder: (_, _) => const Text('Theme details'),
+        ),
       ],
     );
     addTearDown(() async {
@@ -354,7 +358,10 @@ void main() {
     });
     await tester.pumpWidget(shell(AdaptiveThemeWrapper(router: router)));
     await tester.pumpAndSettle();
-    final firstContext = tester.element(find.text('Theme probe'));
+    unawaited(router.push<void>('/details'));
+    await tester.pumpAndSettle();
+    final firstContext = tester.element(find.text('Theme details'));
+    final initialLocation = router.routeInformationProvider.value.uri;
     final manager = AdaptiveTheme.of(firstContext);
     final initialNotifications = firstContext.read<NotificationsCubit>()
       ..recordPush(title: 'Keep history');
@@ -367,13 +374,38 @@ void main() {
       Brightness.dark,
     );
 
-    void expectPalette(AppColors expected) {
-      final context = tester.element(find.text('Theme probe'));
+    void expectPalette(AppColors expected, {bool glassEnabled = true}) {
+      final context = tester.element(find.text('Theme details'));
+      expect(context.colors.canvas, expected.canvas, reason: 'active canvas');
+      expect(
+        context.colors.surface,
+        expected.surface,
+        reason: 'active surface',
+      );
       expect(context.colors, expected);
+      expect(AppGlassTheme.of(context).enabled, glassEnabled);
+      expect(
+        manager.lightTheme.extension<AppGlassTheme>()!.enabled,
+        glassEnabled,
+      );
+      expect(
+        manager.darkTheme.extension<AppGlassTheme>()!.enabled,
+        glassEnabled,
+      );
       expect(context.read<NotificationsCubit>(), same(initialNotifications));
       expect(initialNotifications.state.pushes.single.title, 'Keep history');
       expect(context.read<UiPreferencesCubit>(), same(ui));
-      expect(router.routeInformationProvider.value.uri.path, '/');
+      expect(context.read<HomeCubit>(), same(home));
+      expect(context.read<ScheduleDisplayCubit>(), same(display));
+      expect(context.read<LessonRemindersCubit>(), same(reminders));
+      expect(context.read<ThemeCubit>(), same(theme));
+      expect(
+        tester.widget<AppRouter>(find.byType(AppRouter)).router,
+        same(router),
+      );
+      expect(router.routeInformationProvider.value.uri, initialLocation);
+      expect(GoRouterState.of(context).uri.path, '/details');
+      expect(router.canPop(), isTrue);
     }
 
     manager
@@ -387,28 +419,55 @@ void main() {
     await tester.pumpAndSettle();
     manager.setTheme(light: theme.getLightTheme(), dark: staleDark);
     await tester.pumpAndSettle();
-    expectPalette(AppColors.light);
+    expectPalette(AppColorSchemes.getLightColors(AppColorScheme.blue));
     expect(manager.darkTheme.colors, AppColors.dark);
 
+    final lightNavigator = tester.state<NavigatorState>(
+      find.byType(Navigator).first,
+    );
     theme
       ..setColorScheme(AppColorScheme.violet)
-      ..setAmoled(enabled: true);
+      ..setGlassEnabled(enabled: false);
     await tester.pumpAndSettle();
-    expectPalette(AppColors.light.withAccent(AppAccent.violet));
-    final darkColors = AppColors.dark
-        .withAccent(AppAccent.violet)
-        .copyWith(
-          canvas: AppColors.amoledCanvas,
-          surface: AppColors.amoledSurface,
-          surface2: AppColors.amoledSurface2,
-        );
+    expectPalette(
+      AppColors.light.withAccent(AppAccent.violet),
+      glassEnabled: false,
+    );
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator).first),
+      same(lightNavigator),
+    );
+    final darkColors = AppColors.dark.withAccent(AppAccent.violet);
     expect(manager.darkTheme.colors, darkColors);
     manager.setDark();
     await tester.pumpAndSettle();
-    expectPalette(darkColors);
-    theme.setAmoled(enabled: false);
+    expectPalette(darkColors, glassEnabled: false);
+    final darkNavigator = tester.state<NavigatorState>(
+      find.byType(Navigator).first,
+    );
+    theme.setGlassEnabled(enabled: true);
     await tester.pumpAndSettle();
-    expectPalette(AppColors.dark.withAccent(AppAccent.violet));
+    expectPalette(darkColors);
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator).first),
+      same(darkNavigator),
+    );
+    manager.setLight();
+    await tester.pumpAndSettle();
+    expectPalette(AppColors.light.withAccent(AppAccent.violet));
+    final restoredLightNavigator = tester.state<NavigatorState>(
+      find.byType(Navigator).first,
+    );
+    theme.setGlassEnabled(enabled: false);
+    await tester.pumpAndSettle();
+    expectPalette(
+      AppColors.light.withAccent(AppAccent.violet),
+      glassEnabled: false,
+    );
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator).first),
+      same(restoredLightNavigator),
+    );
     expect(tester.takeException(), isNull);
   });
 

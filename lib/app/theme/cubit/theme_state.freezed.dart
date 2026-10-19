@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ThemeState {
 
- AppColorScheme get colorScheme; bool get isAmoled;
+ AppColorScheme get colorScheme; bool get glassEnabled;
 /// Create a copy of ThemeState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ThemeStateCopyWith<ThemeState> get copyWith => _$ThemeStateCopyWithImpl<ThemeSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThemeState&&(identical(other.colorScheme, colorScheme) || other.colorScheme == colorScheme)&&(identical(other.isAmoled, isAmoled) || other.isAmoled == isAmoled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThemeState&&(identical(other.colorScheme, colorScheme) || other.colorScheme == colorScheme)&&(identical(other.glassEnabled, glassEnabled) || other.glassEnabled == glassEnabled));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,colorScheme,isAmoled);
+int get hashCode => Object.hash(runtimeType,colorScheme,glassEnabled);
 
 @override
 String toString() {
-  return 'ThemeState(colorScheme: $colorScheme, isAmoled: $isAmoled)';
+  return 'ThemeState(colorScheme: $colorScheme, glassEnabled: $glassEnabled)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ThemeStateCopyWith<$Res>  {
   factory $ThemeStateCopyWith(ThemeState value, $Res Function(ThemeState) _then) = _$ThemeStateCopyWithImpl;
 @useResult
 $Res call({
- AppColorScheme colorScheme, bool isAmoled
+ AppColorScheme colorScheme, bool glassEnabled
 });
 
 
@@ -65,10 +65,10 @@ class _$ThemeStateCopyWithImpl<$Res>
 
 /// Create a copy of ThemeState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? colorScheme = null,Object? isAmoled = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? colorScheme = null,Object? glassEnabled = null,}) {
   return _then(_self.copyWith(
 colorScheme: null == colorScheme ? _self.colorScheme : colorScheme // ignore: cast_nullable_to_non_nullable
-as AppColorScheme,isAmoled: null == isAmoled ? _self.isAmoled : isAmoled // ignore: cast_nullable_to_non_nullable
+as AppColorScheme,glassEnabled: null == glassEnabled ? _self.glassEnabled : glassEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -154,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppColorScheme colorScheme,  bool isAmoled)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppColorScheme colorScheme,  bool glassEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ThemeState() when $default != null:
-return $default(_that.colorScheme,_that.isAmoled);case _:
+return $default(_that.colorScheme,_that.glassEnabled);case _:
   return orElse();
 
 }
@@ -175,10 +175,10 @@ return $default(_that.colorScheme,_that.isAmoled);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppColorScheme colorScheme,  bool isAmoled)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppColorScheme colorScheme,  bool glassEnabled)  $default,) {final _that = this;
 switch (_that) {
 case _ThemeState():
-return $default(_that.colorScheme,_that.isAmoled);case _:
+return $default(_that.colorScheme,_that.glassEnabled);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +195,10 @@ return $default(_that.colorScheme,_that.isAmoled);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppColorScheme colorScheme,  bool isAmoled)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppColorScheme colorScheme,  bool glassEnabled)?  $default,) {final _that = this;
 switch (_that) {
 case _ThemeState() when $default != null:
-return $default(_that.colorScheme,_that.isAmoled);case _:
+return $default(_that.colorScheme,_that.glassEnabled);case _:
   return null;
 
 }
@@ -210,11 +210,11 @@ return $default(_that.colorScheme,_that.isAmoled);case _:
 @JsonSerializable()
 
 class _ThemeState implements ThemeState {
-  const _ThemeState({this.colorScheme = AppColorScheme.blue, this.isAmoled = false});
+  const _ThemeState({this.colorScheme = AppColorScheme.blue, this.glassEnabled = true});
   factory _ThemeState.fromJson(Map<String, dynamic> json) => _$ThemeStateFromJson(json);
 
 @override@JsonKey() final  AppColorScheme colorScheme;
-@override@JsonKey() final  bool isAmoled;
+@override@JsonKey() final  bool glassEnabled;
 
 /// Create a copy of ThemeState
 /// with the given fields replaced by the non-null parameter values.
@@ -229,16 +229,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThemeState&&(identical(other.colorScheme, colorScheme) || other.colorScheme == colorScheme)&&(identical(other.isAmoled, isAmoled) || other.isAmoled == isAmoled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThemeState&&(identical(other.colorScheme, colorScheme) || other.colorScheme == colorScheme)&&(identical(other.glassEnabled, glassEnabled) || other.glassEnabled == glassEnabled));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,colorScheme,isAmoled);
+int get hashCode => Object.hash(runtimeType,colorScheme,glassEnabled);
 
 @override
 String toString() {
-  return 'ThemeState(colorScheme: $colorScheme, isAmoled: $isAmoled)';
+  return 'ThemeState(colorScheme: $colorScheme, glassEnabled: $glassEnabled)';
 }
 
 
@@ -249,7 +249,7 @@ abstract mixin class _$ThemeStateCopyWith<$Res> implements $ThemeStateCopyWith<$
   factory _$ThemeStateCopyWith(_ThemeState value, $Res Function(_ThemeState) _then) = __$ThemeStateCopyWithImpl;
 @override @useResult
 $Res call({
- AppColorScheme colorScheme, bool isAmoled
+ AppColorScheme colorScheme, bool glassEnabled
 });
 
 
@@ -266,10 +266,10 @@ class __$ThemeStateCopyWithImpl<$Res>
 
 /// Create a copy of ThemeState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? colorScheme = null,Object? isAmoled = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? colorScheme = null,Object? glassEnabled = null,}) {
   return _then(_ThemeState(
 colorScheme: null == colorScheme ? _self.colorScheme : colorScheme // ignore: cast_nullable_to_non_nullable
-as AppColorScheme,isAmoled: null == isAmoled ? _self.isAmoled : isAmoled // ignore: cast_nullable_to_non_nullable
+as AppColorScheme,glassEnabled: null == glassEnabled ? _self.glassEnabled : glassEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

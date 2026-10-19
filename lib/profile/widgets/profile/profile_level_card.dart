@@ -31,82 +31,27 @@ class ProfileLevelCard extends StatelessWidget {
       level + 1,
       streakDays,
     );
-    return AppCard(
-      tinted: true,
-      radius: AppRadius.lg,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.sectionGap,
-        AppSpacing.md,
-        AppSpacing.sectionGap,
-        AppSpacing.md,
-      ),
+    return AppProgressCard(
       onTap: onTap,
       semanticsLabel: '$title, $place, $footer',
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.accent,
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              '$level',
-              style: AppText.sans(
-                15,
-                FontWeight.w800,
-              ).copyWith(color: colors.onAccent),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    Text(
-                      title,
-                      style: AppText.compactStrong.copyWith(
-                        color: colors.ink,
-                        height: 17 / 13.5,
-                      ),
-                    ),
-                    Text(
-                      place,
-                      style: AppText.compact.copyWith(
-                        color: colors.muted,
-                        height: 17 / 13.5,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                NinjaProgressBar(
-                  value: progress,
-                  height: 4,
-                  color: colors.accent,
-                  trackColor: colors.surface,
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  footer,
-                  style: AppText.sans(
-                    11.5,
-                    FontWeight.w400,
-                    height: 15 / 11.5,
-                  ).copyWith(color: colors.muted),
-                ),
-              ],
-            ),
-          ),
-        ],
+      title: Text(title),
+      value: Text(l10n.profileLevel(level)),
+      emblem: AppIconTile(
+        icon: AppLineIcon.trophy,
+        size: 25 + AppSpacing.actionInset * 2,
+        radius: AppRadius.field,
+        background: colors.tint,
+        foreground: colors.accent,
+        iconSize: 25,
       ),
+      progress: NinjaProgressBar(
+        value: progress,
+        height: 7,
+        color: colors.accent,
+        trackColor: colors.accent.withValues(alpha: .1),
+      ),
+      supporting: Text(footer),
+      metadata: Text(place),
     );
   }
 }

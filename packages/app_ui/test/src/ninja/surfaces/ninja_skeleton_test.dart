@@ -82,8 +82,9 @@ void main() {
       expect(card.color, kitColors.canvas);
       expect(card.borderRadius, BorderRadius.circular(AppRadius.lg));
 
-      final blocks =
-          tester.widgetList<NinjaSkeleton>(find.byType(NinjaSkeleton)).toList();
+      final blocks = tester
+          .widgetList<NinjaSkeleton>(find.byType(NinjaSkeleton))
+          .toList();
       expect(blocks, hasLength(4));
       expect(blocks.first.width, 44);
       expect(blocks.first.radius, 14);

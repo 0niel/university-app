@@ -49,7 +49,7 @@ class _EditorHeaderState extends State<EditorHeader> {
     final presenceLabel = editors.length <= 1
         ? context.l10n.collabNotesPresenceSolo
         : context.l10n.collabNotesPresenceEditing(editors.length);
-    final wide = MediaQuery.sizeOf(context).width >= 720;
+    final wide = MediaQuery.widthOf(context) >= 720;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screen,

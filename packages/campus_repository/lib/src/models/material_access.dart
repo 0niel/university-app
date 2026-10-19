@@ -20,4 +20,7 @@ class MaterialPurchaseException implements Exception {
   const MaterialPurchaseException(this.reason);
 
   final MaterialPurchaseFailure reason;
+
+  @override
+  String toString() => 'MaterialPurchaseException(${reason.name})';
 }

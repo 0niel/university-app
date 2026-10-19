@@ -10,6 +10,7 @@ class _CategoryPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return AppChipRow<EventCategory>(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
       value: selected,
       onChanged: onSelected,
       items: [

@@ -1,19 +1,5 @@
 part of 'profile_widgets.dart';
 
-class ProfileMetric {
-  const ProfileMetric({
-    required this.value,
-    required this.label,
-    this.onTap,
-    this.danger = false,
-  });
-
-  final String value;
-  final String label;
-  final VoidCallback? onTap;
-  final bool danger;
-}
-
 class ProfileMetricCards extends StatelessWidget {
   const ProfileMetricCards({required this.metrics, super.key});
 
@@ -63,4 +49,18 @@ class ProfileMetricCards extends StatelessWidget {
       ],
     );
   }
+}
+
+class ProfileMetric {
+  const ProfileMetric({
+    required this.value,
+    required this.label,
+    this.onTap,
+    this.danger = false,
+  });
+
+  final String value;
+  final String label;
+  final VoidCallback? onTap;
+  final bool danger;
 }

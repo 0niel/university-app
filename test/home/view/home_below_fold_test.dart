@@ -113,6 +113,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    expect(find.byType(AppServiceTile), findsNWidgets(5));
+    expect(find.byType(AppShortcutGrid), findsOneWidget);
     for (final label in [
       'Карта',
       'Аудитории',
@@ -150,6 +152,7 @@ void main() {
     );
     expect(tester.takeException(), isNull);
     expect(tester.widget<Text>(find.text('Аудитории')).maxLines, 3);
+    expect(find.byType(AppShortcutGrid), findsOneWidget);
     expect(
       tester.getTopLeft(find.text('Пропуск')).dy,
       greaterThan(tester.getBottomLeft(find.text('Карта')).dy),
@@ -164,6 +167,7 @@ void main() {
       HomeQuickActions(services: const [], onAll: () {}, loading: true),
     );
     expect(find.byType(AppSkeleton), findsWidgets);
+    expect(find.byType(AppShortcutGrid), findsOneWidget);
     expect(find.byType(AppEmptyState), findsNothing);
     expect(tester.takeException(), isNull);
   });

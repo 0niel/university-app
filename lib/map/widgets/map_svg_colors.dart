@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,11 +17,12 @@ class MapSvgColors extends ColorMapper {
     Color color,
   ) {
     if (color.a == 0) return color;
-    final channels = [color.r, color.g, color.b]..sort();
-    if (channels.last - channels.first > .12) return color;
+    final darkest = math.min(color.r, math.min(color.g, color.b));
+    final lightest = math.max(color.r, math.max(color.g, color.b));
+    if (lightest - darkest > .12) return color;
     if (elementName == 'text' || elementName == 'tspan') return colors.ink;
     if (attributeName == 'stroke') return colors.muted2;
-    return channels.last < .3 ? colors.surface : colors.surface2;
+    return lightest < .3 ? colors.surface : colors.surface2;
   }
 
   @override

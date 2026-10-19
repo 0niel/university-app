@@ -35,7 +35,6 @@ class ScheduleExporterRepository {
       30,
       720,
     ], // 10 minutes, 30 minutes, 12 hours
-    bool deleteExistingCalendar = false,
   }) async {
     try {
       if (calendarName.trim().isEmpty) {
@@ -145,17 +144,17 @@ class ScheduleExporterRepository {
       if (existingCalendar != null) {
         final dates =
             occurrences.values.map((entry) => entry.start).toList()..sort();
-        final events = await _deviceCalendarPlugin.retrieveEvents(
+        final existingEvents = await _deviceCalendarPlugin.retrieveEvents(
           calendarId,
           RetrieveEventsParams(
-            startDate: dates.first.subtract(const Duration(days: 1)),
-            endDate: dates.last.add(const Duration(days: 2)),
+            startDate: dates.firstOrNull!.subtract(const Duration(days: 1)),
+            endDate: dates.lastOrNull!.add(const Duration(days: 2)),
           ),
         );
-        if (!events.isSuccess || events.data == null) {
+        if (!existingEvents.isSuccess || existingEvents.data == null) {
           throw const CalendarException('Failed to read calendar events');
         }
-        for (final event in events.data!) {
+        for (final event in existingEvents.data!) {
           final marker = event.description?.split('\n').lastOrNull;
           if (event.eventId != null &&
               marker != null &&

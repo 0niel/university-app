@@ -11,7 +11,7 @@ class MarketplaceGridSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final scale = MediaQuery.textScalerOf(context).scale(1);
     final columns = MarketplaceLayout.columns(
-      MediaQuery.sizeOf(context).width,
+      MediaQuery.widthOf(context),
       scale,
     );
     return NinjaSkeletonGroup(

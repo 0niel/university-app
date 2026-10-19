@@ -16,8 +16,8 @@ class ScheduleComparisonCubit extends Cubit<ScheduleComparisonState> {
 
   String get friendName => _friendName ?? friend?.name ?? '';
 
-  void start(SelectedSchedule schedule, {String? friendName}) {
-    _friendName = friendName;
+  void start(SelectedSchedule schedule, {String? comparisonName}) {
+    _friendName = comparisonName;
     emit(state.copyWith(schedules: {schedule}, isEnabled: true));
   }
 

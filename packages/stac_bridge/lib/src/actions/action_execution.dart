@@ -8,6 +8,10 @@ import 'package:stac_bridge/src/mini_app_host.dart';
 import 'package:stac_bridge/src/widgets/mini_app_state_scope.dart';
 import 'package:stac_bridge/src/widgets/mini_app_state_store.dart';
 
+export 'stac_multi_action_kit_parser.dart';
+export 'stac_run_action_parser.dart';
+export 'stac_try_action_parser.dart';
+
 final _executionKey = Object();
 final _bindingsKey = Object();
 final _resolver = MiniAppTreeResolver(
@@ -15,8 +19,8 @@ final _resolver = MiniAppTreeResolver(
   deferActions: true,
 );
 
-class _Execution {
-  _Execution(this.store, this.form, this.context);
+class _ActionExecution {
+  _ActionExecution(this.store, this.form, this.context);
 
   final MiniAppStateStore? store;
   final StacFormScope? form;
@@ -35,13 +39,13 @@ Future<Object?> runMiniAppAction(
   Map<String, Object?> bindings = const {},
 }) async {
   if (action is! Map<Object?, Object?>) return null;
-  final inherited = Zone.current[_executionKey] as _Execution?;
+  final inherited = Zone.current[_executionKey] as _ActionExecution?;
   if (inherited == null && !context.mounted) return null;
   final execution =
       inherited ??
-      _Execution(
+      _ActionExecution(
         MiniAppStateScope.of(context),
-        context.getInheritedWidgetOfExactType<StacFormScope>(),
+        context.getInheritedWidgetOfExactType(),
         context,
       );
   final stableContext = execution.store?.actionContext ?? execution.context;
@@ -65,7 +69,7 @@ Future<Object?> runMiniAppAction(
           stableContext,
           json['action'],
           bindings: captured is Map<Object?, Object?>
-              ? Map<String, Object?>.from(captured)
+              ? Map.from(captured)
               : const {},
         );
       }
@@ -86,77 +90,4 @@ Future<Object?> runMiniAppAction(
       return Stac.onCallFromJson(resolved, stableContext);
     }, zoneValues: {_executionKey: execution, _bindingsKey: locals}),
   );
-}
-
-class StacRunActionParser implements StacActionParser<Map<String, Object?>> {
-  const StacRunActionParser();
-
-  @override
-  String get actionType => 'appRunAction';
-
-  @override
-  Map<String, Object?> getModel(Map<String, dynamic> json) => json;
-
-  @override
-  Future<Object?> onCall(BuildContext context, Map<String, Object?> model) =>
-      runMiniAppAction(context, model);
-}
-
-class StacMultiActionKitParser
-    implements StacActionParser<Map<String, Object?>> {
-  const StacMultiActionKitParser();
-
-  @override
-  String get actionType => 'multiAction';
-
-  @override
-  Map<String, Object?> getModel(Map<String, dynamic> json) => json;
-
-  @override
-  Future<Object?> onCall(
-    BuildContext context,
-    Map<String, Object?> model,
-  ) async {
-    final actions = model['actions'];
-    if (actions is! List<Object?>) return null;
-    if (actions.length > 128) throw StateError('Too many actions');
-    if (model['sync'] == false) {
-      return Future.wait([
-        for (final action in actions) runMiniAppAction(context, action),
-      ]);
-    }
-    Object? result;
-    for (final action in actions) {
-      if (!context.mounted) break;
-      result = await runMiniAppAction(context, action);
-    }
-    return result;
-  }
-}
-
-class StacTryActionParser implements StacActionParser<Map<String, Object?>> {
-  const StacTryActionParser();
-
-  @override
-  String get actionType => 'tryAction';
-
-  @override
-  Map<String, Object?> getModel(Map<String, dynamic> json) => json;
-
-  @override
-  Future<Object?> onCall(
-    BuildContext context,
-    Map<String, Object?> model,
-  ) async {
-    try {
-      return await runMiniAppAction(context, model['do']);
-    } on Exception {
-      final result = await runMiniAppAction(context, model['onError']);
-      return result;
-    } finally {
-      if (context.mounted) {
-        await runMiniAppAction(context, model['onFinally']);
-      }
-    }
-  }
 }

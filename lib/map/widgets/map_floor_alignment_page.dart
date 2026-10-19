@@ -17,6 +17,27 @@ Map<String, Object?> buildMapFloorAlignmentPatch({
   required List<FloorGeoAnchor> anchors,
   double? measuredDistanceMeters,
 }) {
+  if (anchors case [final a, final b, final c]) {
+    return _buildAlignmentPatch(
+      floor,
+      anchors,
+      a,
+      b,
+      c,
+      measuredDistanceMeters,
+    );
+  }
+  throw const FormatException('Отметьте три пары точек на плане и на здании.');
+}
+
+Map<String, Object?> _buildAlignmentPatch(
+  MapFloorData floor,
+  List<FloorGeoAnchor> anchors,
+  FloorGeoAnchor a,
+  FloorGeoAnchor b,
+  FloorGeoAnchor c,
+  double? measuredDistanceMeters,
+) {
   if (anchors.length != 3) {
     throw const FormatException(
       'Отметьте три пары точек на плане и на здании.',
@@ -32,9 +53,6 @@ Map<String, Object?> buildMapFloorAlignmentPatch({
       );
     }
   }
-  final a = anchors[0];
-  final b = anchors[1];
-  final c = anchors[2];
   final area =
       ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)).abs() / 2;
   if (area < floor.width * floor.height * .005) {
@@ -47,10 +65,13 @@ Map<String, Object?> buildMapFloorAlignmentPatch({
     FloorGeoreference(anchors)
       ..pixelToGeographic(0, 0)
       ..pixelToGeographic(floor.width, floor.height);
-  } on FormatException {
-    throw const FormatException(
-      'По этим точкам нельзя совместить план. '
-      'Проверьте пары и выберите разные углы здания.',
+  } on FormatException catch (error, stackTrace) {
+    Error.throwWithStackTrace(
+      const FormatException(
+        'По этим точкам нельзя совместить план. '
+        'Проверьте пары и выберите разные углы здания.',
+      ),
+      stackTrace,
     );
   }
   double? scale;
@@ -304,6 +325,7 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
       );
       if (sent && mounted) Navigator.pop(context, true);
     } on FormatException catch (error) {
+      if (!mounted) return;
       setState(() => _error = error.message);
     }
   }
@@ -324,15 +346,19 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
           AppMapTiles.tileLayer(context, tileProvider: _tiles),
           MarkerLayer(
             markers: [
-              for (var index = 0; index < _anchors.length; index++)
+              for (
+                var anchorIndex = 0;
+                anchorIndex < _anchors.length;
+                anchorIndex++
+              )
                 Marker(
                   point: LatLng(
-                    _anchors[index].latitude,
-                    _anchors[index].longitude,
+                    _anchors[anchorIndex].latitude,
+                    _anchors[anchorIndex].longitude,
                   ),
                   width: 32,
                   height: 32,
-                  child: _AnchorBadge(number: index + 1),
+                  child: _AnchorBadge(number: anchorIndex + 1),
                 ),
             ],
           ),
@@ -369,7 +395,7 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
   @override
   Widget build(BuildContext context) {
     final floor = _floor;
-    final index = (_replaceIndex ?? _anchors.length) + 1;
+    final anchorIndex = (_replaceIndex ?? _anchors.length) + 1;
     return Scaffold(
       backgroundColor: context.colors.canvas,
       body: Column(
@@ -419,12 +445,12 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
                       ),
                       MapEditorHint(
                         label: _showMap && _pending != null
-                            ? 'Точка $index: тот же угол на карте'
+                            ? 'Точка $anchorIndex: тот же угол на карте'
                             : _anchors.length == 3 && _replaceIndex == null
                             ? 'Проверьте наложение контуров'
                             : _showMap
                             ? 'Найдите здание на карте'
-                            : 'Точка $index: выберите угол на плане',
+                            : 'Точка $anchorIndex: выберите угол на плане',
                         help:
                             'Выберите узнаваемый угол здания на плане, '
                             'затем тот же угол на реальной карте. '
@@ -462,7 +488,7 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
                         top: false,
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
-                            maxHeight: MediaQuery.sizeOf(context).height * .30,
+                            maxHeight: MediaQuery.heightOf(context) * .30,
                           ),
                           child: SingleChildScrollView(
                             padding: const EdgeInsets.all(16),
@@ -474,9 +500,9 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
                                   child: Row(
                                     children: [
                                       for (
-                                        var index = 0;
-                                        index < _anchors.length;
-                                        index++
+                                        var pairIndex = 0;
+                                        pairIndex < _anchors.length;
+                                        pairIndex++
                                       )
                                         Padding(
                                           padding: const EdgeInsets.only(
@@ -484,12 +510,14 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
                                           ),
                                           child: Tooltip(
                                             message:
-                                                'Изменить пару ${index + 1}',
+                                                'Изменить пару '
+                                                '${pairIndex + 1}',
                                             child: AppChip(
-                                              label: '${index + 1}',
-                                              selected: _replaceIndex == index,
+                                              label: '${pairIndex + 1}',
+                                              selected:
+                                                  _replaceIndex == pairIndex,
                                               onTap: () => setState(() {
-                                                _replaceIndex = index;
+                                                _replaceIndex = pairIndex;
                                                 _pending = null;
                                                 _showMap = false;
                                                 _error = null;
@@ -559,7 +587,7 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
                                       onPressed:
                                           _anchors.length == 3 &&
                                               !_loadingPreview
-                                          ? _preview
+                                          ? () => unawaited(_preview())
                                           : null,
                                     ),
                                     const SizedBox(width: 8),
@@ -569,7 +597,7 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
                                         onPressed:
                                             _anchors.length == 3 &&
                                                 _dirty.contains(floor.floor.id)
-                                            ? _review
+                                            ? () => unawaited(_review())
                                             : null,
                                       ),
                                     ),

@@ -82,15 +82,13 @@ void main() {
     expect(find.byType(NinjaStudyGroupHeroCard), findsOneWidget);
     expect(_pastelCardCount(tester, colors.tint2), 1);
 
-    final hero = tester.widget<DecoratedBox>(
-      find
-          .descendant(
-            of: find.byType(NinjaStudyGroupHeroCard),
-            matching: find.byType(DecoratedBox),
-          )
-          .first,
+    final hero = tester.widget<AppCard>(
+      find.descendant(
+        of: find.byType(NinjaStudyGroupHeroCard),
+        matching: find.byType(AppCard),
+      ),
     );
-    expect((hero.decoration as BoxDecoration).color, colors.tint2);
+    expect(hero.color, colors.tint2);
     expect(find.text('ИКБО-09-22'), findsOneWidget);
     expect(find.text('Пётр Петров'), findsOneWidget);
   });

@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/config/config.dart';
+import 'package:rtu_mirea_app/services/config/home_service_defaults.dart';
 import 'package:rtu_mirea_app/services/data/services_directory.dart';
 import 'package:rtu_mirea_app/services/models/service_entry.dart';
 import 'package:rtu_mirea_app/services/models/service_model.dart';
@@ -34,29 +35,14 @@ abstract final class ServicesConfig {
     UniversityConfig config,
   ) => _models(ServicesDirectory.useful(context, config));
 
-  static const List<String> _homeDefaults = [
-    '/services/map',
-    '/services/nfc',
-    '/services/free-rooms',
-    '/services/deadlines',
-    '/schedule/session',
-    '/services/collab-notes',
-    '/services/tools',
-    '/services/knowledge-bank',
-    '/services/communities',
-    '/services/events',
-  ];
-
   static List<ServiceModel> getHomeServices(
     BuildContext context,
     UniversityConfig config,
   ) {
     final all = ServicesDirectory.all(context, config);
-    return [
-      for (final path in _homeDefaults)
-        for (final entry in all)
-          if (entry.model.routePath == path) entry.model,
-    ];
+    return _models(
+      ServicesDirectory.orderedEntries(all, HomeServiceDefaults.routes),
+    );
   }
 
   static List<ServiceModel> getAllBuiltInServices(

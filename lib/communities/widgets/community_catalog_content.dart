@@ -81,7 +81,7 @@ class CommunityCatalogContent extends StatelessWidget {
           AppOverline(
             state.selectedSectionKey == null
                 ? l10n.communitiesRecommended
-                : sections.first.title,
+                : (sections.firstOrNull?.title ?? l10n.communitiesRecommended),
             topPadding: 24,
             bottomPadding: 12,
           ),

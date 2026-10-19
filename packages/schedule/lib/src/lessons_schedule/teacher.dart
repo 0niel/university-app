@@ -27,7 +27,7 @@ final _teacherNameWhitespace = RegExp(r'\s+');
 String normalizeTeacherName(String name) => name
     .replaceAllMapped(
       _joinedCyrillicNameParts,
-      (match) => '${match[1]} ${match[2]}',
+      (match) => '${match[1]!} ${match[2]!}',
     )
     .replaceAll(_teacherNameWhitespace, ' ')
     .trim();

@@ -28,6 +28,7 @@ import '../../helpers/pump_app.dart';
 class _CampusRepository extends Mock implements CampusRepository {}
 
 class _NoCache implements MapDataCache {
+  const _NoCache();
   @override
   Future<String?> read(String key) async => null;
 
@@ -35,7 +36,7 @@ class _NoCache implements MapDataCache {
   Future<void> write(String key, String value) async {}
 }
 
-class _RecordingController extends SvgInteractiveMapController {
+class RecordingMapController extends SvgInteractiveMapController {
   final focuses = <List<Offset>>[];
 
   @override
@@ -100,8 +101,8 @@ Map<String, Object?> _document({bool updated = false}) => {
   },
 };
 
-class _Harness {
-  final controller = _RecordingController();
+class MapRouteGuidanceHarness {
+  final controller = RecordingMapController();
   late final MapDataRepository repository;
   late final MapBloc map;
   late final FreeRoomsCubit free;
@@ -116,7 +117,7 @@ class _Harness {
   }) async {
     repository = MapDataRepository(
       organizationId: 'mirea',
-      cache: _NoCache(),
+      cache: const _NoCache(),
       bundledCatalogAsset: 'catalog.json',
       assetLoader: (path) async => jsonEncode(
         path == 'catalog.json'
@@ -221,7 +222,7 @@ void main() {
   testWidgets(
     'timeline previews while dragging and commits the final floor once',
     (tester) async {
-      final harness = _Harness();
+      final harness = MapRouteGuidanceHarness();
       await harness.mount(tester);
       final slider = tester.getRect(find.byType(AppSlider));
       final gesture = await tester.startGesture(
@@ -259,7 +260,7 @@ void main() {
   testWidgets('tap without a preview rebuild commits the touched step', (
     tester,
   ) async {
-    final harness = _Harness();
+    final harness = MapRouteGuidanceHarness();
     await harness.mount(tester);
     final count = harness.route.instructions.length;
     final stair = harness.route.instructions.indexWhere(
@@ -285,7 +286,7 @@ void main() {
   testWidgets(
     'cancelled scrubbing restores the committed thumb without moving the map',
     (tester) async {
-      final harness = _Harness();
+      final harness = MapRouteGuidanceHarness();
       await harness.mount(tester);
       final slider = tester.getRect(find.byType(AppSlider));
       final gesture = await tester.startGesture(
@@ -304,7 +305,7 @@ void main() {
   testWidgets('scrubbing away and back before a frame does not move the map', (
     tester,
   ) async {
-    final harness = _Harness();
+    final harness = MapRouteGuidanceHarness();
     await harness.mount(tester);
     final slider = tester.getRect(find.byType(AppSlider));
     final start = Offset(slider.left + 2, slider.center.dy);
@@ -321,7 +322,7 @@ void main() {
   testWidgets(
     'rapid keyboard selections use the latest step before a frame',
     (tester) async {
-      final harness = _Harness();
+      final harness = MapRouteGuidanceHarness();
       await harness.mount(tester);
       final slider = tester.getRect(find.byType(AppSlider));
       await tester.tapAt(Offset(slider.left + 2, slider.center.dy));
@@ -345,7 +346,7 @@ void main() {
   testWidgets(
     'selected milestone restores its floor after manually changing floors',
     (tester) async {
-      final harness = _Harness();
+      final harness = MapRouteGuidanceHarness();
       await harness.mount(tester);
       await tester.runAsync(() async {
         final loaded = harness.map.stream.firstWhere(
@@ -385,7 +386,7 @@ void main() {
   testWidgets(
     'keyboard steps and rapid jumps keep only the latest focus',
     (tester) async {
-      final harness = _Harness();
+      final harness = MapRouteGuidanceHarness();
       await harness.mount(tester);
       final slider = tester.getRect(find.byType(AppSlider));
       await tester.tapAt(Offset(slider.left + 2, slider.center.dy));
@@ -421,7 +422,7 @@ void main() {
   testWidgets('snapshot replacement cancels a scrub before pointer release', (
     tester,
   ) async {
-    final harness = _Harness();
+    final harness = MapRouteGuidanceHarness();
     await harness.mount(tester);
     final selected = harness.guidance(tester).onStepSelected!;
     final slider = tester.getRect(find.byType(AppSlider));
@@ -456,7 +457,7 @@ void main() {
     (tester) async {
       final semantics = tester.ensureSemantics();
       try {
-        final harness = _Harness();
+        final harness = MapRouteGuidanceHarness();
         await harness.mount(tester);
         final graph = IndoorNavigationGraph.fromJson({
           'nodes': [
@@ -531,7 +532,7 @@ void main() {
           ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
         await icons.load();
       }
-      final harness = _Harness();
+      final harness = MapRouteGuidanceHarness();
       await harness.mount(
         tester,
         size: size,
@@ -596,7 +597,7 @@ void main() {
   testWidgets(
     'rotation preserves the route and frees the map beside guidance',
     (tester) async {
-      final harness = _Harness();
+      final harness = MapRouteGuidanceHarness();
       await harness.mount(tester);
       harness.guidance(tester).onNext!();
       await tester.pumpAndSettle();
@@ -620,7 +621,7 @@ void main() {
   testWidgets(
     'stairs stay on departure floor until advancing and back restores it',
     (tester) async {
-      final harness = _Harness();
+      final harness = MapRouteGuidanceHarness();
       await harness.mount(tester);
       final stairIndex = harness.route.instructions.indexWhere(
         (instruction) => instruction.maneuver == IndoorManeuver.stairs,
@@ -648,7 +649,7 @@ void main() {
   testWidgets(
     'closing route cancels camera focus already queued for next frame',
     (tester) async {
-      final harness = _Harness();
+      final harness = MapRouteGuidanceHarness();
       await harness.mount(tester);
       final guidance = harness.guidance(tester);
       guidance.onNext!();
@@ -663,7 +664,7 @@ void main() {
   testWidgets('closing during floor change cancels deferred arrival focus', (
     tester,
   ) async {
-    final harness = _Harness();
+    final harness = MapRouteGuidanceHarness();
     await harness.mount(tester);
     final stairIndex = harness.route.instructions.indexWhere(
       (instruction) => instruction.maneuver == IndoorManeuver.stairs,
@@ -692,7 +693,7 @@ void main() {
   testWidgets(
     'snapshot replacement cancels queued focus even at same revision',
     (tester) async {
-      final harness = _Harness();
+      final harness = MapRouteGuidanceHarness();
       await harness.mount(tester);
       final snapshot = harness.map.state.campusData;
       harness.guidance(tester).onNext!();
@@ -719,7 +720,7 @@ void main() {
   testWidgets('unchanged refresh preserves route progress and floor', (
     tester,
   ) async {
-    final harness = _Harness();
+    final harness = MapRouteGuidanceHarness();
     await harness.mount(tester);
     final stairIndex = harness.route.instructions.indexWhere(
       (instruction) => instruction.maneuver == IndoorManeuver.stairs,
@@ -750,7 +751,7 @@ void main() {
   testWidgets('refresh discards a route focus waiting on a different floor', (
     tester,
   ) async {
-    final harness = _Harness();
+    final harness = MapRouteGuidanceHarness();
     await harness.mount(tester);
     final stairIndex = harness.route.instructions.indexWhere(
       (instruction) => instruction.maneuver == IndoorManeuver.stairs,

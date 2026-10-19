@@ -119,9 +119,11 @@ void main() {
 double _contrastRatio(Color first, Color second) {
   final firstLuminance = first.computeLuminance();
   final secondLuminance = second.computeLuminance();
-  final lighter =
-      firstLuminance > secondLuminance ? firstLuminance : secondLuminance;
-  final darker =
-      firstLuminance > secondLuminance ? secondLuminance : firstLuminance;
+  final lighter = firstLuminance > secondLuminance
+      ? firstLuminance
+      : secondLuminance;
+  final darker = firstLuminance > secondLuminance
+      ? secondLuminance
+      : firstLuminance;
   return (lighter + 0.05) / (darker + 0.05);
 }

@@ -120,7 +120,8 @@ class KnowledgeBankCubit extends Cubit<KnowledgeBankState> {
       _gamificationRepository.getProfile,
       state.profile,
     );
-    if (!isClosed) emit(state.copyWith(profile: profile.value));
+    if (isClosed) return;
+    emit(state.copyWith(profile: profile.value));
   }
 
   Future<void> materialOpened(StudyMaterial material) async {

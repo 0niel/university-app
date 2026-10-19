@@ -243,7 +243,7 @@ class _SearchSheetState extends State<SearchSheet> {
               controller: _controller,
               autofocus: true,
               height: 52,
-              onCanvas: true,
+              isOnCanvas: true,
               hintText: l10n.searchSheetPlaceholder,
               onSubmitted: (value) {
                 if (value.trim().isNotEmpty) _commit(value.trim());

@@ -22,7 +22,11 @@ class MapRoomSheet extends StatelessWidget {
       const SizedBox(height: AppSpacing.lg),
       Text(
         room.name.isEmpty ? room.roomId : room.name,
-        style: AppText.serif(28, height: 1).copyWith(color: context.colors.ink),
+        style: AppText.sans(
+          26,
+          FontWeight.w700,
+          height: 1.2,
+        ).copyWith(color: context.colors.ink),
       ),
       const SizedBox(height: AppSpacing.sectionGap),
       AppBanner(message: context.l10n.roomAvailabilityUnknown),

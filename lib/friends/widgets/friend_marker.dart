@@ -8,8 +8,8 @@ part 'marker_pop.dart';
 part 'my_location_marker.dart';
 part 'name_pill.dart';
 
-const friendMarkerAvatarSize = 34.0;
-const friendMarkerRingWidth = 3.0;
+const kFriendMarkerAvatarSize = 34.0;
+const kFriendMarkerRingWidth = 3.0;
 
 String friendMarkerSemanticsLabel(Friend friend, AppLocalizations l10n) {
   final freshness = friendFreshnessLabel(friend, l10n);
@@ -29,7 +29,8 @@ String friendFreshnessLabel(Friend friend, AppLocalizations l10n) {
 
 String friendFirstName(String fullName) {
   final parts = fullName.trim().split(RegExp(r'\s+'));
-  return parts.firstOrNull?.isNotEmpty ?? false ? parts.first : fullName;
+  final first = parts.firstOrNull;
+  return first != null && first.isNotEmpty ? first : fullName;
 }
 
 class FriendMarker extends StatelessWidget {

@@ -21,52 +21,23 @@ class ScheduleViewTransition extends StatelessWidget {
       duration: NinjaMotion.of(context, const Duration(milliseconds: 420)),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
-      layoutBuilder: (current, previous) => Stack(
+      layoutBuilder: (current, _) => Stack(
         fit: fill ? StackFit.expand : StackFit.loose,
         alignment: Alignment.topCenter,
         clipBehavior: Clip.none,
         children: [
-          for (final old in previous)
-            if (fill)
-              Positioned.fill(
-                child: IgnorePointer(child: ExcludeSemantics(child: old)),
-              )
-            else
-              Positioned(
-                left: 0,
-                right: 0,
-                child: IgnorePointer(child: ExcludeSemantics(child: old)),
-              ),
           ?current,
         ],
       ),
-      transitionBuilder: (child, animation) => AnimatedBuilder(
-        animation: animation,
-        child: child,
-        builder: (context, child) => animation.isCompleted
-            ? child!
-            : fill
-            ? FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(
-                  alignment: Alignment.topCenter,
-                  scale: Tween<double>(begin: .96, end: 1).animate(animation),
-                  child: child,
-                ),
-              )
-            : FadeTransition(
-                opacity: animation,
-                child: SizeTransition(
-                  sizeFactor: animation,
-                  alignment: Alignment.topCenter,
-                  child: ScaleTransition(
-                    alignment: Alignment.topCenter,
-                    scale: Tween<double>(begin: .96, end: 1).animate(animation),
-                    child: child,
-                  ),
-                ),
-              ),
-      ),
+      transitionBuilder: (content, animation) {
+        const fullScale = 1.0;
+        final scale = Tween(begin: .985, end: fullScale);
+        return ScaleTransition(
+          alignment: Alignment.topCenter,
+          scale: scale.animate(animation),
+          child: content,
+        );
+      },
       child: child,
     );
   }

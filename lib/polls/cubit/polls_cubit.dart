@@ -165,7 +165,7 @@ class PollsCubit extends Cubit<PollsState> {
     _pending.add(poll.id);
     try {
       final updated = await _campusRepository.closePoll(poll.id);
-      if (!isClosed) _replace(updated);
+      _replace(updated);
       return true;
     } on Exception catch (error, stackTrace) {
       addError(error, stackTrace);
@@ -202,6 +202,7 @@ class PollsCubit extends Cubit<PollsState> {
   }
 
   void _replace(Poll updated) {
+    if (isClosed) return;
     if (state.status == .loading) {
       unawaited(load());
       return;
@@ -282,7 +283,8 @@ bool validPollAnswers(Poll poll, List<PollAnswer> answers) {
       if (question.isRequired) return false;
       continue;
     }
-    final answer = matches.single;
+    final answer = matches.singleOrNull;
+    if (answer == null) return false;
     final hasAnswer =
         answer.optionIds.isNotEmpty ||
         (answer.text?.trim().isNotEmpty ?? false) ||

@@ -6,13 +6,13 @@ import 'package:stac_bridge/src/expression/json_equality.dart';
 class MiniAppStateStore extends ChangeNotifier {
   final Map<String, Object?> _values = <String, Object?>{};
   final Map<String, Object?> _initial = <String, Object?>{};
-  bool _disposed = false;
+  bool _isDisposed = false;
   BuildContext? actionContext;
   final Map<String, int> _requests = {};
   int _requestId = 0;
   bool _reconcileQueued = false;
 
-  bool get isDisposed => _disposed;
+  bool get isDisposed => _isDisposed;
 
   int beginRequest(String key) {
     final id = ++_requestId;
@@ -21,7 +21,7 @@ class MiniAppStateStore extends ChangeNotifier {
   }
 
   bool isCurrentRequest(String key, int id) =>
-      !_disposed && _requests[key] == id;
+      !_isDisposed && _requests[key] == id;
 
   void finishRequest(String key, int id) {
     if (_requests[key] == id) _requests.remove(key);
@@ -44,11 +44,11 @@ class MiniAppStateStore extends ChangeNotifier {
     _initial
       ..clear()
       ..addAll(initial);
-    if (changed && !_reconcileQueued && !_disposed) {
+    if (changed && !_reconcileQueued && !_isDisposed) {
       _reconcileQueued = true;
       scheduleMicrotask(() {
         _reconcileQueued = false;
-        if (!_disposed) notifyListeners();
+        if (!_isDisposed) notifyListeners();
       });
     }
   }
@@ -62,7 +62,7 @@ class MiniAppStateStore extends ChangeNotifier {
   }
 
   void setAll(Map<String, Object?> values) {
-    if (_disposed) return;
+    if (_isDisposed) return;
     var changed = false;
     for (final entry in values.entries) {
       if (!_values.containsKey(entry.key) ||
@@ -84,7 +84,7 @@ class MiniAppStateStore extends ChangeNotifier {
 
   @override
   void dispose() {
-    _disposed = true;
+    _isDisposed = true;
     actionContext = null;
     _values.clear();
     _initial.clear();

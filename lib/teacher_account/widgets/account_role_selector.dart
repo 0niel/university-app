@@ -23,7 +23,7 @@ class AccountRoleSelector extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         AppSegmentedControl<AccountRole>(
-          onCanvas: true,
+          isOnCanvas: true,
           value: role,
           options: [
             AppSegmentedOption(

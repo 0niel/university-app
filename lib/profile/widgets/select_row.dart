@@ -1,4 +1,4 @@
-part of 'settings_sheets.dart';
+part of 'schedule_widget_refresh_sheet.dart';
 
 class _SelectRow<T> extends StatelessWidget {
   const _SelectRow({

@@ -69,7 +69,7 @@ part 'schedule_details_page/teacher_row.dart';
 part 'schedule_details_page/group_note_card.dart';
 part 'schedule_details_page/groups_card.dart';
 part 'schedule_details_page/peers_card.dart';
-part 'schedule_details_page/upload_material_sheet.dart';
+part 'schedule_details_page/lesson_material_upload_sheet.dart';
 part 'schedule_details_page/drop_zone.dart';
 part 'schedule_details_page/source_button.dart';
 part 'schedule_details_page/type_chip.dart';
@@ -166,7 +166,7 @@ class _ScheduleDetailsPageState extends State<ScheduleDetailsPage>
         teacherProfile: _teacherProfile,
         sourceChanges: widget.sourceTeacher == null ? null : _sourceChanges,
         sourceChangesError: _sourceChangesError,
-        onRetrySourceChanges: _loadSourceChanges,
+        onRetrySourceChanges: () => unawaited(_loadSourceChanges()),
         showGroups: _streamGroupNames.isNotEmpty,
         onBack: () => Navigator.of(context).maybePop(),
         onShare: () => showScheduleShareSheet(

@@ -19,7 +19,7 @@ Future<void> showGuestUpgradeSheet(BuildContext context) async {
     subtitle: context.l10n.authGuestUpgradeSubtitle,
     child: GuestUpgradeSheet(
       userId: user.id,
-      repository: context.read<UserRepository>(),
+      repository: context.read(),
       onSaved: () => navigator.pop(true),
     ),
   );
@@ -111,7 +111,12 @@ class _GuestUpgradeSheetState extends State<GuestUpgradeSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([_email, _code, _password, _confirmation]),
+    builder: (context, _) => _content(context),
+  );
+
+  Widget _content(BuildContext context) {
     final l10n = context.l10n;
     final action = switch (_step) {
       _UpgradeStep.email => l10n.authGuestUpgradeSendCode,
@@ -131,7 +136,6 @@ class _GuestUpgradeSheetState extends State<GuestUpgradeSheet> {
             leadingIcon: AppLineIcon.at,
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
-            onChanged: (_) => setState(() {}),
             onSubmitted: (_) => unawaited(_submit()),
           ),
         if (_step == _UpgradeStep.code) ...[
@@ -151,7 +155,6 @@ class _GuestUpgradeSheetState extends State<GuestUpgradeSheet> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(6),
             ],
-            onChanged: (_) => setState(() {}),
             onSubmitted: (_) => unawaited(_submit()),
           ),
           AppButton.text(
@@ -176,7 +179,6 @@ class _GuestUpgradeSheetState extends State<GuestUpgradeSheet> {
             showPasswordToggle: true,
             showClear: false,
             autofillHints: const [AutofillHints.newPassword],
-            onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: AppSpacing.md),
           AppInputField(
@@ -188,7 +190,6 @@ class _GuestUpgradeSheetState extends State<GuestUpgradeSheet> {
             showPasswordToggle: true,
             showClear: false,
             autofillHints: const [AutofillHints.newPassword],
-            onChanged: (_) => setState(() {}),
             onSubmitted: (_) => unawaited(_submit()),
           ),
         ],

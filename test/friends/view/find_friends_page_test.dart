@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
@@ -120,6 +122,10 @@ void main() {
   });
 
   testWidgets('cold load shows card skeletons, not a spinner', (tester) async {
+    final pendingRoster = Completer<GroupRoster>();
+    when(
+      () => repository.getGroupMembers(),
+    ).thenAnswer((_) => pendingRoster.future);
     await tester.pumpWidget(wrap());
     await tester.pump();
 
@@ -127,8 +133,11 @@ void main() {
     expect(find.byType(NinjaSkeleton), findsWidgets);
     expect(find.byType(CircularProgressIndicator), findsNothing);
 
+    pendingRoster.complete(roster);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(NinjaFindFriendsResultsSkeleton), findsNothing);
+    expect(find.text('Олег Титов'), findsOneWidget);
   });
 
   testWidgets('a failed load shows an inline error card with a live retry', (

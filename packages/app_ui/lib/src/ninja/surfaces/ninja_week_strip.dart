@@ -1,30 +1,14 @@
 import 'dart:math' as math;
 
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_week_day.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_horizontal_scroll_view.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
 
-class NinjaWeekDay {
-  const NinjaWeekDay(
-    this.label, {
-    this.short,
-    this.isWeekend = false,
-    this.isPast = false,
-    this.isToday = false,
-    this.dots = const <Color>[],
-    this.semanticsLabel,
-  });
-
-  final String label;
-  final String? short;
-  final bool isWeekend;
-  final bool isPast;
-  final bool isToday;
-  final List<Color> dots;
-  final String? semanticsLabel;
-}
+export 'ninja_week_day.dart';
 
 class NinjaWeekStrip extends StatelessWidget {
   const NinjaWeekStrip({
@@ -65,8 +49,10 @@ class NinjaWeekStrip extends StatelessWidget {
         : ((width - minimum * columns) / (columns - 1)).clamp(2.0, 6.0);
     final cellWidth = (width - (columns - 1) * gap) / columns;
     final dotColumns = math.max(1, ((cellWidth - 12 - 4 + 2) / 6).floor());
-    final maxDots =
-        days.fold(0, (value, day) => math.max(value, day.dots.length));
+    final maxDots = days.fold(
+      0,
+      (value, day) => math.max(value, day.dots.length),
+    );
     final dotRows = (maxDots / dotColumns).ceil();
     final markHeight = dotRows == 0 ? 0 : AppSpacing.micro + dotRows * 6 - 2;
     final cellHeight = math
@@ -84,30 +70,36 @@ class NinjaWeekStrip extends StatelessWidget {
       columns: columns,
       gap: gap,
       cellHeight: cellHeight,
-      height: cellHeight * rows + gap * (rows - 1)
+      height: cellHeight * rows + gap * (rows - 1),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (fitWeek && constraints.hasBoundedWidth && days.isNotEmpty) {
-            final metrics = layout(
-              context,
-              width: constraints.maxWidth,
-              days: days,
-              scheduleStyle: scheduleStyle,
-            );
-            return Column(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double availableWidth = math.max(
+          0,
+          constraints.maxWidth - padding.horizontal,
+        );
+        if (fitWeek && constraints.hasBoundedWidth && days.isNotEmpty) {
+          final metrics = layout(
+            context,
+            width: availableWidth,
+            days: days,
+            scheduleStyle: scheduleStyle,
+          );
+          return Padding(
+            padding: padding,
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               spacing: metrics.gap,
               children: [
-                for (var start = 0;
-                    start < days.length;
-                    start += metrics.columns)
+                for (
+                  var start = 0;
+                  start < days.length;
+                  start += metrics.columns
+                )
                   Row(
                     spacing: metrics.gap,
                     children: [
@@ -118,7 +110,7 @@ class NinjaWeekStrip extends StatelessWidget {
                             child: start + column >= days.length
                                 ? null
                                 : NinjaDayPill(
-                                    day: days[start + column],
+                                    day: days.elementAtOrNull(start + column)!,
                                     selected: start + column == selectedIndex,
                                     dense: dense,
                                     scheduleStyle: scheduleStyle,
@@ -131,42 +123,42 @@ class NinjaWeekStrip extends StatelessWidget {
                     ],
                   ),
               ],
-            );
-          }
-          final textWidth = MediaQuery.textScalerOf(context).scale(16) * 2 + 12;
-          final cellWidth = textWidth < 44 ? 44.0 : textWidth;
-          final minimum = days.length * cellWidth +
-              (days.isEmpty ? 0 : days.length - 1) * gap;
-          final width =
-              constraints.hasBoundedWidth && constraints.maxWidth > minimum
-                  ? constraints.maxWidth
-                  : minimum;
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              width: width,
-              child: Row(
-                children: [
-                  for (var index = 0; index < days.length; index++) ...[
-                    if (index != 0) SizedBox(width: gap),
-                    Expanded(
-                      child: NinjaDayPill(
-                        day: days[index],
-                        selected: index == selectedIndex,
-                        dense: dense,
-                        scheduleStyle: scheduleStyle,
-                        onTap: onSelected == null
-                            ? null
-                            : () => onSelected!(index),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
             ),
           );
-        },
-      ),
+        }
+        final textWidth = MediaQuery.textScalerOf(context).scale(16) * 2 + 12;
+        final cellWidth = textWidth < 44 ? 44.0 : textWidth;
+        final minimum =
+            days.length * cellWidth +
+            (days.isEmpty ? 0 : days.length - 1) * gap;
+        final width = constraints.hasBoundedWidth && availableWidth > minimum
+            ? availableWidth
+            : minimum;
+        return AppHorizontalScrollView(
+          padding: padding,
+          child: SizedBox(
+            width: width,
+            child: Row(
+              children: [
+                for (var index = 0; index < days.length; index++) ...[
+                  if (index != 0) SizedBox(width: gap),
+                  Expanded(
+                    child: NinjaDayPill(
+                      day: days[index],
+                      selected: index == selectedIndex,
+                      dense: dense,
+                      scheduleStyle: scheduleStyle,
+                      onTap: onSelected == null
+                          ? null
+                          : () => onSelected!(index),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -190,37 +182,42 @@ class NinjaDayPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
 
     final foreground = selected
         ? colors.onAccent
         : (day.isWeekend || day.isPast)
-            ? colors.muted2
-            : colors.ink;
+        ? colors.muted2
+        : colors.ink;
 
     final ring = !selected && day.isToday ? colors.accent : null;
     final short = day.short;
 
     return AppPressable(
       onTap: onTap,
-      semanticsLabel: day.semanticsLabel ??
+      semanticsLabel:
+          day.semanticsLabel ??
           (short == null ? day.label : '$short ${day.label}'),
       semanticsSelected: selected,
       child: AnimatedContainer(
-        duration:
-            reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+        duration: reduceMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
         constraints: BoxConstraints(
-          minHeight:
-              dense ? AppControlSize.touchTarget : AppControlSize.dayPill,
+          minHeight: dense
+              ? AppControlSize.touchTarget
+              : AppControlSize.dayPill,
         ),
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xsm),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: selected ? colors.accent : colors.surface,
-          borderRadius:
-              BorderRadius.circular(dense ? AppRadius.iconTile : AppRadius.lg),
+          borderRadius: BorderRadius.circular(
+            dense ? AppRadius.iconTile : AppRadius.lg,
+          ),
           border: ring == null ? null : Border.all(color: ring, width: 2),
         ),
         child: Column(
@@ -232,14 +229,15 @@ class NinjaDayPill extends StatelessWidget {
                 opacity: .8,
                 child: Text(
                   short,
-                  style: (dense
-                          ? AppText.sans(9.5, FontWeight.w700)
-                          : AppText.sans(
-                              scheduleStyle ? 10 : 10.5,
-                              FontWeight.w600,
-                              letterSpacingEm: .04,
-                            ))
-                      .copyWith(color: foreground),
+                  style:
+                      (dense
+                              ? AppText.sans(9.5, FontWeight.w700)
+                              : AppText.sans(
+                                  scheduleStyle ? 10 : 10.5,
+                                  FontWeight.w600,
+                                  letterSpacingEm: .04,
+                                ))
+                          .copyWith(color: foreground),
                 ),
               ),
               const SizedBox(height: AppSpacing.micro),
@@ -250,8 +248,8 @@ class NinjaDayPill extends StatelessWidget {
                 dense
                     ? 14
                     : scheduleStyle
-                        ? 15
-                        : 16,
+                    ? 15
+                    : 16,
                 FontWeight.w700,
                 tabular: true,
               ).copyWith(color: foreground),

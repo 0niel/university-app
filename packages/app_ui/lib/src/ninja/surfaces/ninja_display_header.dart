@@ -54,8 +54,10 @@ class NinjaDisplayHeader extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xsm),
                   Text(
                     summary,
-                    style: AppText.sans(13, FontWeight.w500)
-                        .copyWith(color: colors.muted),
+                    style: AppText.sans(
+                      13,
+                      FontWeight.w500,
+                    ).copyWith(color: colors.muted),
                   ),
                 ],
               ],

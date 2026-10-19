@@ -339,7 +339,7 @@ void main() {
 }
 
 class _SessionHarness {
-  _SessionHarness({
+  factory _SessionHarness({
     required Future<Map<String, String>> Function(Uri) readCookies,
     Duration redirectTimeout = const Duration(seconds: 20),
     String oauthUrl = _authorizationUrl,
@@ -347,19 +347,26 @@ class _SessionHarness {
     String specialCookieName = _sessionName,
     bool waitForSpecialCookie = false,
   }) {
-    observer = OAuthSessionObserver(
+    final results = <LoginSuccessData>[];
+    final errors = <Object?>[];
+    final observer = OAuthSessionObserver(
       oauthUrl: oauthUrl,
       expectedRedirectUrls: expectedRedirectUrls,
       specialCookieName: specialCookieName,
       waitForSpecialCookie: waitForSpecialCookie,
       readCookies: readCookies,
       onSuccess: results.add,
-      onError: () => errors++,
+      onError: () => errors.add(null),
       redirectTimeout: redirectTimeout,
     );
+    return _SessionHarness._(observer, results, errors);
   }
 
-  late final OAuthSessionObserver observer;
-  final List<LoginSuccessData> results = [];
-  int errors = 0;
+  const _SessionHarness._(this.observer, this.results, this._errors);
+
+  final OAuthSessionObserver observer;
+  final List<LoginSuccessData> results;
+  final List<Object?> _errors;
+
+  int get errors => _errors.length;
 }

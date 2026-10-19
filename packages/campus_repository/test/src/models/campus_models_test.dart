@@ -264,7 +264,7 @@ void main() {
       expect(space.memberNames, ['A', 'B', 'C']);
       expect(space.myBirthdaySet, isTrue);
       expect(space.members, hasLength(2));
-      expect(space.members.first.isOwner, isTrue);
+      expect(space.members.firstOrNull!.isOwner, isTrue);
       expect(space.links, hasLength(2));
       expect(space.announcement?.id, 'a1');
       expect(space.notes, hasLength(1));
@@ -814,7 +814,7 @@ void main() {
       expect(p.height, 1200);
       expect(p.createdBy, 'user-1');
       expect(p.authorName, 'Анна К.');
-      expect(p.createdAt, isNotNull);
+      expect(p.createdAt, DateTime.utc(2026, 1, 2, 3, 4, 5).toLocal());
       expect(p.isMine, isTrue);
       expect(p.url, '');
     });
@@ -951,7 +951,7 @@ void main() {
       expect(p.reviews, hasLength(2));
       expect(
         p.reviews.map((review) => review.id),
-        containsAllInOrder(['rv1']),
+        contains('rv1'),
       );
     });
 

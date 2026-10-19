@@ -15,10 +15,13 @@ import 'package:rtu_mirea_app/nfc_pass/bloc/nfc_hce_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/bloc/pass_security_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/profile_cubit.dart';
+import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/view/about_app_page.dart';
 import 'package:rtu_mirea_app/profile/view/profile_settings_page.dart';
+import 'package:rtu_mirea_app/profile/widgets/settings/settings_widgets.dart';
 import 'package:rtu_mirea_app/schedule/cubit/schedule_display/schedule_display_cubit.dart';
+import 'package:rtu_mirea_app/services/services.dart';
 import 'package:user_repository/user_repository.dart';
 
 import '../helpers/profile_test_environment.dart';
@@ -48,20 +51,32 @@ void main() {
     webAppPathPrefix: '/app',
   );
 
-  Widget mediaQueryOverride({required Widget child, required double bottom}) {
+  Widget mediaQueryOverride({
+    required Widget child,
+    required double bottom,
+    double scale = 1,
+  }) {
     return Builder(
       builder: (context) => MediaQuery(
-        data: MediaQuery.of(
-          context,
-        ).copyWith(padding: EdgeInsets.only(bottom: bottom)),
+        data:
+            MediaQuery.of(
+              context,
+            ).copyWith(
+              padding: EdgeInsets.only(bottom: bottom),
+              textScaler: TextScaler.linear(scale),
+              disableAnimations: true,
+            ),
         child: child,
       ),
     );
   }
 
   testWidgets(
-    'settings page reserves the shell bottom inset below its last section',
+    'settings keeps its inset and advanced actions without search at 200%',
     (tester) async {
+      tester.view.physicalSize = const Size(320, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       final environment = ProfileTestEnvironment();
       final profile = _Profile();
       final app = _App();
@@ -72,6 +87,8 @@ void main() {
       final locale = LocaleCubit();
       final preferences = UiPreferencesCubit();
       final display = ScheduleDisplayCubit();
+      final favorites = FavoriteServicesCubit();
+      final sync = SyncPreferencesCubit();
       [
         profile.close,
         app.close,
@@ -82,6 +99,8 @@ void main() {
         locale.close,
         preferences.close,
         display.close,
+        favorites.close,
+        sync.close,
       ].forEach(addTearDown);
       when(() => profile.state).thenReturn(
         const ProfileState(
@@ -121,15 +140,21 @@ void main() {
               BlocProvider.value(value: locale),
               BlocProvider.value(value: preferences),
               BlocProvider.value(value: display),
+              BlocProvider.value(value: favorites),
+              BlocProvider.value(value: sync),
             ],
-            child: MaterialApp(
-              theme: AppTheme.lightTheme,
-              locale: const Locale('ru'),
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              home: mediaQueryOverride(
-                bottom: 40,
-                child: const ProfileSettingsPage(),
+            child: RepositoryProvider<UniversityConfig>.value(
+              value: config,
+              child: MaterialApp(
+                theme: AppTheme.lightTheme,
+                locale: const Locale('ru'),
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                home: mediaQueryOverride(
+                  bottom: 40,
+                  scale: 2,
+                  child: const ProfileSettingsPage(),
+                ),
               ),
             ),
           ),
@@ -147,6 +172,47 @@ void main() {
         find.byKey(const ValueKey('settings-bottom-inset')),
       );
       expect(gap.height, 40 + AppSpacing.lg);
+      final l10n = tester.element(find.byType(ProfileSettingsPage)).l10n;
+      expect(find.byType(AppSearchField), findsNothing);
+      expect(find.text(l10n.settingsLockWidget), findsNothing);
+      expect(find.text(l10n.accountEmailLabel), findsNothing);
+      final advanced = find.text(l10n.settingsAdvanced);
+      await tester.ensureVisible(advanced);
+      await tester.tap(advanced);
+      await tester.pumpAndSettle();
+      expect(find.byType(AppSearchField), findsNothing);
+      expect(find.text(l10n.search), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text(l10n.settingsScreenWidgets),
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text(l10n.settingsScreenWidgets), findsOneWidget);
+      expect(find.text(l10n.settingsLockWidget), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text(l10n.settingsLanguage),
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text(l10n.settingsLanguage));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.settingsLanguage).hitTestable(), findsOneWidget);
+      await tester.tap(find.text(l10n.settingsLanguage));
+      await tester.pumpAndSettle();
+      expect(find.byType(AppSheet), findsOneWidget);
+      Navigator.of(tester.element(find.byType(AppSheet))).pop();
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        advanced,
+        -300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(advanced);
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsHomeSection), findsNothing);
+      expect(find.byType(AppSearchField), findsNothing);
+      expect(tester.takeException(), isNull);
     },
   );
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/common/widgets/app_date_picker.dart';
@@ -28,8 +30,8 @@ class ComparisonDayDetails extends StatelessWidget {
   final String myName;
   final String friendName;
   final ValueChanged<DateTime> onDay;
-  final Iterable<(int start, int end)> myBusyRanges;
-  final Iterable<(int start, int end)> friendBusyRanges;
+  final Iterable<(int, int)> myBusyRanges;
+  final Iterable<(int, int)> friendBusyRanges;
   final Iterable<int> myUncertainFrom;
   final Iterable<int> friendUncertainFrom;
 
@@ -63,13 +65,13 @@ class ComparisonDayDetails extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: AppPressable(
-                onTap: () async {
+                onTap: () => unawaited(() async {
                   final selected = await showAppDatePicker(
                     context,
                     initial: day,
                   );
                   if (selected != null && context.mounted) onDay(selected);
-                },
+                }()),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(minHeight: 44),
                   child: Center(
@@ -171,7 +173,8 @@ class ComparisonDayDetails extends StatelessWidget {
                           slot.minute >= range.$1 && slot.minute < range.$2,
                     ) ||
                     myUncertainFrom.any(
-                      (minute) => minute < (slot.freeUntil ?? slot.minute + 1),
+                      (minute) =>
+                          minute < (slot.freeUntil ?? (slot.minute + 1)),
                     ),
                 friendBusy:
                     friendBusyRanges.any(
@@ -179,7 +182,8 @@ class ComparisonDayDetails extends StatelessWidget {
                           slot.minute >= range.$1 && slot.minute < range.$2,
                     ) ||
                     friendUncertainFrom.any(
-                      (minute) => minute < (slot.freeUntil ?? slot.minute + 1),
+                      (minute) =>
+                          minute < (slot.freeUntil ?? (slot.minute + 1)),
                     ),
               ),
       ],

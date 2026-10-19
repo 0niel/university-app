@@ -7,12 +7,12 @@ enum EventsFilter {
   past;
 
   bool matches(CampusEvent event, DateTime now) {
-    final past = isEventPast(event, now);
+    final hasEnded = isEventPast(event, now);
     return switch (this) {
-      .all => !past,
-      .today => _isSameDay(event.startsAt, now) && !past,
-      .going => event.isGoing && !past,
-      .past => past,
+      .all => !hasEnded,
+      .today => _isSameDay(event.startsAt, now) && !hasEnded,
+      .going => event.isGoing && !hasEnded,
+      .past => hasEnded,
     };
   }
 

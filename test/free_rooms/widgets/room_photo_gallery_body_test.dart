@@ -20,12 +20,14 @@ void main() {
     ValueChanged<RoomPhoto>? onDeletePhoto,
     VoidCallback? onAddPhoto,
   }) {
+    final pageController = PageController();
+    addTearDown(pageController.dispose);
     return Scaffold(
       body: RoomPhotoGalleryBody(
         status: status,
         photos: photos,
         index: index,
-        pageController: PageController(),
+        pageController: pageController,
         uploadDone: uploadDone,
         uploadTotal: uploadTotal,
         onIndexChanged: (_) {},

@@ -55,80 +55,91 @@ class TeacherDashboardScheduleSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AppOverline(l10n.teacherWeekWorkload),
-        Row(
-          children: [
-            AppIconButton(
-              tooltip: l10n.teacherPreviousWeek,
-              onPressed: () => onChangeWeek(-1),
-              icon: const AppLineIconWidget(AppLineIcon.chevronL),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Text(
-                '${dateFormat.format(state.week)} – '
-                '${dateFormat.format(weekEnd)}',
-                textAlign: TextAlign.center,
-                style: AppText.headlineStrong.copyWith(color: colors.ink),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            AppIconButton(
-              tooltip: l10n.teacherNextWeek,
-              onPressed: () => onChangeWeek(1),
-              icon: const AppLineIconWidget(AppLineIcon.chevronR),
-            ),
-          ],
-        ),
-        if (!DateUtils.isSameDay(state.day, state.now))
-          Align(
-            child: AppButton.text(label: l10n.today, onPressed: onToday),
-          )
-        else
-          const SizedBox(height: AppSpacing.md),
-        if (!state.schedule.hasError && state.schedule.data == null)
-          AppSkeletonGroup(
-            semanticsLabel: l10n.loadingContent,
-            child: const AppSkeleton(height: 160, radius: AppRadius.card),
-          )
-        else if (state.schedule.hasError && state.schedule.data == null)
-          AppErrorState(
-            title: l10n.scheduleLoadingError,
-            message: l10n.tryAgain,
-            primaryLabel: l10n.retry,
-            footnote: null,
-            onPrimary: onRetry,
-          )
-        else ...[
-          TeacherScheduleStatus(
-            resource: state.schedule,
-            changes: state.changes,
-            onRetry: onRetry,
-          ),
-          TeacherMetrics(
-            metrics: [
-              (l10n.teacherLessonCount, '$lessonCount'),
-              (l10n.teacherTeachingTime, duration(workload.totalDuration)),
-              (
-                l10n.teacherWindowTime,
-                duration(
-                  workload.gaps.fold(
-                    Duration.zero,
-                    (sum, gap) => sum + gap.duration,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppOverline(l10n.teacherWeekWorkload),
+              Row(
+                children: [
+                  AppIconButton(
+                    tooltip: l10n.teacherPreviousWeek,
+                    onPressed: () => onChangeWeek(-1),
+                    icon: const AppLineIconWidget(AppLineIcon.chevronL),
                   ),
-                ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      '${dateFormat.format(state.week)} – '
+                      '${dateFormat.format(weekEnd)}',
+                      textAlign: TextAlign.center,
+                      style: AppText.headlineStrong.copyWith(color: colors.ink),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  AppIconButton(
+                    tooltip: l10n.teacherNextWeek,
+                    onPressed: () => onChangeWeek(1),
+                    icon: const AppLineIconWidget(AppLineIcon.chevronR),
+                  ),
+                ],
               ),
-              (l10n.teacherGroups, '${workload.groups.length}'),
+              if (!DateUtils.isSameDay(state.day, state.now))
+                Align(
+                  child: AppButton.text(label: l10n.today, onPressed: onToday),
+                )
+              else
+                const SizedBox(height: AppSpacing.md),
+              if (!state.schedule.hasError && state.schedule.data == null)
+                AppSkeletonGroup(
+                  semanticsLabel: l10n.loadingContent,
+                  child: const AppSkeleton(height: 160, radius: AppRadius.card),
+                )
+              else if (state.schedule.hasError && state.schedule.data == null)
+                AppErrorState(
+                  title: l10n.scheduleLoadingError,
+                  message: l10n.tryAgain,
+                  primaryLabel: l10n.retry,
+                  footnote: null,
+                  onPrimary: onRetry,
+                )
+              else ...[
+                TeacherScheduleStatus(
+                  resource: state.schedule,
+                  changes: state.changes,
+                  onRetry: onRetry,
+                ),
+                TeacherMetrics(
+                  metrics: [
+                    (l10n.teacherLessonCount, '$lessonCount'),
+                    (
+                      l10n.teacherTeachingTime,
+                      duration(workload.totalDuration),
+                    ),
+                    (
+                      l10n.teacherWindowTime,
+                      duration(
+                        workload.gaps.fold(
+                          Duration.zero,
+                          (sum, gap) => sum + gap.duration,
+                        ),
+                      ),
+                    ),
+                    (l10n.teacherGroups, '${workload.groups.length}'),
+                  ],
+                ),
+                if (workload.occurrences.isEmpty) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    l10n.teacherWeekNoLessons,
+                    style: AppText.body.copyWith(color: colors.muted),
+                  ),
+                ],
+              ],
             ],
           ),
-          if (workload.occurrences.isEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.teacherWeekNoLessons,
-              style: AppText.body.copyWith(color: colors.muted),
-            ),
-          ],
-        ],
+        ),
         TeacherDaySchedule(
           key: const ValueKey('teacher-dashboard-days'),
           schedule: state.schedule,
@@ -141,12 +152,15 @@ class TeacherDashboardScheduleSection extends StatelessWidget {
           onOpenLesson: onOpenLesson,
         ),
         if (state.schedule.data != null)
-          TeacherDashboardTargetsSection(
-            key: ValueKey(state.query),
-            groups: workload.groups,
-            rooms: workload.classrooms,
-            onOpenGroup: onOpenGroup,
-            onOpenRoom: onOpenRoom,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: TeacherDashboardTargetsSection(
+              key: ValueKey(state.query),
+              groups: workload.groups,
+              rooms: workload.classrooms,
+              onOpenGroup: onOpenGroup,
+              onOpenRoom: onOpenRoom,
+            ),
           ),
       ],
     );

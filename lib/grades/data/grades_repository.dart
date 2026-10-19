@@ -26,7 +26,7 @@ class LocalGradesRepository implements GradesRepository {
     if (raw == null || raw.isEmpty) return const GradesBook();
     final json = jsonDecode(raw);
     if (json is! Map) throw const FormatException('Grades book is invalid');
-    return GradesBook.fromJson(Map<String, dynamic>.from(json));
+    return GradesBook.fromJson(Map.from(json));
   }
 
   @override

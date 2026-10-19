@@ -10,14 +10,6 @@ import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_content.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_refresh_surface.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/mini_app_scaffold.dart';
 
-class MiniAppInnerScreenController {
-  _MiniAppInnerScreenState? _state;
-
-  String? get path => _state?.widget.path;
-
-  Future<void> refresh() => _state?._reload() ?? Future<void>.value();
-}
-
 class MiniAppInnerScreen extends StatefulWidget {
   const MiniAppInnerScreen({
     required this.path,
@@ -32,6 +24,14 @@ class MiniAppInnerScreen extends StatefulWidget {
 
   @override
   State<MiniAppInnerScreen> createState() => _MiniAppInnerScreenState();
+}
+
+class MiniAppInnerScreenController {
+  _MiniAppInnerScreenState? _state;
+
+  String? get path => _state?.widget.path;
+
+  Future<void> refresh() => _state?._reload() ?? Future.value();
 }
 
 class _MiniAppInnerScreenState extends State<MiniAppInnerScreen> {

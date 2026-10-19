@@ -9,8 +9,7 @@ List<DrawingStroke> decodeDrawingStrokes(String json) {
     if (raw is! List) return const [];
     return [
       for (final entry in raw)
-        if (entry is Map)
-          DrawingStroke.fromJson(Map<String, Object?>.from(entry)),
+        if (entry is Map) DrawingStroke.fromJson(Map.from(entry)),
     ];
   } on FormatException {
     return const [];
@@ -31,22 +30,21 @@ class DrawingStroke {
     final points = <PointVector>[
       if (rawPoints is List)
         for (final entry in rawPoints)
-          if (entry is List &&
-              entry.length >= 2 &&
-              entry[0] is num &&
-              entry[1] is num &&
-              (entry[0] as num).isFinite &&
-              (entry[1] as num).isFinite)
+          if (entry case [
+            final num x,
+            final num y,
+            ...final pressure,
+          ] when x.isFinite && y.isFinite)
             PointVector(
-              (entry[0] as num).toDouble(),
-              (entry[1] as num).toDouble(),
+              x.toDouble(),
+              y.toDouble(),
               json['simulatePressure'] == true
                   ? null
-                  : entry.length > 2 &&
-                        entry[2] is num &&
-                        (entry[2] as num).isFinite
-                  ? (entry[2] as num).toDouble().clamp(0, 1)
-                  : 1,
+                  : switch (pressure.firstOrNull) {
+                      final num value when value.isFinite =>
+                        value.toDouble().clamp(0, 1),
+                      _ => 1,
+                    },
             ),
     ];
     return DrawingStroke(

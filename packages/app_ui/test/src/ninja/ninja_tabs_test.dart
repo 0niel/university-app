@@ -12,15 +12,15 @@ void main() {
   ];
 
   Widget build({int value = 0, ValueChanged<int>? onChanged}) => wrapKit(
-        SizedBox(
-          width: 340,
-          child: NinjaTabs<int>(
-            tabs: tabs,
-            value: value,
-            onChanged: onChanged,
-          ),
-        ),
-      );
+    SizedBox(
+      width: 340,
+      child: NinjaTabs<int>(
+        tabs: tabs,
+        value: value,
+        onChanged: onChanged,
+      ),
+    ),
+  );
 
   testWidgets('renders every label and its count pill', (tester) async {
     await tester.pumpWidget(build(onChanged: (_) {}));

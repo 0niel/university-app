@@ -175,7 +175,7 @@ class ExamTopics extends StatelessWidget {
       subtitle: title,
       child: Builder(
         builder: (sheetContext) => AppButton.danger(
-          label: context.l10n.examsRemoveTopic,
+          label: sheetContext.l10n.examsRemoveTopic,
           expanded: true,
           onPressed: () {
             cubit.remove(exam.key, index);
@@ -205,6 +205,7 @@ class _AddTopic extends StatefulWidget {
 
 class _AddTopicState extends State<_AddTopic> {
   final controller = TextEditingController();
+  bool _canAdd = false;
 
   @override
   void dispose() {
@@ -220,13 +221,13 @@ class _AddTopicState extends State<_AddTopic> {
         placeholder: context.l10n.examsTopicHint,
         autofocus: true,
         maxLength: 150,
-        onChanged: (_) => setState(() {}),
+        onChanged: (value) => setState(() => _canAdd = value.trim().isNotEmpty),
       ),
       const SizedBox(height: AppSpacing.sectionGap),
       AppButton.primary(
         label: context.l10n.add,
         expanded: true,
-        onPressed: controller.text.trim().isEmpty
+        onPressed: !_canAdd
             ? null
             : () {
                 if (widget.cubit.addTopic(widget.examKey, controller.text)) {

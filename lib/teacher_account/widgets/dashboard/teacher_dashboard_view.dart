@@ -63,43 +63,43 @@ class TeacherDashboardView extends StatelessWidget {
               onBack: () =>
                   context.canPop() ? context.pop() : context.go('/profile'),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screen,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const TeacherAccountSyncBanner(),
-                  switch (state.binding) {
-                    TeacherBindingReady() => const TeacherDashboardContent(),
-                    TeacherBindingRestoring() => AppSkeletonGroup(
-                      semanticsLabel: context.l10n.loadingContent,
-                      child: const AppSkeleton(
-                        height: 220,
-                        radius: AppRadius.card,
-                      ),
-                    ),
-                    final binding => AppEmptyState(
-                      lineIcon: AppLineIcon.user,
-                      title: binding is TeacherBindingUnavailable
-                          ? context.l10n.teacherUnavailableTitle
-                          : context.l10n.teacherChooseTitle,
-                      subtitle: binding is TeacherBindingUnavailable
-                          ? context.l10n.teacherUnavailableDescription
-                          : context.l10n.teacherChooseDescription,
-                      actionLabel: context.l10n.teacherChooseTitle,
-                      onAction: () => unawaited(
-                        showAccountPersonaSheet(
-                          context,
-                          initialRole: AccountRole.teacher,
-                        ),
-                      ),
-                    ),
-                  },
-                ],
-              ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+              child: TeacherAccountSyncBanner(),
             ),
+            switch (state.binding) {
+              TeacherBindingReady() => const TeacherDashboardContent(),
+              TeacherBindingRestoring() => Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screen,
+                ),
+                child: AppSkeletonGroup(
+                  semanticsLabel: context.l10n.loadingContent,
+                  child: const AppSkeleton(height: 220, radius: AppRadius.card),
+                ),
+              ),
+              final binding => Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screen,
+                ),
+                child: AppEmptyState(
+                  lineIcon: AppLineIcon.user,
+                  title: binding is TeacherBindingUnavailable
+                      ? context.l10n.teacherUnavailableTitle
+                      : context.l10n.teacherChooseTitle,
+                  subtitle: binding is TeacherBindingUnavailable
+                      ? context.l10n.teacherUnavailableDescription
+                      : context.l10n.teacherChooseDescription,
+                  actionLabel: context.l10n.teacherChooseTitle,
+                  onAction: () => unawaited(
+                    showAccountPersonaSheet(
+                      context,
+                      initialRole: AccountRole.teacher,
+                    ),
+                  ),
+                ),
+              ),
+            },
           ],
         ),
       ),

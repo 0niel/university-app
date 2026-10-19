@@ -1,4 +1,4 @@
-part of 'mini_apps_page.dart';
+part of 'mini_apps_catalog.dart';
 
 class _CatalogSkeleton extends StatelessWidget {
   const _CatalogSkeleton({super.key});
@@ -7,10 +7,9 @@ class _CatalogSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return NinjaSkeletonGroup(
       semanticsLabel: context.l10n.loadingContent,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: _CatalogLayout.bottomInset(context)),
-        child: Column(
-          children: [
+      child: Column(
+        children: [
+          if (!_CatalogLayout.compactHeight(context)) ...[
             const _CatalogSectionLabelSkeleton(width: 132),
             SizedBox(
               height: _RecentMiniApps.height(context),
@@ -22,28 +21,48 @@ class _CatalogSkeleton extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: 5,
                 separatorBuilder: (_, _) =>
-                    const SizedBox(width: AppSpacing.sm),
-                itemBuilder: (_, _) => const NinjaSkeleton(
-                  width: 260,
-                  height: 80,
-                  radius: AppRadius.field,
+                    const SizedBox(width: AppSpacing.xs),
+                itemBuilder: (context, _) => SizedBox(
+                  width: _RecentMiniApps.width(context),
+                  child: Column(
+                    children: [
+                      const NinjaSkeleton(
+                        width: 52,
+                        height: 52,
+                        radius: AppRadius.field,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      NinjaSkeleton(
+                        width: 60,
+                        height: MediaQuery.textScalerOf(context).scale(12),
+                        radius: AppRadius.skeletonThin,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      NinjaSkeleton(
+                        width: 42,
+                        height: MediaQuery.textScalerOf(context).scale(12),
+                        radius: AppRadius.skeletonThin,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.gap),
+            const SizedBox(height: AppSpacing.xs),
             const _CatalogSectionLabelSkeleton(width: 96),
-            for (var i = 0; i < 6; i++)
-              const Padding(
-                padding: .fromLTRB(
-                  AppSpacing.screen,
-                  0,
-                  AppSpacing.screen,
-                  10,
-                ),
-                child: MiniAppCardSkeleton(),
+          ] else
+            const SizedBox(height: AppSpacing.sm),
+          for (var i = 0; i < 6; i++)
+            const Padding(
+              padding: .fromLTRB(
+                AppSpacing.screen,
+                0,
+                AppSpacing.screen,
+                AppSpacing.sm,
               ),
-          ],
-        ),
+              child: MiniAppCardSkeleton(),
+            ),
+        ],
       ),
     );
   }

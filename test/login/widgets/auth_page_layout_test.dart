@@ -50,11 +50,7 @@ void main() {
       (
         tester,
       ) async {
-        final colors = AppColors.dark.copyWith(
-          canvas: AppColors.amoledCanvas,
-          surface: AppColors.amoledSurface,
-          surface2: AppColors.amoledSurface2,
-        );
+        const colors = AppColors.dark;
         AppColors? contentColors;
         AppColors? actionColors;
         await tester.pumpWidget(
@@ -144,7 +140,7 @@ void main() {
     expect(find.byType(AppStepIndicator), findsNothing);
   });
 
-  testWidgets('accent word renders as an italic serif in the ink colour', (
+  testWidgets('accent word uses bold sans in the accent colour', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -167,10 +163,11 @@ void main() {
     expect(accent, isNotNull);
     expect(
       accent?.style?.color ?? (rich.text as TextSpan).style?.color,
-      colors.ink,
+      colors.accent,
     );
-    expect(accent?.style?.fontStyle, FontStyle.italic);
-    expect(accent?.style?.fontFamily, AppText.serifFamily);
+    expect(accent?.style?.fontStyle ?? FontStyle.normal, FontStyle.normal);
+    expect(accent?.style?.fontFamily, AppText.sansFamily);
+    expect(accent?.style?.fontWeight, FontWeight.w700);
   });
 
   testWidgets('pins actions at the bottom and stays scrollable when large', (
@@ -247,9 +244,15 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('The code was rejected. Try again.'), findsOneWidget);
-    expect(
-      tester.getBottomRight(find.byKey(const Key('layout-aware-action'))).dy,
-      844 - AuthPageLayout.bottomPadding,
-    );
+    final action = find.byKey(const Key('layout-aware-action'));
+    final footer = find
+        .ancestor(
+          of: action,
+          matching: find.byType(AppGlassSurface),
+        )
+        .first;
+    final footerBottom = tester.getBottomRight(footer).dy;
+    expect(footerBottom, 844 - AuthPageLayout.bottomPadding);
+    expect(tester.getBottomRight(action).dy, footerBottom - AppSpacing.md);
   });
 }

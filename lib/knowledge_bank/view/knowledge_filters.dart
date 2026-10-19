@@ -19,6 +19,8 @@ class _KnowledgeFilters extends StatelessWidget {
       ('cheat', l10n.knowledgeChipCheats),
     ];
     return AppChipRow<String>(
+      key: const ValueKey('knowledge-filters'),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
       value: value,
       onChanged: onChanged,
       items: [

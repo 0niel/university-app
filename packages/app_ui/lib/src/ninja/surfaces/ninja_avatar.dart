@@ -1,8 +1,9 @@
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_avatar_tone.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:flutter/widgets.dart';
 
-enum NinjaAvatarTone { ink, surface, indigo, lecture, lab, exam }
+export 'ninja_avatar_tone.dart';
 
 class NinjaAvatar extends StatelessWidget {
   const NinjaAvatar({
@@ -54,8 +55,10 @@ class NinjaAvatar extends StatelessWidget {
       decoration: BoxDecoration(color: background, shape: BoxShape.circle),
       child: Text(
         initials,
-        style: AppText.sans(fontSizeFor(size), weightFor(size))
-            .copyWith(color: foreground),
+        style: AppText.sans(
+          fontSizeFor(size),
+          weightFor(size),
+        ).copyWith(color: foreground),
       ),
     );
 

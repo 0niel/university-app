@@ -32,25 +32,27 @@ class NinjaSpotlight extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final media = MediaQuery.maybeOf(context);
-    final reduceMotion = (media?.disableAnimations ?? false) ||
+    final reduceMotion =
+        (media?.disableAnimations ?? false) ||
         (media?.accessibleNavigation ?? false);
-    final scrim =
-        colors.isDark ? colors.canvas.withValues(alpha: 0.9) : colors.scrim;
+    final scrim = colors.isDark
+        ? colors.canvas.withValues(alpha: 0.9)
+        : colors.scrim;
 
     Widget paint(Rect? rect) => AnimatedBuilder(
-          animation: pulse,
-          builder: (context, _) => CustomPaint(
-            size: Size.infinite,
-            painter: _NinjaSpotlightPainter(
-              hole: rect,
-              shape: shape,
-              radius: radius,
-              scrim: scrim,
-              ring: colors.accent,
-              pulse: reduceMotion ? 0 : pulse.value,
-            ),
-          ),
-        );
+      animation: pulse,
+      builder: (context, _) => CustomPaint(
+        size: Size.infinite,
+        painter: _NinjaSpotlightPainter(
+          hole: rect,
+          shape: shape,
+          radius: radius,
+          scrim: scrim,
+          ring: colors.accent,
+          pulse: reduceMotion ? 0 : pulse.value,
+        ),
+      ),
+    );
 
     if (hole == null) return IgnorePointer(child: paint(null));
 
@@ -121,18 +123,16 @@ class _NinjaSpotlightPainter extends CustomPainter {
 
   Path _path(Rect rect) {
     if (shape == NinjaSpotlightShape.circle) {
-      return Path()
-        ..addOval(
-          Rect.fromCircle(center: rect.center, radius: rect.longestSide / 2),
-        );
-    }
-    return Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          rect,
-          Radius.circular(math.min(radius, rect.shortestSide / 2)),
-        ),
+      return Path()..addOval(
+        Rect.fromCircle(center: rect.center, radius: rect.longestSide / 2),
       );
+    }
+    return Path()..addRRect(
+      RRect.fromRectAndRadius(
+        rect,
+        Radius.circular(math.min(radius, rect.shortestSide / 2)),
+      ),
+    );
   }
 
   @override

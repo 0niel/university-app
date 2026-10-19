@@ -33,7 +33,7 @@ Future<BuildContext> pumpKit(
       home: Scaffold(
         body: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: .stretch,
             children: [body],
           ),
         ),

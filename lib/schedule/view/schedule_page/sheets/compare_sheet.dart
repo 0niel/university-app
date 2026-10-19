@@ -12,16 +12,16 @@ Future<void> showCompareSheet(BuildContext context) {
     context,
     title: context.l10n.scheduleCompareTitle,
     subtitle: context.l10n.scheduleCompareSubtitle,
-    child: _CompareFriends(
-      friends: context.read<FriendsRepository>(),
-      repository: context.read<ScheduleRepository>(),
-      comparison: context.read<ScheduleComparisonCubit>(),
+    child: _CompareSheet(
+      friends: context.read(),
+      repository: context.read(),
+      comparison: context.read(),
     ),
   );
 }
 
-class _CompareFriends extends StatefulWidget {
-  const _CompareFriends({
+class _CompareSheet extends StatefulWidget {
+  const _CompareSheet({
     required this.friends,
     required this.repository,
     required this.comparison,
@@ -30,10 +30,10 @@ class _CompareFriends extends StatefulWidget {
   final ScheduleRepository repository;
   final ScheduleComparisonCubit comparison;
   @override
-  State<_CompareFriends> createState() => _CompareFriendsState();
+  State<_CompareSheet> createState() => _CompareSheetState();
 }
 
-class _CompareFriendsState extends State<_CompareFriends> {
+class _CompareSheetState extends State<_CompareSheet> {
   late Future<List<Friend>> _friends = widget.friends.getFriends();
   String? _busy;
   String? _error;
@@ -53,7 +53,7 @@ class _CompareFriendsState extends State<_CompareFriends> {
           group: Group(name: friend.group!),
           schedule: response.data,
         ),
-        friendName: friend.fullName,
+        comparisonName: friend.fullName,
       );
       ToastManager.showSuccess(
         context,

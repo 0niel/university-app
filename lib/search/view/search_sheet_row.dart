@@ -1,20 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 
-class SearchSheetHit {
-  const SearchSheetHit({
-    required this.kind,
-    required this.title,
-    required this.onTap,
-    this.subtitle,
-  });
-
-  final String kind;
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-}
-
 class SearchSheetRow extends StatelessWidget {
   const SearchSheetRow({required this.hit, super.key});
 
@@ -83,6 +69,20 @@ class SearchSheetRow extends StatelessWidget {
       ),
     );
   }
+}
+
+class SearchSheetHit {
+  const SearchSheetHit({
+    required this.kind,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final String kind;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
 }
 
 class SearchRecentPill extends StatelessWidget {

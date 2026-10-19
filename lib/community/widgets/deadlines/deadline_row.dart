@@ -19,7 +19,7 @@ class DeadlineRow extends StatelessWidget {
   final bool pending;
   final VoidCallback? onToggle;
   final VoidCallback? onDelete;
-  final VoidCallback onLongPress;
+  final VoidCallback? onLongPress;
   final DateTime? now;
 
   @override
@@ -62,7 +62,7 @@ class DeadlineRow extends StatelessWidget {
                 return false;
               }
               if (onDelete == null) return false;
-              onDelete!.call();
+              onDelete!();
               return true;
             },
             child: row,

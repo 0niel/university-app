@@ -28,8 +28,8 @@ Future<void> showTeacherProfileSheet(
   TeacherProfile? initialProfile,
 }) => showAppSheet<void>(
   context,
-  child: RepositoryProvider.value(
-    value: context.read<CampusRepository>(),
+  child: RepositoryProvider<CampusRepository>.value(
+    value: context.read(),
     child: TeacherProfilePage(
       teacherName: teacher.name,
       teacher: teacher,
@@ -102,12 +102,11 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
     });
     try {
       final profile = await _repository.getTeacherProfile(widget.teacherName);
-      if (mounted && revision == _loadRevision) {
-        setState(() {
-          _profile = profile;
-          _loading = false;
-        });
-      }
+      if (!mounted || revision != _loadRevision) return;
+      setState(() {
+        _profile = profile;
+        _loading = false;
+      });
     } on Exception catch (error, stackTrace) {
       log(
         'Failed to load teacher profile',
@@ -180,7 +179,7 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
         message: l10n.tryAgain,
         primaryLabel: l10n.retry,
         footnote: null,
-        onPrimary: _load,
+        onPrimary: () => unawaited(_load()),
       );
     }
     if (_profile.reviews.isEmpty) {
@@ -192,7 +191,7 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
             ? l10n.teacherOwnReviewsEmptyDescription
             : l10n.teacherProfileEmptySub,
         actionLabel: _readOnly ? null : l10n.teacherProfileLeaveReview,
-        onAction: _readOnly ? null : _review,
+        onAction: _readOnly ? null : () => unawaited(_review()),
       );
     }
     if (widget.inSheet) {
@@ -238,9 +237,10 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
                 children: [
                   Text(
                     widget.teacherName,
-                    style: AppText.serif(
+                    style: AppText.sans(
                       24,
-                      height: 1.1,
+                      FontWeight.w700,
+                      height: 1.2,
                     ).copyWith(color: colors.ink),
                   ),
                   if (widget.teacher?.department case final department?) ...[
@@ -364,12 +364,12 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
                   label: l10n.scheduleTeacherWrite,
                   expanded: true,
                   backgroundColor: colors.surface,
-                  onPressed: _write,
+                  onPressed: () => unawaited(_write()),
                 ),
                 AppButton.primary(
                   label: l10n.scheduleTeacherReview,
                   expanded: true,
-                  onPressed: _review,
+                  onPressed: () => unawaited(_review()),
                 ),
               ];
               return constraints.maxWidth < 320 ||
@@ -377,9 +377,10 @@ class _TeacherProfilePageState extends State<TeacherProfilePage> {
                   ? Column(spacing: AppSpacing.sm, children: buttons)
                   : Row(
                       children: [
-                        Expanded(child: buttons.first),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(child: buttons.last),
+                        for (final (index, button) in buttons.indexed) ...[
+                          if (index > 0) const SizedBox(width: AppSpacing.sm),
+                          Expanded(child: button),
+                        ],
                       ],
                     );
             },

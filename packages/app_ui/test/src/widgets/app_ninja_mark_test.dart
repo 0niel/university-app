@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(body: Center(child: child)),
+  );
 
   group('AppNinjaMark', () {
     testWidgets('paints the mark', (tester) async {
@@ -48,8 +48,9 @@ void main() {
     });
 
     testWidgets('renders solid (cutout: false) without error', (tester) async {
-      await tester
-          .pumpWidget(wrap(const AppNinjaMark(size: 40, cutout: false)));
+      await tester.pumpWidget(
+        wrap(const AppNinjaMark(size: 40, cutout: false)),
+      );
 
       expect(find.byType(AppNinjaMark), findsOneWidget);
       expect(tester.takeException(), isNull);

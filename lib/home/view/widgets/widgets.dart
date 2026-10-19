@@ -4,6 +4,7 @@ export 'home_greeting.dart';
 export 'home_hero.dart';
 export 'home_lessons_group.dart';
 export 'home_quick_actions.dart';
+export 'home_section_reveal.dart';
 export 'home_status_strip.dart';
 export 'home_stories_rail.dart';
 export 'home_top_row.dart';

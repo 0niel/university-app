@@ -52,6 +52,7 @@ class TeacherWeekDays extends StatelessWidget {
           DateTime(start.year, start.month, start.day + day.weekday - 1),
         ),
         daysBuilder: days,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
       ),
     );
   }
@@ -59,9 +60,10 @@ class TeacherWeekDays extends StatelessWidget {
   AppWeekDay _day(BuildContext context, DateFormat format, DateTime date) {
     final l10n = context.l10n;
     final lessons = _activeLessons(date);
-    final week = date.subtract(Duration(days: date.weekday - 1));
+    final selectedWeek = date.subtract(Duration(days: date.weekday - 1));
     final available =
-        DateUtils.isSameDay(week, workload.weekStart) && schedule.data != null;
+        DateUtils.isSameDay(selectedWeek, workload.weekStart) &&
+        schedule.data != null;
     final summary = available
         ? l10n.scheduleDayLessons(lessons.length)
         : l10n.loadingContent;
