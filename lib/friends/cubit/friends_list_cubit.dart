@@ -2,7 +2,60 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:friends_repository/friends_repository.dart';
 
-enum FriendsListStatus { initial, loading, loaded, failure }
+class FriendsListCubit extends Cubit<FriendsListState> {
+  FriendsListCubit({required FriendsRepository friendsRepository})
+    : _repository = friendsRepository,
+      super(const FriendsListState());
+
+  final FriendsRepository _repository;
+  var _request = 0;
+
+  Future<void> load() async {
+    final request = ++_request;
+    emit(state.copyWith(status: FriendsListStatus.loading));
+    try {
+      final friends = await _repository.getFriends();
+      if (isClosed || request != _request) return;
+      final sorted = [...friends]..sort(_byPresence);
+      emit(state.copyWith(status: FriendsListStatus.loaded, friends: sorted));
+    } on Object catch (error, stackTrace) {
+      if (!isClosed && request == _request) {
+        addError(error, stackTrace);
+        emit(state.copyWith(status: FriendsListStatus.failure));
+      }
+    }
+  }
+
+  void setFilter(FriendsFilter filter) => emit(state.copyWith(filter: filter));
+
+  Future<bool> removeFriend(String userId) async {
+    if (isClosed) return false;
+    try {
+      await _repository.removeFriend(userId);
+      if (isClosed) return false;
+      emit(
+        state.copyWith(
+          friends: [
+            for (final friend in state.friends)
+              if (friend.userId != userId) friend,
+          ],
+        ),
+      );
+      return true;
+    } on Object catch (error, stackTrace) {
+      if (!isClosed) addError(error, stackTrace);
+      return false;
+    }
+  }
+
+  static int _byPresence(Friend a, Friend b) {
+    final now = DateTime.now();
+    final campus =
+        (friendOnCampus(b, now) ? 1 : 0) - (friendOnCampus(a, now) ? 1 : 0);
+    if (campus != 0) return campus;
+    return a.fullName.compareTo(b.fullName);
+  }
+}
 
 enum FriendsFilter { all, onCampus }
 
@@ -75,57 +128,4 @@ class FriendsListState extends Equatable {
   List<Object?> get props => [status, friends, filter];
 }
 
-class FriendsListCubit extends Cubit<FriendsListState> {
-  FriendsListCubit({required FriendsRepository friendsRepository})
-    : _repository = friendsRepository,
-      super(const FriendsListState());
-
-  final FriendsRepository _repository;
-  var _request = 0;
-
-  Future<void> load() async {
-    final request = ++_request;
-    emit(state.copyWith(status: FriendsListStatus.loading));
-    try {
-      final friends = await _repository.getFriends();
-      if (isClosed || request != _request) return;
-      final sorted = [...friends]..sort(_byPresence);
-      emit(state.copyWith(status: FriendsListStatus.loaded, friends: sorted));
-    } on Object catch (error, stackTrace) {
-      if (!isClosed && request == _request) {
-        addError(error, stackTrace);
-        emit(state.copyWith(status: FriendsListStatus.failure));
-      }
-    }
-  }
-
-  void setFilter(FriendsFilter filter) => emit(state.copyWith(filter: filter));
-
-  Future<bool> removeFriend(String userId) async {
-    if (isClosed) return false;
-    try {
-      await _repository.removeFriend(userId);
-      if (isClosed) return false;
-      emit(
-        state.copyWith(
-          friends: [
-            for (final friend in state.friends)
-              if (friend.userId != userId) friend,
-          ],
-        ),
-      );
-      return true;
-    } on Object catch (error, stackTrace) {
-      if (!isClosed) addError(error, stackTrace);
-      return false;
-    }
-  }
-
-  static int _byPresence(Friend a, Friend b) {
-    final now = DateTime.now();
-    final campus =
-        (friendOnCampus(b, now) ? 1 : 0) - (friendOnCampus(a, now) ? 1 : 0);
-    if (campus != 0) return campus;
-    return a.fullName.compareTo(b.fullName);
-  }
-}
+enum FriendsListStatus { initial, loading, loaded, failure }

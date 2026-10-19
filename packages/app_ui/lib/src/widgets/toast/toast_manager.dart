@@ -213,25 +213,25 @@ class ToastManager {
     };
 
     Widget buildToastChild(VoidCallback dismiss) => AppToast(
-          message: message,
-          icon: icon,
-          iconColor: tone,
-          actionLabel: actionLabel,
-          onAction: onAction == null
-              ? null
-              : () {
-                  dismiss();
-                  onAction.call();
-                },
-          leading: emoji == null
-              ? null
-              : AppIconTile(
-                  size: 32,
-                  radius: AppRadius.sm,
-                  background: colors.surface2,
-                  child: Text(emoji, style: AppText.sans(17, FontWeight.w400)),
-                ),
-        );
+      message: message,
+      icon: icon,
+      iconColor: tone,
+      actionLabel: actionLabel,
+      onAction: onAction == null
+          ? null
+          : () {
+              dismiss();
+              onAction();
+            },
+      leading: emoji == null
+          ? null
+          : AppIconTile(
+              size: 32,
+              radius: AppRadius.sm,
+              background: colors.surface2,
+              child: Text(emoji, style: AppText.sans(17, FontWeight.w400)),
+            ),
+    );
 
     return _bottomQueue.show(
       context,
@@ -283,13 +283,12 @@ class _VisibleToast {
 }
 
 class _ToastAnimationHandle {
-  VoidCallback? onExit;
-  VoidCallback? onFallbackExit;
+  _ToastAnimationHandle(this.onFallbackExit) : onExit = onFallbackExit;
 
-  void exit() {
-    final handler = onExit ?? onFallbackExit;
-    handler?.call();
-  }
+  VoidCallback onExit;
+  final VoidCallback onFallbackExit;
+
+  void exit() => onExit();
 }
 
 class _ToastQueue {
@@ -348,7 +347,6 @@ class _ToastQueue {
     final overlay = _overlay;
     if (overlay == null) return;
 
-    final handle = _ToastAnimationHandle();
     Timer? timer;
     var handled = false;
     late final OverlayEntry entry;
@@ -382,12 +380,12 @@ class _ToastQueue {
       });
     }
 
+    final handle = _ToastAnimationHandle(removeAndAdvance);
+
     void scheduleTimer(Duration duration) {
       timer?.cancel();
       timer = Timer(duration, handle.exit);
     }
-
-    handle.onFallbackExit = removeAndAdvance;
 
     entry = OverlayEntry(
       builder: (entryContext) {
@@ -398,10 +396,10 @@ class _ToastQueue {
           bottom: alignTop
               ? null
               : math.max(
-                    viewInsets.bottom,
-                    math.max(padding.bottom, queued.bottomInset),
-                  ) +
-                  AppSpacing.xlg,
+                      viewInsets.bottom,
+                      math.max(padding.bottom, queued.bottomInset),
+                    ) +
+                    AppSpacing.xlg,
           left: AppSpacing.lg,
           right: AppSpacing.lg,
           child: Semantics(
@@ -485,13 +483,13 @@ class _AnimatedToastSlotState extends State<_AnimatedToastSlot>
   @override
   void initState() {
     super.initState();
-    widget.handle.onExit = _animateOutAndRemove;
+    widget.handle.onExit = () => unawaited(_animateOutAndRemove());
     unawaited(_controller.forward());
   }
 
   @override
   void dispose() {
-    widget.handle.onExit = null;
+    widget.handle.onExit = widget.handle.onFallbackExit;
     _controller.dispose();
     widget.onDispose();
     super.dispose();
@@ -522,12 +520,13 @@ class _AnimatedToastSlotState extends State<_AnimatedToastSlot>
     if (reduceMotion) {
       content = FadeTransition(opacity: _controller, child: content);
     } else {
-      final offset = Tween(
-        begin: Offset(0, widget.fromTop ? -1 : 1),
-        end: Offset.zero,
-      ).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-      );
+      final offset =
+          Tween(
+            begin: Offset(0, widget.fromTop ? -1 : 1),
+            end: Offset.zero,
+          ).animate(
+            CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+          );
       content = SlideTransition(position: offset, child: content);
     }
 

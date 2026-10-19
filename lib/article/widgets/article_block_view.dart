@@ -4,6 +4,7 @@ import 'package:news_blocks/news_blocks.dart';
 import 'package:news_blocks_ui/news_blocks_ui.dart' show Video;
 import 'package:rtu_mirea_app/article/widgets/article_html.dart';
 import 'package:rtu_mirea_app/article/widgets/article_media.dart';
+import 'package:rtu_mirea_app/article/widgets/article_slide_view.dart';
 import 'package:rtu_mirea_app/feed/widgets/widgets.dart';
 
 class ArticleBlockView extends StatelessWidget {
@@ -63,40 +64,18 @@ class ArticleBlockView extends StatelessWidget {
         spacing: AppSpacing.sectionGap,
         children: [
           for (final slide in slides)
-            ArticleBlockView(
-              block: slide,
+            ArticleSlideView(
+              slide: slide,
               gallery: gallery,
               sourceUri: sourceUri,
             ),
         ],
       ),
-      SlideBlock(
-        :final imageUrl,
-        :final caption,
-        :final description,
-        :final photoCredit,
-      ) =>
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: AppSpacing.sm,
-          children: [
-            FeedImage(
-              imageUrl: articleImageUrl(imageUrl, sourceUri: sourceUri),
-              gallery: gallery,
-              radius: AppRadius.card,
-              height: 220,
-              width: double.infinity,
-            ),
-            if (caption.isNotEmpty) Text(caption, style: AppText.subtextStrong),
-            if (description.isNotEmpty)
-              Text(description, style: AppText.paragraph),
-            if (photoCredit.isNotEmpty)
-              Text(
-                photoCredit,
-                style: AppText.caption.copyWith(color: colors.muted),
-              ),
-          ],
-        ),
+      SlideBlock() => ArticleSlideView(
+        slide: block,
+        gallery: gallery,
+        sourceUri: sourceUri,
+      ),
       _ => const SizedBox.shrink(),
     };
   }

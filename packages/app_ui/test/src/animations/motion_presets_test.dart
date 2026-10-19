@@ -3,15 +3,15 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _host({bool reduced = false, bool accessible = false}) => Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: MediaQueryData(
-          disableAnimations: reduced,
-          accessibleNavigation: accessible,
-        ),
-        child: const _Counter().animatePageEntrance(),
-      ),
-    );
+  textDirection: TextDirection.ltr,
+  child: MediaQuery(
+    data: MediaQueryData(
+      disableAnimations: reduced,
+      accessibleNavigation: accessible,
+    ),
+    child: const _Counter().animatePageEntrance(),
+  ),
+);
 
 void main() {
   for (final accessible in [false, true]) {
@@ -29,8 +29,9 @@ void main() {
     });
   }
 
-  testWidgets('changing motion preferences preserves child state',
-      (tester) async {
+  testWidgets('changing motion preferences preserves child state', (
+    tester,
+  ) async {
     await tester.pumpWidget(_host(reduced: true));
     await tester.tap(find.text('0'));
     await tester.pump();
@@ -40,8 +41,9 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('enabling accessibility completes an active entrance',
-      (tester) async {
+  testWidgets('enabling accessibility completes an active entrance', (
+    tester,
+  ) async {
     await tester.pumpWidget(_host());
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, lessThan(1));
@@ -64,7 +66,7 @@ class _CounterState extends State<_Counter> {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: () => setState(() => _count++),
-        child: Text('$_count'),
-      );
+    onTap: () => setState(() => _count++),
+    child: Text('$_count'),
+  );
 }

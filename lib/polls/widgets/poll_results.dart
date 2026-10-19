@@ -184,10 +184,9 @@ class _TextResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final l10n = context.l10n;
     if (question.textAnswers.isEmpty) {
       return Text(
-        l10n.pollsResultsNoAnswers,
+        context.l10n.pollsResultsNoAnswers,
         style: AppText.caption.copyWith(color: colors.muted),
       );
     }
@@ -224,7 +223,7 @@ class _RatingResults extends StatelessWidget {
     final average = question.ratingAverage;
     if (question.ratingCount == 0 || average == null) {
       return Text(
-        l10n.pollsResultsNoAnswers,
+        context.l10n.pollsResultsNoAnswers,
         style: AppText.caption.copyWith(color: colors.muted),
       );
     }

@@ -2,13 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/indoor_navigation_graph.dart';
 import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
+import 'package:rtu_mirea_app/map/services/prepared_map_navigation.dart';
 
-class PreparedMapNavigation {
-  PreparedMapNavigation._({required this.graph, required this.byFloor});
-
-  final IndoorNavigationGraph? graph;
-  final Map<String, List<MapNavigationLandmark>> byFloor;
-}
+export 'prepared_map_navigation.dart';
 
 Future<PreparedMapNavigation> prepareMapNavigation(CampusMapData campus) =>
     compute(
@@ -32,7 +28,7 @@ PreparedMapNavigation _prepareMapNavigation(
     )) {
       (byFloor[landmark.place.floorId] ??= []).add(landmark);
     }
-    return PreparedMapNavigation._(
+    return PreparedMapNavigation(
       graph: graph,
       byFloor: Map.unmodifiable({
         for (final entry in byFloor.entries)
@@ -40,6 +36,6 @@ PreparedMapNavigation _prepareMapNavigation(
       }),
     );
   } on FormatException {
-    return PreparedMapNavigation._(graph: null, byFloor: const {});
+    return const PreparedMapNavigation(graph: null, byFloor: {});
   }
 }

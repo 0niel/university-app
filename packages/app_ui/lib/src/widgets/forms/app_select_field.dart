@@ -43,7 +43,8 @@ class AppSelectField extends StatelessWidget {
     final value = this.value;
     final hasValue = value != null && value.isNotEmpty;
     final leadingIcon = this.leadingIcon;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
 
     return Column(
@@ -72,8 +73,8 @@ class AppSelectField extends StatelessWidget {
               color: !enabled
                   ? colors.canvas
                   : pressed
-                      ? colors.canvas
-                      : (fillColor ?? colors.surface2),
+                  ? colors.canvas
+                  : (fillColor ?? colors.surface2),
               borderRadius: BorderRadius.circular(borderRadius),
             ),
             child: Row(
@@ -95,8 +96,8 @@ class AppSelectField extends StatelessWidget {
                       color: !enabled
                           ? colors.muted2
                           : hasValue
-                              ? colors.ink
-                              : colors.muted2,
+                          ? colors.ink
+                          : colors.muted2,
                     ),
                   ),
                 ),

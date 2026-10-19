@@ -21,10 +21,10 @@ class NinjaSkeleton extends StatelessWidget {
     double size = 44,
     this.pulse = true,
     this.shimmer = true,
-  })  : width = size,
-        height = size,
-        widthFactor = null,
-        radius = size / 2;
+  }) : width = size,
+       height = size,
+       widthFactor = null,
+       radius = size / 2;
 
   const NinjaSkeleton.bar({
     super.key,
@@ -32,8 +32,8 @@ class NinjaSkeleton extends StatelessWidget {
     this.widthFactor,
     this.pulse = true,
     this.shimmer = true,
-  })  : width = null,
-        radius = AppRadius.full;
+  }) : width = null,
+       radius = AppRadius.full;
 
   const NinjaSkeleton.tile({
     super.key,
@@ -41,8 +41,8 @@ class NinjaSkeleton extends StatelessWidget {
     this.width,
     this.pulse = true,
     this.shimmer = true,
-  })  : widthFactor = null,
-        radius = AppRadius.field;
+  }) : widthFactor = null,
+       radius = AppRadius.field;
 
   final double? width;
   final double height;
@@ -64,8 +64,9 @@ class NinjaSkeleton extends StatelessWidget {
   }
 
   Widget _buildGeometry(BuildContext context, _NinjaSkeletonSceneData? scene) {
-    final animation =
-        pulse && shimmer && scene?.animate == true ? scene!.animation : null;
+    final animation = pulse && shimmer && scene?.animate == true
+        ? scene!.animation
+        : null;
     Widget geometry = _NinjaSkeletonGeometry(
       width: width,
       height: height,
@@ -143,9 +144,11 @@ class _NinjaSkeletonGroupState extends State<NinjaSkeletonGroup>
   void _syncAnimation() {
     _parent = _NinjaSkeletonSceneData.maybeOf(context);
     final mediaQuery = MediaQuery.maybeOf(context);
-    final reduceMotion = mediaQuery?.disableAnimations == true ||
+    final reduceMotion =
+        mediaQuery?.disableAnimations == true ||
         mediaQuery?.accessibleNavigation == true;
-    final animate = _parent == null &&
+    final animate =
+        _parent == null &&
         widget.pulse &&
         !reduceMotion &&
         TickerMode.valuesOf(context).enabled;
@@ -269,16 +272,12 @@ class _NinjaSkeletonGeometry extends LeafRenderObjectWidget {
 
 class _RenderNinjaSkeletonGeometry extends RenderBox {
   _RenderNinjaSkeletonGeometry({
-    required double? width,
-    required double height,
-    required double radius,
-    required Color base,
-    required Animation<double>? animation,
-  })  : _width = width,
-        _height = height,
-        _radius = radius,
-        _base = base,
-        _animation = animation;
+    required this._width,
+    required this._height,
+    required this._radius,
+    required this._base,
+    required this._animation,
+  });
 
   double? _width;
   double _height;
@@ -363,8 +362,9 @@ class _RenderNinjaSkeletonGeometry extends RenderBox {
     final bounds = offset & size;
     final rrect = RRect.fromRectAndRadius(bounds, Radius.circular(_radius));
     final currentAnimation = _animation;
-    final opacity =
-        currentAnimation == null ? 1.0 : pulseOpacity(currentAnimation.value);
+    final opacity = currentAnimation == null
+        ? 1.0
+        : pulseOpacity(currentAnimation.value);
     context.canvas.drawRRect(
       rrect,
       Paint()..color = _base.withValues(alpha: _base.a * opacity),

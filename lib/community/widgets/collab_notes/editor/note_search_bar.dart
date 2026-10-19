@@ -51,7 +51,9 @@ class _NoteSearchBarState extends State<NoteSearchBar> {
   void _step(int delta) {
     if (_matches.isEmpty) return;
     setState(() => _index = (_index + delta) % _matches.length);
-    widget.onSelected(_matches[_index]);
+    if (_matches.elementAtOrNull(_index) case final match?) {
+      widget.onSelected(match);
+    }
   }
 
   @override

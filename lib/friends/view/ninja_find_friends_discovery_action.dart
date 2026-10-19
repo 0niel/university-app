@@ -20,8 +20,8 @@ class NinjaFindFriendsDiscoveryAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final foreground = accented ? colors.ink : colors.ink;
-    final mutedForeground = accented ? colors.muted : colors.muted;
+    final foreground = colors.ink;
+    final mutedForeground = colors.muted;
     return AppPressable(
       onTap: onTap,
       semanticsLabel: '$title, $subtitle',

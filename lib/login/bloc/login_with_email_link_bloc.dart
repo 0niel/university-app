@@ -79,9 +79,11 @@ class LoginWithEmailLinkBloc
     LoginWithEmailCodeSubmitted event,
     Emitter<LoginWithEmailLinkState> emit,
   ) async {
-    if (state.status == LoginWithEmailLinkStatus.loading ||
-        state.status == LoginWithEmailLinkStatus.success) {
-      return;
+    switch (state.status) {
+      case LoginWithEmailLinkStatus.loading || LoginWithEmailLinkStatus.success:
+        return;
+      case LoginWithEmailLinkStatus.initial || LoginWithEmailLinkStatus.failure:
+        break;
     }
     try {
       emit(state.copyWith(status: .loading));

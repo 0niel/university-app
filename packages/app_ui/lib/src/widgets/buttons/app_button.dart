@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_control_surface.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_press_state.dart';
 import 'package:app_ui/src/widgets/app_tooltip.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
 enum AppButtonVariant {
   primary,
   secondary,
+  glass,
   tonal,
   text,
   destructive,
@@ -29,7 +31,7 @@ abstract final class _ButtonMetrics {
   static const double iconGap = AppSpacing.sm;
   static const double iconStroke = 2.4;
   static const double smallIcon = 15;
-  static const double largeIcon = 18;
+  static const double largeIcon = trailingPadding;
   static const double compactIcon = 17;
   static const double spinnerStroke = 2.5;
   static const double dotSize = 7;
@@ -38,33 +40,34 @@ abstract final class _ButtonMetrics {
 
 extension AppButtonSizeX on AppButtonSize {
   double get height => switch (this) {
-        AppButtonSize.small => AppControlSize.buttonSmall,
-        AppButtonSize.medium => AppControlSize.buttonMedium,
-        AppButtonSize.large => AppControlSize.buttonLarge,
-        AppButtonSize.hero => AppControlSize.buttonHero,
-      };
+    AppButtonSize.small => AppControlSize.buttonSmall,
+    AppButtonSize.medium => AppControlSize.buttonMedium,
+    AppButtonSize.large => AppControlSize.buttonLarge,
+    AppButtonSize.hero => AppControlSize.buttonHero,
+  };
 
   double get horizontalPadding => switch (this) {
-        AppButtonSize.small => AppSpacing.lg,
-        AppButtonSize.medium => AppSpacing.xl,
-        AppButtonSize.large => AppSpacing.section,
-        AppButtonSize.hero => AppSpacing.section,
-      };
+    AppButtonSize.small => AppSpacing.lg,
+    AppButtonSize.medium => AppSpacing.xl,
+    AppButtonSize.large => AppSpacing.section,
+    AppButtonSize.hero => AppSpacing.section,
+  };
 
   TextStyle get textStyle => switch (this) {
-        AppButtonSize.small => AppText.buttonSmall,
-        AppButtonSize.medium => AppText.button,
-        AppButtonSize.large =>
-          AppText.buttonLarge.copyWith(fontWeight: FontWeight.w600),
-        AppButtonSize.hero => AppText.buttonHero,
-      };
+    AppButtonSize.small => AppText.buttonSmall,
+    AppButtonSize.medium => AppText.button,
+    AppButtonSize.large => AppText.buttonLarge.copyWith(
+      fontWeight: FontWeight.w600,
+    ),
+    AppButtonSize.hero => AppText.buttonHero,
+  };
 
   double get iconSize => switch (this) {
-        AppButtonSize.small => _ButtonMetrics.smallIcon,
-        AppButtonSize.medium => AppIconSize.sm,
-        AppButtonSize.large => _ButtonMetrics.largeIcon,
-        AppButtonSize.hero => AppIconSize.md,
-      };
+    AppButtonSize.small => _ButtonMetrics.smallIcon,
+    AppButtonSize.medium => AppIconSize.sm,
+    AppButtonSize.large => _ButtonMetrics.largeIcon,
+    AppButtonSize.hero => AppIconSize.md,
+  };
 }
 
 class AppButtonPalette {
@@ -84,7 +87,14 @@ class AppButtonPalette {
     if (!enabled) {
       final background = switch (variant) {
         AppButtonVariant.text || AppButtonVariant.ghost => Colors.transparent,
-        _ => colors.surface2,
+        AppButtonVariant.primary ||
+        AppButtonVariant.secondary ||
+        AppButtonVariant.glass ||
+        AppButtonVariant.tonal ||
+        AppButtonVariant.destructive ||
+        AppButtonVariant.destructiveOutline ||
+        AppButtonVariant.outline ||
+        AppButtonVariant.danger => colors.surface2,
       };
       return AppButtonPalette(
         background: background,
@@ -95,47 +105,51 @@ class AppButtonPalette {
     }
     return switch (variant) {
       AppButtonVariant.primary => AppButtonPalette(
-          background: colors.accent,
-          pressed: colors.accent,
-          foreground: colors.onAccent,
-          spinnerTrack: colors.white.withValues(alpha: .35),
-          pressedOpacity: .82,
-        ),
+        background: colors.accent,
+        pressed: colors.accent,
+        foreground: colors.onAccent,
+        spinnerTrack: colors.white.withValues(alpha: .35),
+        pressedOpacity: .82,
+      ),
       AppButtonVariant.secondary ||
-      AppButtonVariant.outline =>
-        AppButtonPalette(
-          background: colors.surface2,
-          pressed: colors.canvas,
-          foreground: colors.ink,
-          spinnerTrack: colors.line,
-        ),
+      AppButtonVariant.outline => AppButtonPalette(
+        background: colors.surface2,
+        pressed: colors.canvas,
+        foreground: colors.ink,
+        spinnerTrack: colors.line,
+      ),
+      AppButtonVariant.glass => AppButtonPalette(
+        background: colors.surface,
+        pressed: colors.canvas,
+        foreground: colors.ink,
+        spinnerTrack: colors.line,
+      ),
       AppButtonVariant.tonal => AppButtonPalette(
-          background: colors.tint,
-          pressed: colors.canvas,
-          foreground: colors.accent,
-          spinnerTrack: colors.line,
-        ),
+        background: colors.tint,
+        pressed: colors.canvas,
+        foreground: colors.accent,
+        spinnerTrack: colors.line,
+      ),
       AppButtonVariant.text || AppButtonVariant.ghost => AppButtonPalette(
-          background: Colors.transparent,
-          pressed: colors.canvas,
-          foreground: colors.accent,
-          spinnerTrack: colors.line,
-        ),
+        background: Colors.transparent,
+        pressed: colors.canvas,
+        foreground: colors.accent,
+        spinnerTrack: colors.line,
+      ),
       AppButtonVariant.destructive ||
-      AppButtonVariant.danger =>
-        AppButtonPalette(
-          background: colors.danger,
-          pressed: colors.danger,
-          foreground: colors.white,
-          spinnerTrack: colors.white.withValues(alpha: .35),
-          pressedOpacity: .82,
-        ),
+      AppButtonVariant.danger => AppButtonPalette(
+        background: colors.danger,
+        pressed: colors.danger,
+        foreground: colors.white,
+        spinnerTrack: colors.white.withValues(alpha: .35),
+        pressedOpacity: .82,
+      ),
       AppButtonVariant.destructiveOutline => AppButtonPalette(
-          background: colors.examTint,
-          pressed: colors.canvas,
-          foreground: colors.danger,
-          spinnerTrack: colors.line,
-        ),
+        background: colors.examTint,
+        pressed: colors.canvas,
+        foreground: colors.danger,
+        spinnerTrack: colors.line,
+      ),
     };
   }
 
@@ -198,6 +212,23 @@ class AppButton extends StatelessWidget {
     this.tooltip,
     this.textStyle,
   }) : variant = AppButtonVariant.secondary;
+
+  const AppButton.glass({
+    required this.label,
+    super.key,
+    this.onPressed,
+    this.icon,
+    this.trailingIcon,
+    this.size = AppButtonSize.medium,
+    this.expanded = false,
+    this.loading = false,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.borderRadius,
+    this.padding,
+    this.tooltip,
+    this.textStyle,
+  }) : variant = AppButtonVariant.glass;
 
   const AppButton.tonal({
     required this.label,
@@ -337,7 +368,8 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final enabled = onPressed != null && !loading;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     final palette = AppButtonPalette.of(
       colors,
@@ -348,7 +380,8 @@ class AppButton extends StatelessWidget {
     final foreground = foregroundColor ?? palette.foreground;
     final radius = BorderRadius.circular(borderRadius ?? AppRadius.full);
     final hasLeading = icon != null || loading;
-    final resolvedPadding = padding ??
+    final resolvedPadding =
+        padding ??
         EdgeInsets.only(
           left: hasLeading && size == AppButtonSize.medium
               ? _ButtonMetrics.leadingPadding
@@ -363,64 +396,83 @@ class AppButton extends StatelessWidget {
       enabled: enabled,
       semanticsLabel: label,
       semanticsButton: true,
-      builder: (context, {required pressed}) => AnimatedOpacity(
-        duration:
-            reduceMotion ? Duration.zero : const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
-        opacity: pressed ? palette.pressedOpacity : 1,
-        child: AnimatedContainer(
-          duration:
-              reduceMotion ? Duration.zero : const Duration(milliseconds: 120),
-          curve: Curves.easeOut,
-          height: size.height,
-          padding: resolvedPadding,
-          decoration: BoxDecoration(
-            color: pressed ? (backgroundColor ?? palette.pressed) : background,
-            borderRadius: radius,
-          ),
-          child: Row(
-            mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (loading) ...[
-                AppButtonSpinner(
-                  color: foreground,
-                  trackColor: palette.spinnerTrack,
-                ),
-                const SizedBox(width: _ButtonMetrics.iconGap),
-              ] else if (icon != null) ...[
-                _ButtonIcon(
-                  color: foreground,
-                  size: size.iconSize,
-                  strokeWidth: _ButtonMetrics.iconStroke,
-                  child: icon!,
-                ),
-                const SizedBox(width: _ButtonMetrics.iconGap),
-              ],
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: size.textStyle
-                      .merge(textStyle)
-                      .copyWith(color: foreground),
-                ),
+      pressedScale: variant == AppButtonVariant.glass ? .97 : 1,
+      builder: (context, {required pressed}) {
+        final surface = AppControlSurface(
+          color: pressed ? (backgroundColor ?? palette.pressed) : background,
+          borderRadius: radius.topLeft.x,
+          enabled: enabled || loading,
+          pressed: pressed,
+          tone: switch (variant) {
+            AppButtonVariant.glass => AppControlSurfaceTone.glass,
+            AppButtonVariant.primary ||
+            AppButtonVariant.destructive ||
+            AppButtonVariant.danger => AppControlSurfaceTone.accent,
+            AppButtonVariant.text ||
+            AppButtonVariant.ghost => AppControlSurfaceTone.quiet,
+            AppButtonVariant.secondary ||
+            AppButtonVariant.tonal ||
+            AppButtonVariant.destructiveOutline ||
+            AppButtonVariant.outline => AppControlSurfaceTone.neutral,
+          },
+          child: SizedBox(
+            height: size.height,
+            child: Padding(
+              padding: resolvedPadding,
+              child: Row(
+                mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (loading) ...[
+                    AppButtonSpinner(
+                      color: foreground,
+                      trackColor: palette.spinnerTrack,
+                    ),
+                    const SizedBox(width: _ButtonMetrics.iconGap),
+                  ] else if (icon != null) ...[
+                    _ButtonIcon(
+                      color: foreground,
+                      size: size.iconSize,
+                      strokeWidth: _ButtonMetrics.iconStroke,
+                      child: icon!,
+                    ),
+                    const SizedBox(width: _ButtonMetrics.iconGap),
+                  ],
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: size.textStyle
+                          .merge(textStyle)
+                          .copyWith(color: foreground),
+                    ),
+                  ),
+                  if (trailingIcon != null) ...[
+                    const SizedBox(width: _ButtonMetrics.iconGap),
+                    _ButtonIcon(
+                      color: foreground,
+                      size: size.iconSize,
+                      strokeWidth: _ButtonMetrics.iconStroke,
+                      child: trailingIcon!,
+                    ),
+                  ],
+                ],
               ),
-              if (trailingIcon != null) ...[
-                const SizedBox(width: _ButtonMetrics.iconGap),
-                _ButtonIcon(
-                  color: foreground,
-                  size: size.iconSize,
-                  strokeWidth: _ButtonMetrics.iconStroke,
-                  child: trailingIcon!,
-                ),
-              ],
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+        if (variant == AppButtonVariant.glass) return surface;
+        return AnimatedOpacity(
+          duration: reduceMotion
+              ? Duration.zero
+              : const Duration(milliseconds: 120),
+          curve: Curves.easeOut,
+          opacity: pressed ? palette.pressedOpacity : 1,
+          child: surface,
+        );
+      },
     );
 
     if (expanded) button = SizedBox(width: double.infinity, child: button);
@@ -459,7 +511,8 @@ class _AppButtonSpinnerState extends State<AppButtonSpinner>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final animate = !MediaQuery.disableAnimationsOf(context) &&
+    final animate =
+        !MediaQuery.disableAnimationsOf(context) &&
         !MediaQuery.accessibleNavigationOf(context) &&
         TickerMode.valuesOf(context).enabled;
     if (animate && !_controller.isAnimating) {
@@ -570,7 +623,15 @@ class _ButtonIcon extends StatelessWidget {
   }
 }
 
-enum AppIconButtonTone { secondary, primary, surface, tonal, danger, plain }
+enum AppIconButtonTone {
+  secondary,
+  primary,
+  surface,
+  tonal,
+  danger,
+  plain,
+  glass,
+}
 
 enum AppIconButtonShape { rounded, circle }
 
@@ -578,16 +639,16 @@ enum AppIconButtonSize { regular, compact, small }
 
 extension AppIconButtonSizeX on AppIconButtonSize {
   double get dimension => switch (this) {
-        AppIconButtonSize.regular => AppControlSize.iconButton,
-        AppIconButtonSize.compact => AppControlSize.iconButtonCompact,
-        AppIconButtonSize.small => AppControlSize.iconButtonSmall,
-      };
+    AppIconButtonSize.regular => AppControlSize.iconButton,
+    AppIconButtonSize.compact => AppControlSize.iconButtonCompact,
+    AppIconButtonSize.small => AppControlSize.iconButtonSmall,
+  };
 
   double get iconSize => switch (this) {
-        AppIconButtonSize.regular => AppIconSize.md,
-        AppIconButtonSize.compact => AppIconSize.md,
-        AppIconButtonSize.small => _ButtonMetrics.compactIcon,
-      };
+    AppIconButtonSize.regular => AppIconSize.md,
+    AppIconButtonSize.compact => AppIconSize.md,
+    AppIconButtonSize.small => _ButtonMetrics.compactIcon,
+  };
 }
 
 class AppIconButton extends StatelessWidget {
@@ -626,38 +687,37 @@ class AppIconButton extends StatelessWidget {
     final enabled = onPressed != null;
     final palette = switch (tone) {
       AppIconButtonTone.primary => (
-          colors.accent,
-          colors.accent.withValues(alpha: .82),
-          colors.onAccent,
-        ),
-      AppIconButtonTone.surface => (
-          colors.surface,
-          colors.canvas,
-          colors.ink,
-        ),
+        colors.accent,
+        colors.accent.withValues(alpha: .82),
+        colors.onAccent,
+      ),
+      AppIconButtonTone.surface || AppIconButtonTone.glass => (
+        colors.surface,
+        colors.canvas,
+        colors.ink,
+      ),
       AppIconButtonTone.tonal => (colors.tint, colors.canvas, colors.accent),
       AppIconButtonTone.danger => (
-          colors.examTint,
-          colors.canvas,
-          colors.danger,
-        ),
+        colors.examTint,
+        colors.canvas,
+        colors.danger,
+      ),
       AppIconButtonTone.plain => (
-          Colors.transparent,
-          colors.canvas,
-          colors.ink,
-        ),
+        Colors.transparent,
+        colors.canvas,
+        colors.ink,
+      ),
       AppIconButtonTone.secondary => (
-          colors.surface2,
-          colors.canvas,
-          colors.ink,
-        ),
+        colors.surface2,
+        colors.canvas,
+        colors.ink,
+      ),
     };
-    final (background, pressedBackground, foreground) =
-        enabled ? palette : (colors.canvas, colors.canvas, colors.muted2);
+    final (background, pressedBackground, foreground) = enabled
+        ? palette
+        : (colors.canvas, colors.canvas, colors.muted2);
     final dimension = size.dimension;
     final target = math.max(dimension, AppControlSize.touchTarget);
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
-        MediaQuery.accessibleNavigationOf(context);
 
     Widget button = AppPressState(
       onTap: onPressed,
@@ -668,28 +728,35 @@ class AppIconButton extends StatelessWidget {
       builder: (context, {required pressed}) => SizedBox.square(
         dimension: target,
         child: Center(
-          child: AnimatedContainer(
-            duration: reduceMotion
-                ? Duration.zero
-                : const Duration(milliseconds: 120),
-            curve: Curves.easeOut,
-            width: dimension,
-            height: dimension,
-            decoration: BoxDecoration(
-              color: pressed
-                  ? (backgroundColor ?? pressedBackground)
-                  : (backgroundColor ?? background),
-              borderRadius: shape == AppIconButtonShape.rounded
-                  ? BorderRadius.circular(AppRadius.field)
-                  : BorderRadius.circular(dimension / 2),
-            ),
-            child: Center(
-              child: _ButtonIcon(
-                color: foregroundColor ?? foreground,
-                size: iconSize ?? size.iconSize,
-                strokeWidth: strokeWidth ??
-                    (tone == AppIconButtonTone.primary ? 2.2 : 2),
-                child: icon,
+          child: AppControlSurface(
+            color: pressed
+                ? (backgroundColor ?? pressedBackground)
+                : (backgroundColor ?? background),
+            borderRadius: shape == AppIconButtonShape.rounded
+                ? AppRadius.field
+                : dimension / 2,
+            tone: switch (tone) {
+              AppIconButtonTone.glass => AppControlSurfaceTone.glass,
+              AppIconButtonTone.primary => AppControlSurfaceTone.accent,
+              AppIconButtonTone.plain => AppControlSurfaceTone.quiet,
+              AppIconButtonTone.secondary ||
+              AppIconButtonTone.surface ||
+              AppIconButtonTone.tonal ||
+              AppIconButtonTone.danger => AppControlSurfaceTone.neutral,
+            },
+            enabled: enabled,
+            pressed: pressed,
+            child: SizedBox.square(
+              dimension: dimension,
+              child: Center(
+                child: _ButtonIcon(
+                  color: foregroundColor ?? foreground,
+                  size: iconSize ?? size.iconSize,
+                  strokeWidth:
+                      strokeWidth ??
+                      (tone == AppIconButtonTone.primary ? 2.2 : 2),
+                  child: icon,
+                ),
               ),
             ),
           ),
@@ -748,7 +815,8 @@ class AppSplitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final enabled = onPressed != null || onMenuPressed != null;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     final background = enabled ? colors.accent : colors.canvas;
     final foreground = enabled ? colors.onAccent : colors.muted2;
@@ -776,8 +844,9 @@ class AppSplitButton extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                     horizontal: _ButtonMetrics.trailingPadding,
                   ),
-                  color:
-                      pressed ? background.withValues(alpha: .82) : background,
+                  color: pressed
+                      ? background.withValues(alpha: .82)
+                      : background,
                   alignment: Alignment.center,
                   child: Text(
                     label,
@@ -792,7 +861,8 @@ class AppSplitButton extends StatelessWidget {
               onTap: onMenuPressed,
               enabled: onMenuPressed != null,
               semanticsButton: true,
-              semanticsLabel: menuSemanticLabel ??
+              semanticsLabel:
+                  menuSemanticLabel ??
                   MaterialLocalizations.of(context).moreButtonTooltip,
               builder: (context, {required pressed}) => AnimatedContainer(
                 duration: reduceMotion

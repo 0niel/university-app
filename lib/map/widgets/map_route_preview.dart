@@ -45,7 +45,7 @@ class MapRoutePreview extends StatelessWidget {
       l10n.mapFloorsCount(route.floorIds.length),
     ].join(' · ');
     final expanded =
-        MediaQuery.sizeOf(context).height >= 560 &&
+        MediaQuery.heightOf(context) >= 560 &&
         MediaQuery.textScalerOf(context).scale(16) < 24;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

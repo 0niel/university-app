@@ -24,7 +24,7 @@ class GradesContent extends StatelessWidget {
         GradesGpaCard(state: state),
         const SizedBox(height: AppSpacing.sectionGap),
         AppSegmentedControl<String>(
-          onCanvas: true,
+          isOnCanvas: true,
           value: state.termId,
           onChanged: context.read<GradesCubit>().termChanged,
           options: [
@@ -54,7 +54,7 @@ class GradesContent extends StatelessWidget {
               isNew: subject.isNew(now),
               onTap: () => showAddMarkSheet(
                 context,
-                cubit: context.read<GradesCubit>(),
+                cubit: context.read(),
                 subject: subject,
               ),
             ),

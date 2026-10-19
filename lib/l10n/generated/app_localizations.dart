@@ -6236,17 +6236,59 @@ abstract class AppLocalizations {
   /// **'Couldn\'\'t sign in as a guest. Try again later.'**
   String get authGuestUnavailable;
 
-  /// No description provided for @settingsAmoledTitle.
+  /// No description provided for @settingsGlassEffectTitle.
   ///
   /// In en, this message translates to:
-  /// **'AMOLED'**
-  String get settingsAmoledTitle;
+  /// **'Glass effect'**
+  String get settingsGlassEffectTitle;
 
-  /// No description provided for @settingsAmoledSubtitle.
+  /// No description provided for @mapRotatePlan.
   ///
   /// In en, this message translates to:
-  /// **'True-black dark theme for OLED screens'**
-  String get settingsAmoledSubtitle;
+  /// **'Rotate floor plan'**
+  String get mapRotatePlan;
+
+  /// No description provided for @mapTopDownView.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-down view'**
+  String get mapTopDownView;
+
+  /// No description provided for @mapVolumeView.
+  ///
+  /// In en, this message translates to:
+  /// **'3D floor plan'**
+  String get mapVolumeView;
+
+  /// No description provided for @mapShowCampus.
+  ///
+  /// In en, this message translates to:
+  /// **'Show campus'**
+  String get mapShowCampus;
+
+  /// No description provided for @mapActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Map actions'**
+  String get mapActions;
+
+  /// No description provided for @map2DLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'2D'**
+  String get map2DLabel;
+
+  /// No description provided for @map3DLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'3D'**
+  String get map3DLabel;
+
+  /// No description provided for @settingsGlassEffectSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Translucent surfaces, blur and refraction'**
+  String get settingsGlassEffectSubtitle;
 
   /// No description provided for @scheduleDiffTitle.
   ///
@@ -7874,6 +7916,12 @@ abstract class AppLocalizations {
   /// **'Mini apps'**
   String get miniAppsTitle;
 
+  /// No description provided for @miniAppsSearchResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No matches} one{{count} result} other{{count} results}}'**
+  String miniAppsSearchResultsCount(int count);
+
   /// No description provided for @miniAppsSubtitle.
   ///
   /// In en, this message translates to:
@@ -7925,7 +7973,7 @@ abstract class AppLocalizations {
   /// No description provided for @miniAppsEmptySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Be the first: build a mini app on Stac JSON and publish it for all students'**
+  /// **'Create a useful mini app and share it with your university'**
   String get miniAppsEmptySubtitle;
 
   /// No description provided for @miniAppsNothingFound.

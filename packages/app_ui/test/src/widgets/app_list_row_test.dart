@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: ThemeData(extensions: const [AppColors.light]),
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: ThemeData(extensions: const [AppColors.light]),
+    home: Scaffold(body: Center(child: child)),
+  );
 
   group('AppListRow', () {
     testWidgets('renders title and fires onTap via AppPressable', (
@@ -66,8 +66,11 @@ void main() {
       expect(find.text('3'), findsOneWidget);
       expect(
         tester.getSemantics(find.byType(AppListRow)).label,
-        allOf(contains('Уведомления'), contains('Пуши и напоминания'),
-            contains('3'),),
+        allOf(
+          contains('Уведомления'),
+          contains('Пуши и напоминания'),
+          contains('3'),
+        ),
       );
     });
 
@@ -84,8 +87,9 @@ void main() {
     });
 
     testWidgets('strong switches the title to the 600 weight', (tester) async {
-      await tester
-          .pumpWidget(wrap(const AppListRow(title: 'Итог', strong: true)));
+      await tester.pumpWidget(
+        wrap(const AppListRow(title: 'Итог', strong: true)),
+      );
 
       final text = tester.widget<Text>(find.text('Итог'));
       expect(text.style?.fontWeight, FontWeight.w600);

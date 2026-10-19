@@ -1,13 +1,13 @@
 import 'dart:io';
 
-const forbiddenPaths = <String>{
+const kForbiddenPaths = {
   'android/app/src/main/kotlin/ninja/mirea/mireaapp/DigitalPassHostApduService.kt',
   'android/app/src/main/kotlin/ninja/mirea/mireaapp/DigitalPassStore.kt',
   'android/app/src/main/kotlin/ninja/mirea/mireaapp/Utils.kt',
   'android/app/src/main/res/xml/apduservice.xml',
 };
 
-const forbiddenAndroidTerms = <String>{
+const kForbiddenAndroidTerms = {
   'DigitalPassHostApduService',
   'DigitalPassStore',
   'HostApduService',
@@ -15,7 +15,7 @@ const forbiddenAndroidTerms = <String>{
   'host_apdu_service',
 };
 
-const auditedAndroidExtensions = <String>{
+const kAuditedAndroidExtensions = {
   '.gradle',
   '.java',
   '.kt',
@@ -25,26 +25,26 @@ const auditedAndroidExtensions = <String>{
 };
 
 void main(List<String> arguments) {
-  final tracked = _git(<String>[
+  final tracked = _git([
     'ls-files',
   ]).split('\n').where((line) => line.isNotEmpty).toSet();
   final violations = <String>{
     ...tracked
-        .intersection(forbiddenPaths)
+        .intersection(kForbiddenPaths)
         .where((path) => File(path).existsSync()),
     ...tracked.where((path) => path.startsWith('android/private/')),
     ...tracked.where((path) => path.startsWith('private/')),
   };
 
   for (final path in tracked.where(
-    (path) =>
-        path.startsWith('android/') &&
-        auditedAndroidExtensions.any(path.endsWith),
+    (candidate) =>
+        candidate.startsWith('android/') &&
+        kAuditedAndroidExtensions.any(candidate.endsWith),
   )) {
     final file = File(path);
     if (!file.existsSync()) continue;
     final contents = file.readAsStringSync();
-    if (forbiddenAndroidTerms.any(contents.contains)) violations.add(path);
+    if (kForbiddenAndroidTerms.any(contents.contains)) violations.add(path);
   }
 
   for (final private in const <String>[
@@ -53,20 +53,20 @@ void main(List<String> arguments) {
   ]) {
     final ignored = Process.runSync(
       'git',
-      <String>['check-ignore', '-q', private],
+      ['check-ignore', '-q', private],
       runInShell: true,
     );
     if (ignored.exitCode != 0) violations.add('.gitignore');
   }
 
   if (arguments.contains('--history')) {
-    final history = _git(<String>[
+    final history = _git([
       'log',
       '--format=',
       '--name-only',
       'HEAD',
       '--',
-      ...forbiddenPaths,
+      ...kForbiddenPaths,
       'android/private',
       'private',
     ]).trim();

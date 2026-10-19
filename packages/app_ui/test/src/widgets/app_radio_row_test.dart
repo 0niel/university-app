@@ -6,15 +6,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child, {bool reduceMotion = false}) => MaterialApp(
-        theme: NinjaTheme.light(),
-        home: MediaQuery(
-          data: MediaQueryData(
-            textScaler: const TextScaler.linear(2),
-            accessibleNavigation: reduceMotion,
-          ),
-          child: Scaffold(body: SizedBox(width: 320, child: child)),
-        ),
-      );
+    theme: NinjaTheme.light(),
+    home: MediaQuery(
+      data: MediaQueryData(
+        textScaler: const TextScaler.linear(2),
+        accessibleNavigation: reduceMotion,
+      ),
+      child: Scaffold(body: SizedBox(width: 320, child: child)),
+    ),
+  );
 
   testWidgets('is a large-text safe selected choice', (tester) async {
     await tester.pumpWidget(
@@ -71,8 +71,9 @@ void main() {
   });
 
   for (final dark in [false, true]) {
-    testWidgets('grouped middle selection is flat in dark=$dark',
-        (tester) async {
+    testWidgets('grouped middle selection is flat in dark=$dark', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: dark ? AppTheme.darkTheme : AppTheme.lightTheme,

@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/widgets/app_control_surface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -6,17 +7,17 @@ import '../kit_harness.dart';
 
 void main() {
   Widget host(Widget child, {double scale = 1, bool rtl = false}) => wrapKit(
-        Directionality(
-          textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
-          child: SizedBox(width: 320, child: child),
-        ),
-        textScale: scale,
-      );
+    Directionality(
+      textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
+      child: SizedBox(width: 320, child: child),
+    ),
+    textScale: scale,
+  );
 
   Finder circle() => find.descendant(
-        of: find.byType(AppHeaderCircleButton),
-        matching: find.byType(Container),
-      );
+    of: find.byType(AppHeaderCircleButton),
+    matching: find.byType(AppControlSurface),
+  );
 
   testWidgets('42px header layout retains a real 44px target in its padding', (
     tester,
@@ -82,31 +83,32 @@ void main() {
   for (final rtl in [false, true]) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(
-          'inner header adapts its trailing label scale=$scale rtl=$rtl',
-          (tester) async {
-        var taps = 0;
-        await tester.pumpWidget(
-          host(
-            AppInnerHeader(
-              title: 'Контроль',
-              trailingLabel: 'сессия через 12 дн',
-              onBack: () {},
-              onTrailingLabelTap: () => taps++,
+        'inner header adapts its trailing label scale=$scale rtl=$rtl',
+        (tester) async {
+          var taps = 0;
+          await tester.pumpWidget(
+            host(
+              AppInnerHeader(
+                title: 'Контроль',
+                trailingLabel: 'сессия через 12 дн',
+                onBack: () {},
+                onTrailingLabelTap: () => taps++,
+              ),
+              scale: scale,
+              rtl: rtl,
             ),
-            scale: scale,
-            rtl: rtl,
-          ),
-        );
-        expect(tester.takeException(), isNull);
-        final target = find.ancestor(
-          of: find.text('сессия через 12 дн'),
-          matching: find.byType(AppPressable),
-        );
-        expect(tester.getSize(target).height, greaterThanOrEqualTo(44));
-        expect(tester.getSize(target).width, greaterThanOrEqualTo(44));
-        await tester.tap(target);
-        expect(taps, 1);
-      });
+          );
+          expect(tester.takeException(), isNull);
+          final target = find.ancestor(
+            of: find.text('сессия через 12 дн'),
+            matching: find.byType(AppPressable),
+          );
+          expect(tester.getSize(target).height, greaterThanOrEqualTo(44));
+          expect(tester.getSize(target).width, greaterThanOrEqualTo(44));
+          await tester.tap(target);
+          expect(taps, 1);
+        },
+      );
     }
     testWidgets('header actions stay separate at 200 percent rtl=$rtl', (
       tester,

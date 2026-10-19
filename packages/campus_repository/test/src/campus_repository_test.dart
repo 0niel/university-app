@@ -8,7 +8,7 @@ import 'package:http/testing.dart';
 import 'package:supabase/supabase.dart';
 import 'package:test/test.dart';
 
-const _materialUserId = '00000000-0000-4000-8000-000000000010';
+const _kMaterialUserId = '00000000-0000-4000-8000-000000000010';
 
 void main() {
   test('material subjects preserve legacy and multiple subject payloads', () {
@@ -156,7 +156,7 @@ void main() {
     expect(removed, isTrue);
     expect(
       uploadPath,
-      startsWith('/storage/v1/object/lesson-materials/$_materialUserId/bank/'),
+      startsWith('/storage/v1/object/lesson-materials/$_kMaterialUserId/bank/'),
     );
     expect(removedPaths, [
       uploadPath.substring('/storage/v1/object/lesson-materials/'.length),
@@ -251,7 +251,7 @@ void main() {
         expect(parameters['p_file_size'], 3);
         expect(
           parameters['p_file_path'],
-          matches('^$_materialUserId/bank/[a-f0-9]{32}\$'),
+          matches('^$_kMaterialUserId/bank/[a-f0-9]{32}\$'),
         );
         expect(parameters['p_preview_path'], isNull);
         expect(parameters['p_batch_id'], isNull);
@@ -286,7 +286,7 @@ void main() {
         final parameters = jsonDecode(request.body) as Map;
         expect(
           parameters['p_preview_path'],
-          matches('^$_materialUserId/bank/previews/[a-f0-9]{32}\\.jpg\$'),
+          matches('^$_kMaterialUserId/bank/previews/[a-f0-9]{32}\\.jpg\$'),
         );
         expect(parameters['p_batch_id'], 'batch-1');
         expect(parameters['p_width'], 480);
@@ -311,7 +311,7 @@ void main() {
     );
     expect(id, '00000000-0000-4000-8000-000000000002');
     expect(uploadPaths, hasLength(2));
-    expect(uploadPaths.last, contains('/bank/previews/'));
+    expect(uploadPaths.lastOrNull, contains('/bank/previews/'));
   });
 
   test('requires a subject before uploading a file', () async {
@@ -504,7 +504,7 @@ void main() {
     final calls = <String>[];
     final repository = _repository(
       MockClient((request) async {
-        calls.add(request.url.pathSegments.last);
+        calls.add(request.url.pathSegments.lastOrNull!);
         return http.Response(
           jsonEncode({'canDownload': false, 'price': 40, 'filePath': null}),
           200,
@@ -529,7 +529,10 @@ void main() {
     () async {
       final repository = _repository(
         MockClient((request) async {
-          expect(request.url.pathSegments.last, 'purchase_public_material');
+          expect(
+            request.url.pathSegments.lastOrNull,
+            'purchase_public_material',
+          );
           expect(jsonDecode(request.body), {
             'p_id': 'paid',
             'p_expected_price': 40,
@@ -960,7 +963,7 @@ void main() {
         expect(removed, isTrue);
         expect(
           uploadPath,
-          startsWith('/storage/v1/object/room-photos/$_materialUserId/'),
+          startsWith('/storage/v1/object/room-photos/$_kMaterialUserId/'),
         );
       },
     );
@@ -983,7 +986,7 @@ void main() {
             'path': rpcBody?['p_path'],
             'width': 1600,
             'height': 1200,
-            'createdBy': _materialUserId,
+            'createdBy': _kMaterialUserId,
             'authorName': 'Анна',
             'createdAt': '2026-01-02T03:04:05Z',
             'isMine': true,
@@ -1143,7 +1146,7 @@ Future<CampusRepository> _signedInRepository(http.Client client) async {
     jsonEncode({
       'access_token': 'test-access-token',
       'token_type': 'bearer',
-      'user': {'id': _materialUserId},
+      'user': {'id': _kMaterialUserId},
     }),
   );
   return CampusRepository(supabase: supabase, organizationId: 'university');

@@ -1,4 +1,4 @@
-import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/glass/app_glass_surface.dart';
 import 'package:app_ui/src/ninja/surfaces/ninja_dialog.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:flutter/widgets.dart';
@@ -11,18 +11,17 @@ Future<T?> showAppDialog<T>(
   bool barrierDismissible = true,
   double maxWidth = 340,
 }) {
-  return showNinjaDialog<T>(
+  return showNinjaDialog(
     context,
     barrierDismissible: barrierDismissible,
     maxWidth: maxWidth,
     builder: (dialogContext) {
+      final child = builder(dialogContext);
+      if (child is NinjaDialog) return child;
       final radius = BorderRadius.circular(AppRadius.dialog);
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          color: dialogContext.colors.canvas,
-          borderRadius: radius,
-        ),
-        child: ClipRRect(borderRadius: radius, child: builder(dialogContext)),
+      return AppGlassSurface(
+        role: AppGlassRole.overlay,
+        child: ClipRRect(borderRadius: radius, child: child),
       );
     },
   );

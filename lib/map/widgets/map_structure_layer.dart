@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/map/services/map_scale_repaint.dart';
@@ -110,7 +111,9 @@ class MapStructureLayers {
     );
     _cache[svg] = result;
     while (_cache.length > 4) {
-      _cache.remove(_cache.keys.first);
+      final oldest = _cache.keys.firstOrNull;
+      if (oldest == null) break;
+      _cache.remove(oldest);
     }
     return result;
   }
@@ -304,7 +307,16 @@ class MapStructureLayers {
         values.any((value) => value == null || !value.isFinite)) {
       throw const FormatException('Structural map requires a finite viewBox');
     }
-    return Rect.fromLTWH(values[0]!, values[1]!, values[2]!, values[3]!);
+    return switch (values) {
+      [
+        final double x,
+        final double y,
+        final double width,
+        final double height,
+      ] =>
+        Rect.fromLTWH(x, y, width, height),
+      _ => throw const FormatException('Invalid SVG viewBox'),
+    };
   }
 }
 
@@ -359,7 +371,7 @@ class _StructureStyle {
       if (value == null) return inherited;
       final number = value.endsWith('%')
           ? (double.tryParse(value.substring(0, value.length - 1)) ?? 100) / 100
-          : double.tryParse(value) ?? inherited;
+          : (double.tryParse(value) ?? inherited);
       return number.isFinite ? number.clamp(0, 1) : inherited;
     }
 
@@ -443,7 +455,7 @@ class _StructurePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_StructurePainter old) =>
-      old.shapes != shapes ||
+      !identical(old.shapes, shapes) ||
       old.colors != colors ||
       old.openingsOnly != openingsOnly ||
       old.scale != scale;

@@ -53,8 +53,9 @@ void main() {
   test('edge job validates ingestion and mini-app notifications', () {
     final edgeJob = jobs['edge-functions'] as YamlMap;
     final steps = (edgeJob['steps'] as YamlList).cast<YamlMap>();
+    final commands = {for (final step in steps) step['name']: step['run']};
     for (final name in ['Check formatting', 'Type-check', 'Lint', 'Test']) {
-      final command = steps.singleWhere((step) => step['name'] == name)['run'];
+      final command = commands[name];
       expect(command, contains('supabase/functions/ingest'));
       expect(command, contains('supabase/functions/miniapp-notify'));
     }

@@ -6,8 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../kit_harness.dart';
 
 void main() {
-  testWidgets('balances wrapped text without changing its content',
-      (tester) async {
+  testWidgets('balances wrapped text without changing its content', (
+    tester,
+  ) async {
     const text = 'Alpha beta gamma delta';
     await tester.pumpWidget(
       wrapKit(
@@ -45,8 +46,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('balancing does not introduce an emergency word break',
-      (tester) async {
+  testWidgets('balancing does not introduce an emergency word break', (
+    tester,
+  ) async {
     const text = 'abcdefghij abcd';
     await tester.pumpWidget(
       wrapKit(
@@ -74,8 +76,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('mixed style words retain their measured width at text scale',
-      (tester) async {
+  testWidgets('mixed style words retain their measured width at text scale', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         const SizedBox(
@@ -114,8 +117,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('CJK may balance at its valid character boundaries',
-      (tester) async {
+  testWidgets('CJK may balance at its valid character boundaries', (
+    tester,
+  ) async {
     const text = '大学课程安排信息';
     await tester.pumpWidget(
       wrapKit(
@@ -133,8 +137,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('an unavoidable long word keeps the available width',
-      (tester) async {
+  testWidgets('an unavoidable long word keeps the available width', (
+    tester,
+  ) async {
     const text = 'abcdefghijklmnop';
     await tester.pumpWidget(
       wrapKit(

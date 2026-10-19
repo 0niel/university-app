@@ -8,6 +8,90 @@ void main() {
   Widget host(Widget child) => wrapKit(SizedBox(width: 360, child: child));
 
   group('AppDeadlineRow', () {
+    for (final width in [320.0, 390.0]) {
+      for (final scale in [1.0, 2.0]) {
+        testWidgets(
+          'remaining time reaches the trailing edge at $width and scale $scale',
+          (tester) async {
+            tester.view.physicalSize = Size(width, 900);
+            tester.view.devicePixelRatio = 1;
+            addTearDown(tester.view.reset);
+            var opens = 0;
+            var toggles = 0;
+            const title = 'Отчёт по лабораторной работе по физике';
+            const meta = 'Физика и основы измерений · 22 октября, 23:59';
+            await tester.pumpWidget(
+              wrapKit(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: AppListGroup(
+                    children: [
+                      AppDeadlineRow(
+                        title: title,
+                        meta: meta,
+                        left: '3 дн',
+                        onTap: () => opens++,
+                        onToggle: () => toggles++,
+                      ),
+                    ],
+                  ),
+                ),
+                textScale: scale,
+              ),
+            );
+            await tester.pumpAndSettle();
+            final row = tester.getRect(find.byType(AppDeadlineRow));
+            final remaining = tester.getRect(find.text('3 дн'));
+            expect(remaining.right, closeTo(row.right - AppSpacing.lg, .01));
+            expect(
+              tester.getRect(find.text(title)).right,
+              lessThanOrEqualTo(remaining.left - AppSpacing.gap),
+            );
+            expect(
+              tester.getRect(find.text(meta)).right,
+              lessThanOrEqualTo(remaining.left - AppSpacing.gap),
+            );
+            expect(
+              tester.getSize(find.byType(AppDeadlineCheck)),
+              const Size(44, 44),
+            );
+            await tester.tap(find.byType(AppDeadlineCheck));
+            await tester.pumpAndSettle();
+            expect(toggles, 1);
+            expect(opens, 0);
+            await tester.tap(find.text(title));
+            await tester.pumpAndSettle();
+            expect(opens, 1);
+            expect(toggles, 1);
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+    }
+
+    testWidgets('a long remaining label fits enlarged narrow rows', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapKit(
+          const SizedBox(
+            width: 280,
+            child: AppDeadlineRow(
+              title: 'Лабораторная работа',
+              meta: 'Математический анализ · вчера, 23:59',
+              left: 'Просрочено',
+            ),
+          ),
+          textScale: 2,
+        ),
+      );
+      final row = tester.getRect(find.byType(AppDeadlineRow));
+      final remaining = tester.getRect(find.text('Просрочено'));
+      expect(remaining.right, closeTo(row.right - AppSpacing.lg, .01));
+      expect(tester.widget<Text>(find.text('Просрочено')).maxLines, 2);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('renders a 44px surface2 check, 14.5/600 title and label', (
       tester,
     ) async {

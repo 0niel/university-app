@@ -17,9 +17,9 @@ Future<void> showDeadlineActionsSheet(
 }) {
   final l10n = context.l10n;
   final navigator = Navigator.of(context, rootNavigator: true);
-  void run(VoidCallback action) {
+  void run(FutureOr<void> Function() action) {
     navigator.pop();
-    if (context.mounted) action();
+    if (context.mounted) unawaited(Future.sync(action));
   }
 
   return showAppSheet<void>(

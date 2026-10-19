@@ -80,7 +80,7 @@ class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
                   AppHeaderAction(
                     icon: AppLineIcon.check,
                     semanticsLabel: l10n.save,
-                    onTap: _saving ? null : _save,
+                    onTap: _saving ? null : () => unawaited(_save()),
                   ),
                 ],
               ),
@@ -139,7 +139,7 @@ class _CustomLessonEditorViewState extends State<CustomLessonEditorView> {
                       markedValues: widget.colors.toSet(),
                       defaultValue: widget.colors.firstOrNull,
                       resetLabel: widget.colors.isEmpty ? null : l10n.reset,
-                      swatchSemanticsLabel: (color) =>
+                      swatchSemanticsBuilder: (color) =>
                           '${l10n.lessonEditorColorLabel} #'
                           '${appColorHexOf(color)}',
                     ),

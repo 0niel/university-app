@@ -132,7 +132,10 @@ void main() {
         find.byKey(const ValueKey('materials_page_empty')),
         findsOneWidget,
       );
-      oldRequest.completeError(Exception('late network failure'));
+      oldRequest.completeError(
+        Exception('late network failure'),
+        StackTrace.current,
+      );
       await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey('materials_page_empty')),

@@ -5,7 +5,7 @@ import 'package:rtu_mirea_app/communities/widgets/community_platform.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 Color communityTone(AppColors colors, String seed) {
-  final palette = <Color>[
+  final palette = [
     colors.accent,
     colors.lecture,
     colors.practice,
@@ -16,7 +16,7 @@ Color communityTone(AppColors colors, String seed) {
   for (final unit in seed.codeUnits) {
     hash = (hash * 31 + unit) & 0xffffff;
   }
-  return palette[hash % palette.length];
+  return palette.elementAtOrNull(hash % palette.length) ?? colors.accent;
 }
 
 String communityAbbreviation(String name) {
@@ -51,9 +51,8 @@ String communityPlatformLabel(
 
 String communityMembers(
   AppLocalizations l10n,
-  CommunityCatalogEntry entry, {
-  required bool joined,
-}) {
+  CommunityCatalogEntry entry,
+) {
   final count = entry.membersCount;
   if (count == null) return communityPlatformLabel(l10n, entry);
   return l10n.communitiesMembersCount('$count');
@@ -63,13 +62,12 @@ String communityMeta(
   AppLocalizations l10n,
   CommunityCatalogEntry entry, {
   required String categoryTitle,
-  required bool joined,
 }) {
   final count = entry.membersCount;
   final parts = <String>[
     if (categoryTitle.trim().isNotEmpty) categoryTitle.trim(),
     if (count != null)
-      communityMembers(l10n, entry, joined: joined)
+      communityMembers(l10n, entry)
     else
       communityPlatformLabel(l10n, entry),
   ];
@@ -81,6 +79,6 @@ String? communityHandle(String url) {
   if (uri == null) return null;
   final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
   if (segments.isEmpty) return null;
-  final handle = segments.last.replaceFirst('@', '').trim();
+  final handle = segments.lastOrNull?.replaceFirst('@', '').trim() ?? '';
   return handle.isEmpty ? null : handle.toLowerCase();
 }

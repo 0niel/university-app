@@ -56,7 +56,7 @@ Future<void> _rename(
   final title = await showAppSheet<String>(
     context,
     title: context.l10n.collabNotesRenameTitle,
-    child: _RenameSheet(controller: controller),
+    child: _NoteActionsSheet(controller: controller),
   );
   controller.dispose();
   if (title == null || title.trim().isEmpty) return;
@@ -112,8 +112,8 @@ Future<void> _delete(
   }
 }
 
-class _RenameSheet extends StatelessWidget {
-  const _RenameSheet({required this.controller});
+class _NoteActionsSheet extends StatelessWidget {
+  const _NoteActionsSheet({required this.controller});
 
   final TextEditingController controller;
 

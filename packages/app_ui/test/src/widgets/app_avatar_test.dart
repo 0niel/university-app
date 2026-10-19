@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _wrap(Widget child) => MaterialApp(
-      theme: ThemeData(extensions: const [AppColors.light]),
-      home: Scaffold(body: Center(child: child)),
-    );
+  theme: ThemeData(extensions: const [AppColors.light]),
+  home: Scaffold(body: Center(child: child)),
+);
 
 void main() {
   group('AppAvatar', () {

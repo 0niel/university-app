@@ -44,6 +44,6 @@ final class NfcPassUnreachableException implements Exception {
   final Object? cause;
 
   @override
-  String toString() =>
-      'NfcPassUnreachableException: $host is unreachable ($cause)';
+  String toString() => 'NfcPassUnreachableException: $host is unreachable '
+      "(${cause?.toString() ?? 'unknown cause'})";
 }

@@ -8,12 +8,12 @@ class SubjectGrades extends Equatable {
     this.marks = const [],
   });
 
-  factory SubjectGrades.fromJson(Map<String, dynamic> json) => SubjectGrades(
-    subject: json['subject'] as String,
+  factory SubjectGrades.fromJson(Map<String, Object?> json) => SubjectGrades(
+    subject: json['subject']! as String,
     teacher: json['teacher'] as String? ?? '',
     marks: [
-      for (final mark in json['marks'] as List<dynamic>? ?? const [])
-        GradeMark.fromJson(Map<String, dynamic>.from(mark as Map)),
+      for (final mark in json['marks'] as List<Object?>? ?? const [])
+        GradeMark.fromJson(Map.from(mark! as Map<Object?, Object?>)),
     ],
   );
 
@@ -36,14 +36,17 @@ class SubjectGrades extends Equatable {
   bool isNew(DateTime now) =>
       marks.any((mark) => now.difference(mark.date) < newMarkWindow);
 
-  SubjectGrades copyWith({String? teacher, List<GradeMark>? marks}) =>
-      SubjectGrades(
-        subject: subject,
-        teacher: teacher ?? this.teacher,
-        marks: marks ?? this.marks,
-      );
+  SubjectGrades copyWith({
+    String? teacher,
+    List<GradeMark>? marks,
+    String? subject,
+  }) => SubjectGrades(
+    teacher: teacher ?? this.teacher,
+    marks: marks ?? this.marks,
+    subject: subject ?? this.subject,
+  );
 
-  Map<String, dynamic> toJson() => {
+  Map<String, Object?> toJson() => {
     'subject': subject,
     'teacher': teacher,
     'marks': [for (final mark in marks) mark.toJson()],

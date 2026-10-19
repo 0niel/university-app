@@ -32,7 +32,7 @@ abstract class MarketListing with _$MarketListing {
   factory MarketListing.fromJson(Map<String, Object?> json) =>
       _$MarketListingFromJson(json);
 
-  MarketMediaItem? get cover => media.isEmpty ? null : media.first;
+  MarketMediaItem? get cover => media.firstOrNull;
 }
 
 List<MarketMediaItem> _mediaFromJson(Object? value) => value is List

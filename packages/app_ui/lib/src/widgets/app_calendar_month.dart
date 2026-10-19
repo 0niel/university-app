@@ -17,7 +17,7 @@ class AppCalendarMonth extends StatelessWidget {
     super.key,
     this.selectedDay,
     this.today,
-    this.dotsForDay,
+    this.dotsBuilder,
     this.headerLabelBuilder,
     this.weekdayLabelBuilder,
     this.firstDayOfWeek = DateTime.monday,
@@ -28,7 +28,7 @@ class AppCalendarMonth extends StatelessWidget {
   final ValueChanged<DateTime> onDaySelected;
   final DateTime? selectedDay;
   final DateTime? today;
-  final List<Color> Function(DateTime day)? dotsForDay;
+  final List<Color> Function(DateTime day)? dotsBuilder;
   final String Function(DateTime month)? headerLabelBuilder;
   final String Function(DateTime day)? weekdayLabelBuilder;
   final int firstDayOfWeek;
@@ -49,7 +49,8 @@ class AppCalendarMonth extends StatelessWidget {
       0,
     ).day;
     final totalCells = ((daysBefore + daysInMonth + 6) ~/ 7) * 7;
-    final headerLabel = headerLabelBuilder?.call(normalizedMonth) ??
+    final headerLabel =
+        headerLabelBuilder?.call(normalizedMonth) ??
         _defaultHeaderLabel(normalizedMonth, locale);
 
     return AppCard(
@@ -141,7 +142,7 @@ class AppCalendarMonth extends StatelessWidget {
                           month: normalizedMonth.month,
                           today: now,
                           selected: selected,
-                          dots: dotsForDay,
+                          dotsBuilder: dotsBuilder,
                           onTap: onDaySelected,
                         ),
                       ),
@@ -170,7 +171,7 @@ class _AppCalendarDayCell extends StatelessWidget {
     required this.month,
     required this.today,
     required this.selected,
-    required this.dots,
+    required this.dotsBuilder,
     required this.onTap,
   });
 
@@ -178,7 +179,7 @@ class _AppCalendarDayCell extends StatelessWidget {
   final int month;
   final DateTime today;
   final DateTime? selected;
-  final List<Color> Function(DateTime day)? dots;
+  final List<Color> Function(DateTime day)? dotsBuilder;
   final ValueChanged<DateTime> onTap;
 
   static bool _isSameDay(DateTime a, DateTime b) =>
@@ -193,8 +194,9 @@ class _AppCalendarDayCell extends StatelessWidget {
     final isToday = _isSameDay(day, today);
     final selectedDay = selected;
     final isSelected = selectedDay != null && _isSameDay(day, selectedDay);
-    final dotColors = dots?.call(day) ?? const <Color>[];
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final dotColors = dotsBuilder?.call(day) ?? const <Color>[];
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
 
     return AppPressState(
@@ -207,8 +209,9 @@ class _AppCalendarDayCell extends StatelessWidget {
       semanticsSelected: isSelected,
       onTap: () => onTap(day),
       builder: (context, {required pressed}) => AnimatedContainer(
-        duration:
-            reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+        duration: reduceMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 200),
         constraints: const BoxConstraints(minHeight: AppControlSize.navCircle),
         padding: const EdgeInsets.symmetric(vertical: 5),
         decoration: BoxDecoration(

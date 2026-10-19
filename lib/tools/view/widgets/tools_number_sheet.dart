@@ -17,13 +17,18 @@ void showToolsNumberSheet(
     showAppSheet<void>(
       context,
       title: title,
-      child: _NumberForm(value: value, min: min, max: max, onSave: onSave),
+      child: _ToolsNumberSheet(
+        value: value,
+        min: min,
+        max: max,
+        onSave: onSave,
+      ),
     ),
   );
 }
 
-class _NumberForm extends StatefulWidget {
-  const _NumberForm({
+class _ToolsNumberSheet extends StatefulWidget {
+  const _ToolsNumberSheet({
     required this.value,
     required this.min,
     required this.max,
@@ -36,10 +41,10 @@ class _NumberForm extends StatefulWidget {
   final ValueChanged<int> onSave;
 
   @override
-  State<_NumberForm> createState() => _NumberFormState();
+  State<_ToolsNumberSheet> createState() => _ToolsNumberSheetState();
 }
 
-class _NumberFormState extends State<_NumberForm> {
+class _ToolsNumberSheetState extends State<_ToolsNumberSheet> {
   late final controller = TextEditingController(text: '${widget.value}');
 
   @override
@@ -49,31 +54,35 @@ class _NumberFormState extends State<_NumberForm> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final value = int.tryParse(controller.text);
-    final valid = value != null && value >= widget.min && value <= widget.max;
-    return Column(
-      children: [
-        AppInputField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          onChanged: (_) => setState(() {}),
-          helperText: '${widget.min}–${widget.max}',
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        AppButton.primary(
-          label: context.l10n.save,
-          expanded: true,
-          onPressed: valid
-              ? () {
-                  widget.onSave(value);
-                  Navigator.of(context).pop();
-                }
-              : null,
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) =>
+      ValueListenableBuilder<TextEditingValue>(
+        valueListenable: controller,
+        builder: (context, textValue, child) {
+          final value = int.tryParse(textValue.text);
+          final valid =
+              value != null && value >= widget.min && value <= widget.max;
+          return Column(
+            children: [
+              AppInputField(
+                controller: controller,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                helperText: '${widget.min}–${widget.max}',
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              AppButton.primary(
+                label: context.l10n.save,
+                expanded: true,
+                onPressed: valid
+                    ? () {
+                        widget.onSave(value);
+                        Navigator.of(context).pop();
+                      }
+                    : null,
+              ),
+            ],
+          );
+        },
+      );
 }

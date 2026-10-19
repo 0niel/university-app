@@ -13,26 +13,21 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     emit(state.copyWith(colorScheme: scheme));
   }
 
-  void setAmoled({required bool enabled}) {
-    emit(state.copyWith(isAmoled: enabled));
+  void setGlassEnabled({required bool enabled}) {
+    emit(state.copyWith(glassEnabled: enabled));
   }
 
   ThemeData getLightTheme() => AppTheme.generateTheme(
     AppColorSchemes.getLightColors(state.colorScheme),
     Brightness.light,
+    glassEnabled: state.glassEnabled,
   );
 
-  ThemeData getDarkTheme() {
-    final base = AppColorSchemes.getDarkColors(state.colorScheme);
-    final colors = state.isAmoled
-        ? base.copyWith(
-            canvas: AppColors.amoledCanvas,
-            surface: AppColors.amoledSurface,
-            surface2: AppColors.amoledSurface2,
-          )
-        : base;
-    return AppTheme.generateTheme(colors, Brightness.dark);
-  }
+  ThemeData getDarkTheme() => AppTheme.generateTheme(
+    AppColorSchemes.getDarkColors(state.colorScheme),
+    Brightness.dark,
+    glassEnabled: state.glassEnabled,
+  );
 
   @override
   ThemeState fromJson(Map<String, dynamic> json) {

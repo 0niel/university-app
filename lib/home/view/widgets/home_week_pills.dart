@@ -13,8 +13,8 @@ class HomeWeekPills extends StatelessWidget {
     required this.changedDays,
     required this.onSelected,
     this.lessonColors = const [],
-    this.lessonCountForDay,
-    this.lessonColorsForDay,
+    this.onLessonCountForDay,
+    this.onLessonColorsForDay,
     this.onWeekChanged,
     super.key,
   });
@@ -27,19 +27,21 @@ class HomeWeekPills extends StatelessWidget {
   final Set<int> changedDays;
   final ValueChanged<int> onSelected;
   final ValueChanged<int>? onWeekChanged;
-  final int Function(DateTime)? lessonCountForDay;
-  final List<Color> Function(DateTime)? lessonColorsForDay;
+  final int Function(DateTime)? onLessonCountForDay;
+  final List<Color> Function(DateTime)? onLessonColorsForDay;
 
   @override
   Widget build(BuildContext context) {
+    final first = days.firstOrNull;
+    final last = days.lastOrNull;
     final colors = context.colors;
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).languageCode;
     final format = DateFormat.E(locale);
     String? rangeLabel(int offset) {
-      if (days.isEmpty) return null;
-      final start = AppWeekPager.offsetWeek(days.first, offset);
-      final end = AppWeekPager.offsetWeek(days.last, offset);
+      if (first == null || last == null) return null;
+      final start = AppWeekPager.offsetWeek(first, offset);
+      final end = AppWeekPager.offsetWeek(last, offset);
       return '${DateFormat.yMMMd(locale).format(start)} — '
           '${DateFormat.yMMMd(locale).format(end)}';
     }
@@ -49,8 +51,8 @@ class HomeWeekPills extends StatelessWidget {
         (value) => DateUtils.isSameDay(value, date),
       );
       final count =
-          lessonCountForDay?.call(date) ??
-          (index < 0 ? 0 : lessonCounts.elementAtOrNull(index) ?? 0);
+          onLessonCountForDay?.call(date) ??
+          (index < 0 ? 0 : (lessonCounts.elementAtOrNull(index) ?? 0));
       return AppWeekDay(
         '${date.day}',
         short: format.format(date).replaceAll('.', '').toUpperCase(),
@@ -60,7 +62,7 @@ class HomeWeekPills extends StatelessWidget {
             '${DateFormat.yMMMMd(locale).format(date)}, '
             '${l10n.scheduleDayLessons(count)}',
         dots:
-            lessonColorsForDay?.call(date) ??
+            onLessonColorsForDay?.call(date) ??
             (index < 0 ? null : lessonColors.elementAtOrNull(index)) ??
             List.filled(count, colors.accent),
       );
@@ -82,23 +84,25 @@ class HomeWeekPills extends StatelessWidget {
         onDecrease: onWeekChanged == null ? null : () => onWeekChanged!(-1),
         child: Padding(
           padding: const EdgeInsets.only(top: 18),
-          child: days.isEmpty || onWeekChanged == null
+          child: first == null || onWeekChanged == null
               ? AppWeekStrip(
-                  padding: EdgeInsets.zero,
                   selectedIndex: selectedIndex,
                   onSelected: onSelected,
-                  days: days.isEmpty ? const [] : week(days.first),
+                  days: first == null ? const [] : week(first),
                 )
               : AppWeekPager(
-                  weekStart: days.first,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screen,
+                  ),
+                  weekStart: first,
                   selectedIndex: selectedIndex,
                   onSelected: onSelected,
                   daysBuilder: week,
                   onWeekChanged: (start) {
                     final from = DateTime.utc(
-                      days.first.year,
-                      days.first.month,
-                      days.first.day,
+                      first.year,
+                      first.month,
+                      first.day,
                     );
                     final to = DateTime.utc(start.year, start.month, start.day);
                     onWeekChanged!(to.difference(from).inDays ~/ 7);

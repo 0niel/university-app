@@ -1,7 +1,5 @@
 part of 'schedule_management_page.dart';
 
-enum _SavedScheduleAction { open, delete }
-
 class _HubBody extends StatelessWidget {
   const _HubBody({
     required this.state,
@@ -218,3 +216,5 @@ class _HubBody extends StatelessWidget {
     );
   }
 }
+
+enum _SavedScheduleAction { open, delete }

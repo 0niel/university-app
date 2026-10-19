@@ -18,6 +18,7 @@ import '../../helpers/pump_app.dart';
 class _CampusRepository extends Mock implements CampusRepository {}
 
 class _NoCache implements MapDataCache {
+  const _NoCache();
   @override
   Future<String?> read(String key) async => null;
 
@@ -107,7 +108,7 @@ Future<(MapBloc, _Controller)> _pump(
   final currentDocument = document ?? _document;
   final repository = MapDataRepository(
     organizationId: 'mirea',
-    cache: _NoCache(),
+    cache: const _NoCache(),
     rpc: (name, _) async => name == 'get_map_catalog'
         ? {
             'campuses': [currentDocument()],

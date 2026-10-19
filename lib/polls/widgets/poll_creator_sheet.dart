@@ -32,6 +32,7 @@ Future<bool?> showPollCreatorSheet(
     context,
     title: context.l10n.pollsCreateTitle,
     scrollable: false,
+    contentPadding: EdgeInsets.zero,
     child: PollCreatorSheet(cubit: cubit),
   );
 }
@@ -71,7 +72,12 @@ class _QuestionDraft {
     return values.length >= 2 &&
         values.toSet().length == values.length &&
         (kind != PollQuestionKind.quiz ||
-            optionControllers[correctIndex].text.trim().isNotEmpty);
+            (optionControllers
+                    .elementAtOrNull(correctIndex)
+                    ?.text
+                    .trim()
+                    .isNotEmpty ??
+                false));
   }
 
   PollQuestionDraft toDraft() => PollQuestionDraft(
@@ -91,6 +97,17 @@ class _QuestionDraft {
               .length
         : null,
   );
+
+  void setKind(PollQuestionKind value) {
+    kind = value;
+    if (hasOptions) {
+      while (optionControllers.length < 2) {
+        addOption();
+      }
+    }
+  }
+
+  void addOption() => optionControllers.add(TextEditingController());
 
   void dispose() {
     textController.dispose();
@@ -115,7 +132,7 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
   final _scrollController = ScrollController();
   final _title = TextEditingController();
   final _description = TextEditingController();
-  final _questions = <_QuestionDraft>[_QuestionDraft()];
+  final _questions = [_QuestionDraft()];
 
   _CreatorStep _step = _CreatorStep.basics;
   PollCategory? _category;
@@ -157,8 +174,6 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
   bool get _questionsValid =>
       _questions.isNotEmpty && _questions.every((question) => question.isValid);
 
-  void _refresh() => setState(() {});
-
   void _clearStepError() {
     if (_showStepError) setState(() => _showStepError = false);
   }
@@ -189,36 +204,20 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
   }
 
   void _setQuestionKind(int index, PollQuestionKind kind) {
-    setState(() {
-      final question = _questions[index]..kind = kind;
-      if ((kind == PollQuestionKind.single ||
-              kind == PollQuestionKind.multiple ||
-              kind == PollQuestionKind.quiz) &&
-          question.optionControllers.length < 2) {
-        question.optionControllers = [
-          ...question.optionControllers,
-          ...List.generate(
-            2 - question.optionControllers.length,
-            (_) => TextEditingController(),
-          ),
-        ];
-      }
-    });
+    final question = _questions.elementAtOrNull(index);
+    if (question == null) return;
+    setState(() => question.setKind(kind));
   }
 
   void _addOption(int index) {
-    final question = _questions[index];
-    if (question.optionControllers.length >= 10) return;
-    setState(
-      () => question.optionControllers = [
-        ...question.optionControllers,
-        TextEditingController(),
-      ],
-    );
+    final question = _questions.elementAtOrNull(index);
+    if (question == null || question.optionControllers.length >= 10) return;
+    setState(question.addOption);
   }
 
   void _removeOption(int index, int optionIndex) {
-    final question = _questions[index];
+    final question = _questions.elementAtOrNull(index);
+    if (question == null) return;
     if (question.optionControllers.length <= 2) return;
     setState(() {
       final removed = question.optionControllers.removeAt(optionIndex);
@@ -256,7 +255,7 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
   }
 
   void _revealQuestion(int index) {
-    final target = _questions[index].editorKey.currentContext;
+    final target = _questions.elementAtOrNull(index)?.editorKey.currentContext;
     if (target != null) {
       unawaited(Scrollable.ensureVisible(target));
     }
@@ -279,12 +278,20 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
       unawaited(_submit());
       return;
     }
-    _showStep(_CreatorStep.values[_step.index + 1]);
+    _showStep(switch (_step) {
+      _CreatorStep.basics => _CreatorStep.questions,
+      _CreatorStep.questions => _CreatorStep.settings,
+      _CreatorStep.settings || _CreatorStep.preview => _CreatorStep.preview,
+    });
   }
 
   void _back() {
     if (_step == _CreatorStep.basics || _saving) return;
-    _showStep(_CreatorStep.values[_step.index - 1]);
+    _showStep(switch (_step) {
+      _CreatorStep.basics || _CreatorStep.questions => _CreatorStep.basics,
+      _CreatorStep.settings => _CreatorStep.questions,
+      _CreatorStep.preview => _CreatorStep.settings,
+    });
   }
 
   Future<void> _pickClosesDate() async {
@@ -322,8 +329,6 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
       return;
     }
     setState(() => _saving = true);
-    final l10n = context.l10n;
-    final navigator = Navigator.of(context);
     final poll = await widget.cubit.createPoll(
       title: _title.text.trim(),
       questions: [for (final question in _questions) question.toDraft()],
@@ -337,14 +342,26 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
     if (!mounted) return;
     setState(() => _saving = false);
     if (poll != null) {
-      navigator.pop(true);
+      Navigator.of(context).pop(true);
     } else {
-      ToastManager.showError(context, message: l10n.pollsCreateError);
+      ToastManager.showError(context, message: context.l10n.pollsCreateError);
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([
+      _title,
+      _description,
+      for (final question in _questions) ...[
+        question.textController,
+        ...question.optionControllers,
+      ],
+    ]),
+    builder: (context, _) => _buildContent(context),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
     final totalSteps = _CreatorStep.values.length;
@@ -354,99 +371,113 @@ class _PollCreatorSheetState extends State<PollCreatorSheet> {
       _CreatorStep.settings => l10n.pollsSettings,
       _CreatorStep.preview => l10n.pollsStepPreview,
     };
-    final header = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(child: Text(stepTitle, style: AppText.bodyStrong)),
-            Text(
-              l10n.pollsStepCounter(_step.index + 1, totalSteps),
-              style: AppText.caption.copyWith(color: colors.muted),
+    final header = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(stepTitle, style: AppText.bodyStrong)),
+              Text(
+                l10n.pollsStepCounter(_step.index + 1, totalSteps),
+                style: AppText.caption.copyWith(color: colors.muted),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppProgressBar(value: (_step.index + 1) / totalSteps),
+          const SizedBox(height: AppSpacing.md),
+        ],
+      ),
+    );
+    final content = Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: _step == _CreatorStep.basics ? 0 : AppSpacing.screen,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          switch (_step) {
+            _CreatorStep.basics => _BasicsStep(
+              titleController: _title,
+              descriptionController: _description,
+              category: _category,
+              showError: _showStepError,
+              onCategoryChanged: (value) => setState(() => _category = value),
+              onChanged: _clearStepError,
+            ),
+            _CreatorStep.questions => _CreatorQuestionsStep(
+              questions: _questions,
+              showError: _showStepError,
+              onAdd: _addQuestion,
+              onRemove: _removeQuestion,
+              onMove: _moveQuestion,
+              onKindChanged: _setQuestionKind,
+              onAddOption: _addOption,
+              onRemoveOption: _removeOption,
+              onRequiredChanged: (index, {required value}) => setState(() {
+                final question = _questions.elementAtOrNull(index);
+                if (question != null) question.isRequired = value;
+              }),
+              onChanged: _clearStepError,
+            ),
+            _CreatorStep.settings => _CreatorSettingsStep(
+              anonymous: _anonymous,
+              onAnonymousChanged: (value) => setState(() => _anonymous = value),
+              resultsVisibility: _resultsVisibility,
+              onResultsVisibilityChanged: (value) =>
+                  setState(() => _resultsVisibility = value),
+              allowChange: _allowChange,
+              onAllowChangeChanged: (value) =>
+                  setState(() => _allowChange = value),
+              closesEnabled: _closesEnabled,
+              closesAt: _closesAt,
+              onClosesCleared: () => setState(() => _closesEnabled = false),
+              onPickDate: () => unawaited(_pickClosesDate()),
+              onPickTime: () => unawaited(_pickClosesTime()),
+              onPreset: (days) => setState(() {
+                final at = DateTime.now().add(Duration(days: days));
+                _closesAtDate = at;
+                _closesHour = at.hour;
+                _closesMinute = at.minute;
+                _closesEnabled = true;
+              }),
+            ),
+            _CreatorStep.preview => _CreatorPreviewStep(
+              title: _title.text.trim(),
+              description: _description.text.trim(),
+              category: _category,
+              questions: _questions,
+              anonymous: _anonymous,
+              closesAt: _closesAt,
+              onEditBasics: _saving
+                  ? null
+                  : () => _showStep(_CreatorStep.basics),
+              onEditQuestion: _saving
+                  ? null
+                  : (index) =>
+                        _showStep(_CreatorStep.questions, questionIndex: index),
+            ),
+          },
+          if (_step == _CreatorStep.settings && _showStepError) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppBanner(
+              message: l10n.pollsClosesFuture,
+              tone: AppBannerTone.danger,
             ),
           ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        AppProgressBar(value: (_step.index + 1) / totalSteps),
-        const SizedBox(height: AppSpacing.md),
-      ],
-    );
-    final content = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        switch (_step) {
-          _CreatorStep.basics => _BasicsStep(
-            titleController: _title,
-            descriptionController: _description,
-            category: _category,
-            showError: _showStepError,
-            onCategoryChanged: (value) => setState(() => _category = value),
-            onChanged: _clearStepError,
-          ),
-          _CreatorStep.questions => _QuestionsStep(
-            questions: _questions,
-            showError: _showStepError,
-            onAdd: _addQuestion,
-            onRemove: _removeQuestion,
-            onMove: _moveQuestion,
-            onKindChanged: _setQuestionKind,
-            onAddOption: _addOption,
-            onRemoveOption: _removeOption,
-            onRequiredChanged: (index, {required value}) =>
-                setState(() => _questions[index].isRequired = value),
-            onChanged: () {
-              _refresh();
-              _clearStepError();
-            },
-          ),
-          _CreatorStep.settings => _SettingsStep(
-            anonymous: _anonymous,
-            onAnonymousChanged: (value) => setState(() => _anonymous = value),
-            resultsVisibility: _resultsVisibility,
-            onResultsVisibilityChanged: (value) =>
-                setState(() => _resultsVisibility = value),
-            allowChange: _allowChange,
-            onAllowChangeChanged: (value) =>
-                setState(() => _allowChange = value),
-            closesEnabled: _closesEnabled,
-            closesAt: _closesAt,
-            onClosesCleared: () => setState(() => _closesEnabled = false),
-            onPickDate: () => unawaited(_pickClosesDate()),
-            onPickTime: () => unawaited(_pickClosesTime()),
-            onPreset: (days) => setState(() {
-              final at = DateTime.now().add(Duration(days: days));
-              _closesAtDate = at;
-              _closesHour = at.hour;
-              _closesMinute = at.minute;
-              _closesEnabled = true;
-            }),
-          ),
-          _CreatorStep.preview => _PreviewStep(
-            title: _title.text.trim(),
-            description: _description.text.trim(),
-            category: _category,
-            questions: _questions,
-            anonymous: _anonymous,
-            closesAt: _closesAt,
-            onEditBasics: _saving ? null : () => _showStep(_CreatorStep.basics),
-            onEditQuestion: _saving
-                ? null
-                : (index) =>
-                      _showStep(_CreatorStep.questions, questionIndex: index),
-          ),
-        },
-        if (_step == _CreatorStep.settings && _showStepError) ...[
-          const SizedBox(height: AppSpacing.sm),
-          AppBanner(
-            message: l10n.pollsClosesFuture,
-            tone: AppBannerTone.danger,
-          ),
         ],
-      ],
+      ),
     );
     final footer = Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screen,
+        AppSpacing.md,
+        AppSpacing.screen,
+        0,
+      ),
       child: Row(
         children: [
           if (_step != _CreatorStep.basics) ...[
@@ -523,34 +554,44 @@ class _BasicsStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppInputField(
-          controller: titleController,
-          placeholder: l10n.pollsTitleHint,
-          autofocus: true,
-          maxLength: 200,
-          textInputAction: TextInputAction.next,
-          errorText: showError && titleController.text.trim().isEmpty
-              ? l10n.pollsTitleRequired
-              : null,
-          onChanged: (_) => onChanged(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppInputField(
+                controller: titleController,
+                placeholder: l10n.pollsTitleHint,
+                autofocus: true,
+                maxLength: 200,
+                textInputAction: TextInputAction.next,
+                errorText: showError && titleController.text.trim().isEmpty
+                    ? l10n.pollsTitleRequired
+                    : null,
+                onChanged: (_) => onChanged(),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppInputField.multiline(
+                controller: descriptionController,
+                placeholder: l10n.pollsDescriptionHint,
+                maxLength: 2000,
+                showCounter: false,
+                minLines: 2,
+                maxLines: 4,
+                onChanged: (_) => onChanged(),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                l10n.pollsCategoryLabel,
+                style: AppText.captionStrong.copyWith(color: colors.muted),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+          ),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        AppInputField.multiline(
-          controller: descriptionController,
-          placeholder: l10n.pollsDescriptionHint,
-          maxLength: 2000,
-          showCounter: false,
-          minLines: 2,
-          maxLines: 4,
-          onChanged: (_) => onChanged(),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          l10n.pollsCategoryLabel,
-          style: AppText.captionStrong.copyWith(color: colors.muted),
-        ),
-        const SizedBox(height: AppSpacing.sm),
         AppChipRow<PollCategory?>(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
           value: category,
           onChanged: onCategoryChanged,
           items: [

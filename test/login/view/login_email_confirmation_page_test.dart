@@ -94,10 +94,11 @@ void main() {
     });
     expect(
       accent?.style?.color ?? (rich.text as TextSpan).style?.color,
-      colors.ink,
+      colors.accent,
     );
-    expect(accent?.style?.fontStyle, FontStyle.italic);
-    expect(accent?.style?.fontFamily, AppText.serifFamily);
+    expect(accent?.style?.fontStyle ?? FontStyle.normal, FontStyle.normal);
+    expect(accent?.style?.fontFamily, AppText.sansFamily);
+    expect(accent?.style?.fontWeight, FontWeight.w700);
   });
 
   testWidgets('a complete code is submitted to the repository', (

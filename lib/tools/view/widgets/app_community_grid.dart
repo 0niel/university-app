@@ -20,6 +20,7 @@ class AppCommunityGrid extends StatelessWidget {
     final l10n = context.l10n;
     final cards = [
       AppCommunityCard(
+        featured: true,
         icon: const Icon(UniconsLine.github),
         title: 'GitHub',
         subtitle: l10n.toolsCardGithubSubtitle,
@@ -47,7 +48,7 @@ class AppCommunityGrid extends StatelessWidget {
     ];
 
     return Column(
-      spacing: 10,
+      spacing: 12,
       children: cards,
     );
   }

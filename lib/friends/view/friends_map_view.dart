@@ -101,7 +101,9 @@ class _FriendsMapViewState extends State<FriendsMapView>
               context.l10n.friendsLocationServiceDisabled,
             FriendsLocationStatus.unavailable =>
               context.l10n.friendsLocationUnsupported,
-            _ => null,
+            FriendsLocationStatus.stopped ||
+            FriendsLocationStatus.locating ||
+            FriendsLocationStatus.active => null,
           };
 
     return Scaffold(

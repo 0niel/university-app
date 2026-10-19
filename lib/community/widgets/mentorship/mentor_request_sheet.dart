@@ -78,7 +78,7 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
     );
     final sending = stateSending || _submitting;
     final slotKeys = UniversityConfig.current.mentorWhenSlotKeys;
-    final fields = <Widget>[
+    final fields = [
       if (_failed)
         AppBanner(
           message: context.l10n.mentorshipRequestError,
@@ -149,7 +149,7 @@ class _MentorRequestSheetState extends State<MentorRequestSheet> {
     );
   }
 
-  Widget _mentorSummary(BuildContext context) {
+  Widget _mentorSummary(BuildContext _) {
     return AppListGroup(
       children: [
         AppListRow(

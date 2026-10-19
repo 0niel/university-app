@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_tooltip_arrow.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_icon_tile.dart';
@@ -8,7 +9,7 @@ import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/widgets.dart';
 
-enum NinjaTooltipArrow { up, down }
+export 'ninja_tooltip_arrow.dart';
 
 class NinjaTooltip extends StatelessWidget {
   const NinjaTooltip({

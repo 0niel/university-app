@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/widgets/app_control_surface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,7 +32,8 @@ void main() {
 
       final title = kitStyleOf(tester, 'Главная');
       expect(title?.fontSize, 34);
-      expect(title?.fontFamily, AppText.serifFamily);
+      expect(title?.fontFamily, AppText.sansFamily);
+      expect(title?.fontWeight, FontWeight.w600);
       expect(find.text('СРЕДА'), findsOneWidget);
       expect(kitStyleOf(tester, '4 пары')?.color, kitColors.muted);
 
@@ -45,9 +47,15 @@ void main() {
       );
       expect(top.padding.resolve(TextDirection.ltr).top, AppSpacing.screenTop);
 
-      final circle = kitDecorationOf(tester, AppHeaderCircleButton);
+      final circle = tester.widget<AppControlSurface>(
+        find.descendant(
+          of: find.byType(AppHeaderCircleButton),
+          matching: find.byType(AppControlSurface),
+        ),
+      );
       expect(circle.color, kitColors.surface);
-      expect(circle.shape, BoxShape.circle);
+      expect(circle.borderRadius, AppRadius.full);
+      expect(circle.tone, AppControlSurfaceTone.neutral);
       expect(
         tester.getSize(find.byType(AppHeaderCircleButton)).width,
         AppControlSize.touchTarget,
@@ -57,7 +65,7 @@ void main() {
           find
               .descendant(
                 of: find.byType(AppHeaderCircleButton),
-                matching: find.byType(Container),
+                matching: find.byType(AppControlSurface),
               )
               .first,
         ),
@@ -175,16 +183,22 @@ void main() {
 
       final title = kitStyleOf(tester, 'Дедлайны');
       expect(title?.fontSize, 28);
-      expect(title?.fontFamily, AppText.serifFamily);
-      final back = tester.widget<Container>(
-        find
-            .ancestor(
-              of: find.byType(AppLineIconWidget),
-              matching: find.byType(Container),
-            )
-            .first,
+      expect(title?.fontFamily, AppText.sansFamily);
+      expect(title?.fontWeight, FontWeight.w600);
+      final back = find
+          .ancestor(
+            of: find.byType(AppLineIconWidget),
+            matching: find.byType(AppControlSurface),
+          )
+          .first;
+      expect(
+        tester.getSize(back),
+        const Size.square(AppControlSize.iconButton),
       );
-      expect(back.constraints?.maxWidth, AppControlSize.iconButton);
+      expect(
+        tester.widget<AppControlSurface>(back).tone,
+        AppControlSurfaceTone.neutral,
+      );
       final trailing = kitStyleOf(tester, 'Изменить');
       expect(trailing?.fontSize, 13);
       expect(trailing?.color, kitColors.muted);
@@ -195,7 +209,7 @@ void main() {
   });
 
   group('AppSectionTitle / AppOverline', () {
-    testWidgets('section title pairs serif 22 with an accent action', (
+    testWidgets('section title pairs sans 22 with an accent action', (
       tester,
     ) async {
       var taps = 0;
@@ -210,6 +224,8 @@ void main() {
       );
 
       expect(kitStyleOf(tester, 'Дедлайны')?.fontSize, 22);
+      expect(kitStyleOf(tester, 'Дедлайны')?.fontFamily, AppText.sansFamily);
+      expect(kitStyleOf(tester, 'Дедлайны')?.fontWeight, FontWeight.w600);
       final action = kitStyleOf(tester, 'все');
       expect(action?.fontSize, 13);
       expect(action?.fontWeight, FontWeight.w600);

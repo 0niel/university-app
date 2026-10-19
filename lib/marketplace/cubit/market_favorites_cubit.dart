@@ -18,5 +18,5 @@ class MarketFavoritesCubit extends HydratedCubit<List<String>> {
   }
 
   @override
-  Map<String, dynamic>? toJson(List<String> state) => {'ids': state};
+  Map<String, dynamic> toJson(List<String> state) => {'ids': state};
 }

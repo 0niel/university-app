@@ -3535,10 +3535,24 @@
   "@authInvalidCredentials": {},
   "authGuestUnavailable": "Couldn''t sign in as a guest. Try again later.",
   "@authGuestUnavailable": {},
-  "settingsAmoledTitle": "AMOLED",
-  "@settingsAmoledTitle": {},
-  "settingsAmoledSubtitle": "True-black dark theme for OLED screens",
-  "@settingsAmoledSubtitle": {},
+  "settingsGlassEffectTitle": "Glass effect",
+  "mapRotatePlan": "Rotate floor plan",
+  "@mapRotatePlan": {},
+  "mapTopDownView": "Top-down view",
+  "@mapTopDownView": {},
+  "mapVolumeView": "3D floor plan",
+  "@mapVolumeView": {},
+  "mapShowCampus": "Show campus",
+  "@mapShowCampus": {},
+  "mapActions": "Map actions",
+  "@mapActions": {},
+  "map2DLabel": "2D",
+  "@map2DLabel": {},
+  "map3DLabel": "3D",
+  "@map3DLabel": {},
+  "@settingsGlassEffectTitle": {},
+  "settingsGlassEffectSubtitle": "Translucent surfaces, blur and refraction",
+  "@settingsGlassEffectSubtitle": {},
   "scheduleDiffTitle": "Schedule updates",
   "@scheduleDiffTitle": {},
   "scheduleDiffFoundChanges": "{count, plural, one{Found {count} change in your schedule} other{Found {count} changes in your schedule}}",
@@ -4264,6 +4278,14 @@
   "loginGenericError": "Couldn't sign in. Check your details and try again.",
   "@loginGenericError": {},
   "miniAppsTitle": "Mini apps",
+  "miniAppsSearchResultsCount": "{count, plural, =0{No matches} one{{count} result} other{{count} results}}",
+  "@miniAppsSearchResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@miniAppsTitle": {
     "description": "Mini apps catalog title"
   },
@@ -4282,7 +4304,7 @@
   "miniAppsMyApps": "My apps",
   "miniAppsCatalogSection": "Catalog",
   "miniAppsEmptyTitle": "No mini apps yet",
-  "miniAppsEmptySubtitle": "Be the first: build a mini app on Stac JSON and publish it for all students",
+  "miniAppsEmptySubtitle": "Create a useful mini app and share it with your university",
   "miniAppsNothingFound": "Nothing found",
   "miniAppsNothingFoundSubtitle": "Try a different query or category",
   "miniAppsLaunches": "{count, plural, =0{no launches} one{{count} launch} other{{count} launches}}",

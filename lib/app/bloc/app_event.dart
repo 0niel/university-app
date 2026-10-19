@@ -21,15 +21,6 @@ class InteractedMessageReceived extends AppEvent {
   List<Object?> get props => [message, userId];
 }
 
-class ThemeChanged extends AppEvent {
-  const ThemeChanged({required this.isAmoled});
-
-  final bool isAmoled;
-
-  @override
-  List<Object?> get props => [isAmoled];
-}
-
 class AppUserChanged extends AppEvent {
   const AppUserChanged(this.user);
 

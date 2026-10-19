@@ -1,14 +1,6 @@
 part of 'account_persona_form_cubit.dart';
 
 @freezed
-abstract class AccountPersonaDraft with _$AccountPersonaDraft {
-  const factory AccountPersonaDraft({
-    AccountRole? role,
-    @Default(TeacherSelectionEdit.keep()) TeacherSelectionEdit selection,
-  }) = _AccountPersonaDraft;
-}
-
-@freezed
 abstract class AccountPersonaFormState with _$AccountPersonaFormState {
   const factory AccountPersonaFormState({
     required AccountPersona persona,
@@ -30,7 +22,7 @@ abstract class AccountPersonaFormState with _$AccountPersonaFormState {
       draft.selection is! TeacherSelectionKeep;
 
   Teacher? get teacher => switch (draft.selection) {
-    TeacherSelectionSelect(:final teacher) => teacher,
+    TeacherSelectionSelect(teacher: final selectedTeacher) => selectedTeacher,
     TeacherSelectionClear() => null,
     TeacherSelectionKeep() => switch ((
       persona.teacherId,
@@ -48,4 +40,12 @@ abstract class AccountPersonaFormState with _$AccountPersonaFormState {
       persona.teacherId != null &&
       teacher?.uid == persona.teacherId &&
       !persona.teacherAvailable;
+}
+
+@freezed
+abstract class AccountPersonaDraft with _$AccountPersonaDraft {
+  const factory AccountPersonaDraft({
+    AccountRole? role,
+    @Default(TeacherSelectionEdit.keep()) TeacherSelectionEdit selection,
+  }) = _AccountPersonaDraft;
 }

@@ -26,6 +26,7 @@ class DrawingCanvasPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final saveCount = canvas.getSaveCount();
     canvas
       ..save()
       ..clipRect(Offset.zero & size)
@@ -45,9 +46,7 @@ class DrawingCanvasPainter extends CustomPainter {
           ..blendMode = stroke.isEraser ? BlendMode.clear : BlendMode.srcOver,
       );
     }
-    canvas
-      ..restore()
-      ..restore();
+    canvas.restoreToCount(saveCount);
   }
 
   @override

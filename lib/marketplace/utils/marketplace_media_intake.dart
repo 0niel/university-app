@@ -7,26 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:video_player/video_player.dart';
 
-class MarketMediaPick {
-  const MarketMediaPick({
-    required this.bytes,
-    required this.contentType,
-    required this.extension,
-    required this.kind,
-    this.width = 0,
-    this.height = 0,
-    this.duration = 0,
-  });
-
-  final Uint8List bytes;
-  final String contentType;
-  final String extension;
-  final MarketMediaKind kind;
-  final int width;
-  final int height;
-  final int duration;
-}
-
 abstract final class MarketplaceMediaIntake {
   static const int maxImages = 6;
   static const int maxVideos = 1;
@@ -108,4 +88,24 @@ abstract final class MarketplaceMediaIntake {
     'video/quicktime' => 'mov',
     _ => throw FormatException('Unsupported video type: $contentType'),
   };
+}
+
+class MarketMediaPick {
+  const MarketMediaPick({
+    required this.bytes,
+    required this.contentType,
+    required this.extension,
+    required this.kind,
+    this.width = 0,
+    this.height = 0,
+    this.duration = 0,
+  });
+
+  final Uint8List bytes;
+  final String contentType;
+  final String extension;
+  final MarketMediaKind kind;
+  final int width;
+  final int height;
+  final int duration;
 }

@@ -45,7 +45,11 @@ class _AppDatePickerSheetState extends State<AppDatePickerSheet> {
               for (final (index, chip) in widget.quickChips.indexed)
                 AppChipRowItem(value: index, label: chip.label),
             ],
-            onChanged: (index) => _pop(widget.quickChips[index].date),
+            onChanged: (index) {
+              if (widget.quickChips.elementAtOrNull(index) case final chip?) {
+                _pop(chip.date);
+              }
+            },
           ),
           const SizedBox(height: 14),
         ],

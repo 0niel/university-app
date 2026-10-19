@@ -100,7 +100,7 @@ class _PromoBannerViewState extends State<_PromoBannerView> {
       PromoEvent.open,
       placement: widget.placement,
     );
-    unawaited(PromoDetailsRoute(slug: widget.banner.slug).push<void>(context));
+    unawaited(PromoDetailsRoute(slug: widget.banner.slug).push(context));
   }
 
   Future<void> _dismiss() async {
@@ -140,7 +140,7 @@ class _PromoBannerViewState extends State<_PromoBannerView> {
       solid: banner.style == PromoStyle.solid,
       compact: widget.compact,
       onTap: _open,
-      onClose: banner.dismissible ? _dismiss : null,
+      onClose: banner.dismissible ? () => unawaited(_dismiss()) : null,
       closeSemanticsLabel: context.l10n.promoHideSheetTitle,
     );
   }

@@ -16,7 +16,7 @@ const Map<String, int> kDefaultLessonTypeColors = {
   'unknown': 0xFF6B7280,
 };
 
-const Map<String, int> _legacyDefaultLessonTypeColors = {
+const Map<String, int> _kLegacyDefaultLessonTypeColors = {
   'lecture': 0xFF087F5B,
   'physicalEducation': 0xFF087F5B,
   'credit': 0xFFDB8B00,
@@ -55,7 +55,7 @@ class LessonTypePalette extends InheritedWidget {
     'unknown': palette.muted.toARGB32(),
     for (final entry in overrides.entries)
       if (entry.value != kDefaultLessonTypeColors[entry.key] &&
-          entry.value != _legacyDefaultLessonTypeColors[entry.key])
+          entry.value != _kLegacyDefaultLessonTypeColors[entry.key])
         entry.key: entry.value,
   };
 

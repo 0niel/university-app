@@ -56,7 +56,6 @@ class SavedCommunityRow extends StatelessWidget {
                       context.l10n,
                       entry,
                       categoryTitle: categoryTitle,
-                      joined: true,
                     ),
                     style: AppText.sans(
                       12.5,

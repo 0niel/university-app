@@ -13,6 +13,24 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
+class AddDeadlineSheet extends StatefulWidget {
+  const AddDeadlineSheet({
+    required this.cubit,
+    required this.subjects,
+    super.key,
+    this.editing,
+    this.now,
+  });
+
+  final DeadlinesCubit cubit;
+  final List<String> subjects;
+  final Deadline? editing;
+  final DateTime? now;
+
+  @override
+  State<AddDeadlineSheet> createState() => _AddDeadlineSheetState();
+}
+
 enum DeadlineDue { today, tomorrow, week, pick }
 
 Future<void> showAddDeadlineSheet(
@@ -21,7 +39,7 @@ Future<void> showAddDeadlineSheet(
   Deadline? editing,
 }) async {
   final owned = cubit == null
-      ? DeadlinesCubit(repository: context.read<ScheduleRepository>())
+      ? DeadlinesCubit(repository: context.read())
       : null;
   final target = cubit ?? owned!;
   final subjects = _scheduleSubjects(context);
@@ -54,24 +72,6 @@ List<String> _scheduleSubjects(BuildContext context) {
           seen.add(part.subject))
         part.subject,
   ];
-}
-
-class AddDeadlineSheet extends StatefulWidget {
-  const AddDeadlineSheet({
-    required this.cubit,
-    required this.subjects,
-    super.key,
-    this.editing,
-    this.now,
-  });
-
-  final DeadlinesCubit cubit;
-  final List<String> subjects;
-  final Deadline? editing;
-  final DateTime? now;
-
-  @override
-  State<AddDeadlineSheet> createState() => _AddDeadlineSheetState();
 }
 
 class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
@@ -114,20 +114,15 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
       _hour = editing.dueAt.hour;
       _minute = editing.dueAt.minute;
     } else {
-      _subject = widget.subjects.isEmpty ? null : widget.subjects.first;
+      _subject = widget.subjects.firstOrNull;
     }
-    _controller.addListener(_onTitleChanged);
   }
 
   @override
   void dispose() {
-    _controller
-      ..removeListener(_onTitleChanged)
-      ..dispose();
+    _controller.dispose();
     super.dispose();
   }
-
-  void _onTitleChanged() => setState(() {});
 
   DateTime get _now => widget.now ?? DateTime.now();
 
@@ -174,7 +169,6 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
     if (!valid || _saving) return;
     setState(() => _saving = true);
     final l10n = context.l10n;
-    final navigator = Navigator.of(context);
     final editing = _editing;
     final bool ok;
     if (editing == null) {
@@ -210,7 +204,7 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
             ? l10n.deadlineSaved
             : l10n.deadlineUpdatedToast,
       );
-      navigator.pop();
+      Navigator.of(context).pop();
     } else {
       ToastManager.showError(
         context,
@@ -236,8 +230,27 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
     };
   }
 
+  Future<void> _pickTime() async {
+    final time = await showAppTimePicker(
+      context,
+      initial: (hour: _hour, minute: _minute),
+    );
+    if (time != null && mounted) {
+      setState(() {
+        _hour = time.hour;
+        _minute = time.minute;
+        _dueEdited = true;
+      });
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: _controller,
+    builder: (context, _) => _buildContent(context),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
     final valid =
@@ -371,19 +384,7 @@ class _AddDeadlineSheetState extends State<AddDeadlineSheet> {
           onRemindMinutesChanged: (value) =>
               setState(() => _remindMinutes = value),
           onProgressChanged: (value) => setState(() => _progress = value),
-          onTime: () async {
-            final time = await showAppTimePicker(
-              context,
-              initial: (hour: _hour, minute: _minute),
-            );
-            if (time != null && mounted) {
-              setState(() {
-                _hour = time.hour;
-                _minute = time.minute;
-                _dueEdited = true;
-              });
-            }
-          },
+          onTime: () => unawaited(_pickTime()),
         ),
       ],
     );

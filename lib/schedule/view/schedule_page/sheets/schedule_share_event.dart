@@ -63,13 +63,15 @@ List<ScheduleShareEvent> scheduleShareEvents({
   final events = <String, ScheduleShareEvent>{};
   void add(ScheduleShareEvent event) {
     if (event.title.trim().isNotEmpty) {
-      events['${event.id}:${event.date.toIso8601String()}:${event.start}'] =
-          event;
+      final date = event.date.toIso8601String();
+      final start = event.start?.toIso8601String() ?? '';
+      events['${event.id}:$date:$start'] = event;
     }
   }
 
   for (final event in schedule.whereType<CalendarSchedulePart>()) {
-    final id = 'calendar:${event.uid ?? '${event.title}:${event.location}'}';
+    final id =
+        'calendar:${event.uid ?? '${event.title}:${event.location ?? ''}'}';
     if (!event.isAllDay && event.startsAt != null) {
       if (overlaps(event.startsAt!, event.endsAt)) {
         add(

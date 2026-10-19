@@ -1,26 +1,3 @@
-enum ScheduleView { day, week, month }
-
-final scheduleAnchorMonday = DateTime.utc(2020, 1, 6);
-
-int scheduleDayIndex(DateTime day) {
-  return DateTime.utc(
-    day.year,
-    day.month,
-    day.day,
-  ).difference(scheduleAnchorMonday).inDays;
-}
-
-int scheduleWeekIndex(DateTime day) => (scheduleDayIndex(day) / 7).floor();
-
-DateTime scheduleDayOfIndex(int index) {
-  final utc = scheduleAnchorMonday.add(Duration(days: index));
-  return DateTime(utc.year, utc.month, utc.day);
-}
-
-bool schedulePagerShouldJump(int from, int to, {int threshold = 7}) {
-  return (to - from).abs() >= threshold;
-}
-
 class SchedulePaging {
   SchedulePaging({required DateTime today, this.weekRadius = 104})
     : firstWeekIndex = scheduleWeekIndex(today) - weekRadius;
@@ -62,6 +39,29 @@ class SchedulePaging {
     final start = weekPage.clamp(0, weekPageCount - 1) * 7;
     return [for (var index = 0; index < 7; index++) dayOfPage(start + index)];
   }
+}
+
+enum ScheduleView { day, week, month }
+
+final scheduleAnchorMonday = DateTime.utc(2020, 1, 6);
+
+int scheduleDayIndex(DateTime day) {
+  return DateTime.utc(
+    day.year,
+    day.month,
+    day.day,
+  ).difference(scheduleAnchorMonday).inDays;
+}
+
+int scheduleWeekIndex(DateTime day) => (scheduleDayIndex(day) / 7).floor();
+
+DateTime scheduleDayOfIndex(int index) {
+  final utc = scheduleAnchorMonday.add(Duration(days: index));
+  return DateTime(utc.year, utc.month, utc.day);
+}
+
+bool schedulePagerShouldJump(int from, int to, {int threshold = 7}) {
+  return (to - from).abs() >= threshold;
 }
 
 class ScheduleMonthPaging {

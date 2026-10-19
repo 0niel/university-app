@@ -29,43 +29,62 @@ class _SourceSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: .start,
       children: [
-        _SubmitSectionLabel(
-          title: l10n.miniAppsSubmitSource,
-          subtitle: l10n.miniAppsSubmitSourceSubtitle,
-        ),
-        NinjaSegmented<MiniAppSourceKind>(
-          value: sourceKind,
-          onChanged: onKindChanged,
-          segments: [
-            NinjaSegment(
-              value: MiniAppSourceKind.hosted,
-              label: l10n.miniAppsSourceHosted,
-            ),
-            NinjaSegment(
-              value: MiniAppSourceKind.remote,
-              label: l10n.miniAppsSourceRemote,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sectionGap),
-        if (sourceKind == .remote) ...[
-          NinjaInput(
-            controller: originController,
-            keyboardType: .url,
-            placeholder: 'https://my-app.example.com',
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _SubmitSectionLabel(
+                title: l10n.miniAppsSubmitSource,
+                subtitle: l10n.miniAppsSubmitSourceSubtitle,
+              ),
+              NinjaSegmented<MiniAppSourceKind>(
+                value: sourceKind,
+                onChanged: onKindChanged,
+                segments: [
+                  NinjaSegment(
+                    value: MiniAppSourceKind.hosted,
+                    label: l10n.miniAppsSourceHosted,
+                  ),
+                  NinjaSegment(
+                    value: MiniAppSourceKind.remote,
+                    label: l10n.miniAppsSourceRemote,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
+            ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          NinjaInput(
-            controller: entryPathController,
-            placeholder: l10n.miniAppsSubmitEntryPathHint,
-          ),
-        ] else ...[
-          _SubmitSectionLabel(
-            title: l10n.miniAppsTplTitle,
-            subtitle: l10n.miniAppsTplSubtitle,
+        ),
+        if (sourceKind == .remote)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                NinjaInput(
+                  controller: originController,
+                  keyboardType: .url,
+                  placeholder: 'https://my-app.example.com',
+                ),
+                const SizedBox(height: AppSpacing.md),
+                NinjaInput(
+                  controller: entryPathController,
+                  placeholder: l10n.miniAppsSubmitEntryPathHint,
+                ),
+              ],
+            ),
+          )
+        else ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: _SubmitSectionLabel(
+              title: l10n.miniAppsTplTitle,
+              subtitle: l10n.miniAppsTplSubtitle,
+            ),
           ),
           NinjaChipRow(
-            padding: EdgeInsets.zero,
+            key: const ValueKey('mini-app-submit-templates'),
             children: [
               for (final template in miniAppTemplates)
                 NinjaChip(
@@ -74,26 +93,34 @@ class _SourceSection extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          for (var i = 0; i < screens.length; i++) ...[
-            _ScreenEditor(
-              key: ObjectKey(screens[i]),
-              draft: screens[i],
-              isEntry: i == 0,
-              onPreview: () => onPreview(screens[i]),
-              onRemove: i == 0 ? null : () => onRemoveScreen(screens[i]),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: AppSpacing.lg),
+                for (var i = 0; i < screens.length; i++) ...[
+                  _ScreenEditor(
+                    key: ObjectKey(screens[i]),
+                    draft: screens[i],
+                    isEntry: i == 0,
+                    onPreview: () => onPreview(screens[i]),
+                    onRemove: i == 0 ? null : () => onRemoveScreen(screens[i]),
+                  ),
+                  const SizedBox(height: AppSpacing.sectionGap),
+                ],
+                NinjaButton.outline(
+                  label: l10n.miniAppsSubmitAddScreen,
+                  expanded: true,
+                  icon: AppLineIconWidget(
+                    .plus,
+                    size: AppIconSize.sm,
+                    color: context.colors.muted,
+                  ),
+                  onPressed: onAddScreen,
+                ),
+              ],
             ),
-            const SizedBox(height: AppSpacing.sectionGap),
-          ],
-          NinjaButton.outline(
-            label: l10n.miniAppsSubmitAddScreen,
-            expanded: true,
-            icon: AppLineIconWidget(
-              .plus,
-              size: AppIconSize.sm,
-              color: context.colors.muted,
-            ),
-            onPressed: onAddScreen,
           ),
         ],
       ],

@@ -125,6 +125,67 @@ void main() {
       );
       expect(after.lessons.toSet(), before.lessons.toSet());
     });
+
+    for (final (oldIndex, newIndex) in [(-1, 0), (0, -1), (2, 0), (0, 2)]) {
+      test('ignores invalid reorder indices $oldIndex to $newIndex', () {
+        final cubit = CustomScheduleCubit(now: () => monday);
+        addTearDown(cubit.close);
+        final schedule = cubit.create(name: 'My week');
+        for (var index = 0; index < 2; index++) {
+          cubit.addLesson(
+            schedule.id,
+            _lesson(
+              subject: 'Lesson $index',
+              number: index + 1,
+              startHour: 9 + index * 2,
+              endHour: 10 + index * 2,
+              date: monday,
+            ),
+          );
+        }
+        final before = cubit.state;
+
+        cubit.reorderLessons(schedule.id, DateTime.monday, oldIndex, newIndex);
+
+        expect(cubit.state, same(before));
+      });
+    }
+
+    test('missing schedules reject mutations without changing saved data', () {
+      final cubit = CustomScheduleCubit(now: () => monday);
+      addTearDown(cubit.close);
+      final schedule = cubit.create(name: 'My week');
+      final lesson = _lesson(
+        subject: 'A',
+        number: 1,
+        startHour: 9,
+        endHour: 10,
+        date: monday,
+      );
+      cubit.addLesson(schedule.id, lesson);
+      final existing = cubit
+          .lessonsForWeekday(schedule.id, DateTime.monday)
+          .single;
+      final before = cubit.state;
+
+      expect(
+        cubit.addLesson('missing', lesson),
+        CustomLessonMutationResult.scheduleNotFound,
+      );
+      expect(
+        cubit.replaceLesson('missing', existing, lesson),
+        CustomLessonMutationResult.scheduleNotFound,
+      );
+      expect(
+        cubit.removeLesson('missing', existing),
+        CustomLessonMutationResult.scheduleNotFound,
+      );
+      cubit
+        ..update(schedule.copyWith(id: 'missing'))
+        ..reorderLessons('missing', DateTime.monday, 0, 1);
+
+      expect(cubit.state, same(before));
+    });
   });
 
   group('CustomScheduleCubit color & reminders', () {

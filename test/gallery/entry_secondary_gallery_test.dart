@@ -112,7 +112,17 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        if (scene == _Scene.resetCode || scene == _Scene.resetPassword) {
+        final needsResetCode = switch (scene) {
+          _Scene.resetCode || _Scene.resetPassword => true,
+          _Scene.signUp ||
+          _Scene.signUpInvalid ||
+          _Scene.reset ||
+          _Scene.email ||
+          _Scene.confirm ||
+          _Scene.confirmInvalid ||
+          _Scene.identity => false,
+        };
+        if (needsResetCode) {
           await tester.tap(
             find.byKey(const Key('passwordResetPage_haveCodeButton')),
           );
@@ -130,7 +140,7 @@ void main() {
           FocusManager.instance.primaryFocus?.unfocus();
           await tester.pumpAndSettle();
         }
-        if (scene == _Scene.signUpInvalid) {
+        if (scene case _Scene.signUpInvalid) {
           await tester.enterText(
             find.descendant(
               of: find.byKey(const Key('signUpPage_emailInput')),

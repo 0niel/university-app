@@ -7,7 +7,6 @@ import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
 import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
-import 'package:rtu_mirea_app/notifications/data/notification_inbox_repository.dart';
 import 'package:rtu_mirea_app/profile/cubit/geo_sharing_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
 import 'package:rtu_mirea_app/promo/cubit/promo_dismissals_cubit.dart';
@@ -69,7 +68,7 @@ class UserPreferencesScope extends StatelessWidget {
           BlocProvider(
             create: (context) => NotificationsCubit(
               userId: userId,
-              repository: context.read<NotificationInboxRepository>(),
+              repository: context.read(),
             ),
           ),
           BlocProvider(

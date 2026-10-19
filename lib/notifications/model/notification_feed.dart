@@ -21,7 +21,6 @@ List<AppNotification> buildNotificationFeed({
   required AppLocalizations l10n,
   required List<AppNotification> pushes,
   required List<ScheduleChange> changes,
-  DateTime? now,
 }) {
   return [
     ...pushes,

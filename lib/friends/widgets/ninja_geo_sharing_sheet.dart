@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +44,9 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                   message: l10n.friendsPrivacySyncError,
                   footnote: null,
                   primaryLabel: l10n.retry,
-                  onPrimary: state.privacyBusy ? null : cubit.retryPrivacy,
+                  onPrimary: state.privacyBusy
+                      ? null
+                      : () => unawaited(cubit.retryPrivacy()),
                 ),
               ),
               const SizedBox(height: AppSpacing.sectionGap),
@@ -76,7 +80,7 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                 GeoVisibility.students => l10n.friendsVisStudentsSub,
               },
               child: AppSegmentedControl<GeoVisibility>(
-                onCanvas: true,
+                isOnCanvas: true,
                 value: settings.visibility,
                 onChanged: state.privacyBusy
                     ? null
@@ -103,7 +107,7 @@ class NinjaGeoSharingSheet extends StatelessWidget {
             _NinjaGeoSettingsSection(
               title: l10n.friendsPrecisionHeader,
               child: AppSegmentedControl<GeoPrecision>(
-                onCanvas: true,
+                isOnCanvas: true,
                 value: settings.precision,
                 onChanged: state.privacyBusy
                     ? null
@@ -134,7 +138,11 @@ class NinjaGeoSharingSheet extends StatelessWidget {
                   : switch (defaultTargetPlatform) {
                       TargetPlatform.android => l10n.friendsBackgroundMobileSub,
                       TargetPlatform.iOS => l10n.friendsBackgroundIosSub,
-                      _ => l10n.friendsBackgroundForegroundSub,
+                      TargetPlatform.fuchsia ||
+                      TargetPlatform.linux ||
+                      TargetPlatform.macOS ||
+                      TargetPlatform.windows =>
+                        l10n.friendsBackgroundForegroundSub,
                     },
               child: Text(
                 state.backgroundLocationActive
@@ -165,7 +173,7 @@ class NinjaGeoSharingSheet extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.xl),
                 child: AppButton.text(
-                  onPressed: cubit.retryLocation,
+                  onPressed: () => unawaited(cubit.retryLocation()),
                   label: state.locationPermissionDenied
                       ? l10n.friendsLocationRetry
                       : l10n.retry,

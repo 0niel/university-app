@@ -58,15 +58,17 @@ class AppPushNotificationBanner extends StatelessWidget {
                               title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: AppText.captionStrong
-                                  .copyWith(color: colors.canvas),
+                              style: AppText.captionStrong.copyWith(
+                                color: colors.canvas,
+                              ),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.xsm),
                           Text(
                             timeLabel,
-                            style: AppText.captionSmall
-                                .copyWith(color: colors.muted),
+                            style: AppText.captionSmall.copyWith(
+                              color: colors.muted,
+                            ),
                           ),
                         ],
                       ),
@@ -94,8 +96,10 @@ class AppPushNotificationBanner extends StatelessWidget {
                   bottom: Radius.circular(AppRadius.tile),
                 ),
               ),
-              child:
-                  const SizedBox(height: AppSpacing.sm, width: double.infinity),
+              child: const SizedBox(
+                height: AppSpacing.sm,
+                width: double.infinity,
+              ),
             ),
           ),
       ],

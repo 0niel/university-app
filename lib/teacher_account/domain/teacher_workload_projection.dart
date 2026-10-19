@@ -22,11 +22,11 @@ TeacherWorkload projectTeacherWorkload({
       final key = _occurrenceKey(lesson, date, start, end);
       final previous = unique[key];
       final groups = _distinctGroups([
-        if (previous != null) ...previous.groups,
+        ...?previous?.groups,
         ..._lessonGroups(lesson),
       ]);
       final classrooms = _distinctClassrooms([
-        if (previous != null) ...previous.lesson.classrooms,
+        ...?previous?.lesson.classrooms,
         ...lesson.classrooms,
       ]);
       unique[key] = TeacherLessonOccurrence(
@@ -113,8 +113,8 @@ String _occurrenceKey(
           .map(
             (room) => _identity(
               room.uid,
-              '${room.campus?.uid ?? room.campus?.name}:'
-              '${room.name}:${room.url}',
+              '${room.campus?.uid ?? room.campus?.name ?? ''}:'
+              '${room.name}:${room.url ?? ''}',
             ),
           )
           .toSet()
@@ -148,8 +148,8 @@ List<Group> _distinctGroups(Iterable<Group> groups) {
   final unique = <String, Group>{};
   for (final group in groups) {
     if (group.name.trim().isEmpty) continue;
-    final nameKey = _identity(null, group.name);
     if (group.uid?.trim().isNotEmpty == true) {
+      final nameKey = _identity(null, group.name);
       unique.remove(nameKey);
     } else if (unique.values.any(
       (candidate) =>
@@ -169,7 +169,8 @@ List<Classroom> _distinctClassrooms(Iterable<Classroom> classrooms) {
     if (room.name.trim().isEmpty) continue;
     unique[_identity(
           room.uid,
-          '${room.campus?.uid ?? room.campus?.name}:${room.name}:${room.url}',
+          '${room.campus?.uid ?? room.campus?.name ?? ''}:'
+          '${room.name}:${room.url ?? ''}',
         )] =
         room;
   }
@@ -188,11 +189,11 @@ bool _isCancelled(
             occurrence.lesson.subject.trim().toLowerCase()) {
       return false;
     }
-    final start = occurrence.lesson.lessonBells.startTime;
-    final slot =
-        '${start.hour.toString().padLeft(2, '0')}:'
-        '${start.minute.toString().padLeft(2, '0')}';
     if (change.oldValue.start != null || change.newValue.start != null) {
+      final start = occurrence.lesson.lessonBells.startTime;
+      final slot =
+          '${start.hour.toString().padLeft(2, '0')}:'
+          '${start.minute.toString().padLeft(2, '0')}';
       return _normalizedTime(change.oldValue.start) == slot ||
           _normalizedTime(change.newValue.start) == slot;
     }
@@ -215,9 +216,15 @@ bool _isCancelled(
 
 String? _normalizedTime(String? value) {
   final parts = value?.trim().split(':');
-  if (parts == null || parts.length < 2) return null;
-  final hour = int.tryParse(parts[0]);
-  final minute = int.tryParse(parts[1]);
+  if (parts case [final rawHour, final rawMinute, ...]) {
+    return _parsedTime(rawHour, rawMinute);
+  }
+  return null;
+}
+
+String? _parsedTime(String rawHour, String rawMinute) {
+  final hour = int.tryParse(rawHour);
+  final minute = int.tryParse(rawMinute);
   if (hour == null ||
       minute == null ||
       hour < 0 ||

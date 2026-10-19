@@ -12,7 +12,6 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/tab_reselect_notifier.dart';
 import 'package:rtu_mirea_app/profile/cubit/profile_cubit.dart';
 import 'package:rtu_mirea_app/profile/view/profile_page.dart';
-import 'package:rtu_mirea_app/profile/view/profile_settings_page.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/ninja_path_view.dart';
 import 'package:rtu_mirea_app/profile/widgets/profile/profile_widgets.dart';
 import 'package:rtu_mirea_app/profile/widgets/profile_activity_card.dart';
@@ -288,22 +287,31 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('level card uses the shared tint without shadow or gradient', (
+  testWidgets('level card uses shared glass and preserves its action', (
     tester,
   ) async {
     await pumpProfile(tester);
-    final card = tester.widget<AppCard>(
+    final card = tester.widget<AppGlassSurface>(
+      find
+          .descendant(
+            of: find.byType(ProfileLevelCard),
+            matching: find.byType(AppGlassSurface),
+          )
+          .first,
+    );
+    expect(card.tone, AppGlassTone.regular);
+    expect(card.borderRadius, AppRadius.dialog);
+    expect(card.padding, const EdgeInsets.all(AppSpacing.contentGap));
+    final action = tester.widget<AppPressable>(
       find.descendant(
         of: find.byType(ProfileLevelCard),
-        matching: find.byType(AppCard),
+        matching: find.byType(AppPressable),
       ),
     );
-    expect(card.tinted, isTrue);
-    expect(card.radius, AppRadius.lg);
-    expect(card.onTap, isNotNull);
+    expect(action.onTap, isNotNull);
   });
 
-  testWidgets('level progress is a 4 px bar derived from real XP', (
+  testWidgets('level progress is a 7 px bar derived from real XP', (
     tester,
   ) async {
     await pumpProfile(tester);
@@ -313,65 +321,10 @@ void main() {
         matching: find.byType(NinjaProgressBar),
       ),
     );
-    expect(bar.height, 4);
+    expect(bar.height, 7);
     expect(bar.value, greaterThanOrEqualTo(0));
     expect(bar.value, lessThanOrEqualTo(1));
     expect(find.textContaining('стрик 5 дн.'), findsOneWidget);
-  });
-
-  testWidgets('settings pinned search keeps its declared phone extent', (
-    tester,
-  ) async {
-    tester.view
-      ..physicalSize = const Size(360, 699)
-      ..devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-
-    Future<void> pumpSearch(double textScale) async {
-      final controller = TextEditingController();
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          locale: const Locale('ru'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(
-              context,
-            ).copyWith(textScaler: TextScaler.linear(textScale)),
-            child: child!,
-          ),
-          home: Scaffold(
-            body: CustomScrollView(
-              slivers: [
-                const SliverToBoxAdapter(child: SizedBox(height: 170)),
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: SettingsSearchDelegate(
-                    controller: controller,
-                    hint: 'Поиск',
-                    textScale: textScale,
-                    onChanged: (_) {},
-                  ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 900)),
-              ],
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(tester.takeException(), isNull);
-      expect(
-        tester.getSize(find.byType(AppSearchField)).height,
-        textScale == 1 ? 54 : 76,
-      );
-    }
-
-    await pumpSearch(1);
-    await pumpSearch(2);
   });
 
   testWidgets('activity header reflects the real server streak count', (

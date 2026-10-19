@@ -24,5 +24,5 @@ class FollowedSourcesCubit extends HydratedCubit<List<String>> {
   }
 
   @override
-  Map<String, dynamic>? toJson(List<String> state) => {'keys': state};
+  Map<String, dynamic> toJson(List<String> state) => {'keys': state};
 }

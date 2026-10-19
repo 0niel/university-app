@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(body: Center(child: child)),
+  );
 
   group('AppProgressRing', () {
     testWidgets('renders the center label', (tester) async {
@@ -25,8 +25,9 @@ void main() {
       expect(semantics.value, '42%');
     });
 
-    testWidgets('clamps an out-of-range value without throwing',
-        (tester) async {
+    testWidgets('clamps an out-of-range value without throwing', (
+      tester,
+    ) async {
       await tester.pumpWidget(wrap(const AppProgressRing(value: 1.5)));
       expect(tester.takeException(), isNull);
     });

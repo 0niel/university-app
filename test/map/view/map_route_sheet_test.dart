@@ -353,6 +353,7 @@ void main() {
     tester,
   ) async {
     final campus = _campus();
+    final nodes = campus.graph['nodes']! as List;
     for (final entry in {
       'other-start': 'Другой вход',
       'other-end': 'Другая аудитория',
@@ -366,7 +367,7 @@ void main() {
           'y': 20,
         }),
       );
-      (campus.graph['nodes']! as List).add({
+      nodes.add({
         'id': entry.key,
         'room_id': entry.key,
         'floor_id': 'floor-1',

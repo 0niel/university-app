@@ -1,7 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-enum SupabaseAuthCallbackResult { ignored, guestPreserved, authenticated }
-
 class SupabaseAuthCallbackHandler {
   factory SupabaseAuthCallbackHandler.forClient(GoTrueClient auth) =>
       _instances[auth] ??= SupabaseAuthCallbackHandler._(auth);
@@ -39,9 +37,11 @@ class SupabaseAuthCallbackHandler {
   Future<T> _serialize<T>(Future<T> Function() operation) {
     final result = _pending.then((_) => operation());
     _pending = result.then<void>(
-      (_) {},
-      onError: (Object error, StackTrace stackTrace) {},
+      (_) => null,
+      onError: (Object error, StackTrace stackTrace) => null,
     );
     return result;
   }
 }
+
+enum SupabaseAuthCallbackResult { ignored, guestPreserved, authenticated }

@@ -9,15 +9,17 @@ Future<void> showScheduleFilterSheet(
   BuildContext context, {
   DateTime? day,
 }) async {
+  final preferences = context.read<SchedulePreferencesCubit>();
+  final display = context.read<ScheduleDisplayCubit>();
   final action = await showAppSheet<ScheduleAction>(
     context,
     title: context.l10n.scheduleFilterTitle,
     child: MultiBlocProvider(
       providers: [
-        BlocProvider.value(value: context.read<ScheduleDisplayCubit>()),
-        BlocProvider.value(value: context.read<SchedulePreferencesCubit>()),
+        BlocProvider.value(value: preferences),
+        BlocProvider.value(value: display),
       ],
-      child: const _ScheduleFilters(),
+      child: const _ScheduleFilterSheet(),
     ),
   );
   if (action != null && context.mounted) {
@@ -25,8 +27,8 @@ Future<void> showScheduleFilterSheet(
   }
 }
 
-class _ScheduleFilters extends StatelessWidget {
-  const _ScheduleFilters();
+class _ScheduleFilterSheet extends StatelessWidget {
+  const _ScheduleFilterSheet();
 
   @override
   Widget build(BuildContext context) {

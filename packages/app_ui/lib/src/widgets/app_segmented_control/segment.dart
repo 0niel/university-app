@@ -18,10 +18,12 @@ class _Segment<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
-    final duration =
-        reduceMotion ? Duration.zero : const Duration(milliseconds: 200);
+    final duration = reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 200);
     final foreground = selected ? colors.onAccent : colors.muted;
     final icon = option.icon;
 
@@ -33,7 +35,7 @@ class _Segment<T> extends StatelessWidget {
       semanticsButton: true,
       semanticsSelected: selected,
       builder: (context, {required pressed}) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: _segmentHitInset),
+        padding: const EdgeInsets.symmetric(vertical: _kSegmentHitInset),
         child: AnimatedContainer(
           duration: duration,
           curve: Curves.easeOut,
@@ -42,9 +44,10 @@ class _Segment<T> extends StatelessWidget {
               ? const BoxConstraints(minHeight: AppControlSize.segmentHeight)
               : null,
           padding: EdgeInsets.symmetric(
-            horizontal:
-                expanded && !wrapped ? _segmentInset : AppSpacing.sectionGap,
-            vertical: _segmentInset,
+            horizontal: expanded && !wrapped
+                ? _kSegmentInset
+                : AppSpacing.sectionGap,
+            vertical: _kSegmentInset,
           ),
           decoration: BoxDecoration(
             color: selected ? colors.accent : Colors.transparent,
@@ -61,7 +64,7 @@ class _Segment<T> extends StatelessWidget {
                   size: AppIconSize.xs,
                   color: foreground,
                 ),
-                const SizedBox(width: _segmentInset),
+                const SizedBox(width: _kSegmentInset),
               ],
               Flexible(
                 child: AnimatedDefaultTextStyle(
@@ -71,8 +74,9 @@ class _Segment<T> extends StatelessWidget {
                   child: Text(
                     option.label,
                     maxLines: wrapped ? 2 : 1,
-                    overflow:
-                        wrapped ? TextOverflow.visible : TextOverflow.fade,
+                    overflow: wrapped
+                        ? TextOverflow.visible
+                        : TextOverflow.fade,
                     softWrap: wrapped,
                     textAlign: TextAlign.center,
                   ),

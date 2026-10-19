@@ -75,6 +75,7 @@ dcm:
     - match-getter-setter-field-names:
         exclude:
           - lib/tour/app_tour_controller.dart
+          - "**/src/colors/colors.dart"
           - "**/src/ninja/ninja_colors.dart"
     - prefer-correct-callback-field-name:
         exclude:
@@ -94,6 +95,7 @@ dcm:
     - function-always-returns-same-value:
         exclude:
           - lib/schedule/view/schedule_page.dart
+          - "**/src/widgets/app_week_pager.dart"
     - dispose-fields:
         exclude:
           - lib/tour/view/app_tour_overlay.dart

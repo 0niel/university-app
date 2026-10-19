@@ -6,8 +6,9 @@ final class ModuleScopedStorage {
     required String organizationId,
     required String accountId,
     required String moduleId,
-    required this._isAccountActive,
-  }) : _prefix = [
+    required bool Function() isAccountActive,
+  }) : _onIsAccountActive = isAccountActive,
+       _prefix = [
          'university-module',
          organizationId,
          accountId,
@@ -19,11 +20,11 @@ final class ModuleScopedStorage {
   }
 
   final Storage _storage;
-  final bool Function() _isAccountActive;
+  final bool Function() _onIsAccountActive;
   final String _prefix;
 
   void checkAccount() {
-    if (!_isAccountActive()) throw const ModuleAccountChangedException();
+    if (!_onIsAccountActive()) throw const ModuleAccountChangedException();
   }
 
   String _key(String key) {

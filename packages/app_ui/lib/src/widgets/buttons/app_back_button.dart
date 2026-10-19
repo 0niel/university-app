@@ -18,8 +18,8 @@ class AppBackButton extends StatelessWidget {
     this.onPressed,
     this.icon = AppLineIcon.chevronL,
     this.backgroundColor,
-  })  : iconColor = Colors.white,
-        tone = AppIconButtonTone.plain;
+  }) : iconColor = Colors.white,
+       tone = AppIconButtonTone.plain;
 
   final VoidCallback? onPressed;
   final AppLineIcon icon;

@@ -218,13 +218,10 @@ class HomeClockPill extends StatelessWidget {
     final parity = week.isOdd
         ? l10n.weekParityOddFull
         : l10n.weekParityEvenFull;
-    return Container(
-      constraints: const BoxConstraints(minHeight: 34),
-      padding: const EdgeInsets.fromLTRB(10, 0, 12, 0),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.full),
-      ),
+    return AppGlassSurface(
+      borderRadius: AppRadius.full,
+      tone: AppGlassTone.subtle,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.center,
         runAlignment: WrapAlignment.center,

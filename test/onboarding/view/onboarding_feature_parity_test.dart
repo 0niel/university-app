@@ -436,9 +436,14 @@ void main() {
       await tester.tap(find.byKey(const Key('onboarding_haveAccount')));
       await tester.pumpAndSettle();
       await tester.tap(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is NinjaPillButton && widget.label == l10n.profileSignOut,
+        find.descendant(
+          of: find.byType(NinjaDialog),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is AppPressable &&
+                widget.semanticsLabel == l10n.profileSignOut &&
+                widget.onTap != null,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -467,9 +472,14 @@ void main() {
     );
     final l10n = tester.element(find.byType(OnBoardingPage)).l10n;
     await tester.tap(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is NinjaPillButton && widget.label == l10n.profileSignOut,
+      find.descendant(
+        of: find.byType(NinjaDialog),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is AppPressable &&
+              widget.semanticsLabel == l10n.profileSignOut &&
+              widget.onTap != null,
+        ),
       ),
     );
     await tester.pumpAndSettle();

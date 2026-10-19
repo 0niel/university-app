@@ -1,18 +1,5 @@
 part of 'password_reset_bloc.dart';
 
-enum PasswordResetStep { email, code, password, complete }
-
-enum PasswordResetError {
-  sendFailed,
-  verificationFailed,
-  invalidCode,
-  rateLimited,
-  weakPassword,
-  samePassword,
-  sessionExpired,
-  updateFailed,
-}
-
 @freezed
 abstract class PasswordResetState with _$PasswordResetState {
   const factory PasswordResetState({
@@ -40,4 +27,17 @@ abstract class PasswordResetState with _$PasswordResetState {
       verifiedUserId != null && Formz.validate([password, confirmedPassword]),
     .complete => false,
   };
+}
+
+enum PasswordResetStep { email, code, password, complete }
+
+enum PasswordResetError {
+  sendFailed,
+  verificationFailed,
+  invalidCode,
+  rateLimited,
+  weakPassword,
+  samePassword,
+  sessionExpired,
+  updateFailed,
 }

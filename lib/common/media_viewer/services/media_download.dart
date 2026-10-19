@@ -26,7 +26,7 @@ Future<void> saveMediaItem(
   ValueChanged<double>? onProgress,
 }) async {
   final file = await downloadMediaFile(item.url, onProgress: onProgress);
-  final name = item.fileName ?? file.uri.pathSegments.last;
+  final name = item.fileName ?? file.uri.pathSegments.lastOrNull ?? 'download';
   try {
     if (!kIsWeb && Platform.isIOS) {
       await SharePlus.instance.share(
@@ -52,7 +52,7 @@ Future<void> shareMediaItem(
   ValueChanged<double>? onProgress,
 }) async {
   final file = await downloadMediaFile(item.url, onProgress: onProgress);
-  final name = item.fileName ?? file.uri.pathSegments.last;
+  final name = item.fileName ?? file.uri.pathSegments.lastOrNull ?? 'download';
   await SharePlus.instance.share(
     ShareParams(
       files: [XFile(file.path, name: name)],

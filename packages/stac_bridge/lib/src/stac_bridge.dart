@@ -30,7 +30,7 @@ abstract final class StacBridge {
     StacReactiveNodeParser(),
     StacInsetScrollViewParser(),
     ...kitWidgetParsers,
-    ...materialOverrideParsers,
+    ...kMaterialOverrideParsers,
   ];
 
   static const actionParsers = <StacActionParser<Object?>>[

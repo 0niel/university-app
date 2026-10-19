@@ -90,7 +90,7 @@ String? _time(Map<String, dynamic> json, List<String> keys) {
     final minutes = int.parse(match[2]!);
     final seconds = int.parse(match[3] ?? '0');
     if (hours > 23 || minutes > 59 || seconds > 59) continue;
-    return '${hours.toString().padLeft(2, '0')}:${match[2]}';
+    return '${hours.toString().padLeft(2, '0')}:${match[2]!}';
   }
   return null;
 }

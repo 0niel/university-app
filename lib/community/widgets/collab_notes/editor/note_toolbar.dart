@@ -26,27 +26,9 @@ class NoteToolbar extends StatefulWidget {
 }
 
 class _NoteToolbarState extends State<NoteToolbar> {
-  late final QuillController _controller = context
-      .read<NoteEditorCubit>()
-      .controller;
+  QuillController get _controller => context.read<NoteEditorCubit>().controller;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(_onControllerChanged);
-  }
-
-  @override
-  void dispose() {
-    _controller.removeListener(_onControllerChanged);
-    super.dispose();
-  }
-
-  void _onControllerChanged() {
-    if (mounted) setState(() {});
-  }
-
-  bool _has(Attribute<dynamic> attribute) =>
+  bool _has(Attribute<Object?> attribute) =>
       _controller.getSelectionStyle().attributes.containsKey(attribute.key);
 
   int? _headerLevel() {
@@ -63,7 +45,7 @@ class _NoteToolbarState extends State<NoteToolbar> {
 
   bool get _canEdit => mounted && !widget.readOnly && !_controller.readOnly;
 
-  void _toggle(Attribute<dynamic> attribute) {
+  void _toggle(Attribute<Object?> attribute) {
     if (!_canEdit) return;
     final active = _has(attribute);
     _controller.formatSelection(
@@ -262,24 +244,24 @@ class _NoteToolbarState extends State<NoteToolbar> {
         title: title,
         child: AppListGroup(
           children: [
-            for (final (index, action) in actions.indexed)
+            for (final (index, item) in actions.indexed)
               AppListRow(
-                title: action.label,
-                leading: AppLineIconWidget(action.icon),
-                trailing: action.active
+                title: item.label,
+                leading: AppLineIconWidget(item.icon),
+                trailing: item.active
                     ? const AppLineIconWidget(AppLineIcon.check)
                     : null,
                 showChevron: false,
                 isFirst: index == 0,
                 onTap: () =>
-                    Navigator.of(context, rootNavigator: true).pop(action),
+                    Navigator.of(context, rootNavigator: true).pop(item),
               ),
           ],
         ),
       );
       if (!_canEdit) return;
       bookmark.restore();
-      if (action != null) await action.run();
+      if (action != null) await action.onRun();
       if (_canEdit && focus?.context != null) focus!.requestFocus();
     } finally {
       await bookmark.dispose();
@@ -287,18 +269,23 @@ class _NoteToolbarState extends State<NoteToolbar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: _controller,
+    builder: (context, _) => _buildToolbar(context),
+  );
+
+  Widget _buildToolbar(BuildContext context) {
     final l10n = context.l10n;
     final voiceStatus = context.select<NoteEditorCubit, NoteVoiceStatus>(
       (cubit) => cubit.state.voiceStatus,
     );
     final voiceActive = voiceStatus == .listening;
     final style = _controller.getSelectionStyle().attributes;
-    bool has(Attribute<dynamic> attribute) => style.containsKey(attribute.key);
+    bool has(Attribute<Object?> attribute) => style.containsKey(attribute.key);
     final headerLevel = style[Attribute.header.key]?.value;
     final listValue = style[Attribute.list.key]?.value;
     final disabled = widget.readOnly || _controller.readOnly;
-    final formatting = <_NoteToolbarAction>[
+    final formatting = [
       _NoteToolbarAction(
         .textBold,
         l10n.noteToolbarBold,
@@ -377,7 +364,7 @@ class _NoteToolbarState extends State<NoteToolbar> {
         active: has(Attribute.background),
       ),
     ];
-    final inserting = <_NoteToolbarAction>[
+    final inserting = [
       _NoteToolbarAction(
         .link,
         l10n.noteToolbarLink,
@@ -420,12 +407,12 @@ class _NoteToolbarState extends State<NoteToolbar> {
                 semanticsLabel: action.label,
                 active: action.active,
                 enabled: !disabled,
-                onTap: () => unawaited(Future.sync(action.run)),
+                onTap: () => unawaited(Future.sync(action.onRun)),
               ),
-            if (expanded) ...[
+            if (expanded)
               for (final action in [
-                formatting[7],
-                formatting[9],
+                ...formatting.skip(7).take(1),
+                ...formatting.skip(9).take(1),
                 ...inserting.skip(1),
               ])
                 NoteToolbarButton(
@@ -433,9 +420,8 @@ class _NoteToolbarState extends State<NoteToolbar> {
                   semanticsLabel: action.label,
                   active: action.active,
                   enabled: !disabled,
-                  onTap: () => unawaited(Future.sync(action.run)),
+                  onTap: () => unawaited(Future.sync(action.onRun)),
                 ),
-            ],
             NoteToolbarButton(
               icon: .more,
               semanticsLabel: l10n.noteToolbarFormat,
@@ -473,19 +459,19 @@ class _NoteToolbarAction {
   const _NoteToolbarAction(
     this.icon,
     this.label,
-    this.run, {
+    this.onRun, {
     this.active = false,
   });
 
   final AppLineIcon icon;
   final String label;
-  final FutureOr<void> Function() run;
+  final FutureOr<void> Function() onRun;
   final bool active;
 }
 
 class _NoteSelectionBookmark {
   _NoteSelectionBookmark(this.controller) : selection = controller.selection {
-    subscription = controller.document.changes.listen((event) {
+    _subscription = controller.document.changes.listen((event) {
       selection = TextSelection(
         baseOffset: event.change.transformPosition(selection.baseOffset),
         extentOffset: event.change.transformPosition(selection.extentOffset),
@@ -495,7 +481,7 @@ class _NoteSelectionBookmark {
 
   final QuillController controller;
   TextSelection selection;
-  late final StreamSubscription<DocChange> subscription;
+  StreamSubscription<DocChange>? _subscription;
 
   void restore() {
     final end = controller.document.length - 1;
@@ -510,5 +496,5 @@ class _NoteSelectionBookmark {
       );
   }
 
-  Future<void> dispose() => subscription.cancel();
+  Future<void> dispose() async => _subscription?.cancel();
 }

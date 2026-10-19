@@ -1,0 +1,54 @@
+import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/glass/app_glass_lens.dart';
+import 'package:app_ui/src/glass/app_glass_style.dart';
+import 'package:flutter/material.dart';
+
+export 'app_glass_style.dart' show AppGlassRole, AppGlassTone;
+
+class AppGlassSurface extends StatelessWidget {
+  const AppGlassSurface({
+    required this.child,
+    this.borderRadius = 28,
+    this.padding = EdgeInsets.zero,
+    this.tint,
+    this.color,
+    this.tone = AppGlassTone.regular,
+    this.role = AppGlassRole.content,
+    super.key,
+  });
+
+  final Widget child;
+  final double borderRadius;
+  final EdgeInsetsGeometry padding;
+  final Color? tint;
+  final Color? color;
+  final AppGlassTone tone;
+  final AppGlassRole role;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final highContrast = MediaQuery.highContrastOf(context);
+    final accent = tint ?? colors.accent;
+    final base =
+        color ??
+        (tone == AppGlassTone.accent
+            ? Color.alphaBlend(accent.withValues(alpha: .13), colors.surface)
+            : colors.surface);
+    final style = AppGlassStyle.surface(
+      colors: colors,
+      radius: borderRadius,
+      tone: tone,
+      highContrast: highContrast,
+      role: role,
+      tint: accent,
+      baseColor: Color.alphaBlend(base, colors.surface),
+    );
+    return AppGlassLens(
+      style: style,
+      borderRadius: borderRadius,
+      fallbackColor: Color.alphaBlend(base, colors.surface),
+      child: Padding(padding: padding, child: child),
+    );
+  }
+}

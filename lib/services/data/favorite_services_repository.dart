@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:rtu_mirea_app/services/config/home_service_defaults.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoriteServicesRepository {
@@ -16,7 +17,8 @@ class FavoriteServicesRepository {
   Future<Set<String>> load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getStringList(_storageKey)?.toSet() ?? {};
+      return prefs.getStringList(_storageKey)?.toSet() ??
+          HomeServiceDefaults.routes.toSet();
     } on Exception catch (e, st) {
       log(
         'Failed to load favorite services',
@@ -24,7 +26,7 @@ class FavoriteServicesRepository {
         stackTrace: st,
         name: 'FavoriteServicesRepository',
       );
-      return {};
+      return HomeServiceDefaults.routes.toSet();
     }
   }
 

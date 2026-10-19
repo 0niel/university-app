@@ -12,24 +12,23 @@ void main() {
   ];
 
   BoxDecoration containerOf(WidgetTester tester) => kitDecoration(
-        tester,
-        find
-            .descendant(
-              of: find.byType(NinjaSegmented<int>),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
+    tester,
+    find
+        .descendant(
+          of: find.byType(NinjaSegmented<int>),
+          matching: find.byType(Container),
+        )
+        .first,
+  );
 
   BoxDecoration segmentOf(WidgetTester tester, String label) => kitDecoration(
-        tester,
-        find
-            .ancestor(of: find.text(label), matching: find.byType(Container))
-            .first,
-      );
+    tester,
+    find.ancestor(of: find.text(label), matching: find.byType(Container)).first,
+  );
 
-  testWidgets('container keeps 4px visual inset with 44px hit targets',
-      (tester) async {
+  testWidgets('container keeps 4px visual inset with 44px hit targets', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         SizedBox(
@@ -87,7 +86,7 @@ void main() {
     expect(tester.getSize(find.text('Неделя').first).height, lessThan(38));
   });
 
-  testWidgets('onCanvas swaps the container to surface', (tester) async {
+  testWidgets('isOnCanvas swaps the container to surface', (tester) async {
     await tester.pumpWidget(
       wrapKit(
         SizedBox(
@@ -95,7 +94,7 @@ void main() {
           child: NinjaSegmented<int>(
             segments: segments,
             value: 0,
-            onCanvas: true,
+            isOnCanvas: true,
             onChanged: (_) {},
           ),
         ),

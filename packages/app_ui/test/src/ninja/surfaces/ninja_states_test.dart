@@ -8,13 +8,13 @@ void main() {
   Widget host(Widget child) => wrapKit(SizedBox(width: 320, child: child));
 
   Container tileOf(WidgetTester tester) => tester.widget<Container>(
-        find.byWidgetPredicate(
-          (widget) => widget is Container && widget.constraints?.maxWidth == 56,
-        ),
-      );
+    find.byWidgetPredicate(
+      (widget) => widget is Container && widget.constraints?.maxWidth == 56,
+    ),
+  );
 
   group('NinjaEmptyState', () {
-    testWidgets('card variant: surface r24, tint tile, serif 19, tonal pill', (
+    testWidgets('card variant: surface r24, tint tile, sans 19, tonal pill', (
       tester,
     ) async {
       var taps = 0;
@@ -48,7 +48,8 @@ void main() {
 
       final title = kitStyleOf(tester, 'Пока пусто');
       expect(title?.fontSize, 19);
-      expect(title?.fontFamily, AppText.serifFamily);
+      expect(title?.fontFamily, AppText.sansFamily);
+      expect(title?.fontWeight, FontWeight.w600);
       final message = kitStyleOf(tester, 'Добавьте первый дедлайн');
       expect(message?.fontSize, 12.5);
       expect(message?.color, kitColors.muted);
@@ -97,8 +98,9 @@ void main() {
       expect(icon.icon, AppLineIcon.cloudOff);
       expect(icon.color, kitColors.danger);
 
-      final retry =
-          tester.widget<NinjaPillButton>(find.byType(NinjaPillButton));
+      final retry = tester.widget<NinjaPillButton>(
+        find.byType(NinjaPillButton),
+      );
       expect(retry.tone, NinjaPillTone.secondary);
       expect(
         kitDecorationOf(tester, NinjaPillButton).color,

@@ -32,6 +32,7 @@ class _TeacherPickerState extends State<TeacherPicker>
     with WidgetsBindingObserver {
   late final _controller = TextEditingController(text: widget.selected?.name);
   late final TeacherPickerBloc _bloc;
+  late double _platformKeyboardInset;
 
   @override
   void initState() {
@@ -39,7 +40,7 @@ class _TeacherPickerState extends State<TeacherPicker>
     WidgetsBinding.instance.addObserver(this);
     _bloc =
         TeacherPickerBloc(
-          scheduleRepository: context.read<ScheduleRepository>(),
+          scheduleRepository: context.read(),
           selected: widget.selected,
         )..add(
           TeacherPickerEvent.searchRequested(
@@ -47,6 +48,13 @@ class _TeacherPickerState extends State<TeacherPicker>
             immediate: true,
           ),
         );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final view = View.of(context);
+    _platformKeyboardInset = view.viewInsets.bottom / view.devicePixelRatio;
   }
 
   @override
@@ -59,7 +67,12 @@ class _TeacherPickerState extends State<TeacherPicker>
 
   @override
   void didChangeMetrics() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    final view = View.of(context);
+    setState(
+      () => _platformKeyboardInset =
+          view.viewInsets.bottom / view.devicePixelRatio,
+    );
   }
 
   void _retry() => _bloc.add(
@@ -88,18 +101,18 @@ class _TeacherPickerState extends State<TeacherPicker>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
-    final view = View.of(context);
     final keyboardInset = math.max(
       MediaQuery.viewInsetsOf(context).bottom,
-      view.viewInsets.bottom / view.devicePixelRatio,
+      _platformKeyboardInset,
     );
     final availableHeight =
-        MediaQuery.sizeOf(context).height -
+        (MediaQuery.maybeHeightOf(context) ?? 0.0) -
         keyboardInset -
         MediaQuery.paddingOf(context).vertical;
+    const minimumResultsHeight = 120.0;
     final resultsHeight = math.min(
       widget.maxResultsHeight,
-      math.max<double>(120, availableHeight * 0.5),
+      math.max(minimumResultsHeight, availableHeight * 0.5),
     );
     return BlocBuilder<TeacherPickerBloc, TeacherPickerState>(
       bloc: _bloc,

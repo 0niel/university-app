@@ -74,7 +74,7 @@ class _ApplyToTeamSheetState extends State<ApplyToTeamSheet> {
               tone: AppBannerTone.danger,
             ),
           _summary(context),
-          if (widget.team.neededRoles.isNotEmpty) ...[
+          if (widget.team.neededRoles.isNotEmpty)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -101,7 +101,6 @@ class _ApplyToTeamSheetState extends State<ApplyToTeamSheet> {
                 ],
               ],
             ),
-          ],
           AppInputField.multiline(
             controller: _message,
             minLines: 2,

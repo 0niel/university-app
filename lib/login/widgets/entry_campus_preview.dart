@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,9 +123,9 @@ class _EntryCampusPreviewState extends State<EntryCampusPreview> {
                     controller: _query,
                     campuses: [floor.campus],
                     selectedCampus: floor.campus,
-                    onQueryChanged: (_) {},
-                    onCampusSelected: (_) {},
-                    onFriends: () {},
+                    onQueryChanged: (_) => (),
+                    onCampusSelected: (_) => (),
+                    onFriends: () => (),
                   ),
                 ),
                 Positioned(
@@ -154,9 +155,12 @@ typedef _FloorDocument = ({
 
 _FloorDocument _decodeFloor(String source) {
   final document = mapJsonObject(jsonDecode(source));
-  final floor = mapJsonRows(document['floors']).firstWhere(
-    (floor) => floor['id'] == 'v-78-floor1',
+  final floor = mapJsonRows(document['floors']).firstWhereOrNull(
+    (candidate) => candidate['id'] == 'v-78-floor1',
   );
+  if (floor == null) {
+    throw const FormatException('Campus preview floor is missing');
+  }
   return (
     campusId: document['id']! as String,
     campusTitle: document['short_title']! as String,
@@ -195,10 +199,9 @@ Future<_CampusFloor> _loadFloor() async {
     size: bounds.size,
     rooms: rooms,
     places: document.places.map(MapPlaceData.fromJson).toList(),
-    selectedRoom: rooms.firstWhere(
-      (room) => room.name == 'А-125',
-      orElse: () => rooms.first,
-    ),
+    selectedRoom:
+        rooms.firstWhereOrNull((room) => room.name == 'А-125') ??
+        rooms.firstOrNull!,
   );
 }
 

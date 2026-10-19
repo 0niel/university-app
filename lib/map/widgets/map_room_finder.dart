@@ -22,7 +22,12 @@ class _MapRoomFinderState extends State<MapRoomFinder> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: _controller,
+    builder: (context, _) => _content(context),
+  );
+
+  Widget _content(BuildContext context) {
     final query = _controller.text.trim().toLowerCase();
     final rooms = widget.rooms.where(
       (room) =>
@@ -35,8 +40,6 @@ class _MapRoomFinderState extends State<MapRoomFinder> {
         AppSearchField(
           controller: _controller,
           hintText: context.l10n.mapRoomSearchHint,
-          onChanged: (_) => setState(() {}),
-          onClear: () => setState(() {}),
         ),
         const SizedBox(height: 12),
         AppListGroup(

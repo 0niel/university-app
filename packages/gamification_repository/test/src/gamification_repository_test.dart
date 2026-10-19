@@ -48,8 +48,8 @@ void main() {
       password: 'test-password',
     );
     await GamificationRepository(supabase: client).recordActiveDay();
-    expect(requests.single.url.path, '/rest/v1/rpc/record_active_day');
-    expect(requests.single.headers['Authorization'], 'Bearer $token');
+    expect(requests.singleOrNull!.url.path, '/rest/v1/rpc/record_active_day');
+    expect(requests.singleOrNull!.headers['Authorization'], 'Bearer $token');
   });
 
   test('guest activity does not send an unauthenticated RPC', () async {
@@ -71,7 +71,8 @@ void main() {
 
   for (final group in <String?>[null, 'GROUP-01']) {
     test(
-      'academic bootstrap sends only organization and optional group $group',
+      'academic bootstrap sends only organization and optional group '
+      "${group ?? 'null'}",
       () async {
         final requests = <http.Request>[];
         final repository = GamificationRepository(
@@ -89,10 +90,10 @@ void main() {
           academicGroup: group,
         );
         expect(
-          requests.single.url.path,
+          requests.singleOrNull!.url.path,
           '/rest/v1/rpc/ensure_academic_profile',
         );
-        expect(jsonDecode(requests.single.body), {
+        expect(jsonDecode(requests.singleOrNull!.body), {
           'p_organization_id': 'university',
           'p_group': ?group,
         });

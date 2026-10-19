@@ -162,7 +162,7 @@ class _PlaceMarkerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_PlaceMarkerPainter oldDelegate) =>
-      oldDelegate.places != places ||
+      !identical(oldDelegate.places, places) ||
       oldDelegate.color != color ||
       oldDelegate.background != background;
 }

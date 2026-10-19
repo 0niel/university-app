@@ -74,10 +74,10 @@ class _TeacherDayPagerState extends State<TeacherDayPager> {
     super.dispose();
   }
 
-  bool _onScroll(ScrollNotification notification) {
+  void _onScroll(ScrollNotification notification) {
     if (notification.depth != 0 ||
         notification.metrics.axis != Axis.horizontal) {
-      return false;
+      return;
     }
     if (notification is ScrollStartNotification &&
         notification.dragDetails != null) {
@@ -93,13 +93,11 @@ class _TeacherDayPagerState extends State<TeacherDayPager> {
       });
       if (_target != null) {
         if (page == _target) _target = null;
-        return false;
       } else if (page != _pageOf(widget.day)) {
         _reportedDay = _dayOf(page);
         widget.onDay(_reportedDay!);
       }
     }
-    return false;
   }
 
   void _measure(int page, Size size) {
@@ -134,7 +132,10 @@ class _TeacherDayPagerState extends State<TeacherDayPager> {
         curve: NinjaMotion.enter,
         height: height,
         child: NotificationListener<ScrollNotification>(
-          onNotification: _onScroll,
+          onNotification: (notification) {
+            _onScroll(notification);
+            return false;
+          },
           child: PageView.builder(
             key: const ValueKey('teacher-dashboard-day-pager'),
             controller: _controller,

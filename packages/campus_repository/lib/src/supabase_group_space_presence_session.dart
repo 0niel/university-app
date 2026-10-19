@@ -32,11 +32,11 @@ final class SupabaseGroupSpacePresenceSession
         })
         .subscribe((status, error) {
           if (_closed) return;
-          if (status == RealtimeSubscribeStatus.subscribed) {
+          if (status == .subscribed) {
             unawaited(_track());
             return;
           }
-          if (status == RealtimeSubscribeStatus.channelError) {
+          if (status == .channelError) {
             _onlineCount.addError(
               error ?? StateError('Could not join group presence channel'),
             );

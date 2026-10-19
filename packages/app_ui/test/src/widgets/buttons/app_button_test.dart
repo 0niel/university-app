@@ -110,8 +110,9 @@ void main() {
       expect(kitStyleOf(tester, 'Выйти')?.color, kitColors.danger);
     });
 
-    testWidgets('disabled retains its filled shape with muted2 text',
-        (tester) async {
+    testWidgets('disabled retains its filled shape with muted2 text', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrapKit(const AppButton.primary(label: 'Нельзя')),
       );
@@ -193,15 +194,24 @@ void main() {
       );
     });
 
-    testWidgets('has no shadow or border', (tester) async {
+    testWidgets('primary has a subtle highlight without a second rim', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        wrapKit(AppButton.primary(label: 'Плоско', onPressed: () {})),
+        wrapKit(AppButton.primary(label: 'Ок', onPressed: () {})),
       );
 
       final decoration = decorationOf(tester);
       expect(decoration.boxShadow, isNull);
       expect(decoration.border, isNull);
-      expect(decoration.gradient, isNull);
+      expect(decoration.gradient, isA<LinearGradient>());
+      final surface = tester.widget<AnimatedContainer>(
+        find.descendant(
+          of: find.byType(AppButton),
+          matching: find.byType(AnimatedContainer),
+        ),
+      );
+      expect((surface.foregroundDecoration! as BoxDecoration).border, isNull);
     });
   });
 

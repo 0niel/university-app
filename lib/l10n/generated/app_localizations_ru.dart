@@ -3545,11 +3545,32 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось войти как гость. Попробуйте позже.';
 
   @override
-  String get settingsAmoledTitle => 'AMOLED';
+  String get settingsGlassEffectTitle => 'Эффект стекла';
 
   @override
-  String get settingsAmoledSubtitle =>
-      'Чисто чёрный фон тёмной темы для OLED-экранов';
+  String get mapRotatePlan => 'Повернуть план';
+
+  @override
+  String get mapTopDownView => 'Вид сверху';
+
+  @override
+  String get mapVolumeView => 'Объёмный план';
+
+  @override
+  String get mapShowCampus => 'Показать кампус';
+
+  @override
+  String get mapActions => 'Действия с картой';
+
+  @override
+  String get map2DLabel => '2D';
+
+  @override
+  String get map3DLabel => '3D';
+
+  @override
+  String get settingsGlassEffectSubtitle =>
+      'Полупрозрачные поверхности, размытие и преломление';
 
   @override
   String get scheduleDiffTitle => 'Обновления расписания';
@@ -4555,6 +4576,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get miniAppsTitle => 'Мини-аппы';
 
   @override
+  String miniAppsSearchResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count результата',
+      many: '$count результатов',
+      few: '$count результата',
+      one: '$count результат',
+      zero: 'Нет совпадений',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String miniAppsSubtitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -4590,7 +4625,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get miniAppsEmptySubtitle =>
-      'Стань первым: собери мини-апп на Stac JSON и опубликуй его для всех студентов';
+      'Создай полезное мини-приложение и поделись им с университетом';
 
   @override
   String get miniAppsNothingFound => 'Ничего не нашлось';

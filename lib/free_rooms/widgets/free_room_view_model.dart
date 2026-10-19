@@ -29,9 +29,7 @@ class FreeRoomViewModel {
     final level = floor;
     if (level != null) return '$level';
     final building = room.building;
-    return building.isEmpty
-        ? (name.isEmpty ? '—' : name.characters.first)
-        : building;
+    return building.isEmpty ? (name.characters.firstOrNull ?? '—') : building;
   }
 
   String? get untilTime {

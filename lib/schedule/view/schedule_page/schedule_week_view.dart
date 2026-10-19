@@ -36,6 +36,7 @@ class ScheduleWeekView extends StatelessWidget {
     this.friendActivities = const [],
     this.onCompare,
     this.now,
+    this.padding = EdgeInsets.zero,
     super.key,
   });
 
@@ -50,6 +51,7 @@ class ScheduleWeekView extends StatelessWidget {
   final ValueChanged<DateTime> onDay;
   final VoidCallback? onCompare;
   final DateTime? now;
+  final EdgeInsetsGeometry padding;
 
   List<LessonSchedulePart> _lessons(DateTime date) => visibleLessonsForDay(
     schedule: schedule,
@@ -73,17 +75,18 @@ class ScheduleWeekView extends StatelessWidget {
           activities: friend == null ? const [] : friendActivities,
         ),
     };
+    final sunday = dates.lastOrNull ?? day;
     final showSunday =
-        _lessons(dates.last).isNotEmpty ||
-        friendOccupancy[dates.last]!.hasEntries ||
-        _activitySlots(dates.last).isNotEmpty ||
-        _events(dates.last).isNotEmpty ||
-        _untimedActivities(activities, [dates.last]).isNotEmpty ||
+        _lessons(sunday).isNotEmpty ||
+        friendOccupancy[sunday]!.hasEntries ||
+        _activitySlots(sunday).isNotEmpty ||
+        _events(sunday).isNotEmpty ||
+        _untimedActivities(activities, [sunday]).isNotEmpty ||
         schedule
             .where((part) => part is! LessonSchedulePart)
             .any(
               (part) => _noticeDates(part).any(
-                (date) => isSameDate(date, dates.last),
+                (date) => isSameDate(date, sunday),
               ),
             );
     final days = dates.take(showSunday ? 7 : 6).toList();
@@ -92,7 +95,10 @@ class ScheduleWeekView extends StatelessWidget {
           ? part.title
           : (part as CalendarSchedulePart).title;
       final dateLabels = _noticeDates(part)
-          .where((date) => days.any((day) => isSameDate(day, date)))
+          .where(
+            (date) =>
+                days.any((selectedDate) => isSameDate(selectedDate, date)),
+          )
           .map((date) => DateFormat.MMMd(locale).format(date));
       final time =
           part is CalendarSchedulePart &&
@@ -142,78 +148,99 @@ class ScheduleWeekView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: AppButton.secondary(
-                label: l10n.scheduleCompareFriend,
-                size: AppButtonSize.small,
-                icon: const AppLineIconWidget(AppLineIcon.people, size: 16),
-                backgroundColor: friend == null
-                    ? context.colors.surface
-                    : context.colors.accent,
-                foregroundColor: friend == null
-                    ? null
-                    : context.colors.onAccent,
-                onPressed: onCompare ?? () => showCompareSheet(context),
+        Padding(
+          padding: padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton.secondary(
+                      label: l10n.scheduleCompareFriend,
+                      size: AppButtonSize.small,
+                      icon: const AppLineIconWidget(
+                        AppLineIcon.people,
+                        size: 16,
+                      ),
+                      backgroundColor: friend == null
+                          ? context.colors.surface
+                          : context.colors.accent,
+                      foregroundColor: friend == null
+                          ? null
+                          : context.colors.onAccent,
+                      onPressed: onCompare ?? () => showCompareSheet(context),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        for (final part in schedule)
-          if ((part is HolidaySchedulePart ||
-                  part is CalendarSchedulePart &&
-                      (part.isAllDay || !_hasTimeRange(part))) &&
-              _noticeDates(part).any(
-                (date) => days.any((day) => isSameDate(day, date)),
-              ))
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: AppBanner(message: calendarLabel(part)),
-            ),
-        for (final activity in _untimedActivities(activities, days))
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: AppBanner(message: activityLabel(activity)),
-          ),
-        if (friend != null) ...[
-          for (final part in friend!.schedule.whereType<CalendarSchedulePart>())
-            if ((part.isAllDay || !_hasTimeRange(part)) &&
-                _noticeDates(part).any(
-                  (date) => days.any((day) => isSameDate(day, date)),
-                ))
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: AppBanner(
-                  message: '${friend!.name} · ${calendarLabel(part)}',
+              const SizedBox(height: AppSpacing.md),
+              for (final part in schedule)
+                if ((part is HolidaySchedulePart ||
+                        part is CalendarSchedulePart &&
+                            (part.isAllDay || !_hasTimeRange(part))) &&
+                    _noticeDates(part).any(
+                      (date) => days.any(
+                        (selectedDate) => isSameDate(selectedDate, date),
+                      ),
+                    ))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: AppBanner(message: calendarLabel(part)),
+                  ),
+              for (final activity in _untimedActivities(activities, days))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: AppBanner(message: activityLabel(activity)),
                 ),
-              ),
-          for (final activity in _untimedActivities(friendActivities, days))
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: AppBanner(
-                message: '${friend!.name} · ${activityLabel(activity)}',
-              ),
-            ),
-        ],
-        AppCard(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md,
-            AppSpacing.sectionGap,
-            AppSpacing.md,
-            AppSpacing.lg,
+              if (friend != null) ...[
+                for (final part
+                    in friend!.schedule.whereType<CalendarSchedulePart>())
+                  if ((part.isAllDay || !_hasTimeRange(part)) &&
+                      _noticeDates(part).any(
+                        (date) => days.any(
+                          (selectedDate) => isSameDate(selectedDate, date),
+                        ),
+                      ))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: AppBanner(
+                        message: '${friend!.name} · ${calendarLabel(part)}',
+                      ),
+                    ),
+                for (final activity in _untimedActivities(
+                  friendActivities,
+                  days,
+                ))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: AppBanner(
+                      message: '${friend!.name} · ${activityLabel(activity)}',
+                    ),
+                  ),
+              ],
+            ],
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final width = math.max(
-                constraints.maxWidth,
-                MediaQuery.textScalerOf(context).scale(324),
-              );
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: width,
+        ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final gutters = padding.resolve(Directionality.of(context));
+            final width = math.max(
+              constraints.maxWidth - gutters.horizontal,
+              MediaQuery.textScalerOf(context).scale(324) + AppSpacing.md * 2,
+            );
+            return AppHorizontalScrollView(
+              key: const ValueKey('schedule-week-table-scroll'),
+              padding: gutters,
+              child: SizedBox(
+                width: width,
+                child: AppCard(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.sectionGap,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                  ),
                   child: Column(
                     children: [
                       Row(
@@ -311,83 +338,97 @@ class ScheduleWeekView extends StatelessWidget {
                     ],
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.xsm,
-            AppSpacing.sectionGap,
-            AppSpacing.xsm,
-            AppSpacing.zero,
-          ),
-          child: Wrap(
-            spacing: AppSpacing.sectionGap,
-            runSpacing: AppSpacing.sm,
+          padding: padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final item in [
-                (l10n.lecture, LessonCard.getColorByTypeFor(context, .lecture)),
-                (
-                  l10n.practice,
-                  LessonCard.getColorByTypeFor(context, .practice),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xsm,
+                  AppSpacing.sectionGap,
+                  AppSpacing.xsm,
+                  AppSpacing.zero,
                 ),
-                (
-                  l10n.lessonTypeLabName,
-                  LessonCard.getColorByTypeFor(context, .laboratoryWork),
-                ),
-                (l10n.scheduleChangeTagCancelled, context.colors.exam),
-                (l10n.scheduleLegendAddOwn, null),
-              ])
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+                child: Wrap(
+                  spacing: AppSpacing.sectionGap,
+                  runSpacing: AppSpacing.sm,
                   children: [
-                    Container(
-                      key: ValueKey('schedule-legend-${item.$1}'),
-                      width: AppSpacing.gap,
-                      height: AppSpacing.gap,
-                      decoration: BoxDecoration(
-                        color: item.$2,
-                        border: item.$2 == null
-                            ? Border.all(color: context.colors.muted2)
-                            : null,
-                        borderRadius: BorderRadius.circular(AppRadius.bar),
+                    for (final item in [
+                      (
+                        l10n.lecture,
+                        LessonCard.getColorByTypeFor(context, .lecture),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.xsm),
-                    Flexible(
-                      child: Text(
-                        item.$1,
-                        style: AppText.sans(
-                          12,
-                          FontWeight.w600,
-                        ).copyWith(color: context.colors.muted),
+                      (
+                        l10n.practice,
+                        LessonCard.getColorByTypeFor(context, .practice),
                       ),
-                    ),
+                      (
+                        l10n.lessonTypeLabName,
+                        LessonCard.getColorByTypeFor(context, .laboratoryWork),
+                      ),
+                      (l10n.scheduleChangeTagCancelled, context.colors.exam),
+                      (l10n.scheduleLegendAddOwn, null),
+                    ])
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            key: ValueKey('schedule-legend-${item.$1}'),
+                            width: AppSpacing.gap,
+                            height: AppSpacing.gap,
+                            decoration: BoxDecoration(
+                              color: item.$2,
+                              border: item.$2 == null
+                                  ? Border.all(color: context.colors.muted2)
+                                  : null,
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.bar,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xsm),
+                          Flexible(
+                            child: Text(
+                              item.$1,
+                              style: AppText.sans(
+                                12,
+                                FontWeight.w600,
+                              ).copyWith(color: context.colors.muted),
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
+              ),
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                children: [
+                  AppButton.text(
+                    label: l10n.schedulePrevWeek,
+                    size: AppButtonSize.small,
+                    onPressed: () =>
+                        onDay(day.subtract(const Duration(days: 7))),
+                  ),
+                  AppButton.text(
+                    label: l10n.todayLower,
+                    size: AppButtonSize.small,
+                    onPressed: () => onDay(now ?? DateTime.now()),
+                  ),
+                  AppButton.text(
+                    label: l10n.scheduleNextWeek,
+                    size: AppButtonSize.small,
+                    onPressed: () => onDay(day.add(const Duration(days: 7))),
+                  ),
+                ],
+              ),
             ],
           ),
-        ),
-        Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          children: [
-            AppButton.text(
-              label: l10n.schedulePrevWeek,
-              size: AppButtonSize.small,
-              onPressed: () => onDay(day.subtract(const Duration(days: 7))),
-            ),
-            AppButton.text(
-              label: l10n.todayLower,
-              size: AppButtonSize.small,
-              onPressed: () => onDay(now ?? DateTime.now()),
-            ),
-            AppButton.text(
-              label: l10n.scheduleNextWeek,
-              size: AppButtonSize.small,
-              onPressed: () => onDay(day.add(const Duration(days: 7))),
-            ),
-          ],
         ),
       ],
     );
@@ -402,7 +443,6 @@ class ScheduleWeekView extends StatelessWidget {
     final lessons = _lessons(date).where((l) => _overlap(l, bell)).toList();
     final busy = occupancy.isBusy(bell.startMinutes, bell.endMinutes);
     final uncertain = occupancy.isUncertain(bell.startMinutes, bell.endMinutes);
-    final friendFree = occupancy.isFree(bell.startMinutes, bell.endMinutes);
     final own = activities
         .where(
           (activity) =>
@@ -415,6 +455,7 @@ class ScheduleWeekView extends StatelessWidget {
       date,
     ).where((event) => _eventOverlap(event, date, bell)).toList();
     if (lessons.isNotEmpty || own.isNotEmpty || events.isNotEmpty) {
+      final friendFree = occupancy.isFree(bell.startMinutes, bell.endMinutes);
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: AppSpacing.xs,

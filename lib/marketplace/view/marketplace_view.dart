@@ -30,6 +30,7 @@ class MarketplaceView extends StatelessWidget {
           ? context.l10n.marketSellTitle
           : context.l10n.marketEditTitle,
       subtitle: context.l10n.marketSellSubtitle,
+      contentPadding: EdgeInsets.zero,
       backgroundColor: context.colors.canvas,
       child: MultiBlocProvider(
         providers: [

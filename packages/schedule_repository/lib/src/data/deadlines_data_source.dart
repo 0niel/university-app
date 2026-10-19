@@ -93,7 +93,9 @@ class DeadlinesDataSource {
       'postpone_deadlines',
       params: {'p_ids': ids, 'p_until': until.toUtc().toIso8601String()},
     );
-    return response is int ? response : int.tryParse('$response') ?? 0;
+    return response is int
+        ? response
+        : (int.tryParse(response?.toString() ?? '') ?? 0);
   }
 
   Future<void> createReminder({

@@ -32,6 +32,8 @@ sealed class TeacherDashboardBinding with _$TeacherDashboardBinding {
 
   Teacher? get teacher => switch (this) {
     TeacherBindingReady(:final value) => value,
-    _ => null,
+    TeacherBindingRestoring() ||
+    TeacherBindingUnselected() ||
+    TeacherBindingUnavailable() => null,
   };
 }

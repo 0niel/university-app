@@ -39,7 +39,10 @@ class AppAchievementToast extends StatelessWidget {
             AppIconTile(
               size: 32,
               radius: AppRadius.sm,
-              background: colors.tintOf(colors.accent, .3),
+              background: Color.alphaBlend(
+                colors.accent.withValues(alpha: .3),
+                colors.surface,
+              ),
               child: Text(emoji, style: AppText.sans(17, FontWeight.w400)),
             ),
             const SizedBox(width: AppSpacing.md),

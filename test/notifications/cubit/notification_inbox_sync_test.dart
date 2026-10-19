@@ -22,7 +22,7 @@ AppNotification notice(String id) => AppNotification(
 class Inbox extends Fake implements NotificationInboxRepository {
   Future<NotificationInboxSnapshot> Function(String) onLoad = (_) async =>
       const NotificationInboxSnapshot(items: []);
-  Future<void> Function(String, Set<String>) onRead = (_, _) async {};
+  Future<void> Function(String, Set<String>) onRead = (_, _) => Future.value();
   int loads = 0;
   final reads = <Set<String>>[];
 

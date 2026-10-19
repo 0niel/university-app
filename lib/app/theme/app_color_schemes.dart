@@ -23,9 +23,8 @@ class AppColorSchemes {
   }
 
   static AppAccent toAccent(AppColorScheme scheme) => switch (scheme) {
-    .blue => AppAccent.blue,
+    .blue || .yellow => AppAccent.blue,
     .violet => AppAccent.violet,
-    .yellow => AppAccent.blue,
     .red => AppAccent.red,
     .green => AppAccent.green,
   };

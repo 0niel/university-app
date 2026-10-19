@@ -153,7 +153,7 @@ void main() {
           cache: cache,
           rpc: (name, args) async {
             if (name == 'get_map_catalog') return _catalog();
-            final campus = args['p_campus_id']! as String;
+            final {'p_campus_id': campus} = args;
             expect(campus, 'b');
             order.add('request-b');
             if (!entered.isCompleted) entered.complete();

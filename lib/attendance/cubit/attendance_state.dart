@@ -4,8 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:rtu_mirea_app/attendance/models/models.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-enum AttendanceStatus { initial, loading, ready, failure }
-
 class AttendanceState extends Equatable {
   const AttendanceState({
     this.status = AttendanceStatus.initial,
@@ -46,8 +44,8 @@ class AttendanceState extends Equatable {
           (held[name] ?? 0) +
           lesson.dates.toSet().where((date) => _isHeld(lesson, date)).length;
     }
-    final absences = semesterAbsences;
-    for (final absence in absences) {
+    final recordedAbsences = semesterAbsences;
+    for (final absence in recordedAbsences) {
       if (held.containsKey(absence.subject)) continue;
       order.add(absence.subject);
       held[absence.subject] = 0;
@@ -57,7 +55,7 @@ class AttendanceState extends Equatable {
         AttendanceSubject(
           subject: name,
           total: held[name] ?? 0,
-          misses: absences
+          misses: recordedAbsences
               .where((absence) => absence.subject == name)
               .sorted(
                 (a, b) => b.date.compareTo(a.date),
@@ -88,14 +86,18 @@ class AttendanceState extends Equatable {
 
   List<AttendanceWeek> get weeks {
     final start = semesterStart;
-    final absences = semesterAbsences;
+    final recordedAbsences = semesterAbsences;
     return [
       for (var index = 0; index < weekCount; index++)
-        _week(index, start.add(Duration(days: 7 * index)), absences),
+        _week(index, start.add(Duration(days: 7 * index)), recordedAbsences),
     ];
   }
 
-  AttendanceWeek _week(int index, DateTime start, List<Absence> absences) {
+  AttendanceWeek _week(
+    int index,
+    DateTime start,
+    List<Absence> recordedAbsences,
+  ) {
     final end = start.add(const Duration(days: 7));
     bool inWeek(DateTime day) => !day.isBefore(start) && day.isBefore(end);
     var total = 0;
@@ -108,7 +110,7 @@ class AttendanceState extends Equatable {
     return AttendanceWeek(
       index: index,
       total: total,
-      misses: absences.where((absence) => inWeek(absence.day)).length,
+      misses: recordedAbsences.where((absence) => inWeek(absence.day)).length,
       isCurrent: index == currentWeekIndex,
     );
   }
@@ -151,3 +153,5 @@ class AttendanceState extends Equatable {
   @override
   List<Object?> get props => [status, absences, lessons, expandedSubject, now];
 }
+
+enum AttendanceStatus { initial, loading, ready, failure }

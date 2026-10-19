@@ -12,7 +12,7 @@ import '../../helpers/pump_app.dart';
 
 void main() {
   late QuillController controller;
-  late _ProcessText platform;
+  late FakeNoteToolsProcessText platform;
   late NoteTextActions actions;
   String? copied;
   String? shared;
@@ -22,7 +22,7 @@ void main() {
       document: Document()..insert(0, 'Hello world'),
       selection: const TextSelection(baseOffset: 0, extentOffset: 5),
     );
-    platform = _ProcessText();
+    platform = FakeNoteToolsProcessText();
     copied = null;
     shared = null;
     actions = NoteTextActions(
@@ -170,7 +170,10 @@ void main() {
     (tester) async {
       await open(tester);
       await process(tester);
-      platform.result.completeError(PlatformException(code: 'unavailable'));
+      platform.result.completeError(
+        PlatformException(code: 'unavailable'),
+        StackTrace.current,
+      );
       await tester.pumpAndSettle();
       expect(find.text('Не удалось обработать текст'), findsOneWidget);
       expect(find.byKey(const ValueKey('note-text-copy')), findsOneWidget);
@@ -193,7 +196,7 @@ void main() {
   });
 }
 
-class _ProcessText implements ProcessTextService {
+class FakeNoteToolsProcessText implements ProcessTextService {
   List<ProcessTextAction> actions = const [
     ProcessTextAction('translate', 'Перевести'),
   ];

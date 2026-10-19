@@ -25,6 +25,7 @@ class _BatchEntry {
     required this.bytes,
     required this.mimeType,
     required String title,
+    this.preview,
   }) : titleController = TextEditingController(text: title);
 
   final String id;
@@ -32,9 +33,7 @@ class _BatchEntry {
   final Uint8List bytes;
   final String? mimeType;
   final TextEditingController titleController;
-  Uint8List? previewBytes;
-  int? previewWidth;
-  int? previewHeight;
+  final GeneratedImagePreview? preview;
   _BatchStatus status = _BatchStatus.pending;
 
   void dispose() => titleController.dispose();
@@ -90,20 +89,17 @@ class _MaterialBatchUploadSheetState extends State<MaterialBatchUploadSheet> {
   }) async {
     if (bytes.isEmpty || bytes.length > _kMaxUploadBytes) return;
     final mimeType = lookupMimeType(fileName, headerBytes: bytes);
+    final preview = mimeType != null && mimeType.startsWith('image/')
+        ? await generateImagePreview(bytes)
+        : null;
     final entry = _BatchEntry(
       id: const Uuid().v4(),
       fileName: fileName,
       bytes: bytes,
       mimeType: mimeType,
       title: _titleFromFileName(fileName),
+      preview: preview,
     );
-    if (mimeType != null && mimeType.startsWith('image/')) {
-      final preview = await generateImagePreview(bytes);
-      entry
-        ..previewBytes = preview?.bytes
-        ..previewWidth = preview?.width
-        ..previewHeight = preview?.height;
-    }
     if (!mounted) {
       entry.dispose();
       return;
@@ -184,21 +180,23 @@ class _MaterialBatchUploadSheetState extends State<MaterialBatchUploadSheet> {
   }
 
   Future<void> _uploadEntry(_BatchEntry entry) async {
+    final subject = _subjects.firstOrNull;
+    if (subject == null) return;
     setState(() => entry.status = _BatchStatus.uploading);
     try {
       await widget.repository.createPublicMaterial(
         title: entry.titleController.text.trim(),
-        subjectName: _subjects.first,
+        subjectName: subject,
         subjectNames: _subjects.toList(growable: false),
         materialType: _type,
         isAnonymous: _anonymous,
         fileName: entry.fileName,
         fileBytes: entry.bytes,
         mimeType: entry.mimeType,
-        previewBytes: entry.previewBytes,
-        previewMimeType: entry.previewBytes == null ? null : 'image/png',
-        width: entry.previewWidth,
-        height: entry.previewHeight,
+        previewBytes: entry.preview?.bytes,
+        previewMimeType: entry.preview?.bytes == null ? null : 'image/png',
+        width: entry.preview?.width,
+        height: entry.preview?.height,
         batchId: _batchId,
       );
       if (mounted) setState(() => entry.status = _BatchStatus.done);
@@ -250,7 +248,14 @@ class _MaterialBatchUploadSheetState extends State<MaterialBatchUploadSheet> {
       _entries.where((entry) => entry.status == _BatchStatus.done).length;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([
+      for (final entry in _entries) entry.titleController,
+    ]),
+    builder: (context, _) => _buildContent(context),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
     final canUpload =
@@ -322,7 +327,6 @@ class _MaterialBatchUploadSheetState extends State<MaterialBatchUploadSheet> {
                   uploading: _uploading,
                   onRemove: () => _removeEntry(entry),
                   onRetry: () => unawaited(_retryEntry(entry)),
-                  onTitleChanged: () => setState(() {}),
                 ),
             ],
           ),
@@ -415,7 +419,6 @@ class _BatchEntryRow extends StatelessWidget {
     required this.uploading,
     required this.onRemove,
     required this.onRetry,
-    required this.onTitleChanged,
     super.key,
   });
 
@@ -423,7 +426,6 @@ class _BatchEntryRow extends StatelessWidget {
   final bool uploading;
   final VoidCallback onRemove;
   final VoidCallback onRetry;
-  final VoidCallback onTitleChanged;
 
   AppLineIcon get _glyph {
     final mimeType = entry.mimeType ?? '';
@@ -437,7 +439,8 @@ class _BatchEntryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
-    final preview = entry.previewBytes;
+    final preview = entry.preview?.bytes;
+    final accent = colors.lecture;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Column(
@@ -451,7 +454,7 @@ class _BatchEntryRow extends StatelessWidget {
                     ? Container(
                         width: 44,
                         height: 44,
-                        color: colors.tintOf(colors.lecture),
+                        color: colors.tintOf(accent),
                         alignment: Alignment.center,
                         child: AppLineIconWidget(
                           _glyph,
@@ -461,6 +464,7 @@ class _BatchEntryRow extends StatelessWidget {
                       )
                     : Image.memory(
                         preview,
+                        excludeFromSemantics: true,
                         width: 44,
                         height: 44,
                         fit: BoxFit.cover,
@@ -473,7 +477,6 @@ class _BatchEntryRow extends StatelessWidget {
                   placeholder: l10n.knowledgeUploadTitleHint,
                   maxLength: 200,
                   enabled: !uploading && entry.status != _BatchStatus.done,
-                  onChanged: (_) => onTitleChanged(),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),

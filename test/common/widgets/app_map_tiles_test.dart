@@ -33,6 +33,8 @@ Future<Widget> _buildTiles(
   required ThemeData theme,
 }) async {
   late Widget tiles;
+  final tileProvider = AssetTileProvider();
+  addTearDown(tileProvider.dispose);
   await tester.pumpWidget(
     MaterialApp(
       key: ValueKey(theme.brightness),
@@ -41,7 +43,7 @@ Future<Widget> _buildTiles(
         builder: (context) {
           tiles = AppMapTiles.tileLayer(
             context,
-            tileProvider: AssetTileProvider(),
+            tileProvider: tileProvider,
           );
           return const SizedBox.shrink();
         },

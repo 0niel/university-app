@@ -11,7 +11,7 @@ void main() {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(() => server.close(force: true));
     Map<String, Object?>? parameters;
-    server.listen((request) async {
+    final subscription = server.listen((request) async {
       expect(request.uri.path, '/rest/v1/rpc/search_schedule_targets');
       parameters = (jsonDecode(await utf8.decoder.bind(request).join()) as Map)
           .cast<String, Object?>();
@@ -19,6 +19,7 @@ void main() {
       request.response.write('[]');
       await request.response.close();
     });
+    addTearDown(subscription.cancel);
     final client = SupabaseClient(
       'http://127.0.0.1:${server.port}',
       'test-key',

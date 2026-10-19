@@ -88,7 +88,9 @@ class _StatsChart extends StatelessWidget {
     final colors = context.colors;
     final l10n = context.l10n;
     final index = spots.firstOrNull?.x.toInt();
-    final day = index == null ? null : stats.elementAtOrNull(index)?.day;
+    final day = index == null || index < 0
+        ? null
+        : stats.elementAtOrNull(index)?.day;
     final header = day == null
         ? ''
         : MaterialLocalizations.of(context).formatShortMonthDay(day);

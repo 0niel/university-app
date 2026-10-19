@@ -86,7 +86,7 @@ void main() {
           campus: original,
           floor: original.floors.single,
           repository: repository,
-          painter: _ProbePainter(),
+          painter: const _ProbePainter(),
           onTap: (point, _) => position = point,
         ),
       ),
@@ -136,7 +136,7 @@ void main() {
                 'height': 500,
               }, svgPath: 'editor.svg'),
               repository: repository,
-              painter: _ProbePainter(),
+              painter: const _ProbePainter(),
               onTap: (_, _) => taps++,
             ),
           ),
@@ -148,7 +148,7 @@ void main() {
           ),
           findsOneWidget,
         );
-        firstLoad.completeError(Exception('Unavailable'));
+        firstLoad.completeError(Exception('Unavailable'), StackTrace.current);
         await tester.pumpAndSettle();
         expect(
           find.text(
@@ -239,7 +239,7 @@ void main() {
                     'y': 250,
                   }),
                 ],
-                painter: _ProbePainter(),
+                painter: const _ProbePainter(),
                 onTap: (point, hitRadius) {
                   tapped = point;
                   radius = hitRadius;
@@ -313,6 +313,7 @@ void main() {
 }
 
 class _ProbePainter extends CustomPainter {
+  const _ProbePainter();
   @override
   void paint(Canvas canvas, Size size) {
     canvas

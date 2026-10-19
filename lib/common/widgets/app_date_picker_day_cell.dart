@@ -1,7 +1,5 @@
 part of 'app_date_picker.dart';
 
-enum AppDatePickerDayState { normal, today, selected, disabled }
-
 class AppDatePickerDayCell extends StatelessWidget {
   const AppDatePickerDayCell({
     required this.day,
@@ -21,7 +19,7 @@ class AppDatePickerDayCell extends StatelessWidget {
     final color = switch (state) {
       AppDatePickerDayState.selected => colors.onAccent,
       AppDatePickerDayState.disabled => colors.muted2,
-      _ => colors.ink,
+      AppDatePickerDayState.normal || AppDatePickerDayState.today => colors.ink,
     };
     return Padding(
       padding: const EdgeInsets.all(2),
@@ -43,3 +41,5 @@ class AppDatePickerDayCell extends StatelessWidget {
     );
   }
 }
+
+enum AppDatePickerDayState { normal, today, selected, disabled }

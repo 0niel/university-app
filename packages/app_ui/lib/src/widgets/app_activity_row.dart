@@ -10,28 +10,28 @@ enum AppActivityType { event, retake, extra, personal, consult }
 
 extension AppActivityTypeX on AppActivityType {
   String get label => switch (this) {
-        AppActivityType.event => 'Событие',
-        AppActivityType.retake => 'Пересдача',
-        AppActivityType.extra => 'Доп. занятие',
-        AppActivityType.personal => 'Личное',
-        AppActivityType.consult => 'Консультация',
-      };
+    AppActivityType.event => 'Событие',
+    AppActivityType.retake => 'Пересдача',
+    AppActivityType.extra => 'Доп. занятие',
+    AppActivityType.personal => 'Личное',
+    AppActivityType.consult => 'Консультация',
+  };
 
   Color color(AppColors colors) => switch (this) {
-        AppActivityType.event => colors.accent,
-        AppActivityType.retake => colors.exam,
-        AppActivityType.extra => colors.lecture,
-        AppActivityType.personal => colors.warn,
-        AppActivityType.consult => colors.lab,
-      };
+    AppActivityType.event => colors.accent,
+    AppActivityType.retake => colors.exam,
+    AppActivityType.extra => colors.lecture,
+    AppActivityType.personal => colors.warn,
+    AppActivityType.consult => colors.lab,
+  };
 
   AppLineIcon get icon => switch (this) {
-        AppActivityType.event => AppLineIcon.star,
-        AppActivityType.retake => AppLineIcon.alert,
-        AppActivityType.extra => AppLineIcon.plus,
-        AppActivityType.personal => AppLineIcon.pin,
-        AppActivityType.consult => AppLineIcon.message,
-      };
+    AppActivityType.event => AppLineIcon.star,
+    AppActivityType.retake => AppLineIcon.alert,
+    AppActivityType.extra => AppLineIcon.plus,
+    AppActivityType.personal => AppLineIcon.pin,
+    AppActivityType.consult => AppLineIcon.message,
+  };
 }
 
 class AppActivityRow extends StatelessWidget {

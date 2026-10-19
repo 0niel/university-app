@@ -1,8 +1,8 @@
-import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/home/view/home_day_lessons.dart';
 import 'package:rtu_mirea_app/home/view/widgets/hero/hero_parts.dart';
+import 'package:rtu_mirea_app/home/view/widgets/hero/home_hero_surface.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
 class HeroBefore extends StatelessWidget {
@@ -27,34 +27,21 @@ class HeroBefore extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final format = DateFormat.Hm();
-    return AppCard(
-      tinted: true,
-      radius: AppRadius.hero,
-      padding: const EdgeInsets.all(18),
+    return HomeHeroSurface(
       child: Column(
         crossAxisAlignment: .stretch,
         mainAxisSize: .min,
         children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              HeroPill(
-                label: l10n.homeHeroFirstIn(
-                  homeMinutesUntil(entry.start, now),
-                ),
-              ),
-              HeroMeta(
-                '${format.format(entry.start)}–${format.format(entry.end)}',
-              ),
-            ],
+          HeroLessonHeader(
+            status: HeroPill(
+              label: l10n.homeHeroFirstIn(homeMinutesUntil(entry.start, now)),
+            ),
+            detail: '${format.format(entry.start)}–${format.format(entry.end)}',
+            onRoute: onRoute,
+            onNote: onNote,
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
           HeroSubject(subject: entry.lesson.subject, meta: meta, onTap: onOpen),
-          const SizedBox(height: 14),
-          HeroActions(onRoute: onRoute, onNote: onNote),
         ],
       ),
     );

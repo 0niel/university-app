@@ -4,13 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(body: Center(child: child)),
+  );
 
   group('AppToast', () {
-    testWidgets('renders the message with the default check tile',
-        (tester) async {
+    testWidgets('renders the message with the default check tile', (
+      tester,
+    ) async {
       await tester.pumpWidget(wrap(const AppToast(message: 'Сохранено')));
 
       expect(find.text('Сохранено'), findsOneWidget);

@@ -9,7 +9,8 @@ class HomeGamificationCubit extends Cubit<UserGamificationProfile?> {
   Future<void> load() async {
     try {
       final profile = await _repository.getProfile();
-      if (!isClosed) emit(profile);
+      if (isClosed) return;
+      emit(profile);
     } on Exception catch (_) {
       if (!isClosed && state == null) emit(null);
     }

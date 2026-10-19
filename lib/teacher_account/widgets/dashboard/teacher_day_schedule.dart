@@ -46,21 +46,27 @@ class TeacherDaySchedule extends StatelessWidget {
           onSelect: onSelectDay,
         ),
         const SizedBox(height: AppSpacing.sm),
-        Text(
-          l10n.teacherScheduleSwipeHint,
-          style: AppText.caption.copyWith(color: context.colors.muted),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Text(
+            l10n.teacherScheduleSwipeHint,
+            style: AppText.caption.copyWith(color: context.colors.muted),
+          ),
         ),
         TeacherDayPager(
           day: day,
           onDay: onSelectDay,
-          builder: (context, date) => TeacherDayContent(
-            key: ValueKey(('teacher-day-content', date)),
-            day: date,
-            now: now,
-            schedule: schedule,
-            workload: workload,
-            preview: preview,
-            onOpenLesson: onOpenLesson,
+          builder: (context, date) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: TeacherDayContent(
+              key: ValueKey(('teacher-day-content', date)),
+              day: date,
+              now: now,
+              schedule: schedule,
+              workload: workload,
+              preview: preview,
+              onOpenLesson: onOpenLesson,
+            ),
           ),
         ),
       ],

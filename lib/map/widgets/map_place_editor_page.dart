@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
@@ -6,7 +8,7 @@ import 'package:rtu_mirea_app/map/services/svg_room_parser.dart';
 import 'package:rtu_mirea_app/map/widgets/map_graph_editor_page.dart';
 import 'package:uuid/uuid.dart';
 
-const _placeKinds = {
+const _kPlaceKinds = {
   'canteen': 'Столовая',
   'cafe': 'Кафе',
   'atm': 'Банкомат',
@@ -67,7 +69,7 @@ Map<String, Object?> buildMapPlaceEditorPatch({
   if (name.isEmpty || name.length > 160) {
     throw const FormatException('Укажите название: от 1 до 160 символов.');
   }
-  if (!_placeKinds.containsKey(kind) && kind != room?.kind) {
+  if (!_kPlaceKinds.containsKey(kind) && kind != room?.kind) {
     throw const FormatException('Выберите категорию места.');
   }
   if (description.trim().length > 2000) {
@@ -103,6 +105,7 @@ class MapPlaceEditorPage extends StatefulWidget {
 }
 
 class _MapPlaceEditorPageState extends State<MapPlaceEditorPage> {
+  final GlobalKey _planKey = GlobalKey();
   late final _label = TextEditingController(text: widget.room?.label);
   late final _description = TextEditingController(
     text: widget.room?.description,
@@ -159,17 +162,19 @@ class _MapPlaceEditorPageState extends State<MapPlaceEditorPage> {
           const SizedBox(height: AppSpacing.lg),
           AppListGroup(
             children: [
-              for (final kind in _placeKinds.entries)
+              for (final option in _kPlaceKinds.entries)
                 AppListRow(
-                  title: kind.value,
+                  title: option.value,
                   titleMaxLines: null,
-                  strong: kind.key == _kind,
-                  trailing: kind.key == _kind
+                  strong: option.key == _kind,
+                  trailing: option.key == _kind
                       ? const AppLineIconWidget(AppLineIcon.check)
                       : null,
                   showChevron: false,
-                  onTap: () =>
-                      Navigator.of(context, rootNavigator: true).pop(kind.key),
+                  onTap: () => Navigator.of(
+                    context,
+                    rootNavigator: true,
+                  ).pop(option.key),
                 ),
             ],
           ),
@@ -235,14 +240,19 @@ class _MapPlaceEditorPageState extends State<MapPlaceEditorPage> {
         summary:
             '${widget.room == null ? 'Новое место' : 'Изменение места'}: '
             '${_label.text.trim()}\n'
-            '${_placeKinds[_kind] ?? 'Место'} · этаж ${floor.floor.number}.'
+            '${_kPlaceKinds[_kind] ?? 'Место'} · этаж ${floor.floor.number}.'
             '${description.isEmpty ? '' : '\n$description'}'
             '\nПоложение отмечено на плане. Проверьте, что точка '
             'находится у самого объекта или его входа.$relocationNotice',
       );
       if (sent && mounted) Navigator.pop(context, true);
     } on FormatException catch (error) {
-      if (mounted) setState(() => _error = error.message);
+      if (!mounted) return;
+      setState(() => _error = error.message);
+      final planContext = _planKey.currentContext;
+      if (_point == null && planContext != null && planContext.mounted) {
+        await Scrollable.ensureVisible(planContext, alignment: .5);
+      }
     } on Object {
       if (mounted) {
         setState(
@@ -303,11 +313,11 @@ class _MapPlaceEditorPageState extends State<MapPlaceEditorPage> {
                       ),
                       SliverToBoxAdapter(
                         child: SizedBox(
-                          height: (MediaQuery.sizeOf(context).height * .4)
-                              .clamp(
-                                220.0,
-                                420.0,
-                              ),
+                          key: _planKey,
+                          height: (MediaQuery.heightOf(context) * .4).clamp(
+                            220.0,
+                            420.0,
+                          ),
                           child: MapEditorFloorCanvas(
                             campus: widget.campus,
                             key: ValueKey(floor.floor.id),
@@ -351,10 +361,11 @@ class _MapPlaceEditorPageState extends State<MapPlaceEditorPage> {
                               children: [
                                 AppListRow(
                                   title:
-                                      _placeKinds[_kind] ?? 'Текущая категория',
+                                      _kPlaceKinds[_kind] ??
+                                      'Текущая категория',
                                   titleMaxLines: null,
                                   subtitle: 'Категория',
-                                  onTap: _selectKind,
+                                  onTap: () => unawaited(_selectKind()),
                                 ),
                               ],
                             ),
@@ -406,7 +417,7 @@ class _MapPlaceEditorPageState extends State<MapPlaceEditorPage> {
                       loading: _reviewBusy,
                       onPressed:
                           !_reviewBusy && (widget.room == null || _changed)
-                          ? _review
+                          ? () => unawaited(_review())
                           : null,
                     ),
                   ],
@@ -432,9 +443,9 @@ class _PlacePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Offset project(Offset point) => Offset(
-      point.dx / floor.width * size.width,
-      point.dy / floor.height * size.height,
+    Offset project(Offset location) => Offset(
+      location.dx / floor.width * size.width,
+      location.dy / floor.height * size.height,
     );
     for (final place in places) {
       canvas.drawCircle(
@@ -443,8 +454,8 @@ class _PlacePainter extends CustomPainter {
         Paint()..color = Colors.blueGrey.withValues(alpha: .45),
       );
     }
-    if (point case final point?) {
-      final center = project(point);
+    if (point case final location?) {
+      final center = project(location);
       canvas
         ..drawCircle(center, 16, Paint()..color = color.withValues(alpha: .2))
         ..drawCircle(center, 10, Paint()..color = Colors.white)
@@ -471,5 +482,5 @@ class _PlacePainter extends CustomPainter {
       point != oldDelegate.point ||
       floor != oldDelegate.floor ||
       color != oldDelegate.color ||
-      places != oldDelegate.places;
+      !identical(places, oldDelegate.places);
 }

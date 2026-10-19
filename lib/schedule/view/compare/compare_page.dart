@@ -55,7 +55,7 @@ class _ComparePageState extends State<ComparePage> {
       context,
       title: context.l10n.comparePickerTitle,
       subtitle: context.l10n.comparePickerDescription,
-      child: _GroupPickerSheet(repository: context.read<ScheduleRepository>()),
+      child: _GroupPickerSheet(repository: context.read()),
     );
     if (group != null && mounted) await _loadFriendSchedule(group);
   }
@@ -120,7 +120,7 @@ class _ComparePageState extends State<ComparePage> {
     final friendName =
         group == null && comparison?.friendName.isNotEmpty == true
         ? comparison!.friendName
-        : friend?.name ?? group?.name ?? l10n.comparePickGroup;
+        : (friend?.name ?? group?.name ?? l10n.comparePickGroup);
     final myOccupancy = comparisonOccupancyForDay(
       day: _day,
       schedule: selected?.schedule ?? const [],
@@ -148,12 +148,12 @@ class _ComparePageState extends State<ComparePage> {
                   AppHeaderAction(
                     icon: AppLineIcon.people,
                     semanticsLabel: l10n.scheduleCompareFriend,
-                    onTap: _pickFriend,
+                    onTap: () => unawaited(_pickFriend()),
                   ),
                 AppHeaderAction(
                   icon: AppLineIcon.plus,
                   semanticsLabel: l10n.comparePick,
-                  onTap: _pickFriendGroup,
+                  onTap: () => unawaited(_pickFriendGroup()),
                 ),
               ],
             ),
@@ -190,7 +190,7 @@ class _ComparePageState extends State<ComparePage> {
                             ? const AppLineIconWidget(AppLineIcon.plus)
                             : AppAvatar(name: friendName, size: 40),
                         strong: true,
-                        onTap: _pickFriendGroup,
+                        onTap: () => unawaited(_pickFriendGroup()),
                       ),
                     ],
                   ),
@@ -221,7 +221,7 @@ class _ComparePageState extends State<ComparePage> {
                       title: l10n.comparePickGroup,
                       subtitle: l10n.compareEmptyHint,
                       actionLabel: l10n.comparePick,
-                      onAction: _pickFriendGroup,
+                      onAction: () => unawaited(_pickFriendGroup()),
                     )
                   else ...[
                     AppSegmentedControl<bool>(
@@ -248,7 +248,7 @@ class _ComparePageState extends State<ComparePage> {
                         display: display,
                         activities: activities,
                         friend: friend,
-                        onCompare: _pickFriendGroup,
+                        onCompare: () => unawaited(_pickFriendGroup()),
                         onDay: (value) => setState(() {
                           _day = dateOnly(value);
                           _weekView = false;

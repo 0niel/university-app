@@ -363,7 +363,7 @@ void main() {
     await cubit.load();
     final failed = cubit.submitAnswers(poll: poll, answers: answers);
     await cubit.submitAnswers(poll: second, answers: answers);
-    pending.completeError(Exception('offline'));
+    pending.completeError(Exception('offline'), StackTrace.current);
     expect(await failed, isNull);
     expect(cubit.state.polls.last.iParticipated, isTrue);
     expect(cubit.state.polls.first.iParticipated, isFalse);

@@ -9,14 +9,14 @@ void main() {
     () async {
       final refresh = StreamController<String>.broadcast(sync: true);
       var token = 'first';
-      var rejectRefresh = false;
+      final rejectedTokens = <String>{};
       final registered = <String>[];
       final errors = <Object>[];
       final controller = DeviceTokenSyncController(
         getToken: () async => token,
         tokenRefresh: refresh.stream,
         register: (value) async {
-          if (rejectRefresh) throw StateError('offline');
+          if (rejectedTokens.contains(value)) throw StateError('offline');
           registered.add(value);
         },
         unregister: (_) async {},
@@ -25,11 +25,11 @@ void main() {
       );
       await controller.synchronizeUser('A');
       token = 'refreshed';
-      rejectRefresh = true;
+      rejectedTokens.add(token);
       refresh.add(token);
       await Future<void>.delayed(Duration.zero);
       expect(errors, hasLength(1));
-      rejectRefresh = false;
+      rejectedTokens.clear();
       await controller.synchronizeUser('A');
       expect(registered, ['first', 'refreshed']);
       await controller.pause();
@@ -39,7 +39,7 @@ void main() {
   test(
     'account replacement invalidates before registering a fresh token',
     () async {
-      final fixture = _TokenFixture();
+      final fixture = DeviceTokenFixture();
       addTearDown(fixture.close);
       await fixture.controller.synchronizeUser('A');
       fixture.user = 'B';
@@ -55,7 +55,7 @@ void main() {
   );
 
   test('rapid account replacement only registers the latest user', () async {
-    final fixture = _TokenFixture();
+    final fixture = DeviceTokenFixture();
     addTearDown(fixture.close);
     await fixture.controller.synchronizeUser('A');
     fixture.user = 'B';
@@ -74,7 +74,7 @@ void main() {
   });
 
   test('an old token lookup cannot register after A to B to C', () async {
-    final fixture = _TokenFixture()..getGate = Completer<void>();
+    final fixture = DeviceTokenFixture()..getGate = Completer<void>();
     addTearDown(fixture.close);
     final first = fixture.controller.synchronizeUser('A');
     await Future<void>.delayed(.zero);
@@ -92,7 +92,7 @@ void main() {
   test(
     'old registration completes before rotation without old-user unregister',
     () async {
-      final fixture = _TokenFixture()..registerGate = Completer<void>();
+      final fixture = DeviceTokenFixture()..registerGate = Completer<void>();
       addTearDown(fixture.close);
       final first = fixture.controller.synchronizeUser('A');
       await Future<void>.delayed(.zero);
@@ -116,7 +116,7 @@ void main() {
   test(
     'a switch during deletion discards refreshes and the intermediate user',
     () async {
-      final fixture = _TokenFixture();
+      final fixture = DeviceTokenFixture();
       addTearDown(fixture.close);
       await fixture.controller.synchronizeUser('A');
       fixture
@@ -139,7 +139,7 @@ void main() {
   test(
     'failed rotation remains required before retrying the same account',
     () async {
-      final fixture = _TokenFixture();
+      final fixture = DeviceTokenFixture();
       addTearDown(fixture.close);
       await fixture.controller.synchronizeUser('A');
       fixture
@@ -164,7 +164,7 @@ void main() {
   );
 
   test('a stale lookup failure cannot pause a newer account binding', () async {
-    final fixture = _TokenFixture()
+    final fixture = DeviceTokenFixture()
       ..getGate = Completer<void>()
       ..getFailsOnce = true;
     addTearDown(fixture.close);
@@ -183,7 +183,7 @@ void main() {
   test(
     'logout followed immediately by login avoids old-user unregister',
     () async {
-      final fixture = _TokenFixture();
+      final fixture = DeviceTokenFixture();
       addTearDown(fixture.close);
       await fixture.controller.synchronizeUser('A');
       final logout = fixture.controller.synchronizeUser(null);
@@ -263,8 +263,8 @@ void main() {
   );
 }
 
-class _TokenFixture {
-  _TokenFixture() {
+class DeviceTokenFixture {
+  DeviceTokenFixture() {
     controller = DeviceTokenSyncController(
       getToken: () async {
         final token = _token ??= 'token-${++_sequence}';

@@ -1,15 +1,11 @@
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_heatmap_day.dart';
 import 'package:flutter/material.dart' show Tooltip, TooltipTriggerMode;
 import 'package:flutter/widgets.dart';
 
-class AppHeatmapDay {
-  const AppHeatmapDay({required this.date, required this.count});
-
-  final DateTime date;
-  final int count;
-}
+export 'app_heatmap_day.dart';
 
 class AppActivityHeatmap extends StatelessWidget {
   const AppActivityHeatmap({
@@ -46,21 +42,22 @@ class AppActivityHeatmap extends StatelessWidget {
             entry.count,
     };
     final sortedDates = byDay.keys.toList()..sort();
-    final earliest = sortedDates.first;
+    final earliest = sortedDates.firstOrNull;
+    if (earliest == null) return const SizedBox.shrink();
     final latest = today != null
         ? DateTime(today!.year, today!.month, today!.day)
-        : sortedDates.last;
+        : (sortedDates.lastOrNull ?? earliest);
     final maxCount = byDay.values.fold(0, (m, c) => c > m ? c : m);
-    final weeks = _buildWeeks(earliest, latest, byDay);
+    final weeks = _buildWeeks(earliest, latest);
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final columnStep = cellSize + gap;
         final available = constraints.maxWidth - _labelColumnWidth - gap;
         final weeksFit = (available / columnStep).floor().clamp(
-              1,
-              weeks.length,
-            );
+          1,
+          weeks.length,
+        );
         final visible = weeks.length <= weeksFit
             ? weeks
             : weeks.sublist(weeks.length - weeksFit);
@@ -126,7 +123,6 @@ class AppActivityHeatmap extends StatelessWidget {
   List<List<DateTime?>> _buildWeeks(
     DateTime earliest,
     DateTime latest,
-    Map<DateTime, int> byDay,
   ) {
     final leadingPad = earliest.weekday - 1;
     final start = earliest.subtract(Duration(days: leadingPad));
@@ -153,12 +149,12 @@ class AppActivityHeatmap extends StatelessWidget {
 }
 
 Color appHeatmapLevelColor(AppColors colors, int level) => switch (level) {
-      1 => colors.tintOf(colors.accent, .24),
-      2 => colors.tintOf(colors.accent, .44),
-      3 => colors.tintOf(colors.accent, .7),
-      4 => colors.accent,
-      _ => colors.surface2,
-    };
+  1 => Color.alphaBlend(colors.accent.withValues(alpha: .24), colors.surface),
+  2 => Color.alphaBlend(colors.accent.withValues(alpha: .44), colors.surface),
+  3 => Color.alphaBlend(colors.accent.withValues(alpha: .7), colors.surface),
+  4 => colors.accent,
+  _ => colors.surface2,
+};
 
 class _HeatmapCell extends StatelessWidget {
   const _HeatmapCell({
@@ -224,14 +220,13 @@ class _WeekdayLabels extends StatelessWidget {
               height: cellSize,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: labels != null && labels.length > i && labels[i] != null
-                    ? Text(
-                        labels[i]!,
-                        style: AppText.captionSmall.copyWith(
-                          color: colors.muted2,
-                        ),
-                      )
-                    : null,
+                child: switch (labels?.elementAtOrNull(i)) {
+                  final label? => Text(
+                    label,
+                    style: AppText.captionSmall.copyWith(color: colors.muted2),
+                  ),
+                  null => null,
+                },
               ),
             ),
             if (i != 6) SizedBox(height: gap),

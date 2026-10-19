@@ -1,15 +1,15 @@
 part of 'profile_page.dart';
 
-class _ProfileBody extends StatefulWidget {
-  const _ProfileBody({required this.state});
+class _ProfileContent extends StatefulWidget {
+  const _ProfileContent({required this.state});
 
   final ProfileState state;
 
   @override
-  State<_ProfileBody> createState() => _ProfileBodyState();
+  State<_ProfileContent> createState() => _ProfileContentState();
 }
 
-class _ProfileBodyState extends State<_ProfileBody> {
+class _ProfileContentState extends State<_ProfileContent> {
   final ScrollController _scrollController = ScrollController();
   String? _version;
 
@@ -132,7 +132,7 @@ class _ProfileBodyState extends State<_ProfileBody> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: AppSpacing.xlg),
+              const SizedBox(height: AppSpacing.md),
               if (state.user.isGuest) ...[
                 AppBanner(
                   message: l10n.authGuestUpgradeSubtitle,
@@ -164,7 +164,7 @@ class _ProfileBodyState extends State<_ProfileBody> {
                   onTap: () => showLeaderboardSheet(context),
                 ),
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.md),
               ProfileActivityCard(
                 streakDays: profile.streakDays,
                 longestStreak: profile.longestStreak,
@@ -196,41 +196,44 @@ class _ProfileBodyState extends State<_ProfileBody> {
             AppSpacing.screen,
             0,
           ),
-          child: AppListGroup(
-            children: [
-              ProfileLinkRow(
-                icon: AppLineIcon.people,
-                title: l10n.friendsTitle,
-                meta: friends.status == FriendsListStatus.loaded
-                    ? l10n.profileFriendsMeta(
-                        friends.friends.length,
-                        friends.onCampusCount(DateTime.now()),
-                      )
-                    : null,
-                onTap: () => const FriendsRoute().push<void>(context),
-              ),
-              if (NfcPassAvailability.isSupported && !isTeacher)
+          child: AppGlassSurface(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              children: [
                 ProfileLinkRow(
-                  icon: AppLineIcon.contactless,
-                  title: l10n.profileStudentCard,
-                  meta: cardNumber == null || cardNumber.isEmpty
-                      ? null
-                      : l10n.profileCardNumber(cardNumber),
-                  onTap: () => const NfcPassRoute().push<void>(context),
+                  icon: AppLineIcon.people,
+                  title: l10n.friendsTitle,
+                  meta: friends.status == FriendsListStatus.loaded
+                      ? l10n.profileFriendsMeta(
+                          friends.friends.length,
+                          friends.onCampusCount(DateTime.now()),
+                        )
+                      : null,
+                  onTap: () => const FriendsRoute().push<void>(context),
                 ),
-              ProfileLinkRow(
-                icon: AppLineIcon.tune,
-                title: l10n.settingsTitle,
-                onTap: () => const ProfileSettingsRoute().push<void>(context),
-              ),
-              ProfileLinkRow(
-                icon: AppLineIcon.info,
-                title: l10n.aboutApp,
-                meta: _version,
-                showChevron: false,
-                onTap: () => const AboutAppRoute().push<void>(context),
-              ),
-            ],
+                if (NfcPassAvailability.isSupported && !isTeacher)
+                  ProfileLinkRow(
+                    icon: AppLineIcon.contactless,
+                    title: l10n.profileStudentCard,
+                    meta: cardNumber == null || cardNumber.isEmpty
+                        ? null
+                        : l10n.profileCardNumber(cardNumber),
+                    onTap: () => const NfcPassRoute().push<void>(context),
+                  ),
+                ProfileLinkRow(
+                  icon: AppLineIcon.tune,
+                  title: l10n.settingsTitle,
+                  onTap: () => const ProfileSettingsRoute().push<void>(context),
+                ),
+                ProfileLinkRow(
+                  icon: AppLineIcon.info,
+                  title: l10n.aboutApp,
+                  meta: _version,
+                  showChevron: false,
+                  onTap: () => const AboutAppRoute().push<void>(context),
+                ),
+              ],
+            ),
           ),
         ),
       ],

@@ -12,20 +12,21 @@ class MiniAppCardMeta extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: .end,
-      spacing: 4,
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.xs,
       children: [
         if (app.ratingCount > 0)
           Row(
             mainAxisSize: .min,
             spacing: 3,
             children: [
-              AppLineIconWidget(.star, size: 13, color: colors.accent),
+              AppLineIconWidget(.star, size: 12, color: colors.accent),
               Text(
                 app.ratingAvg.toStringAsFixed(1),
                 style: AppText.tabular(
-                  AppText.subtext.copyWith(
+                  AppText.captionSmall.copyWith(
                     color: colors.ink,
                     fontWeight: .w700,
                   ),

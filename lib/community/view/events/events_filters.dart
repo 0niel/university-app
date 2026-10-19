@@ -25,6 +25,7 @@ class EventsFilters extends StatelessWidget {
     return AppChipRow<EventsFilter>(
       value: value,
       onChanged: onChanged,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
       items: [
         for (final filter in EventsFilter.values)
           AppChipRowItem(value: filter, label: labels[filter] ?? ''),

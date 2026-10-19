@@ -50,10 +50,12 @@ class ProfileActivityCard extends StatelessWidget {
         : l10n.profileStreakRecordBeaten;
     final today = days.isEmpty
         ? null
-        : days.map((entry) => entry.day).reduce(
-            (a, b) => a.isAfter(b) ? a : b,
-          );
-    final weekdayLabels = List<String?>.generate(7, (index) {
+        : days
+              .map((entry) => entry.day)
+              .reduce(
+                (a, b) => a.isAfter(b) ? a : b,
+              );
+    final weekdayLabels = List.generate(7, (index) {
       if (index != 0 && index != 2 && index != 4) return null;
       return _capitalize(
         DateFormat.E(locale).format(DateTime(2024, 1, 1 + index)),

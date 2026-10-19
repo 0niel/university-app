@@ -30,16 +30,18 @@ void main() {
     }
   });
 
-  test('divider opacity matches the reference and softens multiplicatively',
-      () {
-    for (final colors in [AppColors.light, AppColors.dark]) {
-      expect(colors.line.a, .08);
-      final bridge = NinjaColors.fromAppColors(colors, isDark: colors.isDark);
-      expect(bridge.line, colors.line);
-      expect(bridge.lineSoft.a, closeTo(.044, .0000001));
-    }
-    expect(AppColors.light.scrim.a, .42);
-  });
+  test(
+    'divider opacity matches the reference and softens multiplicatively',
+    () {
+      for (final colors in [AppColors.light, AppColors.dark]) {
+        expect(colors.line.a, .08);
+        final bridge = NinjaColors.fromAppColors(colors, isDark: colors.isDark);
+        expect(bridge.line, colors.line);
+        expect(bridge.lineSoft.a, closeTo(.044, .0000001));
+      }
+      expect(AppColors.light.scrim.a, .42);
+    },
+  );
 
   testWidgets('bridge fallback follows dark theme without its extension', (
     tester,

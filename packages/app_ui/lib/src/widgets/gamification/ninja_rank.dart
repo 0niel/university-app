@@ -25,9 +25,9 @@ enum NinjaRank {
   }
 
   NinjaRank? get next => switch (this) {
-        NinjaRank.genin => NinjaRank.chunin,
-        NinjaRank.chunin => NinjaRank.jonin,
-        NinjaRank.jonin => NinjaRank.kage,
-        NinjaRank.kage => null,
-      };
+    NinjaRank.genin => NinjaRank.chunin,
+    NinjaRank.chunin => NinjaRank.jonin,
+    NinjaRank.jonin => NinjaRank.kage,
+    NinjaRank.kage => null,
+  };
 }

@@ -1,124 +1,6 @@
-enum IndoorEdgeKind {
-  corridor,
-  stairs,
-  elevator,
-  ramp,
-  escalator,
-  door,
-  outdoor,
-}
+import 'package:rtu_mirea_app/map/navigation/indoor_edge_kind.dart';
 
-class IndoorNavigationNode {
-  const IndoorNavigationNode({
-    required this.id,
-    required this.floorId,
-    required this.x,
-    required this.y,
-    this.roomId,
-    this.label,
-    this.kind,
-    this.wheelchairAccessible = false,
-    this.closed = false,
-  });
-
-  factory IndoorNavigationNode.fromJson(Map<String, dynamic> json) =>
-      IndoorNavigationNode(
-        id: _requiredString(json, 'id'),
-        floorId: _requiredString(json, 'floor_id'),
-        x: _requiredNumber(json, 'x'),
-        y: _requiredNumber(json, 'y'),
-        roomId: _optionalString(json, 'room_id'),
-        label: _optionalString(json, 'label'),
-        kind: _optionalString(json, 'kind'),
-        wheelchairAccessible: _boolean(json, 'wheelchair_accessible'),
-        closed: _boolean(json, 'closed'),
-      );
-
-  final String id;
-  final String floorId;
-  final double x;
-  final double y;
-  final String? roomId;
-  final String? label;
-  final String? kind;
-  final bool wheelchairAccessible;
-  final bool closed;
-
-  String get displayLabel => label ?? roomId ?? id;
-}
-
-class IndoorNavigationEdge {
-  const IndoorNavigationEdge({
-    required this.id,
-    required this.fromNodeId,
-    required this.toNodeId,
-    this.distanceMeters,
-    this.traversalCost,
-    this.durationSeconds,
-    this.bidirectional = false,
-    this.kind = IndoorEdgeKind.corridor,
-    this.wheelchairAccessible = false,
-    this.closed = false,
-  });
-
-  factory IndoorNavigationEdge.fromJson(Map<String, dynamic> json) {
-    final kind = _optionalString(json, 'kind') ?? 'corridor';
-    final parsedKind = IndoorEdgeKind.values.where((item) => item.name == kind);
-    if (parsedKind.isEmpty) {
-      throw FormatException('Unknown navigation edge kind: $kind');
-    }
-    return IndoorNavigationEdge(
-      id: _requiredString(json, 'id'),
-      fromNodeId: _requiredString(json, 'from_node_id'),
-      toNodeId: _requiredString(json, 'to_node_id'),
-      distanceMeters: json['distance_meters'] == null
-          ? null
-          : _requiredNumber(json, 'distance_meters'),
-      traversalCost: json['traversal_cost'] == null
-          ? null
-          : _requiredNumber(json, 'traversal_cost'),
-      durationSeconds: json['duration_seconds'] == null
-          ? null
-          : _requiredNumber(json, 'duration_seconds'),
-      bidirectional: _boolean(json, 'bidirectional'),
-      kind: parsedKind.single,
-      wheelchairAccessible: _boolean(json, 'wheelchair_accessible'),
-      closed: _boolean(json, 'closed'),
-    );
-  }
-
-  final String id;
-  final String fromNodeId;
-  final String toNodeId;
-  final double? distanceMeters;
-  final double? traversalCost;
-  final double? durationSeconds;
-  final bool bidirectional;
-  final IndoorEdgeKind kind;
-  final bool wheelchairAccessible;
-  final bool closed;
-
-  bool get hasSteps =>
-      kind == IndoorEdgeKind.stairs || kind == IndoorEdgeKind.escalator;
-
-  bool get distanceKnown => distanceMeters != null;
-  bool get hasKnownDistance => distanceKnown;
-  double get routingCost => traversalCost ?? distanceMeters ?? double.infinity;
-
-  double? get estimatedDurationSeconds {
-    if (durationSeconds != null) return durationSeconds;
-    final distance = distanceMeters;
-    if (distance == null || distance == 0) return distance;
-    return switch (kind) {
-      IndoorEdgeKind.stairs => distance / 0.6,
-      IndoorEdgeKind.escalator => distance / 0.5,
-      IndoorEdgeKind.elevator => 20 + distance / 1.5,
-      IndoorEdgeKind.ramp => distance,
-      IndoorEdgeKind.door => distance / 1.2 + 3,
-      IndoorEdgeKind.corridor || IndoorEdgeKind.outdoor => distance / 1.2,
-    };
-  }
-}
+export 'indoor_edge_kind.dart';
 
 class IndoorNavigationGraph {
   factory IndoorNavigationGraph({
@@ -205,6 +87,120 @@ class IndoorNavigationGraph {
 
   Iterable<IndoorNavigationNode> nodesForRoom(String roomId) =>
       nodes.where((node) => node.roomId == roomId);
+}
+
+class IndoorNavigationNode {
+  const IndoorNavigationNode({
+    required this.id,
+    required this.floorId,
+    required this.x,
+    required this.y,
+    this.roomId,
+    this.label,
+    this.kind,
+    this.wheelchairAccessible = false,
+    this.closed = false,
+  });
+
+  factory IndoorNavigationNode.fromJson(Map<String, dynamic> json) =>
+      IndoorNavigationNode(
+        id: _requiredString(json, 'id'),
+        floorId: _requiredString(json, 'floor_id'),
+        x: _requiredNumber(json, 'x'),
+        y: _requiredNumber(json, 'y'),
+        roomId: _optionalString(json, 'room_id'),
+        label: _optionalString(json, 'label'),
+        kind: _optionalString(json, 'kind'),
+        wheelchairAccessible: _boolean(json, 'wheelchair_accessible'),
+        closed: _boolean(json, 'closed'),
+      );
+
+  final String id;
+  final String floorId;
+  final double x;
+  final double y;
+  final String? roomId;
+  final String? label;
+  final String? kind;
+  final bool wheelchairAccessible;
+  final bool closed;
+
+  String get displayLabel => label ?? roomId ?? id;
+}
+
+class IndoorNavigationEdge {
+  const IndoorNavigationEdge({
+    required this.id,
+    required this.fromNodeId,
+    required this.toNodeId,
+    this.distanceMeters,
+    this.traversalCost,
+    this.durationSeconds,
+    this.bidirectional = false,
+    this.kind = IndoorEdgeKind.corridor,
+    this.wheelchairAccessible = false,
+    this.closed = false,
+  });
+
+  factory IndoorNavigationEdge.fromJson(Map<String, dynamic> json) {
+    final kind = _optionalString(json, 'kind') ?? 'corridor';
+    final kinds = IndoorEdgeKind.values.asNameMap();
+    final parsedKind = kinds[kind];
+    if (parsedKind == null) {
+      throw FormatException('Unknown navigation edge kind: $kind');
+    }
+    return IndoorNavigationEdge(
+      id: _requiredString(json, 'id'),
+      fromNodeId: _requiredString(json, 'from_node_id'),
+      toNodeId: _requiredString(json, 'to_node_id'),
+      distanceMeters: json['distance_meters'] == null
+          ? null
+          : _requiredNumber(json, 'distance_meters'),
+      traversalCost: json['traversal_cost'] == null
+          ? null
+          : _requiredNumber(json, 'traversal_cost'),
+      durationSeconds: json['duration_seconds'] == null
+          ? null
+          : _requiredNumber(json, 'duration_seconds'),
+      bidirectional: _boolean(json, 'bidirectional'),
+      kind: parsedKind,
+      wheelchairAccessible: _boolean(json, 'wheelchair_accessible'),
+      closed: _boolean(json, 'closed'),
+    );
+  }
+
+  final String id;
+  final String fromNodeId;
+  final String toNodeId;
+  final double? distanceMeters;
+  final double? traversalCost;
+  final double? durationSeconds;
+  final bool bidirectional;
+  final IndoorEdgeKind kind;
+  final bool wheelchairAccessible;
+  final bool closed;
+
+  bool get hasSteps =>
+      kind == IndoorEdgeKind.stairs || kind == IndoorEdgeKind.escalator;
+
+  bool get distanceKnown => distanceMeters != null;
+  bool get hasKnownDistance => distanceMeters != null;
+  double get routingCost => traversalCost ?? distanceMeters ?? double.infinity;
+
+  double? get estimatedDurationSeconds {
+    final overrideDuration = durationSeconds;
+    if (overrideDuration != null) return overrideDuration;
+    final distance = distanceMeters;
+    if (distance == null || distance == 0) return distance;
+    return switch (kind) {
+      IndoorEdgeKind.stairs => distance / 0.6,
+      IndoorEdgeKind.escalator => distance / 0.5,
+      IndoorEdgeKind.elevator => 20 + distance / 1.5,
+      IndoorEdgeKind.ramp => distance,
+      IndoorEdgeKind.door => distance / 1.2 + 3,
+      IndoorEdgeKind.corridor || IndoorEdgeKind.outdoor => distance / 1.2,
+    };
+  }
 }
 
 String _requiredString(Map<String, dynamic> json, String key) {

@@ -1,4 +1,4 @@
-part of 'mini_apps_page.dart';
+part of 'mini_apps_catalog.dart';
 
 class _CatalogSectionLabelSkeleton extends StatelessWidget {
   const _CatalogSectionLabelSkeleton({required this.width});
@@ -10,13 +10,13 @@ class _CatalogSectionLabelSkeleton extends StatelessWidget {
     return Padding(
       padding: const .fromLTRB(
         AppSpacing.screen,
-        AppSpacing.lg,
-        AppSpacing.screen,
         10,
+        AppSpacing.screen,
+        8,
       ),
       child: NinjaSkeleton(
         width: width,
-        height: 19,
+        height: MediaQuery.textScalerOf(context).scale(16) * 1.2,
         radius: AppRadius.skeleton,
       ),
     );

@@ -9,7 +9,7 @@ import 'package:rtu_mirea_app/map/widgets/map_saved_places_sheet.dart';
 
 import '../../helpers/pump_app.dart';
 
-class _Repository extends Fake implements MapDataRepository {
+class FakeSavedPlacesRepository extends Fake implements MapDataRepository {
   bool authenticated = true;
   bool failLoading = false;
   bool failRemoving = false;
@@ -70,7 +70,7 @@ void main() {
   testWidgets('signed out state does not query private bookmarks', (
     tester,
   ) async {
-    final repository = _Repository()..authenticated = false;
+    final repository = FakeSavedPlacesRepository()..authenticated = false;
     await tester.pumpApp(
       _page(
         MapSavedPlacesSheet(
@@ -86,7 +86,8 @@ void main() {
   testWidgets('shows loading then opens named place without displaying IDs', (
     tester,
   ) async {
-    final repository = _Repository()..pending = Completer<List<MapBookmark>>();
+    final repository = FakeSavedPlacesRepository()
+      ..pending = Completer<List<MapBookmark>>();
     MapBookmark? opened;
     await tester.pumpApp(
       _page(
@@ -113,7 +114,7 @@ void main() {
   testWidgets('failed load offers retry without claiming empty bookmarks', (
     tester,
   ) async {
-    final repository = _Repository()..failLoading = true;
+    final repository = FakeSavedPlacesRepository()..failLoading = true;
     await tester.pumpApp(
       _page(
         MapSavedPlacesSheet(
@@ -134,7 +135,7 @@ void main() {
   testWidgets(
     'removes only after server confirmation and shows empty guidance',
     (tester) async {
-      final repository = _Repository();
+      final repository = FakeSavedPlacesRepository();
       await tester.pumpApp(
         _page(
           MapSavedPlacesSheet(
@@ -152,7 +153,7 @@ void main() {
   );
 
   testWidgets('failed removal retains the saved place', (tester) async {
-    final repository = _Repository()..failRemoving = true;
+    final repository = FakeSavedPlacesRepository()..failRemoving = true;
     await tester.pumpApp(
       _page(
         MapSavedPlacesSheet(
@@ -170,7 +171,7 @@ void main() {
   testWidgets('server saved=true cannot be mistaken for successful removal', (
     tester,
   ) async {
-    final repository = _Repository()..remainsSaved = true;
+    final repository = FakeSavedPlacesRepository()..remainsSaved = true;
     await tester.pumpApp(
       _page(
         MapSavedPlacesSheet(
@@ -188,7 +189,7 @@ void main() {
   testWidgets('search filters saved rooms and clear restores the list', (
     tester,
   ) async {
-    final repository = _Repository()
+    final repository = FakeSavedPlacesRepository()
       ..bookmarks = [
         for (var index = 1; index <= 7; index++)
           MapBookmark.fromJson({

@@ -18,14 +18,18 @@ class HomeGreeting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final title = AppText.serif(32, height: 1.08, letterSpacingEm: -0.02);
+    final title = AppText.sans(
+      36,
+      FontWeight.w700,
+      height: 1.08,
+    ).copyWith(letterSpacing: -1.4);
     return Column(
       crossAxisAlignment: .start,
       children: [
         Padding(
           padding: const EdgeInsets.only(
-            top: AppSpacing.contentGap,
-            bottom: AppSpacing.xsm,
+            top: AppSpacing.xlg,
+            bottom: AppSpacing.md,
           ),
           child: nameLoading
               ? Wrap(
@@ -52,12 +56,7 @@ class HomeGreeting extends StatelessWidget {
                       ),
                       TextSpan(
                         text: name,
-                        style: AppText.serif(
-                          32,
-                          height: 1.08,
-                          letterSpacingEm: -0.02,
-                          italic: true,
-                        ).copyWith(color: colors.accent),
+                        style: title.copyWith(color: colors.accent),
                       ),
                     ],
                   ),

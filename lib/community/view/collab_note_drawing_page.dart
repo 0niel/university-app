@@ -13,6 +13,15 @@ import 'package:rtu_mirea_app/community/widgets/collab_notes/editor/drawing_tool
 import 'package:rtu_mirea_app/community/widgets/collab_notes/editor/drawing_toolbar.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
+class CollabNoteDrawingPage extends StatefulWidget {
+  const CollabNoteDrawingPage({super.key, this.initialStrokes = const []});
+
+  final List<DrawingStroke> initialStrokes;
+
+  @override
+  State<CollabNoteDrawingPage> createState() => _CollabNoteDrawingPageState();
+}
+
 class CollabNoteDrawingResult {
   const CollabNoteDrawingResult({required this.bytes, required this.strokes});
 
@@ -47,15 +56,6 @@ Future<CollabNoteDrawingResult?> showCollabNoteDrawingPage(
       ),
     ),
   );
-}
-
-class CollabNoteDrawingPage extends StatefulWidget {
-  const CollabNoteDrawingPage({super.key, this.initialStrokes = const []});
-
-  final List<DrawingStroke> initialStrokes;
-
-  @override
-  State<CollabNoteDrawingPage> createState() => _CollabNoteDrawingPageState();
 }
 
 class _CollabNoteDrawingPageState extends State<CollabNoteDrawingPage> {
@@ -151,7 +151,7 @@ class _CollabNoteDrawingPageState extends State<CollabNoteDrawingPage> {
     try {
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
-      final ratio = math.min<double>(
+      final double ratio = math.min(
         2,
         4096 / math.max(_canvasSize.width, _canvasSize.height),
       );
@@ -193,7 +193,7 @@ class _CollabNoteDrawingPageState extends State<CollabNoteDrawingPage> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final palette = _palette(context);
-    final color = _color ?? palette.first;
+    final color = _color ?? palette.firstOrNull ?? colors.ink;
     return ColoredBox(
       color: colors.canvas,
       child: SafeArea(

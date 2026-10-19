@@ -7,14 +7,14 @@ import '../../kit_harness.dart';
 void main() {
   const pulse = AlwaysStoppedAnimation<double>(0);
   Finder coachTail() => find.descendant(
-        of: find.byType(NinjaCoachCard),
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is CustomPaint &&
-              widget.painter != null &&
-              widget.child == null,
-        ),
-      );
+    of: find.byType(NinjaCoachCard),
+    matching: find.byWidgetPredicate(
+      (widget) =>
+          widget is CustomPaint &&
+          widget.painter != null &&
+          widget.child == null,
+    ),
+  );
 
   group('NinjaSpotlight', () {
     testWidgets('paints a full scrim without a hole', (tester) async {

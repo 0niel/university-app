@@ -9,7 +9,11 @@ import 'package:rtu_mirea_app/home/view/widgets/home_lessons_group.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
+import '../../gallery/gallery_fonts.dart';
+
 void main() {
+  setUpAll(loadGalleryFonts);
+
   final day = DateTime(2026, 9, 2);
   final lesson = LessonSchedulePart(
     subject: 'Теоретические основы информатики и программирования',
@@ -65,6 +69,41 @@ void main() {
   }
 
   for (final kind in HomeHeroKind.values) {
+    testWidgets('$kind stays compact with a regular lesson', (tester) async {
+      final regular = lesson.copyWith(
+        subject: 'Математический анализ',
+        teachers: const [Teacher(name: 'Матвеев М. М.')],
+      );
+      final featured = HomeLessonEntry(
+        lesson: regular,
+        start: day.add(const Duration(hours: 9)),
+        end: day.add(const Duration(hours: 10, minutes: 30)),
+        isCurrent: kind == HomeHeroKind.during,
+        isNext: kind == HomeHeroKind.before || kind == HomeHeroKind.pause,
+        isPast: kind == HomeHeroKind.done,
+      );
+      await pump(
+        tester,
+        HomeHero(
+          entries: kind == HomeHeroKind.free ? [] : [featured],
+          kind: kind,
+          tomorrow: [regular],
+          now: day.add(const Duration(hours: 9, minutes: 30)),
+          onOpen: (_) {},
+          onRoute: (_) {},
+          onNote: (_) {},
+          onFreeRooms: () {},
+          onDeadlines: () {},
+          onTomorrow: () {},
+        ),
+      );
+      expect(
+        tester.getSize(find.byType(HomeHero)).height,
+        lessThanOrEqualTo(kind == HomeHeroKind.during ? 170 : 210),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('$kind supports narrow width and 200% text without overflow', (
       tester,
     ) async {
@@ -157,10 +196,58 @@ void main() {
         onTomorrow: () {},
       ),
     );
-    await tester.tap(find.byType(AppButton));
-    await tester.tap(find.byType(AppIconButton));
+    await tester.tap(
+      find.byWidgetPredicate(
+        (widget) => widget is AppIconButton && widget.tooltip == 'Маршрут',
+      ),
+    );
+    await tester.tap(
+      find.byWidgetPredicate(
+        (widget) => widget is AppIconButton && widget.tooltip == 'Заметка',
+      ),
+    );
     expect(routes, 1);
     expect(notes, 1);
+  });
+
+  testWidgets('long featured subject stays compact and exposes its full name', (
+    tester,
+  ) async {
+    const title = 'Государственная система обеспечения единства измерений';
+    var opened = 0;
+    final featured = HomeLessonEntry(
+      lesson: lesson.copyWith(subject: title),
+      start: day.add(const Duration(hours: 9)),
+      end: day.add(const Duration(hours: 10, minutes: 30)),
+      isNext: true,
+    );
+    await pump(
+      tester,
+      HomeHero(
+        entries: [featured],
+        kind: HomeHeroKind.before,
+        tomorrow: const [],
+        now: day.add(const Duration(hours: 8)),
+        onOpen: (_) => opened++,
+        onRoute: (_) {},
+        onNote: (_) {},
+        onFreeRooms: () {},
+        onDeadlines: () {},
+        onTomorrow: () {},
+      ),
+    );
+    expect(tester.widget<Text>(find.text(title)).maxLines, 2);
+    expect(
+      tester.getSize(find.byType(HomeHero)).height,
+      lessThanOrEqualTo(200),
+    );
+    final titleButton = find.byWidgetPredicate(
+      (widget) => widget is AppPressable && widget.semanticsLabel == title,
+    );
+    expect(titleButton, findsOneWidget);
+    await tester.tap(titleButton);
+    expect(opened, 1);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('deadline completion only enabled for own non-pending records', (
@@ -196,5 +283,47 @@ void main() {
     expect(rows.where((row) => row.onToggle != null), hasLength(1));
     rows.firstWhere((row) => row.onToggle != null).onToggle!();
     expect(toggles, ['own']);
+  });
+
+  testWidgets('home deadline remaining time stays at the trailing card edge', (
+    tester,
+  ) async {
+    final deadline = Deadline(
+      id: 'report',
+      title: 'Отчёт по лабораторной работе',
+      subjectName: 'Теоретические основы информатики',
+      dueAt: day.add(const Duration(days: 3)),
+      source: DeadlineSource.me,
+      isMine: true,
+    );
+    var opened = 0;
+    var toggled = 0;
+    await pump(
+      tester,
+      HomeDeadlinesGroup(
+        state: DeadlinesState(
+          status: DeadlinesStatus.ready,
+          deadlines: [deadline],
+        ),
+        now: day,
+        onAdd: () {},
+        onOpen: () => opened++,
+        onRetry: () {},
+        onToggle: (_) => toggled++,
+      ),
+      width: 320,
+      scale: 2,
+    );
+    final row = tester.widget<AppDeadlineRow>(find.byType(AppDeadlineRow));
+    final groupRect = tester.getRect(find.byType(AppListGroup));
+    final dateRect = tester.getRect(find.text(row.left));
+    expect(dateRect.right, closeTo(groupRect.right - AppSpacing.lg, .01));
+    expect(row.left, contains('3'));
+    await tester.tap(find.byType(AppDeadlineCheck));
+    expect(toggled, 1);
+    expect(opened, 0);
+    await tester.tap(find.text(deadline.title));
+    expect(opened, 1);
+    expect(tester.takeException(), isNull);
   });
 }

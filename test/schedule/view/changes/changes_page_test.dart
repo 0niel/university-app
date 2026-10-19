@@ -285,7 +285,7 @@ void main() {
         final disabled = tester.widget<AppSwitch>(find.byType(AppSwitch));
         expect(disabled.value, isFalse);
         expect(disabled.onChanged, isNull);
-        pending.completeError(Exception('offline'));
+        pending.completeError(Exception('offline'), StackTrace.current);
         await tester.pumpAndSettle();
         expect(tester.widget<AppSwitch>(find.byType(AppSwitch)).value, isTrue);
         await tester.pump(const Duration(seconds: 5));

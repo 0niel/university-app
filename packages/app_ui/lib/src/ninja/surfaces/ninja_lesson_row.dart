@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/lesson_row_state.dart';
 import 'package:app_ui/src/ninja/surfaces/ninja_pill_button.dart';
 import 'package:app_ui/src/ninja/surfaces/ninja_progress_bar.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
@@ -10,18 +11,7 @@ import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-enum LessonRowState {
-  plain,
-  past,
-  current,
-  next,
-  moved,
-  cancelled,
-  exam,
-  own;
-
-  static const LessonRowState custom = LessonRowState.own;
-}
+export 'lesson_row_state.dart';
 
 class NinjaLessonRow extends StatelessWidget {
   const NinjaLessonRow({
@@ -87,31 +77,47 @@ class NinjaLessonRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final state = _state;
-    final accent = switch (state) {
+    final resolvedState = _state;
+    final accent = switch (resolvedState) {
       LessonRowState.past => colors.surface2,
       LessonRowState.moved => colors.warn,
       LessonRowState.cancelled || LessonRowState.exam => colors.exam,
       LessonRowState.own => colors.ink,
-      _ => color ?? colors.accent,
+      LessonRowState.plain ||
+      LessonRowState.current ||
+      LessonRowState.next => color ?? colors.accent,
     };
-    final cardColor = switch (state) {
+    final cardColor = switch (resolvedState) {
       LessonRowState.current => colors.tint,
       LessonRowState.exam => colors.examTint,
-      _ => colors.surface,
+      LessonRowState.plain ||
+      LessonRowState.past ||
+      LessonRowState.next ||
+      LessonRowState.moved ||
+      LessonRowState.cancelled ||
+      LessonRowState.own => colors.surface,
     };
-    final titleColor = switch (state) {
+    final titleColor = switch (resolvedState) {
       LessonRowState.past => colors.muted2,
       LessonRowState.cancelled => colors.muted,
-      _ => colors.ink,
+      LessonRowState.plain ||
+      LessonRowState.current ||
+      LessonRowState.next ||
+      LessonRowState.moved ||
+      LessonRowState.exam ||
+      LessonRowState.own => colors.ink,
     };
-    final metaColor = switch (state) {
+    final metaColor = switch (resolvedState) {
       LessonRowState.past => colors.muted2,
       LessonRowState.moved => colors.warn,
       LessonRowState.cancelled => colors.danger,
-      _ => colors.muted,
+      LessonRowState.plain ||
+      LessonRowState.current ||
+      LessonRowState.next ||
+      LessonRowState.exam ||
+      LessonRowState.own => colors.muted,
     };
-    final strike = state == LessonRowState.cancelled
+    final strike = resolvedState == LessonRowState.cancelled
         ? TextDecoration.lineThrough
         : TextDecoration.none;
 
@@ -138,9 +144,12 @@ class NinjaLessonRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(
-                width: 44 *
-                    (MediaQuery.textScalerOf(context).scale(14) / 14)
-                        .clamp(1.0, 2.0),
+                width:
+                    44 *
+                    (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(
+                      1.0,
+                      2.0,
+                    ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -203,23 +212,25 @@ class NinjaLessonRow extends StatelessWidget {
                       const SizedBox(height: AppSpacing.xs),
                     Text(
                       title,
-                      style: (scheduleStyle
-                              ? AppText.sans(16, FontWeight.w600)
-                              : AppText.headline)
-                          .copyWith(
-                        color: titleColor,
-                        height: 1.25,
-                        decoration: strike,
-                      ),
+                      style:
+                          (scheduleStyle
+                                  ? AppText.sans(16, FontWeight.w600)
+                                  : AppText.headline)
+                              .copyWith(
+                                color: titleColor,
+                                height: 1.25,
+                                decoration: strike,
+                              ),
                     ),
                     if (metaText != null) ...[
                       SizedBox(height: scheduleStyle ? 5 : 4),
                       Text(
                         metaText,
-                        style: (scheduleStyle
-                                ? AppText.sans(13, FontWeight.w400)
-                                : AppText.subtext)
-                            .copyWith(color: metaColor),
+                        style:
+                            (scheduleStyle
+                                    ? AppText.sans(13, FontWeight.w400)
+                                    : AppText.subtext)
+                                .copyWith(color: metaColor),
                       ),
                     ],
                     if (progress != null) ...[
@@ -255,8 +266,9 @@ class NinjaLessonRow extends StatelessWidget {
               if (onMore != null) ...[
                 const SizedBox(width: AppSpacing.gap),
                 Align(
-                  alignment:
-                      scheduleStyle ? Alignment.topCenter : Alignment.center,
+                  alignment: scheduleStyle
+                      ? Alignment.topCenter
+                      : Alignment.center,
                   child: Transform.translate(
                     offset: Offset(0, scheduleStyle ? -4 : 0),
                     child: AppPressable(

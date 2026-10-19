@@ -14,7 +14,7 @@ class AdaptiveThemeWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeCubit, ThemeState>(
-      builder: (context, themeState) {
+      builder: (context, _) {
         final themeCubit = context.read<ThemeCubit>();
         final lightTheme = themeCubit.getLightTheme();
         final darkTheme = themeCubit.getDarkTheme();
@@ -25,7 +25,6 @@ class AdaptiveThemeWrapper extends StatelessWidget {
           initial: .dark,
           builder: (theme, _) => AppThemeBuilder(
             theme: theme,
-            themeState: themeState,
             themeCubit: themeCubit,
             router: router,
           ),

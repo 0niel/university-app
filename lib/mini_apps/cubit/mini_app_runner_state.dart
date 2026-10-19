@@ -57,7 +57,7 @@ class MiniAppRunnerState {
 
   @override
   String toString() =>
-      'MiniAppRunnerState(status: $status, app: ${app?.slug}, '
+      'MiniAppRunnerState(status: ${status.name}, app: ${app?.slug ?? 'null'}, '
       'screen: ${screen == null ? 'null' : '${screen!.length} keys'}, '
       'fromCache: $fromCache, refreshing: $refreshing, '
       'refreshFailed: $refreshFailed)';

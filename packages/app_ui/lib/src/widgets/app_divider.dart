@@ -9,9 +9,7 @@ class AppDivider extends StatelessWidget {
     this.color,
   });
 
-  const AppDivider.inset({super.key, this.color})
-      : indent = 16,
-        endIndent = 0;
+  const AppDivider.inset({super.key, this.color}) : indent = 16, endIndent = 0;
 
   final double indent;
   final double endIndent;
@@ -24,7 +22,13 @@ class AppDivider extends StatelessWidget {
       child: SizedBox(
         width: double.infinity,
         height: 1,
-        child: ColoredBox(color: color ?? context.colors.line),
+        child: Center(
+          child: SizedBox(
+            width: double.infinity,
+            height: 1 / (MediaQuery.maybeDevicePixelRatioOf(context) ?? 1),
+            child: ColoredBox(color: color ?? context.colors.line),
+          ),
+        ),
       ),
     );
   }
@@ -41,7 +45,13 @@ class AppVerticalDivider extends StatelessWidget {
     return SizedBox(
       width: 1,
       height: height,
-      child: ColoredBox(color: color ?? context.colors.line),
+      child: Center(
+        child: SizedBox(
+          width: 1 / (MediaQuery.maybeDevicePixelRatioOf(context) ?? 1),
+          height: height,
+          child: ColoredBox(color: color ?? context.colors.line),
+        ),
+      ),
     );
   }
 }

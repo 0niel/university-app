@@ -19,7 +19,7 @@ class PromoSectionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final title = switch (section) {
+    final sectionTitle = switch (section) {
       PromoFactsSection(:final title) =>
         title.isEmpty ? l10n.promoSectionFacts : title,
       PromoStepsSection(:final title) =>
@@ -35,7 +35,7 @@ class PromoSectionView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title.isNotEmpty) AppSectionTitle(title: title),
+        if (sectionTitle.isNotEmpty) AppSectionTitle(title: sectionTitle),
         switch (section) {
           PromoFactsSection(:final items) => _Facts(items: items),
           PromoStepsSection(:final items) => _Steps(

@@ -105,11 +105,19 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        if (scene == _Scene.teacherLogin || scene == _Scene.teacherPassword) {
+        final (teacherRole, passwordEntry, advances) = switch (scene) {
+          _Scene.teacherLogin => (true, false, 0),
+          _Scene.teacherPassword => (true, true, 0),
+          _Scene.password => (false, true, 0),
+          _Scene.secondStory => (false, false, 1),
+          _Scene.thirdStory => (false, false, 2),
+          _Scene.login || _Scene.welcome => (false, false, 0),
+        };
+        if (teacherRole) {
           await tester.tap(find.text('Преподаватель'));
           await tester.pumpAndSettle();
         }
-        if (scene == _Scene.password || scene == _Scene.teacherPassword) {
+        if (passwordEntry) {
           await tester.ensureVisible(
             find.byKey(const Key('loginPage_startButton')),
           );
@@ -121,11 +129,6 @@ void main() {
             findsOneWidget,
           );
         }
-        final advances = switch (scene) {
-          _Scene.secondStory => 1,
-          _Scene.thirdStory => 2,
-          _ => 0,
-        };
         for (var page = 0; page < advances; page++) {
           await tester.tap(find.byKey(const Key('onboarding_storyNext')));
           await tester.pumpAndSettle();

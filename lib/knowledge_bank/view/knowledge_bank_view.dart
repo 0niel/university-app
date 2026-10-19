@@ -77,8 +77,8 @@ class _KnowledgeBankViewState extends State<KnowledgeBankView> {
       final prefs = await SharedPreferences.getInstance();
       final grid = prefs.getBool(_kGridViewPrefKey);
       if (mounted && grid != null) setState(() => _gridView = grid);
-    } on Exception {
-      return;
+    } on Exception catch (error) {
+      debugPrint('Material view preference unavailable: ${error.runtimeType}');
     }
   }
 
@@ -87,8 +87,8 @@ class _KnowledgeBankViewState extends State<KnowledgeBankView> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_kGridViewPrefKey, grid);
-    } on Exception {
-      return;
+    } on Exception catch (error) {
+      debugPrint('Material view preference unavailable: ${error.runtimeType}');
     }
   }
 
@@ -428,7 +428,7 @@ class _KnowledgeBankViewState extends State<KnowledgeBankView> {
                       child: AppSearchBar(
                         controller: _searchController,
                         hintText: l10n.knowledgeSearchHint,
-                        onCanvas: true,
+                        isOnCanvas: true,
                         trailingIcon: null,
                         onChanged: (value) => setState(() => _query = value),
                       ),
@@ -447,14 +447,9 @@ class _KnowledgeBankViewState extends State<KnowledgeBankView> {
               ),
             ),
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screen,
-                ),
-                child: _KnowledgeFilters(
-                  value: state.type,
-                  onChanged: cubit.typeChanged,
-                ),
+              child: _KnowledgeFilters(
+                value: state.type,
+                onChanged: cubit.typeChanged,
               ),
             ),
             SliverPadding(

@@ -39,14 +39,18 @@ class AppSheetActionRow extends StatelessWidget {
         children: [
           if (!isFirst) const AppDivider(),
           Padding(
-            padding:
-                const EdgeInsets.symmetric(vertical: AppSpacing.actionInset),
+            padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.actionInset,
+            ),
             child: Row(
               children: [
                 AppIconTile(
                   background: isDestructive ? colors.dangerTint : null,
-                  child:
-                      Icon(icon, size: AppIconSize.compact, color: foreground),
+                  child: Icon(
+                    icon,
+                    size: AppIconSize.compact,
+                    color: foreground,
+                  ),
                 ),
                 const SizedBox(width: AppSpacing.sectionGap),
                 Expanded(

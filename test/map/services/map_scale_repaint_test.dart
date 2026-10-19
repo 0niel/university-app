@@ -15,7 +15,9 @@ void main() {
     addTearDown(transform.dispose);
     addTearDown(scale.dispose);
     var invalidations = 0;
-    scale.addListener(() => invalidations++);
+    void onInvalidated() => invalidations++;
+    scale.addListener(onInvalidated);
+    addTearDown(() => scale.removeListener(onInvalidated));
     for (var frame = 0; frame < 60; frame++) {
       transform.value = Matrix4.identity()
         ..translateByDouble(frame.toDouble(), -frame.toDouble(), 0, 1)

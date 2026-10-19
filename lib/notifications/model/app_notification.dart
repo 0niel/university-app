@@ -1,18 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-enum AppNotificationKind {
-  warn,
-  danger,
-  accent,
-  lecture,
-  muted;
-
-  static AppNotificationKind parse(String? value) => values.firstWhere(
-    (kind) => kind.name == value,
-    orElse: () => AppNotificationKind.accent,
-  );
-}
-
 class AppNotification extends Equatable {
   const AppNotification({
     required this.id,
@@ -54,4 +41,17 @@ class AppNotification extends Equatable {
 
   @override
   List<Object?> get props => [id, kind, title, subtitle, route, createdAt];
+}
+
+enum AppNotificationKind {
+  warn,
+  danger,
+  accent,
+  lecture,
+  muted;
+
+  static AppNotificationKind parse(String? value) => values.firstWhere(
+    (kind) => kind.name == value,
+    orElse: () => AppNotificationKind.accent,
+  );
 }

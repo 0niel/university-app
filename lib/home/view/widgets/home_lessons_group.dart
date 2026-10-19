@@ -19,24 +19,22 @@ class HomeLessonsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = entries
-        .where((entry) => entry != featuredEntry)
-        .toList();
+    final list = entries.where((entry) => entry != featuredEntry).toList();
     if (list.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 10),
-      child: AppListGroup(
-        showDividers: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final entry in list)
-            Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: context.colors.line),
-                ),
-              ),
+          for (final entry in list) ...[
+            if (entry != list.first) const SizedBox(height: AppSpacing.sm),
+            AppGlassSurface(
+              borderRadius: AppRadius.card,
+              tone: AppGlassTone.subtle,
+              tint: lessonAccentOf(context, entry.lesson),
               child: HomeLessonRow(entry: entry, onTap: () => onOpen(entry)),
             ),
+          ],
         ],
       ),
     );

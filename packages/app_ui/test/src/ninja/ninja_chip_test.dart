@@ -6,14 +6,14 @@ import '../kit_harness.dart';
 
 void main() {
   BoxDecoration chipOf(WidgetTester tester) => kitDecoration(
-        tester,
-        find
-            .descendant(
-              of: find.byType(AppChip),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
+    tester,
+    find
+        .descendant(
+          of: find.byType(AppChip),
+          matching: find.byType(Container),
+        )
+        .first,
+  );
 
   testWidgets('unselected chip is surface2 with muted label', (tester) async {
     await tester.pumpWidget(

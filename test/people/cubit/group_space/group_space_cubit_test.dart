@@ -17,7 +17,7 @@ class _FakeRealtimeSession implements GroupSpaceRealtimeSession {
   void emitChange() => _controller.add(null);
 
   @override
-  Future<void> close() async => _controller.close();
+  Future<void> close() => _controller.close();
 }
 
 class _FakePresenceSession implements GroupSpacePresenceSession {
@@ -29,7 +29,7 @@ class _FakePresenceSession implements GroupSpacePresenceSession {
   void emitCount(int count) => _controller.add(count);
 
   @override
-  Future<void> close() async => _controller.close();
+  Future<void> close() => _controller.close();
 }
 
 void main() {

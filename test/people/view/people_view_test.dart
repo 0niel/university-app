@@ -92,6 +92,60 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets(
+      'tabs reach both page edges and accept edge swipes at 200% text',
+      (
+        tester,
+      ) async {
+        await tester.binding.setSurfaceSize(const Size(320, 900));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          buildSubject(const PeopleState(status: .ready), textScale: 2),
+        );
+        await tester.pumpAndSettle();
+
+        final tabs = find.byType(NinjaTabs<PeopleTab>);
+        final tabLabels = tester.widget<NinjaTabs<PeopleTab>>(tabs).tabs;
+        final scrollable = find.descendant(
+          of: tabs,
+          matching: find.byType(Scrollable),
+        );
+        final bounds = tester.getRect(scrollable);
+        final page = tester.getRect(find.byType(PeopleView));
+        final position = tester.state<ScrollableState>(scrollable).position;
+        expect(bounds.left, page.left);
+        expect(bounds.right, page.right);
+        expect(
+          tester.getTopLeft(find.text(tabLabels.first.label)).dx - bounds.left,
+          closeTo(20, .01),
+        );
+        expect(position.maxScrollExtent, greaterThan(0));
+
+        await tester.dragFrom(
+          Offset(bounds.left + 2, bounds.center.dy),
+          const Offset(-160, 0),
+        );
+        await tester.pumpAndSettle();
+        expect(position.pixels, greaterThan(0));
+
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pump();
+        final beforeReturn = position.pixels;
+        await tester.dragFrom(
+          Offset(bounds.right - 2, bounds.center.dy),
+          const Offset(160, 0),
+        );
+        await tester.pumpAndSettle();
+        expect(position.pixels, lessThan(beforeReturn));
+
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pump();
+        await tester.tap(find.text(tabLabels.last.label));
+        verify(() => cubit.tabChanged(PeopleTab.group)).called(1);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('shows a retryable cold-load failure', (tester) async {
       await tester.pumpWidget(
         buildSubject(const PeopleState(status: .failure)),

@@ -498,6 +498,7 @@ class _GroupSpaceViewState extends State<GroupSpaceView> {
       title: telegram
           ? context.l10n.groupSpaceAddTelegramTitle
           : context.l10n.groupSpaceAddLinkTitle,
+      contentPadding: EdgeInsets.zero,
       child: BlocProvider.value(
         value: cubit,
         child: GroupLinkSheet(telegram: telegram),

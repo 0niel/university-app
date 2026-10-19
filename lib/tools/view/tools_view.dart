@@ -23,8 +23,7 @@ class ToolsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return ColoredBox(
-      color: context.colors.canvas,
+    return AppAmbientBackground(
       child: ListView(
         padding: EdgeInsets.fromLTRB(
           AppSpacing.screen,
@@ -35,6 +34,7 @@ class ToolsView extends StatelessWidget {
         children: [
           AppInnerHeader(
             title: l10n.toolsCommunitySection,
+            titleStyle: AppText.sans(32, FontWeight.w700, height: 1.08),
             subtitle: l10n.toolsCommunitySectionSubtitle,
             padding: EdgeInsets.only(
               top: math.max(

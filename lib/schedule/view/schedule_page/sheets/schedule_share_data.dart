@@ -186,7 +186,7 @@ String scheduleShareCalendar(
       'END:VEVENT',
     ]);
   }
-  for (final event in events.where((event) => event.canExportCalendar)) {
+  for (final event in events.where((item) => item.canExportCalendar)) {
     final date = DateFormat('yyyyMMdd').format(event.date);
     final id = Uri.encodeComponent('${event.id}:$date:${event.start ?? ''}');
     final next = DateFormat(
@@ -239,22 +239,22 @@ Future<List<Uint8List>> scheduleShareImages(
   const contentTop = 214.0;
   const contentBottom = height - 108.0;
   final direction = Directionality.of(context);
-  TextPainter text(String value, TextStyle style, {double inset = 0}) {
+  TextPainter text(String value, TextStyle style) {
     final painter = TextPainter(
       text: TextSpan(text: value, style: style),
       textDirection: direction,
-    )..layout(maxWidth: width - padding * 2 - inset);
+    )..layout(maxWidth: width - padding * 2);
     return painter;
   }
 
-  final blocks = <_ScheduleImageBlock>[];
+  final blocks = <_ScheduleShareData>[];
   DateTime? previousDay;
   for (final (date, lesson, event) in rows) {
     final day = dateOnly(date);
     if (day != previousDay) {
       previousDay = day;
       blocks.add(
-        _ScheduleImageBlock(
+        _ScheduleShareData(
           painter: text(
             DateFormat.yMMMMEEEEd(l10n.localeName).format(day),
             AppText.sans(28, FontWeight.w700).copyWith(color: colors.muted),
@@ -287,7 +287,7 @@ Future<List<Uint8List>> scheduleShareImages(
             ...lesson.teachers.map((teacher) => teacher.name),
           ];
     blocks.add(
-      _ScheduleImageBlock(
+      _ScheduleShareData(
         painter: TextPainter(
           text: TextSpan(
             children: [
@@ -324,17 +324,18 @@ Future<List<Uint8List>> scheduleShareImages(
       ),
     );
   }
-  final pages = <List<_ScheduleImageSlice>>[[]];
+  var currentPage = <_ScheduleImageSlice>[];
+  final pages = [currentPage];
   var y = contentTop;
-  for (var index = 0; index < blocks.length; index++) {
-    final block = blocks[index];
+  for (final (index, block) in blocks.indexed) {
+    final nextBlock = blocks.elementAtOrNull(index + 1);
     final inset = block.isHeading ? 0.0 : 24.0;
     final blockHeight = block.painter.height + inset * 2;
-    final nextHeight = block.isHeading && index + 1 < blocks.length
-        ? (blocks[index + 1].painter.height + 68).clamp(0, 300)
+    final nextHeight = block.isHeading && nextBlock != null
+        ? (nextBlock.painter.height + 68).clamp(0, 300)
         : 0;
     if (y > contentTop && y + blockHeight + nextHeight > contentBottom) {
-      pages.add([]);
+      pages.add(currentPage = []);
       y = contentTop;
     }
     var consumed = 0.0;
@@ -348,18 +349,19 @@ Future<List<Uint8List>> scheduleShareImages(
             .map((line) => line.baseline + line.descent)
             .where((end) => end > consumed && end - consumed <= available)
             .toList();
-        if (boundaries.isEmpty) {
-          pages.add([]);
+        final boundary = boundaries.lastOrNull;
+        if (boundary == null) {
+          pages.add(currentPage = []);
           y = contentTop;
           continue;
         }
-        sliceHeight = boundaries.last - consumed;
+        sliceHeight = boundary - consumed;
       }
-      pages.last.add(_ScheduleImageSlice(block, y, consumed, sliceHeight));
+      currentPage.add(_ScheduleImageSlice(block, y, consumed, sliceHeight));
       y += sliceHeight + inset * 2 + 20;
       consumed += sliceHeight;
       if (consumed < block.painter.height) {
-        pages.add([]);
+        pages.add(currentPage = []);
         y = contentTop;
       }
     }
@@ -369,7 +371,10 @@ Future<List<Uint8List>> scheduleShareImages(
     for (final (index, page) in pages.indexed) {
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder)..drawColor(colors.canvas, BlendMode.src);
-      final title = text(name, AppText.serif(50).copyWith(color: colors.ink));
+      final title = text(
+        name,
+        AppText.sans(46, FontWeight.w700).copyWith(color: colors.ink),
+      );
       canvas
         ..save()
         ..clipRect(
@@ -456,8 +461,8 @@ Future<List<Uint8List>> scheduleShareImages(
   }
 }
 
-class _ScheduleImageBlock {
-  const _ScheduleImageBlock({
+class _ScheduleShareData {
+  const _ScheduleShareData({
     required this.painter,
     required this.isHeading,
     required this.accent,
@@ -469,7 +474,7 @@ class _ScheduleImageBlock {
 
 class _ScheduleImageSlice {
   const _ScheduleImageSlice(this.block, this.y, this.offset, this.height);
-  final _ScheduleImageBlock block;
+  final _ScheduleShareData block;
   final double y;
   final double offset;
   final double height;

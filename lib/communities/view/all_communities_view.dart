@@ -63,15 +63,17 @@ class _AllCommunitiesViewState extends State<AllCommunitiesView> {
     }
   }
 
-  Future<void> _open(CommunityCatalogEntry entry, String category) =>
-      Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(
-          builder: (_) => BlocProvider.value(
-            value: context.read<JoinedCommunitiesCubit>(),
-            child: CommunityDetailPage(entry: entry, categoryTitle: category),
-          ),
+  Future<void> _open(CommunityCatalogEntry entry, String category) {
+    final cubit = context.read<JoinedCommunitiesCubit>();
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider.value(
+          value: cubit,
+          child: CommunityDetailPage(entry: entry, categoryTitle: category),
         ),
-      );
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

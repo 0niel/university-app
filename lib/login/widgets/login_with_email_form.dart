@@ -29,10 +29,10 @@ class _LoginWithEmailFormState extends State<LoginWithEmailForm> {
     final state = context.watch<LoginBloc>().state;
     return BlocListener<LoginBloc, LoginState>(
       listenWhen: (previous, current) => previous.status != current.status,
-      listener: (context, state) {
-        if (state.status.isSuccess) {
-          LoginEmailConfirmationRoute(email: state.email.value).go(context);
-        } else if (state.status.isFailure) {
+      listener: (context, current) {
+        if (current.status.isSuccess) {
+          LoginEmailConfirmationRoute(email: current.email.value).go(context);
+        } else if (current.status.isFailure) {
           ToastManager.showError(context, message: l10n.authEmailLinkFailed);
         }
       },

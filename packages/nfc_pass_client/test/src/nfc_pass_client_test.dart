@@ -210,7 +210,7 @@ void main() {
             status,
             headers: {
               'location': location,
-              if (status == 200) ...{'content-type': 'text/html'},
+              if (status == 200) 'content-type': 'text/html',
             },
           ),
         ),

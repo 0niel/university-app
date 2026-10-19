@@ -77,8 +77,9 @@ class AppThemePreview extends StatelessWidget {
                         height: 27,
                         decoration: BoxDecoration(
                           color: preview.surface2,
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.skeletonSmall),
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.skeletonSmall,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 7),
@@ -86,8 +87,9 @@ class AppThemePreview extends StatelessWidget {
                         height: 15,
                         decoration: BoxDecoration(
                           color: preview.surface2,
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.skeletonThin),
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.skeletonThin,
+                          ),
                         ),
                       ),
                     ],
@@ -118,8 +120,9 @@ class AppThemePreview extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: AppText.captionStrong
-                  .copyWith(color: selected ? colors.ink : colors.muted),
+              style: AppText.captionStrong.copyWith(
+                color: selected ? colors.ink : colors.muted,
+              ),
             ),
           ],
         ),

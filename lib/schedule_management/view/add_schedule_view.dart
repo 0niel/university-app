@@ -68,7 +68,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
             child: AppSegmentedControl<ScheduleTarget>(
               value: _target,
               onChanged: _onTargetChanged,
-              onCanvas: true,
+              isOnCanvas: true,
               options: [
                 AppSegmentedOption(
                   value: ScheduleTarget.group,
@@ -97,7 +97,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
             child: AppSearchField(
               controller: _controller,
               autofocus: true,
-              onCanvas: true,
+              isOnCanvas: true,
               hintText: _hint,
               onChanged: _onQueryChanged,
             ),

@@ -21,7 +21,7 @@ void main() {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(() => server.close(force: true));
     final requests = <Map<String, Object?>>[];
-    server.listen((request) async {
+    final subscription = server.listen((request) async {
       expect(request.method, 'POST');
       expect(request.uri.path, '/rest/v1/rpc/get_schedule_for_entity');
       requests.add(
@@ -39,6 +39,7 @@ void main() {
       );
       await request.response.close();
     });
+    addTearDown(subscription.cancel);
     final client = SupabaseClient(
       'http://127.0.0.1:${server.port}',
       'test-key',
@@ -75,7 +76,7 @@ void main() {
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       addTearDown(() => server.close(force: true));
       var requestCount = 0;
-      server.listen((request) async {
+      final subscription = server.listen((request) async {
         await request.drain<void>();
         requestCount++;
         request.response.headers.contentType = ContentType.json;
@@ -93,6 +94,7 @@ void main() {
         }
         await request.response.close();
       });
+      addTearDown(subscription.cancel);
       final client = SupabaseClient(
         'http://127.0.0.1:${server.port}',
         'test-key',

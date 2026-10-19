@@ -40,21 +40,18 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color scrim;
   final bool isDark;
 
-  static const Color amoledCanvas = Colors.black;
-  static const amoledSurface = Color(0xFF101012);
-  static const amoledSurface2 = Color(0xFF1B1C21);
   static const mapCanvasLight = Color(0xFFF1EFEA);
   static const mapCanvasDark = Color(0xFF171A20);
 
   static const AppColors light = AppColors(
-    canvas: Color(0xFFF3F4F6),
+    canvas: Color(0xFFF5F7FC),
     surface: Color(0xFFFFFFFF),
-    surface2: Color(0xFFE9EBEF),
-    ink: Color(0xFF15171C),
-    muted: Color(0xFF6B7280),
+    surface2: Color(0xFFEBEFF7),
+    ink: Color(0xFF111724),
+    muted: Color(0xFF647086),
     muted2: Color(0xFFA3A8B3),
     line: Color.fromRGBO(21, 23, 28, .08),
-    accent: Color(0xFF2F7AFF),
+    accent: Color(0xFF3063DE),
     onAccent: Color(0xFFFFFFFF),
     lecture: Color(0xFF0E8A63),
     practice: Color(0xFF2F7AFF),
@@ -66,20 +63,20 @@ class AppColors extends ThemeExtension<AppColors> {
   );
 
   static const AppColors dark = AppColors(
-    canvas: Color(0xFF0F1012),
-    surface: Color(0xFF1A1B20),
-    surface2: Color(0xFF25272E),
-    ink: Color(0xFFECEDEF),
-    muted: Color(0xFF9AA0AB),
+    canvas: Colors.black,
+    surface: Color(0xFF101012),
+    surface2: Color(0xFF1B1C21),
+    ink: Color(0xFFF5F7FC),
+    muted: Color(0xFFA0AABC),
     muted2: Color(0xFF5F646E),
     line: Color.fromRGBO(236, 237, 239, .08),
-    accent: Color(0xFF78A7FF),
-    onAccent: Color(0xFF0F1012),
-    lecture: Color(0xFF55C7A4),
-    practice: Color(0xFF78A7FF),
-    lab: Color(0xFFA18AFF),
-    exam: Color(0xFFFF7478),
-    warn: Color(0xFFF0C866),
+    accent: Color(0xFFA8C4FF),
+    onAccent: Color(0xFF0D1830),
+    lecture: Color(0xFF69D8BA),
+    practice: Color(0xFFA8C4FF),
+    lab: Color(0xFFB7A0FF),
+    exam: Color(0xFFFF718F),
+    warn: Color(0xFFFFB56D),
     scrim: Color(0x99000000),
     isDark: true,
   );
@@ -87,7 +84,7 @@ class AppColors extends ThemeExtension<AppColors> {
   static Color accentColor(AppAccent accent, {required bool isDark}) {
     return switch (accent) {
       AppAccent.blue =>
-        isDark ? const Color(0xFF78A7FF) : const Color(0xFF2F7AFF),
+        isDark ? const Color(0xFFA8C4FF) : const Color(0xFF3063DE),
       AppAccent.violet =>
         isDark ? const Color(0xFFA18AFF) : const Color(0xFF8064FF),
       AppAccent.green =>
@@ -97,8 +94,8 @@ class AppColors extends ThemeExtension<AppColors> {
     };
   }
 
-  AppColors withAccent(AppAccent accent) {
-    final color = accentColor(accent, isDark: isDark);
+  AppColors withAccent(AppAccent selectedAccent) {
+    final color = accentColor(selectedAccent, isDark: isDark);
     return copyWith(accent: color, practice: color);
   }
 
@@ -116,6 +113,10 @@ class AppColors extends ThemeExtension<AppColors> {
   Color get tint => tintOf(accent);
 
   Color get tint2 => tintOf(accent, tint2Mix);
+
+  Color get inkTint => tintOf(ink);
+
+  Color get mutedTint => tintOf(muted);
 
   Color get lectureTint => tintOf(lecture);
 
@@ -222,24 +223,24 @@ class AppColors extends ThemeExtension<AppColors> {
 
   @override
   int get hashCode => Object.hash(
-        runtimeType,
-        canvas,
-        surface,
-        surface2,
-        ink,
-        muted,
-        muted2,
-        line,
-        accent,
-        onAccent,
-        lecture,
-        practice,
-        lab,
-        exam,
-        warn,
-        scrim,
-        isDark,
-      );
+    runtimeType,
+    canvas,
+    surface,
+    surface2,
+    ink,
+    muted,
+    muted2,
+    line,
+    accent,
+    onAccent,
+    lecture,
+    practice,
+    lab,
+    exam,
+    warn,
+    scrim,
+    isDark,
+  );
 
   @override
   AppColors copyWith({

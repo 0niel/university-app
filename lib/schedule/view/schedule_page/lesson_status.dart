@@ -1,24 +1,12 @@
 import 'dart:math' as math;
-
 import 'package:collection/collection.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_day_status.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_dates.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-class LessonDayStatus {
-  const LessonDayStatus({
-    required this.past,
-    required this.live,
-    required this.progress,
-    required this.minutesLeft,
-  });
-
-  final bool past;
-  final bool live;
-  final double? progress;
-  final int minutesLeft;
-}
+export 'lesson_day_status.dart';
 
 LessonDayStatus lessonDayStatus(
   LessonSchedulePart lesson,

@@ -3,10 +3,13 @@ import 'dart:math' as math;
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_control_surface.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
 import 'package:app_ui/src/widgets/app_screen_header.dart';
 import 'package:flutter/widgets.dart';
+
+export 'app_control_surface_tone.dart';
 
 class AppInnerHeader extends StatelessWidget {
   const AppInnerHeader({
@@ -21,6 +24,7 @@ class AppInnerHeader extends StatelessWidget {
     this.padding,
     this.applyTopInset = true,
     this.titleStyle,
+    this.controlTone = AppControlSurfaceTone.neutral,
   });
 
   final String title;
@@ -33,6 +37,7 @@ class AppInnerHeader extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final bool applyTopInset;
   final TextStyle? titleStyle;
+  final AppControlSurfaceTone controlTone;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +49,8 @@ class AppInnerHeader extends StatelessWidget {
     final trailingLabel = this.trailingLabel;
 
     return Padding(
-      padding: padding ??
+      padding:
+          padding ??
           EdgeInsets.fromLTRB(
             AppSpacing.screen,
             top,
@@ -64,17 +70,17 @@ class AppInnerHeader extends StatelessWidget {
                   textScaler: MediaQuery.textScalerOf(context),
                   locale: Localizations.maybeLocaleOf(context),
                 )..layout());
-          final available = math.max<double>(
+          final double available = math.max(
             0,
             constraints.maxWidth -
                 (onBack == null ? 0 : 56) -
                 actions.length * 52 -
                 12,
           );
-          final trailingWidth = math.min(
+          final double trailingWidth = math.min(
             available * .55,
-            math.max<double>(
-              onTrailingLabelTap == null ? 0 : 44,
+            math.max(
+              onTrailingLabelTap == null ? 0.0 : 44.0,
               (painter?.width ?? 0) + (onTrailingLabelTap == null ? 0 : 8),
             ),
           );
@@ -86,18 +92,19 @@ class AppInnerHeader extends StatelessWidget {
                   onTap: onBack,
                   semanticsLabel: backSemanticsLabel,
                   semanticsButton: true,
-                  child: Container(
-                    width: AppControlSize.iconButton,
-                    height: AppControlSize.iconButton,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: colors.surface,
-                      shape: BoxShape.circle,
-                    ),
-                    child: AppLineIconWidget(
-                      AppLineIcon.chevronL,
-                      size: AppIconSize.md,
-                      color: colors.ink,
+                  child: AppControlSurface(
+                    color: colors.surface,
+                    borderRadius: AppRadius.full,
+                    tone: controlTone,
+                    child: SizedBox.square(
+                      dimension: AppControlSize.iconButton,
+                      child: Center(
+                        child: AppLineIconWidget(
+                          AppLineIcon.chevronL,
+                          size: AppIconSize.md,
+                          color: colors.ink,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -112,8 +119,9 @@ class AppInnerHeader extends StatelessWidget {
                       title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: (titleStyle ?? AppText.displaySmall)
-                          .copyWith(color: colors.ink),
+                      style: (titleStyle ?? AppText.displaySmall).copyWith(
+                        color: colors.ink,
+                      ),
                     ),
                     if (subtitle != null) ...[
                       const SizedBox(height: AppSpacing.xs),
@@ -146,8 +154,10 @@ class AppInnerHeader extends StatelessWidget {
                             trailingLabel,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: AppText.sans(13, FontWeight.w500)
-                                .copyWith(color: colors.muted),
+                            style: AppText.sans(
+                              13,
+                              FontWeight.w500,
+                            ).copyWith(color: colors.muted),
                           ),
                         ),
                       ),
@@ -160,6 +170,7 @@ class AppInnerHeader extends StatelessWidget {
                 AppHeaderCircleButton(
                   action: action,
                   size: AppControlSize.iconButton,
+                  controlTone: controlTone,
                 ),
               ],
             ],

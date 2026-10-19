@@ -165,10 +165,7 @@ class _NoteTextToolsSheetState extends State<NoteTextToolsSheet> {
   void _apply() {
     final result = _result;
     if (result == null || _sourceChanged) return;
-    if (_readOnly) {
-      setState(() {});
-      return;
-    }
+    if (_readOnly) return;
     if (!widget.snapshot.apply(
       widget.controller,
       result,

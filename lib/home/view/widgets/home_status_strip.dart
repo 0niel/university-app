@@ -52,7 +52,7 @@ class HomeStatusStrip extends StatelessWidget {
               dot: colors.lecture,
               onTap: onProfile,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: AppSpacing.md),
           ],
           _StatusPill(
             label: l10n.homeDeadlinesCount(active.length),
@@ -65,7 +65,7 @@ class HomeStatusStrip extends StatelessWidget {
             onTap: onDeadlines,
           ),
           if (days != null) ...[
-            const SizedBox(width: 6),
+            const SizedBox(width: AppSpacing.md),
             _StatusPill(
               label: days == 0 ? l10n.homeExamToday : l10n.homeExamIn(days),
               detail: readiness == null
@@ -97,28 +97,50 @@ class _StatusPill extends StatelessWidget {
   Widget build(BuildContext context) => AppPressable(
     onTap: onTap,
     semanticsLabel: [label, ?detail].join(', '),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 36),
-        padding: const EdgeInsets.fromLTRB(10, 8, 12, 8),
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.full),
-        ),
-        child: Row(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 142, maxWidth: 260),
+      child: AppGlassSurface(
+        borderRadius: AppRadius.card,
+        tone: AppGlassTone.subtle,
+        tint: dot,
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            AppDot(size: 8, color: dot),
-            const SizedBox(width: 7),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: dot.withValues(alpha: .14),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  child: AppDot(size: 8, color: dot),
+                ),
+                if (detail != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Flexible(
+                    child: Text(
+                      detail!,
+                      style: AppText.subtextStrong.copyWith(color: dot),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
             Text(
               label,
-              style: AppText.subtextBold.copyWith(color: context.colors.ink),
+              style: AppText.sans(
+                14,
+                FontWeight.w600,
+                height: 1.25,
+              ).copyWith(color: context.colors.ink),
             ),
-            if (detail != null) ...[
-              const SizedBox(width: 6),
-              Text(detail!, style: AppText.subtextStrong.copyWith(color: dot)),
-            ],
           ],
         ),
       ),

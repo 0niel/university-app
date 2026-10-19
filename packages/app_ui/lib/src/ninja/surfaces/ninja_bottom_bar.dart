@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/glass/app_glass_surface.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
@@ -15,11 +16,11 @@ class NinjaBottomBar extends StatelessWidget {
     required this.currentIndex,
     required this.onSelected,
     super.key,
-  })  : assert(items.length > 1, 'At least two navigation items are required.'),
-        assert(
-          currentIndex >= 0 && currentIndex < items.length,
-          'The selected navigation index must reference an item.',
-        );
+  }) : assert(items.length > 1, 'At least two navigation items are required.'),
+       assert(
+         currentIndex >= 0 && currentIndex < items.length,
+         'The selected navigation index must reference an item.',
+       );
 
   final List<NinjaBottomBarItem> items;
   final int currentIndex;
@@ -41,7 +42,6 @@ class NinjaBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final expanded = textScale >= 1.6;
     final pillHeight = expanded ? 76.0 : AppControlSize.bottomBar;
@@ -53,41 +53,57 @@ class NinjaBottomBar extends StatelessWidget {
       explicitChildNodes: true,
       child: SizedBox(
         height: pillHeight + topPadding + bottomPadding + bottomInset,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: [colors.canvas, colors.canvas.withValues(alpha: 0)],
-              stops: const [0.6, 1],
-            ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            topPadding,
+            AppSpacing.md,
+            bottomPadding + bottomInset,
           ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              topPadding,
-              AppSpacing.md,
-              bottomPadding + bottomInset,
-            ),
-            child: Container(
+          child: AppGlassSurface(
+            role: AppGlassRole.navigation,
+            borderRadius: AppRadius.full,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: SizedBox(
               height: pillHeight,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.full),
-              ),
-              child: Row(
-                children: [
-                  for (var index = 0; index < items.length; index++)
-                    Expanded(
-                      child: _BottomBarItem(
-                        item: items[index],
-                        selected: index == currentIndex,
-                        circleSize: circleSize,
-                        onTap: () => onSelected(index),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final cellWidth = constraints.maxWidth / items.length;
+                  return Stack(
+                    children: [
+                      AnimatedPositionedDirectional(
+                        duration: _reduceMotion(context)
+                            ? Duration.zero
+                            : const Duration(milliseconds: 360),
+                        curve: Curves.easeOutCubic,
+                        start: currentIndex * cellWidth + 2,
+                        top: 6,
+                        bottom: 6,
+                        width: cellWidth - 4,
+                        child: DecoratedBox(
+                          key: const ValueKey('navigation-selection'),
+                          decoration: BoxDecoration(
+                            color: context.colors.tint,
+                            borderRadius: BorderRadius.circular(AppRadius.full),
+                          ),
+                        ),
                       ),
-                    ),
-                ],
+                      Row(
+                        children: [
+                          for (var index = 0; index < items.length; index++)
+                            Expanded(
+                              child: _BottomBarItem(
+                                item: items[index],
+                                selected: index == currentIndex,
+                                circleSize: circleSize,
+                                onTap: () => onSelected(index),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -136,7 +152,7 @@ class _NinjaBottomBarViewportData extends InheritedWidget {
   final double bottomInset;
 
   static _NinjaBottomBarViewportData? maybeOf(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<_NinjaBottomBarViewportData>();
+      context.dependOnInheritedWidgetOfExactType();
 
   @override
   bool updateShouldNotify(_NinjaBottomBarViewportData oldWidget) =>
@@ -194,8 +210,8 @@ class _BottomBarItem extends StatelessWidget {
                   ? Duration.zero
                   : const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
-              decoration: BoxDecoration(
-                color: selected ? colors.accent : const Color(0x00000000),
+              decoration: const BoxDecoration(
+                color: Color(0x00000000),
                 shape: BoxShape.circle,
               ),
               child: Stack(
@@ -203,7 +219,7 @@ class _BottomBarItem extends StatelessWidget {
                 children: [
                   IconTheme(
                     data: IconThemeData(
-                      color: selected ? colors.onAccent : colors.muted,
+                      color: selected ? colors.ink : colors.muted,
                       size: AppIconSize.navigation,
                     ),
                     child: icon,
@@ -214,9 +230,7 @@ class _BottomBarItem extends StatelessWidget {
                       top: 9,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: selected
-                              ? colors.onAccent
-                              : (item.badgeColor ?? colors.accent),
+                          color: item.badgeColor ?? colors.accent,
                           shape: BoxShape.circle,
                         ),
                         child: const SizedBox.square(dimension: 7),

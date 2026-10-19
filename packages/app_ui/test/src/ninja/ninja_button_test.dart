@@ -51,7 +51,9 @@ void main() {
       }
     });
 
-    testWidgets('standard size stays 48 tall with no border', (tester) async {
+    testWidgets('standard size stays 48 tall with a subtle accent surface', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrapKit(NinjaButton.primary(label: 'Ок', onPressed: () {})),
       );
@@ -59,6 +61,18 @@ void main() {
       expect(tester.getSize(find.byType(NinjaButton)).height, 48);
       expect(decorationOf(tester).border, isNull);
       expect(decorationOf(tester).boxShadow, isNull);
+      expect(decorationOf(tester).gradient, isA<LinearGradient>());
+      final surface = tester.widget<AnimatedContainer>(
+        find.descendant(
+          of: find.byType(NinjaButton),
+          matching: find.byType(AnimatedContainer),
+        ),
+      );
+      expect((surface.foregroundDecoration! as BoxDecoration).border, isNull);
+      expect(
+        decorationOf(tester).borderRadius,
+        BorderRadius.circular(AppRadius.full),
+      );
     });
 
     testWidgets('disabled uses surface2 + muted2', (tester) async {

@@ -261,6 +261,7 @@ class LessonReactionsCubit extends HydratedCubit<LessonReactionsState> {
     required LessonBells lessonBells,
   }) {
     final index = _indexOf(subjectName, lessonDate, lessonBells);
+    if (index < 0) return null;
     return state.summaries.elementAtOrNull(index);
   }
 

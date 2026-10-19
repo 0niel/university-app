@@ -20,7 +20,7 @@ class LessonRemindersCubit extends HydratedCubit<Map<String, int>> {
   }
 
   @override
-  Map<String, int>? fromJson(Map<String, dynamic> json) {
+  Map<String, int> fromJson(Map<String, dynamic> json) {
     return {
       for (final entry in json.entries)
         if (entry.value is num) entry.key: (entry.value as num).toInt(),
@@ -28,5 +28,5 @@ class LessonRemindersCubit extends HydratedCubit<Map<String, int>> {
   }
 
   @override
-  Map<String, dynamic>? toJson(Map<String, int> state) => state;
+  Map<String, dynamic> toJson(Map<String, int> state) => state;
 }

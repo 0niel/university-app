@@ -70,12 +70,7 @@ class MapFreeRoomsPanel extends StatelessWidget {
     ),
   );
 
-  static double compactContentExtentOf(
-    BuildContext context, {
-    required double width,
-    required String campusName,
-    bool discoveryMode = false,
-  }) {
+  static double compactContentExtentOf(BuildContext context) {
     double height(String text, TextStyle style, double maxWidth) {
       final painter = TextPainter(
         text: TextSpan(text: text, style: style),
@@ -210,31 +205,39 @@ class MapFreeRoomsPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ?discovery,
-        if (mappedRooms.isNotEmpty && discovery == null) ...[
-          AppListGroup(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final room in mappedRooms)
-                AppListRow(
-                  title: room.name.isEmpty ? room.roomId : room.name,
-                  subtitle: l10n.roomRoute,
-                  onTap: () => onMappedRoomTap(room),
+              if (mappedRooms.isNotEmpty && discovery == null) ...[
+                AppListGroup(
+                  children: [
+                    for (final room in mappedRooms)
+                      AppListRow(
+                        title: room.name.isEmpty ? room.roomId : room.name,
+                        subtitle: l10n.roomRoute,
+                        onTap: () => onMappedRoomTap(room),
+                      ),
+                  ],
                 ),
+                const SizedBox(height: 14),
+              ],
+              Text(l10n.freeRoomsNowTitle, style: AppText.sectionLarge),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                '${campus?.displayName ?? ''} · ${l10n.freeRoomsSubtitle}',
+                style: AppText.subtext.copyWith(color: colors.muted),
+              ),
+              const SizedBox(height: 12),
+              FreeRoomsList(
+                state: filtered,
+                roomFloors: mapState.roomFloors,
+                onRetry: () => unawaited(context.read<FreeRoomsCubit>().load()),
+                onRoomTap: onRoomTap,
+              ),
             ],
           ),
-          const SizedBox(height: 14),
-        ],
-        Text(l10n.freeRoomsNowTitle, style: AppText.sectionLarge),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          '${campus?.displayName ?? ''} · ${l10n.freeRoomsSubtitle}',
-          style: AppText.subtext.copyWith(color: colors.muted),
-        ),
-        const SizedBox(height: 12),
-        FreeRoomsList(
-          state: filtered,
-          roomFloors: mapState.roomFloors,
-          onRetry: () => unawaited(context.read<FreeRoomsCubit>().load()),
-          onRoomTap: onRoomTap,
         ),
       ],
     );
@@ -275,7 +278,7 @@ class MapFreeRoomsPanel extends StatelessWidget {
                       header(scrollController),
                       if (!collapsed)
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+                          padding: const EdgeInsets.only(top: 14),
                           child: rooms,
                         ),
                     ],
@@ -286,20 +289,14 @@ class MapFreeRoomsPanel extends StatelessWidget {
                 children: [
                   header(scrollController),
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(AppRadius.card),
-                        child: SingleChildScrollView(
-                          key: const ValueKey('map-panel-scroll'),
-                          controller: scrollController,
-                          padding: EdgeInsets.only(
-                            top: collapsed ? 0 : AppSpacing.sectionGap,
-                            bottom: AppSpacing.screen,
-                          ),
-                          child: collapsed ? const SizedBox.shrink() : rooms,
-                        ),
+                    child: SingleChildScrollView(
+                      key: const ValueKey('map-panel-scroll'),
+                      controller: scrollController,
+                      padding: EdgeInsets.only(
+                        top: collapsed ? 0 : AppSpacing.sectionGap,
+                        bottom: AppSpacing.screen,
                       ),
+                      child: collapsed ? const SizedBox.shrink() : rooms,
                     ),
                   ),
                 ],

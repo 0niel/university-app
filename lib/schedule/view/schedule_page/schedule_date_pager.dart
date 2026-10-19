@@ -143,9 +143,9 @@ class _ScheduleDatePagerState extends State<ScheduleDatePager> {
               slivers: [
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
-                    AppSpacing.screen,
+                    widget.view == ScheduleView.week ? 0 : AppSpacing.screen,
                     widget.view == ScheduleView.day ? AppSpacing.xsm : 0,
-                    AppSpacing.screen,
+                    widget.view == ScheduleView.week ? 0 : AppSpacing.screen,
                     100 + ninjaBottomInset(context),
                   ),
                   sliver: SliverToBoxAdapter(

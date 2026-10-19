@@ -23,6 +23,6 @@ abstract class NoteEditorState with _$NoteEditorState {
       revision != persistedRevision ||
       switch (status) {
         .dirty || .saving || .failure || .offline || .conflict => true,
-        _ => false,
+        .clean || .saved || .deleted || .readOnly => false,
       };
 }

@@ -6,7 +6,7 @@ import 'package:rtu_mirea_app/grades/data/grades_repository.dart';
 import 'package:rtu_mirea_app/grades/models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class _Repository implements GradesRepository {
+class FakeGradesRepository implements GradesRepository {
   GradesBook book = const GradesBook();
   bool failLoad = false;
   bool failSave = false;
@@ -29,11 +29,11 @@ class _Repository implements GradesRepository {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final now = DateTime(2026, 9, 14, 18);
-  late _Repository repository;
+  late FakeGradesRepository repository;
   late GradesCubit cubit;
 
   setUp(() {
-    repository = _Repository();
+    repository = FakeGradesRepository();
     cubit = GradesCubit(repository: repository, now: () => now);
     SharedPreferences.setMockInitialValues({});
   });

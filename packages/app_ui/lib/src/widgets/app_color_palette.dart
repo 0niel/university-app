@@ -8,7 +8,7 @@ import 'package:app_ui/src/widgets/forms/app_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const List<int> kAppColorPaletteSwatches = <int>[
+const List<int> kAppColorPaletteSwatches = [
   0xFFFCA5A5,
   0xFFEF4444,
   0xFFB91C1C,
@@ -56,7 +56,7 @@ class AppColorPalette extends StatefulWidget {
     this.markedValues = const <int>{},
     this.defaultValue,
     this.resetLabel,
-    this.swatchSemanticsLabel,
+    this.swatchSemanticsBuilder,
   });
 
   final int value;
@@ -68,7 +68,7 @@ class AppColorPalette extends StatefulWidget {
   final String? resetLabel;
   final String hexLabel;
   final String hexInvalidLabel;
-  final String Function(int color)? swatchSemanticsLabel;
+  final String Function(int color)? swatchSemanticsBuilder;
 
   @override
   State<AppColorPalette> createState() => _AppColorPaletteState();
@@ -136,7 +136,8 @@ class _AppColorPaletteState extends State<AppColorPalette> {
                 color: Color(swatch),
                 selected: swatch == widget.value,
                 marked: widget.markedValues.contains(swatch),
-                semanticsLabel: widget.swatchSemanticsLabel?.call(swatch) ??
+                semanticsLabel:
+                    widget.swatchSemanticsBuilder?.call(swatch) ??
                     '#${appColorHexOf(swatch)}',
                 onTap: () => _selectSwatch(swatch),
               ),
@@ -214,8 +215,9 @@ class _AppColorSwatch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final checkColor =
-        color.computeLuminance() > .55 ? colors.ink : colors.white;
+    final checkColor = color.computeLuminance() > .55
+        ? colors.ink
+        : colors.white;
 
     return AppPressable(
       onTap: onTap,
@@ -231,25 +233,26 @@ class _AppColorSwatch extends StatelessWidget {
             decoration: BoxDecoration(
               color: color,
               shape: BoxShape.circle,
-              border:
-                  selected ? Border.all(color: colors.accent, width: 2) : null,
+              border: selected
+                  ? Border.all(color: colors.accent, width: 2)
+                  : null,
             ),
             child: selected
                 ? AppCheckMark(size: 14, color: checkColor, strokeWidth: 2.4)
                 : marked
-                    ? Align(
-                        alignment: Alignment.bottomRight,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: colors.canvas,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: colors.ink, width: 1.4),
-                          ),
-                        ),
-                      )
-                    : null,
+                ? Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: colors.canvas,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colors.ink, width: 1.4),
+                      ),
+                    ),
+                  )
+                : null,
           ),
         ),
       ),

@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: SizedBox(width: 340, child: child))),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(
+      body: Center(child: SizedBox(width: 340, child: child)),
+    ),
+  );
 
   List<AppHeatmapDay> daysUpTo(DateTime today, Map<int, int> countsByOffset) {
     final start = today.subtract(const Duration(days: 27));

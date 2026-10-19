@@ -94,4 +94,27 @@ void main() {
     expect(find.text('все 0'), findsNothing);
     expect(find.byType(ListView), findsNothing);
   });
+
+  testWidgets('badge descriptions remain readable at 200 percent text', (
+    tester,
+  ) async {
+    var opened = 0;
+    await tester.pumpApp(
+      ProfileBadgesRail(
+        badges: [earnedStreak, earnedFriend, lockedMaterial],
+        totalBadges: 17,
+        onBadge: () => opened++,
+      ),
+      size: const Size(320, 700),
+      textScaler: const TextScaler.linear(2),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.drag(find.byType(ListView), const Offset(-200, 0));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Хранитель знаний'));
+    await tester.tap(find.text('Хранитель знаний'));
+    expect(opened, 1);
+    expect(tester.takeException(), isNull);
+  });
 }

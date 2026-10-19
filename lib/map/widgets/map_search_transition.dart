@@ -36,7 +36,6 @@ class MapSearchTransition extends StatelessWidget {
             final progress = animation.value;
             final actionsOpacity =
                 1 - const Interval(0, .4).transform(progress);
-            final searchOpacity = const Interval(.3, 1).transform(progress);
             final expanded = searching && animation.isCompleted;
             return Stack(
               alignment: AlignmentDirectional.centerStart,
@@ -52,9 +51,11 @@ class MapSearchTransition extends StatelessWidget {
                         excluding: searching || !animation.isDismissed,
                         child: IgnorePointer(
                           ignoring: searching || !animation.isDismissed,
-                          child: Opacity(
-                            opacity: actionsOpacity,
-                            child: actions,
+                          child: ClipRect(
+                            child: Transform.translate(
+                              offset: Offset(0, -height * (1 - actionsOpacity)),
+                              child: actions,
+                            ),
                           ),
                         ),
                       ),
@@ -67,67 +68,63 @@ class MapSearchTransition extends StatelessWidget {
                     child: SizedBox(
                       width: lerpDouble(collapsedExtent, width, progress),
                       height: lerpDouble(collapsedExtent, height, progress),
-                      child: ColoredBox(
-                        color: context.colors.surface,
-                        child: OverflowBox(
+                      child: OverflowBox(
+                        alignment: AlignmentDirectional.centerStart,
+                        minWidth: width,
+                        maxWidth: width,
+                        minHeight: height,
+                        maxHeight: height,
+                        child: Stack(
                           alignment: AlignmentDirectional.centerStart,
-                          minWidth: width,
-                          maxWidth: width,
-                          minHeight: height,
-                          maxHeight: height,
-                          child: Stack(
-                            alignment: AlignmentDirectional.centerStart,
-                            children: [
-                              if (!animation.isDismissed || searching)
-                                ExcludeFocus(
+                          children: [
+                            if (!animation.isDismissed || searching)
+                              ExcludeFocus(
+                                excluding: !expanded,
+                                child: ExcludeSemantics(
                                   excluding: !expanded,
-                                  child: ExcludeSemantics(
-                                    excluding: !expanded,
-                                    child: IgnorePointer(
-                                      ignoring: !expanded,
-                                      child: Opacity(
-                                        opacity: searchOpacity,
-                                        child: search,
-                                      ),
-                                    ),
+                                  child: IgnorePointer(
+                                    ignoring: !expanded,
+                                    child: search,
                                   ),
                                 ),
-                              SizedBox(
-                                width: collapsedExtent,
-                                height: height,
-                                child: Center(
-                                  child: AppIconButton(
-                                    tooltip: tooltip,
-                                    tone: AppIconButtonTone.surface,
-                                    shape: AppIconButtonShape.circle,
-                                    onPressed: onToggle,
-                                    icon: SizedBox.square(
-                                      dimension: AppIconSize.md,
-                                      child: Stack(
-                                        children: [
-                                          Opacity(
-                                            opacity: actionsOpacity,
-                                            child: const AppLineIconWidget(
-                                              AppLineIcon.search,
-                                            ),
+                              ),
+                            SizedBox(
+                              width: collapsedExtent,
+                              height: height,
+                              child: Center(
+                                child: AppIconButton(
+                                  tooltip: tooltip,
+                                  tone: searching || !animation.isDismissed
+                                      ? AppIconButtonTone.plain
+                                      : AppIconButtonTone.glass,
+                                  shape: AppIconButtonShape.circle,
+                                  onPressed: onToggle,
+                                  icon: SizedBox.square(
+                                    dimension: AppIconSize.md,
+                                    child: Stack(
+                                      children: [
+                                        Opacity(
+                                          opacity: actionsOpacity,
+                                          child: const AppLineIconWidget(
+                                            AppLineIcon.search,
                                           ),
-                                          Opacity(
-                                            opacity: const Interval(
-                                              .4,
-                                              1,
-                                            ).transform(progress),
-                                            child: const AppLineIconWidget(
-                                              AppLineIcon.chevronL,
-                                            ),
+                                        ),
+                                        Opacity(
+                                          opacity: const Interval(
+                                            .4,
+                                            1,
+                                          ).transform(progress),
+                                          child: const AppLineIconWidget(
+                                            AppLineIcon.chevronL,
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

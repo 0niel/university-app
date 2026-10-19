@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+
 sealed class UniversityProviderSource {
   const UniversityProviderSource();
 
@@ -17,7 +19,7 @@ sealed class UniversityProviderSource {
             '--path',
           }.contains(argument) &&
           index + 1 < arguments.length) {
-        values[argument] = arguments[++index];
+        values[argument] = arguments.elementAtOrNull(++index)!;
       } else {
         throw ArgumentError(
           'Use --local <directory>, --repository <https-url> --ref <commit> '

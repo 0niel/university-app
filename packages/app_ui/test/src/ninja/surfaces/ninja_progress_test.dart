@@ -91,8 +91,7 @@ void main() {
       expect(AppProgressBar, NinjaProgressBar);
     });
 
-    testWidgets(
-        'indeterminate sweeps a 40% segment and skips under reduced '
+    testWidgets('indeterminate sweeps a 40% segment and skips under reduced '
         'motion', (tester) async {
       await tester.pumpWidget(
         wrapKit(
@@ -170,10 +169,12 @@ void main() {
           .widgetList<SizedBox>(find.byType(SizedBox))
           .where((box) => box.width == 3);
       expect(gaps, hasLength(3));
-      final rest = tester
-          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-          .last
-          .decoration as BoxDecoration;
+      final rest =
+          tester
+                  .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+                  .last
+                  .decoration
+              as BoxDecoration;
       expect(rest.color, kitColors.surface2);
     });
   });

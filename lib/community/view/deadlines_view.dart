@@ -15,8 +15,6 @@ import 'package:rtu_mirea_app/community/widgets/deadlines/deadline_row.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-enum DeadlinesViewMode { list, calendar }
-
 class DeadlinesView extends StatefulWidget {
   const DeadlinesView({super.key, this.now});
 
@@ -25,6 +23,8 @@ class DeadlinesView extends StatefulWidget {
   @override
   State<DeadlinesView> createState() => _DeadlinesViewState();
 }
+
+enum DeadlinesViewMode { list, calendar }
 
 class _DeadlinesViewState extends State<DeadlinesView> {
   DeadlinesViewMode _mode = DeadlinesViewMode.list;
@@ -73,8 +73,8 @@ class _DeadlinesViewState extends State<DeadlinesView> {
     required DateTime current,
     required DeadlinesCubit cubit,
   }) {
-    final l10n = context.l10n;
     if (deadlines.isEmpty) {
+      final l10n = context.l10n;
       return [
         SliverToBoxAdapter(
           child: Padding(
@@ -129,6 +129,27 @@ class _DeadlinesViewState extends State<DeadlinesView> {
       );
     }
     return groupSlivers;
+  }
+
+  Future<void> _postponeOverdue(
+    BuildContext context,
+    DeadlinesCubit cubit,
+    DateTime current,
+  ) async {
+    final l10n = context.l10n;
+    final moved = await cubit.postponeOverdueToTomorrow(now: current);
+    if (!context.mounted) return;
+    if (moved) {
+      ToastManager.showSuccess(
+        context,
+        message: l10n.deadlinesPostponedToast,
+      );
+    } else {
+      ToastManager.showError(
+        context,
+        message: l10n.deadlinesPostponeError,
+      );
+    }
   }
 
   @override
@@ -253,22 +274,9 @@ class _DeadlinesViewState extends State<DeadlinesView> {
                               ),
                               tone: AppBannerTone.danger,
                               actionLabel: l10n.deadlinesPostponeAction,
-                              onAction: () async {
-                                final moved = await cubit
-                                    .postponeOverdueToTomorrow(now: current);
-                                if (!context.mounted) return;
-                                if (moved) {
-                                  ToastManager.showSuccess(
-                                    context,
-                                    message: l10n.deadlinesPostponedToast,
-                                  );
-                                } else {
-                                  ToastManager.showError(
-                                    context,
-                                    message: l10n.deadlinesPostponeError,
-                                  );
-                                }
-                              },
+                              onAction: () => unawaited(
+                                _postponeOverdue(context, cubit, current),
+                              ),
                             ),
                           ),
                         ),
@@ -362,7 +370,7 @@ class _DeadlinesCalendar extends StatelessWidget {
           today: now,
           onMonthChanged: onMonthChanged,
           onDaySelected: onDaySelected,
-          dotsForDay: (day) => _dotsForDay(context, day),
+          dotsBuilder: (day) => _dotsForDay(context, day),
         ),
         if (selected != null) ...[
           const SizedBox(height: AppSpacing.lg),

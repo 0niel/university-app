@@ -201,6 +201,7 @@ void main() {
         ),
       );
 
+      final searchElement = tester.element(find.byType(TextField));
       await tester.enterText(
         find.descendant(
           of: find.byType(AppSearchField),
@@ -208,6 +209,7 @@ void main() {
         ),
         'мышь',
       );
+      expect(tester.element(find.byType(TextField)), same(searchElement));
       await tester.pumpAndSettle();
 
       expect(find.text('Беспроводная мышь'), findsOneWidget);

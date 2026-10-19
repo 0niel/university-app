@@ -6,6 +6,7 @@ import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/services/objects_service.dart';
 
 class _NoCache implements MapDataCache {
+  const _NoCache();
   @override
   Future<String?> read(String key) async => null;
 
@@ -80,7 +81,10 @@ void main() {
         expect(concurrent, same(forced));
         expect(requests, 2);
         if (backgroundFails) {
-          backgroundResponse.completeError(const MapDataException('offline'));
+          backgroundResponse.completeError(
+            const MapDataException('offline'),
+            StackTrace.current,
+          );
         } else {
           backgroundResponse.complete(_document(1));
         }
@@ -106,7 +110,7 @@ void main() {
       var requests = 0;
       final repository = MapDataRepository(
         organizationId: 'mirea',
-        cache: _NoCache(),
+        cache: const _NoCache(),
         rpc: (_, _) async => ++requests == 1 ? _document(1) : response.future,
       );
       addTearDown(repository.dispose);
@@ -133,7 +137,7 @@ void main() {
           final response = Completer<Object?>();
           final repository = MapDataRepository(
             organizationId: 'mirea',
-            cache: savedCache ? _MemoryCache() : _NoCache(),
+            cache: savedCache ? _MemoryCache() : const _NoCache(),
             rpc: (name, _) async {
               if (name == 'get_map_catalog') {
                 return {

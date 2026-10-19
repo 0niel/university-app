@@ -1,5 +1,3 @@
-enum NfcVerificationFailure { wrongCode, nfcError }
-
 final class NfcVerificationException implements Exception {
   const NfcVerificationException(this.failure);
 
@@ -8,3 +6,5 @@ final class NfcVerificationException implements Exception {
   @override
   String toString() => 'NfcVerificationException(${failure.name})';
 }
+
+enum NfcVerificationFailure { wrongCode, nfcError }

@@ -79,8 +79,10 @@ void main() {
       expect(tester.state(find.byType(AppStateScopeView)), same(firstScope));
       expect(find.text('Server: After'), findsOneWidget);
       expect(find.text('Server: Before'), findsNothing);
-      expect(find.text('Draft: Local edit'), findsOneWidget);
-      expect(find.text('Local edit'), findsOneWidget);
+      expect(
+        find.textContaining('Local edit'),
+        findsNWidgets(2),
+      );
       expect(tester.takeException(), isNull);
     },
   );

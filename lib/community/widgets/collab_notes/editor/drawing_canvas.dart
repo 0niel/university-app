@@ -156,8 +156,8 @@ class DrawingCanvasState extends State<DrawingCanvas> {
 
   double get _touchSpan {
     if (_touches.length < 2) return 0;
-    final values = _touches.values.take(2).toList();
-    return (values.first - values.last).distance;
+    final [first, second] = _touches.values.take(2).toList();
+    return (first - second).distance;
   }
 
   void _transform(Offset before, Offset after, double factor) {

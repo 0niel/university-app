@@ -23,6 +23,7 @@ import 'package:rtu_mirea_app/map/widgets/map_volume_layer.dart';
 import 'gallery_fonts.dart';
 
 class _Cache implements MapDataCache {
+  const _Cache();
   @override
   Future<String?> read(String key) async => null;
 
@@ -45,7 +46,7 @@ void main() {
     addTearDown(tester.view.reset);
     final repository = MapDataRepository(
       organizationId: 'mirea',
-      cache: _Cache(),
+      cache: const _Cache(),
       bundledCatalogAsset: MapDataRepository.pulseCatalogAsset,
       rpc: (_, _) async => throw const MapDataException('offline'),
     );
@@ -206,7 +207,7 @@ void main() {
       addTearDown(scale.dispose);
       final repository = MapDataRepository(
         organizationId: 'mirea',
-        cache: _Cache(),
+        cache: const _Cache(),
         bundledCatalogAsset: MapDataRepository.pulseCatalogAsset,
         rpc: (_, _) async => throw const MapDataException('offline'),
       );

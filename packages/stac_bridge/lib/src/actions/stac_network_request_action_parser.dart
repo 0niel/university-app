@@ -112,7 +112,10 @@ class StacNetworkRequestActionParser
       }
       final result = <String, Object?>{};
       for (final entry in value.entries) {
-        result[entry.key.toString()] = await _body(context, entry.value);
+        result[entry.key?.toString() ?? 'null'] = await _body(
+          context,
+          entry.value,
+        );
       }
       return result;
     }

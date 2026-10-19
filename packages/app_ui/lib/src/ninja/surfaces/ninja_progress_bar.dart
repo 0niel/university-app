@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_progress_tone.dart';
 import 'package:flutter/widgets.dart';
 
-enum NinjaProgressTone { lime, scarlet, ink, lecture, warn }
+export 'ninja_progress_tone.dart';
 
 class NinjaProgressBar extends StatefulWidget {
   const NinjaProgressBar({
@@ -66,7 +67,8 @@ class _NinjaProgressBarState extends State<NinjaProgressBar>
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final fill = widget.color ??
+    final fill =
+        widget.color ??
         switch (widget.tone) {
           NinjaProgressTone.lime => colors.accent,
           NinjaProgressTone.scarlet => colors.danger,

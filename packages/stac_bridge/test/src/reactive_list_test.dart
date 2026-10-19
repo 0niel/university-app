@@ -68,8 +68,10 @@ void main() {
       final fields = tester
           .widgetList<TextField>(find.byType(TextField))
           .toList();
-      expect(fields[0].controller?.text, 'Second draft');
-      expect(fields[1].controller?.text, 'First draft');
+      expect(
+        fields.map((field) => field.controller?.text),
+        ['Second draft', 'First draft'],
+      );
       expect(tester.takeException(), isNull);
     },
   );

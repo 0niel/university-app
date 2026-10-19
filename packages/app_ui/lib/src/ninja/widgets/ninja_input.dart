@@ -52,18 +52,18 @@ class NinjaInput extends StatelessWidget {
     this.onChanged,
     this.onTap,
     this.textStyle,
-  })  : leadingIcon = null,
-        textAlign = TextAlign.start,
-        trailing = null,
-        success = false,
-        obscureText = false,
-        clearable = false,
-        keyboardType = TextInputType.multiline,
-        textInputAction = TextInputAction.newline,
-        textCapitalization = TextCapitalization.sentences,
-        autofillHints = null,
-        onSubmitted = null,
-        showCounter = true;
+  }) : leadingIcon = null,
+       textAlign = TextAlign.start,
+       trailing = null,
+       success = false,
+       obscureText = false,
+       clearable = false,
+       keyboardType = TextInputType.multiline,
+       textInputAction = TextInputAction.newline,
+       textCapitalization = TextCapitalization.sentences,
+       autofillHints = null,
+       onSubmitted = null,
+       showCounter = true;
 
   final TextEditingController? controller;
   final FocusNode? focusNode;

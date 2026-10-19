@@ -112,6 +112,28 @@ void main() {
       await cubit.close();
     });
 
+    test('unknown notes cannot be renamed or change visibility', () async {
+      when(() => repository.getGroupNotes()).thenAnswer((_) async => [note]);
+      final cubit = buildCubit();
+      addTearDown(cubit.close);
+      await cubit.load();
+      final previous = cubit.state;
+
+      expect(await cubit.rename('missing-note', 'New title'), isFalse);
+      expect(
+        await cubit.setVisibility(
+          'missing-note',
+          CollabNoteVisibility.personal,
+        ),
+        isFalse,
+      );
+      expect(cubit.state, previous);
+      verifyNever(() => repository.renameGroupNote(any(), any()));
+      verifyNever(
+        () => repository.setGroupNoteVisibility(any(), any()),
+      );
+    });
+
     test('renames a note optimistically', () async {
       when(
         () => repository.getGroupNotes(),

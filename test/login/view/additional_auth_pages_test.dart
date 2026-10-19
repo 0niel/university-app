@@ -135,7 +135,12 @@ void main() {
     (tester) async {
       final request = Completer<void>();
       addTearDown(() {
-        if (!request.isCompleted) request.completeError(Exception('cancelled'));
+        if (!request.isCompleted) {
+          request.completeError(
+            Exception('cancelled'),
+            StackTrace.current,
+          );
+        }
       });
       when(
         () => repository.signUp(
@@ -166,7 +171,10 @@ void main() {
           password: 'password123',
         ),
       ).called(1);
-      request.completeError(Exception('unavailable'));
+      request.completeError(
+        Exception('unavailable'),
+        StackTrace.current,
+      );
       await tester.pump();
       await tester.pump();
       expect(

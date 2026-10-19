@@ -15,8 +15,10 @@ class NotificationsSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.colors.canvas,
-      body: BlocBuilder<ProfileCubit, ProfileState>(
-        builder: _buildBody,
+      body: AppAmbientBackground(
+        child: BlocBuilder<ProfileCubit, ProfileState>(
+          builder: _buildBody,
+        ),
       ),
     );
   }

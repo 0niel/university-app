@@ -28,7 +28,7 @@ String scheduleDayLabel(BuildContext context, DateTime day) {
 bool scheduleSpecialDay(DateTime day) =>
     switch (RussianWorkCalendar.dayInfo(day).kind) {
       .publicHoliday || .transferredDayOff || .transferredWorkday => true,
-      _ => false,
+      .workday || .weekend => false,
     };
 
 class ScheduleCalendarNotice extends StatelessWidget {

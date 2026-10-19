@@ -30,9 +30,10 @@ class MapCanvasControls extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     children: [
       if (showZoom) ...[
-        AppCard(
-          padding: EdgeInsets.zero,
-          radius: AppRadius.full,
+        AppGlassSurface(
+          role: AppGlassRole.control,
+          key: const ValueKey('map-zoom-controls'),
+          borderRadius: AppRadius.full,
           child: Flex(
             direction: axis,
             mainAxisSize: MainAxisSize.min,
@@ -41,14 +42,14 @@ class MapCanvasControls extends StatelessWidget {
                 icon: const AppLineIconWidget(AppLineIcon.plus),
                 tooltip: context.l10n.mapZoomIn,
                 shape: AppIconButtonShape.circle,
-                tone: AppIconButtonTone.surface,
+                tone: AppIconButtonTone.plain,
                 onPressed: onZoomIn,
               ),
               AppIconButton(
                 icon: const AppLineIconWidget(AppLineIcon.minus),
                 tooltip: context.l10n.mapZoomOut,
                 shape: AppIconButtonShape.circle,
-                tone: AppIconButtonTone.surface,
+                tone: AppIconButtonTone.plain,
                 onPressed: onZoomOut,
               ),
             ],
@@ -63,16 +64,19 @@ class MapCanvasControls extends StatelessWidget {
         icon: const AppLineIconWidget(AppLineIcon.map),
         tooltip: context.l10n.mapFitFloorPlan,
         shape: AppIconButtonShape.circle,
-        tone: AppIconButtonTone.surface,
+        tone: AppIconButtonTone.glass,
         onPressed: onFit,
       ),
       if (onRotate != null) ...[
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(
+          height: axis == Axis.vertical ? AppSpacing.sm : 0,
+          width: axis == Axis.horizontal ? AppSpacing.sm : 0,
+        ),
         AppIconButton(
           icon: const AppLineIconWidget(AppLineIcon.refresh),
-          tooltip: 'Повернуть план',
+          tooltip: context.l10n.mapRotatePlan,
           shape: AppIconButtonShape.circle,
-          tone: AppIconButtonTone.surface,
+          tone: AppIconButtonTone.glass,
           onPressed: onRotate,
         ),
       ],
@@ -81,18 +85,23 @@ class MapCanvasControls extends StatelessWidget {
           height: axis == Axis.vertical ? AppSpacing.sm : 0,
           width: axis == Axis.horizontal ? AppSpacing.sm : 0,
         ),
-        AppIconButton(
-          icon: Text(
-            is3D ? '2D' : '3D',
-            style: AppText.caption.copyWith(
-              fontWeight: FontWeight.w700,
-              color: is3D ? context.colors.onAccent : context.colors.ink,
+        Semantics(
+          toggled: is3D,
+          child: AppIconButton(
+            icon: Text(
+              is3D ? context.l10n.map2DLabel : context.l10n.map3DLabel,
+              style: AppText.caption.copyWith(
+                fontWeight: FontWeight.w700,
+                color: is3D ? context.colors.accent : context.colors.ink,
+              ),
             ),
+            tooltip: is3D
+                ? context.l10n.mapTopDownView
+                : context.l10n.mapVolumeView,
+            shape: AppIconButtonShape.circle,
+            tone: AppIconButtonTone.glass,
+            onPressed: onToggle3D,
           ),
-          tooltip: is3D ? 'Вид сверху' : 'Объёмный план',
-          shape: AppIconButtonShape.circle,
-          tone: is3D ? AppIconButtonTone.primary : AppIconButtonTone.surface,
-          onPressed: onToggle3D,
         ),
       ],
     ],

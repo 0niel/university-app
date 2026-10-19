@@ -16,7 +16,7 @@ class MarketMediaPicker extends StatelessWidget {
 
   final List<MarketMediaDraftItem> items;
   final void Function(int oldIndex, int newIndex) onReorder;
-  final ValueChanged<int> onRemove;
+  final ValueChanged<int>? onRemove;
   final VoidCallback? onAddPhoto;
   final VoidCallback? onAddVideo;
 
@@ -28,34 +28,43 @@ class MarketMediaPicker extends StatelessWidget {
       for (final (index, item) in items.indexed)
         Padding(
           key: ValueKey(item.key),
-          padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
+          padding: EdgeInsetsDirectional.only(
+            end:
+                index == items.length - 1 &&
+                    onAddPhoto == null &&
+                    onAddVideo == null
+                ? 0
+                : AppSpacing.sm,
+          ),
           child: ReorderableDelayedDragStartListener(
             index: index,
             child: MarketMediaThumbnail(
               item: item,
               isCover: index == 0,
-              onRemove: () => onRemove(index),
+              onRemove: onRemove == null ? null : () => onRemove!(index),
             ),
           ),
         ),
-      if (onAddPhoto case final onAddPhoto?)
+      if (onAddPhoto case final addPhoto?)
         Padding(
           key: const ValueKey('market-add-photo'),
-          padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
+          padding: EdgeInsetsDirectional.only(
+            end: onAddVideo == null ? 0 : AppSpacing.sm,
+          ),
           child: _AddMediaButton(
             icon: AppLineIcon.image,
             semanticsLabel: l10n.marketAddPhotoAction,
-            onPressed: onAddPhoto,
+            onPressed: addPhoto,
           ),
         ),
-      if (onAddVideo case final onAddVideo?)
+      if (onAddVideo case final addVideo?)
         Padding(
           key: const ValueKey('market-add-video'),
           padding: EdgeInsets.zero,
           child: _AddMediaButton(
             icon: AppLineIcon.video,
             semanticsLabel: l10n.marketAddVideoAction,
-            onPressed: onAddVideo,
+            onPressed: addVideo,
           ),
         ),
     ];
@@ -63,14 +72,18 @@ class MarketMediaPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.marketMediaLabel,
-          style: AppText.captionSmall.copyWith(color: colors.muted),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Text(
+            l10n.marketMediaLabel,
+            style: AppText.captionSmall.copyWith(color: colors.muted),
+          ),
         ),
         const SizedBox(height: AppSpacing.gap),
         SizedBox(
           height: 76,
           child: ReorderableListView(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
             scrollDirection: Axis.horizontal,
             buildDefaultDragHandles: false,
             onReorderItem: (oldIndex, newIndex) {
@@ -81,9 +94,12 @@ class MarketMediaPicker extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        Text(
-          l10n.marketMediaHint,
-          style: AppText.caption.copyWith(color: colors.muted2),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Text(
+            l10n.marketMediaHint,
+            style: AppText.caption.copyWith(color: colors.muted2),
+          ),
         ),
       ],
     );

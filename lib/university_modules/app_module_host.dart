@@ -4,16 +4,19 @@ import 'package:rtu_mirea_app/university_modules/module_scoped_storage.dart';
 import 'package:university_modules/university_modules.dart';
 
 final class AppModuleHost implements ModuleHost, DigitalPassDeviceHost {
-  AppModuleHost({
+  const AppModuleHost({
     required this.organizationId,
     required this.accountId,
     required this.digitalPassAvailable,
     required this._storage,
-    this._institutionLogin,
-    this._setDigitalPassSession,
-    this._clearDigitalPassSession,
-    this._clearDigitalPassBinding,
-  });
+    Future<String?> Function()? institutionLogin,
+    Future<void> Function(String cookie)? setDigitalPassSession,
+    Future<void> Function()? clearDigitalPassSession,
+    Future<void> Function()? clearDigitalPassBinding,
+  }) : _onInstitutionLogin = institutionLogin,
+       _onSetDigitalPassSession = setDigitalPassSession,
+       _onClearDigitalPassSession = clearDigitalPassSession,
+       _onClearDigitalPassBinding = clearDigitalPassBinding;
 
   @override
   final String organizationId;
@@ -23,50 +26,50 @@ final class AppModuleHost implements ModuleHost, DigitalPassDeviceHost {
   final bool digitalPassAvailable;
 
   final ModuleScopedStorage _storage;
-  final Future<String?> Function()? _institutionLogin;
-  final Future<void> Function(String cookie)? _setDigitalPassSession;
-  final Future<void> Function()? _clearDigitalPassSession;
-  final Future<void> Function()? _clearDigitalPassBinding;
+  final Future<String?> Function()? _onInstitutionLogin;
+  final Future<void> Function(String cookie)? _onSetDigitalPassSession;
+  final Future<void> Function()? _onClearDigitalPassSession;
+  final Future<void> Function()? _onClearDigitalPassBinding;
 
   @override
   Future<String?> Function()? get institutionLogin =>
-      _institutionLogin == null ? null : _runInstitutionLogin;
+      _onInstitutionLogin == null ? null : _runInstitutionLogin;
 
   Future<String?> _runInstitutionLogin() async {
     _storage.checkAccount();
-    final cookie = await _institutionLogin!();
+    final cookie = await _onInstitutionLogin!();
     _storage.checkAccount();
     return cookie;
   }
 
   @override
   Future<void> Function(String cookie)? get setDigitalPassSession =>
-      digitalPassAvailable && _setDigitalPassSession != null
+      digitalPassAvailable && _onSetDigitalPassSession != null
       ? _adoptDigitalPassSession
       : null;
 
   @override
   Future<void> Function()? get clearDigitalPassSession =>
-      digitalPassAvailable && _clearDigitalPassSession != null
+      digitalPassAvailable && _onClearDigitalPassSession != null
       ? _removeDigitalPassSession
       : null;
 
   Future<void> _adoptDigitalPassSession(String cookie) async {
     _storage.checkAccount();
-    await _setDigitalPassSession!(cookie);
+    await _onSetDigitalPassSession!(cookie);
     _storage.checkAccount();
   }
 
   Future<void> _removeDigitalPassSession() async {
     _storage.checkAccount();
-    await _clearDigitalPassSession!();
+    await _onClearDigitalPassSession!();
     _storage.checkAccount();
   }
 
   @override
   Future<void> clearDigitalPassBinding() async {
     _storage.checkAccount();
-    final clear = _clearDigitalPassBinding;
+    final clear = _onClearDigitalPassBinding;
     if (!digitalPassAvailable || clear == null) {
       throw UnsupportedError('Device pass removal is unavailable.');
     }

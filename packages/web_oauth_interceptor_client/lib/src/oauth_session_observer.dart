@@ -9,18 +9,18 @@ class OAuthSessionObserver {
     required this.oauthUrl,
     required this.expectedRedirectUrls,
     required this.specialCookieName,
-    required this.readCookies,
+    required Future<Map<String, String>> Function(Uri) readCookies,
     required this.onSuccess,
     required this.onError,
     this.waitForSpecialCookie = false,
     this.pollInterval = const Duration(milliseconds: 500),
     this.redirectTimeout = const Duration(seconds: 20),
-  });
+  }) : _onReadCookies = readCookies;
 
   final String oauthUrl;
   final List<String> expectedRedirectUrls;
   final String specialCookieName;
-  final Future<Map<String, String>> Function(Uri) readCookies;
+  final Future<Map<String, String>> Function(Uri) _onReadCookies;
   final void Function(LoginSuccessData) onSuccess;
   final void Function() onError;
   final bool waitForSpecialCookie;
@@ -67,7 +67,7 @@ class OAuthSessionObserver {
       _probeAgain = true;
       return pending;
     }
-    late final Future<void> pending;
+    final Future<void> pending;
     pending = _inspect().whenComplete(() {
       _pending = null;
       if (_probeAgain && !_closed) {
@@ -107,7 +107,7 @@ class OAuthSessionObserver {
       if (uri == null || !_cookieUrl(uri)) continue;
       Map<String, String> cookies;
       try {
-        cookies = await readCookies(uri);
+        cookies = await _onReadCookies(uri);
       } on Exception {
         continue;
       }

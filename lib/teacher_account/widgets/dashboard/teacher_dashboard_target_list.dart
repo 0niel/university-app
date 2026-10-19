@@ -9,16 +9,17 @@ class TeacherDashboardTargetList<T> extends StatefulWidget {
   const TeacherDashboardTargetList({
     required this.title,
     required this.items,
-    required this.labelFor,
-    required this.iconFor,
+    required String Function(T) labelFor,
+    required AppLineIcon Function(T) iconFor,
     required this.onOpen,
     super.key,
-  });
+  }) : labelBuilder = labelFor,
+       iconBuilder = iconFor;
 
   final String title;
   final List<T> items;
-  final String Function(T) labelFor;
-  final AppLineIcon Function(T) iconFor;
+  final String Function(T) labelBuilder;
+  final AppLineIcon Function(T) iconBuilder;
   final ValueChanged<T> onOpen;
 
   @override
@@ -45,8 +46,8 @@ class _TeacherDashboardTargetListState<T>
           children: [
             for (final item in visible)
               ProfileLinkRow(
-                icon: widget.iconFor(item),
-                title: widget.labelFor(item),
+                icon: widget.iconBuilder(item),
+                title: widget.labelBuilder(item),
                 onTap: () => widget.onOpen(item),
               ),
           ],

@@ -1,14 +1,10 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rtu_mirea_app/community/widgets/collab_notes/editor/note_link_input.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-class NoteLinkInput {
-  const NoteLinkInput({required this.url, required this.text});
-
-  final String url;
-  final String text;
-}
+export 'note_link_input.dart';
 
 Future<NoteLinkInput?> showNoteLinkSheet(
   BuildContext context, {

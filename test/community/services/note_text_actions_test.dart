@@ -83,7 +83,7 @@ void main() {
   test(
     'queries real actions and forwards only requested text and readonly flag',
     () async {
-      final platform = _ProcessText();
+      final platform = FakeNoteProcessText();
       final actions = NoteTextActions(processTextService: platform);
       expect(await actions.availableActions(), [
         const ProcessTextAction('translate', 'Translate'),
@@ -101,7 +101,7 @@ void main() {
   );
 }
 
-class _ProcessText implements ProcessTextService {
+class FakeNoteProcessText implements ProcessTextService {
   (String, String, bool)? lastCall;
 
   @override

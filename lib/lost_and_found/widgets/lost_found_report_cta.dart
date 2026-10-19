@@ -18,8 +18,8 @@ class LostFoundReportCta extends StatelessWidget {
     final l10n = context.l10n;
     final enabled = onTap != null;
     final pastel = accented && enabled;
-    final title = pastel ? colors.ink : colors.ink;
-    final support = pastel ? colors.muted : colors.muted;
+    final title = colors.ink;
+    final support = colors.muted;
     return AppPressable(
       onTap: onTap,
       enabled: enabled,

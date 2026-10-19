@@ -103,16 +103,13 @@ void main() {
 
     expect(tester.getSize(find.byType(NinjaNavigationRail)).width, 220);
     final surface = tester.getRect(
-      find.descendant(
-        of: find.byType(NinjaNavigationRail),
-        matching: find.byType(ClipRRect),
-      ),
+      find.byType(AppGlassSurface),
     );
     final rail = tester.getRect(find.byType(NinjaNavigationRail));
     expect(surface.height, lessThan(rail.height - 100));
     expect(surface.center.dy, closeTo(rail.center.dy, 0.01));
     expect(find.text('Расписание занятий'), findsOneWidget);
-    expect(kitStyleOf(tester, 'Карта')?.color, kitColors.onAccent);
+    expect(kitStyleOf(tester, 'Карта')?.color, kitColors.ink);
     expect(kitStyleOf(tester, 'Главная')?.color, kitColors.muted);
     await tester.tap(find.text('Профиль'));
     expect(selected, 4);

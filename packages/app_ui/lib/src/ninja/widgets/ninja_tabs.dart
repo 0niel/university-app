@@ -80,7 +80,8 @@ class _NinjaTabsState<T> extends State<NinjaTabs<T>> {
           .offset
           .clamp(position.minScrollExtent, position.maxScrollExtent);
       if ((offset - _scrollController.offset).abs() < 0.5) return;
-      final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+      final reduceMotion =
+          MediaQuery.disableAnimationsOf(context) ||
           MediaQuery.accessibleNavigationOf(context);
       if (reduceMotion) {
         _scrollController.jumpTo(offset);
@@ -113,7 +114,7 @@ class _NinjaTabsState<T> extends State<NinjaTabs<T>> {
           children: [
             for (final (index, tab) in widget.tabs.indexed) ...[
               if (index > 0) SizedBox(width: widget.spacing),
-              _NinjaTabItem<T>(
+              _NinjaTabItem(
                 key: _tabKeys.putIfAbsent(tab.value, GlobalKey.new),
                 tab: tab,
                 selected: tab.value == widget.value,
@@ -157,10 +158,12 @@ class _NinjaTabItem<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final count = tab.count;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
-    final duration =
-        reduceMotion ? Duration.zero : const Duration(milliseconds: 200);
+    final duration = reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 200);
 
     return AppPressState(
       onTap: onTap,
@@ -176,8 +179,10 @@ class _NinjaTabItem<T> extends StatelessWidget {
             minHeight: AppControlSize.touchTarget,
             minWidth: AppControlSize.touchTarget,
           ),
-          padding:
-              const EdgeInsets.only(top: AppSpacing.gap, bottom: AppSpacing.md),
+          padding: const EdgeInsets.only(
+            top: AppSpacing.gap,
+            bottom: AppSpacing.md,
+          ),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
@@ -195,8 +200,11 @@ class _NinjaTabItem<T> extends StatelessWidget {
                 style: AppText.tab.copyWith(
                   color: selected ? colors.ink : colors.muted,
                 ),
-                child:
-                    Text(tab.label, maxLines: 1, overflow: TextOverflow.fade),
+                child: Text(
+                  tab.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.fade,
+                ),
               ),
               if (count != null) ...[
                 const SizedBox(width: AppSpacing.xsm),

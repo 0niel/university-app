@@ -12,6 +12,7 @@ class AppWeekPager extends StatefulWidget {
     required this.onWeekChanged,
     required this.onSelected,
     this.scheduleStyle = false,
+    this.padding = EdgeInsets.zero,
     super.key,
   });
 
@@ -21,6 +22,7 @@ class AppWeekPager extends StatefulWidget {
   final ValueChanged<DateTime> onWeekChanged;
   final ValueChanged<int> onSelected;
   final bool scheduleStyle;
+  final EdgeInsetsGeometry padding;
 
   static DateTime offsetWeek(DateTime start, int offset) =>
       DateTime(start.year, start.month, start.day + offset * 7);
@@ -47,9 +49,11 @@ class _AppWeekPagerState extends State<AppWeekPager> {
 
   int _pageOf(DateTime date) =>
       _originPage +
-      DateTime.utc(date.year, date.month, date.day)
-              .difference(_origin)
-              .inDays ~/
+      DateTime.utc(
+            date.year,
+            date.month,
+            date.day,
+          ).difference(_origin).inDays ~/
           7;
 
   DateTime _weekOf(int page) {
@@ -124,66 +128,78 @@ class _AppWeekPagerState extends State<AppWeekPager> {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) {
-          final current = _pageOf(widget.weekStart);
-          final pages = <int>{
-            for (var offset = -1; offset <= 1; offset++) ...[
-              current + offset,
-              _visiblePage + offset,
-            ],
-            if ((current - _visiblePage).abs() <= 7)
-              for (var page = math.min(current, _visiblePage);
-                  page <= math.max(current, _visiblePage);
-                  page++)
-                page,
-          };
-          final data = <int, List<NinjaWeekDay>>{
-            for (final page in pages) page: widget.daysBuilder(_weekOf(page)),
-          };
-          final measured = data.values
+    builder: (context, constraints) {
+      final padding = widget.padding.resolve(Directionality.of(context));
+      final double contentWidth = math.max(
+        0,
+        constraints.maxWidth - padding.horizontal,
+      );
+      final current = _pageOf(widget.weekStart);
+      final pages = <int>{
+        for (var offset = -1; offset <= 1; offset++) ...[
+          current + offset,
+          _visiblePage + offset,
+        ],
+        if ((current - _visiblePage).abs() <= 7)
+          for (
+            var page = math.min(current, _visiblePage);
+            page <= math.max(current, _visiblePage);
+            page++
+          )
+            page,
+      };
+      final data = <int, List<NinjaWeekDay>>{
+        for (final page in pages) page: widget.daysBuilder(_weekOf(page)),
+      };
+      final measured =
+          data.values
               .map(
                 (days) => NinjaWeekStrip.layout(
                   context,
-                  width: constraints.maxWidth,
+                  width: contentWidth,
                   days: days,
                   scheduleStyle: widget.scheduleStyle,
                 ).height,
               )
-              .reduce(math.max);
-          final scale = MediaQuery.textScalerOf(context).scale(16);
-          if (_width != constraints.maxWidth || _fontScale != scale) {
-            _retainedHeight = 0;
-            _width = constraints.maxWidth;
-            _fontScale = scale;
-          }
-          final height = _retainedHeight = _dragging || _target != null
-              ? math.max(measured, _retainedHeight)
-              : measured;
-          return SizedBox(
-            height: height,
-            child: NotificationListener<ScrollNotification>(
-              onNotification: _onScroll,
-              child: PageView.builder(
-                controller: _controller,
-                onPageChanged: (page) => setState(() => _visiblePage = page),
-                itemBuilder: (context, page) => Align(
-                  alignment: Alignment.topCenter,
-                  child: IgnorePointer(
-                    ignoring: page != current,
-                    child: NinjaWeekStrip(
-                      key: ValueKey(_weekOf(page)),
-                      padding: EdgeInsets.zero,
-                      fitWeek: true,
-                      scheduleStyle: widget.scheduleStyle,
-                      selectedIndex: widget.selectedIndex,
-                      onSelected: widget.onSelected,
-                      days: data[page] ?? widget.daysBuilder(_weekOf(page)),
-                    ),
+              .reduce(math.max) +
+          padding.vertical;
+      final scale = MediaQuery.textScalerOf(context).scale(16);
+      if (_width != constraints.maxWidth || _fontScale != scale) {
+        _retainedHeight = 0;
+        _width = constraints.maxWidth;
+        _fontScale = scale;
+      }
+      final height = _retainedHeight = _dragging || _target != null
+          ? math.max(measured, _retainedHeight)
+          : measured;
+      return SizedBox(
+        height: height,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: _onScroll,
+          child: PageView.builder(
+            controller: _controller,
+            onPageChanged: (page) => setState(() => _visiblePage = page),
+            itemBuilder: (context, page) => Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: padding,
+                child: IgnorePointer(
+                  ignoring: page != current,
+                  child: NinjaWeekStrip(
+                    key: ValueKey(_weekOf(page)),
+                    padding: EdgeInsets.zero,
+                    fitWeek: true,
+                    scheduleStyle: widget.scheduleStyle,
+                    selectedIndex: widget.selectedIndex,
+                    onSelected: widget.onSelected,
+                    days: data[page] ?? widget.daysBuilder(_weekOf(page)),
                   ),
                 ),
               ),
             ),
-          );
-        },
+          ),
+        ),
       );
+    },
+  );
 }

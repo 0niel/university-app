@@ -1,0 +1,1 @@
+enum AppSearchFieldTone { filled, glass }

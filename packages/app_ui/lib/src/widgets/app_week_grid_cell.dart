@@ -6,9 +6,10 @@ import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_dashed_border.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_pressable.dart';
+import 'package:app_ui/src/widgets/app_week_grid_cell_variant.dart';
 import 'package:flutter/widgets.dart';
 
-enum AppWeekGridCellVariant { filled, cancelled, busy, empty }
+export 'app_week_grid_cell_variant.dart';
 
 class AppWeekGridCell extends StatelessWidget {
   const AppWeekGridCell({
@@ -54,19 +55,20 @@ class AppWeekGridCell extends StatelessWidget {
     };
     final radius = BorderRadius.circular(AppRadius.sm);
     final top = cancelled ? (topLabel ?? 'ОТМ') : topLabel;
-    final decoration =
-        cancelled && !scheduleStyle ? TextDecoration.lineThrough : null;
+    final decoration = cancelled && !scheduleStyle
+        ? TextDecoration.lineThrough
+        : null;
 
     Widget content = empty
         ? scheduleStyle
-            ? const SizedBox.expand()
-            : Center(
-                child: AppLineIconWidget(
-                  AppLineIcon.plus,
-                  size: AppIconSize.xs,
-                  color: colors.muted2,
-                ),
-              )
+              ? const SizedBox.expand()
+              : Center(
+                  child: AppLineIconWidget(
+                    AppLineIcon.plus,
+                    size: AppIconSize.xs,
+                    color: colors.muted2,
+                  ),
+                )
         : Padding(
             padding: EdgeInsets.symmetric(
               horizontal: scheduleStyle ? AppSpacing.xsm : AppSpacing.fine,
@@ -145,8 +147,8 @@ class AppWeekGridCell extends StatelessWidget {
                 color: empty || busy
                     ? colors.line
                     : selected
-                        ? colors.accent
-                        : foreground.withValues(alpha: 0),
+                    ? colors.accent
+                    : foreground.withValues(alpha: 0),
               )
             : null,
       ),

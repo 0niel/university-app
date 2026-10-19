@@ -40,12 +40,12 @@ class SettingsThemeRow extends StatelessWidget {
             value: current,
             onChanged: onModeSelected == null
                 ? null
-                : (mode) {
-                    if (mode != current) onModeSelected(mode);
+                : (selectedMode) {
+                    if (selectedMode != current) onModeSelected(selectedMode);
                   },
             options: [
-              for (final mode in AdaptiveThemeMode.values)
-                AppSegmentedOption(value: mode, label: mode.label(l10n)),
+              for (final option in AdaptiveThemeMode.values)
+                AppSegmentedOption(value: option, label: option.label(l10n)),
             ],
           ),
         ],

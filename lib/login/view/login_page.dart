@@ -78,9 +78,11 @@ class _LoginPageViewState extends State<_LoginPageView> {
       showDescription: false,
       onChanged: busy
           ? null
-          : (role) {
-              context.read<AccountEntryIntentCubit?>()?.select(role);
-              setState(() => _teacherEntry = role == AccountRole.teacher);
+          : (selectedRole) {
+              context.read<AccountEntryIntentCubit?>()?.select(selectedRole);
+              setState(
+                () => _teacherEntry = selectedRole == AccountRole.teacher,
+              );
             },
     );
     return Scaffold(
@@ -155,6 +157,7 @@ class _LoginWelcome extends StatelessWidget {
     final busy = state.status.isInProgress;
     return AuthPageLayout(
       key: const ValueKey('login_welcome'),
+      surfaceBody: false,
       showBack: Navigator.of(context).canPop(),
       large: true,
       title: teacherEntry ? l10n.teacherLoginTitle : l10n.entryWelcomeTitle,

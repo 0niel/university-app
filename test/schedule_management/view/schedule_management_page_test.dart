@@ -158,7 +158,18 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Редактировать'));
+      expect(find.text('Редактировать'), findsNothing);
+      final edit = find.byWidgetPredicate(
+        (widget) =>
+            widget is AppHeaderCircleButton &&
+            widget.action.semanticsLabel == 'Редактировать',
+      );
+      expect(edit, findsOneWidget);
+      expect(
+        find.descendant(of: edit, matching: find.byType(AppTooltipAnchor)),
+        findsOneWidget,
+      );
+      await tester.tap(edit);
       await tester.pumpAndSettle();
 
       expect(find.byType(EditSchedulesPage), findsOneWidget);

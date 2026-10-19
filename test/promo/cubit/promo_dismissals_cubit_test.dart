@@ -76,7 +76,7 @@ void main() {
       final cubit = PromoDismissalsCubit()
         ..snooze(banner, now: now)
         ..hide(banner.copyWith(id: 'b2'));
-      final json = cubit.toJson(cubit.state)!;
+      final json = cubit.toJson(cubit.state);
       final restored = PromoDismissalsState.fromJson({
         ...json,
         'snoozedUntil': {...json['snoozedUntil'] as Map, 'bad': 'oops'},

@@ -175,10 +175,10 @@ class _MapVolumeLayerState extends State<MapVolumeLayer> {
         floorSize: widget.floorSize,
       );
     }
-    if (widget.rooms != oldWidget.rooms ||
-        widget.places != oldWidget.places ||
-        widget.navigationLandmarks != oldWidget.navigationLandmarks ||
-        widget.syntheticRoomIds != oldWidget.syntheticRoomIds ||
+    if (!identical(widget.rooms, oldWidget.rooms) ||
+        !identical(widget.places, oldWidget.places) ||
+        !identical(widget.navigationLandmarks, oldWidget.navigationLandmarks) ||
+        !identical(widget.syntheticRoomIds, oldWidget.syntheticRoomIds) ||
         widget.floorSize != oldWidget.floorSize) {
       _index();
     }
@@ -186,7 +186,7 @@ class _MapVolumeLayerState extends State<MapVolumeLayer> {
       oldWidget.transform.removeListener(_cameraChanged);
       widget.transform.addListener(_cameraChanged);
     }
-    if (widget.routeSegments != oldWidget.routeSegments ||
+    if (!identical(widget.routeSegments, oldWidget.routeSegments) ||
         widget.instructionPoint != oldWidget.instructionPoint ||
         widget.showRouteStart != oldWidget.showRouteStart ||
         widget.showRouteDestination != oldWidget.showRouteDestination) {
@@ -421,7 +421,7 @@ class _VolumePainter extends CustomPainter {
   bool shouldRepaint(_VolumePainter oldDelegate) =>
       oldDelegate.layers != layers ||
       oldDelegate.mesh != mesh ||
-      oldDelegate.features != features ||
+      !identical(oldDelegate.features, features) ||
       oldDelegate.projection != projection ||
       oldDelegate.colors != colors ||
       oldDelegate.floorSize != floorSize ||
@@ -478,8 +478,8 @@ class _VolumeLabelsPainter extends CustomPainter {
     final candidates = <MapLabelCandidate>[];
     final overview = camera.scale < .5;
     final overviewCaptions = <String>{};
-    final categories = <String>{};
     if (overview) {
+      final categories = <String>{};
       for (final feature in features) {
         final anchor = feature.anchor;
         if (feature.connector ||
@@ -555,11 +555,11 @@ class _VolumeLabelsPainter extends CustomPainter {
           : feature.priority +
                 (feature.service ? 100 : 0) -
                 (overview && feature.connector ? 1000 : 0);
-      void addLabel(TextPainter? caption, Size size, int rank) {
+      void addLabel(TextPainter? labelPainter, Size labelSize, int rank) {
         final candidate = MapLabelCandidate(
           id: feature.id,
           anchor: screen,
-          size: size,
+          size: labelSize,
           priority: rank,
         );
         if (!viewport.contains(candidate.bounds.topLeft) ||
@@ -567,7 +567,7 @@ class _VolumeLabelsPainter extends CustomPainter {
             reserved.any(candidate.bounds.inflate(4).overlaps)) {
           return;
         }
-        labels[candidate] = (feature, caption);
+        labels[candidate] = (feature, labelPainter);
         candidates.add(candidate);
       }
 
@@ -631,8 +631,8 @@ class _VolumeLabelsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_VolumeLabelsPainter oldDelegate) =>
-      oldDelegate.features != features ||
-      oldDelegate.routeMarkers != routeMarkers ||
+      !identical(oldDelegate.features, features) ||
+      !identical(oldDelegate.routeMarkers, routeMarkers) ||
       oldDelegate.projection != projection ||
       oldDelegate.colors != colors ||
       oldDelegate.selectedId != selectedId ||

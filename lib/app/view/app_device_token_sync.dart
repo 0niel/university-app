@@ -20,7 +20,7 @@ class AppDeviceTokenSync extends StatefulWidget {
       context
           .findAncestorStateOfType<_AppDeviceTokenSyncState>()
           ?._synchronize() ??
-      Future<void>.value();
+      Future.value();
 
   @override
   State<AppDeviceTokenSync> createState() => _AppDeviceTokenSyncState();
@@ -90,8 +90,10 @@ class _AppDeviceTokenSyncState extends State<AppDeviceTokenSync>
 
   Future<void> _prepareControllers() {
     final result = _controllerReady.then((_) async {
-      while (_retiring.isNotEmpty) {
-        await _retiring.first.invalidate();
+      while (true) {
+        final retiring = _retiring.firstOrNull;
+        if (retiring == null) break;
+        await retiring.invalidate();
         _retiring.removeAt(0);
       }
     });

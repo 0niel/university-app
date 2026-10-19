@@ -15,7 +15,7 @@ import '../helpers/pump_app.dart';
 
 class _AppBloc extends MockBloc<AppEvent, AppState> implements AppBloc {}
 
-class _Module implements UniversityModule {
+class FakeUniversityModule implements UniversityModule {
   @override
   ModuleDescriptor get descriptor => const ModuleDescriptor(
     id: 'campus-services',
@@ -64,7 +64,7 @@ void main() {
   testWidgets('an unauthenticated route cannot construct the module', (
     tester,
   ) async {
-    final module = _Module();
+    final module = FakeUniversityModule();
     final app = _AppBloc();
     when(() => app.state).thenReturn(const AppState());
     await tester.pumpApp(
@@ -81,7 +81,7 @@ void main() {
   testWidgets('changing the application account replaces the module host', (
     tester,
   ) async {
-    final module = _Module();
+    final module = FakeUniversityModule();
     final app = _AppBloc();
     const initial = AppState(
       status: AppStatus.authenticated,

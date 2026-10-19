@@ -3,8 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'market_media_item.freezed.dart';
 part 'market_media_item.g.dart';
 
-enum MarketMediaKind { image, video }
-
 @freezed
 abstract class MarketMediaItem with _$MarketMediaItem {
   const factory MarketMediaItem({
@@ -23,5 +21,7 @@ abstract class MarketMediaItem with _$MarketMediaItem {
   factory MarketMediaItem.fromJson(Map<String, Object?> json) =>
       _$MarketMediaItemFromJson(json);
 
-  bool get isVideo => kind == MarketMediaKind.video;
+  bool get isVideo => kind == .video;
 }
+
+enum MarketMediaKind { image, video }

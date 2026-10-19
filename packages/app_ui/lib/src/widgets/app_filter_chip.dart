@@ -1,11 +1,48 @@
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
+import 'package:app_ui/src/widgets/app_chip_style.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
 import 'package:app_ui/src/widgets/app_press_state.dart';
 import 'package:flutter/material.dart';
 
-enum AppChipStyle { tinted, filter }
+export 'app_chip_style.dart';
+
+class AppFilterChip extends StatelessWidget {
+  const AppFilterChip({
+    required this.label,
+    super.key,
+    this.onTap,
+    this.isSelected = false,
+    this.color,
+    this.icon,
+    this.leadingIcon,
+    this.count,
+    this.enabled = true,
+  });
+
+  final String label;
+  final VoidCallback? onTap;
+  final bool isSelected;
+  final Color? color;
+  final AppLineIcon? icon;
+  final AppLineIcon? leadingIcon;
+  final int? count;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppChip.filter(
+      label: label,
+      selected: isSelected,
+      onTap: onTap,
+      color: color,
+      leadingIcon: leadingIcon ?? icon,
+      count: count,
+      enabled: enabled,
+    );
+  }
+}
 
 abstract final class _ChipMetrics {
   static const double leadingIcon = 15;
@@ -45,9 +82,9 @@ class AppChip extends StatelessWidget {
     this.leading,
     this.enabled = true,
     this.color,
-  })  : style = AppChipStyle.filter,
-        onRemove = null,
-        removeSemanticLabel = null;
+  }) : style = AppChipStyle.filter,
+       onRemove = null,
+       removeSemanticLabel = null;
 
   final String label;
   final AppChipStyle style;
@@ -66,7 +103,8 @@ class AppChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     final accent = color ?? colors.accent;
     final filter = style == AppChipStyle.filter;
@@ -82,10 +120,12 @@ class AppChip extends StatelessWidget {
       foreground = colors.muted2;
     }
 
-    final removeLabel = removeSemanticLabel ??
+    final removeLabel =
+        removeSemanticLabel ??
         '${MaterialLocalizations.of(context).deleteButtonTooltip}: $label';
     final count = this.count;
-    final leading = this.leading ??
+    final leadingWidget =
+        leading ??
         (leadingIcon == null
             ? null
             : AppLineIconWidget(
@@ -101,8 +141,9 @@ class AppChip extends StatelessWidget {
       semanticsButton: true,
       semanticsSelected: selected,
       builder: (context, {required pressed}) => AnimatedContainer(
-        duration:
-            reduceMotion ? Duration.zero : const Duration(milliseconds: 150),
+        duration: reduceMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 150),
         curve: Curves.easeOut,
         constraints: BoxConstraints(
           minHeight: filter ? 0 : AppControlSize.touchTarget,
@@ -125,8 +166,8 @@ class AppChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (leading != null) ...[
-              leading,
+            if (leadingWidget != null) ...[
+              leadingWidget,
               const SizedBox(width: _ChipMetrics.gap),
             ],
             Flexible(
@@ -183,42 +224,6 @@ class AppChip extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class AppFilterChip extends StatelessWidget {
-  const AppFilterChip({
-    required this.label,
-    super.key,
-    this.onTap,
-    this.isSelected = false,
-    this.color,
-    this.icon,
-    this.leadingIcon,
-    this.count,
-    this.enabled = true,
-  });
-
-  final String label;
-  final VoidCallback? onTap;
-  final bool isSelected;
-  final Color? color;
-  final AppLineIcon? icon;
-  final AppLineIcon? leadingIcon;
-  final int? count;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppChip.filter(
-      label: label,
-      selected: isSelected,
-      onTap: onTap,
-      color: color,
-      leadingIcon: leadingIcon ?? icon,
-      count: count,
-      enabled: enabled,
     );
   }
 }

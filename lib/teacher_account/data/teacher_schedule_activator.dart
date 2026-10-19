@@ -49,7 +49,7 @@ class TeacherScheduleActivator {
             .listen(
               controller.add,
               onError: controller.addError,
-              onDone: controller.close,
+              onDone: () => unawaited(controller.close()),
             );
         _schedule.add(
           matches(_schedule.state)

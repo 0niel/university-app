@@ -30,7 +30,12 @@ class SettingToggleRow extends StatelessWidget {
           child: Row(
             children: [
               if (icon != null) ...[
-                AppLineIconWidget(icon!, color: colors.muted),
+                AppIconTile(
+                  icon: icon,
+                  foreground: value ? colors.accent : colors.muted,
+                  background: value ? colors.tint : colors.surface2,
+                  iconSize: 18,
+                ),
                 const SizedBox(width: 14),
               ],
               Expanded(

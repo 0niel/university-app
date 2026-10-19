@@ -7,8 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../kit_harness.dart';
 
 void main() {
-  testWidgets('stripes follow 135 degrees with 10px perpendicular bands',
-      (tester) async {
+  testWidgets('stripes follow 135 degrees with 10px perpendicular bands', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         const SizedBox.square(

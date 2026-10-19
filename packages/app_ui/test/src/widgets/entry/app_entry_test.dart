@@ -72,11 +72,7 @@ void main() {
   testWidgets('entry layout inherits the AMOLED canvas and lesson palette', (
     tester,
   ) async {
-    final amoled = AppColors.dark.copyWith(
-      canvas: AppColors.amoledCanvas,
-      surface: AppColors.amoledSurface,
-      surface2: AppColors.amoledSurface2,
-    );
+    const amoled = AppColors.dark;
     AppColors? result;
     await tester.pumpWidget(
       MaterialApp(
@@ -96,7 +92,7 @@ void main() {
       ),
     );
     expect(result?.canvas, Colors.black);
-    expect(result?.surface, AppColors.amoledSurface);
+    expect(result?.surface, AppColors.dark.surface);
     expect(result?.lecture, amoled.lecture);
     expect(result?.practice, amoled.practice);
     expect(result?.accent, amoled.accent);

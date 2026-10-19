@@ -45,9 +45,10 @@ class _AppDisclosureState extends State<AppDisclosure> {
   Widget build(BuildContext context) {
     final reduceMotion =
         (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
-            (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
-    final duration =
-        reduceMotion ? Duration.zero : const Duration(milliseconds: 180);
+        (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
+    final duration = reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 180);
     final content = _expanded
         ? Padding(padding: widget.contentPadding, child: widget.child)
         : const SizedBox.shrink();

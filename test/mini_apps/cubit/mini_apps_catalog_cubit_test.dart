@@ -91,6 +91,105 @@ void main() {
         ],
         errors: () => [isA<GetMiniAppsFailure>()],
       );
+
+      test(
+        'keeps the newest full response when an older load finishes last',
+        () async {
+          const newestApp = MiniApp(id: 'new', slug: 'new', name: 'New');
+          final olderOwnedApps = Completer<List<MiniApp>>();
+          var calls = 0;
+          when(repository.getMyApps).thenAnswer((_) {
+            calls++;
+            return calls == 1
+                ? olderOwnedApps.future
+                : Future.value(const [newestApp]);
+          });
+          var moderatorCalls = 0;
+          when(repository.isModerator).thenAnswer((_) async {
+            moderatorCalls++;
+            return moderatorCalls > 1;
+          });
+          var recentCalls = 0;
+          when(
+            () => repository.getRecentApps(limit: any(named: 'limit')),
+          ).thenAnswer((_) async {
+            recentCalls++;
+            return recentCalls == 1 ? const [app] : const [newestApp];
+          });
+          final cubit = buildCubit();
+          addTearDown(cubit.close);
+
+          final olderRequest = cubit.load();
+          await cubit.load();
+          final newestState = cubit.state;
+          olderOwnedApps.complete(const [myApp]);
+          await olderRequest;
+
+          expect(cubit.state, newestState);
+          expect(cubit.state.myApps, const [newestApp]);
+          expect(cubit.state.recents, const [newestApp]);
+          expect(cubit.state.isModerator, isTrue);
+        },
+      );
+
+      test(
+        'loads account sections without replacing a newer search result',
+        () async {
+          const matchingApp = MiniApp(
+            id: 'match',
+            slug: 'match',
+            name: 'Match',
+          );
+          final ownedApps = Completer<List<MiniApp>>();
+          when(repository.getMyApps).thenAnswer((_) => ownedApps.future);
+          when(
+            () => repository.getApps(query: 'match'),
+          ).thenAnswer((_) async => const [matchingApp]);
+          final cubit = buildCubit();
+          addTearDown(cubit.close);
+
+          final initialLoad = cubit.load();
+          await cubit.queryChanged('match');
+          ownedApps.complete(const [myApp]);
+          await initialLoad;
+
+          expect(cubit.state.status, MiniAppsCatalogStatus.populated);
+          expect(cubit.state.query, 'match');
+          expect(cubit.state.apps, const [matchingApp]);
+          expect(cubit.state.myApps, const [myApp]);
+          expect(cubit.state.isModerator, isTrue);
+        },
+      );
+
+      blocTest<MiniAppsCatalogCubit, MiniAppsCatalogState>(
+        'preserves loaded content during a failed refresh',
+        setUp: () => when(
+          () => repository.getApps(),
+        ).thenThrow(const GetMiniAppsFailure('offline')),
+        build: buildCubit,
+        seed: () => const MiniAppsCatalogState(
+          status: MiniAppsCatalogStatus.populated,
+          apps: [app],
+          myApps: [myApp],
+          recents: [app],
+        ),
+        act: (cubit) => cubit.load(),
+        expect: () => const [
+          MiniAppsCatalogState(
+            status: MiniAppsCatalogStatus.loading,
+            apps: [app],
+            myApps: [myApp],
+            recents: [app],
+          ),
+          MiniAppsCatalogState(
+            status: MiniAppsCatalogStatus.failure,
+            apps: [app],
+            myApps: [myApp],
+            recents: [app],
+          ),
+        ],
+        errors: () => [isA<GetMiniAppsFailure>()],
+      );
     });
 
     group('queryChanged', () {
@@ -100,6 +199,10 @@ void main() {
         act: (cubit) => cubit.queryChanged('гороскоп'),
         expect: () => const <MiniAppsCatalogState>[
           MiniAppsCatalogState(query: 'гороскоп'),
+          MiniAppsCatalogState(
+            query: 'гороскоп',
+            status: MiniAppsCatalogStatus.loading,
+          ),
           MiniAppsCatalogState(
             query: 'гороскоп',
             status: MiniAppsCatalogStatus.populated,
@@ -146,6 +249,130 @@ void main() {
           await cubit.close();
         },
       );
+
+      blocTest<MiniAppsCatalogCubit, MiniAppsCatalogState>(
+        'preserves cards while searching and ignores an unchanged query',
+        build: buildCubit,
+        seed: () => const MiniAppsCatalogState(
+          status: MiniAppsCatalogStatus.populated,
+          apps: [app],
+          myApps: [myApp],
+        ),
+        act: (cubit) async {
+          await cubit.queryChanged(' poll ');
+          await cubit.queryChanged('poll');
+        },
+        expect: () => const [
+          MiniAppsCatalogState(
+            status: MiniAppsCatalogStatus.populated,
+            apps: [app],
+            myApps: [myApp],
+            query: 'poll',
+          ),
+          MiniAppsCatalogState(
+            status: MiniAppsCatalogStatus.loading,
+            apps: [app],
+            myApps: [myApp],
+            query: 'poll',
+          ),
+          MiniAppsCatalogState(
+            status: MiniAppsCatalogStatus.populated,
+            apps: [app],
+            myApps: [myApp],
+            query: 'poll',
+          ),
+        ],
+        verify: (_) => verify(
+          () => repository.getApps(query: 'poll'),
+        ).called(1),
+      );
+    });
+
+    group('filters', () {
+      blocTest<MiniAppsCatalogCubit, MiniAppsCatalogState>(
+        'resets query and category together with one refetch',
+        build: buildCubit,
+        seed: () => const MiniAppsCatalogState(
+          status: MiniAppsCatalogStatus.populated,
+          apps: [app],
+          query: 'poll',
+          category: MiniAppCategory.study,
+          sort: MiniAppSort.top,
+          isSearching: true,
+        ),
+        act: (cubit) => cubit.resetFilters(),
+        expect: () => const [
+          MiniAppsCatalogState(
+            status: MiniAppsCatalogStatus.populated,
+            apps: [app],
+            sort: MiniAppSort.top,
+            isSearching: true,
+          ),
+          MiniAppsCatalogState(
+            status: MiniAppsCatalogStatus.loading,
+            apps: [app],
+            sort: MiniAppSort.top,
+            isSearching: true,
+          ),
+          MiniAppsCatalogState(
+            status: MiniAppsCatalogStatus.populated,
+            apps: [app],
+            sort: MiniAppSort.top,
+            isSearching: true,
+          ),
+        ],
+        verify: (_) => verify(
+          () => repository.getApps(sort: MiniAppSort.top),
+        ).called(1),
+      );
+
+      blocTest<MiniAppsCatalogCubit, MiniAppsCatalogState>(
+        'unchanged query, category, sort and reset do not refetch',
+        build: buildCubit,
+        act: (cubit) async {
+          await cubit.queryChanged('  ');
+          await cubit.categoryChanged(null);
+          await cubit.sortChanged(MiniAppSort.popular);
+          await cubit.resetFilters();
+        },
+        expect: () => const <MiniAppsCatalogState>[],
+        verify: (_) => verifyNever(
+          () => repository.getApps(
+            query: any(named: 'query'),
+            category: any(named: 'category'),
+            sort: any(named: 'sort'),
+            includeHidden: any(named: 'includeHidden'),
+          ),
+        ),
+      );
+
+      test(
+        'closing search invalidates its pending results and keeps category',
+        () async {
+          final pendingQuery = Completer<List<MiniApp>>();
+          when(
+            () => repository.getApps(
+              query: 'poll',
+              category: MiniAppCategory.study,
+            ),
+          ).thenAnswer((_) => pendingQuery.future);
+          final cubit = buildCubit();
+          addTearDown(cubit.close);
+          await cubit.categoryChanged(MiniAppCategory.study);
+          await cubit.searchToggled();
+          final queryRequest = cubit.queryChanged('poll');
+          await cubit.searchToggled();
+          final closedSearch = cubit.state;
+          pendingQuery.complete(const []);
+          await queryRequest;
+
+          expect(cubit.state, closedSearch);
+          expect(cubit.state.isSearching, isFalse);
+          expect(cubit.state.query, isEmpty);
+          expect(cubit.state.category, MiniAppCategory.study);
+          expect(cubit.state.apps, const [app]);
+        },
+      );
     });
 
     group('sortChanged', () {
@@ -155,6 +382,10 @@ void main() {
         act: (cubit) => cubit.sortChanged(MiniAppSort.top),
         expect: () => const <MiniAppsCatalogState>[
           MiniAppsCatalogState(sort: MiniAppSort.top),
+          MiniAppsCatalogState(
+            sort: MiniAppSort.top,
+            status: MiniAppsCatalogStatus.loading,
+          ),
           MiniAppsCatalogState(
             sort: MiniAppSort.top,
             status: MiniAppsCatalogStatus.populated,
@@ -169,6 +400,76 @@ void main() {
       );
     });
 
+    group('lifecycle', () {
+      test('ignores a full load response after close', () async {
+        final pending = Completer<List<MiniApp>>();
+        when(() => repository.getApps()).thenAnswer((_) => pending.future);
+        final cubit = buildCubit();
+        final request = cubit.load();
+        await cubit.close();
+        final closedState = cubit.state;
+        pending.complete(const [app]);
+        await request;
+
+        expect(cubit.state, closedState);
+      });
+
+      test('ignores a failed search response after close', () async {
+        final pending = Completer<List<MiniApp>>();
+        when(
+          () => repository.getApps(query: 'poll'),
+        ).thenAnswer((_) => pending.future);
+        final cubit = buildCubit();
+        final request = cubit.queryChanged('poll');
+        await cubit.close();
+        final closedState = cubit.state;
+        pending.completeError(
+          const GetMiniAppsFailure('offline'),
+          StackTrace.current,
+        );
+        await request;
+
+        expect(cubit.state, closedState);
+      });
+
+      test('does not start requests or change filters after close', () async {
+        final cubit = buildCubit();
+        await cubit.close();
+        await cubit.load();
+        await cubit.queryChanged('poll');
+        await cubit.categoryChanged(MiniAppCategory.study);
+        await cubit.sortChanged(MiniAppSort.top);
+        await cubit.resetFilters();
+        await cubit.searchToggled();
+        await cubit.toggleFeatured(app);
+        await cubit.setHidden(app, hidden: true);
+        await cubit.rate(app, 5);
+        await cubit.setConsents(app, const []);
+        await cubit.deleteMyApp(myApp);
+        final reported = await cubit.report(app, MiniAppReportReason.spam, '');
+
+        expect(cubit.state, const MiniAppsCatalogState());
+        expect(reported, isFalse);
+        verifyZeroInteractions(repository);
+      });
+
+      test('ignores a mutation response after close', () async {
+        final pending = Completer<void>();
+        when(
+          () => repository.setHidden(appId: app.id, hidden: true),
+        ).thenAnswer((_) => pending.future);
+        final cubit = buildCubit();
+        await cubit.load();
+        final request = cubit.setHidden(app, hidden: true);
+        await cubit.close();
+        final closedState = cubit.state;
+        pending.complete();
+        await request;
+
+        expect(cubit.state, closedState);
+      });
+    });
+
     group('toggleFeatured', () {
       blocTest<MiniAppsCatalogCubit, MiniAppsCatalogState>(
         'features the app and refetches the catalog',
@@ -181,6 +482,7 @@ void main() {
         build: buildCubit,
         act: (cubit) => cubit.toggleFeatured(app),
         expect: () => const <MiniAppsCatalogState>[
+          MiniAppsCatalogState(status: MiniAppsCatalogStatus.loading),
           MiniAppsCatalogState(
             status: MiniAppsCatalogStatus.populated,
             apps: [app],

@@ -15,7 +15,7 @@ import 'package:rtu_mirea_app/community/widgets/team_finder/team_choice_chip.dar
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-const _boostCost = 50;
+const _kBoostCost = 50;
 
 class CreateTeamSheet extends StatefulWidget {
   const CreateTeamSheet({super.key, this.editing});
@@ -67,25 +67,15 @@ class _CreateTeamSheetState extends State<CreateTeamSheet> {
         _showCustomRoleInput = true;
       }
     }
-    _title.addListener(_onFieldChanged);
-    _customRole.addListener(_onFieldChanged);
     if (editing == null) unawaited(_loadBalance());
   }
 
   @override
   void dispose() {
-    _title
-      ..removeListener(_onFieldChanged)
-      ..dispose();
-    _customRole
-      ..removeListener(_onFieldChanged)
-      ..dispose();
+    _title.dispose();
+    _customRole.dispose();
     _description.dispose();
     super.dispose();
-  }
-
-  void _onFieldChanged() {
-    if (mounted) setState(() {});
   }
 
   Future<void> _loadBalance() async {
@@ -106,7 +96,7 @@ class _CreateTeamSheetState extends State<CreateTeamSheet> {
   ];
 
   bool get _insufficientBoost =>
-      _walletBalance != null && _walletBalance! < _boostCost;
+      _walletBalance != null && _walletBalance! < _kBoostCost;
 
   Future<void> _pickDeadline() async {
     final now = DateTime.now();
@@ -163,7 +153,12 @@ class _CreateTeamSheetState extends State<CreateTeamSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([_title, _customRole]),
+    builder: (context, _) => _buildContent(context),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
     final config = UniversityConfig.current;
@@ -285,7 +280,7 @@ class _CreateTeamSheetState extends State<CreateTeamSheet> {
               _DeadlineControl(
                 deadline: _deadline,
                 saving: _saving,
-                onTap: _pickDeadline,
+                onTap: () => unawaited(_pickDeadline()),
                 onClear: () => setState(() => _deadline = null),
               ),
               const SizedBox(height: AppSpacing.xs),

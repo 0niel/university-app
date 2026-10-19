@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_blocks/news_blocks.dart';
@@ -150,7 +151,7 @@ class _StoryViewerPageState extends State<StoryViewerPage>
     if (_closing) return;
     _dismiss.value = (_dismiss.value + details.delta.dy).clamp(
       0,
-      MediaQuery.sizeOf(context).height,
+      MediaQuery.heightOf(context),
     );
   }
 
@@ -295,10 +296,11 @@ class _StoryViewerPageState extends State<StoryViewerPage>
       _mediaReady = true;
       _resume();
     });
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   void _precacheNext(BuildContext context, List<PostBlock> posts, int index) {
-    final next = index + 1 < posts.length ? posts[index + 1] : null;
+    final next = posts.elementAtOrNull(index + 1);
     final url = next?.imageUrl;
     if (next == null ||
         url == null ||
@@ -311,7 +313,10 @@ class _StoryViewerPageState extends State<StoryViewerPage>
       precacheImage(
         CachedNetworkImageProvider(url),
         context,
-      ).catchError((Object _) {}),
+      ).catchError(
+        (Object error) =>
+            debugPrint('Story image precache failed: ${error.runtimeType}'),
+      ),
     );
   }
 
@@ -342,8 +347,8 @@ class _StoryViewerPageState extends State<StoryViewerPage>
         child: AnimatedBuilder(
           animation: _dismiss,
           builder: (context, child) {
-            final progress =
-                (_dismiss.value / MediaQuery.sizeOf(context).height).clamp(
+            final progress = (_dismiss.value / MediaQuery.heightOf(context))
+                .clamp(
                   0.0,
                   1.0,
                 );
@@ -371,8 +376,10 @@ class _StoryViewerPageState extends State<StoryViewerPage>
                   child: BlocBuilder<FeedBloc, FeedState>(
                     buildWhen: (previous, current) =>
                         previous.status != current.status ||
-                        previous.feed[_category.id] !=
-                            current.feed[_category.id],
+                        !const ListEquality<NewsBlock>().equals(
+                          previous.feed[_category.id],
+                          current.feed[_category.id],
+                        ),
                     builder: (context, state) {
                       final posts = feedPosts(
                         state.feed[_category.id],
@@ -396,24 +403,26 @@ class _StoryViewerPageState extends State<StoryViewerPage>
                         );
                       }
                       final index = math.min(_index, posts.length - 1);
-                      _prepareMedia(posts[index]);
+                      final post = posts.elementAtOrNull(index);
+                      if (post == null) return const SizedBox.shrink();
+                      _prepareMedia(post);
                       _ensureStarted(posts.length);
                       _precacheNext(context, posts, index);
                       return _StoryScreen(
                         posts: posts,
                         index: index,
                         timer: _timer,
-                        sourceName: _sourceName(context, posts[index]),
+                        sourceName: _sourceName(context, post),
                         time: feedRelativeTime(
                           context.l10n,
-                          posts[index].publishedAt,
+                          post.publishedAt,
                         ),
                         avatarUrl: _source?.avatarUrl,
                         heroTag: widget.heroTag,
-                        imageHeroTag: (_mediaHeroScope, posts[index].id),
-                        onViewImage: posts[index].imageUrl?.isNotEmpty == true
+                        imageHeroTag: (_mediaHeroScope, post.id),
+                        onViewImage: post.imageUrl?.isNotEmpty == true
                             ? () => _navigate(
-                                () => unawaited(_viewImage(posts[index])),
+                                () => unawaited(_viewImage(post)),
                               )
                             : null,
                         onPrev: () => _navigate(_prev),
@@ -421,8 +430,8 @@ class _StoryViewerPageState extends State<StoryViewerPage>
                         onNavigationStart: _navigationStarted,
                         onNavigationCancel: _navigationCancelled,
                         onClose: _close,
-                        onRead: () => _read(posts[index]),
-                        onMediaReady: () => _onMediaReady(posts[index].id),
+                        onRead: () => _read(post),
+                        onMediaReady: () => _onMediaReady(post.id),
                       );
                     },
                   ),
@@ -616,9 +625,10 @@ class _StoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final post = posts[index];
+    final post = posts.elementAtOrNull(index);
+    if (post == null) return const SizedBox.shrink();
     final resolvedTime = time ?? feedRelativeTime(l10n, post.publishedAt);
-    final top = math.max<double>(
+    final top = math.max(
       StoryLayout.topInset,
       MediaQuery.paddingOf(context).top + AppSpacing.md,
     );
@@ -777,7 +787,7 @@ class _StoryStagePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final top = math.max<double>(
+    final top = math.max(
       StoryLayout.topInset,
       MediaQuery.paddingOf(context).top + AppSpacing.md,
     );

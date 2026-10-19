@@ -130,6 +130,7 @@ class _ServicesNfcCardState extends State<ServicesNfcCard>
     final reduceMotion =
         MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
+    final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
     final pass = context.watch<NfcPassCubit>().state;
     final hce = context.watch<NfcHceCubit>().state;
     final bound = pass.status == NfcPassStatus.bound;
@@ -170,12 +171,7 @@ class _ServicesNfcCardState extends State<ServicesNfcCard>
             ? Duration.zero
             : const Duration(milliseconds: 250),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.sectionGap,
-          AppSpacing.md,
-          AppSpacing.sectionGap,
-          AppSpacing.md,
-        ),
+        padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -186,8 +182,8 @@ class _ServicesNfcCardState extends State<ServicesNfcCard>
               duration: reduceMotion
                   ? Duration.zero
                   : const Duration(milliseconds: 250),
-              width: 40,
-              height: 40,
+              width: AppControlSize.iconTileMedium,
+              height: AppControlSize.iconTileMedium,
               alignment: Alignment.center,
               decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
               child: AppLineIconWidget(
@@ -197,30 +193,35 @@ class _ServicesNfcCardState extends State<ServicesNfcCard>
                 strokeWidth: 2.2,
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
+            const SizedBox(width: AppSpacing.gap),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    maxLines: largeText ? null : 2,
+                    overflow: largeText
+                        ? TextOverflow.visible
+                        : TextOverflow.ellipsis,
                     style: AppText.headlineStrong.copyWith(color: fg),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
                     subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.caption.copyWith(
+                    maxLines: largeText ? null : 2,
+                    overflow: largeText
+                        ? TextOverflow.visible
+                        : TextOverflow.ellipsis,
+                    style: AppText.cardSubtitle.copyWith(
                       color: fg.withValues(alpha: .7),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
+            const SizedBox(width: AppSpacing.sm),
             AppLineIconWidget(
               AppLineIcon.chevronR,
               size: AppIconSize.sm,

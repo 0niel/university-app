@@ -70,10 +70,14 @@ class ScheduleDayStrip extends StatelessWidget {
       target: AppTourTarget.scheduleWeek,
       child: AppWeekPager(
         key: const ValueKey('schedule-day-strip'),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
         scheduleStyle: true,
-        weekStart: days.first,
+        weekStart: weekStartFor(day),
         selectedIndex: day.weekday - 1,
-        onSelected: (index) => onDay(days[index]),
+        onSelected: (index) {
+          final selected = index < 0 ? null : days.elementAtOrNull(index);
+          if (selected != null) onDay(selected);
+        },
         daysBuilder: (start) => _days(context, start),
         onWeekChanged: (start) => onDay(
           DateTime(start.year, start.month, start.day + day.weekday - 1),
@@ -86,23 +90,23 @@ class ScheduleDayStrip extends StatelessWidget {
 class ScheduleDayStripHeader extends StatelessWidget {
   const ScheduleDayStripHeader({
     required this.strip,
-    required this.background,
+    this.elevated = false,
+    this.topInset = 0,
     super.key,
   });
 
   final ScheduleDayStrip strip;
-  final Color background;
+  final bool elevated;
+  final double topInset;
 
   @override
-  Widget build(BuildContext context) => ColoredBox(
+  Widget build(BuildContext context) => AppPinnedSurface(
     key: const ValueKey('schedule-pinned-days'),
-    color: background,
+    elevated: elevated,
     child: Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screen,
-        AppSpacing.sm,
-        AppSpacing.screen,
-        AppSpacing.sm,
+      padding: EdgeInsets.only(
+        top: topInset + AppSpacing.sm,
+        bottom: AppSpacing.sm,
       ),
       child: strip,
     ),

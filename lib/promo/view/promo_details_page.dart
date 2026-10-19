@@ -117,7 +117,7 @@ class _PromoDetailsBody extends StatelessWidget {
     await openPromoLink(context, uri.toString());
   }
 
-  Future<void> _share(BuildContext context) =>
+  Future<void> _share() =>
       const ShareLauncher().share(text: '${banner.title}\n${banner.ctaUrl}');
 
   @override
@@ -149,7 +149,7 @@ class _PromoDetailsBody extends StatelessWidget {
                 AppHeaderAction(
                   icon: AppLineIcon.share,
                   semanticsLabel: l10n.share,
-                  onTap: () => unawaited(_share(context)),
+                  onTap: () => unawaited(_share()),
                 ),
               ],
             ),
@@ -185,7 +185,7 @@ class _PromoDetailsBody extends StatelessWidget {
                     PromoContactCard(
                       title: details.contact?.title ?? l10n.promoContactTitle,
                       subtitle: details.contact?.subtitle,
-                      handle: '@${banner.contactTelegram}',
+                      handle: '@${banner.contactTelegram!}',
                       actionLabel: l10n.promoWrite,
                       onTap: () => unawaited(_contact(context)),
                     ),

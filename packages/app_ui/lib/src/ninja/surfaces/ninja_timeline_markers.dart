@@ -53,12 +53,12 @@ class NinjaNowLine extends StatelessWidget {
     required this.label,
     super.key,
     this.padding = const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-    this.onCanvas = false,
+    this.isOnCanvas = false,
   });
 
   final String label;
   final EdgeInsets padding;
-  final bool onCanvas;
+  final bool isOnCanvas;
 
   @override
   Widget build(BuildContext context) {
@@ -70,17 +70,20 @@ class NinjaNowLine extends StatelessWidget {
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              color: onCanvas ? colors.canvas : const Color(0x00000000),
+              color: isOnCanvas ? colors.canvas : const Color(0x00000000),
               borderRadius: BorderRadius.circular(AppRadius.xs),
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: onCanvas ? AppSpacing.xs : AppSpacing.zero,
+                horizontal: isOnCanvas ? AppSpacing.xs : AppSpacing.zero,
               ),
               child: Text(
                 label,
-                style: AppText.sans(10.5, FontWeight.w800, tabular: true)
-                    .copyWith(color: colors.danger),
+                style: AppText.sans(
+                  10.5,
+                  FontWeight.w800,
+                  tabular: true,
+                ).copyWith(color: colors.danger),
               ),
             ),
           ),

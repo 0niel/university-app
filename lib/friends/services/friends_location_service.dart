@@ -6,17 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:rtu_mirea_app/friends/services/friends_location_background.dart';
 
-enum FriendsLocationStatus {
-  stopped,
-  locating,
-  active,
-  permissionDenied,
-  permissionDeniedForever,
-  serviceDisabled,
-  unavailable,
-  failure,
-}
-
 class FriendsLocationService with WidgetsBindingObserver {
   FriendsLocationService({
     GeolocatorPlatform? geolocator,
@@ -176,7 +165,7 @@ class FriendsLocationService with WidgetsBindingObserver {
       !_disposed && _enabled && generation == _generation;
 
   Future<void> _syncBackgroundSharing() {
-    if (_isWeb || _platform != .android) return Future<void>.value();
+    if (_isWeb || _platform != .android) return Future.value();
     Future<void> update() => _onBackgroundSharingChanged(
       enabled:
           !_disposed &&
@@ -191,7 +180,13 @@ class FriendsLocationService with WidgetsBindingObserver {
   }
 
   void _releaseBackgroundSharing() {
-    unawaited(_syncBackgroundSharing().catchError((Object _) {}));
+    unawaited(
+      _syncBackgroundSharing().catchError(
+        (Object error) => debugPrint(
+          'Background sharing cleanup failed: ${error.runtimeType}',
+        ),
+      ),
+    );
   }
 
   void _emitPosition(Position position) {
@@ -214,7 +209,7 @@ class FriendsLocationService with WidgetsBindingObserver {
             ),
           )
           .timeout(const Duration(seconds: 15));
-      if (_isCurrent(generation)) _emitPosition(position);
+      _emitIfCurrent(position, generation);
     } on Object catch (error) {
       if (_isCurrent(generation) &&
           (error is PermissionDeniedException ||
@@ -224,6 +219,10 @@ class FriendsLocationService with WidgetsBindingObserver {
     } finally {
       _heartbeatBusy = false;
     }
+  }
+
+  void _emitIfCurrent(Position position, int generation) {
+    if (_isCurrent(generation)) _emitPosition(position);
   }
 
   bool _isUsablePosition(Position position) {
@@ -265,7 +264,8 @@ class FriendsLocationService with WidgetsBindingObserver {
             );
           }
         },
-        onError: (Object _) {},
+        onError: (Object error) =>
+            debugPrint('Location service status failed: ${error.runtimeType}'),
       );
     } on Object catch (_) {
       _serviceSubscription = null;
@@ -302,10 +302,10 @@ class FriendsLocationService with WidgetsBindingObserver {
     });
   }
 
-  void _setStatus(FriendsLocationStatus status) {
-    if (_disposed || _status == status) return;
-    _status = status;
-    _statuses.add(status);
+  void _setStatus(FriendsLocationStatus nextStatus) {
+    if (_disposed || _status == nextStatus) return;
+    _status = nextStatus;
+    _statuses.add(nextStatus);
   }
 
   @override
@@ -398,4 +398,15 @@ LocationSettings friendsMapLocationSettings(
       distanceFilter: 10,
     ),
   };
+}
+
+enum FriendsLocationStatus {
+  stopped,
+  locating,
+  active,
+  permissionDenied,
+  permissionDeniedForever,
+  serviceDisabled,
+  unavailable,
+  failure,
 }

@@ -19,6 +19,7 @@ import '../../helpers/pump_app.dart';
 class _CampusRepository extends Mock implements CampusRepository {}
 
 class _NoCache implements MapDataCache {
+  const _NoCache();
   @override
   Future<String?> read(String key) async => null;
   @override
@@ -75,7 +76,7 @@ void main() {
       var online = false;
       final repository = MapDataRepository(
         organizationId: 'mirea',
-        cache: _NoCache(),
+        cache: const _NoCache(),
         bundledCatalogAsset: 'catalog.json',
         assetLoader: (path) async => jsonEncode(
           path == 'catalog.json'

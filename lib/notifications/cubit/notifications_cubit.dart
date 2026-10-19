@@ -5,89 +5,6 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:rtu_mirea_app/notifications/data/notification_inbox_repository.dart';
 import 'package:rtu_mirea_app/notifications/model/app_notification.dart';
 
-class NotificationsState extends Equatable {
-  const NotificationsState({
-    this.pushes = const [],
-    this.readIds = const {},
-    this.userId,
-    this.pendingReadIds = const {},
-    this.isLoading = false,
-    this.loadFailed = false,
-  });
-
-  factory NotificationsState.fromJson(Map<String, dynamic> json) {
-    final pushes = json['pushes'];
-    final readIds = json['readIds'];
-    return NotificationsState(
-      userId: json['userId'] as String?,
-      pushes: [
-        if (pushes is List)
-          for (final item in pushes)
-            if (item is Map)
-              AppNotification.fromJson(Map<String, dynamic>.from(item)),
-      ],
-      readIds: {
-        if (readIds is List)
-          for (final id in readIds) id.toString(),
-      },
-      pendingReadIds: {
-        if (json['pendingReadIds'] case final List<dynamic> ids)
-          for (final id in ids)
-            if (id is String && isCloudNotificationId(id)) id,
-      },
-    );
-  }
-
-  final List<AppNotification> pushes;
-  final Set<String> readIds;
-  final String? userId;
-  final Set<String> pendingReadIds;
-  final bool isLoading;
-  final bool loadFailed;
-
-  bool isRead(String id) => readIds.contains(id);
-
-  bool hasUnread(Iterable<String> ids) =>
-      ids.any((id) => !readIds.contains(id));
-
-  int unreadCount(Iterable<String> ids) =>
-      ids.where((id) => !readIds.contains(id)).length;
-
-  Map<String, dynamic> toJson() => {
-    'userId': userId,
-    'pushes': pushes.map((push) => push.toJson()).toList(),
-    'readIds': readIds.toList(),
-    'pendingReadIds': pendingReadIds.toList(),
-  };
-
-  NotificationsState copyWith({
-    List<AppNotification>? pushes,
-    Set<String>? readIds,
-    Set<String>? pendingReadIds,
-    bool? isLoading,
-    bool? loadFailed,
-  }) {
-    return NotificationsState(
-      userId: userId,
-      pushes: pushes ?? this.pushes,
-      readIds: readIds ?? this.readIds,
-      pendingReadIds: pendingReadIds ?? this.pendingReadIds,
-      isLoading: isLoading ?? this.isLoading,
-      loadFailed: loadFailed ?? this.loadFailed,
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-    pushes,
-    readIds,
-    userId,
-    pendingReadIds,
-    isLoading,
-    loadFailed,
-  ];
-}
-
 class NotificationsCubit extends HydratedCubit<NotificationsState> {
   NotificationsCubit({String? userId, this._repository})
     : super(const NotificationsState()) {
@@ -117,7 +34,7 @@ class NotificationsCubit extends HydratedCubit<NotificationsState> {
 
   Future<void> refresh() {
     if (isClosed || state.userId == null || _repository == null) {
-      return Future<void>.value();
+      return Future.value();
     }
     final revision = _revision;
     return _refreshTask ??= _refreshUntilCurrent(revision, state.userId!)
@@ -173,7 +90,7 @@ class NotificationsCubit extends HydratedCubit<NotificationsState> {
         state.userId == null ||
         _repository == null ||
         state.pendingReadIds.isEmpty) {
-      return Future<void>.value();
+      return Future.value();
     }
     final revision = _revision;
     return _readTask ??= _sendRead(revision, state.userId!).whenComplete(() {
@@ -295,4 +212,87 @@ class NotificationsCubit extends HydratedCubit<NotificationsState> {
 
   @override
   Map<String, dynamic> toJson(NotificationsState state) => state.toJson();
+}
+
+class NotificationsState extends Equatable {
+  const NotificationsState({
+    this.pushes = const [],
+    this.readIds = const {},
+    this.userId,
+    this.pendingReadIds = const {},
+    this.isLoading = false,
+    this.loadFailed = false,
+  });
+
+  factory NotificationsState.fromJson(Map<String, dynamic> json) {
+    final pushes = json['pushes'];
+    final readIds = json['readIds'];
+    return NotificationsState(
+      userId: json['userId'] as String?,
+      pushes: [
+        if (pushes is List)
+          for (final item in pushes)
+            if (item is Map) AppNotification.fromJson(Map.from(item)),
+      ],
+      readIds: {
+        if (readIds is List)
+          for (final id in readIds) id.toString(),
+      },
+      pendingReadIds: {
+        if (json['pendingReadIds'] case final List<Object?> ids)
+          for (final id in ids)
+            if (id is String && isCloudNotificationId(id)) id,
+      },
+    );
+  }
+
+  final List<AppNotification> pushes;
+  final Set<String> readIds;
+  final String? userId;
+  final Set<String> pendingReadIds;
+  final bool isLoading;
+  final bool loadFailed;
+
+  bool isRead(String id) => readIds.contains(id);
+
+  bool hasUnread(Iterable<String> ids) =>
+      ids.any((id) => !readIds.contains(id));
+
+  int unreadCount(Iterable<String> ids) =>
+      ids.where((id) => !readIds.contains(id)).length;
+
+  Map<String, dynamic> toJson() => {
+    'userId': userId,
+    'pushes': pushes.map((push) => push.toJson()).toList(),
+    'readIds': readIds.toList(),
+    'pendingReadIds': pendingReadIds.toList(),
+  };
+
+  NotificationsState copyWith({
+    List<AppNotification>? pushes,
+    Set<String>? readIds,
+    Set<String>? pendingReadIds,
+    bool? isLoading,
+    bool? loadFailed,
+    String? userId,
+  }) {
+    return NotificationsState(
+      pushes: pushes ?? this.pushes,
+      readIds: readIds ?? this.readIds,
+      pendingReadIds: pendingReadIds ?? this.pendingReadIds,
+      isLoading: isLoading ?? this.isLoading,
+      loadFailed: loadFailed ?? this.loadFailed,
+      userId: userId ?? this.userId,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    pushes,
+    readIds,
+    userId,
+    pendingReadIds,
+    isLoading,
+    loadFailed,
+  ];
 }

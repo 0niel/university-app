@@ -47,8 +47,8 @@ Color? parseAppColor(BuildContext context, String? value) {
     'warnTint' => colors.warnTint,
     'dangerTint' => colors.dangerTint,
     'successTint' => colors.successTint,
-    'inkTint' => colors.tintOf(colors.ink),
-    'mutedTint' => colors.tintOf(colors.muted),
+    'inkTint' => colors.inkTint,
+    'mutedTint' => colors.mutedTint,
     _ => parseHexColor(value),
   };
 }
@@ -201,7 +201,8 @@ Object? digJson(Object? root, String path) {
       current = current[segment];
     } else if (current is List<Object?>) {
       final index = int.tryParse(segment);
-      current = index == null ? null : current.elementAtOrNull(index);
+      if (index == null || index < 0) return null;
+      current = current.elementAtOrNull(index);
     } else {
       return null;
     }

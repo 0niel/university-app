@@ -1,28 +1,5 @@
 part of 'onboarding_flow_cubit.dart';
 
-enum OnboardingStage { welcome, group, teacher, identity, settings }
-
-enum OnboardingDraftOrigin { initial, restored, edited, saved }
-
-enum OnboardingIdentityRequirement { required, skipped }
-
-@freezed
-abstract class OnboardingIdentityDraft with _$OnboardingIdentityDraft {
-  const factory OnboardingIdentityDraft({
-    String? name,
-    String? handle,
-    String? verifiedHandle,
-    @Default(OnboardingDraftOrigin.initial) OnboardingDraftOrigin origin,
-  }) = _OnboardingIdentityDraft;
-
-  const OnboardingIdentityDraft._();
-
-  bool get complete =>
-      (name?.trim().isNotEmpty ?? false) &&
-      (handle?.trim().isNotEmpty ?? false) &&
-      handle?.trim() == verifiedHandle?.trim();
-}
-
 @freezed
 abstract class OnboardingFlowState with _$OnboardingFlowState {
   const factory OnboardingFlowState({
@@ -48,4 +25,27 @@ abstract class OnboardingFlowState with _$OnboardingFlowState {
       identityRequirement == OnboardingIdentityRequirement.required ? 4 : 3;
 
   bool get busy => submission.isInProgressOrSuccess;
+}
+
+enum OnboardingStage { welcome, group, teacher, identity, settings }
+
+enum OnboardingDraftOrigin { initial, restored, edited, saved }
+
+enum OnboardingIdentityRequirement { required, skipped }
+
+@freezed
+abstract class OnboardingIdentityDraft with _$OnboardingIdentityDraft {
+  const factory OnboardingIdentityDraft({
+    String? name,
+    String? handle,
+    String? verifiedHandle,
+    @Default(OnboardingDraftOrigin.initial) OnboardingDraftOrigin origin,
+  }) = _OnboardingIdentityDraft;
+
+  const OnboardingIdentityDraft._();
+
+  bool get complete =>
+      (name?.trim().isNotEmpty ?? false) &&
+      (handle?.trim().isNotEmpty ?? false) &&
+      handle?.trim() == verifiedHandle?.trim();
 }

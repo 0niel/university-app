@@ -1,9 +1,5 @@
 part of 'account_persona_cubit.dart';
 
-enum AccountPersonaOperation { idle, restoring, saving, failed }
-
-enum AccountPersonaEdit { roleOnly, teacherSelection }
-
 @freezed
 abstract class AccountPersonaState with _$AccountPersonaState {
   const factory AccountPersonaState({
@@ -36,3 +32,7 @@ abstract class AccountPersonaState with _$AccountPersonaState {
     return Teacher(uid: id, name: name);
   }
 }
+
+enum AccountPersonaOperation { idle, restoring, saving, failed }
+
+enum AccountPersonaEdit { roleOnly, teacherSelection }

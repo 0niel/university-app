@@ -5,6 +5,23 @@ import 'package:app_ui/src/widgets/app_press_state.dart';
 import 'package:app_ui/src/widgets/app_segmented_control.dart';
 import 'package:flutter/material.dart';
 
+class AppToggle extends StatelessWidget {
+  const AppToggle({
+    required this.value,
+    super.key,
+    this.onChanged,
+    this.label,
+  });
+
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+  final String? label;
+
+  @override
+  Widget build(BuildContext context) =>
+      AppSwitch(value: value, onChanged: onChanged, label: label);
+}
+
 class AppSwitch extends StatelessWidget {
   const AppSwitch({
     required this.value,
@@ -24,10 +41,12 @@ class AppSwitch extends StatelessWidget {
     final colors = context.colors;
     final onChanged = this.onChanged;
     final enabled = onChanged != null;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
-    final duration =
-        reduceMotion ? Duration.zero : const Duration(milliseconds: 200);
+    final duration = reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 200);
     final label = this.label;
 
     return AppPressState(
@@ -59,8 +78,9 @@ class AppSwitch extends StatelessWidget {
                   child: AnimatedAlign(
                     duration: duration,
                     curve: Curves.easeOut,
-                    alignment:
-                        value ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: value
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.micro,
@@ -93,36 +113,19 @@ class AppSwitch extends StatelessWidget {
   }
 }
 
-class AppToggle extends StatelessWidget {
-  const AppToggle({
-    required this.value,
-    super.key,
-    this.onChanged,
-    this.label,
-  });
-
-  final bool value;
-  final ValueChanged<bool>? onChanged;
-  final String? label;
-
-  @override
-  Widget build(BuildContext context) =>
-      AppSwitch(value: value, onChanged: onChanged, label: label);
-}
-
 class AppLangToggle extends StatelessWidget {
   const AppLangToggle({
     required this.value,
     required this.options,
     super.key,
     this.onChanged,
-    this.onCanvas = false,
+    this.isOnCanvas = false,
   });
 
   final String value;
   final List<String> options;
   final ValueChanged<String>? onChanged;
-  final bool onCanvas;
+  final bool isOnCanvas;
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +134,7 @@ class AppLangToggle extends StatelessWidget {
       child: AppSegmentedControl<String>(
         value: value,
         onChanged: onChanged,
-        onCanvas: onCanvas,
+        isOnCanvas: isOnCanvas,
         options: [
           for (final option in options)
             AppSegmentedOption(value: option, label: option),

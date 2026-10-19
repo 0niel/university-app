@@ -55,10 +55,15 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      unawaited(context.read<NoteEditorCubit>().resynchronize());
-    } else if (state == AppLifecycleState.paused) {
-      unawaited(_saveOnPause());
+    switch (state) {
+      case AppLifecycleState.resumed:
+        unawaited(context.read<NoteEditorCubit>().resynchronize());
+      case AppLifecycleState.paused:
+        unawaited(_saveOnPause());
+      case AppLifecycleState.inactive ||
+          AppLifecycleState.hidden ||
+          AppLifecycleState.detached:
+        break;
     }
   }
 
@@ -275,17 +280,21 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView>
   );
 
   void _select(TextSelection selection) {
-    context.read<NoteEditorCubit>().controller
-      ..skipRequestKeyboard = true
-      ..updateSelection(selection, ChangeSource.local)
-      ..skipRequestKeyboard = false;
+    final controller = context.read<NoteEditorCubit>().controller;
+    try {
+      controller
+        ..skipRequestKeyboard = true
+        ..updateSelection(selection, ChangeSource.local);
+    } finally {
+      controller.skipRequestKeyboard = false;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _rawEditorKey.currentState?.bringIntoView(selection.extent);
     });
   }
 
   Future<void> _openOutline() async {
-    if (MediaQuery.sizeOf(context).width >= 1000) {
+    if (MediaQuery.widthOf(context) >= 1000) {
       setState(() => _outline = !_outline);
       return;
     }
@@ -293,11 +302,11 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView>
       context,
       title: context.l10n.noteOutlineTitle,
       child: SizedBox(
-        height: MediaQuery.sizeOf(context).height * .45,
+        height: MediaQuery.heightOf(context) * .45,
         child: NoteOutline(
           controller: context.read<NoteEditorCubit>().controller,
-          onSelected: (heading) =>
-              Navigator.of(context, rootNavigator: true).pop(heading),
+          onSelected: (selectedHeading) =>
+              Navigator.of(context, rootNavigator: true).pop(selectedHeading),
         ),
       ),
     );
@@ -420,7 +429,7 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView>
   Widget build(BuildContext context) {
     final cubit = context.read<NoteEditorCubit>();
     final locked = context.select<NoteEditorCubit, bool>(
-      (cubit) => cubit.state.readOnly,
+      (editor) => editor.state.readOnly,
     );
     final readOnly = locked || _reading;
     cubit.controller.readOnly = readOnly;
@@ -443,7 +452,7 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView>
           children: [
             EditorHeader(
               onBack: () => unawaited(_exit()),
-              onShare: _share,
+              onShare: () => unawaited(_share()),
               onMore: () => unawaited(_openMore()),
               reading: _reading,
               onReading: _toggleReading,
@@ -508,10 +517,7 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView>
                             },
                             customActions: {
                               _NoteFindIntent: CallbackAction<_NoteFindIntent>(
-                                onInvoke: (_) {
-                                  _openSearch();
-                                  return null;
-                                },
+                                onInvoke: (_) => _openSearch(),
                               ),
                             },
                             editorKey: _rawEditorKey,
@@ -527,7 +533,8 @@ class _CollabNoteEditorViewState extends State<CollabNoteEditorView>
                                     ...editor.contextMenuButtonItems,
                                     if (!cubit.controller.selection.isCollapsed)
                                       ContextMenuButtonItem(
-                                        label: context.l10n.noteTextToolsTitle,
+                                        label:
+                                            menuContext.l10n.noteTextToolsTitle,
                                         onPressed: () {
                                           ContextMenuController.removeAny();
                                           unawaited(_textTools());

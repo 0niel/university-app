@@ -146,7 +146,6 @@ class CommunityDetailPage extends StatelessWidget {
                       l10n,
                       entry,
                       categoryTitle: categoryTitle,
-                      joined: selected,
                     ),
                     style: AppText.sans(13, FontWeight.w500).copyWith(
                       color: colors.muted,

@@ -24,19 +24,27 @@ class LostFoundPhotoPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.lostFoundPhotosLabel,
-          style: AppText.captionSmall.copyWith(color: context.colors.muted),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Text(
+            context.l10n.lostFoundPhotosLabel,
+            style: AppText.captionSmall.copyWith(color: context.colors.muted),
+          ),
         ),
         const SizedBox(height: AppSpacing.gap),
         SizedBox(
           height: 72,
           child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
             scrollDirection: Axis.horizontal,
             children: [
               for (final (index, image) in images.indexed)
                 Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.sm),
+                  padding: EdgeInsetsDirectional.only(
+                    end: images.length >= 5 && index == images.length - 1
+                        ? 0
+                        : AppSpacing.sm,
+                  ),
                   child: LostFoundPhotoThumbnail(
                     image: image,
                     onRemove: () => onRemove(index),

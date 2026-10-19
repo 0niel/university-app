@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stac_bridge/src/actions/action_execution.dart';
@@ -52,7 +54,7 @@ class _AsyncActionBuilderState extends State<AsyncActionBuilder> {
     return widget.builder(
       context,
       widget.enabled && !busy && widget.action is Map<Object?, Object?>
-          ? _run
+          ? () => unawaited(_run())
           : null,
       loading: busy,
     );

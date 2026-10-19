@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:app_ui/app_ui.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -8,44 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stac_bridge/src/actions/stac_network_request_action_parser.dart';
 import 'package:stac_bridge/stac_bridge.dart';
 
-import 'device_actions_test.dart' show DeviceActionsTest;
-
-class _Host extends DeviceActionsTest {
-  final photo = Completer<String?>();
-  final requests = <Object?>[];
-
-  @override
-  Future<String?> pickImage({required bool fromCamera}) => photo.future;
-
-  @override
-  Future<Object?> fetch({
-    required String path,
-    String method = 'GET',
-    Map<String, Object?>? query,
-    Object? body,
-  }) async {
-    requests.add(body);
-    return {'ok': true};
-  }
-}
-
-class _Adapter implements HttpClientAdapter {
-  final response = Completer<ResponseBody>();
-  RequestOptions? request;
-
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) {
-    request = options;
-    return response.future;
-  }
-
-  @override
-  void close({bool force = false}) {}
-}
+import 'support/runtime_interaction_adapter.dart';
+import 'support/runtime_interaction_host.dart';
 
 void main() {
   setUpAll(() async {
@@ -73,7 +34,7 @@ void main() {
   testWidgets('capture follow-up uses selected photo before another frame', (
     tester,
   ) async {
-    final host = _Host();
+    final host = RuntimeInteractionHost();
     final session = MiniAppSession(slug: 'test', host: host);
     MiniAppSessionStack.push(session);
     addTearDown(() => MiniAppSessionStack.pop(session));
@@ -130,7 +91,7 @@ void main() {
     (
       tester,
     ) async {
-      final adapter = _Adapter();
+      final adapter = RuntimeInteractionAdapter();
       final dio = Dio()..httpClientAdapter = adapter;
       StacNetworkRequestActionParser.client = dio;
       addTearDown(() => dio.close(force: true));

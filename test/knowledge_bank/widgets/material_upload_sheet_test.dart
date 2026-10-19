@@ -246,7 +246,7 @@ void main() {
         tester.widget<TextField>(find.byType(TextField).first).enabled,
         isFalse,
       );
-      result.completeError(Exception('offline'));
+      result.completeError(Exception('offline'), StackTrace.current);
       await tester.pump();
       expect(
         find.text('Не удалось загрузить материал. Попробуйте ещё раз.'),

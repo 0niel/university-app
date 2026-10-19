@@ -77,20 +77,20 @@ class AppInputField extends StatefulWidget {
     this.validateOnBlur = false,
     this.textStyle,
     this.borderRadius = AppRadius.field,
-  })  : leadingIcon = null,
-        leading = null,
-        trailing = null,
-        obscureText = false,
-        showPasswordToggle = false,
-        success = false,
-        showClear = false,
-        onSubmitted = null,
-        keyboardType = TextInputType.multiline,
-        textInputAction = TextInputAction.newline,
-        textCapitalization = TextCapitalization.sentences,
-        autofillHints = null,
-        textAlign = TextAlign.start,
-        height = AppControlSize.field;
+  }) : leadingIcon = null,
+       leading = null,
+       trailing = null,
+       obscureText = false,
+       showPasswordToggle = false,
+       success = false,
+       showClear = false,
+       onSubmitted = null,
+       keyboardType = TextInputType.multiline,
+       textInputAction = TextInputAction.newline,
+       textCapitalization = TextCapitalization.sentences,
+       autofillHints = null,
+       textAlign = TextAlign.start,
+       height = AppControlSize.field;
 
   final TextEditingController? controller;
   final String? placeholder;
@@ -224,9 +224,11 @@ class _AppInputFieldState extends State<AppInputField> {
     final multiline = widget.maxLines != 1;
     final label = widget.label;
     final helper = widget.helperText;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
-    final leading = widget.leading ??
+    final leading =
+        widget.leading ??
         (widget.leadingIcon == null
             ? null
             : AppLineIconWidget(
@@ -241,8 +243,9 @@ class _AppInputFieldState extends State<AppInputField> {
       children: [
         if (label != null) AppFieldLabel(label),
         AnimatedContainer(
-          duration:
-              reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+          duration: reduceMotion
+              ? Duration.zero
+              : const Duration(milliseconds: 200),
           curve: Curves.easeOut,
           height: multiline ? null : widget.height,
           constraints: multiline
@@ -255,8 +258,8 @@ class _AppInputFieldState extends State<AppInputField> {
             right: widget.showPasswordToggle && widget.obscureText
                 ? AppFormMetrics.trailingInset
                 : leading == null
-                    ? AppFormMetrics.inset
-                    : AppFormMetrics.leadingInset,
+                ? AppFormMetrics.inset
+                : AppFormMetrics.leadingInset,
             top: multiline ? AppFormMetrics.multilineInset : AppSpacing.zero,
             bottom: multiline ? AppFormMetrics.multilineInset : AppSpacing.zero,
           ),
@@ -295,8 +298,12 @@ class _AppInputFieldState extends State<AppInputField> {
         ValueListenableBuilder<TextEditingValue>(
           valueListenable: _controller,
           builder: (context, value, _) {
-            final trailing =
-                _buildTrailing(context, colors, value.text, onValidate);
+            final trailing = _buildTrailing(
+              context,
+              colors,
+              value.text,
+              onValidate,
+            );
             return trailing ?? const SizedBox.shrink();
           },
         ),
@@ -319,10 +326,12 @@ class _AppInputFieldState extends State<AppInputField> {
               '${value.text.characters.length} / $maxLength',
               textAlign: TextAlign.right,
               style:
-                  AppText.sans(AppFormMetrics.counterFontSize, FontWeight.w500)
-                      .copyWith(
-                color: colors.muted,
-              ),
+                  AppText.sans(
+                    AppFormMetrics.counterFontSize,
+                    FontWeight.w500,
+                  ).copyWith(
+                    color: colors.muted,
+                  ),
             ),
           ),
         ],
@@ -338,19 +347,20 @@ class _AppInputFieldState extends State<AppInputField> {
     final ink = widget.enabled ? colors.ink : colors.muted2;
     var style = AppText.body.copyWith(color: ink);
     if (multiline) {
-      style = AppText.sans(
-        AppFormMetrics.multilineFontSize,
-        FontWeight.w500,
-        height: AppFormMetrics.multilineLineHeight,
-      ).copyWith(
-        color: ink,
-      );
+      style =
+          AppText.sans(
+            AppFormMetrics.multilineFontSize,
+            FontWeight.w500,
+            height: AppFormMetrics.multilineLineHeight,
+          ).copyWith(
+            color: ink,
+          );
     } else if (_obscured) {
       style = AppText.sans(AppFormMetrics.passwordFontSize, FontWeight.w600)
           .copyWith(
-        color: ink,
-        letterSpacing: AppFormMetrics.passwordLetterSpacing,
-      );
+            color: ink,
+            letterSpacing: AppFormMetrics.passwordLetterSpacing,
+          );
     }
     final override = widget.textStyle;
     if (override != null) style = style.merge(override);
@@ -394,10 +404,10 @@ class _AppInputFieldState extends State<AppInputField> {
         errorBorder: InputBorder.none,
         focusedErrorBorder: InputBorder.none,
         hintText: widget.placeholder,
-        hintStyle:
-            AppText.sans(AppFormMetrics.hintFontSize, FontWeight.w600).copyWith(
-          color: colors.muted2,
-        ),
+        hintStyle: AppText.sans(AppFormMetrics.hintFontSize, FontWeight.w600)
+            .copyWith(
+              color: colors.muted2,
+            ),
       ),
     );
   }

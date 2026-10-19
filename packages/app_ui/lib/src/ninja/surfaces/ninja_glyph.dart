@@ -45,7 +45,8 @@ class NinjaGlyphIcon extends StatelessWidget {
     final iconTheme = IconTheme.of(context);
     final resolvedSize = size ?? iconTheme.size ?? 20;
     final resolvedColor = color ?? iconTheme.color ?? context.colors.ink;
-    final svg = '<svg xmlns="http://www.w3.org/2000/svg" width="$resolvedSize" '
+    final svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="$resolvedSize" '
         'height="$resolvedSize" viewBox="0 0 24 24" fill="none" '
         'stroke="#000000" stroke-width="$strokeWidth" stroke-linecap="round" '
         'stroke-linejoin="round">${glyph.body}</svg>';

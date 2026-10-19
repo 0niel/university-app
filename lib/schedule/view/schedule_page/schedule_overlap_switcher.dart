@@ -61,9 +61,13 @@ class _ScheduleOverlapSwitcherState extends State<ScheduleOverlapSwitcher> {
     final duration = NinjaMotion.of(context);
     final radius = widget.compact ? AppRadius.sm : AppRadius.card;
     final rtl = Directionality.of(context) == TextDirection.rtl;
+    final selectedChild = widget.children.elementAtOrNull(index);
+    if (selectedChild == null) return const SizedBox.shrink();
+    final selectedLabel = widget.labels.elementAtOrNull(index) ?? label;
+    final nextLabel = widget.labels.elementAtOrNull(next) ?? label;
     final content = KeyedSubtree(
-      key: ValueKey('${widget.labels[index]}-$index'),
-      child: widget.children[index],
+      key: ValueKey('$selectedLabel-$index'),
+      child: selectedChild,
     );
 
     return ClipRRect(
@@ -83,7 +87,7 @@ class _ScheduleOverlapSwitcherState extends State<ScheduleOverlapSwitcher> {
               key: const ValueKey('schedule-overlap-next'),
               semanticsLabel:
                   '$label, ${index + 1}/${widget.children.length}, '
-                  '${widget.labels[next]}',
+                  '$nextLabel',
               onTap: () => _select(next),
               child: Container(
                 constraints: const BoxConstraints(

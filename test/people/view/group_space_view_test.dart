@@ -122,7 +122,12 @@ void main() {
       await tester.drag(find.byType(Dismissible), const Offset(-500, 0));
       await tester.pumpAndSettle();
 
-      final confirmButton = find.widgetWithText(NinjaPillButton, 'Удалить');
+      final confirmButton = find.byWidgetPredicate(
+        (widget) =>
+            widget is AppPressable &&
+            widget.semanticsLabel == 'Удалить' &&
+            widget.semanticsButton == true,
+      );
       expect(confirmButton, findsOneWidget);
       await tester.tap(confirmButton);
       await tester.pumpAndSettle();

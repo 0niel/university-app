@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: ThemeData(extensions: const [AppColors.light]),
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: ThemeData(extensions: const [AppColors.light]),
+    home: Scaffold(body: Center(child: child)),
+  );
 
   group('ImagePlaceholder', () {
     testWidgets('renders a striped box with the image icon', (tester) async {

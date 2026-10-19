@@ -33,13 +33,6 @@ class SettingsAccountSection extends StatelessWidget {
             lineIcon: AppLineIcon.people,
             onTap: () => unawaited(showAccountPersonaSheet(context)),
           ),
-        SettingsRow(
-          title: l10n.accountEmailLabel,
-          value: user.isGuest || (user.email?.isEmpty ?? true)
-              ? l10n.accountGuest
-              : user.email,
-          showChevron: false,
-        ),
         if (user.isGuest)
           SettingsRow(
             title: l10n.authGuestUpgradeTitle,

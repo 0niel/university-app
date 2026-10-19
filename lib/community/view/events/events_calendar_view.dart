@@ -69,7 +69,7 @@ class _EventsCalendarViewState extends State<EventsCalendarView> {
             _selectedDay = _dayOf(day);
             _month = _monthOf(day);
           }),
-          dotsForDay: (day) => _dotsFor(context, day),
+          dotsBuilder: (day) => _dotsFor(context, day),
         ),
         const SizedBox(height: AppSpacing.cardGap),
         AppOverline(_selectedDayLabel(context, now), topPadding: 0),

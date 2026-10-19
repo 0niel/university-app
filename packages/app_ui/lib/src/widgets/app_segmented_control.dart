@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 part 'app_segmented_control/segment.dart';
 
-const _segmentInset = 6.0;
-const double _segmentHitInset =
+const _kSegmentInset = 6.0;
+const double _kSegmentHitInset =
     (AppControlSize.touchTarget - AppControlSize.segmentHeight) / 2;
 
 class AppSegmentedControl<T> extends StatelessWidget {
@@ -17,7 +17,7 @@ class AppSegmentedControl<T> extends StatelessWidget {
     required this.value,
     super.key,
     this.onChanged,
-    this.onCanvas = false,
+    this.isOnCanvas = false,
     this.expanded = true,
     this.backgroundColor,
   });
@@ -25,7 +25,7 @@ class AppSegmentedControl<T> extends StatelessWidget {
   final List<AppSegmentedOption<T>> options;
   final T value;
   final ValueChanged<T>? onChanged;
-  final bool onCanvas;
+  final bool isOnCanvas;
   final bool expanded;
   final Color? backgroundColor;
 
@@ -36,7 +36,7 @@ class AppSegmentedControl<T> extends StatelessWidget {
     final enabled = onChanged != null;
     final segments = [
       for (final option in options)
-        _Segment<T>(
+        _Segment(
           option: option,
           selected: option.value == value,
           wrapped: largeText,
@@ -50,10 +50,11 @@ class AppSegmentedControl<T> extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.xs,
-          vertical: AppSpacing.xs - _segmentHitInset,
+          vertical: AppSpacing.xs - _kSegmentHitInset,
         ),
         decoration: BoxDecoration(
-          color: backgroundColor ?? (onCanvas ? colors.surface : colors.canvas),
+          color:
+              backgroundColor ?? (isOnCanvas ? colors.surface : colors.canvas),
           borderRadius: BorderRadius.circular(AppRadius.full),
         ),
         child: largeText

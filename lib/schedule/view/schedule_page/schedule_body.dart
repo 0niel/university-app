@@ -25,7 +25,9 @@ import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_view.dart
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_header.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_month_view.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_paging.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_pinned_day_sliver.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_quick_actions.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_view_selector.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_view_transition.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_week_view.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/sheets.dart';
@@ -48,6 +50,7 @@ class ScheduleBody extends StatefulWidget {
 }
 
 class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
+  late DateTime _now = widget.now ?? clock.now();
   late DateTime _day = dateOnly(widget.now ?? clock.now());
   late ScheduleView _view = widget.initialView;
   ScheduleState? _previous;
@@ -57,7 +60,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
   bool get isClockTickNeeded => widget.now == null;
 
   @override
-  void onClockTick() => setState(() {});
+  void onClockTick() => setState(() => _now = clock.now());
 
   @override
   void initState() {
@@ -155,7 +158,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
 
   @override
   Widget build(BuildContext context) {
-    final now = widget.now ?? clock.now();
+    final now = widget.now ?? _now;
     final state = context.watch<ScheduleBloc>().state;
     final preferences = context.watch<SchedulePreferencesCubit>().state;
     final display = context.watch<ScheduleDisplayCubit>().state;
@@ -186,8 +189,9 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
     }
     final showToday = !isSameDate(_day, now);
     final topInset = MediaQuery.paddingOf(context).top;
+    final extendTop = selected != null && _view == ScheduleView.day;
     final view = _view;
-    Widget page(BuildContext context, DateTime day) => switch (view) {
+    Widget page(BuildContext _, DateTime day) => switch (view) {
       ScheduleView.day => ScheduleDayView(
         day: day,
         now: now,
@@ -201,6 +205,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
         showDayStrip: false,
       ),
       ScheduleView.week => ScheduleWeekView(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
         day: day,
         now: now,
         schedule: schedule,
@@ -237,157 +242,153 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
     );
     return BlocListener<ScheduleBloc, ScheduleState>(
       listener: _listen,
-      child: ColoredBox(
-        color: context.colors.canvas,
+      child: AppAmbientBackground(
+        accentColor: context.colors.accent,
         child: Stack(
           children: [
             RefreshIndicator(
               onRefresh: _refresh,
-              child: SafeArea(
-                bottom: false,
-                child: NestedScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                    SliverToBoxAdapter(
-                      child: ScheduleHeader(
-                        day: _day,
-                        name: switch (selected) {
-                          SelectedTeacherSchedule(:final teacher) =>
-                            shortTeacherName(teacher.name),
-                          _ => selected?.name,
-                        },
-                        nameSemanticsLabel: selected?.name,
-                        topInset: topInset,
-                      ),
-                    ),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screen,
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            ScheduleQuickActions(
-                              hasChanges: unreadChanges.isNotEmpty,
-                              onSearch: () => openScheduleSearch(context),
-                              onChanges: () => const ScheduleChangesRoute()
-                                  .push<void>(context),
-                              onExport: () =>
-                                  showScheduleShareSheet(context, day: _day),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            ScheduleCalendarNotice(day: _day),
-                            PromoBannerSlot(
-                              placement: PromoPlacement.schedule,
-                              now: now,
-                              compact: true,
-                              padding: const EdgeInsets.only(
-                                bottom: AppSpacing.sm,
-                              ),
-                            ),
-                            if (state.isOffline) ...[
-                              AppBanner(
-                                message: l10n.offlineFromCache,
-                                tone: AppBannerTone.warn,
-                              ),
-                              const SizedBox(height: AppSpacing.sm),
-                            ],
-                            if (weekChanges.isNotEmpty &&
-                                selected is! SelectedCustomSchedule) ...[
-                              AppBanner(
-                                message: l10n.scheduleChangesThisWeek(
-                                  weekChanges.length,
-                                ),
-                                tone: AppBannerTone.warn,
-                                actionLabel: l10n.scheduleShow,
-                                onAction: () => showScheduleChangesSheet(
-                                  context,
-                                  weekOf: _day,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.sm),
-                            ],
-                            if (comparison.state.isEnabled &&
-                                comparison.friend != null) ...[
-                              AppBanner(
-                                message: l10n.scheduleCompareWith(
-                                  comparison.friendName,
-                                ),
-                                actionLabel: l10n.scheduleCompareOff,
-                                onAction: comparison.stop,
-                              ),
-                              const SizedBox(height: AppSpacing.sm),
-                            ],
-                            const SizedBox(height: AppSpacing.xsm),
-                            AppTourAnchor(
-                              target: AppTourTarget.scheduleViews,
-                              child: AppSegmentedControl<ScheduleView>(
-                                options: [
-                                  AppSegmentedOption(
-                                    value: ScheduleView.day,
-                                    label: l10n.scheduleViewDay,
-                                  ),
-                                  AppSegmentedOption(
-                                    value: ScheduleView.week,
-                                    label: l10n.week,
-                                  ),
-                                  AppSegmentedOption(
-                                    value: ScheduleView.month,
-                                    label: l10n.month,
-                                  ),
-                                ],
-                                value: _view,
-                                onCanvas: true,
-                                onChanged: (value) =>
-                                    setState(() => _view = value),
-                              ),
-                            ),
-                            SizedBox(
-                              height:
-                                  selected != null && _view == ScheduleView.day
-                                  ? AppSpacing.sm
-                                  : AppSpacing.lg,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (selected != null && _view == ScheduleView.day)
-                      PinnedHeaderSliver(
-                        child: ScheduleDayStripHeader(
-                          strip: strip,
-                          background: context.colors.canvas,
-                        ),
-                      ),
-                  ],
-                  body: selected != null
-                      ? ScheduleViewTransition(
-                          fill: true,
-                          child: ScheduleDatePager(
-                            key: ValueKey(_view),
+              edgeOffset: topInset,
+              child: MediaQuery.removePadding(
+                context: context,
+                removeTop: extendTop,
+                child: SafeArea(
+                  top: !extendTop,
+                  bottom: false,
+                  child: NestedScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    headerSliverBuilder: (context, _) => [
+                      SliverPadding(
+                        padding: EdgeInsets.only(top: extendTop ? topInset : 0),
+                        sliver: SliverToBoxAdapter(
+                          child: ScheduleHeader(
                             day: _day,
-                            anchor: now,
-                            view: _view,
-                            onDay: (day) {
-                              if (_view == view) _selectDay(day);
+                            name: switch (selected) {
+                              SelectedTeacherSchedule(:final teacher) =>
+                                shortTeacherName(teacher.name),
+                              SelectedGroupSchedule() ||
+                              SelectedClassroomSchedule() ||
+                              SelectedCustomSchedule() ||
+                              null => selected?.name,
                             },
-                            builder: page,
+                            nameSemanticsLabel: selected?.name,
+                            topInset: topInset,
                           ),
-                        )
-                      : CustomScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          slivers: [
-                            SliverPadding(
-                              padding: EdgeInsets.fromLTRB(
-                                AppSpacing.screen,
-                                0,
-                                AppSpacing.screen,
-                                ninjaBottomInset(context) + AppSpacing.lg,
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screen,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ScheduleQuickActions(
+                                hasChanges: unreadChanges.isNotEmpty,
+                                onSearch: () => openScheduleSearch(context),
+                                onChanges: () => const ScheduleChangesRoute()
+                                    .push<void>(context),
+                                onExport: () =>
+                                    showScheduleShareSheet(context, day: _day),
                               ),
-                              sliver: SliverToBoxAdapter(
-                                child: state.status == ScheduleStatus.loading
-                                    ? const AppSkeletonGroup(
+                              const SizedBox(height: AppSpacing.sm),
+                              ScheduleCalendarNotice(day: _day),
+                              PromoBannerSlot(
+                                placement: PromoPlacement.schedule,
+                                now: now,
+                                compact: true,
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.sm,
+                                ),
+                              ),
+                              if (state.isOffline) ...[
+                                AppBanner(
+                                  message: l10n.offlineFromCache,
+                                  tone: AppBannerTone.warn,
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                              ],
+                              if (weekChanges.isNotEmpty &&
+                                  selected is! SelectedCustomSchedule) ...[
+                                AppBanner(
+                                  message: l10n.scheduleChangesThisWeek(
+                                    weekChanges.length,
+                                  ),
+                                  tone: AppBannerTone.warn,
+                                  actionLabel: l10n.scheduleShow,
+                                  onAction: () => showScheduleChangesSheet(
+                                    context,
+                                    weekOf: _day,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                              ],
+                              if (comparison.state.isEnabled &&
+                                  comparison.friend != null) ...[
+                                AppBanner(
+                                  message: l10n.scheduleCompareWith(
+                                    comparison.friendName,
+                                  ),
+                                  actionLabel: l10n.scheduleCompareOff,
+                                  onAction: comparison.stop,
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                              ],
+                              const SizedBox(height: AppSpacing.xsm),
+                              AppTourAnchor(
+                                target: AppTourTarget.scheduleViews,
+                                child: ScheduleViewSelector(
+                                  value: _view,
+                                  onChanged: (value) =>
+                                      setState(() => _view = value),
+                                ),
+                              ),
+                              SizedBox(
+                                height:
+                                    selected != null &&
+                                        _view == ScheduleView.day
+                                    ? AppSpacing.sm
+                                    : AppSpacing.lg,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (selected != null && _view == ScheduleView.day)
+                        SchedulePinnedDaySliver(
+                          strip: strip,
+                          topInset: topInset,
+                        ),
+                    ],
+                    body: selected != null
+                        ? ScheduleViewTransition(
+                            fill: true,
+                            child: ScheduleDatePager(
+                              key: ValueKey(_view),
+                              day: _day,
+                              anchor: now,
+                              view: _view,
+                              onDay: (day) {
+                                if (_view == view) _selectDay(day);
+                              },
+                              builder: page,
+                            ),
+                          )
+                        : CustomScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            slivers: [
+                              SliverPadding(
+                                padding: EdgeInsets.fromLTRB(
+                                  AppSpacing.screen,
+                                  0,
+                                  AppSpacing.screen,
+                                  ninjaBottomInset(context) + AppSpacing.lg,
+                                ),
+                                sliver: SliverToBoxAdapter(
+                                  child: switch (state.status) {
+                                    ScheduleStatus.loading =>
+                                      const AppSkeletonGroup(
                                         child: Column(
                                           children: [
                                             AppSkeletonRow(),
@@ -397,27 +398,29 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                                             AppSkeletonRow(),
                                           ],
                                         ),
-                                      )
-                                    : state.status == ScheduleStatus.failure
-                                    ? AppErrorState(
-                                        title: l10n.scheduleLoadingError,
-                                        message: l10n.scheduleLoadError,
-                                        primaryLabel: l10n.retry,
-                                        footnote: null,
-                                        onPrimary: _refresh,
-                                      )
-                                    : AppEmptyState(
-                                        title: l10n.scheduleNotSelected,
-                                        subtitle: l10n.scheduleHubEmptySubtitle,
-                                        actionLabel: l10n.addSchedule,
-                                        onAction: () =>
-                                            const ScheduleManagementRoute()
-                                                .push<void>(context),
                                       ),
+                                    ScheduleStatus.failure => AppErrorState(
+                                      title: l10n.scheduleLoadingError,
+                                      message: l10n.scheduleLoadError,
+                                      primaryLabel: l10n.retry,
+                                      footnote: null,
+                                      onPrimary: () => unawaited(_refresh()),
+                                    ),
+                                    ScheduleStatus.initial ||
+                                    ScheduleStatus.loaded => AppEmptyState(
+                                      title: l10n.scheduleNotSelected,
+                                      subtitle: l10n.scheduleHubEmptySubtitle,
+                                      actionLabel: l10n.addSchedule,
+                                      onAction: () =>
+                                          const ScheduleManagementRoute()
+                                              .push<void>(context),
+                                    ),
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                  ),
                 ),
               ),
             ),

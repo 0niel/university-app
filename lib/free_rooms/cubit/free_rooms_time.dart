@@ -2,7 +2,7 @@ import 'package:campus_repository/campus_repository.dart';
 import 'package:rtu_mirea_app/config/lesson_bell_slot_config.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-const freeRoomUrgentMinutes = 90;
+const kFreeRoomUrgentMinutes = 90;
 
 int? freeRoomMinutesLeft(FreeRoom room, DateTime now) {
   final until = room.freeUntil;
@@ -12,7 +12,7 @@ int? freeRoomMinutesLeft(FreeRoom room, DateTime now) {
 }
 
 bool freeRoomIsUrgent(int? minutesLeft) =>
-    minutesLeft != null && minutesLeft < freeRoomUrgentMinutes;
+    minutesLeft != null && minutesLeft < kFreeRoomUrgentMinutes;
 
 String freeRoomLeftLabel(AppLocalizations l10n, int minutes) {
   if (minutes < 60) return l10n.freeRoomsLeftMinutes(minutes);

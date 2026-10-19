@@ -34,7 +34,12 @@ class _SubjectHero extends StatelessWidget {
                   LessonType.practice => AppBadgeTone.practice,
                   LessonType.laboratoryWork => AppBadgeTone.lab,
                   LessonType.exam || LessonType.credit => AppBadgeTone.exam,
-                  _ => AppBadgeTone.accent,
+                  LessonType.physicalEducation ||
+                  LessonType.consultation ||
+                  LessonType.individualWork ||
+                  LessonType.courseWork ||
+                  LessonType.courseProject ||
+                  LessonType.unknown => AppBadgeTone.accent,
                 },
               ),
               Text(
@@ -51,10 +56,11 @@ class _SubjectHero extends StatelessWidget {
           const SizedBox(height: AppSpacing.sectionGap),
           AppBalancedText(
             lesson.subject,
-            style: AppText.serif(
-              32,
-              height: 1.1,
-              letterSpacingEm: -.02,
+            style: AppText.sans(
+              28,
+              FontWeight.w700,
+              height: 1.18,
+              letterSpacingEm: -.025,
             ).copyWith(color: colors.ink),
           ),
           const SizedBox(height: AppSpacing.contentGap),
@@ -84,9 +90,10 @@ class _SubjectHero extends StatelessWidget {
                   : Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(child: cards.first),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(child: cards.last),
+                        for (final (index, card) in cards.indexed) ...[
+                          if (index > 0) const SizedBox(width: AppSpacing.sm),
+                          Expanded(child: card),
+                        ],
                       ],
                     );
             },

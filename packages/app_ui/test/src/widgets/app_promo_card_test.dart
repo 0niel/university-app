@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.lightTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: AppTheme.lightTheme,
+    home: Scaffold(body: Center(child: child)),
+  );
 
   testWidgets('AppPromoCard renders copy and fires callbacks', (tester) async {
     var tapped = 0;

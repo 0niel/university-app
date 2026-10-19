@@ -9,9 +9,9 @@ void main() {
       kitDecorationOf(tester, AppIconButton);
 
   Finder dot() => find.descendant(
-        of: find.byType(AppIconButton),
-        matching: find.byType(IgnorePointer),
-      );
+    of: find.byType(AppIconButton),
+    matching: find.byType(IgnorePointer),
+  );
 
   testWidgets('fires onPressed', (tester) async {
     var taps = 0;

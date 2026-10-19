@@ -15,8 +15,7 @@ class AppEntryPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final height =
-        (MediaQuery.sizeOf(context).height * .36).clamp(220.0, 320.0);
+    final height = (MediaQuery.heightOf(context) * .36).clamp(220.0, 320.0);
     return ExcludeSemantics(
       child: ExcludeFocus(
         child: IgnorePointer(

@@ -7,6 +7,7 @@ class AppCommunityCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.featured = false,
     super.key,
   });
 
@@ -14,17 +15,18 @@ class AppCommunityCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final bool featured;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final iconTile = Container(
-      width: 44,
-      height: 44,
+      width: 52,
+      height: 52,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: colors.tint,
-        borderRadius: .circular(AppRadius.tile),
+        color: colors.accent.withValues(alpha: .12),
+        borderRadius: .circular(18),
       ),
       child: IconTheme.merge(
         data: IconThemeData(color: colors.accent, size: AppIconSize.md),
@@ -38,12 +40,13 @@ class AppCommunityCard extends StatelessWidget {
       children: [
         Text(
           title,
-          maxLines: 1,
+          maxLines: 2,
           overflow: .ellipsis,
-          style: AppText.headline.copyWith(
-            color: colors.ink,
-            fontWeight: .w600,
-          ),
+          style: AppText.sans(featured ? 24 : 19, FontWeight.w700, height: 1.15)
+              .copyWith(
+                color: colors.ink,
+                fontWeight: .w600,
+              ),
         ),
         Text(
           subtitle,
@@ -58,15 +61,13 @@ class AppCommunityCard extends StatelessWidget {
       label: title,
       child: AppPressable(
         onTap: onTap,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: .circular(AppRadius.card),
-          ),
+        child: AppGlassSurface(
+          tone: featured ? AppGlassTone.accent : AppGlassTone.subtle,
+          borderRadius: featured ? 30 : 26,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 72),
+            constraints: BoxConstraints(minHeight: featured ? 112 : 94),
             child: Padding(
-              padding: const .all(16),
+              padding: const .all(20),
               child: Row(
                 children: [
                   iconTile,

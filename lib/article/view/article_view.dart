@@ -39,8 +39,8 @@ class ArticleView extends StatelessWidget {
       backgroundColor: colors.canvas,
       body: BlocListener<ArticleBloc, ArticleState>(
         listenWhen: (previous, current) => previous.status != current.status,
-        listener: (context, state) {
-          if (state.status == ArticleStatus.shareFailure) {
+        listener: (context, articleState) {
+          if (articleState.status == ArticleStatus.shareFailure) {
             ToastManager.showError(context, message: context.l10n.shareFailed);
           }
         },
@@ -104,9 +104,9 @@ class ArticleView extends StatelessWidget {
   }
 
   Widget _content(BuildContext context, ArticleState state) {
-    final l10n = context.l10n;
     if (state.content.isEmpty) {
       if (state.status == ArticleStatus.failure) {
+        final l10n = context.l10n;
         return NinjaErrorState(
           key: const Key('articleContent_failure'),
           title: l10n.loadingError,

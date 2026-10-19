@@ -1,20 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 
-class MediaTopBarAction {
-  const MediaTopBarAction({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-    this.busy = false,
-  });
-
-  final AppLineIcon icon;
-  final String tooltip;
-  final VoidCallback? onPressed;
-  final bool busy;
-}
-
 class MediaTopBar extends StatelessWidget {
   const MediaTopBar({
     required this.title,
@@ -98,4 +84,18 @@ class MediaTopBar extends StatelessWidget {
       ),
     );
   }
+}
+
+class MediaTopBarAction {
+  const MediaTopBarAction({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.busy = false,
+  });
+
+  final AppLineIcon icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
+  final bool busy;
 }

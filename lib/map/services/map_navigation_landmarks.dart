@@ -1,20 +1,8 @@
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/indoor_navigation_graph.dart';
+import 'package:rtu_mirea_app/map/services/map_navigation_landmark.dart';
 
-class MapNavigationLandmark {
-  MapNavigationLandmark._({
-    required this.place,
-    required Iterable<String> nodeIds,
-    required Iterable<String> outgoingFloorIds,
-    required this.closed,
-  }) : nodeIds = Set.unmodifiable(nodeIds),
-       outgoingFloorIds = Set.unmodifiable(outgoingFloorIds);
-
-  final MapPlaceData place;
-  final Set<String> nodeIds;
-  final Set<String> outgoingFloorIds;
-  final bool closed;
-}
+export 'map_navigation_landmark.dart';
 
 List<MapNavigationLandmark> mapNavigationLandmarks(
   IndoorNavigationGraph graph, {
@@ -70,7 +58,8 @@ List<MapNavigationLandmark> mapNavigationLandmarks(
   final result = <MapNavigationLandmark>[];
   for (final entry in groups.entries) {
     final nodes = entry.value..sort((a, b) => a.id.compareTo(b.id));
-    final first = nodes.first;
+    final first = nodes.firstOrNull;
+    if (first == null) continue;
     final kind = entry.key.$2;
     final label = switch (kind) {
       'stairs' => 'Лестница',
@@ -80,7 +69,7 @@ List<MapNavigationLandmark> mapNavigationLandmarks(
       _ => throw StateError('Unknown connector kind: $kind'),
     };
     result.add(
-      MapNavigationLandmark._(
+      MapNavigationLandmark(
         place: MapPlaceData.fromJson({
           'id': 'navigation:$kind:${first.id}',
           'floor_id': first.floorId,

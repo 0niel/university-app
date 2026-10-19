@@ -258,125 +258,147 @@ class _MarketSellSheetState extends State<MarketSellSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AppInputField(
-            controller: _title,
-            autofocus: !isEditing,
-            enabled: !saving,
-            maxLength: 120,
-            placeholder: l10n.marketTitleHint,
-            leadingIcon: AppLineIcon.tag,
-          ),
-          const SizedBox(height: AppSpacing.gap),
-          AppInputField.multiline(
-            controller: _description,
-            enabled: !saving,
-            maxLength: 4000,
-            placeholder: l10n.marketDescriptionHint,
-          ),
-          const SizedBox(height: AppSpacing.sectionGap),
-          AppCard(
-            padding: const EdgeInsets.all(AppSpacing.sectionGap),
-            child: MarketplaceCategoryPicker(
-              keys: config.marketplaceCategoryKeys,
-              selectedKey: _category,
-              onChanged: saving
-                  ? null
-                  : (value) => setState(() {
-                      _category = value;
-                      _showPriceError = false;
-                    }),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppInputField(
+                  controller: _title,
+                  autofocus: !isEditing,
+                  enabled: !saving,
+                  maxLength: 120,
+                  placeholder: l10n.marketTitleHint,
+                  leadingIcon: AppLineIcon.tag,
+                ),
+                const SizedBox(height: AppSpacing.gap),
+                AppInputField.multiline(
+                  controller: _description,
+                  enabled: !saving,
+                  maxLength: 4000,
+                  placeholder: l10n.marketDescriptionHint,
+                ),
+                const SizedBox(height: AppSpacing.sectionGap),
+                AppCard(
+                  padding: const EdgeInsets.all(AppSpacing.sectionGap),
+                  child: MarketplaceCategoryPicker(
+                    keys: config.marketplaceCategoryKeys,
+                    selectedKey: _category,
+                    onChanged: saving
+                        ? null
+                        : (value) => setState(() {
+                            _category = value;
+                            _showPriceError = false;
+                          }),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sectionGap),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: AppInputField(
+                        controller: _price,
+                        enabled: !saving && !_isFree,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        placeholder: l10n.marketPriceHintWithCurrency(
+                          config.marketplaceCurrencyCode,
+                        ),
+                        leadingIcon: AppLineIcon.card,
+                        errorText: _showPriceError
+                            ? l10n.marketPriceInvalid
+                            : null,
+                        onChanged: (_) {
+                          if (_showPriceError) {
+                            setState(() => _showPriceError = false);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.sm),
+                      child: AppToggle(
+                        value: _isFree,
+                        label: l10n.marketFree,
+                        onChanged: saving
+                            ? null
+                            : (value) => setState(() {
+                                _isFree = value;
+                                _showPriceError = false;
+                              }),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sectionGap),
+              ],
             ),
           ),
-          const SizedBox(height: AppSpacing.sectionGap),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: AppInputField(
-                  controller: _price,
-                  enabled: !saving && !_isFree,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  placeholder: l10n.marketPriceHintWithCurrency(
-                    config.marketplaceCurrencyCode,
-                  ),
-                  leadingIcon: AppLineIcon.card,
-                  errorText: _showPriceError ? l10n.marketPriceInvalid : null,
-                  onChanged: (_) {
-                    if (_showPriceError) {
-                      setState(() => _showPriceError = false);
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.sm),
-                child: AppToggle(
-                  value: _isFree,
-                  label: l10n.marketFree,
-                  onChanged: saving
-                      ? null
-                      : (value) => setState(() {
-                          _isFree = value;
-                          _showPriceError = false;
-                        }),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sectionGap),
           MarketMediaPicker(
             items: _media,
             onReorder: _reorderMedia,
-            onRemove: saving ? (_) {} : _removeMedia,
-            onAddPhoto: saving ? null : _pickPhotos,
-            onAddVideo: saving ? null : _pickVideo,
+            onRemove: saving ? null : _removeMedia,
+            onAddPhoto: saving ? null : () => unawaited(_pickPhotos()),
+            onAddVideo: saving ? null : () => unawaited(_pickVideo()),
           ),
-          const SizedBox(height: AppSpacing.sectionGap),
-          AppInputField(
-            controller: _telegram,
-            enabled: !saving,
-            label: l10n.marketTelegramLabel,
-            placeholder: l10n.marketTelegramHint,
-            leadingIcon: AppLineIcon.at,
-            errorText: _showTelegramError
-                ? (_telegram.text.trim().isEmpty
-                      ? l10n.marketTelegramRequired
-                      : l10n.marketTelegramInvalid)
-                : null,
-            onChanged: (_) {
-              if (_showTelegramError) {
-                setState(() => _showTelegramError = false);
-              }
-            },
-          ),
-          const SizedBox(height: AppSpacing.sectionGap),
-          AppCard(
-            padding: EdgeInsets.zero,
-            child: AppSettingsToggleRow(
-              title: l10n.marketContactConsent,
-              subtitle: l10n.marketContactConsentHint,
-              value: _showContact,
-              isFirst: true,
-              isLast: true,
-              onChanged: saving
-                  ? null
-                  : (value) => setState(() => _showContact = value),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: AppSpacing.sectionGap),
+                AppInputField(
+                  controller: _telegram,
+                  enabled: !saving,
+                  label: l10n.marketTelegramLabel,
+                  placeholder: l10n.marketTelegramHint,
+                  leadingIcon: AppLineIcon.at,
+                  errorText: _showTelegramError
+                      ? (_telegram.text.trim().isEmpty
+                            ? l10n.marketTelegramRequired
+                            : l10n.marketTelegramInvalid)
+                      : null,
+                  onChanged: (_) {
+                    if (_showTelegramError) {
+                      setState(() => _showTelegramError = false);
+                    }
+                  },
+                ),
+                const SizedBox(height: AppSpacing.sectionGap),
+                AppCard(
+                  padding: EdgeInsets.zero,
+                  child: AppSettingsToggleRow(
+                    title: l10n.marketContactConsent,
+                    subtitle: l10n.marketContactConsentHint,
+                    value: _showContact,
+                    isFirst: true,
+                    isLast: true,
+                    onChanged: saving
+                        ? null
+                        : (value) => setState(() => _showContact = value),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.fieldGap),
+                AppButton.primary(
+                  label: isEditing
+                      ? (busy ? l10n.marketSaving : l10n.marketSave)
+                      : (busy ? l10n.marketPublishing : l10n.marketPublish),
+                  icon: AppLineIconWidget(
+                    isEditing ? AppLineIcon.check : AppLineIcon.upload,
+                  ),
+                  size: .large,
+                  expanded: true,
+                  loading: busy,
+                  onPressed: busy ? null : () => unawaited(_save()),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: AppSpacing.fieldGap),
-          AppButton.primary(
-            label: isEditing
-                ? (busy ? l10n.marketSaving : l10n.marketSave)
-                : (busy ? l10n.marketPublishing : l10n.marketPublish),
-            icon: AppLineIconWidget(
-              isEditing ? AppLineIcon.check : AppLineIcon.upload,
-            ),
-            size: .large,
-            expanded: true,
-            loading: busy,
-            onPressed: busy ? null : () => unawaited(_save()),
           ),
         ],
       ),

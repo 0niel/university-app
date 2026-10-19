@@ -50,45 +50,119 @@ abstract final class AppText {
     );
   }
 
-  static final TextStyle displayLarge =
-      serif(42, height: 1.05, letterSpacingEm: -.02);
+  static final TextStyle displayLarge = sans(
+    42,
+    FontWeight.w600,
+    height: 1.05,
+    letterSpacingEm: -.05,
+  );
 
-  static final TextStyle entryHero =
-      sans(38, FontWeight.w500, height: 1.08, letterSpacingEm: -.045);
+  static final TextStyle entryHero = sans(
+    38,
+    FontWeight.w500,
+    height: 1.08,
+    letterSpacingEm: -.045,
+  );
 
-  static final TextStyle entryTitle =
-      sans(32, FontWeight.w500, height: 1.12, letterSpacingEm: -.035);
+  static final TextStyle entryTitle = sans(
+    32,
+    FontWeight.w500,
+    height: 1.12,
+    letterSpacingEm: -.035,
+  );
 
-  static final TextStyle displayHero =
-      serif(36, height: 1.08, letterSpacingEm: -.02);
+  static final TextStyle displayHero = sans(
+    36,
+    FontWeight.w600,
+    height: 1.08,
+    letterSpacingEm: -.045,
+  );
 
-  static final TextStyle display =
-      serif(34, height: 1.05, letterSpacingEm: -.02);
+  static final TextStyle display = sans(
+    34,
+    FontWeight.w600,
+    height: 1.08,
+    letterSpacingEm: -.04,
+  );
 
-  static final TextStyle displayMedium =
-      serif(32, height: 1.08, letterSpacingEm: -.02);
+  static final TextStyle displayMedium = sans(
+    32,
+    FontWeight.w600,
+    height: 1.1,
+    letterSpacingEm: -.04,
+  );
 
-  static final TextStyle displayCompact =
-      serif(30, height: 1.12, letterSpacingEm: -.02);
+  static final TextStyle displayCompact = sans(
+    30,
+    FontWeight.w600,
+    height: 1.12,
+    letterSpacingEm: -.035,
+  );
 
-  static final TextStyle displaySmall =
-      serif(28, height: 1.05, letterSpacingEm: -.02);
+  static final TextStyle displaySmall = sans(
+    28,
+    FontWeight.w600,
+    height: 1.1,
+    letterSpacingEm: -.035,
+  );
 
-  static final TextStyle sectionLarge = serif(24, height: 1.1);
+  static final TextStyle sectionLarge = sans(
+    24,
+    FontWeight.w600,
+    height: 1.15,
+    letterSpacingEm: -.03,
+  );
 
-  static final TextStyle section = serif(22);
+  static final TextStyle section = sans(
+    22,
+    FontWeight.w600,
+    height: 1.2,
+    letterSpacingEm: -.025,
+  );
 
-  static final TextStyle sectionSmall = serif(19);
+  static final TextStyle sectionSmall = sans(
+    19,
+    FontWeight.w600,
+    height: 1.25,
+    letterSpacingEm: -.02,
+  );
 
-  static final TextStyle title =
-      sans(19, FontWeight.w700, height: 1.2, letterSpacingEm: -.01);
+  static final TextStyle title = sans(
+    19,
+    FontWeight.w700,
+    height: 1.2,
+    letterSpacingEm: -.01,
+  );
+
+  static final TextStyle identityTitle = sans(
+    30,
+    FontWeight.w700,
+    height: 1.08,
+  ).copyWith(letterSpacing: -1.1);
+
+  static final TextStyle cardValue = sans(
+    29,
+    FontWeight.w700,
+    height: 1.1,
+  ).copyWith(letterSpacing: -.9);
+
+  static final TextStyle cardSubtitle = sans(13, FontWeight.w500, height: 1.4);
+
+  static final TextStyle cardDescription = sans(
+    12,
+    FontWeight.w400,
+    height: 1.35,
+  );
 
   static final TextStyle heading = sans(16, FontWeight.w600, height: 1.25);
 
   static final TextStyle headline = sans(15, FontWeight.w600, height: 1.25);
 
-  static final TextStyle headlineStrong =
-      sans(15, FontWeight.w700, height: 1.25);
+  static final TextStyle headlineStrong = sans(
+    15,
+    FontWeight.w700,
+    height: 1.25,
+  );
 
   static final TextStyle cell = sans(14.5, FontWeight.w600);
 
@@ -116,11 +190,17 @@ abstract final class AppText {
 
   static final TextStyle subtext = sans(12.5, FontWeight.w500, height: 1.35);
 
-  static final TextStyle subtextStrong =
-      sans(12.5, FontWeight.w600, height: 1.35);
+  static final TextStyle subtextStrong = sans(
+    12.5,
+    FontWeight.w600,
+    height: 1.35,
+  );
 
-  static final TextStyle subtextBold =
-      sans(12.5, FontWeight.w700, height: 1.35);
+  static final TextStyle subtextBold = sans(
+    12.5,
+    FontWeight.w700,
+    height: 1.35,
+  );
 
   static final TextStyle caption = sans(12, FontWeight.w500);
 
@@ -128,11 +208,18 @@ abstract final class AppText {
 
   static final TextStyle captionBold = sans(12, FontWeight.w700);
 
-  static final TextStyle captionSmall =
-      sans(11.5, FontWeight.w600, height: 1.25);
+  static final TextStyle captionSmall = sans(
+    11.5,
+    FontWeight.w600,
+    height: 1.25,
+  );
 
-  static final TextStyle overline =
-      sans(11.5, FontWeight.w700, height: 1.2, letterSpacingEm: .08);
+  static final TextStyle overline = sans(
+    11.5,
+    FontWeight.w700,
+    height: 1.2,
+    letterSpacingEm: .08,
+  );
 
   static final TextStyle micro = sans(11, FontWeight.w700, height: 1.2);
 
@@ -140,16 +227,34 @@ abstract final class AppText {
 
   static final TextStyle badge = sans(11.5, FontWeight.w600, height: 1.2);
 
+  static final TextStyle quickActionLabel = sans(
+    10.5,
+    FontWeight.w600,
+    height: 1.2,
+  );
+
   static final TextStyle countBadge = sans(10, FontWeight.w800, height: 1.2);
 
-  static final TextStyle typeTag =
-      sans(10.5, FontWeight.w800, height: 1.2, letterSpacingEm: .06);
+  static final TextStyle typeTag = sans(
+    10.5,
+    FontWeight.w800,
+    height: 1.2,
+    letterSpacingEm: .06,
+  );
 
-  static final TextStyle tileTag =
-      sans(9.5, FontWeight.w800, height: 1.2, letterSpacingEm: .04);
+  static final TextStyle tileTag = sans(
+    9.5,
+    FontWeight.w800,
+    height: 1.2,
+    letterSpacingEm: .04,
+  );
 
-  static final TextStyle gridTag =
-      sans(8.5, FontWeight.w800, height: 1.2, letterSpacingEm: .04);
+  static final TextStyle gridTag = sans(
+    8.5,
+    FontWeight.w800,
+    height: 1.2,
+    letterSpacingEm: .04,
+  );
 
   static final TextStyle button = sans(13.5, FontWeight.w600, height: 1.2);
 
@@ -167,20 +272,40 @@ abstract final class AppText {
 
   static final TextStyle tab = sans(14, FontWeight.w700, height: 1.2);
 
-  static final TextStyle time =
-      sans(14, FontWeight.w700, height: 1.5, tabular: true);
+  static final TextStyle time = sans(
+    14,
+    FontWeight.w700,
+    height: 1.5,
+    tabular: true,
+  );
 
-  static final TextStyle timeEnd =
-      sans(12, FontWeight.w500, height: 1.5, tabular: true);
+  static final TextStyle timeEnd = sans(
+    12,
+    FontWeight.w500,
+    height: 1.5,
+    tabular: true,
+  );
 
-  static final TextStyle metric =
-      sans(19, FontWeight.w800, height: 1.2, tabular: true);
+  static final TextStyle metric = sans(
+    19,
+    FontWeight.w800,
+    height: 1.2,
+    tabular: true,
+  );
 
-  static final TextStyle metricLarge =
-      sans(22, FontWeight.w800, height: 1.2, tabular: true);
+  static final TextStyle metricLarge = sans(
+    22,
+    FontWeight.w800,
+    height: 1.2,
+    tabular: true,
+  );
 
-  static final TextStyle code =
-      sans(22, FontWeight.w700, height: 1.2, tabular: true);
+  static final TextStyle code = sans(
+    22,
+    FontWeight.w700,
+    height: 1.2,
+    tabular: true,
+  );
 
   static TextStyle tabular([TextStyle? base]) {
     return (base ?? bodyStrong).copyWith(

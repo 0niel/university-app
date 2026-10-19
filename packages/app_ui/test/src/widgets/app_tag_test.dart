@@ -6,13 +6,14 @@ import '../kit_harness.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(body: Center(child: child)),
+  );
 
   group('AppTag', () {
-    testWidgets('renders the label and an optional leading dot',
-        (tester) async {
+    testWidgets('renders the label and an optional leading dot', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrap(
           const AppTag(
@@ -35,8 +36,9 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('long scaled labels wrap within available width',
-        (tester) async {
+    testWidgets('long scaled labels wrap within available width', (
+      tester,
+    ) async {
       for (final dark in [false, true]) {
         for (final hasLeading in [false, true]) {
           await tester.pumpWidget(
@@ -57,8 +59,9 @@ void main() {
             ),
           );
           expect(tester.takeException(), isNull);
-          final bounds =
-              tester.getRect(find.byKey(const ValueKey('tag-bounds')));
+          final bounds = tester.getRect(
+            find.byKey(const ValueKey('tag-bounds')),
+          );
           final tag = tester.getRect(find.byType(AppTag));
           expect(tag.left, greaterThanOrEqualTo(bounds.left));
           expect(tag.right, lessThanOrEqualTo(bounds.right));
@@ -74,13 +77,17 @@ void main() {
       }
     });
 
-    testWidgets('compact tags retain intrinsic geometry in an unbounded row',
-        (tester) async {
+    testWidgets('compact tags retain intrinsic geometry in an unbounded row', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrapKit(
           const Row(
             mainAxisSize: MainAxisSize.min,
-            children: [AppTag(label: 'Идёт'), Text('Рядом')],
+            children: [
+              AppTag(label: 'Идёт'),
+              Text('Рядом'),
+            ],
           ),
         ),
       );

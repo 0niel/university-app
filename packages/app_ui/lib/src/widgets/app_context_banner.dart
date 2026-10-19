@@ -16,9 +16,9 @@ class AppContextBanner extends StatelessWidget {
     this.actionLabel,
     this.onTap,
   }) : assert(
-          emoji != null || icon != null,
-          'AppContextBanner requires either emoji or icon.',
-        );
+         emoji != null || icon != null,
+         'AppContextBanner requires either emoji or icon.',
+       );
 
   final String? emoji;
   final AppLineIcon? icon;

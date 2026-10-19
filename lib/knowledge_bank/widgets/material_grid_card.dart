@@ -77,8 +77,8 @@ class MaterialGridCard extends StatelessWidget {
                   spacing: AppSpacing.xsm,
                   runSpacing: AppSpacing.xsm,
                   children: [
-                    if (material.subjects.isNotEmpty)
-                      AppTag(label: material.subjects.first),
+                    if (material.subjects.firstOrNull case final subject?)
+                      AppTag(label: subject),
                     AppTag(label: typeLabel, tone: .accent),
                   ],
                 ),

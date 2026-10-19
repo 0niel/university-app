@@ -46,8 +46,8 @@ class AppRankNode extends StatelessWidget {
     final background = isActive
         ? colors.accent
         : isDone
-            ? colors.tint
-            : colors.surface2;
+        ? colors.tint
+        : colors.surface2;
 
     Widget emoji = Text(
       rank.emoji,

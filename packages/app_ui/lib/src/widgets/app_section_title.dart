@@ -32,8 +32,7 @@ class AppSectionTitle extends StatelessWidget {
     final subtitleText = subtitle;
     final actionText = action;
     final metaText = meta;
-    final titleStyle =
-        AppText.serif(22, height: 1.5).copyWith(color: colors.ink);
+    final titleStyle = AppText.section.copyWith(color: colors.ink, height: 1.5);
     final actionStyle = AppText.label.copyWith(color: colors.accent);
 
     return LayoutBuilder(
@@ -139,16 +138,17 @@ class AppSectionTitle extends StatelessWidget {
                 end: 0,
                 width: actionWidth,
                 child: LayoutBuilder(
-                  builder: (context, constraints) {
+                  builder: (context, actionConstraints) {
                     final height = math.min(
-                      constraints.maxHeight,
+                      actionConstraints.maxHeight,
                       math.max(AppControlSize.touchTarget, actionSize.height),
                     );
-                    final visualTop = topMargin +
+                    final visualTop =
+                        topMargin +
                         math.max(titleSize.baseline, actionSize.baseline) -
                         actionSize.baseline;
                     final top = (visualTop + (actionSize.height - height) / 2)
-                        .clamp(0.0, constraints.maxHeight - height);
+                        .clamp(0.0, actionConstraints.maxHeight - height);
                     return Stack(
                       children: [
                         Positioned(

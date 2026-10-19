@@ -73,7 +73,7 @@ class PromoRepository {
         placement: placement,
       );
     } on Object {
-      return;
+      // Analytics failures must not interrupt the banner action.
     }
   }
 }

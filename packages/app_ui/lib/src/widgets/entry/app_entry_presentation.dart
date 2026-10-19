@@ -1,0 +1,1 @@
+enum AppEntryPresentation { scroll, staged }

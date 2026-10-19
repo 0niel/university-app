@@ -137,7 +137,7 @@ void main() {
       await tester.tap(submit);
       await tester.pump();
       expect(tester.widget<AppButton>(submit).onPressed, isNull);
-      completion.completeError(Exception('email conflict'));
+      completion.completeError(Exception('email conflict'), StackTrace.current);
       await tester.pumpAndSettle();
       expect(find.byType(AppBanner), findsOneWidget);
       expect(find.byKey(const ValueKey('guest-upgrade-email')), findsOneWidget);

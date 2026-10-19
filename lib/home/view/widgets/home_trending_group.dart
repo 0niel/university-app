@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/top_discussions/top_discussions.dart';
 
-const homeTrendingTopicsLimit = 5;
+const kHomeTrendingTopicsLimit = 5;
 
 class HomeTrendingGroup extends StatelessWidget {
   const HomeTrendingGroup({
@@ -44,7 +44,7 @@ class HomeTrendingGroup extends StatelessWidget {
                 state.status == DiscourseStatus.initial))
           AppListGroup(
             children: [
-              for (var i = 0; i < homeTrendingTopicsLimit; i++)
+              for (var i = 0; i < kHomeTrendingTopicsLimit; i++)
                 const AppSkeletonRow(),
             ],
           )
@@ -53,7 +53,7 @@ class HomeTrendingGroup extends StatelessWidget {
         else if (topics.isNotEmpty)
           AppListGroup(
             children: [
-              for (final topic in topics.take(homeTrendingTopicsLimit))
+              for (final topic in topics.take(kHomeTrendingTopicsLimit))
                 _HomeTrendingRow(
                   title: topic.title,
                   subtitle:

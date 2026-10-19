@@ -41,10 +41,13 @@ class _PollsViewState extends State<PollsView> {
   }
 
   Future<void> _open(BuildContext context, Poll poll) async {
-    final cubit = context.read<PollsCubit>();
     final canTake = !poll.iParticipated && !poll.isEnded;
     if (canTake) {
-      await showPollRunnerSheet(context, poll: poll, cubit: cubit);
+      await showPollRunnerSheet(
+        context,
+        poll: poll,
+        cubit: context.read(),
+      );
     } else {
       await showPollResultsSheet(context, poll: poll);
     }
@@ -60,7 +63,7 @@ class _PollsViewState extends State<PollsView> {
     await showPollRunnerSheet(
       context,
       poll: poll,
-      cubit: context.read<PollsCubit>(),
+      cubit: context.read(),
     );
   }
 

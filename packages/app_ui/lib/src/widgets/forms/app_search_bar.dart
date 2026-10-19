@@ -18,31 +18,31 @@ class AppSearchBar extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.height = AppControlSize.search,
-    this.onCanvas = false,
+    this.isOnCanvas = false,
     this.trailing,
     this.trailingIcon = AppLineIcon.mic,
     this.onTrailingTap,
     this.trailingSemanticLabel,
-  })  : onTap = null,
-        isButton = false;
+  }) : onTap = null,
+       isButton = false;
 
   const AppSearchBar.button({
     required this.hintText,
     required this.onTap,
     super.key,
     this.height = AppControlSize.search,
-    this.onCanvas = false,
+    this.isOnCanvas = false,
     this.trailing,
     this.trailingIcon = AppLineIcon.mic,
     this.onTrailingTap,
     this.trailingSemanticLabel,
-  })  : controller = null,
-        onChanged = null,
-        onSubmitted = null,
-        onClear = null,
-        focusNode = null,
-        autofocus = false,
-        isButton = true;
+  }) : controller = null,
+       onChanged = null,
+       onSubmitted = null,
+       onClear = null,
+       focusNode = null,
+       autofocus = false,
+       isButton = true;
 
   final TextEditingController? controller;
   final String hintText;
@@ -52,7 +52,7 @@ class AppSearchBar extends StatelessWidget {
   final FocusNode? focusNode;
   final bool autofocus;
   final double height;
-  final bool onCanvas;
+  final bool isOnCanvas;
   final Widget? trailing;
   final AppLineIcon? trailingIcon;
   final VoidCallback? onTrailingTap;
@@ -72,7 +72,7 @@ class AppSearchBar extends StatelessWidget {
         focusNode: focusNode,
         autofocus: autofocus,
         height: height,
-        onCanvas: onCanvas,
+        isOnCanvas: isOnCanvas,
         trailing: trailing,
         trailingIcon: trailingIcon,
         onTrailingTap: onTrailingTap,
@@ -81,10 +81,11 @@ class AppSearchBar extends StatelessWidget {
     }
 
     final colors = context.colors;
-    final fill = onCanvas ? colors.surface : colors.surface2;
-    final wellColor = onCanvas ? colors.canvas : colors.surface;
+    final fill = isOnCanvas ? colors.surface : colors.surface2;
+    final wellColor = isOnCanvas ? colors.canvas : colors.surface;
     final icon = trailingIcon;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
 
     return AppPressState(
@@ -92,8 +93,9 @@ class AppSearchBar extends StatelessWidget {
       semanticsLabel: onTrailingTap == null ? hintText : null,
       semanticsButton: true,
       builder: (context, {required pressed}) => AnimatedContainer(
-        duration:
-            reduceMotion ? Duration.zero : const Duration(milliseconds: 120),
+        duration: reduceMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 120),
         curve: Curves.easeOut,
         height: height,
         padding: const EdgeInsets.only(
@@ -126,7 +128,8 @@ class AppSearchBar extends StatelessWidget {
               AppPressState(
                 onTap: onTrailingTap,
                 semanticsButton: onTrailingTap != null,
-                semanticsLabel: trailingSemanticLabel ??
+                semanticsLabel:
+                    trailingSemanticLabel ??
                     MaterialLocalizations.of(context).moreButtonTooltip,
                 builder: (context, {required pressed}) => SizedBox.square(
                   dimension: AppControlSize.touchTarget,

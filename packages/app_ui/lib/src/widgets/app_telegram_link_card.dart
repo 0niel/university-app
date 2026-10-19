@@ -15,18 +15,18 @@ class AppTelegramLinkCard extends StatelessWidget {
     super.key,
     this.actionLabel = 'Открыть',
     this.onTap,
-  })  : isAdd = false,
-        addLabel = null;
+  }) : isAdd = false,
+       addLabel = null;
 
   const AppTelegramLinkCard.add({
     required String label,
     super.key,
     this.onTap,
-  })  : isAdd = true,
-        addLabel = label,
-        title = '',
-        handle = '',
-        actionLabel = '';
+  }) : isAdd = true,
+       addLabel = label,
+       title = '',
+       handle = '',
+       actionLabel = '';
 
   final String title;
   final String handle;

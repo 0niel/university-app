@@ -107,8 +107,9 @@ void main() {
       );
 
       expect(kitDecorationOf(tester, NinjaLessonRow).color, kitColors.tint);
-      final bar =
-          tester.widget<NinjaProgressBar>(find.byType(NinjaProgressBar));
+      final bar = tester.widget<NinjaProgressBar>(
+        find.byType(NinjaProgressBar),
+      );
       expect(bar.value, .47);
       expect(bar.height, 4);
       expect(bar.trackColor, kitColors.surface);

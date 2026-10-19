@@ -44,7 +44,7 @@ void main() {
   );
 
   testWidgets(
-    'header and lesson share a clipped surface without outer outline',
+    'header and lesson share a clipped surface without extra layout insets',
     (
       tester,
     ) async {

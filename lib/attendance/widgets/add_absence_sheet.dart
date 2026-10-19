@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/attendance/cubit/attendance_cubit.dart';
@@ -124,7 +126,7 @@ class _AddAbsenceSheetState extends State<AddAbsenceSheet> {
           label: l10n.attendanceSheetDate,
           value: formatShortDate(_date, locale),
           leadingIcon: AppLineIcon.calendar,
-          onTap: _saving ? null : _pickDate,
+          onTap: _saving ? null : () => unawaited(_pickDate()),
         ),
         const SizedBox(height: AppSpacing.lg),
         AppFieldLabel(l10n.attendanceSheetReason),
@@ -149,7 +151,7 @@ class _AddAbsenceSheetState extends State<AddAbsenceSheet> {
           size: AppButtonSize.large,
           expanded: true,
           loading: _saving,
-          onPressed: canSubmit ? _submit : null,
+          onPressed: canSubmit ? () => unawaited(_submit()) : null,
         ),
       ],
     );

@@ -73,7 +73,7 @@ class SvgRoomParser {
         parentTransform: _ancestorTransform(element),
         destination: roomPaths,
       );
-      final combinedPath = roomPaths.isEmpty ? Path() : roomPaths.first;
+      final combinedPath = roomPaths.firstOrNull ?? Path();
       for (final shape in roomPaths.skip(1)) {
         final merged = Path.combine(PathOperation.union, combinedPath, shape);
         combinedPath

@@ -171,10 +171,12 @@ class _MapTopBarState extends State<MapTopBar>
             onToggle: _searching ? _closeSearch : _openSearch,
             search: AppSearchField(
               controller: widget.controller,
+              tone: AppSearchFieldTone.glass,
+              leading: const SizedBox.square(dimension: AppIconSize.md),
               focusNode: _focus,
               height: searchHeight,
               hintText: l10n.mapSearchPlaceholder,
-              onCanvas: true,
+              isOnCanvas: true,
               onChanged: widget.onQueryChanged,
               onSubmitted: (_) => _focus.unfocus(),
             ),
@@ -184,7 +186,7 @@ class _MapTopBarState extends State<MapTopBar>
                   child: widget.showCampusSelector
                       ? Align(
                           alignment: AlignmentDirectional.centerStart,
-                          child: AppButton.secondary(
+                          child: AppButton.glass(
                             label:
                                 widget.selectedCampus?.displayName ??
                                 l10n.mapCampusFilter,
@@ -195,7 +197,7 @@ class _MapTopBarState extends State<MapTopBar>
                             size: AppButtonSize.small,
                             onPressed: widget.campuses.isEmpty
                                 ? null
-                                : _chooseCampus,
+                                : () => unawaited(_chooseCampus()),
                           ),
                         )
                       : const SizedBox.shrink(),
@@ -204,7 +206,7 @@ class _MapTopBarState extends State<MapTopBar>
                 AppIconButton(
                   icon: const AppLineIconWidget(AppLineIcon.people),
                   tooltip: l10n.mapFriendsToggle,
-                  tone: AppIconButtonTone.surface,
+                  tone: AppIconButtonTone.glass,
                   shape: AppIconButtonShape.circle,
                   onPressed: widget.onFriends,
                 ),

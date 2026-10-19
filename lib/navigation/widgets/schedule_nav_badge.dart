@@ -8,7 +8,7 @@ class ScheduleNavBadge extends StatelessWidget {
   const ScheduleNavBadge({required this.builder, super.key});
 
   final Widget Function(BuildContext context, {required bool hasUnread})
-      builder;
+  builder;
 
   @override
   Widget build(BuildContext context) {

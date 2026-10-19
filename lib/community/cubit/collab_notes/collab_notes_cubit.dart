@@ -88,8 +88,10 @@ class CollabNotesCubit extends Cubit<CollabNotesState> {
     final previous = state.notes;
     final index = previous.indexWhere((note) => note.id == id);
     if (index < 0) return false;
-    final updated = List<CollabNote>.of(previous);
-    updated[index] = updated[index].copyWith(title: normalized);
+    final existing = previous.elementAtOrNull(index);
+    if (existing == null) return false;
+    final updated = List.of(previous);
+    updated[index] = existing.copyWith(title: normalized);
     emit(state.copyWith(notes: updated));
     try {
       await _repository.renameGroupNote(id, normalized);
@@ -107,8 +109,10 @@ class CollabNotesCubit extends Cubit<CollabNotesState> {
     final previous = state.notes;
     final index = previous.indexWhere((note) => note.id == id);
     if (index < 0) return false;
-    final updated = List<CollabNote>.of(previous);
-    updated[index] = updated[index].copyWith(
+    final existing = previous.elementAtOrNull(index);
+    if (existing == null) return false;
+    final updated = List.of(previous);
+    updated[index] = existing.copyWith(
       isPersonal: visibility == .personal,
     );
     emit(state.copyWith(notes: updated));

@@ -78,8 +78,8 @@ Map<String, Object?> _catalog(int revision) => {
   ],
 };
 
-class _RefreshFixture {
-  _RefreshFixture({this.newerBundle = false, this.delayFirstRoom = false});
+class MapRefreshFixture {
+  MapRefreshFixture({this.newerBundle = false, this.delayFirstRoom = false});
 
   final bool newerBundle;
   final bool delayFirstRoom;
@@ -206,7 +206,10 @@ class _RefreshFixture {
 
   Future<void> complete(WidgetTester tester, {bool fail = false}) async {
     if (fail) {
-      campusRequests.last.completeError(const MapDataException('offline'));
+      campusRequests.last.completeError(
+        const MapDataException('offline'),
+        StackTrace.current,
+      );
     } else {
       campusRequests.last.complete(_campus(nextRevision));
     }
@@ -232,7 +235,7 @@ void main() {
   testWidgets('opening newer room details refreshes the plan in place', (
     tester,
   ) async {
-    final fixture = _RefreshFixture();
+    final fixture = MapRefreshFixture();
     await fixture.pump(tester);
     final sheetState = tester.state(find.byType(MapPlaceDetailsSheet));
     expect(fixture.campusRequests, hasLength(1));
@@ -274,7 +277,7 @@ void main() {
   testWidgets('failed automatic refresh keeps the sheet open for retry', (
     tester,
   ) async {
-    final fixture = _RefreshFixture();
+    final fixture = MapRefreshFixture();
     await fixture.pump(tester);
     final sheetState = tester.state(find.byType(MapPlaceDetailsSheet));
     await fixture.complete(tester, fail: true);
@@ -307,7 +310,7 @@ void main() {
   testWidgets('publication refresh accepts a retained newer bundled plan', (
     tester,
   ) async {
-    final fixture = _RefreshFixture(newerBundle: true);
+    final fixture = MapRefreshFixture(newerBundle: true);
     await fixture.pump(tester);
     final displayed = fixture.map.state.campusData!;
     final sheetState = tester.state(find.byType(MapPlaceDetailsSheet));
@@ -335,7 +338,7 @@ void main() {
   testWidgets('late room details cannot invalidate an updated plan', (
     tester,
   ) async {
-    final fixture = _RefreshFixture(delayFirstRoom: true);
+    final fixture = MapRefreshFixture(delayFirstRoom: true);
     await fixture.pump(tester);
     final sheetState = tester.state(find.byType(MapPlaceDetailsSheet));
     expect(fixture.campusRequests, isEmpty);

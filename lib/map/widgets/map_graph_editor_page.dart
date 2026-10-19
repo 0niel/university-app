@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
@@ -9,198 +11,10 @@ import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/services/room_key.dart';
 import 'package:rtu_mirea_app/map/widgets/map_community_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/map_editor_floor_canvas.dart';
+import 'package:rtu_mirea_app/map/widgets/map_graph_draft.dart';
 
 export 'map_editor_floor_canvas.dart';
-
-class MapGraphDraft {
-  MapGraphDraft(this.campus)
-    : _nodes = mapJsonRows(campus.graph['nodes']).map(Map.of).toList(),
-      _edges = mapJsonRows(campus.graph['edges']).map(Map.of).toList();
-
-  final CampusMapData campus;
-  final List<Map<String, Object?>> _nodes;
-  List<Map<String, Object?>> _edges;
-  final _history = <void Function()>[];
-  final _unmeasuredEdges = <String>{};
-  List<IndoorNavigationNode>? _nodeCache;
-  List<IndoorNavigationEdge>? _edgeCache;
-  Map<String, IndoorNavigationNode>? _nodeIndex;
-
-  bool get canUndo => _history.isNotEmpty;
-  bool get needsDistanceReview => _unmeasuredEdges.isNotEmpty;
-  List<IndoorNavigationNode> get nodes => _nodeCache ??= List.unmodifiable(
-    _nodes.map(
-      (row) => IndoorNavigationNode.fromJson(Map<String, dynamic>.of(row)),
-    ),
-  );
-  List<IndoorNavigationEdge> get edges => _edgeCache ??= List.unmodifiable(
-    _edges.map(
-      (row) => IndoorNavigationEdge.fromJson(Map<String, dynamic>.of(row)),
-    ),
-  );
-  IndoorNavigationNode? nodeForId(String? id) =>
-      (_nodeIndex ??= {for (final node in nodes) node.id: node})[id];
-
-  Map<String, Object?> get patch => {
-    'nodes': _nodes.map(Map<String, Object?>.of).toList(),
-    'edges': _edges.map(Map<String, Object?>.of).toList(),
-  };
-
-  void _remember(void Function() restore) {
-    final unmeasured = Set.of(_unmeasuredEdges);
-    _history.add(() {
-      restore();
-      _unmeasuredEdges
-        ..clear()
-        ..addAll(unmeasured);
-    });
-    if (_history.length > 40) _history.removeAt(0);
-  }
-
-  void _invalidate({bool nodes = true, bool edges = true}) {
-    if (nodes) {
-      _nodeCache = null;
-      _nodeIndex = null;
-    }
-    if (edges) _edgeCache = null;
-  }
-
-  void undo() {
-    if (!canUndo) return;
-    _history.removeLast()();
-    _invalidate();
-  }
-
-  void saveNode(Map<String, Object?> row) {
-    final node = IndoorNavigationNode.fromJson(Map<String, dynamic>.of(row));
-    final floor = campus.floorForId(node.floorId);
-    if (floor == null ||
-        node.x < 0 ||
-        node.y < 0 ||
-        node.x > floor.width ||
-        node.y > floor.height) {
-      throw const FormatException(
-        'Точка должна находиться внутри плана этажа.',
-      );
-    }
-    if (node.roomId != null &&
-        !campus.rooms.any(
-          (room) => room.id == node.roomId && room.floorId == node.floorId,
-        )) {
-      throw const FormatException('Выберите помещение на этом этаже.');
-    }
-    final index = _nodes.indexWhere((item) => item['id'] == node.id);
-    final previous = index < 0 ? null : _nodes[index];
-    _remember(() {
-      if (previous == null) {
-        _nodes.removeWhere((item) => item['id'] == node.id);
-      } else {
-        _nodes[index] = previous;
-      }
-    });
-    if (index < 0) {
-      _nodes.add(Map.of(row));
-    } else {
-      _nodes[index] = {..._nodes[index], ...row};
-    }
-    _invalidate(edges: false);
-  }
-
-  void moveNode(String id, Offset point) {
-    final row = _nodes.firstWhere((item) => item['id'] == id);
-    saveNode({...row, 'x': point.dx, 'y': point.dy});
-    _unmeasuredEdges.addAll(
-      _edges
-          .where(
-            (edge) => edge['from_node_id'] == id || edge['to_node_id'] == id,
-          )
-          .map((edge) => edge['id']! as String),
-    );
-  }
-
-  void removeNode(String id) {
-    final index = _nodes.indexWhere((item) => item['id'] == id);
-    if (index < 0) return;
-    final previous = _nodes[index];
-    final links = [
-      for (var i = 0; i < _edges.length; i++)
-        if (_edges[i]['from_node_id'] == id || _edges[i]['to_node_id'] == id)
-          (i, _edges[i]),
-    ];
-    _remember(() {
-      _nodes.insert(index, previous);
-      for (final (position, edge) in links) {
-        _edges.insert(position, edge);
-      }
-    });
-    _nodes.removeWhere((item) => item['id'] == id);
-    _edges.removeWhere(
-      (item) => item['from_node_id'] == id || item['to_node_id'] == id,
-    );
-    _unmeasuredEdges.retainAll(_edges.map((edge) => edge['id']! as String));
-    _invalidate();
-  }
-
-  void saveEdge(Map<String, Object?> row) {
-    final edge = IndoorNavigationEdge.fromJson(Map<String, dynamic>.of(row));
-    if (edge.fromNodeId == edge.toNodeId) {
-      throw const FormatException('Выберите две разные точки.');
-    }
-    final from = nodeForId(edge.fromNodeId);
-    final to = nodeForId(edge.toNodeId);
-    if (from == null || to == null) {
-      throw const FormatException('Обе точки должны существовать на плане.');
-    }
-    if (from.floorId != to.floorId &&
-        !const {
-          IndoorEdgeKind.stairs,
-          IndoorEdgeKind.elevator,
-          IndoorEdgeKind.ramp,
-          IndoorEdgeKind.escalator,
-          IndoorEdgeKind.outdoor,
-        }.contains(edge.kind)) {
-      throw const FormatException(
-        'Выберите подходящий тип перехода между этажами.',
-      );
-    }
-    if (edge.hasSteps && edge.wheelchairAccessible) {
-      throw const FormatException(
-        'Ступени не подходят для маршрута без лестниц.',
-      );
-    }
-    final next = _edges.where((item) => item['id'] != edge.id).toList()
-      ..add(row);
-    IndoorNavigationGraph.fromJson({'nodes': _nodes, 'edges': next});
-    final index = _edges.indexWhere((item) => item['id'] == edge.id);
-    final previous = index < 0 ? null : _edges[index];
-    _remember(() {
-      _edges.removeWhere((item) => item['id'] == edge.id);
-      if (previous != null) _edges.insert(index, previous);
-    });
-    _edges = next;
-    _unmeasuredEdges.remove(edge.id);
-    _invalidate(nodes: false);
-  }
-
-  void removeEdge(String id) {
-    final index = _edges.indexWhere((item) => item['id'] == id);
-    if (index < 0) return;
-    final previous = _edges[index];
-    _remember(() => _edges.insert(index, previous));
-    _edges.removeAt(index);
-    _unmeasuredEdges.remove(id);
-    _invalidate(nodes: false);
-  }
-
-  IndoorNavigationGraph validate() {
-    if (needsDistanceReview) {
-      throw const FormatException(
-        'После переноса точки откройте её проходы и проверьте длины.',
-      );
-    }
-    return IndoorNavigationGraph.fromJson(Map<String, dynamic>.of(patch));
-  }
-}
+export 'map_graph_draft.dart';
 
 class MapGraphEditorPage extends StatefulWidget {
   const MapGraphEditorPage({
@@ -362,14 +176,14 @@ class _MapGraphEditorPageState extends State<MapGraphEditorPage> {
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: MediaQuery.sizeOf(context).height * .55,
+          height: MediaQuery.heightOf(context) * .55,
           child: StatefulBuilder(
             builder: (context, update) {
               final links = _draft.edges
                   .where(
-                    (edge) =>
-                        edge.fromNodeId == selected.id ||
-                        edge.toNodeId == selected.id,
+                    (candidate) =>
+                        candidate.fromNodeId == selected.id ||
+                        candidate.toNodeId == selected.id,
                   )
                   .toList();
               return ListView(
@@ -403,8 +217,9 @@ class _MapGraphEditorPageState extends State<MapGraphEditorPage> {
                         tooltip: 'Удалить проход',
                         icon: const Icon(Icons.delete_outline_rounded),
                         onPressed: () {
-                          setState(() => _draft.removeEdge(link.id));
-                          update(() {});
+                          update(
+                            () => setState(() => _draft.removeEdge(link.id)),
+                          );
                         },
                       ),
                     ),
@@ -516,7 +331,8 @@ class _MapGraphEditorPageState extends State<MapGraphEditorPage> {
                           floor: floor,
                           repository: widget.repository,
                           places: widget.campus.rooms,
-                          onTap: _tap,
+                          onTap: (point, scale) =>
+                              unawaited(_tap(point, scale)),
                           painter: _GraphPainter(
                             floor: floor,
                             nodes: _draft.nodes,
@@ -531,7 +347,7 @@ class _MapGraphEditorPageState extends State<MapGraphEditorPage> {
                         top: false,
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
-                            maxHeight: MediaQuery.sizeOf(context).height * .30,
+                            maxHeight: MediaQuery.heightOf(context) * .30,
                           ),
                           child: SingleChildScrollView(
                             padding: const EdgeInsets.all(16),
@@ -580,7 +396,8 @@ class _MapGraphEditorPageState extends State<MapGraphEditorPage> {
                                         ),
                                         AppButton.text(
                                           size: AppButtonSize.small,
-                                          onPressed: _connections,
+                                          onPressed: () =>
+                                              unawaited(_connections()),
                                           label: 'Проходы',
                                         ),
                                         AppIconButton(
@@ -604,13 +421,16 @@ class _MapGraphEditorPageState extends State<MapGraphEditorPage> {
                                     padding: const EdgeInsets.only(bottom: 8),
                                     child: AppButton.secondary(
                                       label: 'Найти конечную точку',
-                                      onPressed: _findConnection,
+                                      onPressed: () =>
+                                          unawaited(_findConnection()),
                                     ),
                                   ),
                                 AppButton.primary(
                                   label: 'Проверить изменения',
                                   expanded: true,
-                                  onPressed: _draft.canUndo ? _review : null,
+                                  onPressed: _draft.canUndo
+                                      ? () => unawaited(_review())
+                                      : null,
                                 ),
                               ],
                             ),
@@ -647,7 +467,7 @@ class _MapEditorDialog extends StatelessWidget {
         ConstrainedBox(
           constraints: BoxConstraints(
             maxHeight:
-                (MediaQuery.sizeOf(context).height -
+                (MediaQuery.heightOf(context) -
                     MediaQuery.viewInsetsOf(context).bottom) *
                 .42,
           ),
@@ -741,7 +561,7 @@ class MapEditorFloorPicker extends StatelessWidget {
 }
 
 class _GraphPainter extends CustomPainter {
-  _GraphPainter({
+  const _GraphPainter({
     required this.floor,
     required this.nodes,
     required this.edges,
@@ -760,7 +580,9 @@ class _GraphPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final points = {
-      for (final node in nodes.where((node) => node.floorId == floor.floor.id))
+      for (final node in nodes.where(
+        (candidate) => candidate.floorId == floor.floor.id,
+      ))
         node.id: Offset(
           node.x / floor.width * size.width,
           node.y / floor.height * size.height,
@@ -856,8 +678,8 @@ class _NodeDialogState extends State<_NodeDialog> {
       selected: _roomId ?? '',
       options: {
         '': 'Точка в коридоре',
-        for (final room in widget.rooms)
-          if (room.floorId == widget.floor.floor.id) room.id: room.label,
+        for (final option in widget.rooms)
+          if (option.floorId == widget.floor.floor.id) option.id: option.label,
       },
     );
     if (room != null && mounted) {
@@ -896,7 +718,7 @@ class _NodeDialogState extends State<_NodeDialog> {
                       .firstOrNull
                       ?.label ??
                   'Точка в коридоре',
-              onTap: _chooseRoom,
+              onTap: () => unawaited(_chooseRoom()),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -939,7 +761,9 @@ class _NodeDialogState extends State<_NodeDialog> {
             'y': widget.point.dy,
             'label': _label.text.trim(),
             'room_id': _roomId,
-            'kind': _roomId == null ? widget.node?.kind ?? 'junction' : 'door',
+            'kind': _roomId == null
+                ? (widget.node?.kind ?? 'junction')
+                : 'door',
             'wheelchair_accessible': _accessible,
             'closed': _closed,
           });
@@ -995,9 +819,9 @@ class _GraphNodeLabels {
     var distance = double.infinity;
     for (var dx = -2; dx <= 2; dx++) {
       for (var dy = -2; dy <= 2; dy++) {
-        for (final candidate
-            in _cells[(node.floorId, x + dx, y + dy)] ??
-                const <MapPlaceData>[]) {
+        final cell = (node.floorId, x + dx, y + dy);
+        final nearby = _cells[cell] ?? const <MapPlaceData>[];
+        for (final candidate in nearby) {
           final current =
               math.pow(candidate.x - node.x, 2) +
               math.pow(candidate.y - node.y, 2);
@@ -1240,14 +1064,21 @@ class _EdgeDialogState extends State<_EdgeDialog> {
       title: 'Тип прохода',
       selected: _kind,
       options: {
-        for (final kind in IndoorEdgeKind.values) kind: _edgeLabel(kind),
+        for (final option in IndoorEdgeKind.values) option: _edgeLabel(option),
       },
     );
     if (kind == null || !mounted) return;
     setState(() {
       _kind = kind;
-      if (kind == IndoorEdgeKind.stairs || kind == IndoorEdgeKind.escalator) {
-        _accessible = false;
+      switch (kind) {
+        case IndoorEdgeKind.stairs || IndoorEdgeKind.escalator:
+          _accessible = false;
+        case IndoorEdgeKind.corridor ||
+            IndoorEdgeKind.elevator ||
+            IndoorEdgeKind.ramp ||
+            IndoorEdgeKind.door ||
+            IndoorEdgeKind.outdoor:
+          break;
       }
     });
   }
@@ -1364,13 +1195,13 @@ class _EdgeDialogState extends State<_EdgeDialog> {
                     ? 'Поиск по этажу и помещению'
                     : _labels.subtitle(to),
                 trailing: const Icon(Icons.search_rounded),
-                onTap: _chooseTarget,
+                onTap: () => unawaited(_chooseTarget()),
               ),
               const SizedBox(height: 12),
               AppSelectField(
                 label: 'Тип прохода',
                 value: _edgeLabel(_kind),
-                onTap: _chooseKind,
+                onTap: () => unawaited(_chooseKind()),
               ),
               const SizedBox(height: 16),
               AppInputField(
@@ -1464,7 +1295,7 @@ Future<T?> _showEditorOptions<T>(
             )
             .toList();
         return SizedBox(
-          height: MediaQuery.sizeOf(context).height * .5,
+          height: MediaQuery.heightOf(context) * .5,
           child: Column(
             children: [
               if (options.length > 10) ...[
@@ -1676,7 +1507,7 @@ class _ReviewDialogState extends State<_ReviewDialog> {
                 loading: _busy,
                 onPressed: _busy || !widget.repository.isAuthenticated
                     ? null
-                    : _submit,
+                    : () => unawaited(_submit()),
               ),
             ],
     ),

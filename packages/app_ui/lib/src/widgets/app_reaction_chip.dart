@@ -48,8 +48,11 @@ class AppReactionChip extends StatelessWidget {
                 const SizedBox(width: AppSpacing.xsm),
                 Text(
                   '$count',
-                  style: AppText.sans(13, FontWeight.w600, tabular: true)
-                      .copyWith(color: foreground),
+                  style: AppText.sans(
+                    13,
+                    FontWeight.w600,
+                    tabular: true,
+                  ).copyWith(color: foreground),
                 ),
               ],
             ),

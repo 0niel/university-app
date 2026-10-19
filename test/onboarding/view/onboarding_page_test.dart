@@ -174,7 +174,7 @@ void main() {
     expect(find.textContaining('MIREA'), findsNothing);
   });
 
-  testWidgets('welcome accent word is an italic serif in the ink colour', (
+  testWidgets('welcome accent word uses bold sans in the accent colour', (
     tester,
   ) async {
     await pumpPage(tester);
@@ -198,10 +198,11 @@ void main() {
     expect(spans, hasLength(1));
     expect(
       spans.single.style?.color ?? (rich.text as TextSpan).style?.color,
-      colors.ink,
+      colors.accent,
     );
-    expect(spans.single.style?.fontStyle, FontStyle.italic);
-    expect(spans.single.style?.fontFamily, AppText.serifFamily);
+    expect(spans.single.style?.fontStyle ?? FontStyle.normal, FontStyle.normal);
+    expect(spans.single.style?.fontFamily, AppText.sansFamily);
+    expect(spans.single.style?.fontWeight, FontWeight.w700);
   });
 
   testWidgets('story paging reaches campus, community and group setup', (
@@ -412,6 +413,9 @@ void main() {
     expect(find.text('ИКБО-01-24'), findsNWidgets(2));
     expect(find.text('ИКБО-02-24'), findsOneWidget);
 
+    await tester.ensureVisible(find.text('ИКБО-02-24'));
+    await tester.pumpAndSettle();
+    expect(find.text('ИКБО-02-24').hitTestable(), findsOneWidget);
     await tester.tap(find.text('ИКБО-02-24'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));

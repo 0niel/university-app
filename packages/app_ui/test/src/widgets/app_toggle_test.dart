@@ -6,14 +6,14 @@ import '../kit_harness.dart';
 
 void main() {
   BoxDecoration trackOf(WidgetTester tester) => kitDecoration(
-        tester,
-        find
-            .descendant(
-              of: find.byType(AppSwitch),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
+    tester,
+    find
+        .descendant(
+          of: find.byType(AppSwitch),
+          matching: find.byType(Container),
+        )
+        .first,
+  );
 
   testWidgets('track is 48x28 and toggles the accent fill', (tester) async {
     await tester.pumpWidget(

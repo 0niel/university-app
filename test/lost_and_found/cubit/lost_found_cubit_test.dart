@@ -189,6 +189,18 @@ void main() {
     },
   );
 
+  test('deleting an unknown item preserves state without a request', () async {
+    stubItems(() async => [keys, notebook]);
+    final cubit = buildCubit();
+    addTearDown(cubit.close);
+    await cubit.load();
+    final previous = cubit.state;
+
+    expect(await cubit.deleteItem(keys.copyWith(id: 'missing-item')), isFalse);
+    expect(cubit.state, previous);
+    verifyNever(() => repository.deleteItem(itemId: any(named: 'itemId')));
+  });
+
   test(
     'optimistic deletion restores its original position on failure',
     () async {

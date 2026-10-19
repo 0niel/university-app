@@ -8,20 +8,10 @@ import 'package:mini_apps_repository/mini_apps_repository.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/mini_apps/cubit/mini_apps_catalog_cubit.dart';
 import 'package:rtu_mirea_app/mini_apps/view/mini_app_stats_page.dart';
+import 'package:rtu_mirea_app/mini_apps/view/mini_apps_catalog.dart';
 import 'package:rtu_mirea_app/mini_apps/widgets/widgets.dart';
 
 part 'mini_apps_view.dart';
-part 'mini_apps_app_bar.dart';
-part 'mini_apps_search_field.dart';
-part 'mini_apps_sort_button.dart';
-part 'mini_apps_sort_sheet.dart';
-part 'sort_icon.dart';
-part 'category_chips.dart';
-part 'catalog_body.dart';
-part 'recent_mini_apps.dart';
-part 'catalog_section_label.dart';
-part 'catalog_skeleton.dart';
-part 'catalog_section_label_skeleton.dart';
 part 'app_actions_sheet.dart';
 part 'mini_app_action_tile.dart';
 

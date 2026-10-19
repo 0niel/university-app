@@ -149,7 +149,7 @@ void main() {
       );
       final lesson = find.byWidgetPredicate(
         (widget) =>
-            widget is AppLessonRow &&
+            widget is AppLessonCard &&
             widget.title == 'Программирование на Python',
       );
       expect(

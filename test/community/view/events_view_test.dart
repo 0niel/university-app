@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/community/cubit/events/events.dart';
+import 'package:rtu_mirea_app/community/view/events/events_filters.dart';
 import 'package:rtu_mirea_app/community/view/events_view.dart';
 import 'package:rtu_mirea_app/community/widgets/events/events_skeleton.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -99,6 +100,77 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('День карьеры'), findsNothing);
     });
+
+    testWidgets(
+      'filters reach both page edges and accept edge swipes at 200% text',
+      (
+        tester,
+      ) async {
+        await tester.binding.setSurfaceSize(const Size(320, 900));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final upcoming = buildEvent(id: 'upcoming', title: 'Скоро');
+        final past = buildEvent(
+          id: 'past',
+          title: 'Уже прошло',
+          startsAt: DateTime.now().subtract(const Duration(days: 3)),
+        );
+        await tester.pumpWidget(
+          buildSubject(
+            EventsState(status: .ready, events: [upcoming, past]),
+            textScale: 2,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final filters = find.byType(EventsFilters);
+        final scrollable = find.descendant(
+          of: filters,
+          matching: find.byType(Scrollable),
+        );
+        final bounds = tester.getRect(scrollable);
+        final page = tester.getRect(find.byType(EventsView));
+        final position = tester.state<ScrollableState>(scrollable).position;
+        expect(bounds.left, page.left);
+        expect(bounds.right, page.right);
+        expect(
+          tester
+                  .getTopLeft(
+                    find
+                        .descendant(of: filters, matching: find.byType(AppChip))
+                        .first,
+                  )
+                  .dx -
+              bounds.left,
+          closeTo(20, .01),
+        );
+        expect(position.maxScrollExtent, greaterThan(0));
+
+        await tester.dragFrom(
+          Offset(bounds.left + 2, bounds.center.dy),
+          const Offset(-160, 0),
+        );
+        await tester.pumpAndSettle();
+        expect(position.pixels, greaterThan(0));
+
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pump();
+        final beforeReturn = position.pixels;
+        await tester.dragFrom(
+          Offset(bounds.right - 2, bounds.center.dy),
+          const Offset(160, 0),
+        );
+        await tester.pumpAndSettle();
+        expect(position.pixels, lessThan(beforeReturn));
+
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pump();
+        await tester.tap(find.text('Прошедшие'));
+        await tester.pumpAndSettle();
+        expect(find.text('Скоро'), findsNothing);
+        expect(find.text('Уже прошло'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('past filter hides upcoming events and shows past ones', (
       tester,

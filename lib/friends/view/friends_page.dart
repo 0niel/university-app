@@ -33,21 +33,10 @@ class FriendsListView extends StatefulWidget {
 }
 
 class _FriendsListViewState extends State<FriendsListView> {
-  Timer? _presenceTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _presenceTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _presenceTimer?.cancel();
-    super.dispose();
-  }
+  final Stream<int> _presenceTicks = Stream.periodic(
+    const Duration(minutes: 1),
+    (tick) => tick,
+  );
 
   Future<void> _addFriend() async {
     await Navigator.of(context).push(FindFriendsPage.route());
@@ -68,7 +57,12 @@ class _FriendsListViewState extends State<FriendsListView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => StreamBuilder(
+    stream: _presenceTicks,
+    builder: (context, _) => _buildContent(context),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
     return Scaffold(
@@ -109,7 +103,7 @@ class _FriendsListViewState extends State<FriendsListView> {
                         ),
                       ),
                       semanticsLabel: l10n.friendsAddFriend,
-                      onTap: _addFriend,
+                      onTap: () => unawaited(_addFriend()),
                     ),
                   ],
                 ),
@@ -142,8 +136,10 @@ class _FriendsListViewState extends State<FriendsListView> {
                               const SizedBox(height: AppSpacing.xs),
                               Text(
                                 l10n.friendsCompareHeroTitle,
-                                style: AppText.serif(
+                                style: AppText.sans(
                                   22,
+                                  FontWeight.w700,
+                                  height: 1.2,
                                 ).copyWith(color: colors.ink),
                               ),
                               const SizedBox(height: AppSpacing.xs),
@@ -238,7 +234,7 @@ class _FriendsListViewState extends State<FriendsListView> {
                             message: null,
                             footnote: null,
                             primaryLabel: l10n.retry,
-                            onPrimary: cubit.load,
+                            onPrimary: () => unawaited(cubit.load()),
                           ),
                           FriendsListStatus.loaded => AppEmptyState(
                             title: state.filter == FriendsFilter.onCampus
@@ -248,7 +244,7 @@ class _FriendsListViewState extends State<FriendsListView> {
                                 ? l10n.friendsEmptySub
                                 : null,
                             actionLabel: l10n.friendsAddFriend,
-                            onAction: _addFriend,
+                            onAction: () => unawaited(_addFriend()),
                             lineIcon: AppLineIcon.people,
                           ),
                         },

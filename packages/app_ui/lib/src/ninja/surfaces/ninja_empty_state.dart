@@ -13,8 +13,8 @@ class NinjaEmptyState extends StatelessWidget {
     this.actionLabel,
     this.onAction,
     this.outlinedAction = false,
-  })  : _screen = false,
-        _compact = false;
+  }) : _screen = false,
+       _compact = false;
 
   const NinjaEmptyState.screen({
     required this.title,
@@ -24,8 +24,8 @@ class NinjaEmptyState extends StatelessWidget {
     this.actionLabel,
     this.onAction,
     this.outlinedAction = false,
-  })  : _screen = true,
-        _compact = false;
+  }) : _screen = true,
+       _compact = false;
 
   const NinjaEmptyState.compact({
     required this.title,
@@ -35,8 +35,8 @@ class NinjaEmptyState extends StatelessWidget {
     this.actionLabel,
     this.onAction,
     this.outlinedAction = false,
-  })  : _screen = false,
-        _compact = true;
+  }) : _screen = false,
+       _compact = true;
 
   final bool _screen;
   final bool _compact;

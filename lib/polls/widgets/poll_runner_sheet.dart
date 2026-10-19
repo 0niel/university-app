@@ -92,9 +92,7 @@ class _PollRunnerSheetState extends State<PollRunnerSheet> {
       switch (question.kind) {
         case PollQuestionKind.single:
         case PollQuestionKind.quiz:
-          _singleAnswers[question.id] = question.myOptionIds.isEmpty
-              ? null
-              : question.myOptionIds.first;
+          _singleAnswers[question.id] = question.myOptionIds.firstOrNull;
         case PollQuestionKind.multiple:
           _multipleAnswers[question.id] = {...question.myOptionIds};
         case PollQuestionKind.text:
@@ -145,7 +143,8 @@ class _PollRunnerSheetState extends State<PollRunnerSheet> {
       ToastManager.showError(context, message: context.l10n.pollsStatusClosed);
       return;
     }
-    final current = _questions[_step];
+    final current = _questions.elementAtOrNull(_step);
+    if (current == null) return;
     if (current.isRequired && !_isAnswered(current)) {
       setState(() => _showError = true);
       return;
@@ -203,7 +202,6 @@ class _PollRunnerSheetState extends State<PollRunnerSheet> {
     FocusScope.of(context).unfocus();
     setState(() => _submitting = true);
     final l10n = context.l10n;
-    final navigator = Navigator.of(context);
     final updated = await widget.cubit.submitAnswers(
       poll: widget.poll,
       answers: answers,
@@ -212,7 +210,7 @@ class _PollRunnerSheetState extends State<PollRunnerSheet> {
     setState(() => _submitting = false);
     if (updated != null) {
       ToastManager.showSuccess(context, message: l10n.pollsRunnerSuccess);
-      navigator.pop(true);
+      Navigator.of(context).pop(true);
     } else {
       ToastManager.showError(context, message: l10n.error);
     }
@@ -229,7 +227,8 @@ class _PollRunnerSheetState extends State<PollRunnerSheet> {
         icon: const AppLineIconWidget(AppLineIcon.chart),
       );
     }
-    final current = _questions[_step];
+    final current = _questions.elementAtOrNull(_step);
+    if (current == null) return const SizedBox.shrink();
     return CustomScrollView(
       key: ValueKey(('pollRunner_scroll', widget.poll.id, current.id)),
       shrinkWrap: true,
@@ -291,24 +290,20 @@ class _PollRunnerSheetState extends State<PollRunnerSheet> {
                   child: _QuestionInput(
                     question: current,
                     singleValue: _singleAnswers[current.id],
-                    multipleValue:
-                        _multipleAnswers[current.id] ?? const <String>{},
+                    multipleValue: _multipleAnswers[current.id] ?? const {},
                     textController: _textControllers[current.id],
                     ratingValue: _ratingAnswers[current.id],
                     onSingleChanged: (value) {
-                      _singleAnswers[current.id] = value;
-                      setState(() {});
+                      setState(() => _singleAnswers[current.id] = value);
                       _clearError();
                     },
                     onMultipleChanged: (value) {
-                      _multipleAnswers[current.id] = value;
-                      setState(() {});
+                      setState(() => _multipleAnswers[current.id] = value);
                       _clearError();
                     },
                     onTextChanged: _clearError,
                     onRatingChanged: (value) {
-                      _ratingAnswers[current.id] = value;
-                      setState(() {});
+                      setState(() => _ratingAnswers[current.id] = value);
                       _clearError();
                     },
                   ),

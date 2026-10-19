@@ -3493,10 +3493,32 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'\'t sign in as a guest. Try again later.';
 
   @override
-  String get settingsAmoledTitle => 'AMOLED';
+  String get settingsGlassEffectTitle => 'Glass effect';
 
   @override
-  String get settingsAmoledSubtitle => 'True-black dark theme for OLED screens';
+  String get mapRotatePlan => 'Rotate floor plan';
+
+  @override
+  String get mapTopDownView => 'Top-down view';
+
+  @override
+  String get mapVolumeView => '3D floor plan';
+
+  @override
+  String get mapShowCampus => 'Show campus';
+
+  @override
+  String get mapActions => 'Map actions';
+
+  @override
+  String get map2DLabel => '2D';
+
+  @override
+  String get map3DLabel => '3D';
+
+  @override
+  String get settingsGlassEffectSubtitle =>
+      'Translucent surfaces, blur and refraction';
 
   @override
   String get scheduleDiffTitle => 'Schedule updates';
@@ -4464,6 +4486,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get miniAppsTitle => 'Mini apps';
 
   @override
+  String miniAppsSearchResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '$count result',
+      zero: 'No matches',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String miniAppsSubtitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -4498,7 +4532,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get miniAppsEmptySubtitle =>
-      'Be the first: build a mini app on Stac JSON and publish it for all students';
+      'Create a useful mini app and share it with your university';
 
   @override
   String get miniAppsNothingFound => 'Nothing found';

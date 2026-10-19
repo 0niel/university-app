@@ -186,6 +186,66 @@ void main() {
       cubit = MockKnowledgeBankCubit();
     });
 
+    testWidgets('filter viewport accepts edge swipes at 320px and 200% text', (
+      tester,
+    ) async {
+      tester.view
+        ..physicalSize = const Size(320, 900)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      SharedPreferences.setMockInitialValues({});
+      when(() => cubit.state).thenReturn(
+        const KnowledgeBankState(status: KnowledgeBankStatus.populated),
+      );
+      when(() => cubit.typeChanged(any())).thenAnswer((_) {});
+      await tester.pumpWidget(
+        _wrap(
+          BlocProvider<KnowledgeBankCubit>.value(
+            value: cubit,
+            child: const KnowledgeBankView(),
+          ),
+          textScale: 2,
+          reduceMotion: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final rail = find.byKey(const ValueKey('knowledge-filters'));
+      await tester.ensureVisible(rail);
+      await tester.pumpAndSettle();
+      final viewport = tester.getRect(rail);
+      expect(viewport.left, 0);
+      expect(viewport.right, 320);
+      expect(
+        tester
+            .getRect(
+              find.descendant(of: rail, matching: find.byType(AppChip)).first,
+            )
+            .left,
+        AppSpacing.screen,
+      );
+      final scroll = tester.state<ScrollableState>(
+        find.descendant(of: rail, matching: find.byType(Scrollable)),
+      );
+      await tester.dragFrom(
+        Offset(318, viewport.center.dy),
+        const Offset(-220, 0),
+      );
+      await tester.pumpAndSettle();
+      expect(scroll.position.pixels, greaterThan(0));
+      final previous = scroll.position.pixels;
+      await tester.dragFrom(
+        Offset(2, viewport.center.dy),
+        const Offset(220, 0),
+      );
+      await tester.pumpAndSettle();
+      expect(scroll.position.pixels, lessThan(previous));
+      final notes = find.text(tester.element(rail).l10n.knowledgeChipNotes);
+      await tester.ensureVisible(notes);
+      await tester.tap(notes);
+      verify(() => cubit.typeChanged('note')).called(1);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('sort sheet closes on the root navigator and keeps the page', (
       tester,
     ) async {

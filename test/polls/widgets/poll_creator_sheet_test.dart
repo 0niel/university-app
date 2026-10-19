@@ -94,6 +94,65 @@ void main() {
     await tap(tester, find.text('Далее'));
   }
 
+  testWidgets('modal categories scroll from both sheet edges at 200% text', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      modal: true,
+      size: const Size(320, 900),
+      textScale: 2,
+    );
+    final chips = find.byType(AppChipRow<PollCategory?>);
+    await tester.ensureVisible(chips);
+    await tester.pumpAndSettle();
+    final scrollable = find.descendant(
+      of: chips,
+      matching: find.byType(Scrollable),
+    );
+    final position = tester.state<ScrollableState>(scrollable).position
+      ..jumpTo(0);
+    await tester.pump();
+    final bounds = tester.getRect(scrollable);
+    final sheet = tester.getRect(find.byType(AppSheet));
+    expect(bounds.left, sheet.left);
+    expect(bounds.right, sheet.right);
+    expect(
+      tester
+              .getTopLeft(
+                find
+                    .descendant(of: chips, matching: find.byType(AppChip))
+                    .first,
+              )
+              .dx -
+          bounds.left,
+      closeTo(20, .01),
+    );
+    expect(position.maxScrollExtent, greaterThan(0));
+    await tester.dragFrom(
+      Offset(bounds.left + 2, bounds.center.dy),
+      const Offset(-160, 0),
+    );
+    await tester.pumpAndSettle();
+    expect(position.pixels, greaterThan(0));
+    position.jumpTo(position.maxScrollExtent);
+    await tester.pump();
+    final beforeReturn = position.pixels;
+    await tester.dragFrom(
+      Offset(bounds.right - 2, bounds.center.dy),
+      const Offset(160, 0),
+    );
+    await tester.pumpAndSettle();
+    expect(position.pixels, lessThan(beforeReturn));
+    position.jumpTo(position.maxScrollExtent);
+    await tester.pump();
+    final last = tester.widget<AppChipRow<PollCategory?>>(chips).items.last;
+    await tester.tap(find.text(last.label));
+    await tester.pumpAndSettle();
+    expect(tester.widget<AppChipRow<PollCategory?>>(chips).value, last.value);
+    expect(tester.takeException(), isNull);
+  });
+
   Future<void> submitFromQuestions(WidgetTester tester) async {
     await tap(tester, find.text('Далее'));
     expect(find.text('3 из 4'), findsOneWidget);

@@ -10,7 +10,7 @@ import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class _Cache implements MapDataCache {
+class FakeStartupMapCache implements MapDataCache {
   final entries = <String, String>{};
   final reads = <String, int>{};
   Completer<String?>? pendingRead;
@@ -79,7 +79,7 @@ void main() {
   test(
     'fresh disk startup avoids RPC and expires after 30 minutes',
     () async {
-      final cache = _Cache();
+      final cache = FakeStartupMapCache();
       var now = DateTime.utc(2026, 9, 8, 12);
       final online = MapDataRepository(
         organizationId: 'mirea',
@@ -125,7 +125,7 @@ void main() {
     () async {
       final repository = MapDataRepository(
         organizationId: 'mirea',
-        cache: _Cache(),
+        cache: FakeStartupMapCache(),
         rpc: (_, _) async => fail('Cached startup must not start an RPC'),
       );
       addTearDown(repository.dispose);
@@ -138,7 +138,7 @@ void main() {
   test(
     'newer source acknowledges publication without changing its revision',
     () async {
-      final cache = _Cache();
+      final cache = FakeStartupMapCache();
       var now = DateTime.utc(2026, 1, 4);
       var remoteRevision = 17;
       var calls = 0;
@@ -233,7 +233,7 @@ void main() {
   test('bundled revision needs verification against publication', () async {
     final repository = MapDataRepository(
       organizationId: 'mirea',
-      cache: _Cache(),
+      cache: FakeStartupMapCache(),
       bundledCatalogAsset: 'catalog.json',
       rpc: (_, _) async => _campus(),
       assetLoader: (asset) async => jsonEncode(
@@ -256,7 +256,7 @@ void main() {
     var document = _campus();
     final repository = MapDataRepository(
       organizationId: 'mirea',
-      cache: _Cache(),
+      cache: FakeStartupMapCache(),
       rpc: (_, _) async => document,
     );
     addTearDown(repository.dispose);
@@ -271,7 +271,7 @@ void main() {
   });
 
   test('published disk snapshot retains its exact revision', () async {
-    final cache = _Cache();
+    final cache = FakeStartupMapCache();
     final repository = MapDataRepository(
       organizationId: 'mirea',
       cache: cache,
@@ -297,7 +297,7 @@ void main() {
     final graphs = <_ReadCountingNodes>[];
     final repository = MapDataRepository(
       organizationId: 'mirea',
-      cache: _Cache(),
+      cache: FakeStartupMapCache(),
       rpc: (_, _) async {
         final nodes = _ReadCountingNodes([
           {'id': 'node', 'x': 15, 'y': 15},
@@ -328,7 +328,7 @@ void main() {
   test(
     'concurrent disk loads share parsing without decoding a duplicate bundle',
     () async {
-      final cache = _Cache()
+      final cache = FakeStartupMapCache()
         ..entries['mirea:campus:v-78'] = jsonEncode(_campus());
       final assets = <String>[];
       final repository = MapDataRepository(
@@ -358,7 +358,7 @@ void main() {
   test(
     'manual refresh bypasses fresh disk data and compares full plan contents',
     () async {
-      final cache = _Cache()
+      final cache = FakeStartupMapCache()
         ..entries['mirea:campus:v-78'] = jsonEncode(_campus());
       var svg = _svg;
       var calls = 0;
@@ -390,7 +390,8 @@ void main() {
       ..['image_url'] = 'https://example.org/floor.svg';
     final repository = MapDataRepository(
       organizationId: 'mirea',
-      cache: _Cache()..entries['mirea:campus:v-78'] = jsonEncode(document),
+      cache: FakeStartupMapCache()
+        ..entries['mirea:campus:v-78'] = jsonEncode(document),
       httpClient: MockClient((_) async => fail('Unexpected SVG request')),
       rpc: (_, _) async => fail('Unexpected RPC'),
     );
@@ -403,7 +404,7 @@ void main() {
       'pending disk cannot overwrite remote refresh '
       '(remote first: $remoteFirst)',
       () async {
-        final cache = _Cache()..pendingRead = Completer<String?>();
+        final cache = FakeStartupMapCache()..pendingRead = Completer<String?>();
         final response = Completer<Object?>();
         final nextSvg = _svg.replaceFirst('width="30"', 'width="50"');
         final repository = MapDataRepository(
@@ -432,7 +433,7 @@ void main() {
 
   test('preferences retain all four real campus documents together', () async {
     SharedPreferences.setMockInitialValues({});
-    final cache = PreferencesMapDataCache();
+    const cache = PreferencesMapDataCache();
     final documents = <String, String>{};
     for (final campus in ['v-78', 'v-86', 's-20', 'mp-1']) {
       documents[campus] = File(
@@ -459,7 +460,8 @@ void main() {
     () async {
       final repository = MapDataRepository(
         organizationId: 'mirea',
-        cache: _Cache()..entries['mirea:catalog'] = '{"campuses":[{"id":17}]}',
+        cache: FakeStartupMapCache()
+          ..entries['mirea:catalog'] = '{"campuses":[{"id":17}]}',
         bundledCatalogAsset: 'catalog.json',
         assetLoader: (_) async => jsonEncode(_catalog()),
         rpc: (_, _) async => http.Response('', 500),

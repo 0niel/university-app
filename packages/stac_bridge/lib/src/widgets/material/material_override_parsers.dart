@@ -12,7 +12,7 @@ export 'material_icon_names.dart';
 export 'material_shell_parsers.dart';
 export 'material_surface_parsers.dart';
 
-const List<StacParser<Object?>> materialOverrideParsers = [
+const List<StacParser<Object?>> kMaterialOverrideParsers = [
   StacAlertDialogKitParser(),
   StacAppBarKitParser(),
   StacBadgeKitParser(),

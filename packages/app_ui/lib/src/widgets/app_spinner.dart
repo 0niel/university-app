@@ -32,7 +32,8 @@ class _AppSpinnerState extends State<AppSpinner>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final animate = !MediaQuery.disableAnimationsOf(context) &&
+    final animate =
+        !MediaQuery.disableAnimationsOf(context) &&
         !MediaQuery.accessibleNavigationOf(context) &&
         TickerMode.valuesOf(context).enabled;
     if (animate && !_controller.isAnimating) {

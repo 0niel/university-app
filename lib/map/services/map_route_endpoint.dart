@@ -1,0 +1,1 @@
+enum MapRouteEndpoint { start, destination }

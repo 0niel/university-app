@@ -73,8 +73,9 @@ void main() {
     expect(scale(tester), closeTo(1, .01));
   });
 
-  testWidgets('base scale vertical swipe dismisses and short drag returns',
-      (tester) async {
+  testWidgets('base scale vertical swipe dismisses and short drag returns', (
+    tester,
+  ) async {
     var closes = 0;
     await pump(tester, dismiss: () => closes++);
     await tester.timedDrag(
@@ -90,8 +91,9 @@ void main() {
     expect(closes, 1);
   });
 
-  testWidgets('horizontal swipe pages while zoomed drag only pans',
-      (tester) async {
+  testWidgets('horizontal swipe pages while zoomed drag only pans', (
+    tester,
+  ) async {
     var next = 0;
     var previous = 0;
     var closes = 0;
@@ -117,16 +119,21 @@ void main() {
     expect(scale(tester), greaterThan(1));
   });
 
-  testWidgets('two finger pinch zooms without dismissing or paging',
-      (tester) async {
+  testWidgets('two finger pinch zooms without dismissing or paging', (
+    tester,
+  ) async {
     var closes = 0;
     var pages = 0;
     await pump(tester, dismiss: () => closes++, next: () => pages++);
     final center = tester.getCenter(find.byType(AppZoomableImage));
-    final first =
-        await tester.startGesture(center - const Offset(30, 0), pointer: 1);
-    final second =
-        await tester.startGesture(center + const Offset(30, 0), pointer: 2);
+    final first = await tester.startGesture(
+      center - const Offset(30, 0),
+      pointer: 1,
+    );
+    final second = await tester.startGesture(
+      center + const Offset(30, 0),
+      pointer: 2,
+    );
     await first.moveTo(center - const Offset(45, 0));
     await second.moveTo(center + const Offset(45, 0));
     await tester.pump();
@@ -148,16 +155,19 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('adding a pinch finger never commits a pending dismiss',
-      (tester) async {
+  testWidgets('adding a pinch finger never commits a pending dismiss', (
+    tester,
+  ) async {
     var closes = 0;
     await pump(tester, dismiss: () => closes++);
     final center = tester.getCenter(find.byType(AppZoomableImage));
     final first = await tester.startGesture(center, pointer: 1);
     await first.moveBy(const Offset(0, 160));
     await tester.pump();
-    final second =
-        await tester.startGesture(center - const Offset(50, 0), pointer: 2);
+    final second = await tester.startGesture(
+      center - const Offset(50, 0),
+      pointer: 2,
+    );
     await tester.pump();
     expect(closes, 0);
     await first.moveBy(const Offset(20, 0));
@@ -169,12 +179,14 @@ void main() {
     expect(closes, 0);
   });
 
-  testWidgets('cancelled drag beyond dismissal threshold stays open',
-      (tester) async {
+  testWidgets('cancelled drag beyond dismissal threshold stays open', (
+    tester,
+  ) async {
     var closes = 0;
     await pump(tester, dismiss: () => closes++);
-    final gesture = await tester
-        .startGesture(tester.getCenter(find.byType(AppZoomableImage)));
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(AppZoomableImage)),
+    );
     await gesture.moveBy(const Offset(0, 180));
     await tester.pump();
     await gesture.cancel();

@@ -23,12 +23,12 @@ class NinjaToast extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppToast(
-        message: message,
-        showIcon: showCheck,
-        icon: icon,
-        actionLabel: actionLabel,
-        onAction: onAction,
-      );
+    message: message,
+    showIcon: showCheck,
+    icon: icon,
+    actionLabel: actionLabel,
+    onAction: onAction,
+  );
 }
 
 class NinjaToastData {
@@ -161,12 +161,16 @@ class NinjaToastHostState extends State<NinjaToastHost>
             child: FadeTransition(
               opacity: _controller,
               child: SlideTransition(
-                position: Tween(
-                  begin: const Offset(0, 0.22),
-                  end: Offset.zero,
-                ).animate(
-                  CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-                ),
+                position:
+                    Tween(
+                      begin: const Offset(0, 0.22),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: _controller,
+                        curve: Curves.easeOut,
+                      ),
+                    ),
                 child: NinjaToast(
                   message: toast.message,
                   showCheck: toast.showCheck,

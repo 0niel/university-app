@@ -1,18 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 
-class GroupSpaceQuickAction {
-  const GroupSpaceQuickAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final AppLineIcon icon;
-  final String label;
-  final VoidCallback onTap;
-}
-
 class GroupSpaceQuickActions extends StatelessWidget {
   const GroupSpaceQuickActions({required this.actions, super.key});
 
@@ -60,4 +48,16 @@ class GroupSpaceQuickActions extends StatelessWidget {
       ),
     );
   }
+}
+
+class GroupSpaceQuickAction {
+  const GroupSpaceQuickAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final AppLineIcon icon;
+  final String label;
+  final VoidCallback onTap;
 }

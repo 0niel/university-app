@@ -25,7 +25,7 @@ class _AppPulseDotState extends State<AppPulseDot>
     super.didChangeDependencies();
     final reduceMotion =
         (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
-            (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
+        (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
     if (reduceMotion || !TickerMode.valuesOf(context).enabled) {
       _controller.stop();
     } else if (!_controller.isAnimating) {
@@ -44,7 +44,7 @@ class _AppPulseDotState extends State<AppPulseDot>
     final color = widget.color ?? context.colors.accent;
     final reduceMotion =
         (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
-            (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
+        (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
 
     final dot = DecoratedBox(
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),

@@ -6,24 +6,24 @@ import '../kit_harness.dart';
 
 void main() {
   BoxDecoration ringOf(WidgetTester tester) => kitDecoration(
-        tester,
-        find
-            .descendant(
-              of: find.byType(AppRadio<String>),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
+    tester,
+    find
+        .descendant(
+          of: find.byType(AppRadio<String>),
+          matching: find.byType(Container),
+        )
+        .first,
+  );
 
   BoxDecoration dotOf(WidgetTester tester) => kitDecoration(
-        tester,
-        find
-            .descendant(
-              of: find.byType(AppRadio<String>),
-              matching: find.byType(Container),
-            )
-            .last,
-      );
+    tester,
+    find
+        .descendant(
+          of: find.byType(AppRadio<String>),
+          matching: find.byType(Container),
+        )
+        .last,
+  );
 
   testWidgets('unselected ring is muted2 with a transparent dot', (
     tester,

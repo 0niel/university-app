@@ -24,13 +24,13 @@ Future<void> showScheduleChangesSheet(
         BlocProvider.value(value: cubit),
         BlocProvider.value(value: notifications),
       ],
-      child: _Changes(weekOf: weekOf),
+      child: _ScheduleChangesSheet(weekOf: weekOf),
     ),
   );
 }
 
-class _Changes extends StatelessWidget {
-  const _Changes({required this.weekOf});
+class _ScheduleChangesSheet extends StatelessWidget {
+  const _ScheduleChangesSheet({required this.weekOf});
   final DateTime weekOf;
   @override
   Widget build(BuildContext context) {

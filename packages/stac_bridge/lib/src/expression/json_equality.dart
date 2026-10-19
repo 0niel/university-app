@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+
 bool jsonEquals(Object? a, Object? b) {
   if (identical(a, b)) return true;
   if (a is Map<Object?, Object?>) {
@@ -10,8 +12,8 @@ bool jsonEquals(Object? a, Object? b) {
   }
   if (a is List<Object?>) {
     if (b is! List<Object?> || a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (!jsonEquals(a[i], b[i])) return false;
+    for (final (index, value) in a.indexed) {
+      if (!jsonEquals(value, b.elementAtOrNull(index))) return false;
     }
     return true;
   }

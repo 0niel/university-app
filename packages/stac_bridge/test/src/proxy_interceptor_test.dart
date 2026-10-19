@@ -43,18 +43,20 @@ class ProxyInterceptorTest extends MiniAppHost {
 
 /// Captures the interceptor verdict for a given request.
 class _Capture extends RequestInterceptorHandler {
-  RequestOptions? passed;
-  DioException? rejected;
+  (RequestOptions?, DioException?) _verdict = (null, null);
+
+  RequestOptions? get passed => _verdict.$1;
+  DioException? get rejected => _verdict.$2;
 
   @override
-  void next(RequestOptions requestOptions) => passed = requestOptions;
+  void next(RequestOptions requestOptions) => _verdict = (requestOptions, null);
 
   @override
   void reject(
     DioException error, [
     bool callFollowingErrorInterceptor = false,
   ]) {
-    rejected = error;
+    _verdict = (null, error);
   }
 }
 

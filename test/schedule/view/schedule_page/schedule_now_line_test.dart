@@ -37,7 +37,7 @@ void main() {
     final marker = find.byKey(const ValueKey('schedule-now-line'));
     final lesson = find.byWidgetPredicate(
       (widget) =>
-          widget is AppLessonRow &&
+          widget is AppLessonCard &&
           widget.title == 'Программирование на Python',
     );
     await tester.pumpApp(
@@ -79,7 +79,7 @@ void main() {
     await tester.pumpAndSettle();
     final finished = find.byWidgetPredicate(
       (widget) =>
-          widget is AppLessonRow &&
+          widget is AppLessonCard &&
           widget.title == 'Программирование на Python',
     );
     expect(

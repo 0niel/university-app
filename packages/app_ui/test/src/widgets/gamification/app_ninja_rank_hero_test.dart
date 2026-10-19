@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: SingleChildScrollView(child: child)),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  );
 
   group('AppNinjaRankHero', () {
     testWidgets('shows the rank, overline and a canonical shuriken mark', (

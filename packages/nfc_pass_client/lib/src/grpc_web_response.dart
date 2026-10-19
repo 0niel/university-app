@@ -11,8 +11,11 @@ Uint8List parseGrpcWebResponse(
   final normalizedHeaders = {
     for (final entry in headers.entries) entry.key.toLowerCase(): entry.value,
   };
-  final contentType =
-      normalizedHeaders['content-type']?.split(';').first.trim().toLowerCase();
+  final contentType = normalizedHeaders['content-type']
+      ?.split(';')
+      .firstOrNull
+      ?.trim()
+      .toLowerCase();
   if (contentType != 'application/grpc-web+proto' &&
       contentType != 'application/grpc-web') {
     throw const FormatException('Unsupported gRPC-Web content type.');
@@ -26,7 +29,7 @@ Uint8List parseGrpcWebResponse(
     if (body.length - offset < 5) {
       throw const FormatException('Incomplete gRPC-Web frame header.');
     }
-    final flags = body[offset];
+    final flags = ByteData.sublistView(body).getUint8(offset);
     final length =
         ByteData.sublistView(body, offset + 1, offset + 5).getUint32(0);
     offset += 5;

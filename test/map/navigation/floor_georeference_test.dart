@@ -94,8 +94,7 @@ void main() {
       expect(
         () => FloorGeoreference([
           FloorGeoAnchor(x: 0, y: 0, latitude: latitude, longitude: 37),
-          anchors[1],
-          anchors[2],
+          ...anchors.skip(1),
         ]),
         throwsFormatException,
       );

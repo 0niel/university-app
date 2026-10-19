@@ -9,12 +9,13 @@ import '../kit_harness.dart';
 
 void main() {
   Finder pressesIn(Type type) => find.descendant(
-        of: find.byType(type),
-        matching: find.byType(AppPressState),
-      );
+    of: find.byType(type),
+    matching: find.byType(AppPressState),
+  );
 
-  testWidgets('button icons use source geometry and the large label is 600',
-      (tester) async {
+  testWidgets('button icons use source geometry and the large label is 600', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         AppButton(
@@ -51,8 +52,9 @@ void main() {
     expect(kitStyleOf(tester, 'Большая')?.fontWeight, FontWeight.w600);
   });
 
-  testWidgets('icon button keeps compact paint inside a 44px target',
-      (tester) async {
+  testWidgets('icon button keeps compact paint inside a 44px target', (
+    tester,
+  ) async {
     for (final size in AppIconButtonSize.values) {
       await tester.pumpWidget(
         wrapKit(
@@ -65,8 +67,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final icon =
-          tester.widget<AppLineIconWidget>(find.byType(AppLineIconWidget));
+      final icon = tester.widget<AppLineIconWidget>(
+        find.byType(AppLineIconWidget),
+      );
       expect(tester.getSize(pressesIn(AppIconButton)), const Size.square(44));
       expect(icon.size, size.iconSize);
       expect(icon.strokeWidth, 2.4);
@@ -78,8 +81,9 @@ void main() {
     }
   });
 
-  testWidgets('buttons expose keyboard activation and skip disabled controls',
-      (tester) async {
+  testWidgets('buttons expose keyboard activation and skip disabled controls', (
+    tester,
+  ) async {
     var first = 0;
     var last = 0;
     await tester.pumpWidget(
@@ -112,15 +116,16 @@ void main() {
     expect(first, 2);
   });
 
-  testWidgets('loading spinner respects reduced motion and ticker visibility',
-      (tester) async {
+  testWidgets('loading spinner respects reduced motion and ticker visibility', (
+    tester,
+  ) async {
     Widget view({bool reduced = false, bool visible = true}) => wrapKit(
-          TickerMode(
-            enabled: visible,
-            child: const AppButton(label: 'Loading', loading: true),
-          ),
-          accessibleNavigation: reduced,
-        );
+      TickerMode(
+        enabled: visible,
+        child: const AppButton(label: 'Loading', loading: true),
+      ),
+      accessibleNavigation: reduced,
+    );
     await tester.pumpWidget(view(reduced: true));
     await tester.pumpAndSettle();
     expect(tester.binding.hasScheduledFrame, isFalse);
@@ -136,8 +141,9 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('split button fits long labels and names the separate menu',
-      (tester) async {
+  testWidgets('split button fits long labels and names the separate menu', (
+    tester,
+  ) async {
     var menus = 0;
     await tester.pumpWidget(
       wrapKit(
@@ -159,8 +165,9 @@ void main() {
     expect(tester.getSize(pressesIn(AppSplitButton).last).width, 44);
   });
 
-  testWidgets('tooltip renders the kit bubble for hover, focus and Escape',
-      (tester) async {
+  testWidgets('tooltip renders the kit bubble for hover, focus and Escape', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         AppButton(label: 'Target', tooltip: 'Подсказка', onPressed: () {}),
@@ -196,8 +203,9 @@ void main() {
     await mouse.removePointer();
   });
 
-  testWidgets('tooltip flips below a top target and wraps at 200 percent',
-      (tester) async {
+  testWidgets('tooltip flips below a top target and wraps at 200 percent', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(320, 600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -231,126 +239,135 @@ void main() {
   });
 
   testWidgets(
-      'input rebinds controllers, focus and validation without ownership leaks',
-      (tester) async {
-    final first = TextEditingController(text: 'One');
-    final second = TextEditingController(text: 'Two');
-    final firstFocus = FocusNode();
-    final secondFocus = FocusNode();
-    addTearDown(() {
-      first.dispose();
-      second.dispose();
-      firstFocus.dispose();
-      secondFocus.dispose();
-    });
-    final form = GlobalKey<FormState>();
-    Widget view(TextEditingController controller, FocusNode focus) => wrapKit(
-          Form(
-            key: form,
-            child: AppInputField(
+    'input rebinds controllers, focus and validation without ownership leaks',
+    (tester) async {
+      final first = TextEditingController(text: 'One');
+      final second = TextEditingController(text: 'Two');
+      final firstFocus = FocusNode();
+      final secondFocus = FocusNode();
+      addTearDown(() {
+        first.dispose();
+        second.dispose();
+        firstFocus.dispose();
+        secondFocus.dispose();
+      });
+      final form = GlobalKey<FormState>();
+      Widget view(TextEditingController controller, FocusNode focus) => wrapKit(
+        Form(
+          key: form,
+          child: AppInputField(
+            controller: controller,
+            focusNode: focus,
+            validator: (value) => value == 'Two' ? null : 'Invalid',
+          ),
+        ),
+      );
+      await tester.pumpWidget(view(first, firstFocus));
+      form.currentState!.validate();
+      await tester.pump();
+      expect(find.text('Invalid'), findsOneWidget);
+      await tester.pumpWidget(view(second, secondFocus));
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller,
+        second,
+      );
+      expect(form.currentState!.validate(), isTrue);
+      await tester.pump();
+      expect(find.text('Invalid'), findsNothing);
+      secondFocus.requestFocus();
+      await tester.pumpAndSettle();
+      expect(secondFocus.hasFocus, isTrue);
+      expect(firstFocus.hasFocus, isFalse);
+      first.text = 'Detached';
+      await tester.pump();
+      expect(find.text('Two'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      expect(() => first.text = 'Still owned', returnsNormally);
+      expect(() => second.text = 'Still owned', returnsNormally);
+    },
+  );
+
+  testWidgets(
+    'clear has a 44px target, validates and is absent for read-only',
+    (tester) async {
+      final controller = TextEditingController(text: 'Text');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        wrapKit(
+          AppInputField(
+            controller: controller,
+            validator: (value) =>
+                value == null || value.isEmpty ? 'Required' : null,
+          ),
+        ),
+      );
+      final clear = pressesIn(AppInputField);
+      expect(tester.getSize(clear), const Size.square(44));
+      expect(
+        tester.getSize(find.byType(AppLineIconWidget)),
+        const Size.square(16),
+      );
+      await tester.tap(clear);
+      await tester.pump();
+      expect(find.text('Required'), findsOneWidget);
+      controller.text = 'Read only';
+      await tester.pumpWidget(
+        wrapKit(
+          AppInputField(controller: controller, readOnly: true),
+        ),
+      );
+      expect(pressesIn(AppInputField), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'search buttons expose separate 44px clear and trailing actions',
+    (tester) async {
+      final controller = TextEditingController(text: 'Query');
+      addTearDown(controller.dispose);
+      var trailing = 0;
+      await tester.pumpWidget(
+        wrapKit(
+          SizedBox(
+            width: 320,
+            child: AppSearchField(
               controller: controller,
-              focusNode: focus,
-              validator: (value) => value == 'Two' ? null : 'Invalid',
+              trailingIcon: AppLineIcon.mic,
+              onTrailingTap: () => trailing++,
+              trailingSemanticLabel: 'Filters',
             ),
           ),
-        );
-    await tester.pumpWidget(view(first, firstFocus));
-    form.currentState!.validate();
-    await tester.pump();
-    expect(find.text('Invalid'), findsOneWidget);
-    await tester.pumpWidget(view(second, secondFocus));
-    expect(tester.widget<TextField>(find.byType(TextField)).controller, second);
-    expect(form.currentState!.validate(), isTrue);
-    await tester.pump();
-    expect(find.text('Invalid'), findsNothing);
-    secondFocus.requestFocus();
-    await tester.pumpAndSettle();
-    expect(secondFocus.hasFocus, isTrue);
-    expect(firstFocus.hasFocus, isFalse);
-    first.text = 'Detached';
-    await tester.pump();
-    expect(find.text('Two'), findsOneWidget);
-    await tester.pumpWidget(const SizedBox());
-    expect(() => first.text = 'Still owned', returnsNormally);
-    expect(() => second.text = 'Still owned', returnsNormally);
-  });
-
-  testWidgets('clear has a 44px target, validates and is absent for read-only',
-      (tester) async {
-    final controller = TextEditingController(text: 'Text');
-    addTearDown(controller.dispose);
-    await tester.pumpWidget(
-      wrapKit(
-        AppInputField(
-          controller: controller,
-          validator: (value) =>
-              value == null || value.isEmpty ? 'Required' : null,
         ),
-      ),
-    );
-    final clear = pressesIn(AppInputField);
-    expect(tester.getSize(clear), const Size.square(44));
-    expect(
-      tester.getSize(find.byType(AppLineIconWidget)),
-      const Size.square(16),
-    );
-    await tester.tap(clear);
-    await tester.pump();
-    expect(find.text('Required'), findsOneWidget);
-    controller.text = 'Read only';
-    await tester.pumpWidget(
-      wrapKit(
-        AppInputField(controller: controller, readOnly: true),
-      ),
-    );
-    expect(pressesIn(AppInputField), findsNothing);
-  });
-
-  testWidgets('search buttons expose separate 44px clear and trailing actions',
-      (tester) async {
-    final controller = TextEditingController(text: 'Query');
-    addTearDown(controller.dispose);
-    var trailing = 0;
-    await tester.pumpWidget(
-      wrapKit(
-        SizedBox(
-          width: 320,
-          child: AppSearchField(
-            controller: controller,
-            trailingIcon: AppLineIcon.mic,
+      );
+      for (final element in pressesIn(AppSearchField).evaluate()) {
+        expect(
+          tester.getSize(find.byWidget(element.widget)),
+          const Size.square(44),
+        );
+      }
+      await tester.tap(pressesIn(AppSearchField).first);
+      expect(controller.text, isEmpty);
+      await tester.pump();
+      await tester.tap(find.bySemanticsLabel('Filters'));
+      expect(trailing, 1);
+      await tester.pumpWidget(
+        wrapKit(
+          AppSearchBar.button(
+            hintText: 'Search',
+            onTap: () {},
             onTrailingTap: () => trailing++,
             trailingSemanticLabel: 'Filters',
           ),
         ),
-      ),
-    );
-    for (final element in pressesIn(AppSearchField).evaluate()) {
-      expect(
-        tester.getSize(find.byWidget(element.widget)),
-        const Size.square(44),
       );
-    }
-    await tester.tap(pressesIn(AppSearchField).first);
-    expect(controller.text, isEmpty);
-    await tester.pump();
-    await tester.tap(find.bySemanticsLabel('Filters'));
-    expect(trailing, 1);
-    await tester.pumpWidget(
-      wrapKit(
-        AppSearchBar.button(
-          hintText: 'Search',
-          onTap: () {},
-          onTrailingTap: () => trailing++,
-          trailingSemanticLabel: 'Filters',
-        ),
-      ),
-    );
-    await tester.tap(find.bySemanticsLabel('Filters'));
-    expect(trailing, 2);
-  });
+      await tester.tap(find.bySemanticsLabel('Filters'));
+      expect(trailing, 2);
+    },
+  );
 
-  testWidgets('checkbox and radio retain 24px marks with 44px targets',
-      (tester) async {
+  testWidgets('checkbox and radio retain 24px marks with 44px targets', (
+    tester,
+  ) async {
     for (final widget in <Widget>[
       AppCheckbox(value: false, onChanged: (_) {}),
       AppRadio(value: 1, groupValue: 0, onChanged: (_) {}),
@@ -391,14 +408,16 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull);
-    for (final container in tester
-        .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))) {
+    for (final container in tester.widgetList<AnimatedContainer>(
+      find.byType(AnimatedContainer),
+    )) {
       expect(container.duration, Duration.zero);
     }
   });
 
-  testWidgets('removable chip exposes distinct selection and removal',
-      (tester) async {
+  testWidgets('removable chip exposes distinct selection and removal', (
+    tester,
+  ) async {
     var selected = 0;
     var removed = 0;
     await tester.pumpWidget(
@@ -427,8 +446,9 @@ void main() {
     expect(tester.getSize(pressesIn(AppChip).last), const Size.square(44));
   });
 
-  testWidgets('stepper retains 120x48 geometry and guards bounds',
-      (tester) async {
+  testWidgets('stepper retains 120x48 geometry and guards bounds', (
+    tester,
+  ) async {
     int? value;
     await tester.pumpWidget(
       wrapKit(
@@ -445,8 +465,9 @@ void main() {
     expect(value, 1);
   });
 
-  testWidgets('code keypad adapts touch targets and disables every key',
-      (tester) async {
+  testWidgets('code keypad adapts touch targets and disables every key', (
+    tester,
+  ) async {
     var keys = 0;
     for (final width in [320.0, 600.0]) {
       await tester.pumpWidget(
@@ -490,8 +511,9 @@ void main() {
     );
   });
 
-  testWidgets('code input rebinds external state and detaches old listeners',
-      (tester) async {
+  testWidgets('code input rebinds external state and detaches old listeners', (
+    tester,
+  ) async {
     final first = TextEditingController(text: '12');
     final second = TextEditingController(text: '45');
     final firstFocus = FocusNode();
@@ -503,8 +525,8 @@ void main() {
       secondFocus.dispose();
     });
     Widget view(TextEditingController controller, FocusNode focus) => wrapKit(
-          AppCodeInput(controller: controller, focusNode: focus),
-        );
+      AppCodeInput(controller: controller, focusNode: focus),
+    );
     await tester.pumpWidget(view(first, firstFocus));
     await tester.pumpWidget(view(second, secondFocus));
     expect(tester.widget<TextField>(find.byType(TextField)).controller, second);
@@ -513,15 +535,17 @@ void main() {
     expect(secondFocus.hasFocus, isTrue);
     first.text = '99';
     await tester.pump();
-    final cells =
-        tester.widgetList<SixDigitCodeCell>(find.byType(SixDigitCodeCell));
+    final cells = tester.widgetList<SixDigitCodeCell>(
+      find.byType(SixDigitCodeCell),
+    );
     expect(cells.take(2).map((cell) => cell.digit), ['4', '5']);
     await tester.pumpWidget(const SizedBox());
     expect(() => second.text = '67', returnsNormally);
   });
 
-  testWidgets('segments retain 46px track and 38px pills with 44px targets',
-      (tester) async {
+  testWidgets('segments retain 46px track and 38px pills with 44px targets', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         SizedBox(
@@ -546,8 +570,9 @@ void main() {
     expect(pill.top - track.top, 4);
   });
 
-  testWidgets('tabs expose count, minimum targets and keyboard selection',
-      (tester) async {
+  testWidgets('tabs expose count, minimum targets and keyboard selection', (
+    tester,
+  ) async {
     int? selected;
     await tester.pumpWidget(
       wrapKit(

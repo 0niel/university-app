@@ -1,146 +1,39 @@
 part of 'mini_apps_page.dart';
 
-class MiniAppsView extends StatefulWidget {
+class MiniAppsView extends StatelessWidget {
   const MiniAppsView({super.key});
 
   @override
-  State<MiniAppsView> createState() => _MiniAppsViewState();
-}
-
-class _MiniAppsViewState extends State<MiniAppsView> {
-  final _searchController = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _toggleSearch() {
+  Widget build(BuildContext context) {
     final cubit = context.read<MiniAppsCatalogCubit>();
-    if (cubit.state.isSearching) _searchController.clear();
-    unawaited(cubit.searchToggled());
+    final state = context.watch<MiniAppsCatalogCubit>().state;
+    return MiniAppsCatalog(
+      state: state,
+      onRefresh: cubit.load,
+      onQueryChanged: (query) => unawaited(cubit.queryChanged(query)),
+      onCategoryChanged: (category) =>
+          unawaited(cubit.categoryChanged(category)),
+      onSortChanged: (sort) => unawaited(cubit.sortChanged(sort)),
+      onSearchToggled: () => unawaited(cubit.searchToggled()),
+      onOpen: (app) => context.go('/services/apps/${app.slug}/run'),
+      onActions: (app) => unawaited(_openActions(context, app)),
+      onCreate: () => context.go('/services/apps/submit'),
+      onResetFilters: () => unawaited(cubit.resetFilters()),
+      onBack: Navigator.of(context).canPop()
+          ? () => unawaited(Navigator.of(context).maybePop())
+          : null,
+      onModerate: () => context.go('/services/apps/moderation'),
+    );
   }
 
-  void _openApp(MiniApp app) {
-    context.go('/services/apps/${app.slug}/run');
-  }
-
-  void _resetFilters() {
+  Future<void> _openActions(BuildContext context, MiniApp app) {
     final cubit = context.read<MiniAppsCatalogCubit>();
-    _searchController.clear();
-    unawaited(cubit.queryChanged(''));
-    unawaited(cubit.categoryChanged(null));
-  }
-
-  Future<void> _openActions(MiniApp app) async {
-    final cubit = context.read<MiniAppsCatalogCubit>();
-    await showAppSheet<void>(
+    return showAppSheet(
       context,
       title: app.name,
       child: BlocProvider.value(
         value: cubit,
         child: _AppActionsSheet(app: app),
-      ),
-    );
-  }
-
-  Future<void> _openSort() async {
-    final cubit = context.read<MiniAppsCatalogCubit>();
-    final selected = await showAppSheet<MiniAppSort>(
-      context,
-      title: context.l10n.miniAppsSortTitle,
-      backgroundColor: context.colors.canvas,
-      contentPadding: EdgeInsets.zero,
-      child: _MiniAppsSortSheet(selected: cubit.state.sort),
-    );
-    if (!mounted || selected == null || selected == cubit.state.sort) return;
-    await cubit.sortChanged(selected);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final l10n = context.l10n;
-    final state = context.watch<MiniAppsCatalogCubit>().state;
-    final reduceMotion =
-        MediaQuery.disableAnimationsOf(context) ||
-        MediaQuery.accessibleNavigationOf(context);
-    final searchField = state.isSearching
-        ? Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: _MiniAppsSearchField(controller: _searchController),
-          )
-        : const SizedBox.shrink();
-    return Scaffold(
-      backgroundColor: colors.canvas,
-      body: SafeArea(
-        bottom: false,
-        top: false,
-        child: RefreshIndicator(
-          color: colors.accent,
-          backgroundColor: colors.surface,
-          onRefresh: () => context.read<MiniAppsCatalogCubit>().load(),
-          child: CustomScrollView(
-            key: const PageStorageKey('mini-apps-catalog'),
-            physics: const AlwaysScrollableScrollPhysics(),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            slivers: [
-              SliverToBoxAdapter(
-                child: _MiniAppsAppBar(
-                  count: state.apps.length,
-                  isModerator: state.isModerator,
-                  isSearching: state.isSearching,
-                  onSearchToggled: _toggleSearch,
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screen,
-                  vertical: AppSpacing.md,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: [
-                      _MiniAppsSortButton(
-                        label: _miniAppSortLabel(l10n, state.sort),
-                        onPressed: () => unawaited(_openSort()),
-                      ),
-                      NinjaButton.tonal(
-                        key: const ValueKey('mini-apps-create-button'),
-                        label: l10n.miniAppsCreate,
-                        icon: const AppLineIconWidget(AppLineIcon.plus),
-                        onPressed: () => context.go('/services/apps/submit'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: reduceMotion
-                    ? searchField
-                    : AnimatedSize(
-                        duration: const Duration(milliseconds: 220),
-                        curve: Curves.easeOutCubic,
-                        alignment: Alignment.topCenter,
-                        child: searchField,
-                      ),
-              ),
-              SliverToBoxAdapter(
-                child: _CategoryChips(category: state.category),
-              ),
-              _CatalogBody(
-                state: state,
-                onOpen: _openApp,
-                onActions: (app) => unawaited(_openActions(app)),
-                onCreate: () => context.go('/services/apps/submit'),
-                onResetFilters: _resetFilters,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

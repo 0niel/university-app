@@ -1,9 +1,12 @@
 export 'src/animations/animations.dart';
 export 'src/colors/colors.dart';
 export 'src/generated/generated.dart';
+export 'src/glass/glass.dart';
 export 'src/ninja/ninja.dart';
 export 'src/scale/app_scale.dart';
+export 'src/scale/app_scroll_behavior.dart';
 export 'src/spacing/app_spacing.dart';
+export 'src/theme/app_surface_style.dart';
 export 'src/theme/theme.dart';
 export 'src/typography/typography.dart';
 export 'src/widgets/widgets.dart';

@@ -85,115 +85,130 @@ class LostFoundItemSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LostFoundItemHeader(item: item),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: LostFoundItemHeader(item: item),
+          ),
           if (item.images.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.xlg),
             LostFoundGallery(images: item.images),
           ],
-          if (description case final value? when value.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xlg),
-            _InfoSurface(
-              child: Text(
-                value,
-                style: AppText.body.copyWith(
-                  color: colors.ink,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          ],
-          if (item.location.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            _InfoSurface(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppLineIconWidget(
-                    AppLineIcon.pin,
-                    size: AppIconSize.md,
-                    color: colors.accent,
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (description case final value? when value.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xlg),
+                  _InfoSurface(
                     child: Text(
-                      item.location,
+                      value,
                       style: AppText.body.copyWith(
                         color: colors.ink,
-                        fontWeight: FontWeight.w700,
+                        height: 1.5,
                       ),
                     ),
                   ),
                 ],
-              ),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.xlg),
-          if (item.isMine) ...[
-            NinjaButton.primary(
-              label: busy
-                  ? l10n.lostFoundBusy
-                  : item.status == .found
-                  ? l10n.lostFoundFoundOwner
-                  : l10n.lostFoundFoundItem,
-              icon: const AppLineIconWidget(AppLineIcon.swap),
-              size: NinjaButtonSize.large,
-              expanded: true,
-              loading: busy,
-              onPressed: busy
-                  ? null
-                  : () => _mutate(context, () => cubit.toggleItemStatus(item)),
-            ),
-            const SizedBox(height: AppSpacing.gap),
-            NinjaButton.destructiveOutline(
-              label: l10n.lostFoundDelete,
-              icon: const AppLineIconWidget(AppLineIcon.trash),
-              size: NinjaButtonSize.large,
-              expanded: true,
-              onPressed: busy ? null : () => _delete(context),
-            ),
-          ] else ...[
-            if (telegram case final String value when value.isNotEmpty)
-              NinjaButton.primary(
-                label: l10n.friendsWriteTelegram,
-                icon: const AppLineIconWidget(AppLineIcon.send),
-                size: NinjaButtonSize.large,
-                expanded: true,
-                onPressed: () => _contact(
-                  context,
-                  () => contactLauncher.openTelegram(value),
-                ),
-              ),
-            if (phone case final String value when value.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.gap),
-              NinjaButton.secondary(
-                label: l10n.lostFoundCall(value),
-                icon: const AppLineIconWidget(AppLineIcon.phone),
-                size: NinjaButtonSize.large,
-                expanded: true,
-                onPressed: () =>
-                    _contact(context, () => contactLauncher(value)),
-              ),
-            ],
-            if ((telegram == null || telegram.isEmpty) &&
-                (phone == null || phone.isEmpty))
-              _InfoSurface(
-                child: Row(
-                  children: [
-                    AppLineIconWidget(
-                      AppLineIcon.lock,
-                      color: colors.muted,
+                if (item.location.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  _InfoSurface(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppLineIconWidget(
+                          AppLineIcon.pin,
+                          size: AppIconSize.md,
+                          color: colors.accent,
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Text(
+                            item.location,
+                            style: AppText.body.copyWith(
+                              color: colors.ink,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        l10n.lostFoundContactUnavailable,
-                        style: AppText.body.copyWith(color: colors.muted),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.xlg),
+                if (item.isMine) ...[
+                  NinjaButton.primary(
+                    label: busy
+                        ? l10n.lostFoundBusy
+                        : item.status == .found
+                        ? l10n.lostFoundFoundOwner
+                        : l10n.lostFoundFoundItem,
+                    icon: const AppLineIconWidget(AppLineIcon.swap),
+                    size: NinjaButtonSize.large,
+                    expanded: true,
+                    loading: busy,
+                    onPressed: busy
+                        ? null
+                        : () => _mutate(
+                            context,
+                            () => cubit.toggleItemStatus(item),
+                          ),
+                  ),
+                  const SizedBox(height: AppSpacing.gap),
+                  NinjaButton.destructiveOutline(
+                    label: l10n.lostFoundDelete,
+                    icon: const AppLineIconWidget(AppLineIcon.trash),
+                    size: NinjaButtonSize.large,
+                    expanded: true,
+                    onPressed: busy ? null : () => _delete(context),
+                  ),
+                ] else ...[
+                  if (telegram case final String value when value.isNotEmpty)
+                    NinjaButton.primary(
+                      label: l10n.friendsWriteTelegram,
+                      icon: const AppLineIconWidget(AppLineIcon.send),
+                      size: NinjaButtonSize.large,
+                      expanded: true,
+                      onPressed: () => _contact(
+                        context,
+                        () => contactLauncher.openTelegram(value),
                       ),
                     ),
+                  if (phone case final String value when value.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.gap),
+                    NinjaButton.secondary(
+                      label: l10n.lostFoundCall(value),
+                      icon: const AppLineIconWidget(AppLineIcon.phone),
+                      size: NinjaButtonSize.large,
+                      expanded: true,
+                      onPressed: () =>
+                          _contact(context, () => contactLauncher(value)),
+                    ),
                   ],
-                ),
-              ),
-          ],
+                  if ((telegram == null || telegram.isEmpty) &&
+                      (phone == null || phone.isEmpty))
+                    _InfoSurface(
+                      child: Row(
+                        children: [
+                          AppLineIconWidget(
+                            AppLineIcon.lock,
+                            color: colors.muted,
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Text(
+                              l10n.lostFoundContactUnavailable,
+                              style: AppText.body.copyWith(color: colors.muted),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -132,11 +132,12 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
   }
 
   void _emitScreen(MiniApp app, Map<String, dynamic> screen) {
+    final currentScreen = state.screen;
     emit(
       state.copyWith(
         status: .ready,
         app: app,
-        screen: jsonEquals(state.screen, screen) ? state.screen : screen,
+        screen: jsonEquals(currentScreen, screen) ? currentScreen : screen,
         fromCache: false,
         refreshing: false,
         refreshFailed: false,
@@ -156,7 +157,7 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
   }
 
   Future<void> refresh({bool silent = false}) {
-    if (isClosed) return Future<void>.value();
+    if (isClosed) return Future.value();
     final active = _refreshFuture;
     if (active != null) {
       if (!silent && !state.refreshing) {

@@ -78,8 +78,7 @@ String lessonShortLabel(AppLocalizations l10n, LessonType type) {
 
 String activityTypeLabel(AppLocalizations l10n, UserActivityType type) {
   return switch (type) {
-    .personal => l10n.activityTypeEvent,
-    .event => l10n.activityTypeEvent,
+    .personal || .event => l10n.activityTypeEvent,
     .retake => l10n.activityTypeRetake,
     .extra => l10n.activityTypeExtra,
     .consult => l10n.consultation,
@@ -98,15 +97,16 @@ String shortTeacherName(String name) {
       .split(RegExp(r'\s+'))
       .where((part) => part.isNotEmpty)
       .toList();
-  if (parts.length < 2) return parts.isEmpty ? '' : parts.first;
+  final first = parts.firstOrNull ?? '';
+  if (parts.length < 2) return first;
   final initials = parts
       .skip(1)
       .expand((part) => part.split('.'))
       .where((part) => part.isNotEmpty)
       .take(2)
-      .map((part) => '${String.fromCharCode(part.runes.first).toUpperCase()}.')
+      .map((part) => '${part.characters.take(1).join().toUpperCase()}.')
       .join(' ');
-  return initials.isEmpty ? parts.first : '${parts.first} $initials';
+  return initials.isEmpty ? first : '$first $initials';
 }
 
 String capitalizeFirst(String value) {

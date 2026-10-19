@@ -1,9 +1,10 @@
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/ninja/surfaces/ninja_pill_tone.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/widgets/app_pill_button.dart';
 import 'package:flutter/widgets.dart';
 
-enum NinjaPillTone { tonal, secondary, surface, primary, danger }
+export 'ninja_pill_tone.dart';
 
 class NinjaPillButton extends StatelessWidget {
   const NinjaPillButton({

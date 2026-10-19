@@ -31,7 +31,7 @@ class GroupResultRow extends StatelessWidget {
           minHeight: AppControlSize.touchTarget,
         ),
         padding: const EdgeInsets.fromLTRB(18, 15, 18, 15),
-        color: selected ? colors.tint : colors.surface,
+        color: selected ? colors.accent.withValues(alpha: .12) : null,
         child: Row(
           children: [
             Expanded(
@@ -48,7 +48,9 @@ class GroupResultRow extends StatelessWidget {
               height: 22,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected ? colors.accent : colors.surface,
+                color: selected
+                    ? colors.accent
+                    : colors.surface2.withValues(alpha: .65),
                 border: selected
                     ? null
                     : Border.all(color: colors.line, width: 1.5),

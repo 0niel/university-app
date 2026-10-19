@@ -2323,8 +2323,15 @@
   "authInvalidCode": "Неверный или просроченный код. Проверьте и попробуйте ещё раз.",
   "authInvalidCredentials": "Неверный email или пароль.",
   "authGuestUnavailable": "Не удалось войти как гость. Попробуйте позже.",
-  "settingsAmoledTitle": "AMOLED",
-  "settingsAmoledSubtitle": "Чисто чёрный фон тёмной темы для OLED-экранов",
+  "settingsGlassEffectTitle": "Эффект стекла",
+  "mapRotatePlan": "Повернуть план",
+  "mapTopDownView": "Вид сверху",
+  "mapVolumeView": "Объёмный план",
+  "mapShowCampus": "Показать кампус",
+  "mapActions": "Действия с картой",
+  "map2DLabel": "2D",
+  "map3DLabel": "3D",
+  "settingsGlassEffectSubtitle": "Полупрозрачные поверхности, размытие и преломление",
   "scheduleDiffTitle": "Обновления расписания",
   "scheduleDiffFoundChanges": "{count, plural, one{Найдено {count} изменение в вашем расписании} few{Найдено {count} изменения в вашем расписании} other{Найдено {count} изменений в вашем расписании}}",
   "scheduleDiffNewLessons": "Новые занятия",
@@ -2610,6 +2617,14 @@
   "loginWithCode": "Войти по коду",
   "loginGenericError": "Не удалось войти. Проверьте данные и попробуйте снова.",
   "miniAppsTitle": "Мини-аппы",
+  "miniAppsSearchResultsCount": "{count, plural, =0{Нет совпадений} one{{count} результат} few{{count} результата} many{{count} результатов} other{{count} результата}}",
+  "@miniAppsSearchResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "miniAppsSubtitle": "{count, plural, =0{пока нет приложений} one{{count} приложение} few{{count} приложения} other{{count} приложений}}",
   "@miniAppsSubtitle": {
     "placeholders": {
@@ -2625,7 +2640,7 @@
   "miniAppsMyApps": "Мои приложения",
   "miniAppsCatalogSection": "Каталог",
   "miniAppsEmptyTitle": "Мини-аппов пока нет",
-  "miniAppsEmptySubtitle": "Стань первым: собери мини-апп на Stac JSON и опубликуй его для всех студентов",
+  "miniAppsEmptySubtitle": "Создай полезное мини-приложение и поделись им с университетом",
   "miniAppsNothingFound": "Ничего не нашлось",
   "miniAppsNothingFoundSubtitle": "Попробуй другой запрос или категорию",
   "miniAppsLaunches": "{count, plural, =0{нет запусков} one{{count} запуск} few{{count} запуска} other{{count} запусков}}",

@@ -18,13 +18,14 @@ class FreeRoomsView extends StatefulWidget {
 class _FreeRoomsViewState extends State<FreeRoomsView> {
   final _query = TextEditingController();
   Timer? _clock;
+  DateTime _now = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _clock = Timer.periodic(const Duration(minutes: 1), (_) {
       if (!mounted) return;
-      setState(() {});
+      setState(() => _now = DateTime.now());
       unawaited(context.read<FreeRoomsCubit>().load());
     });
   }
@@ -64,7 +65,7 @@ class _FreeRoomsViewState extends State<FreeRoomsView> {
               child: AppSearchField(
                 controller: _query,
                 hintText: l10n.mapRoomSearchHint,
-                onCanvas: true,
+                isOnCanvas: true,
                 onChanged: cubit.queryChanged,
                 onClear: () => cubit.queryChanged(''),
               ),
@@ -85,6 +86,7 @@ class _FreeRoomsViewState extends State<FreeRoomsView> {
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
               child: FreeRoomsList(
                 state: state,
+                now: _now,
                 onRetry: () => unawaited(cubit.load()),
                 onRoomTap: (room) =>
                     unawaited(showFreeRoomSheet(context, room)),

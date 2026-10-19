@@ -33,12 +33,13 @@ class NinjaCard extends StatelessWidget {
     final colors = context.colors;
     final accentColor = accent;
     final borderRadius = BorderRadius.circular(radius);
-    final background = color ??
+    final background =
+        color ??
         (tinted
             ? colors.tint
             : outlined
-                ? colors.surface2
-                : colors.surface);
+            ? colors.surface2
+            : colors.surface);
 
     Widget content = Padding(padding: padding, child: child);
     if (accentColor != null) {

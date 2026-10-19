@@ -161,7 +161,7 @@ void main() {
             HttpStatus.ok,
           );
         }),
-        delay: (_) async {},
+        delay: (_) => .value(),
       );
       final pager = ScheduleSearchPager(
         sourceClient,

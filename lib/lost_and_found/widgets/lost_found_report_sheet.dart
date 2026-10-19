@@ -142,21 +142,29 @@ class _LostFoundReportSheetState extends State<LostFoundReportSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LostFoundReportStatusSelector(
-            value: _status,
-            onChanged: (value) => setState(() => _status = value),
-          ).animateSectionEntrance(),
-          const SizedBox(height: AppSpacing.xlg),
-          LostFoundReportDetailsFields(
-            titleController: _titleController,
-            locationController: _locationController,
-            descriptionController: _descriptionController,
-          ).animateSectionEntrance(index: 1),
-          const SizedBox(height: AppSpacing.lg),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                LostFoundReportStatusSelector(
+                  value: _status,
+                  onChanged: (value) => setState(() => _status = value),
+                ).animateSectionEntrance(),
+                const SizedBox(height: AppSpacing.xlg),
+                LostFoundReportDetailsFields(
+                  titleController: _titleController,
+                  locationController: _locationController,
+                  descriptionController: _descriptionController,
+                ).animateSectionEntrance(index: 1),
+                const SizedBox(height: AppSpacing.lg),
+              ],
+            ),
+          ),
           LostFoundCategoryPicker(
             keys: UniversityConfig.current.lostFoundCategoryKeys,
             value: _category,
-            padding: EdgeInsets.zero,
             onChanged: (value) => setState(() => _category = value),
           ).animateSectionEntrance(index: 2),
           const SizedBox(height: AppSpacing.xlg),
@@ -166,24 +174,33 @@ class _LostFoundReportSheetState extends State<LostFoundReportSheet> {
             onAddFromCamera: () => unawaited(_pickFromCamera()),
             onRemove: (index) => setState(() => _images.removeAt(index)),
           ).animateSectionEntrance(index: 3),
-          const SizedBox(height: AppSpacing.xlg),
-          LostFoundReportContactFields(
-            telegramController: _telegramController,
-            phoneController: _phoneController,
-            showContact: _showContact,
-            onShowContactChanged: (value) =>
-                setState(() => _showContact = value),
-          ).animateSectionEntrance(index: 4),
-          const SizedBox(height: AppSpacing.xlg),
-          NinjaButton.primary(
-            label: isCreating
-                ? l10n.lostFoundPublishing
-                : l10n.lostFoundPublish,
-            icon: const AppLineIconWidget(AppLineIcon.upload),
-            size: NinjaButtonSize.large,
-            expanded: true,
-            loading: isCreating,
-            onPressed: isCreating ? null : () => unawaited(_save()),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: AppSpacing.xlg),
+                LostFoundReportContactFields(
+                  telegramController: _telegramController,
+                  phoneController: _phoneController,
+                  showContact: _showContact,
+                  onShowContactChanged: (value) =>
+                      setState(() => _showContact = value),
+                ).animateSectionEntrance(index: 4),
+                const SizedBox(height: AppSpacing.xlg),
+                NinjaButton.primary(
+                  label: isCreating
+                      ? l10n.lostFoundPublishing
+                      : l10n.lostFoundPublish,
+                  icon: const AppLineIconWidget(AppLineIcon.upload),
+                  size: NinjaButtonSize.large,
+                  expanded: true,
+                  loading: isCreating,
+                  onPressed: isCreating ? null : () => unawaited(_save()),
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -70,7 +70,7 @@ abstract final class DeepLinks {
     final segments = parsed.pathSegments;
     return Uri(
       scheme: deployment.deepLinkScheme,
-      host: segments.isEmpty ? 'feed' : segments.first,
+      host: segments.firstOrNull ?? 'feed',
       pathSegments: segments.skip(1),
       query: parsed.hasQuery ? parsed.query : null,
     );

@@ -4,11 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(
-          body: SizedBox(width: 200, child: child),
-        ),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(
+      body: SizedBox(width: 200, child: child),
+    ),
+  );
 
   group('AppExpandableText', () {
     testWidgets('short text renders without a toggle', (tester) async {

@@ -11,5 +11,5 @@ class MapFriendsToggleCubit extends HydratedCubit<bool> {
   bool? fromJson(Map<String, dynamic> json) => json['enabled'] as bool?;
 
   @override
-  Map<String, dynamic>? toJson(bool state) => {'enabled': state};
+  Map<String, dynamic> toJson(bool state) => {'enabled': state};
 }

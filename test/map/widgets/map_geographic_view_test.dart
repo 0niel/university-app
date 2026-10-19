@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/navigation/floor_georeference.dart';
 import 'package:rtu_mirea_app/map/widgets/map_geographic_view.dart';
@@ -15,8 +16,8 @@ void main() {
     var floorCount = 0;
     for (final id in ['v-78', 'v-86', 's-20', 'mp-1']) {
       final campus = _campus(id);
-      for (final floor
-          in (campus['floors'] as List).cast<Map<String, dynamic>>()) {
+      final {'floors': List<Object?> floors} = campus;
+      for (final floor in floors.cast<Map<String, dynamic>>()) {
         floorCount++;
         final reference = FloorGeoreference.fromJson(floor);
         final metadata = MapFloorData.fromJson(floor, svgPath: 'test.svg');
@@ -107,6 +108,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('ru'),
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(
             context,

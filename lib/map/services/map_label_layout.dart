@@ -1,25 +1,10 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-class MapLabelCandidate {
-  const MapLabelCandidate({
-    required this.id,
-    required this.anchor,
-    required this.size,
-    required this.priority,
-  });
+import 'package:rtu_mirea_app/map/services/map_boundary_segment.dart';
+import 'package:rtu_mirea_app/map/services/map_label_candidate.dart';
 
-  final String id;
-  final Offset anchor;
-  final Size size;
-  final int priority;
-
-  Rect get bounds => Rect.fromCenter(
-    center: anchor,
-    width: size.width,
-    height: size.height,
-  );
-}
+export 'map_label_candidate.dart';
 
 List<MapLabelCandidate> placeMapLabels(
   Iterable<MapLabelCandidate> candidates, {
@@ -93,7 +78,7 @@ Offset? mapInteriorLabelAnchor(Path path) {
   if (!_validBounds(bounds)) return null;
 
   final metrics = path.computeMetrics(forceClosed: true).take(32).toList();
-  final segments = <_BoundarySegment>[];
+  final segments = <MapBoundarySegment>[];
   final contourCenters = <Offset>[];
   final samples = math.max(4, 128 ~/ math.max(1, metrics.length));
   for (final metric in metrics) {
@@ -113,7 +98,7 @@ Offset? mapInteriorLabelAnchor(Path path) {
       contourBounds =
           contourBounds?.expandToInclude(pointBounds) ?? pointBounds;
       if (previous != null && previous != position) {
-        segments.add(_BoundarySegment(previous, position));
+        segments.add(MapBoundarySegment(previous, position));
       }
       previous = position;
     }
@@ -201,22 +186,4 @@ int _compareCandidates(MapLabelCandidate first, MapLabelCandidate second) {
   if (y != 0) return y;
   final width = first.size.width.compareTo(second.size.width);
   return width == 0 ? first.size.height.compareTo(second.size.height) : width;
-}
-
-class _BoundarySegment {
-  const _BoundarySegment(this.from, this.to);
-
-  final Offset from;
-  final Offset to;
-
-  double squaredDistanceTo(Offset point) {
-    final delta = to - from;
-    final lengthSquared = delta.distanceSquared;
-    if (lengthSquared == 0) return (point - from).distanceSquared;
-    final relative = point - from;
-    final ratio =
-        ((relative.dx * delta.dx + relative.dy * delta.dy) / lengthSquared)
-            .clamp(0.0, 1.0);
-    return (point - (from + delta * ratio)).distanceSquared;
-  }
 }

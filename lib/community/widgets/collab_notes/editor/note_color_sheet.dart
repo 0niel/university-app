@@ -1,6 +1,9 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rtu_mirea_app/community/widgets/collab_notes/editor/note_color_selection.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
+
+export 'note_color_selection.dart';
 
 List<Color> noteKitTones(BuildContext context) {
   final colors = context.colors;
@@ -12,12 +15,6 @@ List<Color> noteKitTones(BuildContext context) {
     colors.practice,
     colors.exam,
   ];
-}
-
-class NoteColorSelection {
-  const NoteColorSelection(this.color);
-
-  final Color? color;
 }
 
 Future<NoteColorSelection?> showNoteColorSheet(

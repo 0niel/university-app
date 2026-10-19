@@ -306,11 +306,20 @@ class _Pixels {
     (index) =>
         bytes[index] > 230 && bytes[index + 1] > 230 && bytes[index + 3] > 200,
   );
-  int accentIn(Rect rect) => _count(
-    rect,
-    (index) =>
-        bytes[index] < 80 && bytes[index + 1] > 100 && bytes[index + 3] > 200,
-  );
+  int accentIn(Rect rect) {
+    final accent = AppColors.light.accent;
+    final red = (accent.r * 255).round();
+    final green = (accent.g * 255).round();
+    final blue = (accent.b * 255).round();
+    return _count(
+      rect,
+      (index) =>
+          (bytes[index] - red).abs() <= 2 &&
+          (bytes[index + 1] - green).abs() <= 2 &&
+          (bytes[index + 2] - blue).abs() <= 2 &&
+          bytes[index + 3] > 200,
+    );
+  }
 
   int _count(Rect rect, bool Function(int) accepts) {
     var count = 0;

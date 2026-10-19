@@ -45,12 +45,12 @@ class SettingsPrivacySection extends StatelessWidget {
           value: geo.state.sharing,
           onChanged: geo.state.busy
               ? null
-              : (value) async {
+              : (value) => unawaited(() async {
                   final saved = await geo.setSharing(enabled: value);
                   if (!saved && context.mounted) {
                     ToastManager.showError(context, message: l10n.error);
                   }
-                },
+                }()),
         ),
         SettingsRow(
           title: l10n.settingsWhoSeesProfile,

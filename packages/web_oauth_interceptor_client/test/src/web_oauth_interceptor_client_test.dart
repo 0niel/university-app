@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web_oauth_interceptor_client/web_oauth_interceptor_client.dart';
 
-class _TestInAppBrowser extends PlatformInAppBrowser {
-  _TestInAppBrowser(super.params, this.owner) : super.implementation();
+class TestInAppBrowser extends PlatformInAppBrowser {
+  TestInAppBrowser(super.params, this.owner) : super.implementation();
 
-  final _TestInAppWebViewPlatform owner;
+  final TestInAppWebViewPlatform owner;
 
   @override
   Future<void> openUrlRequest({
@@ -28,7 +28,7 @@ class _TestInAppBrowser extends PlatformInAppBrowser {
 class _TestCookies extends PlatformCookieManager {
   _TestCookies(super.params, this.owner) : super.implementation();
 
-  final _TestInAppWebViewPlatform owner;
+  final TestInAppWebViewPlatform owner;
 
   @override
   Future<List<Cookie>> getCookies({
@@ -36,12 +36,12 @@ class _TestCookies extends PlatformCookieManager {
     PlatformInAppWebViewController? iosBelow11WebViewController,
     PlatformInAppWebViewController? webViewController,
   }) =>
-      owner.readCookies(url);
+      owner.onReadCookies(url);
 }
 
-class _TestInAppWebViewPlatform extends InAppWebViewPlatform {
-  Future<List<Cookie>> Function(WebUri) readCookies = (_) async => [];
-  _TestInAppBrowser? browser;
+class TestInAppWebViewPlatform extends InAppWebViewPlatform {
+  Future<List<Cookie>> Function(WebUri) onReadCookies = (_) async => [];
+  TestInAppBrowser? browser;
   Completer<void>? closing;
   int closes = 0;
   bool failOpening = false;
@@ -50,7 +50,7 @@ class _TestInAppWebViewPlatform extends InAppWebViewPlatform {
   PlatformInAppBrowser createPlatformInAppBrowser(
     PlatformInAppBrowserCreationParams params,
   ) =>
-      browser = _TestInAppBrowser(params, this);
+      browser = TestInAppBrowser(params, this);
 
   @override
   PlatformCookieManager createPlatformCookieManager(
@@ -60,7 +60,7 @@ class _TestInAppWebViewPlatform extends InAppWebViewPlatform {
 }
 
 void main() {
-  final platform = _TestInAppWebViewPlatform();
+  final platform = TestInAppWebViewPlatform();
   setUpAll(() {
     InAppWebViewPlatform.instance = platform;
   });
@@ -69,7 +69,7 @@ void main() {
       ..closes = 0
       ..closing = null
       ..failOpening = false
-      ..readCookies = (_) async => [];
+      ..onReadCookies = (_) async => [];
   });
 
   const loginUrl = 'https://pulse.example/api/auth/login';
@@ -87,7 +87,7 @@ void main() {
     tester,
   ) async {
     final paths = <String>[];
-    platform.readCookies = (url) async {
+    platform.onReadCookies = (url) async {
       paths.add(url.path);
       return [Cookie(name: '.AspNetCore.Cookies', value: 'provider-session')];
     };
@@ -106,7 +106,7 @@ void main() {
     tester,
   ) async {
     var ready = false;
-    platform.readCookies = (_) async => ready
+    platform.onReadCookies = (_) async => ready
         ? [Cookie(name: '.AspNetCore.Cookies', value: 'late-session')]
         : [];
     final login = client().initiateOAuthFlow();
@@ -126,7 +126,7 @@ void main() {
     tester,
   ) async {
     final cookies = Completer<List<Cookie>>();
-    platform.readCookies = (_) => cookies.future;
+    platform.onReadCookies = (_) => cookies.future;
     final login = client().initiateOAuthFlow();
     final cancelled = expectLater(login, throwsA(isA<OAuthFlowCancelled>()));
     await tester.pump();

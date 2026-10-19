@@ -12,10 +12,10 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/profile/cubit/startup_screen_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/sync_preferences_cubit.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
-import 'package:rtu_mirea_app/profile/utils/settings_search_filter.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings/settings_widgets.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_appearance.dart';
 import 'package:rtu_mirea_app/profile/widgets/settings_theme_row.dart';
+import 'package:rtu_mirea_app/profile/widgets/settings_toggle_row.dart';
 import 'package:rtu_mirea_app/schedule/cubit/schedule_display/schedule_display_cubit.dart';
 import 'package:rtu_mirea_app/services/services.dart';
 import 'package:user_repository/user_repository.dart';
@@ -73,6 +73,50 @@ void main() {
   });
 
   testWidgets(
+    'glass toggle defaults on and changes the real theme state both ways',
+    (tester) async {
+      final theme = ThemeCubit();
+      final preferences = UiPreferencesCubit();
+      addTearDown(theme.close);
+      addTearDown(preferences.close);
+      await tester.pumpWidget(
+        wrap(
+          MultiBlocProvider(
+            providers: [
+              BlocProvider<ThemeCubit>.value(value: theme),
+              BlocProvider<UiPreferencesCubit>.value(value: preferences),
+            ],
+            child: const SettingsAppearance(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final row = find.byWidgetPredicate(
+        (widget) =>
+            widget is SettingsToggleRow &&
+            widget.label == l10n.settingsGlassEffectTitle,
+      );
+      final control = find.descendant(
+        of: row,
+        matching: find.byType(AppSwitch),
+      );
+      expect(theme.state.glassEnabled, isTrue);
+      expect(tester.widget<AppSwitch>(control).value, isTrue);
+      await tester.ensureVisible(control);
+      await tester.pumpAndSettle();
+      await tester.tap(control);
+      await tester.pumpAndSettle();
+      expect(theme.state.glassEnabled, isFalse);
+      expect(tester.widget<AppSwitch>(control).value, isFalse);
+      await tester.tap(find.text(l10n.settingsGlassEffectTitle));
+      await tester.pumpAndSettle();
+      expect(theme.state.glassEnabled, isTrue);
+      expect(tester.widget<AppSwitch>(control).value, isTrue);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'lesson reactions appears exactly once between schedule and home',
     (tester) async {
       final schedule = ScheduleDisplayCubit();
@@ -116,7 +160,11 @@ void main() {
       final appBloc = _MockAppBloc();
       when(
         () => appBloc.state,
-      ).thenReturn(const AppState(user: User(id: 'u1')));
+      ).thenReturn(
+        const AppState(
+          user: User(id: 'u1', email: 'anna@example.org'),
+        ),
+      );
       addTearDown(locale.close);
       addTearDown(sync.close);
       addTearDown(schedule.close);
@@ -146,29 +194,8 @@ void main() {
 
       expect(find.text(l10n.settingsLanguage), findsOneWidget);
       expect(find.text(l10n.settingsExportScheduleValue), findsOneWidget);
+      expect(find.text(l10n.accountEmailLabel), findsNothing);
+      expect(find.text('anna@example.org'), findsNothing);
     },
   );
-
-  group('SettingsSearchFilter', () {
-    SettingsSearchFilter filterFor(String query) =>
-        SettingsSearchFilter(query: query, l10n: l10n);
-
-    test('routes lesson reactions to schedule, not home', () {
-      final filter = filterFor(l10n.settingsLessonReactions);
-      expect(filter.showSchedule, isTrue);
-      expect(filter.showHome, isFalse);
-    });
-
-    test('routes calendar export to schedule, not data', () {
-      final filter = filterFor(l10n.settingsExportCalendar);
-      expect(filter.showSchedule, isTrue);
-      expect(filter.showData, isFalse);
-    });
-
-    test('routes language to data, not account', () {
-      final filter = filterFor(l10n.settingsLanguage);
-      expect(filter.showData, isTrue);
-      expect(filter.showAccount, isFalse);
-    });
-  });
 }

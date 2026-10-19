@@ -113,7 +113,7 @@ void main() {
       ToastManager.showSuccess(ctx, message: 'Clear of navigation');
       await tester.pumpAndSettle();
       final toast = tester.getRect(find.byType(AppToast));
-      final height = MediaQuery.sizeOf(ctx).height;
+      final height = MediaQuery.heightOf(ctx);
       expect(height - toast.bottom, greaterThanOrEqualTo(144));
       ToastManager.debugReset();
     });

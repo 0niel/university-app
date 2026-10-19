@@ -4,7 +4,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import 'package:gamification_repository/gamification_repository.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_client/permission_client.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
@@ -17,7 +16,6 @@ import 'package:rtu_mirea_app/onboarding/widgets/teacher_step.dart';
 import 'package:rtu_mirea_app/onboarding/widgets/widgets.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/models/selected_schedule.dart';
-import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:rtu_mirea_app/tour/tour.dart';
 
 class OnBoardingPage extends StatefulWidget {
@@ -39,16 +37,19 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   void initState() {
     super.initState();
     _flow = OnboardingFlowCubit(
-      repository: context.read<GamificationRepository>(),
+      repository: context.read(),
       organizationId: context.read<UniversityConfig>().organizationId,
       currentUserId: () => context.read<AppBloc?>()?.state.user.id,
       isGuest: () => context.read<AppBloc?>()?.state.user.isGuest ?? false,
       selectedGroup: () =>
           switch (context.read<ScheduleBloc?>()?.state.selectedSchedule) {
             SelectedGroupSchedule(:final group) => group,
-            _ => null,
+            SelectedTeacherSchedule() ||
+            SelectedClassroomSchedule() ||
+            SelectedCustomSchedule() ||
+            null => null,
           },
-      persona: context.read<AccountPersonaCubit?>(),
+      persona: context.read(),
     );
     unawaited(_preload());
   }
@@ -66,10 +67,10 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     );
     if (!mounted || !_flow.ownsSession) return;
     final state = _flow.state;
-    final schedule = context.read<ScheduleBloc?>();
     if (state.group case final group?
         when state.groupOrigin == OnboardingDraftOrigin.restored &&
             !state.isTeacher) {
+      final schedule = context.read<ScheduleBloc?>();
       if (schedule != null && schedule.state.selectedSchedule == null) {
         schedule.add(ScheduleRequested(group: group));
       }

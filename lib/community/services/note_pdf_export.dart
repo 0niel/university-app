@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+part 'note_pdf_input.dart';
+
 Future<Uint8List> exportNotePdf({
   required String title,
   required List<Object?> document,
@@ -22,14 +24,14 @@ Future<Uint8List> exportNotePdf({
   );
 }
 
-Future<Uint8List> _buildNotePdf(_NotePdfInput input) async {
+Future<Uint8List> _buildNotePdf(_NotePdfInput input) {
   final title = input.title;
   final document = input.document;
   final attachmentLabel = input.attachmentLabel;
-  final fonts = input.fonts;
-  final regular = pw.Font.ttf(fonts[0]);
-  final bold = pw.Font.ttf(fonts[1]);
-  final italic = pw.Font.ttf(fonts[2]);
+  final [regularData, boldData, italicData] = input.fonts;
+  final regular = pw.Font.ttf(regularData);
+  final bold = pw.Font.ttf(boldData);
+  final italic = pw.Font.ttf(italicData);
   final pdf = pw.Document(
     title: title,
     theme: pw.ThemeData.withFont(
@@ -198,10 +200,10 @@ List<_NotePdfBlock> _readNoteBlocks(
     if (operation is! Map) {
       throw const FormatException('Invalid note operation');
     }
-    final attributes = operation['attributes'];
-    final style = attributes is Map ? attributes : const <String, Object?>{};
     final insert = operation['insert'];
     if (insert is String) {
+      final attributes = operation['attributes'];
+      final style = attributes is Map ? attributes : const <String, Object?>{};
       final lines = insert.split('\n');
       for (final (index, line) in lines.indexed) {
         if (line.isNotEmpty) runs.add(_NotePdfRun(line, style));
@@ -228,32 +230,4 @@ List<_NotePdfBlock> _readNoteBlocks(
   }
   if (runs.isNotEmpty) blocks.add(_NotePdfBlock(runs, const {}));
   return blocks;
-}
-
-class _NotePdfRun {
-  const _NotePdfRun(this.text, this.attributes);
-
-  final String text;
-  final Map<Object?, Object?> attributes;
-}
-
-class _NotePdfBlock {
-  const _NotePdfBlock(this.runs, this.attributes);
-
-  final List<_NotePdfRun> runs;
-  final Map<Object?, Object?> attributes;
-}
-
-class _NotePdfInput {
-  const _NotePdfInput(
-    this.title,
-    this.document,
-    this.attachmentLabel,
-    this.fonts,
-  );
-
-  final String title;
-  final List<Object?> document;
-  final String attachmentLabel;
-  final List<ByteData> fonts;
 }

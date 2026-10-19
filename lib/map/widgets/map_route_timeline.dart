@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -64,10 +65,10 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
   }
 
   List<int> get _milestones => [
-    for (var i = 0; i < widget.route.instructions.length; i++)
+    for (final (i, instruction) in widget.route.instructions.indexed)
       if (i == 0 ||
           i == widget.route.instructions.length - 1 ||
-          _connector(widget.route.instructions[i]))
+          _connector(instruction))
         i,
   ];
 
@@ -77,12 +78,20 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
     IndoorManeuver.ramp ||
     IndoorManeuver.escalator ||
     IndoorManeuver.floorTransition => true,
-    _ => step.toNode != null && step.atNode.floorId != step.toNode!.floorId,
+    IndoorManeuver.depart ||
+    IndoorManeuver.straight ||
+    IndoorManeuver.turnLeft ||
+    IndoorManeuver.turnRight ||
+    IndoorManeuver.turnBack ||
+    IndoorManeuver.arrive =>
+      step.toNode != null && step.atNode.floorId != step.toNode!.floorId,
   };
 
   void _revealMilestone() {
     if (!mounted) return;
-    final active = _milestones.lastWhere((index) => index <= widget.stepIndex);
+    final active = _milestones.lastWhereOrNull(
+      (index) => index <= widget.stepIndex,
+    );
     final context = _milestoneKeys[active]?.currentContext;
     final target = context?.findRenderObject();
     if (target != null && _scroll.hasClients) {
@@ -91,6 +100,7 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
   }
 
   void _previewChanged(double value) {
+    if (widget.route.instructions.isEmpty) return;
     if (_pointerActive && _ignoreCommit) return;
     final index = (value.round() - 1).clamp(
       0,
@@ -108,6 +118,7 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
   }
 
   void _select(int index) {
+    if (widget.route.instructions.isEmpty) return;
     _preview = null;
     _pendingSelection = index.clamp(0, widget.route.instructions.length - 1);
     _gestureRevision++;
@@ -146,7 +157,8 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
     if (index == widget.route.instructions.length - 1) {
       return l10n.mapRouteCompactFinish;
     }
-    final step = widget.route.instructions[index];
+    final step = widget.route.instructions.elementAtOrNull(index);
+    if (step == null) return l10n.mapRouteCompactTransition;
     final from = widget.campus.floorForId(step.atNode.floorId)?.floor.number;
     final to = widget.campus
         .floorForId(step.toNode?.floorId ?? '')
@@ -160,7 +172,13 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
       IndoorManeuver.elevator => l10n.mapRouteCompactElevator,
       IndoorManeuver.ramp => l10n.mapRouteCompactRamp,
       IndoorManeuver.escalator => l10n.mapRouteCompactEscalator,
-      _ => l10n.mapRouteCompactTransition,
+      IndoorManeuver.depart ||
+      IndoorManeuver.straight ||
+      IndoorManeuver.turnLeft ||
+      IndoorManeuver.turnRight ||
+      IndoorManeuver.turnBack ||
+      IndoorManeuver.floorTransition ||
+      IndoorManeuver.arrive => l10n.mapRouteCompactTransition,
     };
   }
 
@@ -175,13 +193,20 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final count = widget.route.instructions.length;
+    if (widget.stepIndex < 0) return const SizedBox.shrink();
+    final instruction = widget.route.instructions.elementAtOrNull(
+      widget.stepIndex,
+    );
+    if (instruction == null) return const SizedBox.shrink();
     final instructionLabel = mapRouteInstructionLabel(
-      widget.route.instructions[widget.stepIndex],
+      instruction,
       widget.campus,
       l10n,
     );
     final milestones = _milestones;
-    final active = milestones.lastWhere((index) => index <= widget.stepIndex);
+    final active = milestones.lastWhereOrNull(
+      (index) => index <= widget.stepIndex,
+    );
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -204,7 +229,9 @@ class _MapRouteTimelineState extends State<MapRouteTimeline> {
                     label: _milestoneLabel(index),
                     leading: Icon(
                       mapRouteInstructionIcon(
-                        widget.route.instructions[index].maneuver,
+                        widget.route.instructions
+                            .elementAtOrNull(index)!
+                            .maneuver,
                       ),
                       size: 16,
                     ),

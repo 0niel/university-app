@@ -5,6 +5,21 @@ part 'promo_details.freezed.dart';
 part 'promo_details.g.dart';
 
 @freezed
+abstract class PromoDetails with _$PromoDetails {
+  const factory PromoDetails({
+    PromoHero? hero,
+    @JsonKey(fromJson: _sectionsFromJson, toJson: _sectionsToJson)
+    @Default(<PromoSection>[])
+    List<PromoSection> sections,
+    PromoContact? contact,
+    String? footnote,
+  }) = _PromoDetails;
+
+  factory PromoDetails.fromJson(Map<String, Object?> json) =>
+      _$PromoDetailsFromJson(json.cast());
+}
+
+@freezed
 abstract class PromoHero with _$PromoHero {
   const factory PromoHero({
     String? badge,
@@ -41,18 +56,3 @@ List<PromoSection> _sectionsFromJson(Object? value) {
 List<Object?> _sectionsToJson(List<PromoSection> sections) => [
   for (final section in sections) section.toJson(),
 ];
-
-@freezed
-abstract class PromoDetails with _$PromoDetails {
-  const factory PromoDetails({
-    PromoHero? hero,
-    @JsonKey(fromJson: _sectionsFromJson, toJson: _sectionsToJson)
-    @Default(<PromoSection>[])
-    List<PromoSection> sections,
-    PromoContact? contact,
-    String? footnote,
-  }) = _PromoDetails;
-
-  factory PromoDetails.fromJson(Map<String, Object?> json) =>
-      _$PromoDetailsFromJson(json.cast());
-}

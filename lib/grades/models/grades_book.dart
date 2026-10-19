@@ -4,16 +4,16 @@ import 'package:rtu_mirea_app/grades/models/subject_grades.dart';
 class GradesBook extends Equatable {
   const GradesBook({this.terms = const {}, this.savedAt});
 
-  factory GradesBook.fromJson(Map<String, dynamic> json) {
-    final rawTerms = json['terms'] as Map<dynamic, dynamic>? ?? const {};
+  factory GradesBook.fromJson(Map<String, Object?> json) {
+    final rawTerms = json['terms'] as Map<Object?, Object?>? ?? const {};
     final savedAt = json['savedAt'] as String?;
     return GradesBook(
       terms: {
         for (final entry in rawTerms.entries)
-          entry.key as String: [
-            for (final subject in entry.value as List<dynamic>)
+          entry.key! as String: [
+            for (final subject in entry.value! as List<Object?>)
               SubjectGrades.fromJson(
-                Map<String, dynamic>.from(subject as Map),
+                Map.from(subject! as Map<Object?, Object?>),
               ),
           ],
       },
@@ -29,10 +29,10 @@ class GradesBook extends Equatable {
   GradesBook withTerm(
     String termId,
     List<SubjectGrades> subjects, {
-    required DateTime savedAt,
-  }) => GradesBook(terms: {...terms, termId: subjects}, savedAt: savedAt);
+    required DateTime updatedAt,
+  }) => GradesBook(terms: {...terms, termId: subjects}, savedAt: updatedAt);
 
-  Map<String, dynamic> toJson() => {
+  Map<String, Object?> toJson() => {
     'terms': {
       for (final entry in terms.entries)
         entry.key: [for (final subject in entry.value) subject.toJson()],

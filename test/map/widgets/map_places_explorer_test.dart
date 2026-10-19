@@ -48,7 +48,6 @@ Widget _page(
   ValueChanged<MapPlaceData>? onPlace,
 }) => Scaffold(
   body: SingleChildScrollView(
-    padding: const EdgeInsets.all(AppSpacing.lg),
     child: MapPlacesExplorer(
       campus: campus,
       query: query,
@@ -66,6 +65,57 @@ List<String> _visibleIds(WidgetTester tester) => tester
     .toList();
 
 void main() {
+  testWidgets('place categories scroll from either screen edge at 200% text', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      _page(
+        _campus([
+          _place('room', '201'),
+          _place('service', 'Cafe', kind: 'cafe'),
+        ]),
+        currentFloorId: 'floor-2',
+      ),
+      size: const Size(320, 900),
+      textScaler: const TextScaler.linear(2),
+    );
+    final rail = find.byKey(const ValueKey('map-place-categories'));
+    await tester.ensureVisible(rail);
+    await tester.pumpAndSettle();
+    final viewport = tester.getRect(rail);
+    expect(viewport.left, 0);
+    expect(viewport.right, 320);
+    expect(
+      tester
+          .getRect(
+            find.descendant(of: rail, matching: find.byType(AppChip)).first,
+          )
+          .left,
+      AppSpacing.screen,
+    );
+    final scroll = tester.state<ScrollableState>(
+      find.descendant(of: rail, matching: find.byType(Scrollable)),
+    );
+    await tester.dragFrom(
+      Offset(318, viewport.center.dy),
+      const Offset(-240, 0),
+    );
+    await tester.pumpAndSettle();
+    expect(scroll.position.pixels, greaterThan(0));
+    final previous = scroll.position.pixels;
+    await tester.dragFrom(Offset(2, viewport.center.dy), const Offset(240, 0));
+    await tester.pumpAndSettle();
+    expect(scroll.position.pixels, lessThan(previous));
+    final floor = find
+        .descendant(of: rail, matching: find.byType(AppChip))
+        .first;
+    await tester.ensureVisible(floor);
+    await tester.tap(floor);
+    await tester.pumpAndSettle();
+    expect(tester.widget<AppChip>(floor).selected, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('current floor precedes other floors with natural room numbers', (
     tester,
   ) async {

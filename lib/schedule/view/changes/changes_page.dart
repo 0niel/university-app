@@ -4,7 +4,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart' hide TimeOfDay;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
-import 'package:local_notifications_repository/local_notifications_repository.dart';
 import 'package:rtu_mirea_app/app/view/app_device_token_sync.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/notifications/notification_permission.dart';
@@ -62,11 +61,10 @@ class _ChangesPageState extends State<ChangesPage> with WidgetsBindingObserver {
     final request = ++_permissionRead;
     try {
       final granted = await hasNotificationPermission(
-        context.read<LocalNotificationsRepository>(),
+        context.read(),
       );
-      if (mounted && request == _permissionRead) {
-        setState(() => _permissionGranted = granted);
-      }
+      if (!mounted || request != _permissionRead) return;
+      setState(() => _permissionGranted = granted);
     } on Exception {
       if (mounted && request == _permissionRead) {
         setState(() => _permissionGranted = false);
@@ -108,7 +106,7 @@ class _ChangesPageState extends State<ChangesPage> with WidgetsBindingObserver {
     try {
       if (value) {
         final granted = await requestNotificationPermission(
-          context.read<LocalNotificationsRepository>(),
+          context.read(),
         );
         if (!mounted) return;
         setState(() => _permissionGranted = granted);

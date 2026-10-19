@@ -15,51 +15,34 @@ class ProfileIdentityRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return AppPressable(
+    return AppFeatureCard.identity(
       onTap: onTap,
       semanticsLabel: name,
-      semanticsButton: onTap != null,
-      pressedScale: 1,
-      child: Row(
-        children: [
-          AppAvatar(name: name, size: 72, color: colors.accent),
-          const SizedBox(width: AppSpacing.lg),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.sectionLarge.copyWith(color: colors.ink),
-                ),
-                if (meta.isNotEmpty) ...[
-                  const SizedBox(height: 5),
-                  Text(
-                    meta,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.sans(
-                      13.5,
-                      FontWeight.w500,
-                      height: 17 / 13.5,
-                    ).copyWith(color: colors.muted),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (onTap != null) ...[
-            const SizedBox(width: AppSpacing.md),
-            AppLineIconWidget(
-              AppLineIcon.chevronR,
-              size: 16,
-              color: colors.muted2,
-            ),
-          ],
-        ],
+      leading: Container(
+        padding: const EdgeInsets.all(AppSpacing.fine),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: colors.accent.withValues(alpha: .22)),
+          color: colors.surface.withValues(alpha: .5),
+        ),
+        child: AppAvatar(name: name, size: 64, color: colors.accent),
       ),
+      trailing: onTap == null
+          ? null
+          : SizedBox.square(
+              dimension: AppIconSize.md + AppSpacing.md * 2,
+              child: Center(
+                child: AppLineIconWidget(
+                  AppLineIcon.chevronR,
+                  size: AppIconSize.md,
+                  color: colors.ink,
+                ),
+              ),
+            ),
+      title: Text(name, maxLines: 3, overflow: TextOverflow.ellipsis),
+      subtitle: meta.isEmpty
+          ? null
+          : Text(meta, maxLines: 3, overflow: TextOverflow.ellipsis),
     );
   }
 }

@@ -183,8 +183,14 @@ void main() {
         lastRating.complete(_rating(_teacher, 5));
         await _drain();
         if (lateFailure) {
-          firstSchedule.completeError(Exception('late schedule error'));
-          firstRating.completeError(Exception('late rating error'));
+          firstSchedule.completeError(
+            Exception('late schedule error'),
+            StackTrace.current,
+          );
+          firstRating.completeError(
+            Exception('late rating error'),
+            StackTrace.current,
+          );
         } else {
           firstSchedule.complete(_snapshot('Outdated'));
           firstRating.complete(_rating(_teacher, 1));
@@ -218,7 +224,10 @@ void main() {
     await _drain();
     accounts.add(_account(_otherTeacher));
     await _drain();
-    oldChanges.completeError(Exception('late old changes'));
+    oldChanges.completeError(
+      Exception('late old changes'),
+      StackTrace.current,
+    );
     await _drain();
 
     expect(bloc.state.teacher, _otherTeacher);
@@ -295,7 +304,10 @@ void main() {
     accounts.add(const AccountPersonaState(loaded: true));
     await _drain();
     pendingSchedule.complete(_snapshot('Old teacher'));
-    pendingChanges.completeError(Exception('old changes'));
+    pendingChanges.completeError(
+      Exception('old changes'),
+      StackTrace.current,
+    );
     pendingRating.complete(_rating(_teacher, 1));
     await _drain();
 
@@ -375,7 +387,10 @@ void main() {
       expect(accounts.hasListener, isFalse);
       accounts.add(_account(_otherTeacher));
       pendingSchedule.complete(_snapshot('After close'));
-      pendingChanges.completeError(Exception('after close'));
+      pendingChanges.completeError(
+        Exception('after close'),
+        StackTrace.current,
+      );
       pendingRating.complete(_rating(_teacher, 1));
       await _drain();
 

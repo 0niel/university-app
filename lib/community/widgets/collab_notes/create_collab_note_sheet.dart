@@ -67,38 +67,48 @@ class _CreateCollabNoteSheetState extends State<CreateCollabNoteSheet> {
       mainAxisSize: .min,
       crossAxisAlignment: .start,
       children: [
-        Text(
-          context.l10n.collabNotesVisibilityLabel,
-          style: AppText.captionSmall.copyWith(
-            color: context.colors.muted,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.collabNotesVisibilityLabel,
+                style: AppText.captionSmall.copyWith(
+                  color: context.colors.muted,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppSegmentedControl<CollabNoteVisibility>(
+                value: _visibility,
+                onChanged: saving
+                    ? null
+                    : (value) => setState(() => _visibility = value),
+                options: [
+                  AppSegmentedOption(
+                    value: CollabNoteVisibility.group,
+                    label: context.l10n.collabNotesVisibilityGroup,
+                  ),
+                  AppSegmentedOption(
+                    value: CollabNoteVisibility.personal,
+                    label: context.l10n.collabNotesVisibilityPersonal,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                context.l10n.collabNotesKindLabel,
+                style: AppText.captionSmall.copyWith(
+                  color: context.colors.muted,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        AppSegmentedControl<CollabNoteVisibility>(
-          value: _visibility,
-          onChanged: saving
-              ? null
-              : (value) => setState(() => _visibility = value),
-          options: [
-            AppSegmentedOption(
-              value: CollabNoteVisibility.group,
-              label: context.l10n.collabNotesVisibilityGroup,
-            ),
-            AppSegmentedOption(
-              value: CollabNoteVisibility.personal,
-              label: context.l10n.collabNotesVisibilityPersonal,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          context.l10n.collabNotesKindLabel,
-          style: AppText.captionSmall.copyWith(
-            color: context.colors.muted,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
         AppChipRow<NoteKind>(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
           value: _kind,
           items: [
             AppChipRowItem(
@@ -120,25 +130,34 @@ class _CreateCollabNoteSheetState extends State<CreateCollabNoteSheet> {
           ],
           onChanged: saving ? null : (value) => setState(() => _kind = value),
         ),
-        const SizedBox(height: AppSpacing.md),
-        AppInputField(
-          controller: _controller,
-          enabled: !saving,
-          autofocus: true,
-          maxLength: 200,
-          textInputAction: .done,
-          onSubmitted: (_) => unawaited(_save()),
-          placeholder: context.l10n.collabNotesTitleExampleHint,
-        ),
-        const SizedBox(height: AppSpacing.fieldGap),
-        AppButton.primary(
-          label: saving
-              ? context.l10n.collabNotesCreating
-              : context.l10n.collabNotesCreate,
-          expanded: true,
-          size: AppButtonSize.large,
-          loading: saving,
-          onPressed: saving ? null : () => unawaited(_save()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: AppSpacing.md),
+              AppInputField(
+                controller: _controller,
+                enabled: !saving,
+                autofocus: true,
+                maxLength: 200,
+                textInputAction: .done,
+                onSubmitted: (_) => unawaited(_save()),
+                placeholder: context.l10n.collabNotesTitleExampleHint,
+              ),
+              const SizedBox(height: AppSpacing.fieldGap),
+              AppButton.primary(
+                label: saving
+                    ? context.l10n.collabNotesCreating
+                    : context.l10n.collabNotesCreate,
+                expanded: true,
+                size: AppButtonSize.large,
+                loading: saving,
+                onPressed: saving ? null : () => unawaited(_save()),
+              ),
+            ],
+          ),
         ),
       ],
     );

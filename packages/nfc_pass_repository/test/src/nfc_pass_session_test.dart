@@ -73,7 +73,7 @@ void main() {
     oauth = _OAuth();
     channel = _Channel();
     when(() => storage.read(key: any(named: 'key'))).thenAnswer(
-      (call) async => values[call.namedArguments[#key]],
+      (call) async => values[call.namedArguments[#key] as String],
     );
     when(
       () => storage.write(
@@ -506,8 +506,8 @@ void main() {
         ),
       );
       expect(requests.length, 1);
-      expect(values['nfc_pass_id'], isNull);
-      expect(values['nfc_cookie'], 'session');
+      expect(values, isNot(contains('nfc_pass_id')));
+      expect(values, containsPair('nfc_cookie', 'session'));
       verifyNever(() => channel.savePassId(any()));
     });
   }
@@ -546,7 +546,7 @@ void main() {
         () async {
       values['nfc_cookie'] = 'expired';
       handler = (request) async {
-        if (request.headers['cookie'] == '.AspNetCore.Cookies=expired') {
+        if (_hasExpiredSessionCookie(request)) {
           return grpcAuth ? _response([], status: 16) : http.Response('', 401);
         }
         return request.url.path == '/token'
@@ -568,7 +568,7 @@ void main() {
   test('recovers a session the backend redirects to its login page', () async {
     values['nfc_cookie'] = 'expired';
     handler = (request) async {
-      if (request.headers['cookie'] == '.AspNetCore.Cookies=expired') {
+      if (_hasExpiredSessionCookie(request)) {
         return http.Response(
           '',
           302,
@@ -799,3 +799,6 @@ void main() {
     expect(requests.first.headers['cookie'], cookie);
   });
 }
+
+bool _hasExpiredSessionCookie(http.Request request) =>
+    request.headers['cookie'] == '.AspNetCore.Cookies=expired';

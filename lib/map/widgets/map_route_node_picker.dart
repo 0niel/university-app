@@ -80,7 +80,12 @@ class _MapRouteNodePickerState extends State<MapRouteNodePicker> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: _query,
+    builder: (context, _) => _content(context),
+  );
+
+  Widget _content(BuildContext context) {
     final l10n = context.l10n;
     final query = roomKey(_query.text);
     final floors = _nodes.map((node) => node.floorId).toSet();
@@ -93,7 +98,7 @@ class _MapRouteNodePickerState extends State<MapRouteNodePicker> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final media = MediaQuery.of(context);
-        final availableHeight = math.max<double>(
+        final double availableHeight = math.max(
           0,
           media.size.height -
               media.viewInsets.bottom -
@@ -152,7 +157,6 @@ class _MapRouteNodePickerState extends State<MapRouteNodePicker> {
                     AppSearchField(
                       controller: _query,
                       hintText: l10n.mapRoutePlaceSearchHint,
-                      onChanged: (_) => setState(() {}),
                     ),
                     if (floors.length > 1) ...[
                       const SizedBox(height: AppSpacing.md),
@@ -212,7 +216,8 @@ class _MapRouteNodePickerState extends State<MapRouteNodePicker> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (index == 0 ||
-                            nodes[index - 1].floorId != node.floorId)
+                            nodes.elementAtOrNull(index - 1)?.floorId !=
+                                node.floorId)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(
                               AppSpacing.md,

@@ -34,8 +34,8 @@ class AccountPersonaSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (_) => AccountPersonaFormCubit(
-      account: context.read<AccountPersonaCubit>(),
+    create: (providerContext) => AccountPersonaFormCubit(
+      account: providerContext.read(),
       initialRole: initialRole,
     ),
     child: BlocConsumer<AccountPersonaFormCubit, AccountPersonaFormState>(

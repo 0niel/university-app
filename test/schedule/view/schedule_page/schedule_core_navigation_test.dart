@@ -51,11 +51,96 @@ void main() {
                   find.byKey(const ValueKey('schedule-pinned-days')),
                 )
                 .dy,
-            closeTo(topInset, 1),
+            closeTo(0, 1),
+          );
+          expect(
+            tester.getTopLeft(strip).dy,
+            closeTo(topInset + AppSpacing.sm, 1),
           );
         },
       );
     }
+  }
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets(
+      'one pinned surface covers status bar '
+      'on empty days and later weeks at $scale',
+      (tester) async {
+        tester.view.padding = const FakeViewPadding(top: 43);
+        await tester.pumpApp(
+          scheduleGalleryScene(),
+          size: const Size(390, 844),
+          textScaler: TextScaler.linear(scale),
+        );
+        await tester.pumpAndSettle();
+        final header = find.byKey(const ValueKey('schedule-pinned-days'));
+        final strip = find.byKey(const ValueKey('schedule-day-strip'));
+        final nested = tester.state<NestedScrollViewState>(
+          find.byType(NestedScrollView),
+        );
+        expect(tester.widget<AppPinnedSurface>(header).elevated, isFalse);
+        await tester.drag(
+          find.byType(NestedScrollView),
+          const Offset(0, -1000),
+        );
+        await tester.pumpAndSettle();
+
+        void expectPinned() {
+          expect(tester.widget<AppPinnedSurface>(header).elevated, isTrue);
+          expect(tester.getRect(header).top, closeTo(0, .5));
+          expect(tester.getRect(strip).top, closeTo(43 + AppSpacing.sm, .5));
+          expect(tester.getRect(strip).left, 0);
+          expect(tester.getRect(strip).right, 390);
+          expect(find.byType(ScheduleDayStripHeader), findsOneWidget);
+        }
+
+        expectPinned();
+        for (final weekday in [DateTime.saturday, DateTime.sunday]) {
+          final pill = find
+              .descendant(of: strip, matching: find.byType(AppDayPill))
+              .hitTestable()
+              .at(weekday - 1);
+          await tester.tap(pill);
+          await tester.pumpAndSettle();
+          expect(
+            tester
+                .widget<ScheduleDatePager>(find.byType(ScheduleDatePager))
+                .day
+                .weekday,
+            weekday,
+          );
+          expectPinned();
+        }
+        for (var week = 0; week < 6; week++) {
+          final rect = tester.getRect(strip);
+          final gesture = await tester.startGesture(
+            Offset(rect.right - 2, rect.center.dy),
+          );
+          await gesture.moveBy(const Offset(-30, 0));
+          await gesture.moveBy(const Offset(-260, 0));
+          await tester.pump();
+          expectPinned();
+          await gesture.up();
+          await tester.pumpAndSettle();
+          expectPinned();
+        }
+        expect(
+          tester.widget<ScheduleDatePager>(find.byType(ScheduleDatePager)).day,
+          DateTime(2026, 10, 18),
+        );
+        expect(
+          nested.innerController.positions.every(
+            (position) => position.pixels == 0,
+          ),
+          isTrue,
+        );
+        nested.outerController.jumpTo(0);
+        await tester.pumpAndSettle();
+        expect(tester.widget<AppPinnedSurface>(header).elevated, isFalse);
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
   testWidgets('week strip settles before changing the schedule date', (
@@ -89,6 +174,48 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final scale in [1.0, 2.0]) {
+    testWidgets(
+      'pinned days gain a surface after scrolling '
+      'and swipe from edges at $scale',
+      (
+        tester,
+      ) async {
+        await tester.pumpApp(
+          scheduleGalleryScene(),
+          size: const Size(390, 844),
+          textScaler: TextScaler.linear(scale),
+        );
+        await tester.pumpAndSettle();
+        final header = find.byKey(const ValueKey('schedule-pinned-days'));
+        expect(tester.widget<AppPinnedSurface>(header).elevated, isFalse);
+        await tester.drag(
+          find.byType(NestedScrollView),
+          const Offset(0, -1000),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.widget<AppPinnedSurface>(header).elevated, isTrue);
+        final strip = find.byKey(const ValueKey('schedule-day-strip'));
+        expect(tester.getRect(strip).left, 0);
+        expect(tester.getRect(strip).right, 390);
+        final initial = tester
+            .widget<ScheduleDatePager>(find.byType(ScheduleDatePager))
+            .day;
+        final rect = tester.getRect(strip);
+        await tester.dragFrom(
+          Offset(rect.right - 2, rect.center.dy),
+          const Offset(-300, 0),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<ScheduleDatePager>(find.byType(ScheduleDatePager)).day,
+          DateTime(initial.year, initial.month, initial.day + 7),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('landscape notch stays outside day and month controls', (
     tester,
   ) async {
@@ -115,6 +242,58 @@ void main() {
     expect(
       tester.widget<ScheduleMonthView>(find.byType(ScheduleMonthView)).day,
       DateUtils.dateOnly(scheduleGalleryNow),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('week table scrolls from screen edges with aligned day columns', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      scheduleGalleryScene(),
+      size: const Size(390, 844),
+      textScaler: const TextScaler.linear(2),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Неделя').first);
+    await tester.tap(find.text('Неделя').first);
+    await tester.pumpAndSettle();
+    final table = find.byKey(const ValueKey('schedule-week-table-scroll'));
+    await tester.drag(find.byType(NestedScrollView), const Offset(0, -1000));
+    await tester.pumpAndSettle();
+    final rect = tester.getRect(table);
+    expect(rect.left, 0);
+    expect(rect.right, 390);
+    final scroll = find.descendant(
+      of: table,
+      matching: find.byType(Scrollable),
+    );
+    final position = tester.state<ScrollableState>(scroll).position;
+    final firstDay = find
+        .descendant(of: table, matching: find.byType(AppDayPill))
+        .first;
+    final firstCell = find
+        .descendant(
+          of: table,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget.key is ValueKey<String> &&
+                (widget.key! as ValueKey<String>).value.startsWith(
+                  'week-cell-',
+                ),
+          ),
+        )
+        .first;
+    final dayX = tester.getTopLeft(firstDay).dx;
+    final cellX = tester.getTopLeft(firstCell).dx;
+    final y = rect.top.clamp(0.0, 600.0) + 24;
+    await tester.dragFrom(Offset(rect.right - 2, y), const Offset(-220, 0));
+    await tester.pumpAndSettle();
+    expect(position.pixels, greaterThan(100));
+    expect(tester.getTopLeft(firstDay).dx, closeTo(dayX - position.pixels, .1));
+    expect(
+      tester.getTopLeft(firstCell).dx,
+      closeTo(cellX - position.pixels, .1),
     );
     expect(tester.takeException(), isNull);
   });

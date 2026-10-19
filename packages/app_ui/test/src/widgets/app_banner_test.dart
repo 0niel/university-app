@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(body: Center(child: child)),
+  );
 
   group('AppBanner', () {
     testWidgets('renders the message and an 8px dot', (tester) async {

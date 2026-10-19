@@ -107,8 +107,8 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
             NfcVerificationUnavailable() => .verificationUnavailable,
           },
           verificationRetryAt: switch (result) {
-            NfcVerificationCodeSent(:final retryAt) => retryAt,
-            NfcVerificationCooldown(:final retryAt) => retryAt,
+            NfcVerificationCodeSent(:final DateTime? retryAt) ||
+            NfcVerificationCooldown(:final DateTime? retryAt) => retryAt,
             NfcVerificationUnavailable() => null,
           },
           verificationIssue: null,
@@ -118,8 +118,9 @@ class NfcPassCubit extends HydratedCubit<NfcPassState> {
       if (!_isCurrent(request)) return;
       final unreachable = error is NfcPassFailure ? error.unreachable : null;
       if (unreachable != null) {
-        final next = await _unreachableState(unreachable);
-        if (_isCurrent(request)) emit(next);
+        await _unreachableState(unreachable).then((next) {
+          if (_isCurrent(request)) emit(next);
+        });
       } else {
         emit(
           state.copyWith(

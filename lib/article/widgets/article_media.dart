@@ -75,9 +75,7 @@ List<String> articleGallery({
   add(cover);
   for (final block in blocks) {
     switch (block) {
-      case ImageBlock(:final imageUrl):
-        add(imageUrl);
-      case SlideBlock(:final imageUrl):
+      case ImageBlock(:final imageUrl) || SlideBlock(:final imageUrl):
         add(imageUrl);
       case SlideshowBlock(:final slides):
         for (final slide in slides) {

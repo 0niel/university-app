@@ -1,15 +1,10 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:rtu_mirea_app/map/services/map_volume_wall.dart';
 import 'package:rtu_mirea_app/map/widgets/map_structure_layer.dart';
 
-class MapVolumeWall {
-  const MapVolumeWall(this.start, this.end);
-
-  final Offset start;
-  final Offset end;
-  Rect get bounds => Rect.fromPoints(start, end).inflate(.001);
-}
+export 'map_volume_wall.dart';
 
 class MapVolumeMesh {
   const MapVolumeMesh._(this.walls, this.truncated);
@@ -47,7 +42,7 @@ class MapVolumeMesh {
     }
     final openingGrid = <(int, int), List<MapVolumeWall>>{};
     final largeOpenings = <MapVolumeWall>[];
-    final cellSize = math.max<double>(1, floorSize.longestSide / 64);
+    final double cellSize = math.max(1, floorSize.longestSide / 64);
     for (final opening in openings) {
       final bounds = opening.bounds.inflate(tolerance * 2);
       final cells = _gridCells(bounds, cellSize);
@@ -133,7 +128,8 @@ List<MapVolumeWall> _flatten(Path path, double tolerance, int limit) {
     }
 
     final start = metric.getTangentForOffset(0)?.position;
-    final end = metric.getTangentForOffset(metric.length)?.position;
+    final length = metric.length;
+    final end = metric.getTangentForOffset(length)?.position;
     if (start == null || end == null || !start.isFinite || !end.isFinite) {
       continue;
     }
@@ -167,7 +163,7 @@ Iterable<MapVolumeWall> _subtractOpenings(
     }
     final a = along(opening.start);
     final b = along(opening.end);
-    final left = math.max<double>(0, math.min(a, b));
+    final double left = math.max(0, math.min(a, b));
     final right = math.min(length, math.max(a, b));
     if (right > left) gaps.add((left, right));
   }

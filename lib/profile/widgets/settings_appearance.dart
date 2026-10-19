@@ -20,30 +20,27 @@ import 'package:schedule_repository/schedule_repository.dart';
 part 'appearance/accent_choice_swatch.dart';
 part 'appearance/accent_color_picker.dart';
 part 'appearance/accent_color_setting.dart';
-part 'appearance/amoled_toggle.dart';
+part 'appearance/glass_effect_toggle.dart';
 part 'appearance/lesson_color_picker_row.dart';
 part 'appearance/lesson_color_preview.dart';
 part 'appearance/lesson_type_colors.dart';
 part 'appearance/lesson_types_color_picker.dart';
 
 class SettingsAppearance extends StatelessWidget {
-  const SettingsAppearance({super.key, this.preview});
-
-  final Widget? preview;
+  const SettingsAppearance({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+    return const Padding(
+      padding: EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: .stretch,
         children: [
-          const SettingsThemeRow(compact: true),
-          const SizedBox(height: 13),
-          const _AccentColorSetting(),
-          const _AmoledToggle(),
-          const _LessonTypeColors(),
-          ?preview,
+          SettingsThemeRow(compact: true),
+          SizedBox(height: 13),
+          _AccentColorSetting(),
+          _GlassEffectToggle(),
+          _LessonTypeColors(),
         ],
       ),
     );

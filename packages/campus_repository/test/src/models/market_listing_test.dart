@@ -44,10 +44,10 @@ void main() {
       expect(m.showContact, isTrue);
       expect(m.telegramHandle, 'ivan_dev');
       expect(m.media, hasLength(2));
-      expect(m.media.first.kind, MarketMediaKind.image);
-      expect(m.media.last.kind, MarketMediaKind.video);
-      expect(m.media.last.duration, 12);
-      expect(m.cover, m.media.first);
+      expect(m.media.firstOrNull!.kind, MarketMediaKind.image);
+      expect(m.media.lastOrNull!.kind, MarketMediaKind.video);
+      expect(m.media.lastOrNull!.duration, 12);
+      expect(m.cover, m.media.firstOrNull);
     });
 
     test('fromJson defaults optional fields', () {
@@ -107,7 +107,7 @@ void main() {
         'owner/image.jpg',
         'owner/video.mp4',
       ]);
-      expect(listing.cover, listing.media.first);
+      expect(listing.cover, listing.media.firstOrNull);
       expect(listing.toJson()['media'], isA<List<Map<String, Object?>>>());
       expect(MarketListing.fromJson(listing.toJson()), listing);
     });
@@ -135,7 +135,7 @@ void main() {
         isFree: true,
         telegramHandle: 'seller',
         media: [
-          MarketMediaItem(path: 'user-1/a.jpg', kind: MarketMediaKind.image),
+          MarketMediaItem(path: 'user-1/a.jpg', kind: .image),
         ],
       );
       expect(MarketListing.fromJson(listing.toJson()), listing);
@@ -164,7 +164,7 @@ void main() {
     test('the resolved url is never serialized', () {
       const item = MarketMediaItem(
         path: 'user-1/a.jpg',
-        kind: MarketMediaKind.image,
+        kind: .image,
         url: 'https://cdn.example/user-1/a.jpg',
       );
       expect(item.toJson(), isNot(contains('url')));

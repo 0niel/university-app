@@ -291,8 +291,11 @@ class _RunnerHost extends MiniAppHost {
       if (permission == .denied) {
         permission = await Geolocator.requestPermission();
       }
-      if (permission == .denied || permission == .deniedForever) {
-        return null;
+      switch (permission) {
+        case .denied || .deniedForever:
+          return null;
+        case .always || .whileInUse || .unableToDetermine:
+          break;
       }
       final position = await Geolocator.getCurrentPosition();
       return {
@@ -329,8 +332,6 @@ class _RunnerHost extends MiniAppHost {
     return repository.uploadImage(
       appId: appId,
       bytes: bytes,
-      fileName: file.name,
-      contentType: file.mimeType,
     );
   }
 
@@ -451,8 +452,10 @@ class _RunnerHost extends MiniAppHost {
     final app = cubit.state.app;
     if (app == null) return false;
     final granted = app.grantedPermissions ?? const <MiniAppPermission>[];
-    if (granted.contains(scope)) return true;
-    if (!app.requestedPermissions.contains(scope)) return false;
+    final hasConsent = granted.contains(scope);
+    if (hasConsent || !app.requestedPermissions.contains(scope)) {
+      return hasConsent;
+    }
 
     final allow = await showNinjaDialog<bool>(
       _state.context,

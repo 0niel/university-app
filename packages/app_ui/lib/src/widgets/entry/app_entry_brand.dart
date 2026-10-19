@@ -10,21 +10,21 @@ class AppEntryBrand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: 44,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppNinjaMark(size: 28, color: context.colors.ink),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppText.labelStrong.copyWith(color: context.colors.ink),
-              ),
-            ),
-          ],
+    height: 44,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AppNinjaMark(size: 28, color: context.colors.ink),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.labelStrong.copyWith(color: context.colors.ink),
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }

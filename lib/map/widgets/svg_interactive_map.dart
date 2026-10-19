@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -350,9 +351,6 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
                             : MapFloorCanvas(
                                 svgAssetPath: widget.svgAssetPath,
                                 canvasSize: bounds.size,
-                                viewportSize: widget.showRoomLabels
-                                    ? viewportSize
-                                    : null,
                                 rooms: rooms,
                                 selectedRoomId: _selectedRoomId,
                                 svgContent: widget.svgContent,
@@ -410,10 +408,13 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
             place: places[room.roomId],
           ).detachedService;
     }).toList();
-    if (labelId != null && state.rooms.any((room) => room.roomId == labelId)) {
+    final labelRoom = state.rooms.firstWhereOrNull(
+      (room) => room.roomId == labelId,
+    );
+    if (labelId != null && labelRoom != null) {
       containing
         ..clear()
-        ..add(state.rooms.firstWhere((room) => room.roomId == labelId));
+        ..add(labelRoom);
     } else if (!cartographic) {
       final services = {
         ...widget.syntheticRoomIds,
@@ -426,7 +427,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
           if (mapPlaceLandmarkPriority(place.kind) > 0) place.id,
       };
       for (final room in state.rooms.where(
-        (room) => services.contains(room.roomId),
+        (candidate) => services.contains(candidate.roomId),
       )) {
         final bounds = room.path.getBounds();
         final location = resolveMapPlaceAnchor(
@@ -666,12 +667,13 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     final valid = points
         .where((point) => point.dx.isFinite && point.dy.isFinite)
         .toList();
-    if (constraints == null || floorBounds == null || valid.isEmpty) return;
-    var bounds = Rect.fromPoints(valid.first, valid.first);
+    final first = valid.firstOrNull;
+    if (constraints == null || floorBounds == null || first == null) return;
+    var bounds = Rect.fromPoints(first, first);
     for (final point in valid.skip(1)) {
       bounds = bounds.expandToInclude(Rect.fromPoints(point, point));
     }
-    final minimumExtent = math.max<double>(floorBounds.shortestSide / 12, 1);
+    final double minimumExtent = math.max(floorBounds.shortestSide / 12, 1);
     bounds = Rect.fromCenter(
       center: bounds.center,
       width: math.max(bounds.width, minimumExtent),
@@ -721,13 +723,14 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       bounds.bottomLeft,
       bounds.bottomRight,
     ].map(projection.sceneToScreen).toList();
-    var projected = Rect.fromPoints(corners.first, corners.first);
+    final first = projection.sceneToScreen(bounds.topLeft);
+    var projected = Rect.fromPoints(first, first);
     for (final corner in corners.skip(1)) {
       projected = projected.expandToInclude(Rect.fromPoints(corner, corner));
     }
-    final horizontalMargin = math.min<double>(12, viewport.width * .08);
-    final topMargin = math.min<double>(24, viewport.height * .2);
-    final bottomMargin = math.min<double>(12, viewport.height * .1);
+    final horizontalMargin = math.min(12, viewport.width * .08);
+    final topMargin = math.min(24, viewport.height * .2);
+    final bottomMargin = math.min(12, viewport.height * .1);
     final available = Rect.fromLTRB(
       viewport.left + horizontalMargin,
       viewport.top + topMargin,

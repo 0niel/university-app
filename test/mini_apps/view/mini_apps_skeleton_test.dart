@@ -142,10 +142,25 @@ void main() {
 
       await tester.tap(sortAction);
       await tester.pumpAndSettle();
-      expect(find.text('Сортировка'), findsOneWidget);
+      final popover = find.byType(AppPopover);
+      expect(popover, findsOneWidget);
+      expect(tester.widget<AppPopover>(popover).semanticLabel, 'Сортировка');
+      final options = find.descendant(
+        of: popover,
+        matching: find.byType(AppRadioRow),
+      );
+      expect(options, findsNWidgets(MiniAppSort.values.length));
+      expect(
+        tester
+            .widgetList<AppRadioRow>(options)
+            .singleWhere((row) => row.selected)
+            .title,
+        'Популярные',
+      );
 
       await tester.tap(find.text('Топ'));
       await tester.pumpAndSettle();
+      expect(popover, findsNothing);
       verify(() => cubit.sortChanged(MiniAppSort.top)).called(1);
     });
 
@@ -182,7 +197,7 @@ void main() {
   });
 
   testWidgets(
-    'categories scroll horizontally and controls leave the viewport',
+    'categories scroll horizontally and filters stay pinned over the catalog',
     (tester) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1;
@@ -212,6 +227,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final categories = find.byKey(const ValueKey('mini-apps-categories'));
+      final initialCategoriesTop = tester.getTopLeft(categories).dy;
       await tester.drag(categories, const Offset(-1000, 0));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Другое'));
@@ -219,8 +235,10 @@ void main() {
       await tester.drag(find.byType(CustomScrollView), const Offset(0, -1100));
       await tester.pumpAndSettle();
       expect(find.byType(AppInnerHeader).hitTestable(), findsNothing);
-      expect(find.byType(NinjaInput).hitTestable(), findsNothing);
-      expect(categories.hitTestable(), findsNothing);
+      expect(find.byType(AppSearchField).hitTestable(), findsOneWidget);
+      expect(categories.hitTestable(), findsOneWidget);
+      expect(tester.getTopLeft(categories).dy, lessThan(initialCategoriesTop));
+      expect(tester.getTopLeft(categories).dy, inInclusiveRange(0, 120));
       expect(find.byType(MiniAppCard).hitTestable(), findsWidgets);
       expect(tester.takeException(), isNull);
     },
@@ -233,6 +251,7 @@ void main() {
       cubit = MockMiniAppsCatalogCubit();
       when(() => cubit.queryChanged(any())).thenAnswer((_) async {});
       when(() => cubit.categoryChanged(any())).thenAnswer((_) async {});
+      when(() => cubit.resetFilters()).thenAnswer((_) async {});
     });
 
     testWidgets('an empty catalog offers a real create action', (tester) async {
@@ -261,7 +280,9 @@ void main() {
       );
     });
 
-    testWidgets('a fruitless filter offers a reset action', (tester) async {
+    testWidgets('owned apps remain visible without a false empty state', (
+      tester,
+    ) async {
       const mine = MiniApp(id: 'mine', slug: 'mine', name: 'Мой апп');
       when(() => cubit.state).thenReturn(
         const MiniAppsCatalogState(
@@ -281,14 +302,91 @@ void main() {
       );
       await tester.pump();
 
+      expect(find.byKey(const ValueKey('owned-mine')), findsOneWidget);
+      expect(find.text('Мой апп'), findsOneWidget);
+      expect(find.byType(NinjaEmptyState), findsNothing);
+      expect(find.text('Ничего не нашлось'), findsNothing);
+      expect(find.text('Сбросить фильтр'), findsNothing);
+    });
+
+    testWidgets(
+      'owned apps matching active filters prevent a false empty state',
+      (tester) async {
+        const matching = MiniApp(
+          id: 'notes',
+          slug: 'notes',
+          name: 'Конспекты',
+          category: MiniAppCategory.study,
+        );
+        const other = MiniApp(
+          id: 'other',
+          slug: 'other',
+          name: 'Другой сервис',
+          category: MiniAppCategory.campus,
+        );
+        when(() => cubit.state).thenReturn(
+          const MiniAppsCatalogState(
+            status: MiniAppsCatalogStatus.populated,
+            query: 'КОНСПЕКТ',
+            category: MiniAppCategory.study,
+            myApps: [matching, other],
+          ),
+        );
+        await tester.pumpWidget(
+          _wrap(
+            BlocProvider<MiniAppsCatalogCubit>.value(
+              value: cubit,
+              child: const MiniAppsView(),
+            ),
+            reduceMotion: true,
+          ),
+        );
+        await tester.pump();
+
+        expect(find.byKey(const ValueKey('owned-notes')), findsOneWidget);
+        expect(find.byKey(const ValueKey('owned-other')), findsNothing);
+        expect(find.byType(MiniAppCard), findsOneWidget);
+        expect(find.byType(NinjaEmptyState), findsNothing);
+        expect(find.text('Ничего не нашлось'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('unmatched owned apps leave one real reset action', (
+      tester,
+    ) async {
+      const mine = MiniApp(id: 'mine', slug: 'mine', name: 'Мой апп');
+      when(() => cubit.state).thenReturn(
+        const MiniAppsCatalogState(
+          status: MiniAppsCatalogStatus.populated,
+          query: 'Неизвестный сервис',
+          category: MiniAppCategory.social,
+          myApps: [mine],
+        ),
+      );
+      await tester.pumpWidget(
+        _wrap(
+          BlocProvider<MiniAppsCatalogCubit>.value(
+            value: cubit,
+            child: const MiniAppsView(),
+          ),
+          reduceMotion: true,
+        ),
+      );
+      await tester.pump();
+
       expect(find.text('Ничего не нашлось'), findsOneWidget);
+      expect(find.byType(MiniAppCard), findsNothing);
+      expect(find.byKey(const ValueKey('owned-mine')), findsNothing);
+      expect(find.text('Сбросить фильтр'), findsOneWidget);
       await tester.ensureVisible(find.text('Сбросить фильтр'));
       await tester.pump();
       await tester.tap(find.text('Сбросить фильтр'));
       await tester.pump();
 
-      verify(() => cubit.categoryChanged(null)).called(1);
-      verify(() => cubit.queryChanged('')).called(1);
+      verify(() => cubit.resetFilters()).called(1);
+      verifyNever(() => cubit.categoryChanged(any()));
+      verifyNever(() => cubit.queryChanged(any()));
     });
   });
 

@@ -46,7 +46,7 @@ void main() {
       );
       expect(accounts, ['mirea:student-a']);
 
-      states.add(signedIn.copyWith(isAmoled: true));
+      states.add(signedIn.withNotificationDestination(route: '/profile'));
       await tester.pump();
       expect(accounts, ['mirea:student-a']);
 

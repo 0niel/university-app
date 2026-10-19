@@ -25,13 +25,13 @@ class TeacherPickerBloc extends Bloc<TeacherPickerEvent, TeacherPickerState> {
       transformer: restartable(),
     );
     on<TeacherPickerSelectionChanged>((event, emit) {
-      final selected = event.teacher?.isPickerLinkable == true
+      final selection = event.teacher?.isPickerLinkable == true
           ? event.teacher
           : null;
       emit(
         state.copyWith(
-          selected: selected,
-          ambiguousNames: _ambiguousNames(state.teachers, selected),
+          selected: selection,
+          ambiguousNames: _ambiguousNames(state.teachers, selection),
         ),
       );
     });

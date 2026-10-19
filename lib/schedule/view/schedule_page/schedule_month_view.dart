@@ -47,7 +47,7 @@ class ScheduleMonthView extends StatelessWidget {
                   .isAfter(now ?? DateTime.now())))
         (activity.title, context.colors.ink, true),
     for (final part in schedule)
-      if (part.dates.any((day) => isSameDate(day, date)))
+      if (part.dates.any((selectedDate) => isSameDate(selectedDate, date)))
         if (part is HolidaySchedulePart)
           (part.title, context.colors.warn, false)
         else if (part is CalendarSchedulePart &&
@@ -271,7 +271,7 @@ class ScheduleMonthTypeChart extends StatelessWidget {
                     Flexible(
                       child: Text(
                         '${lessonTypeName(context.l10n, type)} · '
-                        '${counts[type]}',
+                        '${counts[type] ?? 0}',
                         style: AppText.captionSmall.copyWith(
                           color: context.colors.muted,
                         ),
@@ -370,7 +370,7 @@ class _MonthCell extends StatelessWidget {
                 runSpacing: AppSpacing.xxs,
                 children: [
                   for (final color in [
-                    for (final marker in markers.where((marker) => marker.$3))
+                    for (final marker in markers.where((item) => item.$3))
                       marker.$2,
                     for (final lesson in lessons)
                       lessonAccentOf(context, lesson),

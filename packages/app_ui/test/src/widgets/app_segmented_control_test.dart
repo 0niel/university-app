@@ -87,10 +87,12 @@ void main() {
         ),
       );
       final segment = tester.widget<AnimatedContainer>(
-        find.ancestor(
-          of: find.text('Сегодня'),
-          matching: find.byType(AnimatedContainer),
-        ).first,
+        find
+            .ancestor(
+              of: find.text('Сегодня'),
+              matching: find.byType(AnimatedContainer),
+            )
+            .first,
       );
       expect(
         segment.padding,

@@ -2,20 +2,6 @@ import 'package:app_ui/app_ui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/widgets.dart';
 
-class FeedSourceRailItem {
-  const FeedSourceRailItem({
-    required this.id,
-    required this.name,
-    required this.abbr,
-    this.avatarUrl,
-  });
-
-  final String id;
-  final String name;
-  final String abbr;
-  final String? avatarUrl;
-}
-
 class FeedSourcesRail extends StatelessWidget {
   const FeedSourcesRail({
     required this.items,
@@ -41,7 +27,6 @@ class FeedSourcesRail extends StatelessWidget {
         height: height,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
           itemCount: items.length,
           separatorBuilder: (_, _) =>
@@ -156,4 +141,18 @@ class _SourceCircle extends StatelessWidget {
       ),
     );
   }
+}
+
+class FeedSourceRailItem {
+  const FeedSourceRailItem({
+    required this.id,
+    required this.name,
+    required this.abbr,
+    this.avatarUrl,
+  });
+
+  final String id;
+  final String name;
+  final String abbr;
+  final String? avatarUrl;
 }

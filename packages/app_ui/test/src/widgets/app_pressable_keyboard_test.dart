@@ -8,24 +8,45 @@ import 'package:flutter_test/flutter_test.dart';
 import '../kit_harness.dart';
 
 void main() {
-  testWidgets('focus and control semantics share one node across disable',
-      (tester) async {
+  testWidgets('press state handles the standard activation intent', (
+    tester,
+  ) async {
+    var taps = 0;
+    await tester.pumpWidget(
+      wrapKit(
+        AppPressState(
+          onTap: () => taps++,
+          builder: (context, {required pressed}) => const Text('Control'),
+        ),
+      ),
+    );
+    Actions.invoke(
+      tester.element(find.text('Control')),
+      const ActivateIntent(),
+    );
+    expect(taps, 1);
+  });
+
+  testWidgets('focus and control semantics share one node across disable', (
+    tester,
+  ) async {
     var taps = 0;
     Widget view({required bool enabled}) => wrapKit(
-          AppPressState(
-            enabled: enabled,
-            onTap: () => taps++,
-            semanticsLabel: 'Control',
-            semanticsButton: false,
-            semanticsChecked: true,
-            semanticsExclusive: true,
-            builder: (context, {required pressed}) =>
-                const SizedBox.square(dimension: 48, child: Text('Control')),
-          ),
-        );
+      AppPressState(
+        enabled: enabled,
+        onTap: () => taps++,
+        semanticsLabel: 'Control',
+        semanticsButton: false,
+        semanticsChecked: true,
+        semanticsExclusive: true,
+        builder: (context, {required pressed}) =>
+            const SizedBox.square(dimension: 48, child: Text('Control')),
+      ),
+    );
     await tester.pumpWidget(view(enabled: true));
-    var data =
-        tester.getSemantics(find.byType(AppPressState)).getSemanticsData();
+    var data = tester
+        .getSemantics(find.byType(AppPressState))
+        .getSemanticsData();
     expect(data.flagsCollection.isChecked, ui.CheckedState.isTrue);
     expect(data.flagsCollection.isEnabled, ui.Tristate.isTrue);
     expect(data.flagsCollection.isFocused, ui.Tristate.isFalse);
@@ -52,8 +73,9 @@ void main() {
     expect(taps, 1);
   });
 
-  testWidgets('header and toast actions are reachable by keyboard',
-      (tester) async {
+  testWidgets('header and toast actions are reachable by keyboard', (
+    tester,
+  ) async {
     var backs = 0;
     var actions = 0;
     var retries = 0;
@@ -93,8 +115,9 @@ void main() {
     expect(retries, 1);
   });
 
-  testWidgets('nested pressables dispatch one callback to the tapped target',
-      (tester) async {
+  testWidgets('nested pressables dispatch one callback to the tapped target', (
+    tester,
+  ) async {
     var outer = 0;
     var inner = 0;
     await tester.pumpWidget(
@@ -131,8 +154,9 @@ void main() {
     expect(outer, 1);
   });
 
-  testWidgets('long press remains separate from taps and haptic feedback',
-      (tester) async {
+  testWidgets('long press remains separate from taps and haptic feedback', (
+    tester,
+  ) async {
     var taps = 0;
     var holds = 0;
     var haptics = 0;
@@ -169,8 +193,9 @@ void main() {
     expect(haptics, 1);
   });
 
-  testWidgets('reduced motion keeps opacity immediate and removes scale',
-      (tester) async {
+  testWidgets('reduced motion keeps the surface stable while pressed', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrapKit(
         AppPressable(
@@ -184,24 +209,23 @@ void main() {
       tester.getCenter(find.byType(AppPressable)),
     );
     await tester.pump(const Duration(milliseconds: 150));
-    final opacity =
-        tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity));
-    expect(opacity.opacity, .85);
-    expect(opacity.duration, Duration.zero);
+    expect(find.byType(AnimatedOpacity), findsNothing);
+    expect(find.byType(Opacity), findsNothing);
     expect(find.byType(AnimatedScale), findsNothing);
     await gesture.cancel();
   });
 
-  testWidgets('disabling during a press cancels activation and pressed state',
-      (tester) async {
+  testWidgets('disabling during a press cancels activation and pressed state', (
+    tester,
+  ) async {
     var taps = 0;
     Widget view({required bool enabled}) => wrapKit(
-          AppPressable(
-            enabled: enabled,
-            onTap: () => taps++,
-            child: const SizedBox.square(dimension: 48),
-          ),
-        );
+      AppPressable(
+        enabled: enabled,
+        onTap: () => taps++,
+        child: const SizedBox.square(dimension: 48),
+      ),
+    );
     await tester.pumpWidget(view(enabled: true));
     final gesture = await tester.startGesture(
       tester.getCenter(find.byType(AppPressable)),
@@ -212,7 +236,7 @@ void main() {
     expect(taps, 0);
     await tester.pumpWidget(view(enabled: true));
     expect(
-      tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
+      tester.widget<AnimatedScale>(find.byType(AnimatedScale)).scale,
       1,
     );
     await tester.tap(find.byType(AppPressable));

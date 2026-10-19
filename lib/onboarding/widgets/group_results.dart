@@ -41,7 +41,8 @@ class GroupResults extends StatelessWidget {
           retryLabel: l10n.retry,
           onRetry: onRetry,
         ),
-        _ when results.isNotEmpty => _GroupResultsCard(
+        SearchStatus.initial ||
+        SearchStatus.populated when results.isNotEmpty => _GroupResultsCard(
           key: const ValueKey('onboarding_groups_results'),
           children: [
             for (var index = 0; index < results.length; index++) ...[
@@ -54,11 +55,12 @@ class GroupResults extends StatelessWidget {
             ],
           ],
         ),
-        _ when hasQuery => _GroupResultsCard(
+        SearchStatus.initial ||
+        SearchStatus.populated when hasQuery => _GroupResultsCard(
           key: const ValueKey('onboarding_groups_empty'),
           children: [GroupNotFound(onCreateSchedule: onCreateSchedule)],
         ),
-        _ => _GroupResultsCard(
+        SearchStatus.initial || SearchStatus.populated => _GroupResultsCard(
           key: const ValueKey('onboarding_groups_idle'),
           children: [_GroupsHint(text: l10n.onboardingGroupHint)],
         ),
@@ -76,8 +78,9 @@ class _GroupResultsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.row),
-      child: DecoratedBox(
-        decoration: BoxDecoration(color: context.colors.surface),
+      child: AppGlassSurface(
+        tone: AppGlassTone.subtle,
+        borderRadius: AppRadius.row,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: children,

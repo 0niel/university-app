@@ -42,7 +42,8 @@ class AppFab extends StatelessWidget {
     final foreground =
         foregroundColor ?? (enabled ? colors.onAccent : colors.muted2);
     final labelText = label;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
 
     Widget fab = AppPressState(
@@ -51,8 +52,9 @@ class AppFab extends StatelessWidget {
       semanticsLabel: tooltip ?? labelText,
       semanticsButton: true,
       builder: (context, {required pressed}) => AnimatedContainer(
-        duration:
-            reduceMotion ? Duration.zero : const Duration(milliseconds: 120),
+        duration: reduceMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 120),
         curve: Curves.easeOut,
         height: AppControlSize.fab,
         width: labelText == null ? AppControlSize.fab : null,

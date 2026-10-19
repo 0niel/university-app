@@ -3,11 +3,11 @@ import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:flutter/material.dart';
 
-const double _trackHeight = 4;
-const double _thumbSize = 22;
-const double _thumbRingWidth = 2;
-const double _tickDiameter = 2;
-const double _labelReserve = 30;
+const double _kTrackHeight = 4;
+const double _kThumbSize = 22;
+const double _kThumbRingWidth = 2;
+const double _kTickDiameter = 2;
+const double _kLabelReserve = 30;
 
 class AppSlider extends StatefulWidget {
   const AppSlider({
@@ -103,7 +103,8 @@ class _AppSliderState extends State<AppSlider> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context) ||
+    final reduceMotion =
+        MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     final interactive = _interactive;
     final label = widget.label;
@@ -123,27 +124,30 @@ class _AppSliderState extends State<AppSlider> {
         (widget.value - _stepSize).clamp(widget.min, widget.max),
       ),
       enabled: widget.enabled,
-      onIncrease:
-          interactive && widget.value < widget.max ? () => _step(1) : null,
-      onDecrease:
-          interactive && widget.value > widget.min ? () => _step(-1) : null,
+      onIncrease: interactive && widget.value < widget.max
+          ? () => _step(1)
+          : null,
+      onDecrease: interactive && widget.value > widget.min
+          ? () => _step(-1)
+          : null,
       child: ExcludeSemantics(
         child: Opacity(
           opacity: widget.enabled ? 1 : 0.4,
           child: SizedBox(
             height: hasLabel
-                ? AppControlSize.touchTarget + _labelReserve
+                ? AppControlSize.touchTarget + _kLabelReserve
                 : AppControlSize.touchTarget,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
-                final maxLeft =
-                    width - _thumbSize < 0 ? 0.0 : width - _thumbSize;
-                final thumbLeft = (fraction * width - _thumbSize / 2).clamp(
+                final maxLeft = width - _kThumbSize < 0
+                    ? 0.0
+                    : width - _kThumbSize;
+                final thumbLeft = (fraction * width - _kThumbSize / 2).clamp(
                   0.0,
                   maxLeft,
                 );
-                final trackTop = hasLabel ? _labelReserve : 0.0;
+                final trackTop = hasLabel ? _kLabelReserve : 0.0;
                 return Listener(
                   onPointerDown: (event) {
                     if (_pointer != null) return;
@@ -186,10 +190,11 @@ class _AppSliderState extends State<AppSlider> {
                         : null,
                     onHorizontalDragUpdate: interactive
                         ? (details) =>
-                            _updateFromDx(details.localPosition.dx, width)
+                              _updateFromDx(details.localPosition.dx, width)
                         : null,
-                    onHorizontalDragEnd:
-                        interactive ? (_) => _finishGesture() : null,
+                    onHorizontalDragEnd: interactive
+                        ? (_) => _finishGesture()
+                        : null,
                     onHorizontalDragCancel: interactive ? _cancelGesture : null,
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -201,7 +206,7 @@ class _AppSliderState extends State<AppSlider> {
                           height: AppControlSize.touchTarget,
                           child: Center(
                             child: CustomPaint(
-                              size: Size(width, _trackHeight),
+                              size: Size(width, _kTrackHeight),
                               painter: _SliderTrackPainter(
                                 fraction: fraction,
                                 divisions: widget.divisions,
@@ -214,8 +219,9 @@ class _AppSliderState extends State<AppSlider> {
                         ),
                         Positioned(
                           left: thumbLeft,
-                          top: trackTop +
-                              (AppControlSize.touchTarget - _thumbSize) / 2,
+                          top:
+                              trackTop +
+                              (AppControlSize.touchTarget - _kThumbSize) / 2,
                           child: _Thumb(
                             color: colors.surface,
                             ringColor: colors.accent,
@@ -223,7 +229,7 @@ class _AppSliderState extends State<AppSlider> {
                         ),
                         if (hasLabel)
                           Positioned(
-                            left: thumbLeft + _thumbSize / 2,
+                            left: thumbLeft + _kThumbSize / 2,
                             top: 0,
                             child: FractionalTranslation(
                               translation: const Offset(-0.5, 0),
@@ -258,12 +264,12 @@ class _Thumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: _thumbSize,
-      height: _thumbSize,
+      width: _kThumbSize,
+      height: _kThumbSize,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: ringColor, width: _thumbRingWidth),
+        border: Border.all(color: ringColor, width: _kThumbRingWidth),
       ),
     );
   }
@@ -333,7 +339,7 @@ class _SliderTrackPainter extends CustomPainter {
         final x = (size.width * i / divisions).clamp(0.0, size.width);
         canvas.drawCircle(
           Offset(x, size.height / 2),
-          _tickDiameter / 2,
+          _kTickDiameter / 2,
           tickPaint,
         );
       }

@@ -4,6 +4,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/widgets.dart';
 import 'package:pdfx/pdfx.dart';
+import 'package:rtu_mirea_app/common/media_viewer/media_pdf_document.dart';
 import 'package:rtu_mirea_app/common/media_viewer/services/media_download.dart';
 import 'package:rtu_mirea_app/common/media_viewer/widgets/media_state_widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -18,9 +19,8 @@ class MediaPdfPage extends StatefulWidget {
 }
 
 class _MediaPdfPageState extends State<MediaPdfPage> {
-  PdfControllerPinch? _controller;
-  int _page = 1;
-  int _pageCount = 0;
+  MediaPdfDocument? _document;
+  int _loadRevision = 0;
   Object? _error;
   bool _loading = true;
   double _progress = 0;
@@ -31,35 +31,47 @@ class _MediaPdfPageState extends State<MediaPdfPage> {
     unawaited(_load());
   }
 
+  @override
+  void didUpdateWidget(covariant MediaPdfPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.url != widget.url) unawaited(_load());
+  }
+
   Future<void> _load() async {
+    final revision = ++_loadRevision;
+    final previous = _document;
     setState(() {
+      _document = null;
       _loading = true;
       _error = null;
       _progress = 0;
     });
+    if (previous != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(previous.close());
+      });
+    }
     try {
       final file = await downloadMediaFile(
         widget.url,
         onProgress: (value) {
-          if (mounted) setState(() => _progress = value);
+          if (mounted && revision == _loadRevision) {
+            setState(() => _progress = value);
+          }
         },
       );
-      final documentFuture = PdfDocument.openFile(file.path);
-      final controller = PdfControllerPinch(document: documentFuture);
-      controller.pageListenable.addListener(_onPageChanged);
-      final document = await documentFuture;
-      if (!mounted) {
+      if (!mounted || revision != _loadRevision) return;
+      final document = await PdfDocument.openFile(file.path);
+      if (!mounted || revision != _loadRevision) {
         await document.close();
         return;
       }
       setState(() {
-        _controller = controller;
-        _pageCount = document.pagesCount;
-        _page = controller.pageListenable.value;
+        _document = MediaPdfDocument(document);
         _loading = false;
       });
     } on Object catch (error) {
-      if (!mounted) return;
+      if (!mounted || revision != _loadRevision) return;
       setState(() {
         _error = error;
         _loading = false;
@@ -67,17 +79,9 @@ class _MediaPdfPageState extends State<MediaPdfPage> {
     }
   }
 
-  void _onPageChanged() {
-    final controller = _controller;
-    if (controller == null || !mounted) return;
-    setState(() => _page = controller.pageListenable.value);
-  }
-
   @override
   void dispose() {
-    _controller
-      ?..pageListenable.removeListener(_onPageChanged)
-      ..dispose();
+    unawaited(_document?.close());
     super.dispose();
   }
 
@@ -85,27 +89,29 @@ class _MediaPdfPageState extends State<MediaPdfPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     if (_loading) return MediaLoadingState(progress: _progress);
-    final controller = _controller;
-    if (_error != null || controller == null) {
+    final document = _document;
+    if (_error != null || document == null) {
       return MediaErrorState(
         title: l10n.lessonDetailsOpenFailed,
         retryLabel: l10n.retry,
         onRetry: () => unawaited(_load()),
       );
     }
+    final controller = document.controller;
     const dark = AppColors.dark;
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
         Positioned.fill(
           child: PdfViewPinch(
+            key: ValueKey(controller),
             controller: controller,
             backgroundDecoration: const BoxDecoration(
               color: Colors.transparent,
             ),
           ),
         ),
-        if (_pageCount > 1)
+        if (document.document.pagesCount > 1)
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
             child: DecoratedBox(
@@ -118,12 +124,15 @@ class _MediaPdfPageState extends State<MediaPdfPage> {
                   horizontal: AppSpacing.md,
                   vertical: AppSpacing.xs,
                 ),
-                child: Text(
-                  l10n.mediaViewerIndex(_page, _pageCount),
-                  style: AppText.tabular(
-                    AppText.subtext.copyWith(
-                      color: dark.ink,
-                      fontWeight: FontWeight.w700,
+                child: ValueListenableBuilder<int>(
+                  valueListenable: controller.pageListenable,
+                  builder: (context, page, _) => Text(
+                    l10n.mediaViewerIndex(page, document.document.pagesCount),
+                    style: AppText.tabular(
+                      AppText.subtext.copyWith(
+                        color: dark.ink,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),

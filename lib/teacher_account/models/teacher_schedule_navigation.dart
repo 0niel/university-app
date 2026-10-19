@@ -2,8 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'teacher_schedule_navigation.freezed.dart';
 
-enum TeacherScheduleDestination { schedule, changes, calendar }
-
 @freezed
 sealed class TeacherScheduleNavigation with _$TeacherScheduleNavigation {
   const TeacherScheduleNavigation._();
@@ -21,3 +19,5 @@ sealed class TeacherScheduleNavigation with _$TeacherScheduleNavigation {
 
   bool get isBusy => this is TeacherNavigationActivating;
 }
+
+enum TeacherScheduleDestination { schedule, changes, calendar }

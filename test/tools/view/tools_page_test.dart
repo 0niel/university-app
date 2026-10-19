@@ -130,7 +130,8 @@ void main() {
       );
 
       final title = tester.widget<Text>(find.text('Сообщество приложения'));
-      expect(title.style?.fontSize, AppText.displaySmall.fontSize);
+      expect(title.style?.fontSize, 32);
+      expect(title.style?.fontWeight, FontWeight.w700);
       await tester.scrollUntilVisible(find.text('Обновить данные'), 300);
       final button = find.ancestor(
         of: find.text('Обновить данные'),

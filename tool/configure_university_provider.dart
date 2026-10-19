@@ -18,6 +18,10 @@ void configureProvider(
   Directory root,
   List<String> arguments, {
   RepositoryAccess canReach = gitRepositoryReachable,
-}) => UniversityProviderConfigurator(root: root, canReach: canReach).configure(
-  UniversityProviderSource.parse(arguments),
-);
+}) =>
+    UniversityProviderConfigurator(
+      root: root,
+      onRepositoryAccessCheck: canReach,
+    ).configure(
+      UniversityProviderSource.parse(arguments),
+    );

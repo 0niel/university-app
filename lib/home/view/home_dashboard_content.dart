@@ -80,7 +80,7 @@ class HomeDashboardContent extends StatelessWidget {
         ? l10n.teacherRoleFallback
         : l10n.homeStudent;
     final firstName = hasFullName
-        ? fullName.split(RegExp(r'\s+')).first
+        ? (fullName.split(RegExp(r'\s+')).firstOrNull ?? fullName)
         : userName;
     final nameLoading = identityCubit != null && identity?.isLoaded != true;
     final state = context.watch<ScheduleBloc>().state;
@@ -122,22 +122,19 @@ class HomeDashboardContent extends StatelessWidget {
     final catalogState = context.watch<ServiceCatalogCubit>().state;
     final catalog = catalogState.catalog;
     final quickActionsLoading = !favorites.loaded || catalogState.isLoading;
-    final seen = <String>{};
-    final services = [
-      for (final section in ServicesDirectory.sections(
+    final services = ServicesDirectory.orderedEntries(
+      ServicesDirectory.sections(
         context,
         config: config,
         catalog: catalog,
-      ))
-        for (final entry in section.entries)
-          if (favorites.contains(entry.model) && seen.add(entry.id)) entry,
-    ];
+      ).expand((section) => section.entries),
+      favorites.ids,
+    );
     final notificationState = context.watch<NotificationsCubit>().state;
     final notifications = buildNotificationFeed(
       l10n: l10n,
       pushes: notificationState.pushes,
       changes: changes,
-      now: now,
     );
     final exam = homeNextExam(schedule, now);
     final examState = context.watch<ExamReadinessCubit>().state;
@@ -160,99 +157,106 @@ class HomeDashboardContent extends StatelessWidget {
     void open(HomeLessonEntry entry) => unawaited(
       ScheduleDetailsRoute(
         $extra: (entry.lesson, DateUtils.dateOnly(entry.start)),
-      ).push<void>(context),
+      ).push(context),
     );
     void openDeadlines() => unawaited(
       const DeadlinesRoute().push<void>(context).then((_) {
         if (context.mounted) unawaited(context.read<DeadlinesCubit>().load());
       }),
     );
-    Widget inset(Widget child) => Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-      child: child,
+    var sectionOrder = 0;
+    Widget inset(Widget child) => HomeSectionReveal(
+      order: sectionOrder++,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
+        child: child,
+      ),
     );
-    return Stack(
-      children: [
-        ListView(
-          controller: scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.only(
-            top: top,
-            bottom: ninjaBottomInset(context) + AppSpacing.lg,
-          ),
-          children: [
-            if (state.isOffline)
+    return AppAmbientBackground(
+      child: Stack(
+        children: [
+          ListView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.only(
+              top: top,
+              bottom: ninjaBottomInset(context) + AppSpacing.lg,
+            ),
+            children: [
+              if (state.isOffline)
+                inset(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: AppBanner(
+                      message: l10n.homeOfflineBanner,
+                      tone: AppBannerTone.warn,
+                    ),
+                  ),
+                ),
               inset(
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: AppBanner(
-                    message: l10n.homeOfflineBanner,
-                    tone: AppBannerTone.warn,
+                HomeTopRow(
+                  userName: userName,
+                  photoUrl: user.photo,
+                  level: profile?.isEmpty == false ? profile?.level : null,
+                  now: now,
+                  dotColor: switch (kind) {
+                    HomeHeroKind.during => colors.accent,
+                    HomeHeroKind.pause => colors.lecture,
+                    HomeHeroKind.before ||
+                    HomeHeroKind.done ||
+                    HomeHeroKind.other ||
+                    HomeHeroKind.free => colors.muted2,
+                  },
+                  searchKey: searchKey,
+                  unreadCount: notificationState.unreadCount(
+                    notifications.map((item) => item.id),
                   ),
                 ),
               ),
-            inset(
-              HomeTopRow(
-                userName: userName,
-                photoUrl: user.photo,
-                level: profile?.isEmpty == false ? profile?.level : null,
-                now: now,
-                dotColor: kind == HomeHeroKind.during
-                    ? colors.accent
-                    : kind == HomeHeroKind.pause
-                    ? colors.lecture
-                    : colors.muted2,
-                searchKey: searchKey,
-                unreadCount: notificationState.unreadCount(
-                  notifications.map((item) => item.id),
-                ),
-              ),
-            ),
-            inset(
-              HomeGreeting(
-                greeting: homeGreeting(l10n, now),
-                name: firstName,
-                nameLoading: nameLoading,
-                subtitle: loading
-                    ? l10n.loadingContent
-                    : state.selectedSchedule == null
-                    ? l10n.noScheduleSelected
-                    : '$dayLabel · ${homeStatusLabel(l10n, entries, kind)}',
-              ),
-            ),
-            if (isTeacher)
               inset(
-                const Padding(
-                  padding: EdgeInsets.only(top: AppSpacing.lg),
-                  child: TeacherAccountShortcut(),
+                HomeGreeting(
+                  greeting: homeGreeting(l10n, now),
+                  name: firstName,
+                  nameLoading: nameLoading,
+                  subtitle: loading
+                      ? l10n.loadingContent
+                      : state.selectedSchedule == null
+                      ? l10n.noScheduleSelected
+                      : '$dayLabel · ${homeStatusLabel(l10n, entries, kind)}',
                 ),
               ),
-            const PromoBannerSlot(
-              placement: PromoPlacement.home,
-              homeSlot: PromoHomeSlot.top,
-              padding: EdgeInsets.fromLTRB(
-                AppSpacing.screen,
-                AppSpacing.lg,
-                AppSpacing.screen,
-                0,
+              if (isTeacher)
+                inset(
+                  const Padding(
+                    padding: EdgeInsets.only(top: AppSpacing.lg),
+                    child: TeacherAccountShortcut(),
+                  ),
+                ),
+              const PromoBannerSlot(
+                placement: PromoPlacement.home,
+                homeSlot: PromoHomeSlot.top,
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.screen,
+                  AppSpacing.lg,
+                  AppSpacing.screen,
+                  0,
+                ),
               ),
-            ),
-            HomeStoriesRail(
-              sources: sources,
-              seenSourceIds: context.watch<HomeStoriesCubit>().state,
-              onSourceOpened: context.read<HomeStoriesCubit>().markSeen,
-              loading: sourcesLoading,
-            ),
-            inset(
+              HomeStoriesRail(
+                sources: sources,
+                seenSourceIds: context.watch<HomeStoriesCubit>().state,
+                onSourceOpened: context.read<HomeStoriesCubit>().markSeen,
+                loading: sourcesLoading,
+              ),
               HomeWeekPills(
                 days: days,
                 selectedIndex: days.indexWhere(
                   (day) => DateUtils.isSameDay(day, selectedDay),
                 ),
                 today: now,
-                lessonCountForDay: (day) =>
+                onLessonCountForDay: (day) =>
                     homeLessonsForDay(schedule, day).length,
-                lessonColorsForDay: (day) => [
+                onLessonColorsForDay: (day) => [
                   for (final lesson in homeLessonsForDay(schedule, day))
                     lessonAccentOf(context, lesson),
                 ],
@@ -274,7 +278,11 @@ class HomeDashboardContent extends StatelessWidget {
                     ))
                       index,
                 },
-                onSelected: (index) => onSelectedDay(days[index]),
+                onSelected: (index) {
+                  if (index < 0) return;
+                  final day = days.elementAtOrNull(index);
+                  if (day != null) onSelectedDay(day);
+                },
                 onWeekChanged: (step) => onSelectedDay(
                   DateTime(
                     selectedDay.year,
@@ -283,150 +291,156 @@ class HomeDashboardContent extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-            if (preferences.isSectionEnabled(HomeSection.today))
-              inset(
-                Padding(
-                  padding: const EdgeInsets.only(top: 14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (failed)
-                        AppBanner(
-                          message: l10n.scheduleLoadingError,
-                          tone: AppBannerTone.warn,
-                          actionLabel: l10n.retry,
-                          onAction: onRetry,
-                        ),
-                      if (loading)
-                        AppSkeletonGroup(
-                          semanticsLabel: l10n.loadingContent,
-                          child: const AppSkeleton(
-                            height: 220,
-                            radius: AppRadius.hero,
+              if (preferences.isSectionEnabled(HomeSection.today))
+                inset(
+                  Padding(
+                    padding: const EdgeInsets.only(top: 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (failed)
+                          AppBanner(
+                            message: l10n.scheduleLoadingError,
+                            tone: AppBannerTone.warn,
+                            actionLabel: l10n.retry,
+                            onAction: onRetry,
                           ),
-                        )
-                      else if (state.selectedSchedule == null && !failed)
-                        AppEmptyState(
-                          title: l10n.noScheduleSelected,
-                          lineIcon: AppLineIcon.calendar,
-                          actionLabel: l10n.selectSchedule,
-                          onAction: () => const ScheduleRoute().go(context),
-                        )
-                      else if (state.selectedSchedule != null) ...[
-                        HomeHero(
-                          entries: entries,
-                          kind: kind,
-                          tomorrow: homeLessonsForDay(schedule, tomorrow),
-                          now: now,
-                          deadline: active.firstOrNull,
-                          onOpen: open,
-                          onRoute:
-                              config.isEnabled(UniversityCapability.campusMap)
-                              ? (_) => const MapRoute().go(context)
-                              : null,
-                          onNote: (entry) =>
-                              unawaited(showHomeNoteSheet(context, entry)),
-                          onFreeRooms: () => const FreeRoomsRoute().go(context),
-                          onDeadlines: openDeadlines,
-                          onTomorrow: () => onSelectedDay(tomorrow),
-                        ),
-                        HomeLessonsGroup(
-                          entries: entries,
-                          featuredEntry:
-                              kind == HomeHeroKind.done ||
-                                  kind == HomeHeroKind.free
-                              ? null
-                              : homeHeroEntry(entries, kind),
-                          onOpen: open,
-                        ),
+                        if (loading)
+                          AppSkeletonGroup(
+                            semanticsLabel: l10n.loadingContent,
+                            child: const AppSkeleton(
+                              height: 220,
+                              radius: AppRadius.hero,
+                            ),
+                          )
+                        else if (state.selectedSchedule == null && !failed)
+                          AppEmptyState(
+                            title: l10n.noScheduleSelected,
+                            lineIcon: AppLineIcon.calendar,
+                            actionLabel: l10n.selectSchedule,
+                            onAction: () => const ScheduleRoute().go(context),
+                          )
+                        else if (state.selectedSchedule != null) ...[
+                          HomeHero(
+                            entries: entries,
+                            kind: kind,
+                            tomorrow: homeLessonsForDay(schedule, tomorrow),
+                            now: now,
+                            deadline: active.firstOrNull,
+                            onOpen: open,
+                            onRoute:
+                                config.isEnabled(UniversityCapability.campusMap)
+                                ? (_) => const MapRoute().go(context)
+                                : null,
+                            onNote: (entry) =>
+                                unawaited(showHomeNoteSheet(context, entry)),
+                            onFreeRooms: () =>
+                                const FreeRoomsRoute().go(context),
+                            onDeadlines: openDeadlines,
+                            onTomorrow: () => onSelectedDay(tomorrow),
+                          ),
+                          HomeLessonsGroup(
+                            entries: entries,
+                            featuredEntry: switch (kind) {
+                              HomeHeroKind.done || HomeHeroKind.free => null,
+                              HomeHeroKind.before ||
+                              HomeHeroKind.during ||
+                              HomeHeroKind.pause ||
+                              HomeHeroKind.other => homeHeroEntry(
+                                entries,
+                                kind,
+                              ),
+                            },
+                            onOpen: open,
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: HomeStatusStrip(
-                deadlines: deadlines.deadlines,
-                profile: profile,
-                now: now,
-                exam: isTeacher ? null : exam,
-                readiness: isTeacher ? null : readiness,
-                onProfile: () => const ProfileRoute().go(context),
-                onDeadlines: openDeadlines,
-                onExam: () => const ScheduleSessionRoute().go(context),
-              ),
-            ),
-            PromoBannerSlot(
-              placement: PromoPlacement.home,
-              homeSlot: PromoHomeSlot.afterToday,
-              now: now,
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.screen,
-                AppSpacing.sectionGap,
-                AppSpacing.screen,
-                0,
-              ),
-            ),
-            if (preferences.isSectionEnabled(HomeSection.smartChips))
-              inset(
-                HomeQuickActions(
-                  services: services,
-                  onAll: () => const ServicesRoute().go(context),
-                  loading: quickActionsLoading,
-                ),
-              ),
-            if (preferences.isSectionEnabled(HomeSection.deadlines))
-              inset(
-                HomeDeadlinesGroup(
-                  state: deadlines,
-                  now: now,
-                  onAdd: () => unawaited(
-                    showAddDeadlineSheet(
-                      context,
-                      cubit: context.read<DeadlinesCubit>(),
                     ),
                   ),
-                  onOpen: openDeadlines,
-                  onToggle: (deadline) =>
-                      unawaited(_toggleDeadline(context, deadline)),
-                  onRetry: () =>
-                      unawaited(context.read<DeadlinesCubit>().load()),
+                ),
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.lg),
+                child: HomeStatusStrip(
+                  deadlines: deadlines.deadlines,
+                  profile: profile,
+                  now: now,
+                  exam: isTeacher ? null : exam,
+                  readiness: isTeacher ? null : readiness,
+                  onProfile: () => const ProfileRoute().go(context),
+                  onDeadlines: openDeadlines,
+                  onExam: () => const ScheduleSessionRoute().go(context),
                 ),
               ),
-            if (preferences.isSectionEnabled(HomeSection.trending))
-              inset(
-                HomeTrendingGroup(
-                  state: context.watch<DiscourseBloc>().state,
-                  onAll: () => const CommunitiesRoute().go(context),
-                  onOpen: (topic) => _openTopic(context, topic),
-                  onRetry: () => context.read<DiscourseBloc>().add(
-                    const DiscourseTopTopicsRequested(),
+              PromoBannerSlot(
+                placement: PromoPlacement.home,
+                homeSlot: PromoHomeSlot.afterToday,
+                now: now,
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.screen,
+                  AppSpacing.sectionGap,
+                  AppSpacing.screen,
+                  0,
+                ),
+              ),
+              if (preferences.isSectionEnabled(HomeSection.smartChips))
+                inset(
+                  HomeQuickActions(
+                    services: services,
+                    onAll: () => const ServicesRoute().go(context),
+                    loading: quickActionsLoading,
                   ),
                 ),
+              if (preferences.isSectionEnabled(HomeSection.deadlines))
+                inset(
+                  HomeDeadlinesGroup(
+                    state: deadlines,
+                    now: now,
+                    onAdd: () => unawaited(
+                      showAddDeadlineSheet(
+                        context,
+                        cubit: context.read(),
+                      ),
+                    ),
+                    onOpen: openDeadlines,
+                    onToggle: (deadline) =>
+                        unawaited(_toggleDeadline(context, deadline)),
+                    onRetry: () =>
+                        unawaited(context.read<DeadlinesCubit>().load()),
+                  ),
+                ),
+              if (preferences.isSectionEnabled(HomeSection.trending))
+                inset(
+                  HomeTrendingGroup(
+                    state: context.watch<DiscourseBloc>().state,
+                    onAll: () => const CommunitiesRoute().go(context),
+                    onOpen: (topic) => _openTopic(context, topic),
+                    onRetry: () => context.read<DiscourseBloc>().add(
+                      const DiscourseTopTopicsRequested(),
+                    ),
+                  ),
+                ),
+              PromoBannerSlot(
+                placement: PromoPlacement.home,
+                homeSlot: PromoHomeSlot.bottom,
+                now: now,
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.screen,
+                  AppSpacing.section,
+                  AppSpacing.screen,
+                  0,
+                ),
               ),
-            PromoBannerSlot(
-              placement: PromoPlacement.home,
-              homeSlot: PromoHomeSlot.bottom,
-              now: now,
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.screen,
-                AppSpacing.section,
-                AppSpacing.screen,
-                0,
-              ),
-            ),
-          ],
-        ),
-        if (showCoach)
-          Positioned.fill(
-            child: SearchCoachOverlay(
-              anchorKey: searchKey,
-              onDismiss: () => context.read<HomeCubit>().dismissSearchCoach(),
-            ),
+            ],
           ),
-      ],
+          if (showCoach)
+            Positioned.fill(
+              child: SearchCoachOverlay(
+                anchorKey: searchKey,
+                onDismiss: () => context.read<HomeCubit>().dismissSearchCoach(),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

@@ -93,7 +93,7 @@ class DeadlineGroup extends StatelessWidget {
                           ? null
                           : () => onDelete!(deadline.id),
                       onLongPress: cubit == null
-                          ? () {}
+                          ? null
                           : () => showDeadlineActionsSheet(
                               context,
                               cubit: cubit!,

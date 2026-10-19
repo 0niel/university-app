@@ -8,13 +8,13 @@ void main() {
   Widget host(Widget child) => wrapKit(SizedBox(width: 360, child: child));
 
   Container cellContainer(WidgetTester tester) => tester.widget<Container>(
-        find
-            .descendant(
-              of: find.byType(NinjaListCell),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
+    find
+        .descendant(
+          of: find.byType(NinjaListCell),
+          matching: find.byType(Container),
+        )
+        .first,
+  );
 
   group('NinjaListCell', () {
     testWidgets('base cell is 14/500 ink with a muted2 chevron', (

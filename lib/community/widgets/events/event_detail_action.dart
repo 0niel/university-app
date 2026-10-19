@@ -1,0 +1,1 @@
+enum EventDetailAction { edit, delete }

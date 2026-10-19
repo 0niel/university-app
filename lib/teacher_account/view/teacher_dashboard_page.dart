@@ -9,16 +9,17 @@ import 'package:rtu_mirea_app/teacher_account/widgets/dashboard/teacher_dashboar
 import 'package:rtu_mirea_app/teacher_account/widgets/dashboard/teacher_dashboard_view.dart';
 
 class TeacherDashboardPage extends StatelessWidget {
-  const TeacherDashboardPage({this.clock, super.key});
+  const TeacherDashboardPage({DateTime Function()? clock, super.key})
+    : onClock = clock;
 
-  final DateTime Function()? clock;
+  final DateTime Function()? onClock;
 
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (context) {
       final account = context.read<AccountPersonaCubit>();
       final schedule = context.read<ScheduleBloc>();
-      final now = clock ?? DateTime.now;
+      final now = onClock ?? DateTime.now;
       return TeacherDashboardBloc(
         repository: TeacherDashboardRepository(
           schedules: context.read(),

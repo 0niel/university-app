@@ -1,6 +1,52 @@
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
+class ProfileExtrasCubit extends HydratedCubit<ProfileExtrasState> {
+  ProfileExtrasCubit({this.userId = ''}) : super(const ProfileExtrasState());
+
+  final String userId;
+
+  @override
+  String get id => userId;
+
+  void setBio({required String about, required String telegram}) {
+    emit(state.copyWith(about: about.trim(), telegram: _cleanHandle(telegram)));
+  }
+
+  void setShowCancelled({required bool value}) =>
+      emit(state.copyWith(showCancelled: value));
+
+  void setOnlySubgroup({required bool value}) =>
+      emit(state.copyWith(onlySubgroup: value));
+
+  void setNotifyLessons({required bool value}) =>
+      emit(state.copyWith(notifyLessons: value));
+
+  void setNotifyDeadlines({required bool value}) =>
+      emit(state.copyWith(notifyDeadlines: value));
+
+  void setNotifyNews({required bool value}) =>
+      emit(state.copyWith(notifyNews: value));
+
+  static String _cleanHandle(String value) {
+    final clean = value.trim().replaceFirst('@', '');
+    return clean.isEmpty ? '' : '@$clean';
+  }
+
+  @override
+  ProfileExtrasState? fromJson(Map<String, dynamic> json) {
+    try {
+      return ProfileExtrasState.fromJson(json);
+    } on Object catch (error, stackTrace) {
+      addError(error, stackTrace);
+      return null;
+    }
+  }
+
+  @override
+  Map<String, dynamic> toJson(ProfileExtrasState state) => state.toJson();
+}
+
 class ProfileExtrasState extends Equatable {
   const ProfileExtrasState({
     this.about = '',
@@ -74,50 +120,4 @@ class ProfileExtrasState extends Equatable {
     notifyDeadlines,
     notifyNews,
   ];
-}
-
-class ProfileExtrasCubit extends HydratedCubit<ProfileExtrasState> {
-  ProfileExtrasCubit({this.userId = ''}) : super(const ProfileExtrasState());
-
-  final String userId;
-
-  @override
-  String get id => userId;
-
-  void setBio({required String about, required String telegram}) {
-    emit(state.copyWith(about: about.trim(), telegram: _cleanHandle(telegram)));
-  }
-
-  void setShowCancelled({required bool value}) =>
-      emit(state.copyWith(showCancelled: value));
-
-  void setOnlySubgroup({required bool value}) =>
-      emit(state.copyWith(onlySubgroup: value));
-
-  void setNotifyLessons({required bool value}) =>
-      emit(state.copyWith(notifyLessons: value));
-
-  void setNotifyDeadlines({required bool value}) =>
-      emit(state.copyWith(notifyDeadlines: value));
-
-  void setNotifyNews({required bool value}) =>
-      emit(state.copyWith(notifyNews: value));
-
-  static String _cleanHandle(String value) {
-    final clean = value.trim().replaceFirst('@', '');
-    return clean.isEmpty ? '' : '@$clean';
-  }
-
-  @override
-  ProfileExtrasState? fromJson(Map<String, dynamic> json) {
-    try {
-      return ProfileExtrasState.fromJson(json);
-    } on Object catch (error, stackTrace) {
-      addError(error, stackTrace);
-      return null;
-    }
-  }
-
-  @override
-  Map<String, dynamic>? toJson(ProfileExtrasState state) => state.toJson();
 }

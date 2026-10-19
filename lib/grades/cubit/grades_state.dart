@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:rtu_mirea_app/grades/models/models.dart';
 
-enum GradesStatus { initial, loading, ready, failure }
-
 class GradesState extends Equatable {
   const GradesState({
     this.status = GradesStatus.initial,
@@ -88,3 +86,5 @@ class GradesState extends Equatable {
     now,
   ];
 }
+
+enum GradesStatus { initial, loading, ready, failure }

@@ -13,8 +13,11 @@ abstract final class NinjaText {
 
   static final TextStyle headline = AppText.headline;
 
-  static final TextStyle dialogTitle =
-      AppText.sans(17, FontWeight.w700, height: 1.2);
+  static final TextStyle dialogTitle = AppText.sans(
+    17,
+    FontWeight.w700,
+    height: 1.2,
+  );
 
   static final TextStyle body = AppText.compact.copyWith(
     fontWeight: FontWeight.w500,
@@ -25,8 +28,11 @@ abstract final class NinjaText {
 
   static final TextStyle microLabel = AppText.captionSmall;
 
-  static final TextStyle badge =
-      AppText.sans(10.5, FontWeight.w600, height: 1.2);
+  static final TextStyle badge = AppText.sans(
+    10.5,
+    FontWeight.w600,
+    height: 1.2,
+  );
 
   static final TextStyle button = AppText.button;
 
@@ -37,8 +43,8 @@ abstract final class NinjaText {
   static final TextStyle helper = AppText.sans(11.5, FontWeight.w500);
 
   static TextStyle tabular(TextStyle base) => base.copyWith(
-        fontFeatures: const [FontFeature.tabularFigures()],
-      );
+    fontFeatures: const [FontFeature.tabularFigures()],
+  );
 }
 
 abstract final class NinjaRadius {
@@ -57,7 +63,7 @@ abstract final class NinjaRadius {
 abstract final class NinjaMetrics {
   static const lineWidth = 1.0;
   static const subjectBarWidth = 4.0;
-  static const subjectBarWidthCompact = 4.0;
+  static const double subjectBarWidthCompact = subjectBarWidth;
   static const minTouchTarget = 44.0;
   static const screenPadding = 20.0;
   static const screenTopPadding = 56.0;

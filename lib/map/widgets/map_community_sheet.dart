@@ -156,7 +156,7 @@ class _MapCommunitySheetState extends State<MapCommunitySheet> {
         )
       else ...[
         Text(
-          _proposals?.canModerate ?? widget.campus.canModerate
+          (_proposals?.canModerate ?? widget.campus.canModerate)
               ? 'Очередь проверки и ваши предложения'
               : 'Ваши предложения',
           style: AppText.label,
@@ -201,7 +201,10 @@ class _MapCommunitySheetState extends State<MapCommunitySheet> {
             ),
           )
         else if (_failed)
-          AppButton.secondary(label: 'Повторить загрузку', onPressed: _load)
+          AppButton.secondary(
+            label: 'Повторить загрузку',
+            onPressed: () => unawaited(_load()),
+          )
         else if (_proposals?.proposals.isEmpty ?? true)
           const AppCard(
             child: Text('Здесь пока нет предложений с таким статусом.'),
@@ -225,7 +228,7 @@ class _MapCommunitySheetState extends State<MapCommunitySheet> {
         const SizedBox(height: AppSpacing.md),
         AppButton.text(
           label: 'Обновить список',
-          onPressed: _loading ? null : _load,
+          onPressed: _loading ? null : () => unawaited(_load()),
         ),
       ],
     ],
@@ -416,7 +419,7 @@ class _MapProposalReviewState extends State<MapProposalReview> {
         else if (_proposal == null)
           AppButton.secondary(
             label: 'Повторить загрузку изменений',
-            onPressed: _loadDetails,
+            onPressed: () => unawaited(_loadDetails()),
           )
         else
           MapPatchPreview(patch: proposal.patch),
@@ -538,7 +541,7 @@ String _displayValue(Object? value) {
           final price = row['price'];
           final currency = row['currency'] == 'RUB'
               ? '₽'
-              : row['currency'] ?? '';
+              : (row['currency'] ?? '');
           return '${row['name']}'
               '${price == null ? '' : ' · $price $currency'}'
               '${row['available'] == false ? ' · нет в наличии' : ''}';

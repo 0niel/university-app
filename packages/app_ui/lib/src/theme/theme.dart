@@ -11,14 +11,18 @@ class AppTheme {
       );
 
   static BoxDecoration glassEffect(AppColors colors) => BoxDecoration(
-        color: colors.surface2,
-        borderRadius: BorderRadius.circular(AppRadius.field),
-      );
+    color: colors.surface2,
+    borderRadius: BorderRadius.circular(AppRadius.field),
+  );
 
-  static final ThemeData lightTheme =
-      _buildTheme(AppColors.light, Brightness.light);
-  static final ThemeData darkTheme =
-      _buildTheme(AppColors.dark, Brightness.dark);
+  static final ThemeData lightTheme = _buildTheme(
+    AppColors.light,
+    Brightness.light,
+  );
+  static final ThemeData darkTheme = _buildTheme(
+    AppColors.dark,
+    Brightness.dark,
+  );
 
   static ThemeData getThemeByType(AppThemeType type) {
     return switch (type) {
@@ -27,11 +31,19 @@ class AppTheme {
     };
   }
 
-  static ThemeData generateTheme(AppColors colors, Brightness brightness) {
-    return _buildTheme(colors, brightness);
+  static ThemeData generateTheme(
+    AppColors colors,
+    Brightness brightness, {
+    bool glassEnabled = true,
+  }) {
+    return _buildTheme(colors, brightness, glassEnabled: glassEnabled);
   }
 
-  static ThemeData _buildTheme(AppColors colors, Brightness brightness) {
+  static ThemeData _buildTheme(
+    AppColors colors,
+    Brightness brightness, {
+    bool glassEnabled = true,
+  }) {
     final isDark = brightness == Brightness.dark;
     final colorScheme = ColorScheme(
       brightness: brightness,
@@ -71,6 +83,7 @@ class AppTheme {
       pageTransitionsTheme: NinjaPageTransitions.theme,
       extensions: <ThemeExtension<dynamic>>[
         colors,
+        AppGlassTheme(enabled: glassEnabled),
         NinjaColors.fromAppColors(colors, isDark: isDark),
       ],
     );
@@ -102,8 +115,9 @@ class AppTheme {
           systemStatusBarContrastEnforced: false,
           systemNavigationBarColor: Colors.transparent,
           systemNavigationBarDividerColor: Colors.transparent,
-          systemNavigationBarIconBrightness:
-              isDark ? Brightness.light : Brightness.dark,
+          systemNavigationBarIconBrightness: isDark
+              ? Brightness.light
+              : Brightness.dark,
           systemNavigationBarContrastEnforced: false,
         ),
       ),
@@ -224,8 +238,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colors.surface2,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: _filledInputShape,
         enabledBorder: _filledInputShape,
         disabledBorder: _filledInputShape,
@@ -308,10 +324,15 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.dialog),
         ),
-        titleTextStyle: AppText.sans(17, FontWeight.w700, height: 1.2)
-            .copyWith(color: colors.ink),
-        contentTextStyle: AppText.compact
-            .copyWith(color: colors.muted, fontWeight: FontWeight.w500),
+        titleTextStyle: AppText.sans(
+          17,
+          FontWeight.w700,
+          height: 1.2,
+        ).copyWith(color: colors.ink),
+        contentTextStyle: AppText.compact.copyWith(
+          color: colors.muted,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
@@ -365,8 +386,9 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.sheet),
+          ),
         ),
         elevation: 0,
         modalElevation: 0,
@@ -456,8 +478,9 @@ class AppTheme {
   }) {
     final colors = Theme.of(context).colors;
     return BoxDecoration(
-      color:
-          isSelected ? colors.tintOf(color ?? colors.accent) : colors.surface2,
+      color: isSelected
+          ? colors.tintOf(color ?? colors.accent)
+          : colors.surface2,
       borderRadius: BorderRadius.circular(AppRadius.full),
     );
   }

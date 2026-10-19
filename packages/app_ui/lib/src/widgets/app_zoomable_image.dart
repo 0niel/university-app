@@ -9,6 +9,7 @@ class AppZoomableImage extends StatefulWidget {
   const AppZoomableImage({
     required this.imageProvider,
     this.heroTag,
+    this.semanticLabel,
     this.onTap,
     this.onDismissed,
     this.onPrevious,
@@ -24,6 +25,7 @@ class AppZoomableImage extends StatefulWidget {
 
   final ImageProvider<Object> imageProvider;
   final Object? heroTag;
+  final String? semanticLabel;
   final VoidCallback? onTap;
   final VoidCallback? onDismissed;
   final VoidCallback? onPrevious;
@@ -45,12 +47,16 @@ class _AppZoomableImageState extends State<AppZoomableImage>
   ImageStream? _stream;
   late final ImageStreamListener _imageListener = ImageStreamListener(
     (info, _) {
-      final size =
-          Size(info.image.width.toDouble(), info.image.height.toDouble());
+      final size = Size(
+        info.image.width.toDouble(),
+        info.image.height.toDouble(),
+      );
       info.dispose();
       if (mounted && size != _imageSize) setState(() => _imageSize = size);
     },
-    onError: (error, stackTrace) {},
+    onError: (_, _) {
+      if (mounted && _imageSize != null) setState(() => _imageSize = null);
+    },
   );
   Size? _imageSize;
   Size _viewport = Size.zero;
@@ -94,15 +100,17 @@ class _AppZoomableImageState extends State<AppZoomableImage>
     if (oldWidget.imageProvider != widget.imageProvider) {
       _motion.stop();
       _scale = 1;
-      _offset = _drag = Offset.zero;
+      _offset = Offset.zero;
+      _drag = Offset.zero;
       _imageSize = null;
       _resolveImage();
     }
   }
 
   void _resolveImage() {
-    final next =
-        widget.imageProvider.resolve(createLocalImageConfiguration(context));
+    final next = widget.imageProvider.resolve(
+      createLocalImageConfiguration(context),
+    );
     if (_stream?.key == next.key) return;
     _stream?.removeListener(_imageListener);
     _stream = next..addListener(_imageListener);
@@ -123,8 +131,10 @@ class _AppZoomableImageState extends State<AppZoomableImage>
       _viewport.height / image.height,
     );
     final maxX = math.max(0, (image.width * fit * scale - _viewport.width) / 2);
-    final maxY =
-        math.max(0, (image.height * fit * scale - _viewport.height) / 2);
+    final maxY = math.max(
+      0,
+      (image.height * fit * scale - _viewport.height) / 2,
+    );
     return Offset(
       value.dx.clamp(-maxX, maxX).toDouble(),
       value.dy.clamp(-maxY, maxY).toDouble(),
@@ -142,11 +152,10 @@ class _AppZoomableImageState extends State<AppZoomableImage>
   }
 
   void _reportDrag() => widget.onDismissProgress?.call(
-        _drag.dy.abs() > _drag.dx.abs()
-            ? (_drag.dy.abs() / math.max(1, _viewport.height * .6))
-                .clamp(0.0, 1.0)
-            : 0,
-      );
+    _drag.dy.abs() > _drag.dx.abs()
+        ? (_drag.dy.abs() / math.max(1, _viewport.height * .6)).clamp(0.0, 1.0)
+        : 0,
+  );
 
   Future<void> _animate({double scale = 1, Offset offset = Offset.zero}) async {
     _motion.stop();
@@ -167,7 +176,7 @@ class _AppZoomableImageState extends State<AppZoomableImage>
           )
           .orCancel;
     } on TickerCanceled {
-      return;
+      // Replacing a gesture or disposing the view cancels the transition.
     }
   }
 
@@ -193,13 +202,14 @@ class _AppZoomableImageState extends State<AppZoomableImage>
     _startFocal = details.localFocalPoint;
     _anchor =
         (details.localFocalPoint - _viewport.center(Offset.zero) - _offset) /
-            _scale;
+        _scale;
     _pinching = details.pointerCount > 1;
   }
 
   void _update(ScaleUpdateDetails details) {
     if (_closing) return;
-    _pinching = _pinching ||
+    _pinching =
+        _pinching ||
         details.pointerCount > 1 ||
         (details.scale - 1).abs() > .01;
     setState(() {
@@ -261,7 +271,8 @@ class _AppZoomableImageState extends State<AppZoomableImage>
       return;
     }
     final vertical = _drag.dy.abs() > _drag.dx.abs();
-    final dismiss = vertical &&
+    final dismiss =
+        vertical &&
         widget.onDismissed != null &&
         (_drag.dy.abs() > _viewport.height * .16 ||
             (_drag.dy.abs() > 24 &&
@@ -291,27 +302,28 @@ class _AppZoomableImageState extends State<AppZoomableImage>
         _viewport = constraints.biggest;
         final zoomed = _scale > 1.01;
         final vertical = _drag.dy.abs() > _drag.dx.abs();
-        final dismissRatio =
-            (_drag.dy.abs() / math.max(1, _viewport.height)).clamp(0.0, 1.0);
+        final dismissRatio = (_drag.dy.abs() / math.max(1, _viewport.height))
+            .clamp(0.0, 1.0);
         final visualDrag = zoomed || _paging
             ? Offset.zero
             : vertical
-                ? _drag
-                : Offset(_drag.dx * .16, 0);
+            ? _drag
+            : Offset(_drag.dx * .16, 0);
         Widget image = Image(
           image: widget.imageProvider,
+          semanticLabel: widget.semanticLabel,
           fit: BoxFit.contain,
           width: double.infinity,
           height: double.infinity,
           frameBuilder: (context, child, frame, synchronous) =>
               frame == null && !synchronous
-                  ? widget.loadingBuilder?.call(context, null) ?? child
-                  : child,
+              ? (widget.loadingBuilder?.call(context, null) ?? child)
+              : child,
           loadingBuilder: widget.loadingBuilder == null
               ? null
               : (context, child, progress) => progress == null
-                  ? child
-                  : widget.loadingBuilder!(context, progress),
+                    ? child
+                    : widget.loadingBuilder!(context, progress),
           errorBuilder: widget.errorBuilder,
         );
         if (widget.heroTag case final tag?) {
@@ -342,8 +354,9 @@ class _AppZoomableImageState extends State<AppZoomableImage>
               },
               onPointerSignal: (event) {
                 if (event is! PointerScrollEvent) return;
-                GestureBinding.instance.pointerSignalResolver.register(event,
-                    (_) {
+                GestureBinding.instance.pointerSignalResolver.register(event, (
+                  _,
+                ) {
                   final next = (_scale * math.exp(-event.scrollDelta.dy * .002))
                       .clamp(1.0, 5.0);
                   final focal =
@@ -371,7 +384,8 @@ class _AppZoomableImageState extends State<AppZoomableImage>
                     offset: _offset + visualDrag,
                     child: Transform.scale(
                       key: const ValueKey('image-zoom-transform'),
-                      scale: _scale *
+                      scale:
+                          _scale *
                           (vertical && !zoomed ? 1 - dismissRatio * .25 : 1),
                       child: RepaintBoundary(child: image),
                     ),

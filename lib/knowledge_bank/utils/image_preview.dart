@@ -1,17 +1,9 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-class GeneratedImagePreview {
-  const GeneratedImagePreview({
-    required this.bytes,
-    required this.width,
-    required this.height,
-  });
+import 'package:rtu_mirea_app/knowledge_bank/utils/generated_image_preview.dart';
 
-  final Uint8List bytes;
-  final int width;
-  final int height;
-}
+export 'generated_image_preview.dart';
 
 Future<GeneratedImagePreview?> generateImagePreview(
   Uint8List bytes, {
