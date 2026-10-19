@@ -115,6 +115,23 @@ void main() {
     expect(kitDecorationOf(tester, AppSearchField).color, kitColors.surface);
   });
 
+  testWidgets('supports the university provider canvas search API', (
+    tester,
+  ) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    final search = AppSearchField(controller: controller, onCanvas: true);
+    await tester.pumpWidget(
+      wrapKit(SizedBox(width: 320, child: search)),
+    );
+
+    expect(kitDecorationOf(tester, AppSearchField).color, kitColors.surface);
+    expect(search.onCanvas, isTrue);
+    expect(search.isOnCanvas, isTrue);
+    await tester.enterText(find.byType(TextField), 'Physics');
+    expect(controller.text, 'Physics');
+  });
+
   testWidgets('clear button empties the query', (tester) async {
     final controller = TextEditingController(text: 'физика');
     addTearDown(controller.dispose);

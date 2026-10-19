@@ -176,6 +176,9 @@ jobs:
       - name: Generate code
         run: dart run build_runner build
 
+      - name: Verify university provider compatibility
+        run: flutter analyze --no-pub private/university_provider/lib
+
       - name: Configure signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
