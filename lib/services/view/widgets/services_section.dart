@@ -11,37 +11,63 @@ class ServicesSection extends StatelessWidget {
     required this.onOpen,
     required this.onToggleFavorite,
     super.key,
-  }) : _favoriteBuilder = isFavorite;
+  }) : _favoriteBuilder = isFavorite,
+       _sliver = false;
+
+  const ServicesSection.sliver({
+    required this.section,
+    required this.editMode,
+    required bool Function(ServiceEntry entry) isFavorite,
+    required this.onOpen,
+    required this.onToggleFavorite,
+    super.key,
+  }) : _favoriteBuilder = isFavorite,
+       _sliver = true;
 
   final ServiceSectionEntries section;
   final bool editMode;
   final bool Function(ServiceEntry entry) _favoriteBuilder;
   final ValueChanged<ServiceEntry> onOpen;
   final ValueChanged<ServiceEntry> onToggleFavorite;
+  final bool _sliver;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(
-            top: AppSpacing.md,
-            bottom: AppSpacing.sm,
-          ),
-          child: Text(
-            section.title,
-            style: AppText.heading.copyWith(color: context.colors.ink),
-          ),
-        ),
-        ServicesGrid(
-          entries: section.entries,
-          editMode: editMode,
-          isFavorite: _favoriteBuilder,
-          onOpen: onOpen,
-          onToggleFavorite: onToggleFavorite,
-        ),
-      ],
+    final title = Padding(
+      padding: const EdgeInsets.only(
+        top: AppSpacing.md,
+        bottom: AppSpacing.sm,
+      ),
+      child: Text(
+        section.title,
+        style: AppText.heading.copyWith(color: context.colors.ink),
+      ),
     );
+    return _sliver
+        ? SliverMainAxisGroup(
+            slivers: [
+              SliverToBoxAdapter(child: title),
+              ServicesGrid.sliver(
+                entries: section.entries,
+                editMode: editMode,
+                isFavorite: _favoriteBuilder,
+                onOpen: onOpen,
+                onToggleFavorite: onToggleFavorite,
+              ),
+            ],
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              title,
+              ServicesGrid(
+                entries: section.entries,
+                editMode: editMode,
+                isFavorite: _favoriteBuilder,
+                onOpen: onOpen,
+                onToggleFavorite: onToggleFavorite,
+              ),
+            ],
+          );
   }
 }

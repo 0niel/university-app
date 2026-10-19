@@ -58,6 +58,7 @@ export 'app_sheet.dart';
 export 'app_shortcut_grid.dart';
 export 'app_skeleton_text.dart';
 export 'app_slider.dart';
+export 'app_sliver_adaptive_grid.dart';
 export 'app_smart_chip.dart';
 export 'app_source_badge.dart';
 export 'app_spinner.dart';

@@ -248,26 +248,31 @@ class _ServicesViewState extends State<ServicesView> {
                     const SizedBox(height: AppSpacing.sm),
                     const ServicesNfcCard(),
                   ],
-                  if (spotlight.isNotEmpty)
-                    ServicesSection(
-                      key: const ValueKey('services-spotlight'),
-                      section: ServiceSectionEntries(
-                        key: pinned.isEmpty ? 'quick' : 'pinned',
-                        title: pinned.isEmpty
-                            ? l10n.servicesSectionImportant
-                            : l10n.servicesSectionPinned,
-                        entries: spotlight,
-                      ),
-                      editMode: _editMode,
-                      isFavorite: (entry) => favorites.ids.contains(entry.id),
-                      onOpen: _open,
-                      onToggleFavorite: _toggleFavorite,
-                    ),
                 ],
-                const SizedBox(height: AppSpacing.md),
               ],
             ),
           ),
+          if (selected == null && spotlight.isNotEmpty)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screen,
+              ),
+              sliver: ServicesSection.sliver(
+                key: const ValueKey('services-spotlight'),
+                section: ServiceSectionEntries(
+                  key: pinned.isEmpty ? 'quick' : 'pinned',
+                  title: pinned.isEmpty
+                      ? l10n.servicesSectionImportant
+                      : l10n.servicesSectionPinned,
+                  entries: spotlight,
+                ),
+                editMode: _editMode,
+                isFavorite: (entry) => favorites.ids.contains(entry.id),
+                onOpen: _open,
+                onToggleFavorite: _toggleFavorite,
+              ),
+            ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
           SliverToBoxAdapter(
             child: AppChipRow<String?>(
               key: const ValueKey('services-categories'),
@@ -300,9 +305,9 @@ class _ServicesViewState extends State<ServicesView> {
               AppSpacing.screen,
               AppBottomBar.extentOf(context) + AppSpacing.screen,
             ),
-            sliver: SliverList.list(
-              children: [
-                ServicesSection(
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                ServicesSection.sliver(
                   key: ValueKey('services-section-${catalog.key}'),
                   section: catalog,
                   editMode: _editMode,
@@ -310,10 +315,13 @@ class _ServicesViewState extends State<ServicesView> {
                   onOpen: _open,
                   onToggleFavorite: _toggleFavorite,
                 ),
-                if (loadingCatalog) ...[
-                  const SizedBox(height: 12),
-                  const ServicesGridSkeleton(),
-                ],
+                if (loadingCatalog)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 12),
+                      child: ServicesGridSkeleton(),
+                    ),
+                  ),
               ],
             ),
           ),

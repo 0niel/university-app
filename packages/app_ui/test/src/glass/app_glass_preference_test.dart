@@ -75,7 +75,10 @@ void main() {
           scroll.jumpTo(120);
           await tester.pump();
           expect(focus.hasFocus, isTrue);
-          expect(find.byType(LiquidGlassLens), findsOneWidget);
+          final glass = find.byType(
+            highlight ? LiquidGlassLens : LiquidGlassLite,
+          );
+          expect(glass, findsOneWidget);
 
           for (final next in [false, true, false]) {
             update(() => enabled = next);
@@ -86,7 +89,7 @@ void main() {
             expect(focus.hasFocus, isTrue);
             expect(scroll.offset, 120);
             expect(
-              find.byType(LiquidGlassLens),
+              glass,
               next ? findsOneWidget : findsNothing,
             );
             if (!next) {
@@ -118,7 +121,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(LiquidGlassLens), findsOneWidget);
+      expect(find.byType(LiquidGlassLite), findsOneWidget);
       expect(tester.takeException(), isNull);
     }
   });

@@ -274,8 +274,13 @@ void main() {
         find.byKey(const ValueKey('services-catalog-error')),
         findsNothing,
       );
-      expect(find.text('Университетский портал'), findsOneWidget);
       expect(find.text('Закреплённые'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Университетский портал'),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Университетский портал'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
@@ -393,6 +398,80 @@ void main() {
     expect(search.hitTestable(), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets('large catalog builds visible services at text scale $scale', (
+      tester,
+    ) async {
+      when(() => catalog.state).thenReturn(
+        ServiceCatalogState(
+          catalog: ServiceCatalog(
+            organizationId: 'test',
+            sections: [
+              ServiceCatalogSection(
+                key: 'portal',
+                title: 'Университет',
+                sortOrder: 0,
+                items: [
+                  for (var index = 0; index < 100; index++)
+                    ServiceCatalogEntry(
+                      id: 'portal-$index',
+                      slug: 'portal-$index',
+                      title: 'Университетский портал $index',
+                      description: 'Учебные сервисы',
+                      url: 'https://example.test/portal/$index',
+                      iconKey: 'globe',
+                      colorKey: 'accent',
+                      sortOrder: index,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpApp(
+        subject(),
+        size: const Size(320, 844),
+        textScaler: TextScaler.linear(scale),
+      );
+      expect(find.byType(ServiceRow).evaluate().length, lessThanOrEqualTo(20));
+      expect(find.text('Университетский портал 99'), findsNothing);
+      final category = find.byKey(const ValueKey('services-category-portal'));
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('services-categories')),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(category);
+      await tester.tap(category);
+      await tester.pumpAndSettle();
+      tester
+          .widget<CustomScrollView>(find.byType(CustomScrollView))
+          .controller!
+          .jumpTo(0);
+      await tester.pump();
+      final first = find.text('Университетский портал 0');
+      await tester.scrollUntilVisible(
+        first,
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(first, findsOneWidget);
+      expect(find.byType(ServiceRow).evaluate().length, lessThanOrEqualTo(20));
+      expect(find.text('Университетский портал 99'), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text('Университетский портал 99'),
+        600,
+        maxScrolls: 100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Университетский портал 99'), findsOneWidget);
+      expect(first, findsNothing);
+      expect(find.byType(ServiceRow).evaluate().length, lessThanOrEqualTo(20));
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('category viewport accepts edge swipes at 320px and 200% text', (
     tester,
