@@ -21,7 +21,7 @@ class AppPinnedSurface extends StatelessWidget {
           child: IgnorePointer(
             child: elevated
                 ? const AppGlassSurface(
-                    role: AppGlassRole.navigation,
+                    role: AppGlassRole.pinned,
                     borderRadius: AppRadius.none,
                     child: SizedBox.expand(),
                   )

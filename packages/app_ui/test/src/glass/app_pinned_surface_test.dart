@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
@@ -60,9 +61,23 @@ void main() {
             next ? findsOneWidget : findsNothing,
           );
           expect(
-            find.byType(LiquidGlassLens),
+            find.byType(LiquidGlassLite),
             next && glass ? findsOneWidget : findsNothing,
           );
+          expect(find.byType(LiquidGlassLens), findsNothing);
+          if (next && glass) {
+            final material = tester.widget<LiquidGlassLite>(
+              find.byType(LiquidGlassLite),
+            );
+            expect(material.blur, 6);
+            expect(material.magnification, 1);
+            expect(material.specular, AppGlassStyle.rim);
+            expect(material.glow, AppGlassStyle.glow);
+            expect(
+              tester.layers.whereType<BackdropFilterLayer>(),
+              hasLength(1),
+            );
+          }
           expect(tester.takeException(), isNull);
         }
       });

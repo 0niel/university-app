@@ -34,7 +34,7 @@ class AppGlassLens extends StatelessWidget {
         color: style.color,
         child: const SizedBox.expand(),
       );
-      background = style.blur == 0 && style.magnification == 1
+      background = style.magnification == 1
           ? RepaintBoundary(child: glass)
           : glass;
     } else {

@@ -22,6 +22,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(BackdropFilter), findsNothing);
+      expect(tester.layers.whereType<BackdropFilterLayer>(), isEmpty);
       expect(find.byType(LiquidGlassLens), findsNothing);
       final glass = tester.widget<LiquidGlassLite>(
         find.byType(LiquidGlassLite),

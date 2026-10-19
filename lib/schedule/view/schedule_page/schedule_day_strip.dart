@@ -42,25 +42,27 @@ class ScheduleDayStrip extends StatelessWidget {
 
   List<AppWeekDay> _days(BuildContext context, DateTime start) {
     final locale = Localizations.localeOf(context).toString();
+    final weekdayFormat = DateFormat.E(locale);
+    final dateFormat = DateFormat.yMMMMd(locale);
     final days = [
       for (var offset = 0; offset < 7; offset++)
         DateTime(start.year, start.month, start.day + offset),
     ];
-    return [
-      for (final date in days)
-        AppWeekDay(
-          '${date.day}',
-          short: DateFormat.E(locale).format(date).toUpperCase(),
-          isWeekend: RussianWorkCalendar.dayInfo(date).isNonWorking,
-          isToday: isSameDate(date, now),
-          semanticsLabel: [
-            DateFormat.yMMMMd(locale).format(date),
-            scheduleDayLabel(context, date),
-            ..._marks(context, date).map((mark) => mark.$1),
-          ].join(', '),
-          dots: _marks(context, date).map((mark) => mark.$2).toList(),
-        ),
-    ];
+    return days.map((date) {
+      final marks = _marks(context, date);
+      return AppWeekDay(
+        '${date.day}',
+        short: weekdayFormat.format(date).toUpperCase(),
+        isWeekend: RussianWorkCalendar.dayInfo(date).isNonWorking,
+        isToday: isSameDate(date, now),
+        semanticsLabel: [
+          dateFormat.format(date),
+          scheduleDayLabel(context, date),
+          ...marks.map((mark) => mark.$1),
+        ].join(', '),
+        dots: marks.map((mark) => mark.$2).toList(),
+      );
+    }).toList();
   }
 
   @override

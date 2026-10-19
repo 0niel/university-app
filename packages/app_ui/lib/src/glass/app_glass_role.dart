@@ -1,1 +1,1 @@
-enum AppGlassRole { content, control, navigation, overlay }
+enum AppGlassRole { content, control, navigation, overlay, pinned }
