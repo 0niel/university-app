@@ -36,7 +36,7 @@ jobs:
   release:
     if: ${{ inputs.artifact_run_id == '' && inputs.verify_build_number == '' && inputs.verify_marketing_version == '' && !inputs.verify_release_status }}
     runs-on: macos-15
-    timeout-minutes: 60
+    timeout-minutes: 120
     environment: beta
     permissions:
       contents: write
