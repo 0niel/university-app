@@ -20,6 +20,16 @@ void main() {
       final overlay = material(AppGlassRole.overlay);
       expect(content.liteGlass, isTrue);
       expect(content.refractionIndex, 1);
+      expect(content.blur, 0);
+      expect(
+        AppGlassStyle.surface(
+          colors: colors,
+          radius: 28,
+          tone: AppGlassTone.regular,
+          highContrast: true,
+        ).blur,
+        0,
+      );
       expect(control.liteGlass, isFalse);
       expect(control.refractionIndex, inExclusiveRange(1, 1.02));
       expect(navigation.refractionIndex, lessThan(control.refractionIndex));
@@ -157,16 +167,17 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final lenses = tester.widgetList<LiquidGlassLens>(
-      find.byType(LiquidGlassLens),
+    final lenses = tester.widgetList<LiquidGlassLite>(
+      find.byType(LiquidGlassLite),
     );
     expect(lenses, hasLength(2));
     for (final lens in lenses) {
-      expect(lens.style.liteGlass, isTrue);
-      expect(lens.style.color.a, greaterThan(.97));
-      expect(lens.style.specular, AppGlassStyle.rim);
+      expect(lens.color!.a, greaterThan(.97));
+      expect(lens.specular, AppGlassStyle.rim);
+      expect(lens.glow, AppGlassStyle.glow);
     }
-    final highlight = lenses.last.style.color;
+    expect(lenses.first.blur, 0);
+    final highlight = lenses.last.color!;
     expect(highlight.withValues(alpha: 1), AppColors.dark.tint);
     expect(tester.takeException(), isNull);
   });

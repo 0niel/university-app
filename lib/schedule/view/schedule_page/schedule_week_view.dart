@@ -15,9 +15,9 @@ import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_calendar_notice.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_dates.dart';
-import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_marks.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_overlap_switcher.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_time_slots.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_week_day_data.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/sheets.dart';
 import 'package:rtu_mirea_app/schedule/widgets/lesson_card.dart';
 import 'package:rtu_mirea_app/schedule/widgets/schedule_metrics.dart';
@@ -53,20 +53,24 @@ class ScheduleWeekView extends StatelessWidget {
   final DateTime? now;
   final EdgeInsetsGeometry padding;
 
-  List<LessonSchedulePart> _lessons(DateTime date) => visibleLessonsForDay(
-    schedule: schedule,
-    day: date,
-    now: now ?? DateTime.now(),
-    preferences: preferences,
-    display: display,
-    changes: changes,
-  );
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toString();
     final dates = weekDaysFor(day);
+    final currentTime = now ?? DateTime.now();
+    final dayData = {
+      for (final date in dates)
+        date: ScheduleWeekDayData(
+          day: date,
+          now: currentTime,
+          schedule: schedule,
+          changes: changes,
+          preferences: preferences,
+          display: display,
+          activities: activities,
+        ),
+    };
     final friendOccupancy = {
       for (final date in dates)
         date: comparisonOccupancyForDay(
@@ -77,10 +81,10 @@ class ScheduleWeekView extends StatelessWidget {
     };
     final sunday = dates.lastOrNull ?? day;
     final showSunday =
-        _lessons(sunday).isNotEmpty ||
+        dayData[sunday]!.lessons.isNotEmpty ||
         friendOccupancy[sunday]!.hasEntries ||
-        _activitySlots(sunday).isNotEmpty ||
-        _events(sunday).isNotEmpty ||
+        dayData[sunday]!.activities.isNotEmpty ||
+        dayData[sunday]!.events.isNotEmpty ||
         _untimedActivities(activities, [sunday]).isNotEmpty ||
         schedule
             .where((part) => part is! LessonSchedulePart)
@@ -125,23 +129,14 @@ class ScheduleWeekView extends StatelessWidget {
       configured: configured,
       occupied: [
         for (final date in days) ...[
-          for (final lesson in _lessons(date))
-            LessonBellSlotConfig(
-              startMinutes: minutesOfDay(lesson.lessonBells.startTime),
-              endMinutes: minutesOfDay(lesson.lessonBells.endTime),
-            ),
+          ...?dayData[date]?.lessonSlots,
           for (final range in friendOccupancy[date]!.ranges)
             LessonBellSlotConfig(
               startMinutes: range.$1,
               endMinutes: range.$2,
             ),
-          ..._activitySlots(date),
-          for (final event in _events(date))
-            scheduleSlotForDay(
-              startsAt: event.startsAt!,
-              endsAt: event.endsAt,
-              day: date,
-            )!,
+          for (final activity in dayData[date]!.activities) activity.$2,
+          for (final event in dayData[date]!.events) event.$2,
         ],
       ],
     );
@@ -263,23 +258,16 @@ class ScheduleWeekView extends StatelessWidget {
                                     ).format(date).toUpperCase(),
                                     isToday: isSameDate(
                                       date,
-                                      now ?? DateTime.now(),
+                                      currentTime,
                                     ),
                                     isWeekend: RussianWorkCalendar.dayInfo(
                                       date,
                                     ).isNonWorking,
                                     semanticsLabel: dayLabel(date),
                                     dots: [
-                                      for (final mark in scheduleDayMarks(
-                                        context,
-                                        schedule: schedule,
-                                        day: date,
-                                        now: now ?? DateTime.now(),
-                                        preferences: preferences,
-                                        display: display,
-                                        changes: changes,
-                                      ))
-                                        mark.$2,
+                                      for (final lesson
+                                          in dayData[date]!.lessons)
+                                        lessonAccentOf(context, lesson),
                                     ],
                                   ),
                                   onTap: () => onDay(date),
@@ -327,6 +315,7 @@ class ScheduleWeekView extends StatelessWidget {
                                         context,
                                         date,
                                         bells[index],
+                                        dayData[date]!,
                                         friendOccupancy[date]!,
                                       ),
                                     ),
@@ -438,22 +427,14 @@ class ScheduleWeekView extends StatelessWidget {
     BuildContext context,
     DateTime date,
     LessonBellSlotConfig bell,
+    ScheduleWeekDayData data,
     ComparisonDayOccupancy occupancy,
   ) {
-    final lessons = _lessons(date).where((l) => _overlap(l, bell)).toList();
+    final lessons = data.lessonsIn(bell);
     final busy = occupancy.isBusy(bell.startMinutes, bell.endMinutes);
     final uncertain = occupancy.isUncertain(bell.startMinutes, bell.endMinutes);
-    final own = activities
-        .where(
-          (activity) =>
-              _activityOverlap(activity, date, bell) &&
-              (display.showPast ||
-                  activity.endsAt!.isAfter(now ?? DateTime.now())),
-        )
-        .toList();
-    final events = _events(
-      date,
-    ).where((event) => _eventOverlap(event, date, bell)).toList();
+    final own = data.activitiesIn(bell);
+    final events = data.eventsIn(bell);
     if (lessons.isNotEmpty || own.isNotEmpty || events.isNotEmpty) {
       final friendFree = occupancy.isFree(bell.startMinutes, bell.endMinutes);
       return Column(
@@ -565,37 +546,6 @@ class ScheduleWeekView extends StatelessWidget {
     child: child,
   );
 
-  bool _activityOverlap(
-    UserActivity activity,
-    DateTime date,
-    LessonBellSlotConfig slot,
-  ) {
-    final activitySlot = scheduleSlotForDay(
-      startsAt: activity.startsAt,
-      endsAt: activity.endsAt,
-      day: date,
-    );
-    return activitySlot != null && scheduleSlotsOverlap(activitySlot, slot);
-  }
-
-  bool _overlap(LessonSchedulePart lesson, LessonBellSlotConfig slot) =>
-      minutesOfDay(lesson.lessonBells.startTime) < slot.endMinutes &&
-      minutesOfDay(lesson.lessonBells.endTime) > slot.startMinutes;
-
-  Iterable<CalendarSchedulePart> _events(DateTime date) =>
-      schedule.whereType<CalendarSchedulePart>().where(
-        (event) =>
-            !event.isAllDay &&
-            _hasTimeRange(event) &&
-            scheduleSlotForDay(
-                  startsAt: event.startsAt!,
-                  endsAt: event.endsAt,
-                  day: date,
-                ) !=
-                null &&
-            (display.showPast || event.endsAt!.isAfter(now ?? DateTime.now())),
-      );
-
   bool _hasTimeRange(CalendarSchedulePart event) =>
       event.startsAt != null &&
       event.endsAt != null &&
@@ -615,34 +565,6 @@ class ScheduleWeekView extends StatelessWidget {
             !activity.endsAt!.isAfter(activity.startsAt)) &&
         days.any((date) => isSameDate(date, activity.startsAt)),
   );
-
-  Iterable<LessonBellSlotConfig> _activitySlots(DateTime date) sync* {
-    for (final activity in activities) {
-      if (activity.endsAt == null ||
-          (!display.showPast &&
-              !activity.endsAt!.isAfter(now ?? DateTime.now()))) {
-        continue;
-      }
-      final slot = scheduleSlotForDay(
-        startsAt: activity.startsAt,
-        endsAt: activity.endsAt,
-        day: date,
-      );
-      if (slot != null) yield slot;
-    }
-  }
-
-  bool _eventOverlap(
-    CalendarSchedulePart event,
-    DateTime date,
-    LessonBellSlotConfig slot,
-  ) =>
-      event.startsAt!.isBefore(
-        dateOnly(date).add(Duration(minutes: slot.endMinutes)),
-      ) &&
-      event.endsAt!.isAfter(
-        dateOnly(date).add(Duration(minutes: slot.startMinutes)),
-      );
 
   String _time(int minutes) =>
       '${(minutes ~/ 60).toString().padLeft(2, '0')}:'

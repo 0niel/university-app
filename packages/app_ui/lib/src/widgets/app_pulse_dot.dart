@@ -53,26 +53,28 @@ class _AppPulseDotState extends State<AppPulseDot>
 
     if (reduceMotion) return dot;
 
-    return SizedBox.square(
-      dimension: widget.size,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              final t = _controller.value;
-              final wave = t < .5 ? t * 2 : (1 - t) * 2;
-              return Opacity(
-                opacity: (.6 - .6 * wave).clamp(0, 1).toDouble(),
-                child: Transform.scale(scale: 1 + .4 * wave, child: child),
-              );
-            },
-            child: dot,
-          ),
-          dot,
-        ],
+    return RepaintBoundary(
+      child: SizedBox.square(
+        dimension: widget.size,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                final t = _controller.value;
+                final wave = t < .5 ? t * 2 : (1 - t) * 2;
+                return Opacity(
+                  opacity: (.6 - .6 * wave).clamp(0, 1).toDouble(),
+                  child: Transform.scale(scale: 1 + .4 * wave, child: child),
+                );
+              },
+              child: dot,
+            ),
+            dot,
+          ],
+        ),
       ),
     );
   }

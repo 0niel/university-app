@@ -12,7 +12,19 @@ class ServicesGrid extends StatelessWidget {
     required this.onToggleFavorite,
     this.compact = false,
     super.key,
-  }) : _favoriteBuilder = isFavorite;
+  }) : _favoriteBuilder = isFavorite,
+       _sliver = false;
+
+  const ServicesGrid.sliver({
+    required this.entries,
+    required this.editMode,
+    required bool Function(ServiceEntry) isFavorite,
+    required this.onOpen,
+    required this.onToggleFavorite,
+    this.compact = false,
+    super.key,
+  }) : _favoriteBuilder = isFavorite,
+       _sliver = true;
 
   final List<ServiceEntry> entries;
   final bool editMode;
@@ -20,22 +32,34 @@ class ServicesGrid extends StatelessWidget {
   final ValueChanged<ServiceEntry> onOpen;
   final ValueChanged<ServiceEntry> onToggleFavorite;
   final bool compact;
+  final bool _sliver;
 
   static int columnsFor(BuildContext context, double width) =>
       AppAdaptiveGrid.columnsFor(context, width);
 
+  Widget _buildItem(BuildContext context, int index) {
+    final entry = entries.elementAtOrNull(index)!;
+    return ServiceRow(
+      key: ValueKey(entry.id),
+      entry: entry,
+      editMode: editMode,
+      favorite: _favoriteBuilder(entry),
+      compact: compact,
+      onTap: () => onOpen(entry),
+      onToggleFavorite: () => onToggleFavorite(entry),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) => AppAdaptiveGrid(
-    children: [
-      for (final entry in entries)
-        ServiceRow(
-          entry: entry,
-          editMode: editMode,
-          favorite: _favoriteBuilder(entry),
-          compact: compact,
-          onTap: () => onOpen(entry),
-          onToggleFavorite: () => onToggleFavorite(entry),
-        ),
-    ],
-  );
+  Widget build(BuildContext context) => _sliver
+      ? AppSliverAdaptiveGrid(
+          itemCount: entries.length,
+          itemBuilder: _buildItem,
+        )
+      : AppAdaptiveGrid(
+          children: [
+            for (var index = 0; index < entries.length; index++)
+              _buildItem(context, index),
+          ],
+        );
 }

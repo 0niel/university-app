@@ -18,9 +18,36 @@ class AppGlassLens extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
-    final view = View.of(context);
     final enabled = AppGlassTheme.of(context).enabled;
+    final Widget background;
+    if (!enabled) {
+      background = ColoredBox(color: fallbackColor);
+    } else if (style.liteGlass) {
+      final glass = LiquidGlassLite(
+        shape:
+            style.shape ??
+            LiquidGlassShape.roundedRectangle(cornerRadius: borderRadius),
+        specular: style.specular,
+        glow: style.glow,
+        blur: style.blur,
+        magnification: style.magnification,
+        color: style.color,
+        child: const SizedBox.expand(),
+      );
+      background = style.blur == 0 && style.magnification == 1
+          ? RepaintBoundary(child: glass)
+          : glass;
+    } else {
+      final media = MediaQuery.of(context);
+      final view = View.of(context);
+      background = MediaQuery(
+        data: media.copyWith(
+          size: view.physicalSize / view.devicePixelRatio,
+          devicePixelRatio: view.devicePixelRatio,
+        ),
+        child: LiquidGlassLens(style: style, child: const SizedBox.expand()),
+      );
+    }
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: Stack(
@@ -29,18 +56,7 @@ class AppGlassLens extends StatelessWidget {
           Positioned.fill(
             child: ExcludeSemantics(
               child: IgnorePointer(
-                child: enabled
-                    ? MediaQuery(
-                        data: media.copyWith(
-                          size: view.physicalSize / view.devicePixelRatio,
-                          devicePixelRatio: view.devicePixelRatio,
-                        ),
-                        child: LiquidGlassLens(
-                          style: style,
-                          child: const SizedBox.expand(),
-                        ),
-                      )
-                    : ColoredBox(color: fallbackColor),
+                child: background,
               ),
             ),
           ),

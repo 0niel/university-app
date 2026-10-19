@@ -35,7 +35,7 @@ abstract final class AppGlassStyle {
             ? colors.tintOf(tint ?? colors.accent, .13)
             : colors.surface);
     final (opacity, blur, refraction, band) = switch (role) {
-      AppGlassRole.content => (colors.isDark ? .94 : .97, 6.0, 1.0, 0.0),
+      AppGlassRole.content => (colors.isDark ? .94 : .97, 0.0, 1.0, 0.0),
       AppGlassRole.control => (colors.isDark ? .64 : .76, 6.0, 1.012, 14.0),
       AppGlassRole.navigation => (colors.isDark ? .82 : .9, 12.0, 1.006, 8.0),
       AppGlassRole.overlay => (colors.isDark ? .93 : .96, 14.0, 1.004, 8.0),
@@ -51,7 +51,7 @@ abstract final class AppGlassStyle {
             ? .18
             : opacity,
       ),
-      blur: highContrast ? 8 : blur,
+      blur: role == AppGlassRole.content ? 0 : (highContrast ? 8 : blur),
       refractionIndex: refraction,
       refractionWidth: band,
       liteGlass: highContrast || role == AppGlassRole.content,

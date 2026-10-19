@@ -44,7 +44,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 80));
       expect(find.byType(TextField), findsNothing);
       expect(focus.hasFocus, isFalse);
-      final lens = find.byType(LiquidGlassLens);
+      final lens = find.byType(LiquidGlassLite);
       expect(lens, findsOneWidget);
       expect(
         find.ancestor(of: lens, matching: find.byType(FadeTransition)),
@@ -90,7 +90,10 @@ void main() {
                     onTap: () => taps++,
                     child: highlight
                         ? AppGlassHighlight(child: content)
-                        : AppGlassSurface(child: content),
+                        : AppGlassSurface(
+                            role: AppGlassRole.control,
+                            child: content,
+                          ),
                   ),
                 );
               },
