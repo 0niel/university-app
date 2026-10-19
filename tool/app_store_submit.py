@@ -9,6 +9,7 @@ import urllib.request
 from pathlib import Path
 
 from app_store_build_status import AppStoreConnectClient, get_release_status, wait_for_build
+from app_store_review_notes import merge_review_notes
 
 
 EDITABLE_STATES = {
@@ -515,9 +516,7 @@ def append_review_notes(client, bundle_id, marketing_version, build_id, note):
 
     verify_version(versions[0])
     detail_id, existing = review_detail()
-    combined = existing if note in existing else existing + ("\n\n" if existing else "") + note
-    if len(combined.encode("utf-8")) > 4000:
-        raise ValueError("Combined App Store review notes exceed 4000 bytes")
+    combined = merge_review_notes(existing, note)
     current_version()
     if combined != existing:
         if review_detail() != (detail_id, existing):
