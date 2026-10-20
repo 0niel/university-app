@@ -49,6 +49,7 @@ class NfcPassRepository {
   late final NfcPassClient _nfcPassClient;
 
   Future<NfcVerificationResult>? _bindingOperation;
+  (int, Future<String?>)? _authenticationOperation;
   DateTime? _verificationRetryAt;
   int? _verificationRevision;
   Future<int>? _confirmationOperation;
@@ -62,11 +63,34 @@ class NfcPassRepository {
   /// Runs the institution's interactive login in the shared browser and
   /// stores the resulting session for the digital pass. Returns the session
   /// cookie header, or null when the user closes the browser.
-  Future<String?> authenticateSession() async {
+  Future<String?> authenticateSession() {
+    final revision = _store.sessionRevision;
+    final pending = _authenticationOperation;
+    if (pending != null && pending.$1 == revision) return pending.$2;
+    final previous = pending?.$2.then<void>(
+          (_) {},
+          onError: (Object error, StackTrace stackTrace) {},
+        ) ??
+        Future<void>.value();
+    late final Future<String?> operation;
+    operation =
+        previous.then((_) => _authenticateSession(revision)).whenComplete(() {
+      if (identical(_authenticationOperation?.$2, operation)) {
+        _authenticationOperation = null;
+      }
+    });
+    _authenticationOperation = (revision, operation);
+    return operation;
+  }
+
+  Future<String?> _authenticateSession(int expectedRevision) async {
     final String cookie;
     try {
+      final (revision, request) = await _store.captureLogin(expectedRevision);
+      _store.checkSession(revision);
       cookie =
           _sessionCookieOf(await oauthInterceptorClient.initiateOAuthFlow());
+      await _store.storeLoginCookie(cookie, revision, request);
     } on OAuthFlowCancelled {
       return null;
     } on NfcPassFailure {
@@ -74,7 +98,6 @@ class NfcPassRepository {
     } on Object catch (error, stackTrace) {
       Error.throwWithStackTrace(NfcPassLoginFailure(error), stackTrace);
     }
-    await _store.setSessionCookie(cookie);
     return cookie;
   }
 
@@ -230,11 +253,10 @@ class NfcPassRepository {
 
   Future<void> _loginAndStoreCookie(int expectedRevision) async {
     try {
-      final (revision, request) = await _store.captureLogin(expectedRevision);
-      _store.checkSession(revision);
-      final cookieValue =
-          _sessionCookieOf(await oauthInterceptorClient.initiateOAuthFlow());
-      await _store.storeLoginCookie(cookieValue, revision, request);
+      _store.checkSession(expectedRevision);
+      if (await authenticateSession() == null) {
+        throw const OAuthFlowCancelled();
+      }
     } on NfcPassFailure {
       rethrow;
     } on Object catch (error, stackTrace) {

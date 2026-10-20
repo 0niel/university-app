@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:web_oauth_interceptor_client/src/auto_fill_config.dart';
 import 'package:web_oauth_interceptor_client/src/login_success_data.dart';
@@ -66,6 +66,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   Future<void> onLoadStart(WebUri? url) async {
     super.onLoadStart(url);
     if (url == null) return;
+    _log('navigation started', url: url);
     await _session.observe(url.toString());
   }
 
@@ -73,6 +74,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   Future<void> onLoadStop(WebUri? url) async {
     super.onLoadStop(url);
     if (url == null || _didComplete) return;
+    _log('navigation loaded', url: url);
     await _session.observe(url.toString(), loaded: true);
     if (!_didComplete && autoFillConfig != null) {
       await _tryAutoFillForm();
@@ -83,12 +85,37 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   Future<void> onUpdateVisitedHistory(WebUri? url, bool? isReload) async {
     super.onUpdateVisitedHistory(url, isReload);
     if (url == null || _didComplete) return;
+    _log('history updated', url: url);
     await _session.observe(url.toString(), loaded: true);
   }
 
   Future<Map<String, String>> _readCookies(Uri uri) async {
-    final cookies =
-        await CookieManager.instance().getCookies(url: WebUri(uri.toString()));
+    final List<Cookie> cookies;
+    try {
+      cookies = await CookieManager.instance().getCookies(
+        url: WebUri(uri.toString()),
+        webViewController: webViewController,
+      );
+    } on Object catch (error) {
+      _log(
+        'cookie store read failed (${error.runtimeType})',
+        url: WebUri(uri.toString()),
+      );
+      rethrow;
+    }
+    if (!kReleaseMode) {
+      final metadata = cookies.map((cookie) {
+        final name = cookie.name.replaceFirst(
+          RegExp(r'^(\.AspNetCore\.(?:OpenIdConnect\.Nonce|Correlation))\..*$'),
+          r'$1.<redacted>',
+        );
+        final value = cookie.value;
+        final size =
+            value is String ? '${value.length}' : '${value.runtimeType}';
+        return '$name(length=$size,httpOnly=${cookie.isHttpOnly})';
+      }).join(', ');
+      _log('cookies [$metadata]', url: WebUri(uri.toString()));
+    }
     return {
       for (final cookie in cookies)
         if (cookie.value case final String value) cookie.name: value,
@@ -99,7 +126,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   void onReceivedError(WebResourceRequest request, WebResourceError error) {
     super.onReceivedError(request, error);
     if (request.isForMainFrame == false) return;
-    _reportError('Load error (${error.type}).');
+    _reportError('Load error (${error.type}).', url: request.url);
   }
 
   @override
@@ -112,6 +139,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
     final statusCode = errorResponse.statusCode;
     _reportError(
       statusCode == null ? 'HTTP error.' : 'HTTP error (status $statusCode).',
+      url: request.url,
     );
   }
 
@@ -121,6 +149,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
     _session.close();
     if (_didComplete) return;
     _didComplete = true;
+    _log('browser exited');
     onBrowserExit?.call();
   }
 
@@ -179,6 +208,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
     if (_didComplete) return;
     _didComplete = true;
     _session.close();
+    _log('session captured');
     try {
       onLoginSuccess?.call(successData);
     } finally {
@@ -186,10 +216,11 @@ class WebOAuthInterceptorClient extends InAppBrowser {
     }
   }
 
-  void _reportError(String message) {
+  void _reportError(String message, {WebUri? url}) {
     if (_didComplete) return;
     _didComplete = true;
     _session.close();
+    _log(message, url: url);
     onLoginError?.call(message);
     unawaited(_closeSafely());
   }
@@ -200,6 +231,14 @@ class WebOAuthInterceptorClient extends InAppBrowser {
     } on Exception {
       // A redirect can dispose the browser before this close operation runs.
     }
+  }
+
+  void _log(String message, {WebUri? url}) {
+    if (kReleaseMode) return;
+    final uri = url == null ? null : Uri.tryParse(url.toString());
+    final location =
+        uri == null ? '' : ' ${uri.scheme}://${uri.host}${uri.path}';
+    debugPrint('Institution login: $message$location');
   }
 
   void _appendInputAssignment(

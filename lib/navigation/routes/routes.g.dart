@@ -565,7 +565,7 @@ mixin $ScheduleDetailsRoute on GoRouteData {
       ScheduleDetailsRoute(
         teacherId: state.uri.queryParameters['teacher-id'],
         teacherName: state.uri.queryParameters['teacher-name'],
-        $extra: state.extra as (LessonSchedulePart, DateTime),
+        $extra: state.extra as (LessonSchedulePart, DateTime)?,
       );
 
   ScheduleDetailsRoute get _self => this as ScheduleDetailsRoute;
@@ -597,7 +597,7 @@ mixin $ScheduleDetailsRoute on GoRouteData {
 
 mixin $ScheduleDiffRoute on GoRouteData {
   static ScheduleDiffRoute _fromState(GoRouterState state) =>
-      ScheduleDiffRoute($extra: state.extra as (ScheduleUpdateDiff, String));
+      ScheduleDiffRoute($extra: state.extra as (ScheduleUpdateDiff, String)?);
 
   ScheduleDiffRoute get _self => this as ScheduleDiffRoute;
 
