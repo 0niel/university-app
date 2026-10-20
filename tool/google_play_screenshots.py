@@ -3,6 +3,7 @@ import hashlib
 import json
 import re
 import struct
+import urllib.parse
 from pathlib import Path
 
 from google_play_store_icon import (
@@ -18,6 +19,17 @@ IMAGE_TYPE = "phoneScreenshots"
 
 
 class GooglePlayScreenshotClient(GooglePlayClient):
+    def commit_edit(self, edit_id: str, submit_for_review: bool, *, replace_pending_review: bool = False) -> None:
+        if not replace_pending_review:
+            return super().commit_edit(edit_id, submit_for_review)
+        if not submit_for_review:
+            raise ValueError("Replacing pending review requires submitting screenshots for review")
+        query = urllib.parse.urlencode({
+            "changesInReviewBehavior": "CANCEL_IN_REVIEW_AND_SUBMIT",
+            "changesNotSentForReview": "false",
+        })
+        self.request("POST", f"/applications/{self.package_name}/edits/{self.quoted(edit_id)}:commit?{query}", data=b"")
+
     def image_path(self, edit_id: str, language: str) -> str:
         return (
             f"/applications/{self.package_name}/edits/{self.quoted(edit_id)}"
@@ -117,9 +129,12 @@ def update_screenshots(
     apply: bool = False,
     submit_for_review: bool = False,
     languages: list[str] | None = None,
+    replace_pending_review: bool = False,
 ) -> dict:
     if submit_for_review and not apply:
         raise ValueError("--submit-for-review requires --apply")
+    if replace_pending_review and not (apply and submit_for_review):
+        raise ValueError("Replacing pending review requires --apply --submit-for-review")
     report = {
         "package_name": PACKAGE_NAME,
         "image_type": IMAGE_TYPE,
@@ -129,6 +144,7 @@ def update_screenshots(
             for asset in assets
         ],
         "apply": apply,
+        "replace_pending_review": replace_pending_review,
         "changed": False,
         "committed": False,
         "commit_attempted": False,
@@ -184,7 +200,10 @@ def update_screenshots(
         report["status"] = "verified_before_commit"
         report["commit_attempted"] = True
         write_report(report_dir, report)
-        client.commit_edit(edit_id, submit_for_review)
+        if replace_pending_review:
+            client.commit_edit(edit_id, submit_for_review, replace_pending_review=True)
+        else:
+            client.commit_edit(edit_id, submit_for_review)
         edit_id = None
         report["committed"] = True
         report["changed"] = True
@@ -229,6 +248,7 @@ def main() -> None:
     parser.add_argument("--language", action="append", dest="languages")
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--submit-for-review", action="store_true")
+    parser.add_argument("--replace-pending-review", action="store_true")
     arguments = parser.parse_args()
     if arguments.submit_for_review and not arguments.apply:
         parser.error("--submit-for-review requires --apply")
@@ -244,6 +264,7 @@ def main() -> None:
         apply=arguments.apply,
         submit_for_review=arguments.submit_for_review,
         languages=arguments.languages,
+        replace_pending_review=arguments.replace_pending_review,
     )
     print(json.dumps({
         key: result[key]

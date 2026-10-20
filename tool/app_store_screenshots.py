@@ -9,7 +9,7 @@ import urllib.request
 from pathlib import Path
 
 from app_store_build_status import get_release_status, wait_for_build
-from app_store_submit import AppStoreSubmissionClient, replace_pending_build, validate_version
+from app_store_submit import AppStoreSubmissionClient, pending_review_submission, validate_version
 
 
 DISPLAY_TYPE = "APP_IPHONE_67"
@@ -288,6 +288,7 @@ def replace_set(client, set_id, assets, old, backups, report):
         reorder(client, set_id, created)
         if not matches(listed(client, f"/v1/appScreenshotSets/{set_id}/appScreenshots"), assets):
             raise RuntimeError("App Store screenshot order or checksums differ after update")
+        return created
     except Exception:
         report["rollback_attempted"] = True
         try:
@@ -318,13 +319,112 @@ def replace_set(client, set_id, assets, old, backups, report):
         raise
 
 
-def update_screenshots(client, assets, report_dir, bundle_id, marketing_version, build_number, *, apply=False, replace_pending_review=False, locales=None):
+def restore_snapshot(client, set_id, old, backups, allowed_new=()):
+    if len(old) != len(backups):
+        raise RuntimeError("Screenshot restoration requires a complete backup")
+    current = listed(client, f"/v1/appScreenshotSets/{set_id}/appScreenshots")
+    old_ids = {image["id"] for image in old}
+    if any(image["id"] not in old_ids | set(allowed_new) for image in current):
+        raise RuntimeError("Screenshot set changed concurrently; restoration is blocked")
+    present = {image["id"]: image for image in current if image["id"] in old_ids}
+    for image in current:
+        if image["id"] not in old_ids:
+            client.delete(f"/v1/appScreenshots/{identifier(image['id'])}")
+    restored, expected = [], []
+    for image, backup in zip(old, backups):
+        if image["id"] in present:
+            attributes = image["attributes"]
+            original = {"filename": attributes["fileName"], "bytes": attributes["fileSize"], "md5": attributes["sourceFileChecksum"]}
+            if not matches([present[image["id"]]], [original]):
+                raise RuntimeError("Existing screenshot changed before restoration")
+            restored.append(image["id"])
+            expected.append(original)
+        else:
+            upload_asset(client, set_id, backup, restored)
+            expected.append(backup)
+    reorder(client, set_id, restored)
+    actual = listed(client, f"/v1/appScreenshotSets/{set_id}/appScreenshots")
+    if [image["id"] for image in actual] != restored or not matches(actual, expected):
+        raise RuntimeError("Restored screenshot order or checksums differ")
+
+
+def remove_other_phone_assets(client, target_id, assets, target_old, target_backups, other_snapshots, report, *, target_was_created=False):
+    target_images = listed(client, f"/v1/appScreenshotSets/{target_id}/appScreenshots")
+    if not matches(target_images, assets):
+        raise RuntimeError("Target screenshots must be verified before removing other sizes")
+    try:
+        for set_id, old, backups in other_snapshots:
+            if len(old) != len(backups):
+                raise RuntimeError("Removing other iPhone sizes requires complete backups")
+            current = listed(client, f"/v1/appScreenshotSets/{set_id}/appScreenshots")
+            if [screenshot_summary(image) for image in current] != [screenshot_summary(image) for image in old]:
+                raise RuntimeError("Other iPhone screenshots changed after backup")
+        for set_id, old, _ in other_snapshots:
+            for image in old:
+                client.delete(f"/v1/appScreenshots/{identifier(image['id'])}")
+            if listed(client, f"/v1/appScreenshotSets/{set_id}/appScreenshots"):
+                raise RuntimeError("Other iPhone screenshot size was not cleared")
+            report.setdefault("cleared_phone_sets", []).append(set_id)
+        if not matches(listed(client, f"/v1/appScreenshotSets/{target_id}/appScreenshots"), assets):
+            raise RuntimeError("Target screenshot order or checksums changed during migration")
+    except Exception:
+        report["rollback_attempted"] = True
+        results = []
+        for set_id, old, backups in [*other_snapshots, (target_id, target_old, target_backups)]:
+            try:
+                restore_snapshot(client, set_id, old, backups, [image["id"] for image in target_images] if set_id == target_id else ())
+                if set_id == target_id and target_was_created:
+                    client.delete(f"/v1/appScreenshotSets/{identifier(set_id)}")
+                results.append({"set_id": set_id, "verified": True})
+            except Exception as error:
+                results.append({"set_id": set_id, "verified": False, "error_message": safe_error(error)})
+        report["migration_rollback"] = results
+        report["rollback_succeeded"] = all(result["verified"] for result in results)
+        raise
+
+
+def withdraw_review(client, app_id, version, marketing_version, build_id, timeout=120):
+    version_id = identifier(version.get("id"))
+    attributes = version.get("attributes", {})
+    state = attributes.get("appVersionState") or attributes.get("appStoreState")
+    if state not in ("WAITING_FOR_REVIEW", "IN_REVIEW"):
+        raise RuntimeError("Only waiting or in-review submissions can be withdrawn")
+    submission_id = pending_review_submission(
+        client, app_id, version_id, state,
+        item_states=("READY_FOR_REVIEW", "IN_REVIEW", "WAITING_FOR_REVIEW"),
+    )
+    def current_state():
+        current = client.get(f"/v1/appStoreVersions/{version_id}", {"include": "build"}).get("data", {})
+        attrs = current.get("attributes", {})
+        selected = current.get("relationships", {}).get("build", {}).get("data") or {}
+        if current.get("id") != version_id or attrs.get("platform") != "IOS" or attrs.get("versionString") != marketing_version or selected.get("id") != build_id:
+            raise RuntimeError("App Store version changed before review withdrawal")
+        return attrs.get("appVersionState") or attrs.get("appStoreState")
+    if current_state() != state:
+        raise RuntimeError("App Store review state changed before withdrawal")
+    client.patch(f"/v1/reviewSubmissions/{identifier(submission_id)}", {"data": {
+        "type": "reviewSubmissions", "id": submission_id, "attributes": {"canceled": True},
+    }})
+    deadline = time.monotonic() + timeout
+    while True:
+        current = current_state()
+        if current == "DEVELOPER_REJECTED":
+            return
+        if current not in ("WAITING_FOR_REVIEW", "IN_REVIEW"):
+            raise RuntimeError("Unexpected App Store state after review withdrawal")
+        if time.monotonic() >= deadline:
+            raise RuntimeError("App Store review withdrawal has not completed")
+        time.sleep(3)
+
+
+def update_screenshots(client, assets, report_dir, bundle_id, marketing_version, build_number, *, apply=False, replace_pending_review=False, replace_other_iphone_sizes=False, locales=None):
     validate_version(marketing_version, build_number)
     if replace_pending_review and not apply:
         raise ValueError("--replace-pending-review requires --apply")
     report = {
         "bundle_id": bundle_id, "marketing_version": marketing_version, "build_number": build_number,
         "display_type": DISPLAY_TYPE, "apply": apply, "status": "inspecting",
+        "replace_other_iphone_sizes": replace_other_iphone_sizes,
         "changed": False, "verified": False, "needs_resubmit": False,
         "assets": [{key: asset[key] for key in ("filename", "bytes", "md5", "sha256")} for asset in assets],
     }
@@ -338,17 +438,19 @@ def update_screenshots(client, assets, report_dir, bundle_id, marketing_version,
         state = version["attributes"].get("appVersionState") or version["attributes"].get("appStoreState")
         report.update({"app_id": app_id, "version_id": version["id"], "build_id": build_id, "version_state": state})
         report["localizations"] = inspect_locales(client, version["id"])
-        selected_names = locales or ["ru-RU"]
+        selected_names = locales or ["ru"]
         selected = [locale for locale in report["localizations"] if locale["locale"] in selected_names]
         if len(selected) != len(set(selected_names)):
             raise ValueError("Requested locale is unavailable")
-        changes = []
+        changes, target_matches = [], {}
         for locale in selected:
             targets = [item for item in locale["sets"] if item["display_type"] == DISPLAY_TYPE]
             if len(targets) > 1:
                 raise RuntimeError("Target screenshot set is ambiguous")
             current = listed(client, f"/v1/appScreenshotSets/{targets[0]['id']}/appScreenshots") if targets else []
-            if not matches(current, assets):
+            target_matches[locale["id"]] = matches(current, assets)
+            other_sizes = [item for item in locale["sets"] if str(item["display_type"]).startswith("APP_IPHONE_") and item["display_type"] != DISPLAY_TYPE and item["images"]]
+            if not target_matches[locale["id"]] or other_sizes:
                 changes.append((locale, targets[0] if targets else None))
         report["locales_requiring_update"] = [locale["locale"] for locale, _ in changes]
         report["other_phone_sets"] = [{"locale": locale["locale"], "id": item["id"], "display_type": item["display_type"]} for locale in selected for item in locale["sets"] if str(item["display_type"]).startswith("APP_IPHONE") and item["display_type"] != DISPLAY_TYPE and item["images"]]
@@ -360,28 +462,38 @@ def update_screenshots(client, assets, report_dir, bundle_id, marketing_version,
         write_report(report_dir, report)
         if not apply or not changes:
             return report
-        if state not in EDITABLE_STATES and not (state == "WAITING_FOR_REVIEW" and replace_pending_review):
+        if state not in EDITABLE_STATES and not (state in ("WAITING_FOR_REVIEW", "IN_REVIEW") and replace_pending_review):
             raise RuntimeError("App Store version is not editable; pending review requires explicit replacement")
-        if report["other_phone_sets"]:
-            raise RuntimeError("Other populated iPhone screenshot sizes require an explicit migration plan")
-        backups = {}
+        if report["other_phone_sets"] and not replace_other_iphone_sizes:
+            raise RuntimeError("Other populated iPhone screenshot sizes require --replace-other-iphone-sizes")
+        backups, other_backups = {}, {}
+        report["backups"] = []
         for locale, target in changes:
-            if target:
-                backups[locale["id"]] = backup_assets(client, target["id"], report_dir / "backup" / identifier(locale["id"]))
+            other_sets = [item for item in locale["sets"] if str(item["display_type"]).startswith("APP_IPHONE_") and item["display_type"] != DISPLAY_TYPE and item["images"]]
+            for item in ([target] if target else []) + other_sets:
+                set_id = item["id"]
+                snapshot = backup_assets(client, set_id, report_dir / "backup" / identifier(locale["id"]) / set_id)
+                report["backups"].append({"locale": locale["locale"], "set_id": set_id, "display_type": item["display_type"], "original_images": [screenshot_summary(image) for image in snapshot[0]], "saved_assets": [{key: asset[key] for key in ("filename", "bytes", "md5")} for asset in snapshot[1]]})
+                if item is target:
+                    backups[locale["id"]] = snapshot
+                else:
+                    other_backups.setdefault(locale["id"], []).append((set_id, *snapshot))
+            write_report(report_dir, report)
         release = get_release_status(client, bundle_id, marketing_version, build_id)
         if release["app_store_version_id"] != version["id"] or release["app_version_state"] != state:
             raise RuntimeError("App Store version changed before screenshot update")
-        if state == "WAITING_FOR_REVIEW":
+        if state in ("WAITING_FOR_REVIEW", "IN_REVIEW"):
             report["needs_resubmit"] = True
             write_report(report_dir, report)
-            replace_pending_build(client, app_id, version, marketing_version, build_id)
+            withdraw_review(client, app_id, version, marketing_version, build_id)
         report["needs_resubmit"] = True
         write_report(report_dir, report)
         for locale, target in changes:
             release = get_release_status(client, bundle_id, marketing_version, build_id)
             if release["app_store_version_id"] != version["id"] or release["app_version_state"] not in EDITABLE_STATES:
                 raise RuntimeError("App Store version is no longer editable")
-            if target is None:
+            target_was_created = target is None
+            if target_was_created:
                 target = client.post("/v1/appScreenshotSets", {"data": {
                     "type": "appScreenshotSets", "attributes": {"screenshotDisplayType": DISPLAY_TYPE},
                     "relationships": {"appStoreVersionLocalization": {"data": {"type": "appStoreVersionLocalizations", "id": locale["id"]}}},
@@ -396,7 +508,15 @@ def update_screenshots(client, assets, report_dir, bundle_id, marketing_version,
                     raise RuntimeError("Screenshot set changed after backup")
             report["active_locale"] = locale["locale"]
             write_report(report_dir, report)
-            replace_set(client, set_id, assets, old, saved, report)
+            other_snapshots = other_backups.get(locale["id"], [])
+            for other_id, other_old, _ in other_snapshots:
+                current = listed(client, f"/v1/appScreenshotSets/{other_id}/appScreenshots")
+                if [screenshot_summary(image) for image in current] != [screenshot_summary(image) for image in other_old]:
+                    raise RuntimeError("Other iPhone screenshots changed after backup")
+            if not target_matches[locale["id"]]:
+                replace_set(client, set_id, assets, old, saved, report)
+            if other_snapshots:
+                remove_other_phone_assets(client, set_id, assets, old, saved, other_snapshots, report, target_was_created=target_was_created)
             report["changed"] = True
             write_report(report_dir, report)
         report["localizations_after"] = inspect_locales(client, version["id"])
@@ -425,10 +545,11 @@ def main():
     parser.add_argument("--locale", action="append", dest="locales")
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--replace-pending-review", action="store_true")
+    parser.add_argument("--replace-other-iphone-sizes", action="store_true")
     arguments = parser.parse_args()
     client = ScreenshotClient(arguments.key_id, arguments.issuer_id, arguments.private_key)
     try:
-        report = update_screenshots(client, load_assets(arguments.assets_dir), arguments.report_dir, arguments.bundle_id, arguments.marketing_version, arguments.build_number, apply=arguments.apply, replace_pending_review=arguments.replace_pending_review, locales=arguments.locales)
+        report = update_screenshots(client, load_assets(arguments.assets_dir), arguments.report_dir, arguments.bundle_id, arguments.marketing_version, arguments.build_number, apply=arguments.apply, replace_pending_review=arguments.replace_pending_review, replace_other_iphone_sizes=arguments.replace_other_iphone_sizes, locales=arguments.locales)
     except Exception as error:
         raise SystemExit(f"App Store screenshot update failed ({type(error).__name__}): {safe_error(error)}; inspect the report and current version before retrying") from None
     print(json.dumps(report, ensure_ascii=False))

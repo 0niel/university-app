@@ -93,6 +93,43 @@ class AssetTest(unittest.TestCase):
 
 
 class ScopeTest(unittest.TestCase):
+    def test_in_review_withdrawal_keeps_exact_build(self):
+        client = Mock()
+        client.get.side_effect = [{"data": version("IN_REVIEW")}, {"data": version("DEVELOPER_REJECTED")}]
+        with patch.object(screenshots, "pending_review_submission", return_value="submission-1") as pending:
+            screenshots.withdraw_review(client, "app-1", version("IN_REVIEW"), "5.4.0", "build-1")
+        self.assertEqual(pending.call_args.args[3], "IN_REVIEW")
+        self.assertEqual(client.patch.call_args.args, ("/v1/reviewSubmissions/submission-1", {"data": {"type": "reviewSubmissions", "id": "submission-1", "attributes": {"canceled": True}}}))
+        self.assertEqual(client.patch.call_count, 1)
+
+    def test_withdrawal_rejects_changed_build_before_cancel(self):
+        client = Mock()
+        client.get.return_value = {"data": version("IN_REVIEW", build_id="different")}
+        with patch.object(screenshots, "pending_review_submission", return_value="submission-1"):
+            with self.assertRaisesRegex(RuntimeError, "version changed"):
+                screenshots.withdraw_review(client, "app-1", version("IN_REVIEW"), "5.4.0", "build-1")
+        client.patch.assert_not_called()
+
+    def test_in_review_apply_without_flag_is_blocked(self):
+        client = Mock()
+        build = {"build_id": "build-1", "build_number": "2483.12.49", "marketing_version": "5.4.0", "processing_state": "VALID"}
+        with tempfile.TemporaryDirectory() as temporary, patch.object(screenshots, "wait_for_build", return_value=build), patch.object(screenshots, "find_version", return_value=("app-1", version("IN_REVIEW"))), patch.object(screenshots, "inspect_locales", return_value=[{"id": "locale-1", "locale": "ru", "sets": []}]), patch.object(screenshots, "withdraw_review") as withdraw:
+            with self.assertRaisesRegex(RuntimeError, "explicit replacement"):
+                screenshots.update_screenshots(client, [asset(n) for n in range(1, 7)], Path(temporary), "ninja.test", "5.4.0", "2483.12.49", apply=True)
+            withdraw.assert_not_called()
+
+    def test_other_phone_sizes_require_explicit_migration(self):
+        client = Mock()
+        build = {"build_id": "build-1", "build_number": "2483.12.49", "marketing_version": "5.4.0", "processing_state": "VALID"}
+        locales = [{"id": "ru", "locale": "ru", "sets": [{"id": "other-phone", "display_type": "APP_IPHONE_65", "images": [screenshots.screenshot_summary(image(asset()))]}, {"id": "ipad", "display_type": "APP_IPAD_PRO_129", "images": [screenshots.screenshot_summary(image(asset()))]}]}, {"id": "en", "locale": "en-US", "sets": [{"id": "english-phone", "display_type": "APP_IPHONE_65", "images": [screenshots.screenshot_summary(image(asset()))]}]}]
+        with tempfile.TemporaryDirectory() as temporary, patch.object(screenshots, "wait_for_build", return_value=build), patch.object(screenshots, "find_version", return_value=("app-1", version())), patch.object(screenshots, "inspect_locales", return_value=locales), patch.object(screenshots, "backup_assets") as backup:
+            with self.assertRaisesRegex(RuntimeError, "replace-other-iphone-sizes"):
+                screenshots.update_screenshots(client, [asset(n) for n in range(1, 7)], Path(temporary), "ninja.test", "5.4.0", "2483.12.49", apply=True)
+            report = json.loads((Path(temporary) / "app-store-screenshots.json").read_text())
+            self.assertEqual(report["other_phone_sets"], [{"locale": "ru", "id": "other-phone", "display_type": "APP_IPHONE_65"}])
+            backup.assert_not_called()
+            client.delete.assert_not_called()
+
     def test_wrong_build_is_rejected(self):
         client = Mock()
         client.get.side_effect = [{"data": [{"id": "app-1", "attributes": {"bundleId": "ninja.test"}}]}, {"data": [version(build_id="different")]}]
@@ -109,10 +146,10 @@ class ScopeTest(unittest.TestCase):
     def test_inspection_never_mutates_or_cancels_review(self):
         client = Mock()
         build = {"build_id": "build-1", "build_number": "2483.12.49", "marketing_version": "5.4.0", "processing_state": "VALID"}
-        localizations = [{"id": "locale-1", "locale": "ru-RU", "sets": []}, {"id": "locale-en", "locale": "en-US", "sets": []}]
-        with tempfile.TemporaryDirectory() as temporary, patch.object(screenshots, "wait_for_build", return_value=build), patch.object(screenshots, "find_version", return_value=("app-1", version("WAITING_FOR_REVIEW"))), patch.object(screenshots, "inspect_locales", return_value=localizations), patch.object(screenshots, "replace_pending_build") as replace:
+        localizations = [{"id": "locale-1", "locale": "ru", "sets": []}, {"id": "locale-en", "locale": "en-US", "sets": []}]
+        with tempfile.TemporaryDirectory() as temporary, patch.object(screenshots, "wait_for_build", return_value=build), patch.object(screenshots, "find_version", return_value=("app-1", version("IN_REVIEW"))), patch.object(screenshots, "inspect_locales", return_value=localizations), patch.object(screenshots, "withdraw_review") as replace:
             result = screenshots.update_screenshots(client, [asset(n) for n in range(1, 7)], Path(temporary), "ninja.test", "5.4.0", "2483.12.49")
-            self.assertEqual(result["locales_requiring_update"], ["ru-RU"])
+            self.assertEqual(result["locales_requiring_update"], ["ru"])
             self.assertFalse(result["needs_resubmit"])
             client.post.assert_not_called()
             client.patch.assert_not_called()
@@ -122,7 +159,7 @@ class ScopeTest(unittest.TestCase):
     def test_pending_review_needs_explicit_cancellation_permission(self):
         client = Mock()
         build = {"build_id": "build-1", "build_number": "2483.12.49", "marketing_version": "5.4.0", "processing_state": "VALID"}
-        with tempfile.TemporaryDirectory() as temporary, patch.object(screenshots, "wait_for_build", return_value=build), patch.object(screenshots, "find_version", return_value=("app-1", version("WAITING_FOR_REVIEW"))), patch.object(screenshots, "inspect_locales", return_value=[{"id": "locale-1", "locale": "ru-RU", "sets": []}]):
+        with tempfile.TemporaryDirectory() as temporary, patch.object(screenshots, "wait_for_build", return_value=build), patch.object(screenshots, "find_version", return_value=("app-1", version("WAITING_FOR_REVIEW"))), patch.object(screenshots, "inspect_locales", return_value=[{"id": "locale-1", "locale": "ru", "sets": []}]):
             with self.assertRaisesRegex(RuntimeError, "explicit replacement"):
                 screenshots.update_screenshots(client, [asset(n) for n in range(1, 7)], Path(temporary), "ninja.test", "5.4.0", "2483.12.49", apply=True)
             report = json.loads((Path(temporary) / "app-store-screenshots.json").read_text())
@@ -174,6 +211,65 @@ class ReplacementTest(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 screenshots.replace_set(client, "set-1", [asset(2)], [old], [asset()], report)
         self.assertFalse(report["rollback_succeeded"])
+
+
+class MigrationTest(unittest.TestCase):
+    def stateful_client(self, fail_id=None):
+        target_asset, previous_target = asset(2), asset(1)
+        other_assets = [asset(3), asset(4)]
+        old_target = [image(previous_target, "old-target")]
+        old_other = [image(other_assets[0], "old-other-1"), image(other_assets[1], "old-other-2")]
+        remote = {"target": [image(target_asset, "new-target")], "other": list(old_other), "ipad": [image(asset(5), "ipad-shot")], "english": [image(asset(6), "english-shot")]}
+        client = Mock()
+        client.get.side_effect = lambda path, query: {"data": list(remote[path.split("/")[3]])}
+        failed = []
+        def delete(path):
+            image_id = path.split("/")[-1]
+            if image_id == fail_id and not failed:
+                failed.append(True)
+                raise RuntimeError("Delete failed")
+            for images in remote.values():
+                images[:] = [item for item in images if item["id"] != image_id]
+        def reorder(path, payload):
+            set_id = path.split("/")[3]
+            by_id = {item["id"]: item for item in remote[set_id]}
+            remote[set_id] = [by_id[item["id"]] for item in payload["data"]]
+        client.delete.side_effect = delete
+        client.patch.side_effect = reorder
+        def upload(unused_client, set_id, selected, created):
+            image_id = "restored-" + selected["filename"][:2]
+            remote[set_id].append(image(selected, image_id))
+            created.append(image_id)
+        return client, remote, target_asset, old_target, previous_target, old_other, other_assets, upload
+
+    def test_success_removes_only_other_phone_assets_after_target_verification(self):
+        client, remote, target, old_target, backup, old_other, other_backups, _ = self.stateful_client()
+        report = {}
+        screenshots.remove_other_phone_assets(client, "target", [target], old_target, [backup], [("other", old_other, other_backups)], report)
+        self.assertEqual(remote["other"], [])
+        self.assertEqual(remote["target"][0]["id"], "new-target")
+        self.assertEqual(remote["ipad"][0]["id"], "ipad-shot")
+        self.assertEqual(remote["english"][0]["id"], "english-shot")
+        self.assertEqual(report["cleared_phone_sets"], ["other"])
+
+    def test_partial_delete_failure_restores_old_other_sizes_and_target(self):
+        client, remote, target, old_target, backup, old_other, other_backups, upload = self.stateful_client(fail_id="old-other-2")
+        report = {}
+        with patch.object(screenshots, "upload_asset", side_effect=upload):
+            with self.assertRaisesRegex(RuntimeError, "Delete failed"):
+                screenshots.remove_other_phone_assets(client, "target", [target], old_target, [backup], [("other", old_other, other_backups)], report)
+        self.assertTrue(report["rollback_succeeded"])
+        self.assertTrue(screenshots.matches(remote["target"], [backup]))
+        self.assertTrue(screenshots.matches(remote["other"], other_backups))
+        self.assertEqual(remote["ipad"][0]["id"], "ipad-shot")
+        self.assertEqual(remote["english"][0]["id"], "english-shot")
+
+    def test_unverified_target_prevents_deleting_other_sizes(self):
+        client, remote, target, old_target, backup, old_other, other_backups, _ = self.stateful_client()
+        remote["target"][0]["attributes"]["sourceFileChecksum"] = "wrong"
+        with self.assertRaisesRegex(RuntimeError, "verified before"):
+            screenshots.remove_other_phone_assets(client, "target", [target], old_target, [backup], [("other", old_other, other_backups)], {})
+        client.delete.assert_not_called()
 
     def test_deletion_requires_complete_backup(self):
         client = Mock()

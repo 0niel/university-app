@@ -9,6 +9,7 @@ import tempfile
 import unittest
 import zlib
 from pathlib import Path
+from unittest.mock import Mock
 
 
 sys.path.insert(0, str(Path("tool").resolve()))
@@ -115,6 +116,24 @@ class FakeClient:
 
 
 class GooglePlayScreenshotsTest(unittest.TestCase):
+    def test_replacing_review_requires_explicit_apply_and_submission(self):
+        client = Mock()
+        with self.assertRaisesRegex(ValueError, "requires --apply"):
+            MODULE.update_screenshots(client, assets(), Path('unused'), replace_pending_review=True)
+        client.insert_edit.assert_not_called()
+
+    def test_commit_replaces_review_only_with_explicit_flag(self):
+        client = MODULE.GooglePlayScreenshotClient('token', 'package.name')
+        client.request = Mock(return_value={})
+        client.commit_edit('edit', True)
+        self.assertIn('ERROR_IF_IN_REVIEW', client.request.call_args.args[1])
+        client.commit_edit('edit', True, replace_pending_review=True)
+        self.assertIn('CANCEL_IN_REVIEW_AND_SUBMIT', client.request.call_args.args[1])
+        client.request.reset_mock()
+        with self.assertRaises(ValueError):
+            client.commit_edit('edit', False, replace_pending_review=True)
+        client.request.assert_not_called()
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)

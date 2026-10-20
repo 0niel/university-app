@@ -24,6 +24,14 @@ on:
         description: Withdraw pending Apple review and resubmit the same build
         type: boolean
         default: false
+      replace_pending_google_review:
+        description: Replace pending Google review with the screenshot update
+        type: boolean
+        default: false
+      replace_other_iphone_sizes:
+        description: Replace older iPhone size overrides with automatic scaling
+        type: boolean
+        default: false
       marketing_version:
         description: Existing App Store marketing version
         type: string
@@ -78,11 +86,15 @@ jobs:
       - name: Inspect or update phone screenshots
         env:
           APPLY: ${{ inputs.apply }}
+          REPLACE_PENDING_REVIEW: ${{ inputs.replace_pending_google_review }}
         run: |
           python3 -m unittest discover -s test/tool -p '*screenshots*_test.py'
           arguments=()
           if [[ "$APPLY" == true ]]; then
             arguments+=(--apply --submit-for-review --language ru-RU)
+          fi
+          if [[ "$REPLACE_PENDING_REVIEW" == true ]]; then
+            arguments+=(--replace-pending-review)
           fi
           python3 tool/google_play_screenshots.py --credentials "$RUNNER_TEMP/store-service-account.json" --assets-dir "$RUNNER_TEMP/screenshots/android" --report-dir "$RUNNER_TEMP/store-report" "${arguments[@]}"
       - name: Save screenshot verification report
@@ -144,14 +156,18 @@ jobs:
         env:
           APPLY: ${{ inputs.apply }}
           REPLACE_PENDING_REVIEW: ${{ inputs.replace_pending_apple_review }}
+          REPLACE_OTHER_SIZES: ${{ inputs.replace_other_iphone_sizes }}
         run: |
           python3 -m unittest discover -s test/tool -p '*screenshots*_test.py'
           arguments=()
           if [[ "$APPLY" == true ]]; then
-            arguments+=(--apply --locale ru-RU)
+            arguments+=(--apply --locale ru)
           fi
           if [[ "$REPLACE_PENDING_REVIEW" == true ]]; then
             arguments+=(--replace-pending-review)
+          fi
+          if [[ "$REPLACE_OTHER_SIZES" == true ]]; then
+            arguments+=(--replace-other-iphone-sizes)
           fi
           python3 tool/app_store_screenshots.py --bundle-id pro.oniel.it.university --marketing-version "$MARKETING_VERSION" --build-number "$BUILD_NUMBER" --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" --private-key "$RUNNER_TEMP/store-api.p8" --assets-dir "$RUNNER_TEMP/screenshots/ios" --report-dir "$RUNNER_TEMP/store-report" "${arguments[@]}"
       - name: Resubmit the verified build with updated screenshots
