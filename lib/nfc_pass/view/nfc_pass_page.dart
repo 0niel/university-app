@@ -191,6 +191,7 @@ class _NfcPassPageState extends State<NfcPassPage> {
         final cubit = context.read<NfcPassCubit>();
         final hce = context.watch<NfcHceCubit>().state;
         final bound = state.status == .bound;
+        final emulationOff = hce.loaded && hce.available && !hce.enabled;
         return Scaffold(
           backgroundColor: context.colors.canvas,
           body: SafeArea(
@@ -201,7 +202,11 @@ class _NfcPassPageState extends State<NfcPassPage> {
               children: [
                 NfcPassHeader(
                   title: l10n.nfcPass,
-                  statusLabel: bound ? l10n.nfcPassActiveStatus : null,
+                  statusLabel: bound
+                      ? emulationOff
+                            ? l10n.biometricOff
+                            : l10n.nfcPassActiveStatus
+                      : null,
                   onBack: Navigator.of(context).canPop()
                       ? Navigator.of(context).pop
                       : null,
@@ -212,8 +217,7 @@ class _NfcPassPageState extends State<NfcPassPage> {
                 Expanded(
                   child: NfcPassView(
                     state: state,
-                    turnstileEmulationOff:
-                        hce.loaded && hce.available && !hce.enabled,
+                    turnstileEmulationOff: emulationOff,
                     onConnect: () => unawaited(cubit.bindPass()),
                     onEnterCode: _showCodeSheet,
                     onRetry: () => unawaited(cubit.checkBound()),
