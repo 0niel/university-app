@@ -115,10 +115,13 @@ class GooglePlayReleaseClient(GooglePlayClient):
                 return version_codes
         return []
 
-    def commit_release_edit(self, edit_id: str) -> None:
+    def commit_release_edit(self, edit_id: str, *, replace_pending_review: bool = False) -> None:
         query = urllib.parse.urlencode(
             {
-                "changesInReviewBehavior": "ERROR_IF_IN_REVIEW",
+                "changesInReviewBehavior": (
+                    "CANCEL_IN_REVIEW_AND_SUBMIT" if replace_pending_review
+                    else "ERROR_IF_IN_REVIEW"
+                ),
             }
         )
         self.request(
@@ -139,6 +142,8 @@ def publish_release(
     bundle: bytes,
     release_name: str,
     track: str = "internal",
+    *,
+    replace_pending_review: bool = False,
 ) -> dict[str, object]:
     validate_track(track)
     if not bundle.startswith(b"PK"):
@@ -172,7 +177,10 @@ def publish_release(
         if str(version_code) != expected_version_code:
             raise RuntimeError("Google Play bundle version does not match the requested release")
         client.update_track(edit_id, release_name, version_code, track)
-        client.commit_release_edit(edit_id)
+        if replace_pending_review:
+            client.commit_release_edit(edit_id, replace_pending_review=True)
+        else:
+            client.commit_release_edit(edit_id)
         edit_open = False
     finally:
         if edit_open:
@@ -198,6 +206,7 @@ def main() -> None:
     parser.add_argument("--package-name", required=True)
     parser.add_argument("--release-name", required=True)
     parser.add_argument("--track", choices=("internal", "production"), default="internal")
+    parser.add_argument("--replace-pending-review", action="store_true")
     arguments = parser.parse_args()
     credentials = json.loads(arguments.credentials.read_text(encoding="utf-8"))
     if not isinstance(credentials, dict):
@@ -209,6 +218,7 @@ def main() -> None:
         arguments.bundle.read_bytes(),
         arguments.release_name,
         arguments.track,
+        replace_pending_review=arguments.replace_pending_review,
     )
     print(json.dumps(result, sort_keys=True))
 
