@@ -127,6 +127,258 @@ void main() {
     expect(await repository.readSessionCookie(), isNull);
   });
 
+  for (final cookies in [
+    {'Pulse.Auth.Cookie': 'current'},
+    {'Pulse.Auth.Cookie': 'current', '.AspNetCore.Cookies': 'legacy'},
+  ]) {
+    test('stores the current Pulse session and uses it for the pass $cookies',
+        () async {
+      await repository.synchronizeSessionAccount('mirea:student-a');
+      when(() => oauth.initiateOAuthFlow()).thenAnswer(
+        (_) async => LoginSuccessData(
+          allCookies: {...cookies, '__ddg1_': 'unrelated'},
+        ),
+      );
+
+      expect(
+        await repository.authenticateSession(),
+        'Pulse.Auth.Cookie=current',
+      );
+      expect(await repository.readSessionCookie(), 'Pulse.Auth.Cookie=current');
+      await repository.bindPass();
+      expect(requests, hasLength(2));
+      expect(
+        requests.every(
+          (request) => request.headers['cookie'] == 'Pulse.Auth.Cookie=current',
+        ),
+        isTrue,
+      );
+    });
+  }
+
+  test('preserves current Pulse chunks in shared sessions and pass requests',
+      () async {
+    const header = 'Pulse.Auth.Cookie=chunks-2; Pulse.Auth.CookieC1=first; '
+        'Pulse.Auth.CookieC2=second';
+    when(() => oauth.initiateOAuthFlow()).thenAnswer(
+      (_) async => LoginSuccessData(
+        allCookies: {
+          'Pulse.Auth.CookieC2': 'second',
+          'Pulse.Auth.Cookie': 'chunks-2',
+          'Pulse.Auth.CookieC1': 'first',
+          '.AspNetCore.Cookies': 'legacy',
+        },
+      ),
+    );
+
+    expect(await repository.authenticateSession(), header);
+    await repository.bindPass();
+
+    expect(await repository.readSessionCookie(), header);
+    expect(
+      requests.every((request) => request.headers['cookie'] == header),
+      isTrue,
+    );
+  });
+
+  test('does not accept unrelated cookies as an institution session', () async {
+    when(() => oauth.initiateOAuthFlow()).thenAnswer(
+      (_) async => LoginSuccessData(
+        allCookies: const {
+          'Pulse.Auth.Cookie.evil': 'untrusted',
+          '__ddg1_': 'unrelated',
+        },
+      ),
+    );
+
+    await expectLater(
+      repository.authenticateSession(),
+      throwsA(isA<NfcPassLoginFailure>()),
+    );
+
+    expect(await repository.readSessionCookie(), isNull);
+    expect(requests, isEmpty);
+  });
+
+  test('Pulse login and pass binding share one browser transaction', () async {
+    await repository.synchronizeSessionAccount('mirea:student-a');
+    final started = Completer<void>();
+    final login = Completer<LoginSuccessData>();
+    when(() => oauth.initiateOAuthFlow()).thenAnswer((_) {
+      started.complete();
+      return login.future;
+    });
+
+    final pulse = repository.authenticateSession();
+    await started.future;
+    final pass = repository.bindPass();
+    login.complete(
+      LoginSuccessData(allCookies: {'.AspNetCore.Cookies': 'shared'}),
+    );
+
+    expect(await pulse, '.AspNetCore.Cookies=shared');
+    expect(await pass, isA<NfcVerificationCodeSent>());
+    expect(await repository.readSessionCookie(), '.AspNetCore.Cookies=shared');
+    verify(() => oauth.initiateOAuthFlow()).called(1);
+    expect(requests.map((request) => request.url.path), ['/token', '/send']);
+  });
+
+  test('a late Pulse login cannot attach to another app account', () async {
+    await repository.synchronizeSessionAccount('mirea:student-a');
+    final started = Completer<void>();
+    final login = Completer<LoginSuccessData>();
+    when(() => oauth.initiateOAuthFlow()).thenAnswer((_) {
+      started.complete();
+      return login.future;
+    });
+    final pulse = repository.authenticateSession();
+    final result = expectLater(pulse, throwsA(isA<NfcPassLoginFailure>()));
+    await started.future;
+    await repository.synchronizeSessionAccount('mirea:student-b');
+    login.complete(
+      LoginSuccessData(allCookies: {'.AspNetCore.Cookies': 'old'}),
+    );
+
+    await result;
+    expect(await repository.readSessionCookie(), isNull);
+    expect(values['nfc_session_account'], 'mirea:student-b');
+    expect(requests, isEmpty);
+  });
+
+  test('a new account queues its own login behind the previous browser',
+      () async {
+    await repository.synchronizeSessionAccount('mirea:student-a');
+    final firstStarted = Completer<void>();
+    final secondStarted = Completer<void>();
+    final firstLogin = Completer<LoginSuccessData>();
+    final secondLogin = Completer<LoginSuccessData>();
+    var loginCount = 0;
+    when(() => oauth.initiateOAuthFlow()).thenAnswer((_) {
+      loginCount++;
+      if (loginCount == 1) {
+        firstStarted.complete();
+        return firstLogin.future;
+      }
+      secondStarted.complete();
+      return secondLogin.future;
+    });
+
+    final first = repository.authenticateSession();
+    final rejected = expectLater(first, throwsA(isA<NfcPassLoginFailure>()));
+    await firstStarted.future;
+    await repository.synchronizeSessionAccount('mirea:student-b');
+    final second = repository.authenticateSession();
+    expect(second, isNot(same(first)));
+    expect(repository.authenticateSession(), same(second));
+    expect(loginCount, 1);
+
+    firstLogin.complete(
+      LoginSuccessData(allCookies: {'.AspNetCore.Cookies': 'old'}),
+    );
+    await rejected;
+    await secondStarted.future;
+    expect(await repository.readSessionCookie(), isNull);
+    secondLogin.complete(
+      LoginSuccessData(allCookies: {'.AspNetCore.Cookies': 'replacement'}),
+    );
+
+    expect(await second, '.AspNetCore.Cookies=replacement');
+    expect(
+      await repository.readSessionCookie(),
+      '.AspNetCore.Cookies=replacement',
+    );
+    expect(values['nfc_session_account'], 'mirea:student-b');
+    expect(loginCount, 2);
+  });
+
+  test('an obsolete queued account never opens another login browser',
+      () async {
+    await repository.synchronizeSessionAccount('mirea:student-a');
+    final firstStarted = Completer<void>();
+    final firstLogin = Completer<LoginSuccessData>();
+    var loginCount = 0;
+    when(() => oauth.initiateOAuthFlow()).thenAnswer((_) {
+      loginCount++;
+      if (loginCount == 1) {
+        firstStarted.complete();
+        return firstLogin.future;
+      }
+      return Future.value(
+        LoginSuccessData(allCookies: {'.AspNetCore.Cookies': 'current'}),
+      );
+    });
+
+    final first = repository.authenticateSession();
+    final firstRejected =
+        expectLater(first, throwsA(isA<NfcPassLoginFailure>()));
+    await firstStarted.future;
+    await repository.synchronizeSessionAccount('mirea:student-b');
+    final second = repository.authenticateSession();
+    final secondRejected =
+        expectLater(second, throwsA(isA<NfcPassLoginFailure>()));
+    await repository.synchronizeSessionAccount('mirea:student-c');
+    final current = repository.authenticateSession();
+    firstLogin.complete(
+      LoginSuccessData(allCookies: {'.AspNetCore.Cookies': 'old'}),
+    );
+
+    await Future.wait([firstRejected, secondRejected]);
+    expect(await current, '.AspNetCore.Cookies=current');
+    expect(await repository.readSessionCookie(), '.AspNetCore.Cookies=current');
+    expect(values['nfc_session_account'], 'mirea:student-c');
+    expect(loginCount, 2);
+  });
+
+  test('clearing the shared session invalidates a pending Pulse login',
+      () async {
+    await repository.synchronizeSessionAccount('mirea:student-a');
+    final started = Completer<void>();
+    final login = Completer<LoginSuccessData>();
+    when(() => oauth.initiateOAuthFlow()).thenAnswer((_) {
+      started.complete();
+      return login.future;
+    });
+    final pulse = repository.authenticateSession();
+    final result = expectLater(pulse, throwsA(isA<NfcPassLoginFailure>()));
+    await started.future;
+    await repository.clearSessionCookie();
+    login.complete(
+      LoginSuccessData(allCookies: {'.AspNetCore.Cookies': 'old'}),
+    );
+
+    await result;
+    expect(await repository.readSessionCookie(), isNull);
+  });
+
+  test('an anonymous account cannot open the shared institution login',
+      () async {
+    await repository.synchronizeSessionAccount(null);
+
+    await expectLater(
+      repository.authenticateSession(),
+      throwsA(isA<NfcPassLoginFailure>()),
+    );
+
+    verifyNever(() => oauth.initiateOAuthFlow());
+  });
+
+  test('a cancelled shared login can be retried', () async {
+    await repository.synchronizeSessionAccount('mirea:student-a');
+    when(() => oauth.initiateOAuthFlow()).thenThrow(const OAuthFlowCancelled());
+    expect(await repository.authenticateSession(), isNull);
+    when(() => oauth.initiateOAuthFlow()).thenAnswer(
+      (_) async => LoginSuccessData(
+        allCookies: {'.AspNetCore.Cookies': 'retried'},
+      ),
+    );
+
+    expect(
+      await repository.authenticateSession(),
+      '.AspNetCore.Cookies=retried',
+    );
+    verify(() => oauth.initiateOAuthFlow()).called(2);
+  });
+
   test('authenticateSession reports missing cookies and browser failures',
       () async {
     await repository.synchronizeSessionAccount('mirea:student-a');

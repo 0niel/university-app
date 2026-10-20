@@ -1,12 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:web_oauth_interceptor_client/web_oauth_interceptor_client.dart';
 
 class TestInAppBrowser extends PlatformInAppBrowser {
   TestInAppBrowser(super.params, this.owner) : super.implementation();
 
   final TestInAppWebViewPlatform owner;
+
+  @override
+  PlatformInAppWebViewController? get webViewController => owner.controller;
 
   @override
   Future<void> openUrlRequest({
@@ -35,13 +39,20 @@ class _TestCookies extends PlatformCookieManager {
     required WebUri url,
     PlatformInAppWebViewController? iosBelow11WebViewController,
     PlatformInAppWebViewController? webViewController,
-  }) =>
-      owner.onReadCookies(url);
+  }) {
+    owner.cookieController = webViewController;
+    return owner.onReadCookies(url);
+  }
 }
+
+class _WebViewController extends Mock
+    implements PlatformInAppWebViewController {}
 
 class TestInAppWebViewPlatform extends InAppWebViewPlatform {
   Future<List<Cookie>> Function(WebUri) onReadCookies = (_) async => [];
   TestInAppBrowser? browser;
+  PlatformInAppWebViewController? controller;
+  PlatformInAppWebViewController? cookieController;
   Completer<void>? closing;
   int closes = 0;
   bool failOpening = false;
@@ -68,6 +79,8 @@ void main() {
     platform
       ..closes = 0
       ..closing = null
+      ..controller = _WebViewController()
+      ..cookieController = null
       ..failOpening = false
       ..onReadCookies = (_) async => [];
   });
@@ -99,6 +112,7 @@ void main() {
     await browser.onLoadStop(WebUri(returnUrl));
     await tester.pump();
     expect(paths, ['/services']);
+    expect(platform.cookieController, same(platform.controller));
     expect(platform.closes, 1);
   });
 
@@ -121,6 +135,28 @@ void main() {
     expect((await login).specialCookieValue, 'late-session');
     expect(platform.closes, 1);
   });
+
+  for (final name in ['Pulse.Auth.Cookie', '.AspNetCore.Cookies']) {
+    testWidgets('the browser returns and closes for Pulse cookie $name', (
+      tester,
+    ) async {
+      platform.onReadCookies = (_) async => [
+            Cookie(name: name, value: 'provider-session', isHttpOnly: true),
+          ];
+      final login = const OAuthInterceptorClient(
+        oauthUrl: loginUrl,
+        expectedRedirectUrls: [returnUrl],
+        specialCookieName: 'Pulse.Auth.Cookie',
+        fallbackSpecialCookieNames: ['.AspNetCore.Cookies'],
+      ).initiateOAuthFlow();
+      await tester.pump();
+
+      await handler().onLoadStop(WebUri(returnUrl));
+
+      expect((await login).specialCookieValue, 'provider-session');
+      expect(platform.closes, 1);
+    });
+  }
 
   testWidgets('exiting cancels the flow and ignores a pending cookie read', (
     tester,

@@ -313,14 +313,17 @@ def verify_live(manifest):
         raise ValueError("Release is not active for this platform")
 
 
-def verify_native_config(repo, manifest):
+def verify_native_config(repo, manifest, projection_receipt=None):
     for name, digest in manifest["build_inputs"].items():
         target = safe_path(repo, name)
         if not target.is_file() or sha256(target) != digest:
             raise ValueError(f"Prepared build input differs from the release: {name}")
     if manifest.get("private_native_sha") and private_source(repo) != manifest["private_native_sha"]:
         raise ValueError("Private native module differs from the release")
-    if manifest.get("provider_sha") and provider_source(repo) != manifest["provider_sha"]:
+    if projection_receipt is not None:
+        from shorebird_provider_patch import verify_workspace
+        verify_workspace(repo, manifest, projection_receipt)
+    elif manifest.get("provider_sha") and provider_source(repo) != manifest["provider_sha"]:
         raise ValueError("University provider differs from the release")
     if manifest.get("configuration_inputs") and config_digests() != manifest["configuration_inputs"]:
         raise ValueError("Release configuration differs from its recorded canonical input")
@@ -371,6 +374,7 @@ def main():
             child.add_argument("--artifacts-dir", type=Path, required=True)
         if command == "verify-inputs":
             child.add_argument("--repo", type=Path, default=Path.cwd())
+            child.add_argument("--projection-receipt", type=Path)
     args = parser.parse_args()
     if args.command == "create":
         workflow = os.environ["GITHUB_WORKFLOW_REF"].split("/", 2)[2].split("@", 1)[0]
@@ -383,7 +387,10 @@ def main():
     elif args.command == "verify-live":
         verify_live(load_manifest(args.manifest))
     else:
-        verify_native_config(args.repo, load_manifest(args.manifest))
+        receipt = json.loads(args.projection_receipt.read_text()) if args.projection_receipt else None
+        if receipt is not None and receipt.get("provider_projection") is None:
+            receipt = None
+        verify_native_config(args.repo, load_manifest(args.manifest), receipt)
 
 
 if __name__ == "__main__":

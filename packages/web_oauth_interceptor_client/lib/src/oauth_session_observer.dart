@@ -13,6 +13,7 @@ class OAuthSessionObserver {
     required this.onSuccess,
     required this.onError,
     this.waitForSpecialCookie = false,
+    this.fallbackSpecialCookieNames = const [],
     this.pollInterval = const Duration(milliseconds: 500),
     this.redirectTimeout = const Duration(seconds: 20),
   }) : _onReadCookies = readCookies;
@@ -24,6 +25,7 @@ class OAuthSessionObserver {
   final void Function(LoginSuccessData) onSuccess;
   final void Function() onError;
   final bool waitForSpecialCookie;
+  final List<String> fallbackSpecialCookieNames;
   final Duration pollInterval;
   final Duration redirectTimeout;
 
@@ -96,11 +98,9 @@ class OAuthSessionObserver {
     }
     final revision = _revision;
     final token = expected ? current.queryParameters['access_token'] : null;
-    final urls = {
-      current.toString(),
-      ...expectedRedirectUrls,
-      oauthUrl,
-    };
+    final urls = _loaded
+        ? {current.toString(), ...expectedRedirectUrls, oauthUrl}
+        : const <String>{};
     for (final url in urls) {
       if (_closed || revision != _revision) return;
       final uri = Uri.tryParse(url);
@@ -112,15 +112,19 @@ class OAuthSessionObserver {
         continue;
       }
       if (_closed || revision != _revision) return;
-      final complete = completeOAuthSessionCookies(cookies, specialCookieName);
-      if (complete != null) {
-        _complete(
-          LoginSuccessData(
-            accessToken: token,
-            allCookies: complete,
-            specialCookieValue: complete[specialCookieName],
-          ),
-        );
+      for (final name in [specialCookieName, ...fallbackSpecialCookieNames]) {
+        if (!cookies.containsKey(name)) continue;
+        final complete = completeOAuthSessionCookies(cookies, name);
+        if (complete != null) {
+          _complete(
+            LoginSuccessData(
+              accessToken: token,
+              allCookies: complete,
+              specialCookieValue: complete[name],
+            ),
+          );
+          return;
+        }
         return;
       }
     }

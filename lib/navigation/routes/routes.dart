@@ -397,16 +397,22 @@ class ScheduleDetailsRoute extends GoRouteData with $ScheduleDetailsRoute {
     this.teacherName,
   });
 
-  final (LessonSchedulePart, DateTime) $extra;
+  final (LessonSchedulePart, DateTime)? $extra;
   final String? teacherId;
   final String? teacherName;
 
   @override
+  String? redirect(BuildContext context, GoRouterState state) =>
+      $extra == null ? '/schedule' : null;
+
+  @override
   Widget build(BuildContext context, GoRouterState state) {
+    final payload = $extra;
+    if (payload == null) return const SchedulePage();
     final name = teacherName?.trim();
     return ScheduleDetailsPage(
-      lesson: $extra.$1,
-      selectedDate: $extra.$2,
+      lesson: payload.$1,
+      selectedDate: payload.$2,
       sourceTeacher: name == null || name.isEmpty
           ? null
           : Teacher(name: name, uid: teacherId),
@@ -470,12 +476,18 @@ class ScheduleEditRoute extends GoRouteData with $ScheduleEditRoute {
 class ScheduleDiffRoute extends GoRouteData with $ScheduleDiffRoute {
   const ScheduleDiffRoute({required this.$extra});
 
-  final (ScheduleUpdateDiff, String) $extra;
+  final (ScheduleUpdateDiff, String)? $extra;
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) =>
+      $extra == null ? '/schedule/changes' : null;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    final diff = $extra.$1;
-    final title = $extra.$2;
+    final payload = $extra;
+    if (payload == null) return const ChangesPage();
+    final diff = payload.$1;
+    final title = payload.$2;
     return ScheduleDiffView(diff: diff, title: title);
   }
 }

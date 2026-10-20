@@ -76,6 +76,80 @@ void main() {
     });
   }
 
+  for (final entry in {
+    'details': '/schedule',
+    'diff': '/schedule/changes',
+  }.entries) {
+    testWidgets('${entry.key} factory handles a restored missing payload', (
+      tester,
+    ) async {
+      final generated = _findRoute(Routes.all, entry.key)!;
+      Object? routingError;
+      final router = GoRouter(
+        initialLocation: '/schedule/${entry.key}',
+        errorBuilder: (_, state) {
+          routingError = state.error;
+          return const Text('Routing error');
+        },
+        routes: [
+          GoRoute(
+            path: '/schedule',
+            builder: (_, _) => const Text('Schedule'),
+            routes: [
+              GoRoute(
+                path: 'changes',
+                builder: (_, _) => const Text('Changes'),
+              ),
+              generated,
+            ],
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(routingError, isNull);
+      expect(router.routeInformationProvider.value.uri.path, entry.value);
+    });
+
+    testWidgets('${entry.key} callbacks tolerate a missing restored payload', (
+      tester,
+    ) async {
+      final generated = _findRoute(Routes.all, entry.key)!;
+      final router = GoRouter(
+        routes: [
+          GoRoute(path: '/', builder: (_, _) => const SizedBox.shrink()),
+        ],
+      );
+      addTearDown(router.dispose);
+      late BuildContext context;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (value) {
+              context = value;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      final location = '/schedule/${entry.key}';
+      final state = GoRouterState(
+        router.configuration,
+        uri: Uri.parse(location),
+        matchedLocation: location,
+        fullPath: location,
+        pathParameters: const {},
+        pageKey: ValueKey(location),
+      );
+      expect(await generated.redirect!(context, state), entry.value);
+      expect(() => generated.pageBuilder!(context, state), returnsNormally);
+      expect(() => generated.builder!(context, state), returnsNormally);
+      expect(await generated.onExit!(context, state), isTrue);
+    });
+  }
+
   for (final openPush in [false, true]) {
     testWidgets(
       openPush
@@ -105,6 +179,7 @@ void main() {
                 GoRoute(
                   path: 'details',
                   redirect: generated.redirect,
+                  onExit: generated.onExit,
                   builder: (_, state) => Text('Details ${state.extra != null}'),
                 ),
               ],
