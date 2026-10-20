@@ -387,6 +387,68 @@ class ShorebirdPatchWorkflowTest(unittest.TestCase):
         self.assertIn('stat != f"1\\t1\\t{relative}"', guard)
         self.assertIn('fetch --depth 1 origin "$shorebird_revision"', step(PATCH, 'patch', 'Install pinned Shorebird')['run'])
 
+    def test_ios_verbose_is_forwarded_to_flutter_only(self):
+        publish = step(PATCH, 'patch', 'Publish staging patch')
+        command = {'run': 'shorebird() { printf "<arg>%s</arg>\\n" "$@"; }\n' + publish['run']}
+        for platform in ('ios', 'android'):
+            with self.subTest(platform=platform):
+                result = self.bash(command, PLATFORM=platform)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                args = [line[5:-6] for line in result.stdout.splitlines() if line.startswith('<arg>')]
+                separator = args.index('--')
+                self.assertNotIn('--verbose', args[:separator])
+                self.assertEqual('--verbose' in args[separator + 1:], platform == 'ios')
+
+    def runner_diagnostics(self):
+        item = step(PATCH, 'patch', 'Collect iOS Runner diagnostics')
+        namespace = {'__name__': 'workflow_diagnostics'}
+        exec(compile(python_body(item), '<workflow>', 'exec'), namespace)
+        namespace['inspect_runner'] = lambda _: {}
+        return namespace
+
+    def test_missing_archive_parent_still_saves_a_diagnostics_manifest(self):
+        temporary, workspace = self.root / 'temporary', self.root / 'workspace'
+        temporary.mkdir()
+        workspace.mkdir()
+        output = self.root / 'diagnostics'
+        self.runner_diagnostics()['collect_runners'](temporary, workspace, output)
+        self.assertEqual(json.loads((output / 'manifest.json').read_text()), {'runners': []})
+
+    def test_missing_workspace_archive_does_not_discard_temporary_runners(self):
+        temporary, workspace = self.root / 'temporary', self.root / 'workspace'
+        workspace.mkdir()
+        runner = temporary / 'downloaded/Products/Applications/Runner.app/Runner'
+        runner.parent.mkdir(parents=True)
+        content = b'\xcf\xfa\xed\xfe' + b'bounded-runner'
+        runner.write_bytes(content)
+        output = self.root / 'diagnostics'
+        with patch.object(os, 'O_NOFOLLOW', getattr(os, 'O_NOFOLLOW', 0), create=True):
+            self.runner_diagnostics()['collect_runners'](temporary, workspace, output)
+        manifest = json.loads((output / 'manifest.json').read_text())
+        self.assertEqual([record['label'] for record in manifest['runners']], ['temporary-01'])
+        self.assertEqual((output / 'temporary-01/Runner').read_bytes(), content)
+
+    def test_missing_archive_does_not_relax_existing_runner_validation(self):
+        temporary, workspace = self.root / 'temporary', self.root / 'workspace'
+        temporary.mkdir()
+        workspace.mkdir()
+        runner = workspace / 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Runner'
+        runner.parent.mkdir(parents=True)
+        runner.write_bytes(b'')
+        with self.assertRaisesRegex(ValueError, 'bounded regular file'):
+            self.runner_diagnostics()['find_runners'](temporary, workspace)
+
+    def test_missing_archive_does_not_hide_a_broken_symlink_parent(self):
+        temporary, workspace = self.root / 'temporary', self.root / 'workspace'
+        temporary.mkdir()
+        workspace.mkdir()
+        try:
+            (workspace / 'build').symlink_to(self.root / 'missing', target_is_directory=True)
+        except OSError as error:
+            self.skipTest(f'Symlink creation is unavailable: {error}')
+        with self.assertRaisesRegex(ValueError, 'symlinks'):
+            self.runner_diagnostics()['find_runners'](temporary, workspace)
+
     def test_only_existing_projected_runtime_and_tests_are_validated(self):
         self.write('shorebird-projection.json', {'runtime_paths': ['lib/deleted.dart'], 'test_paths': ['test/deleted_test.dart'], 'excluded_paths': ['tool/excluded.dart']})
         for name in ('Analyze hotfix', 'Test changed runtime'):
