@@ -1,0 +1,176 @@
+name: Store Screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      asset_release_tag:
+        description: Release containing store-screenshots.zip
+        type: string
+        required: true
+      archive_sha256:
+        description: Exact SHA-256 of the screenshot archive
+        type: string
+        required: true
+      target:
+        description: Store to update
+        type: choice
+        default: both
+        options: [both, google-play, app-store]
+      apply:
+        description: Upload and submit screenshots after inspection
+        type: boolean
+        default: false
+      replace_pending_apple_review:
+        description: Withdraw pending Apple review and resubmit the same build
+        type: boolean
+        default: false
+      marketing_version:
+        description: Existing App Store marketing version
+        type: string
+        default: '5.4.0'
+      build_number:
+        description: Existing processed App Store build
+        type: string
+        default: '2483.12.49'
+
+permissions:
+  contents: read
+
+jobs:
+  google-play:
+    if: ${{ github.ref == 'refs/heads/master' && inputs.target != 'app-store' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: beta
+    concurrency:
+      group: google-play-internal
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+      - name: Download and verify screenshot bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASSET_TAG: ${{ inputs.asset_release_tag }}
+          ARCHIVE_SHA256: ${{ inputs.archive_sha256 }}
+        run: |
+          gh release download "$ASSET_TAG" --repo "$GITHUB_REPOSITORY" --pattern store-screenshots.zip --dir "$RUNNER_TEMP"
+          python3 tool/store_screenshots_bundle.py --archive "$RUNNER_TEMP/store-screenshots.zip" --sha256 "$ARCHIVE_SHA256" --destination "$RUNNER_TEMP/screenshots"
+      - name: Prepare publishing credentials
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON || secrets.FIREBASE_SERVICE_ACCOUNT_RTU_MIREA_APP }}
+        run: |
+          python3 - <<'PY'
+          import base64, json, os
+          from pathlib import Path
+          raw = os.environ['GOOGLE_PLAY_SERVICE_ACCOUNT_JSON'].strip()
+          try:
+              credentials = json.loads(raw)
+          except json.JSONDecodeError:
+              credentials = json.loads(base64.b64decode(raw, validate=True))
+          if not {'client_email', 'private_key', 'project_id'}.issubset(credentials):
+              raise SystemExit('Invalid Google Play publishing configuration')
+          path = Path(os.environ['RUNNER_TEMP']) / 'store-service-account.json'
+          path.touch(mode=0o600, exist_ok=False)
+          path.write_text(json.dumps(credentials), encoding='utf-8')
+          PY
+      - name: Inspect or update phone screenshots
+        env:
+          APPLY: ${{ inputs.apply }}
+        run: |
+          python3 -m unittest discover -s test/tool -p '*screenshots*_test.py'
+          arguments=()
+          if [[ "$APPLY" == true ]]; then
+            arguments+=(--apply --submit-for-review --language ru-RU)
+          fi
+          python3 tool/google_play_screenshots.py --credentials "$RUNNER_TEMP/store-service-account.json" --assets-dir "$RUNNER_TEMP/screenshots/android" --report-dir "$RUNNER_TEMP/store-report" "${arguments[@]}"
+      - name: Save screenshot verification report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: google-play-screenshots-report
+          path: ${{ runner.temp }}/store-report
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Remove publishing credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/store-service-account.json"
+
+  app-store:
+    if: ${{ github.ref == 'refs/heads/master' && inputs.target != 'google-play' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: beta
+    concurrency:
+      group: shorebird-ios-release
+      cancel-in-progress: false
+    env:
+      MARKETING_VERSION: ${{ inputs.marketing_version }}
+      BUILD_NUMBER: ${{ inputs.build_number }}
+      APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APPSTORE_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+      APP_STORE_CONNECT_DISABLE_JWT_CACHE: 'true'
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+      - name: Download and verify screenshot bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASSET_TAG: ${{ inputs.asset_release_tag }}
+          ARCHIVE_SHA256: ${{ inputs.archive_sha256 }}
+        run: |
+          gh release download "$ASSET_TAG" --repo "$GITHUB_REPOSITORY" --pattern store-screenshots.zip --dir "$RUNNER_TEMP"
+          python3 tool/store_screenshots_bundle.py --archive "$RUNNER_TEMP/store-screenshots.zip" --sha256 "$ARCHIVE_SHA256" --destination "$RUNNER_TEMP/screenshots"
+      - name: Configure App Store publishing key
+        env:
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          python3 - <<'PY'
+          import base64, os
+          from pathlib import Path
+          key = os.environ['APPSTORE_API_PRIVATE_KEY'].strip()
+          if 'BEGIN PRIVATE KEY' not in key:
+              key = base64.b64decode(''.join(key.split()), validate=True).decode()
+          key = key.replace('\\n', '\n')
+          if 'BEGIN PRIVATE KEY' not in key:
+              raise SystemExit('Invalid App Store publishing key')
+          path = Path(os.environ['RUNNER_TEMP']) / 'store-api.p8'
+          path.touch(mode=0o600, exist_ok=False)
+          path.write_text(key.rstrip() + '\n', encoding='utf-8')
+          PY
+      - name: Inspect or update App Store screenshots
+        env:
+          APPLY: ${{ inputs.apply }}
+          REPLACE_PENDING_REVIEW: ${{ inputs.replace_pending_apple_review }}
+        run: |
+          python3 -m unittest discover -s test/tool -p '*screenshots*_test.py'
+          arguments=()
+          if [[ "$APPLY" == true ]]; then
+            arguments+=(--apply --locale ru-RU)
+          fi
+          if [[ "$REPLACE_PENDING_REVIEW" == true ]]; then
+            arguments+=(--replace-pending-review)
+          fi
+          python3 tool/app_store_screenshots.py --bundle-id pro.oniel.it.university --marketing-version "$MARKETING_VERSION" --build-number "$BUILD_NUMBER" --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" --private-key "$RUNNER_TEMP/store-api.p8" --assets-dir "$RUNNER_TEMP/screenshots/ios" --report-dir "$RUNNER_TEMP/store-report" "${arguments[@]}"
+      - name: Resubmit the verified build with updated screenshots
+        if: ${{ inputs.apply }}
+        run: |
+          python3 -m venv "$RUNNER_TEMP/store-tools"
+          "$RUNNER_TEMP/store-tools/bin/pip" install --disable-pip-version-check 'codemagic-cli-tools==0.69.0'
+          export PATH="$RUNNER_TEMP/store-tools/bin:$PATH"
+          python3 tool/app_store_submit.py --bundle-id pro.oniel.it.university --marketing-version "$MARKETING_VERSION" --build-number "$BUILD_NUMBER" --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" --private-key "$RUNNER_TEMP/store-api.p8" > "$RUNNER_TEMP/store-report/submission.json"
+          python3 tool/app_store_build_status.py --bundle-id pro.oniel.it.university --marketing-version "$MARKETING_VERSION" --build-number "$BUILD_NUMBER" --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" --private-key "$RUNNER_TEMP/store-api.p8" --release-status > "$RUNNER_TEMP/store-report/release-status.json"
+          cat "$RUNNER_TEMP/store-report/submission.json" "$RUNNER_TEMP/store-report/release-status.json"
+      - name: Save screenshot verification report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: app-store-screenshots-report
+          path: ${{ runner.temp }}/store-report
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Remove publishing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/store-api.p8"
