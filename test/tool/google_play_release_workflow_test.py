@@ -26,6 +26,45 @@ class GooglePlayReleaseWorkflowTest(unittest.TestCase):
         self.assertIn("RELEASE_TRACK: ${{ inputs.track || 'internal' }}", WORKFLOW)
         self.assertIn('--track "$RELEASE_TRACK"', step("Upload beta to Google Play"))
 
+    def test_pending_review_replacement_defaults_to_false_and_is_manual_only(self):
+        declaration = WORKFLOW.split("      replace_pending_review:\n", 1)[1].split("      submit_icon_for_review:", 1)[0]
+        self.assertIn("type: boolean", declaration)
+        self.assertIn("default: false", declaration)
+        upload = step("Upload beta to Google Play")
+        self.assertIn("github.event_name == 'workflow_dispatch' && inputs.replace_pending_review || false", upload)
+
+    def test_automatic_and_unselected_manual_runs_never_forward_replacement(self):
+        bash = os.environ.get("TEST_BASH") or shutil.which("bash")
+        self.assertIsNotNone(bash, "Bash is required to test the release workflow")
+        script = textwrap.dedent(step("Upload beta to Google Play").split("run: |\n", 1)[1])
+        script = script.replace("${{ steps.release.outputs.tag }}", "release.1002501")
+        for event, selected, expected in (
+            ("workflow_run", "false", False),
+            ("workflow_run", "true", False),
+            ("workflow_dispatch", "false", False),
+            ("workflow_dispatch", "true", True),
+        ):
+            with self.subTest(event=event, selected=selected), tempfile.TemporaryDirectory() as directory:
+                output = Path(directory) / "arguments"
+                environment = {
+                    **os.environ, "GITHUB_EVENT_NAME": event,
+                    "REPLACE_PENDING_REVIEW": selected,
+                    "RUNNER_TEMP": directory, "ANDROID_BUNDLE": "artifact.aab",
+                    "PACKAGE_NAME": "example.application", "RELEASE_TRACK": "internal",
+                    "ARGUMENT_OUTPUT": output.as_posix(),
+                }
+                result = subprocess.run(
+                    [bash, "--noprofile", "--norc", "-e", "-o", "pipefail", "-c",
+                     'python3() { if [[ "$1" == -m ]]; then return 0; fi; '
+                     'printf "%s\\n" "$@" > "$ARGUMENT_OUTPUT"; }\n' + script],
+                    env=environment, capture_output=True, text=True, timeout=10,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                arguments = output.read_text().splitlines()
+                self.assertEqual("--replace-pending-review" in arguments, expected)
+                self.assertEqual(arguments[arguments.index("--track") + 1], "internal")
+                self.assertEqual(arguments[arguments.index("--release-name") + 1], "release.1002501")
+
     def resolve(self, event, requested_tag="", found_tag="", api_status=0):
         script = textwrap.dedent(step("Resolve beta release").split("run: |\n", 1)[1])
         bash = os.environ.get("TEST_BASH") or shutil.which("bash")

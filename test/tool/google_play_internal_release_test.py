@@ -154,6 +154,44 @@ class GooglePlayInternalReleaseTest(unittest.TestCase):
             "?changesInReviewBehavior=ERROR_IF_IN_REVIEW",
         )
 
+    def test_commit_replaces_pending_review_only_when_explicitly_selected(self):
+        client = self.module.GooglePlayReleaseClient("token", "package.name")
+        with patch.object(client, "request", return_value={}) as request:
+            client.commit_release_edit("edit/id", replace_pending_review=True)
+
+        self.assertEqual(request.call_args.args[:2], (
+            "POST", "/applications/package.name/edits/edit%2Fid:commit"
+            "?changesInReviewBehavior=CANCEL_IN_REVIEW_AND_SUBMIT",
+        ))
+        self.assertEqual(request.call_args.kwargs["data"], b"")
+
+    def test_explicit_review_replacement_preserves_bundle_and_track_verification(self):
+        client = FakeClient(review_in_progress=True, existing_bundle=1002501)
+
+        result = self.module.publish_release(
+            client, b"PKbundle", "release.1002501", "production",
+            replace_pending_review=True,
+        )
+
+        self.assertEqual(result["track"], "production")
+        self.assertEqual(result["version_code"], 1002501)
+        self.assertEqual(client.uploads, [])
+        self.assertEqual(client.replaced, ["edit-1"])
+        self.assertEqual(client.committed, ["edit-1"])
+        self.assertEqual(client.tracks, ["production", "production"])
+
+    def test_review_replacement_cannot_skip_requested_version_guard(self):
+        client = FakeClient(review_in_progress=True)
+        with self.assertRaisesRegex(RuntimeError, "version does not match"):
+            self.module.publish_release(
+                client, b"PKbundle", "release.1002502", "production",
+                replace_pending_review=True,
+            )
+        self.assertEqual(client.replaced, [])
+        self.assertEqual(client.updated, [])
+        self.assertEqual(client.committed, [])
+        self.assertEqual(client.deleted, ["edit-1"])
+
     def test_commit_omits_changes_not_sent_for_review(self):
         client = self.module.GooglePlayReleaseClient("token", "package.name")
 
@@ -270,6 +308,7 @@ class FakeClient:
         self.updated = []
         self.committed = []
         self.deleted = []
+        self.replaced = []
 
     def insert_edit(self):
         self.edit_count += 1
@@ -305,9 +344,11 @@ class FakeClient:
             raise RuntimeError("track update failed")
         self.updated.append((edit_id, release_name, version_code))
 
-    def commit_release_edit(self, edit_id):
-        if self.review_in_progress:
+    def commit_release_edit(self, edit_id, *, replace_pending_review=False):
+        if self.review_in_progress and not replace_pending_review:
             raise RuntimeError("CHANGES_ALREADY_IN_REVIEW")
+        if replace_pending_review:
+            self.replaced.append(edit_id)
         self.committed.append(edit_id)
 
     def delete_edit(self, edit_id):

@@ -25,6 +25,11 @@ on:
         required: false
         type: boolean
         default: false
+      replace_pending_review:
+        description: Replace pending review when publishing the selected release
+        required: false
+        type: boolean
+        default: false
       submit_icon_for_review:
         description: Submit the store icon change for review
         required: false
@@ -159,15 +164,21 @@ jobs:
 
       - name: Upload beta to Google Play
         if: ${{ steps.release.outputs.available == 'true' }}
+        env:
+          REPLACE_PENDING_REVIEW: ${{ github.event_name == 'workflow_dispatch' && inputs.replace_pending_review || false }}
         shell: bash
         run: |
           python3 -m unittest discover -s test/tool -p google_play_internal_release_test.py
+          arguments=()
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch && "$REPLACE_PENDING_REVIEW" == true ]]; then
+            arguments+=(--replace-pending-review)
+          fi
           python3 tool/google_play_internal_release.py \
             --credentials "$RUNNER_TEMP/google-play-service-account.json" \
             --bundle "$ANDROID_BUNDLE" \
             --package-name "$PACKAGE_NAME" \
             --track "$RELEASE_TRACK" \
-            --release-name "${{ steps.release.outputs.tag }}"
+            --release-name "${{ steps.release.outputs.tag }}" "${arguments[@]}"
 
       - name: Update Google Play store icon
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.update_icon_only == true }}
