@@ -740,13 +740,15 @@ jobs:
           --target lib/main/main_production.dart
           --no-confirm
         )
+        flutter_args=()
         if [[ "$PLATFORM" = android ]]; then
           args+=(--flavor production)
         else
           args+=(--export-options-plist "$RUNNER_TEMP/PatchExportOptions.plist")
           args+=(--build-number "${RELEASE_VERSION#*+}")
+          flutter_args+=(--verbose)
         fi
-        shorebird "${args[@]}" -- \
+        shorebird "${args[@]}" -- "${flutter_args[@]}" \
           --dart-define-from-file="$RUNNER_TEMP/university.json" \
           --dart-define-from-file="$RUNNER_TEMP/firebase.json" \
           --dart-define="SUPABASE_URL=$SUPABASE_URL" \
@@ -794,11 +796,17 @@ jobs:
                 (f"temporary-{index:02}", temp_root, path)
                 for index, path in enumerate(temporary, 1)
             ]
-            candidates.append((
+            archive = (
                 "workspace-archive",
                 workspace,
                 workspace / "build/ios/archive/Runner.xcarchive" / RUNNER_SUFFIX,
-            ))
+            )
+            try:
+                validate_runner(archive[1], archive[2])
+            except FileNotFoundError:
+                pass
+            else:
+                candidates.append(archive)
             sizes = [validate_runner(root, path) for _, root, path in candidates]
             if sum(sizes) > MAX_TOTAL_BYTES:
                 raise ValueError("Runner diagnostics exceed the total size limit")
