@@ -127,6 +127,79 @@ void main() {
     expect(await repository.readSessionCookie(), isNull);
   });
 
+  for (final cookies in [
+    {'Pulse.Auth.Cookie': 'current'},
+    {'Pulse.Auth.Cookie': 'current', '.AspNetCore.Cookies': 'legacy'},
+  ]) {
+    test('stores the current Pulse session and uses it for the pass $cookies',
+        () async {
+      await repository.synchronizeSessionAccount('mirea:student-a');
+      when(() => oauth.initiateOAuthFlow()).thenAnswer(
+        (_) async => LoginSuccessData(
+          allCookies: {...cookies, '__ddg1_': 'unrelated'},
+        ),
+      );
+
+      expect(
+        await repository.authenticateSession(),
+        'Pulse.Auth.Cookie=current',
+      );
+      expect(await repository.readSessionCookie(), 'Pulse.Auth.Cookie=current');
+      await repository.bindPass();
+      expect(requests, hasLength(2));
+      expect(
+        requests.every(
+          (request) => request.headers['cookie'] == 'Pulse.Auth.Cookie=current',
+        ),
+        isTrue,
+      );
+    });
+  }
+
+  test('preserves current Pulse chunks in shared sessions and pass requests',
+      () async {
+    const header = 'Pulse.Auth.Cookie=chunks-2; Pulse.Auth.CookieC1=first; '
+        'Pulse.Auth.CookieC2=second';
+    when(() => oauth.initiateOAuthFlow()).thenAnswer(
+      (_) async => LoginSuccessData(
+        allCookies: {
+          'Pulse.Auth.CookieC2': 'second',
+          'Pulse.Auth.Cookie': 'chunks-2',
+          'Pulse.Auth.CookieC1': 'first',
+          '.AspNetCore.Cookies': 'legacy',
+        },
+      ),
+    );
+
+    expect(await repository.authenticateSession(), header);
+    await repository.bindPass();
+
+    expect(await repository.readSessionCookie(), header);
+    expect(
+      requests.every((request) => request.headers['cookie'] == header),
+      isTrue,
+    );
+  });
+
+  test('does not accept unrelated cookies as an institution session', () async {
+    when(() => oauth.initiateOAuthFlow()).thenAnswer(
+      (_) async => LoginSuccessData(
+        allCookies: const {
+          'Pulse.Auth.Cookie.evil': 'untrusted',
+          '__ddg1_': 'unrelated',
+        },
+      ),
+    );
+
+    await expectLater(
+      repository.authenticateSession(),
+      throwsA(isA<NfcPassLoginFailure>()),
+    );
+
+    expect(await repository.readSessionCookie(), isNull);
+    expect(requests, isEmpty);
+  });
+
   test('Pulse login and pass binding share one browser transaction', () async {
     await repository.synchronizeSessionAccount('mirea:student-a');
     final started = Completer<void>();

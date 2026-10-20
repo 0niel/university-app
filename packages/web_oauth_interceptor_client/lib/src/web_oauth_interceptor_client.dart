@@ -18,12 +18,14 @@ class WebOAuthInterceptorClient extends InAppBrowser {
     this.onBrowserExit,
     this.extraHeaders = const {},
     this.waitForSpecialCookie = false,
+    this.fallbackSpecialCookieNames = const [],
   }) {
     _session = OAuthSessionObserver(
       oauthUrl: oauthUrl,
       expectedRedirectUrls: expectedRedirectUrls,
       specialCookieName: specialCookieName,
       waitForSpecialCookie: waitForSpecialCookie,
+      fallbackSpecialCookieNames: fallbackSpecialCookieNames,
       readCookies: _readCookies,
       onSuccess: (result) => unawaited(_completeSuccess(result)),
       onError: () => _reportError('Unable to complete OAuth login.'),
@@ -58,6 +60,7 @@ class WebOAuthInterceptorClient extends InAppBrowser {
   final Map<String, String> extraHeaders;
 
   final bool waitForSpecialCookie;
+  final List<String> fallbackSpecialCookieNames;
 
   late final OAuthSessionObserver _session;
   var _didComplete = false;
@@ -102,19 +105,6 @@ class WebOAuthInterceptorClient extends InAppBrowser {
         url: WebUri(uri.toString()),
       );
       rethrow;
-    }
-    if (!kReleaseMode) {
-      final metadata = cookies.map((cookie) {
-        final name = cookie.name.replaceFirst(
-          RegExp(r'^(\.AspNetCore\.(?:OpenIdConnect\.Nonce|Correlation))\..*$'),
-          r'$1.<redacted>',
-        );
-        final value = cookie.value;
-        final size =
-            value is String ? '${value.length}' : '${value.runtimeType}';
-        return '$name(length=$size,httpOnly=${cookie.isHttpOnly})';
-      }).join(', ');
-      _log('cookies [$metadata]', url: WebUri(uri.toString()));
     }
     return {
       for (final cookie in cookies)
@@ -273,6 +263,7 @@ class OAuthInterceptorClient {
     required this.expectedRedirectUrls,
     required this.specialCookieName,
     this.waitForSpecialCookie = false,
+    this.fallbackSpecialCookieNames = const [],
     this.extraHeaders = const {},
     this.autoFillConfig,
     this.onLoginSuccess,
@@ -290,6 +281,7 @@ class OAuthInterceptorClient {
   final String specialCookieName;
 
   final bool waitForSpecialCookie;
+  final List<String> fallbackSpecialCookieNames;
 
   /// Additional headers to include in the request, if needed.
   final Map<String, String> extraHeaders;
@@ -315,6 +307,7 @@ class OAuthInterceptorClient {
       expectedRedirectUrls: expectedRedirectUrls,
       specialCookieName: specialCookieName,
       waitForSpecialCookie: waitForSpecialCookie,
+      fallbackSpecialCookieNames: fallbackSpecialCookieNames,
       extraHeaders: extraHeaders,
       autoFillConfig: autoFillConfig,
       onLoginSuccess: (result) {

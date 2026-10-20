@@ -136,6 +136,28 @@ void main() {
     expect(platform.closes, 1);
   });
 
+  for (final name in ['Pulse.Auth.Cookie', '.AspNetCore.Cookies']) {
+    testWidgets('the browser returns and closes for Pulse cookie $name', (
+      tester,
+    ) async {
+      platform.onReadCookies = (_) async => [
+            Cookie(name: name, value: 'provider-session', isHttpOnly: true),
+          ];
+      final login = const OAuthInterceptorClient(
+        oauthUrl: loginUrl,
+        expectedRedirectUrls: [returnUrl],
+        specialCookieName: 'Pulse.Auth.Cookie',
+        fallbackSpecialCookieNames: ['.AspNetCore.Cookies'],
+      ).initiateOAuthFlow();
+      await tester.pump();
+
+      await handler().onLoadStop(WebUri(returnUrl));
+
+      expect((await login).specialCookieValue, 'provider-session');
+      expect(platform.closes, 1);
+    });
+  }
+
   testWidgets('exiting cancels the flow and ignores a pending cookie read', (
     tester,
   ) async {

@@ -23,7 +23,10 @@ void main() {
     );
     addTearDown(harness.observer.close);
 
-    await harness.observer.observe('$_callbackUrl?code=provider-code');
+    await harness.observer.observe(
+      '$_callbackUrl?code=provider-code',
+      loaded: true,
+    );
 
     expect(requested.single.path, '/services');
     expect(requested.single.queryParameters, {'code': 'provider-code'});
@@ -54,6 +57,116 @@ void main() {
 
     expect(harness.results.single.specialCookieValue, 'history-session');
     expect(harness.errors, 0);
+  });
+
+  for (final name in ['Pulse.Auth.Cookie', _sessionName]) {
+    testWidgets('accepts the configured Pulse cookie family $name', (
+      tester,
+    ) async {
+      final harness = _SessionHarness(
+        specialCookieName: 'Pulse.Auth.Cookie',
+        fallbackSpecialCookieNames: const [_sessionName],
+        readCookies: (_) async => {name: 'session'},
+      );
+      addTearDown(harness.observer.close);
+
+      await harness.observer.observe(_callbackUrl, loaded: true);
+
+      expect(harness.results.single.specialCookieValue, 'session');
+      expect(harness.results.single.allCookies[name], 'session');
+      expect(harness.errors, 0);
+    });
+  }
+
+  testWidgets('prefers the current Pulse cookie when both names are present', (
+    tester,
+  ) async {
+    final harness = _SessionHarness(
+      specialCookieName: 'Pulse.Auth.Cookie',
+      fallbackSpecialCookieNames: const [_sessionName],
+      readCookies: (_) async => {
+        'Pulse.Auth.Cookie': 'current',
+        _sessionName: 'legacy',
+      },
+    );
+    addTearDown(harness.observer.close);
+
+    await harness.observer.observe(_callbackUrl, loaded: true);
+
+    expect(harness.results.single.specialCookieValue, 'current');
+  });
+
+  testWidgets('ignores a stale cookie before the callback has committed', (
+    tester,
+  ) async {
+    var cookie = 'stale-session';
+    var reads = 0;
+    final harness = _SessionHarness(
+      readCookies: (_) async {
+        reads++;
+        return {_sessionName: cookie};
+      },
+    );
+    addTearDown(harness.observer.close);
+
+    await harness.observer.observe(_callbackUrl);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(reads, 0);
+    expect(harness.results, isEmpty);
+    cookie = 'committed-session';
+    await harness.observer.observe(_callbackUrl, loaded: true);
+
+    expect(harness.results.single.specialCookieValue, 'committed-session');
+    expect(reads, 1);
+  });
+
+  testWidgets('waits for current Pulse chunks instead of reusing legacy auth', (
+    tester,
+  ) async {
+    var ready = false;
+    final harness = _SessionHarness(
+      specialCookieName: 'Pulse.Auth.Cookie',
+      fallbackSpecialCookieNames: const [_sessionName],
+      readCookies: (uri) async => uri.path == '/services'
+          ? {
+              'Pulse.Auth.Cookie': 'chunks-2',
+              'Pulse.Auth.CookieC1': 'first',
+              if (ready) 'Pulse.Auth.CookieC2': 'second',
+              _sessionName: 'legacy',
+            }
+          : {_sessionName: 'legacy'},
+    );
+    addTearDown(harness.observer.close);
+
+    await harness.observer.observe(_callbackUrl, loaded: true);
+    expect(harness.results, isEmpty);
+    ready = true;
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(harness.results.single.specialCookieValue, 'chunks-2');
+    expect(harness.results.single.allCookies['Pulse.Auth.CookieC2'], 'second');
+  });
+
+  testWidgets('does not accept similarly named or unrelated provider cookies', (
+    tester,
+  ) async {
+    final harness = _SessionHarness(
+      specialCookieName: 'Pulse.Auth.Cookie',
+      fallbackSpecialCookieNames: const [_sessionName],
+      readCookies: (_) async => {
+        'Pulse.Auth.Cookie.evil': 'untrusted',
+        '.AspNetCore.Cookies.evil': 'untrusted',
+        '__ddg1_': 'unrelated',
+      },
+    );
+    addTearDown(harness.observer.close);
+
+    await harness.observer.observe(_callbackUrl, loaded: true);
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(harness.results, isEmpty);
+    expect(harness.errors, 0);
+    harness.observer.close();
   });
 
   testWidgets('rechecks a session that appears after the first 500 ms', (
@@ -201,6 +314,7 @@ void main() {
 
     await harness.observer.observe(
       'https://application.example/complete?access_token=callback-token',
+      loaded: true,
     );
     await tester.pump(const Duration(milliseconds: 500));
     expect(harness.results, isEmpty);
@@ -226,7 +340,7 @@ void main() {
     );
     addTearDown(harness.observer.close);
 
-    final pending = harness.observer.observe(_callbackUrl);
+    final pending = harness.observer.observe(_callbackUrl, loaded: true);
     await tester.pump();
     expect(reads, 1);
 
@@ -262,7 +376,7 @@ void main() {
     expect(harness.results, isEmpty);
     expect(harness.errors, 0);
 
-    await harness.observer.observe(_callbackUrl);
+    await harness.observer.observe(_callbackUrl, loaded: true);
     expect(harness.results, hasLength(1));
     expect(requested.single.host, 'pulse.example');
   });
@@ -321,7 +435,7 @@ void main() {
     final harness = _SessionHarness(readCookies: (_) => cookies.future);
     addTearDown(harness.observer.close);
 
-    final callback = harness.observer.observe(_callbackUrl);
+    final callback = harness.observer.observe(_callbackUrl, loaded: true);
     await tester.pump();
     final identityProvider = harness.observer.observe(
       'https://identity.example/sign-in',
@@ -346,6 +460,7 @@ class _SessionHarness {
     List<String> expectedRedirectUrls = const [_callbackUrl],
     String specialCookieName = _sessionName,
     bool waitForSpecialCookie = false,
+    List<String> fallbackSpecialCookieNames = const [],
   }) {
     final results = <LoginSuccessData>[];
     final errors = <Object?>[];
@@ -354,6 +469,7 @@ class _SessionHarness {
       expectedRedirectUrls: expectedRedirectUrls,
       specialCookieName: specialCookieName,
       waitForSpecialCookie: waitForSpecialCookie,
+      fallbackSpecialCookieNames: fallbackSpecialCookieNames,
       readCookies: readCookies,
       onSuccess: results.add,
       onError: () => errors.add(null),

@@ -115,7 +115,7 @@ def index_tree(root, baseline, entries, changed_paths):
         return git(root, "write-tree", env=env).decode().strip()
 
 
-def projection(root, baseline, source):
+def projection(root, baseline, source, provider=None):
     for revision in (baseline, source):
         if not COMMIT.fullmatch(revision):
             raise ValueError("A full commit SHA is required")
@@ -137,7 +137,8 @@ def projection(root, baseline, source):
             raise ValueError(f"Gitlink changes require a full release: {path}")
         if path in before and path in after and before[path].split()[0] != after[path].split()[0]:
             raise ValueError(f"File mode changes require a full release: {path}")
-        category = classification(path, package_roots)
+        category = ("excluded" if path == "config/university_provider.json" and provider is not None
+                    else classification(path, package_roots))
         paths[category].append(path)
         if category == "excluded":
             continue
@@ -146,7 +147,7 @@ def projection(root, baseline, source):
         else:
             projected.pop(path)
     projected_tree = index_tree(root, baseline, projected, paths["runtime"] + paths["test"])
-    return projected, {
+    receipt = {
         "baseline_sha": baseline,
         "source_sha": source,
         "reviewed_source_sha": source,
@@ -157,6 +158,15 @@ def projection(root, baseline, source):
         "test_paths": paths["test"],
         "excluded_paths": paths["excluded"],
     }
+    if provider is not None:
+        if provider.get("public_baseline_sha") != baseline or provider.get("public_source_sha") != source:
+            raise ValueError("Provider projection differs from the public source")
+        receipt["provider_projection"] = provider
+        receipt["projection_sha256"] = hashlib.sha256(json.dumps(
+            {"tree": projected, "provider_projection": provider},
+            sort_keys=True, separators=(",", ":"),
+        ).encode()).hexdigest()
+    return projected, receipt
 
 
 def manifest_for(path, baseline, root):
@@ -193,10 +203,14 @@ def verify_ignored_private_checkout(root, manifest):
         raise ValueError("Private native module differs from the release")
 
 
-def verify_ignored_provider_checkout(root, manifest):
+def verify_ignored_provider_checkout(root, manifest, receipt=None):
     if not manifest or not COMMIT.fullmatch(manifest.get("provider_sha") or ""):
         raise ValueError("Ignored provider checkout requires verified release inputs")
     verify_checkout_path(root, ("private", "university_provider"), "university provider")
+    if receipt and receipt.get("provider_projection") is not None:
+        from shorebird_provider_patch import verify_workspace
+        verify_workspace(root, manifest, receipt)
+        return
     from release_manifest import provider_source
     if provider_source(root) != manifest["provider_sha"]:
         raise ValueError("University provider differs from the release")
@@ -255,7 +269,7 @@ def verify_worktree(root, entries, receipt, manifest=None, verify_native_inputs=
         verify_ignored_private_checkout(root, manifest)
         ignored.remove("android/private/nfc-pass-android/")
     if "private/university_provider/" in ignored:
-        verify_ignored_provider_checkout(root, manifest)
+        verify_ignored_provider_checkout(root, manifest, receipt)
         ignored.remove("private/university_provider/")
     if any(is_runtime(path) for path in ignored):
         raise ValueError("Unexpected ignored runtime source in the projected workspace")
@@ -269,7 +283,10 @@ def verify_worktree(root, entries, receipt, manifest=None, verify_native_inputs=
         if not manifest:
             raise ValueError("Native input verification requires a release manifest")
         from release_manifest import verify_native_config
-        verify_native_config(root, manifest)
+        if receipt.get("provider_projection"):
+            verify_native_config(root, manifest, receipt)
+        else:
+            verify_native_config(root, manifest)
 
 
 def materialize(root, output, entries, receipt):
@@ -293,6 +310,7 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--manifest", type=Path)
+    parser.add_argument("--provider-repo", type=Path)
     parser.add_argument("--receipt", type=Path)
     parser.add_argument("--github-output", type=Path)
     parser.add_argument("--expected-projection")
@@ -301,7 +319,11 @@ def main():
     args = parser.parse_args()
     root = args.repo.resolve()
     manifest = manifest_for(args.manifest, args.baseline, root)
-    entries, receipt = projection(root, args.baseline, args.source)
+    provider = None
+    if args.provider_repo:
+        from shorebird_provider_patch import prepare
+        provider = prepare(root, args.baseline, args.source, manifest, args.provider_repo.resolve())
+    entries, receipt = projection(root, args.baseline, args.source, provider)
     if manifest:
         for name in ("platform", "app_id", "release_version"):
             receipt[name] = manifest[name]
@@ -313,6 +335,11 @@ def main():
         verify_worktree(args.output, entries, receipt, manifest, args.verify_native_inputs)
     else:
         materialize(root, args.output, entries, receipt)
+        if args.provider_repo:
+            from shorebird_provider_patch import materialize as materialize_provider, request
+            selected = request(root, args.baseline, args.source, manifest)
+            materialize_provider(args.provider_repo.resolve(), args.output.resolve(), selected["ref"])
+            verify_worktree(args.output, entries, receipt, manifest)
         if args.receipt:
             args.receipt.write_text(json.dumps(receipt, sort_keys=True) + "\n", encoding="utf-8")
     if args.github_output:

@@ -298,24 +298,57 @@ class ShorebirdPatchWorkflowTest(unittest.TestCase):
         self.assertFalse((self.root / 'projection/ios/Podfile.lock').exists())
 
     def test_patch_rebuilds_with_the_registered_university_provider(self):
-        names = [item['name'] for item in PATCH['jobs']['patch']['steps']]
-        for name in ('Read university provider pin', 'Check out university provider', 'Resolve registered provider workspace'):
-            self.assertGreater(names.index(name), names.index('Resolve locked workspace'))
-            self.assertLess(names.index(name), names.index('Verify projected workspace'))
-        self.assertIn('"$RELEASE_TOOLS/tool/university_provider_pin.py"', step(PATCH, 'patch', 'Read university provider pin')['run'])
-        checkout = step(PATCH, 'patch', 'Check out university provider')
-        self.assertEqual(checkout['if'], "steps.release.outputs.provider_sha != ''")
-        self.assertEqual(checkout['with']['repository'], '${{ steps.provider.outputs.repository }}')
-        self.assertEqual(checkout['with']['ref'], '${{ steps.release.outputs.provider_sha }}')
-        self.assertEqual(checkout['with']['path'], 'private/university_provider')
-        self.assertFalse(checkout['with']['persist-credentials'])
-        resolve = step(PATCH, 'patch', 'Resolve registered provider workspace')
-        self.assertEqual(resolve['if'], "steps.release.outputs.provider_sha != ''")
-        self.assertEqual(resolve['working-directory'], '${{ env.PATCH_WORKSPACE }}')
-        self.assertIn('tool/configure_university_provider.dart --local private/university_provider', resolve['run'])
-        self.assertLess(resolve['run'].index('configure_university_provider.dart'), resolve['run'].index("python3 - <<'PY'"))
-        self.assertLess(resolve['run'].index('\nPY'), resolve['run'].index('flutter pub get --enforce-lockfile'))
-        self.assertNotIn('Check out university provider', [item['name'] for item in PATCH['jobs']['validate']['steps']])
+        for job in ('validate', 'patch'):
+            names = [item['name'] for item in PATCH['jobs'][job]['steps']]
+            for name in ('Read university provider pin', 'Check out approved provider source', 'Isolate approved provider source'):
+                self.assertGreater(names.index(name), names.index('Resolve registered release'))
+                self.assertLess(names.index(name), names.index('Prepare verified runtime projection'))
+            self.assertIn('shorebird_provider_patch.py', step(PATCH, job, 'Read university provider pin')['run'])
+            self.assertIn('--manifest "$RUNNER_TEMP/release-manifest.json"', step(PATCH, job, 'Read university provider pin')['run'])
+            checkout = step(PATCH, job, 'Check out approved provider source')
+            self.assertEqual(checkout['if'], "steps.provider.outputs.ref != ''")
+            self.assertEqual(checkout['with']['repository'], '${{ steps.provider.outputs.repository }}')
+            self.assertEqual(checkout['with']['ref'], '${{ steps.provider.outputs.ref }}')
+            self.assertEqual(checkout['with']['fetch-depth'], 0)
+            self.assertEqual(checkout['with']['path'], 'provider-source')
+            self.assertFalse(checkout['with']['persist-credentials'])
+            resolve = step(PATCH, job, 'Resolve registered provider workspace')
+            self.assertEqual(resolve['if'], "steps.release.outputs.provider_sha != ''")
+            self.assertEqual(resolve['working-directory'], '${{ env.PATCH_WORKSPACE }}')
+            self.assertIn('tool/configure_university_provider.dart --local private/university_provider', resolve['run'])
+            self.assertLess(resolve['run'].index('configure_university_provider.dart'), resolve['run'].index("python3 - <<'PY'"))
+            self.assertLess(resolve['run'].index('\nPY'), resolve['run'].index('flutter pub get --enforce-lockfile'))
+            self.assertIn('--provider-repo "$PROVIDER_SOURCE_WORKSPACE"', step(PATCH, job, 'Prepare verified runtime projection')['run'])
+
+    def test_provider_hotfix_is_tested_with_registered_locks_and_verified_at_promotion(self):
+        analyze = step(PATCH, 'validate', 'Analyze hotfix')['run']
+        tests = step(PATCH, 'validate', 'Test changed runtime')['run']
+        self.assertIn('receipt.get("provider_projection")', analyze)
+        self.assertIn('private/university_provider/', analyze)
+        self.assertIn('receipt.get("provider_projection")', tests)
+        self.assertIn('path.startswith("private/university_provider/test/")', tests)
+        self.assertIn('--projection-receipt "$RUNNER_TEMP/shorebird-projection.json"', step(PATCH, 'patch', 'Configure release parameters')['run'])
+        promotion = step(PROMOTE, 'promote', 'Verify provider projection provenance')['run']
+        self.assertIn('--source "$SOURCE_SHA"', promotion)
+        self.assertIn('--baseline "$BASELINE_SHA"', promotion)
+        self.assertIn('--verify-receipt "$RUNNER_TEMP/promotion-receipt/shorebird-patch-receipt.json"', promotion)
+
+    def test_provider_checkout_is_isolated_only_after_identity_validation(self):
+        item = step(PATCH, 'patch', 'Isolate approved provider source')
+        workspace = self.root / 'workspace'
+        source = workspace / 'provider-source'
+        source.mkdir(parents=True)
+        (source / 'source.txt').write_text('approved')
+        environment = {**self.environment, 'GITHUB_WORKSPACE': str(workspace), 'PROVIDER_SOURCE_SHA': 'a' * 40, 'GITHUB_ENV': str(self.root / 'github-env')}
+        with patch.dict(os.environ, environment), patch('subprocess.check_output', side_effect=[str(source), 'b' * 40]):
+            with self.assertRaisesRegex(SystemExit, 'differs from the approved source'):
+                exec(compile(python_body(item), '<workflow>', 'exec'), {})
+        self.assertTrue((source / 'source.txt').is_file())
+        self.assertFalse((self.root / 'shorebird-provider-source').exists())
+        with patch.dict(os.environ, environment), patch('subprocess.check_output', side_effect=[str(source), 'a' * 40, '']):
+            exec(compile(python_body(item), '<workflow>', 'exec'), {})
+        self.assertFalse(source.exists())
+        self.assertEqual((self.root / 'shorebird-provider-source/source.txt').read_text(), 'approved')
 
     def test_registered_dart_lock_is_restored_only_with_its_digest(self):
         import hashlib

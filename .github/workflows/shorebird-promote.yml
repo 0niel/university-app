@@ -181,6 +181,12 @@ jobs:
             raise SystemExit("The staging receipt has no valid patch artifacts")
         print(json.dumps(expected, sort_keys=True))
         PY
+    - name: Verify provider projection provenance
+      run: |
+        python3 tool/shorebird_provider_patch.py --repo "$GITHUB_WORKSPACE" \
+          --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
+          --manifest "$RUNNER_TEMP/release-manifest.json" \
+          --verify-receipt "$RUNNER_TEMP/promotion-receipt/shorebird-patch-receipt.json"
     - name: Set up Flutter
       uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
       with:

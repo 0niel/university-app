@@ -79,6 +79,40 @@ void main() {
     );
   });
 
+  test('uses the current Pulse cookie for every step of digital-pass binding',
+      () async {
+    final paths = <String>[];
+    final client = NfcPassClient(
+      cookieProvider: () => 'Pulse.Auth.Cookie=current',
+      endpoints: _endpoints,
+      httpClient: MockClient((request) async {
+        paths.add(request.url.path);
+        expect(request.headers['cookie'], 'Pulse.Auth.Cookie=current');
+        final payload = switch (request.url.path) {
+          '/token' => [10, 3, ...ascii.encode('jwt')],
+          '/send' => [10, 0],
+          _ => [10, 2, 8, 42],
+        };
+        return http.Response.bytes(_success(payload), 200, headers: _headers);
+      }),
+    );
+
+    final token = await client.getAccessTokenForDigitalPass();
+    expect(
+      await client.sendVerificationCode(token),
+      isA<NfcVerificationCodeSent>(),
+    );
+    expect(
+      await client.getDigitalPass(
+        bearerToken: token,
+        sixDigitCode: '123456',
+        deviceName: 'Phone',
+      ),
+      42,
+    );
+    expect(paths, ['/token', '/send', '/pass']);
+  });
+
   test('rejects a failed trailer even after a valid protobuf message',
       () async {
     final client = _client(

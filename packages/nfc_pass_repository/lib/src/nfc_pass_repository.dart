@@ -24,7 +24,8 @@ class NfcPassRepository {
               expectedRedirectUrls: configuration.expectedRedirectUrls
                   .map((url) => url.toString())
                   .toList(growable: false),
-              specialCookieName: '.AspNetCore.Cookies',
+              specialCookieName: 'Pulse.Auth.Cookie',
+              fallbackSpecialCookieNames: const ['.AspNetCore.Cookies'],
             ) {
     _store =
         NfcPassStore(storage: storage, digitalPassChannel: _digitalPassChannel);
@@ -265,14 +266,17 @@ class NfcPassRepository {
   }
 
   static String _sessionCookieOf(LoginSuccessData result) {
-    if ((result.allCookies['.AspNetCore.Cookies'] ?? '').isEmpty) {
+    if (!const ['Pulse.Auth.Cookie', '.AspNetCore.Cookies'].any(
+      (name) => (result.allCookies[name] ?? '').isNotEmpty,
+    )) {
       throw const NfcPassLoginFailure('Cookie not found');
     }
     return nfcSessionCookieHeader(
       result.allCookies.entries
           .where(
-            (entry) => RegExp(r'^\.AspNetCore\.Cookies(?:C[1-9][0-9]*)?$')
-                .hasMatch(entry.key),
+            (entry) => RegExp(
+              r'^(?:Pulse\.Auth\.Cookie|\.AspNetCore\.Cookies)(?:C[1-9][0-9]*)?$',
+            ).hasMatch(entry.key),
           )
           .map((entry) => '${entry.key}=${entry.value}')
           .join('; '),

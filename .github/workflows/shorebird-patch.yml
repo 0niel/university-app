@@ -113,12 +113,54 @@ jobs:
         fetch-depth: 0
         path: source
         persist-credentials: false
+    - name: Read university provider pin
+      id: provider
+      env:
+        BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
+      run: |
+        python3 "$GITHUB_WORKSPACE/tool/shorebird_provider_patch.py" --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" --manifest "$RUNNER_TEMP/release-manifest.json" --github-output "$GITHUB_OUTPUT"
+    - name: Check out approved provider source
+      if: steps.provider.outputs.ref != ''
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        repository: ${{ steps.provider.outputs.repository }}
+        ref: ${{ steps.provider.outputs.ref }}
+        fetch-depth: 0
+        ssh-key: ${{ secrets.UNIVERSITY_PROVIDER_DEPLOY_KEY }}
+        path: provider-source
+        persist-credentials: false
+    - name: Isolate approved provider source
+      if: steps.provider.outputs.ref != ''
+      env:
+        PROVIDER_SOURCE_SHA: ${{ steps.provider.outputs.ref }}
+      run: |
+        python3 - <<'PY'
+        import os
+        import shutil
+        import subprocess
+        from pathlib import Path
+
+        workspace = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+        source = workspace / "provider-source"
+        destination = Path(os.environ["RUNNER_TEMP"]).resolve() / "shorebird-provider-source"
+        if source.is_symlink() or not source.is_dir() or destination.exists() or destination.is_symlink():
+            raise SystemExit("Unsafe provider source location")
+        def git(*args):
+            return subprocess.check_output(["git", "-C", str(source), *args], text=True).strip()
+        if Path(git("rev-parse", "--show-toplevel")).resolve() != source or git("rev-parse", "HEAD") != os.environ["PROVIDER_SOURCE_SHA"] or git("status", "--porcelain", "--untracked-files=all"):
+            raise SystemExit("Provider checkout differs from the approved source")
+        shutil.move(source, destination)
+        with Path(os.environ["GITHUB_ENV"]).open("a") as stream:
+            stream.write(f"PROVIDER_SOURCE_WORKSPACE={destination}\n")
+        PY
     - name: Prepare verified runtime projection
       id: projection
       env:
         BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
       run: |
-        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" \
+        provider_args=()
+        if [[ -n "${PROVIDER_SOURCE_WORKSPACE:-}" ]]; then provider_args+=(--provider-repo "$PROVIDER_SOURCE_WORKSPACE"); fi
+        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" "${provider_args[@]}" \
           --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
           --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
           --receipt "$RUNNER_TEMP/shorebird-projection.json" \
@@ -166,11 +208,33 @@ jobs:
     - name: Resolve locked workspace
       working-directory: ${{ env.PATCH_WORKSPACE }}
       run: flutter pub get --enforce-lockfile --no-example
+    - name: Resolve registered provider workspace
+      if: steps.release.outputs.provider_sha != ''
+      working-directory: ${{ env.PATCH_WORKSPACE }}
+      run: |
+        dart run tool/configure_university_provider.dart --local private/university_provider
+        python3 - <<'PY'
+        import hashlib
+        import json
+        import os
+        from pathlib import Path
+
+        root = Path(os.environ["RUNNER_TEMP"])
+        manifest = json.loads((root / "release-manifest.json").read_text())
+        digest = manifest["build_inputs"]["pubspec.lock"]
+        data = (root / "pubspec.lock").read_bytes()
+        if hashlib.sha256(data).hexdigest() != digest:
+            raise SystemExit("Registered Dart lock digest mismatch")
+        (Path(os.environ["PATCH_WORKSPACE"]) / "pubspec.lock").write_bytes(data)
+        PY
+        flutter pub get --enforce-lockfile --no-example
     - name: Verify projected workspace
       env:
         BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
       run: |
-        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" \
+        provider_args=()
+        if [[ -n "${PROVIDER_SOURCE_WORKSPACE:-}" ]]; then provider_args+=(--provider-repo "$PROVIDER_SOURCE_WORKSPACE"); fi
+        python3 "$GITHUB_WORKSPACE/tool/prepare_shorebird_patch.py" "${provider_args[@]}" \
           --repo "$GITHUB_WORKSPACE/source" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
           --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
           --receipt "$RUNNER_TEMP/shorebird-projection.json" --verify-worktree
@@ -183,9 +247,11 @@ jobs:
         import subprocess
 
         receipt = json.loads((Path(os.environ["RUNNER_TEMP"]) / "shorebird-projection.json").read_text())
+        provider = receipt.get("provider_projection") or {}
+        provider_paths = ["private/university_provider/" + path for path in provider.get("runtime_paths", []) + provider.get("test_paths", [])]
         generated_suffixes = (".freezed.dart", ".g.dart", ".gen.dart", ".pb.dart", ".pbgrpc.dart", ".pbjson.dart")
         generated_directories = ("lib/l10n/generated/", "wear/lib/l10n/generated/")
-        paths = sorted(path for path in receipt["runtime_paths"] + receipt["test_paths"]
+        paths = sorted(path for path in receipt["runtime_paths"] + receipt["test_paths"] + provider_paths
             if path.endswith(".dart") and Path(path).is_file()
             and not path.endswith(generated_suffixes) and not path.startswith(generated_directories))
         if paths:
@@ -201,12 +267,14 @@ jobs:
         import subprocess
 
         receipt = json.loads((Path(os.environ["RUNNER_TEMP"]) / "shorebird-projection.json").read_text())
-        paths = [path for path in receipt["test_paths"] if Path(path).is_file()]
+        provider = receipt.get("provider_projection") or {}
+        test_paths = receipt["test_paths"] + ["private/university_provider/" + path for path in provider.get("test_paths", [])]
+        paths = [path for path in test_paths if Path(path).is_file()]
         groups = {}
         for path in paths:
             if not path.endswith("_test.dart"):
                 continue
-            if path.startswith("test/"):
+            if path.startswith("test/") or path.startswith("private/university_provider/test/"):
                 groups.setdefault(".", []).append(path)
             elif path.startswith("packages/") and "/test/" in path:
                 package, relative = path.split("/test/", 1)
@@ -322,12 +390,54 @@ jobs:
         if hashlib.sha256(path.read_bytes()).hexdigest() != os.environ["MANIFEST_SHA256"]:
             raise SystemExit("The registered manifest changed after validation")
         PY
+    - name: Read university provider pin
+      id: provider
+      env:
+        BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
+      run: |
+        python3 "$RELEASE_TOOLS/tool/shorebird_provider_patch.py" --repo "$SOURCE_WORKSPACE" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" --manifest "$RUNNER_TEMP/release-manifest.json" --github-output "$GITHUB_OUTPUT"
+    - name: Check out approved provider source
+      if: steps.provider.outputs.ref != ''
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        repository: ${{ steps.provider.outputs.repository }}
+        ref: ${{ steps.provider.outputs.ref }}
+        fetch-depth: 0
+        ssh-key: ${{ secrets.UNIVERSITY_PROVIDER_DEPLOY_KEY }}
+        path: provider-source
+        persist-credentials: false
+    - name: Isolate approved provider source
+      if: steps.provider.outputs.ref != ''
+      env:
+        PROVIDER_SOURCE_SHA: ${{ steps.provider.outputs.ref }}
+      run: |
+        python3 - <<'PY'
+        import os
+        import shutil
+        import subprocess
+        from pathlib import Path
+
+        workspace = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+        source = workspace / "provider-source"
+        destination = Path(os.environ["RUNNER_TEMP"]).resolve() / "shorebird-provider-source"
+        if source.is_symlink() or not source.is_dir() or destination.exists() or destination.is_symlink():
+            raise SystemExit("Unsafe provider source location")
+        def git(*args):
+            return subprocess.check_output(["git", "-C", str(source), *args], text=True).strip()
+        if Path(git("rev-parse", "--show-toplevel")).resolve() != source or git("rev-parse", "HEAD") != os.environ["PROVIDER_SOURCE_SHA"] or git("status", "--porcelain", "--untracked-files=all"):
+            raise SystemExit("Provider checkout differs from the approved source")
+        shutil.move(source, destination)
+        with Path(os.environ["GITHUB_ENV"]).open("a") as stream:
+            stream.write(f"PROVIDER_SOURCE_WORKSPACE={destination}\n")
+        PY
     - name: Prepare verified runtime projection
       id: projection
       env:
         BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
       run: |
-        python3 "$RELEASE_TOOLS/tool/prepare_shorebird_patch.py" \
+        provider_args=()
+        if [[ -n "${PROVIDER_SOURCE_WORKSPACE:-}" ]]; then provider_args+=(--provider-repo "$PROVIDER_SOURCE_WORKSPACE"); fi
+        python3 "$RELEASE_TOOLS/tool/prepare_shorebird_patch.py" "${provider_args[@]}" \
           --repo "$SOURCE_WORKSPACE" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
           --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
           --receipt "$RUNNER_TEMP/shorebird-projection.json" \
@@ -439,18 +549,6 @@ jobs:
     - name: Resolve locked workspace
       working-directory: ${{ env.PATCH_WORKSPACE }}
       run: flutter pub get --enforce-lockfile --no-example
-    - name: Read university provider pin
-      id: provider
-      run: python3 "$RELEASE_TOOLS/tool/university_provider_pin.py" --github-output "$GITHUB_OUTPUT"
-    - name: Check out university provider
-      if: steps.release.outputs.provider_sha != ''
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      with:
-        repository: ${{ steps.provider.outputs.repository }}
-        ref: ${{ steps.release.outputs.provider_sha }}
-        ssh-key: ${{ secrets.UNIVERSITY_PROVIDER_DEPLOY_KEY }}
-        path: private/university_provider
-        persist-credentials: false
     - name: Resolve registered provider workspace
       if: steps.release.outputs.provider_sha != ''
       working-directory: ${{ env.PATCH_WORKSPACE }}
@@ -475,7 +573,9 @@ jobs:
       env:
         BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
       run: |
-        python3 "$RELEASE_TOOLS/tool/prepare_shorebird_patch.py" \
+        provider_args=()
+        if [[ -n "${PROVIDER_SOURCE_WORKSPACE:-}" ]]; then provider_args+=(--provider-repo "$PROVIDER_SOURCE_WORKSPACE"); fi
+        python3 "$RELEASE_TOOLS/tool/prepare_shorebird_patch.py" "${provider_args[@]}" \
           --repo "$SOURCE_WORKSPACE" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
           --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
           --receipt "$RUNNER_TEMP/shorebird-projection.json" --verify-worktree --expected-projection "$PROJECTION_SHA256"
@@ -595,7 +695,7 @@ jobs:
         python3 tool/configure_firebase.py "${firebase_args[@]}"
         dart run tool/configure_university.dart --config "$RUNNER_TEMP/university.json"
         python3 "$RELEASE_TOOLS/tool/release_manifest.py" verify-inputs \
-          --manifest "$RUNNER_TEMP/release-manifest.json" --repo "$PATCH_WORKSPACE"
+          --manifest "$RUNNER_TEMP/release-manifest.json" --repo "$PATCH_WORKSPACE" --projection-receipt "$RUNNER_TEMP/shorebird-projection.json"
         python3 - <<'PY'
         import os
         import re
@@ -611,7 +711,9 @@ jobs:
       env:
         BASELINE_SHA: ${{ steps.release.outputs.baseline_sha }}
       run: |
-        python3 "$RELEASE_TOOLS/tool/prepare_shorebird_patch.py" \
+        provider_args=()
+        if [[ -n "${PROVIDER_SOURCE_WORKSPACE:-}" ]]; then provider_args+=(--provider-repo "$PROVIDER_SOURCE_WORKSPACE"); fi
+        python3 "$RELEASE_TOOLS/tool/prepare_shorebird_patch.py" "${provider_args[@]}" \
           --repo "$SOURCE_WORKSPACE" --baseline "$BASELINE_SHA" --source "$SOURCE_SHA" \
           --output "$PATCH_WORKSPACE" --manifest "$RUNNER_TEMP/release-manifest.json" \
           --receipt "$RUNNER_TEMP/shorebird-projection.json" --verify-worktree --expected-projection "$PROJECTION_SHA256"
@@ -835,6 +937,8 @@ jobs:
         if projection["projection_sha256"] != os.environ["PROJECTION_SHA256"]:
             raise SystemExit("Built projection differs from validated projection")
         receipt.update({key: projection[key] for key in ("baseline_sha", "source_tree_sha", "projected_tree_sha", "projection_sha256")})
+        if "provider_projection" in projection:
+            receipt["provider_projection"] = projection["provider_projection"]
         receipt["manifest_sha256"] = os.environ["MANIFEST_SHA256"]
         receipt["workflow_sha"] = os.environ["WORKFLOW_SHA"]
         receipt["staging_run_attempt"] = int(os.environ["GITHUB_RUN_ATTEMPT"])

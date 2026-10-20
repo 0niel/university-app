@@ -33,6 +33,15 @@ The verifier overlays Dart, localization, and test changes onto the original
 release; build tools remain at the baseline. Changes to native code, assets,
 dependencies, file modes, or unknown build inputs require a full release.
 
+A provider hotfix may change the immutable provider ref in the approved source.
+Its repository and package layout must match the release, and the registered
+provider commit must be an ancestor of that ref. Only `lib/**/*.dart` and
+`test/**/*.dart` may differ; provider dependencies, native files, assets, and
+file modes remain unchanged. Both validation and compilation use that clean
+provider checkout with the release's resolved dependency lock. The receipt binds
+both provider commits and trees to the approved public source and combined
+projection digest. Full releases continue to record the actual provider commit.
+
 **Shorebird Patch Promotion** accepts the successful staging run and exact target.
 It verifies the manifest, source tree, staging receipt, and live patch artifacts
 before promoting to stable. Never bypass native or asset checks to force delivery
