@@ -74,6 +74,14 @@ void main() {
     expect(find.text('12 •••• 78'), findsOneWidget);
     expect(find.text('12345678'), findsNothing);
     expect(find.byType(Animate), findsNothing);
+    expect(
+      tester
+          .widget<ColoredBox>(
+            find.byKey(const ValueKey('nfc-pass-media-scrim')),
+          )
+          .color,
+      const Color.fromRGBO(0, 0, 0, NfcPassCard.textScrimOpacity),
+    );
     expect(tester.takeException(), isNull);
   });
 }

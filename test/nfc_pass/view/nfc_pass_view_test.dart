@@ -125,7 +125,7 @@ void main() {
     );
 
     testWidgets(
-      'shows a portrait card skeleton on action '
+      'shows a wallet card skeleton on action '
       'transitions',
       (tester) async {
         await tester.pumpWidget(
@@ -148,7 +148,7 @@ void main() {
       },
     );
 
-    testWidgets('loading skeleton mirrors the portrait pass card', (
+    testWidgets('loading skeleton mirrors the compact wallet card', (
       tester,
     ) async {
       await tester.pumpWidget(

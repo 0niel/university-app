@@ -11,6 +11,7 @@ import 'package:rtu_mirea_app/nfc_pass/bloc/pass_security_cubit.dart';
 import 'package:rtu_mirea_app/nfc_pass/view/nfc_pass_page.dart';
 import 'package:rtu_mirea_app/nfc_pass/widgets/nfc_card_info.dart';
 import 'package:rtu_mirea_app/nfc_pass/widgets/nfc_card_settings_sheet.dart';
+import 'package:rtu_mirea_app/nfc_pass/widgets/nfc_pass_header.dart';
 
 class _MockNfcPassCubit extends MockCubit<NfcPassState>
     implements NfcPassCubit {}
@@ -21,6 +22,46 @@ class _MockPassSecurityCubit extends MockCubit<PassSecurityState>
     implements PassSecurityCubit {}
 
 void main() {
+  testWidgets('header does not claim active turnstile when emulation is off', (
+    tester,
+  ) async {
+    final pass = _MockNfcPassCubit();
+    final hce = _MockNfcHceCubit();
+    final security = _MockPassSecurityCubit();
+    when(() => pass.state).thenReturn(
+      const NfcPassState(status: NfcPassStatus.bound, passId: 12345678),
+    );
+    when(pass.checkBound).thenAnswer((_) async {});
+    when(pass.releaseTurnstilePriority).thenAnswer((_) async {});
+    when(() => hce.state).thenReturn(
+      const NfcHceState(loaded: true, available: true, enabled: false),
+    );
+    when(() => security.state).thenReturn(const PassSecurityState());
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.darkTheme,
+        locale: const Locale('ru'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<NfcPassCubit>.value(value: pass),
+            BlocProvider<NfcHceCubit>.value(value: hce),
+            BlocProvider<PassSecurityCubit>.value(value: security),
+          ],
+          child: const NfcPassPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<NfcPassHeader>(find.byType(NfcPassHeader)).statusLabel,
+      'Выключено',
+    );
+    expect(find.text('Активен'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final confirm in [false, true]) {
     testWidgets('settings preserve unbinding with confirmation=$confirm', (
       tester,

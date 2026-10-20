@@ -16,24 +16,53 @@ class _NfcPassBoundBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (emulationOff)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-            child: NinjaBanner(
-              tone: NinjaBannerTone.warn,
-              title: l10n.settingsNfcEmulation,
-              body: l10n.settingsNfcEmulationSub,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: NfcPassCard.maxWidth),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            NfcPassCard(
+              passId: passId,
+              localFilePath: localFilePath,
+              isVideo: isVideo,
+              emulationOff: emulationOff,
             ),
-          ),
-        NfcPassCard(
-          passId: passId,
-          localFilePath: localFilePath,
-          isVideo: isVideo,
+            if (emulationOff)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.lg),
+                child: NinjaBanner(
+                  tone: NinjaBannerTone.warn,
+                  title: l10n.settingsNfcEmulation,
+                  body: l10n.settingsNfcEmulationSub,
+                ),
+              ),
+            if (!emulationOff)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xlg),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AppLineIconWidget(
+                      AppLineIcon.contactless,
+                      size: AppIconSize.md,
+                      color: context.colors.muted,
+                    ),
+                    const SizedBox(width: AppSpacing.gap),
+                    Flexible(
+                      child: Text(
+                        l10n.nfcPassTapHint.replaceAll('\n', ' '),
+                        style: AppText.body.copyWith(
+                          color: context.colors.muted,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

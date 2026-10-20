@@ -52,6 +52,10 @@ class _NfcPassViewState extends State<NfcPassView> {
           : const Duration(milliseconds: 240),
       switchInCurve: Curves.easeOut,
       switchOutCurve: Curves.easeIn,
+      layoutBuilder: (current, previous) => Stack(
+        alignment: Alignment.topCenter,
+        children: [...previous, ?current],
+      ),
       child: KeyedSubtree(
         key: ValueKey(widget.state.status),
         child: _buildBody(context),
