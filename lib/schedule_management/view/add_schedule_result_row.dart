@@ -14,12 +14,17 @@ class _AddScheduleResultRow extends StatefulWidget {
   State<_AddScheduleResultRow> createState() => _AddScheduleResultRowState();
 }
 
-class _AddScheduleResultRowState extends State<_AddScheduleResultRow> {
+class _AddScheduleResultRowState extends State<_AddScheduleResultRow>
+    with AutomaticKeepAliveClientMixin<_AddScheduleResultRow> {
   bool _pending = false;
+
+  @override
+  bool get wantKeepAlive => _pending;
 
   void _add() {
     if (_pending || widget.added) return;
     setState(() => _pending = true);
+    updateKeepAlive();
     widget.result.onSubscribe(context.read());
   }
 
@@ -28,6 +33,7 @@ class _AddScheduleResultRowState extends State<_AddScheduleResultRow> {
     final added = widget.result.isAdded(state);
     if (!added && state.status != ScheduleStatus.failure) return;
     setState(() => _pending = false);
+    updateKeepAlive();
     showNinjaToast(
       context,
       showCheck: added,
@@ -39,6 +45,7 @@ class _AddScheduleResultRowState extends State<_AddScheduleResultRow> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final colors = context.colors;
     final l10n = context.l10n;
     final result = widget.result;

@@ -1,6 +1,8 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 void main() {
   Widget host({
@@ -225,13 +227,6 @@ void main() {
         tester.getRect(find.byType(AppSheetAction)).bottom,
         lessThanOrEqualTo(844 - 320 - AppSpacing.sheetBottom),
       );
-      final padding = tester.widget<AnimatedPadding>(
-        find.descendant(
-          of: find.byType(AppSheet),
-          matching: find.byType(AnimatedPadding),
-        ),
-      );
-      expect(padding.duration, Duration.zero);
       await tester.tap(find.byType(AppSheetAction));
       expect(actions, 1);
       expect(tester.takeException(), isNull);
@@ -245,6 +240,92 @@ void main() {
 
       expect(tester.widget<Material>(surfaceMaterial()).color, background);
       expect(find.byType(AppGlassSurface), findsOneWidget);
+    });
+
+    testWidgets('opaque sheet retains the original full lens lighting', (
+      tester,
+    ) async {
+      usePhoneViewport(tester);
+      await open(tester, title: 'Search');
+
+      final glass = tester.widget<LiquidGlassLens>(
+        find.byType(LiquidGlassLens),
+      );
+      expect(glass.style.specular, AppGlassStyle.rim);
+      expect(glass.style.glow, AppGlassStyle.glow);
+      expect(glass.style.blur, 14);
+      expect(glass.style.refractionIndex, 1.004);
+      expect(glass.style.refractionWidth, 8);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('translucent sheet keeps its live backdrop', (tester) async {
+      usePhoneViewport(tester);
+      await open(
+        tester,
+        title: 'Search',
+        backgroundColor: const Color(0x40263142),
+      );
+
+      expect(find.byType(LiquidGlassLens), findsOneWidget);
+      expect(tester.layers.whereType<BackdropFilterLayer>(), isNotEmpty);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('keyboard inset progress keeps the footer visible each frame', (
+      tester,
+    ) async {
+      usePhoneViewport(tester);
+      final controller = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focus.dispose);
+      await tester.pumpWidget(
+        host(
+          onTap: (context) => showAppSheet<void>(
+            context,
+            title: 'Search',
+            primaryAction: 'Done',
+            onPrimaryAction: () {},
+            child: Column(
+              children: [
+                TextField(controller: controller, focusNode: focus),
+                const SizedBox(height: 800),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'draft');
+      final field = tester.element(find.byType(TextField));
+
+      for (final inset in [
+        80.0,
+        160.0,
+        240.0,
+        320.0,
+        240.0,
+        160.0,
+        80.0,
+        0.0,
+      ]) {
+        tester.view.viewInsets = FakeViewPadding(bottom: inset);
+        tester.view.padding = const FakeViewPadding(top: 47);
+        await tester.pump(const Duration(milliseconds: 16));
+        await tester.pump();
+
+        expect(
+          tester.getRect(find.byType(AppSheetAction)).bottom,
+          lessThanOrEqualTo(844 - inset - AppSpacing.sheetBottom + .01),
+          reason: 'The footer must follow the current keyboard inset $inset',
+        );
+        expect(tester.element(find.byType(TextField)), same(field));
+        expect(controller.text, 'draft');
+        expect(focus.hasFocus, isTrue);
+        expect(tester.takeException(), isNull);
+      }
     });
 
     testWidgets('the grabber is a line-colored pill', (tester) async {

@@ -10,6 +10,7 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:rtu_mirea_app/schedule/utils/schedule_date_index.dart';
 import 'package:rtu_mirea_app/schedule/view/compare/comparison_logic.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
@@ -37,6 +38,7 @@ class ScheduleWeekView extends StatelessWidget {
     this.onCompare,
     this.now,
     this.padding = EdgeInsets.zero,
+    this.dateIndex,
     super.key,
   });
 
@@ -52,6 +54,7 @@ class ScheduleWeekView extends StatelessWidget {
   final VoidCallback? onCompare;
   final DateTime? now;
   final EdgeInsetsGeometry padding;
+  final ScheduleDateIndex? dateIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +67,8 @@ class ScheduleWeekView extends StatelessWidget {
         date: ScheduleWeekDayData(
           day: date,
           now: currentTime,
-          schedule: schedule,
+          schedule: dateIndex?.partsForDay(date) ?? schedule,
+          calendarEvents: dateIndex?.calendarEvents,
           changes: changes,
           preferences: preferences,
           display: display,

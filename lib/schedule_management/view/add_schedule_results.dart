@@ -37,30 +37,54 @@ class _AddScheduleResults extends StatelessWidget {
         }
 
         final scheduleState = context.watch<ScheduleBloc>().state;
-        return ListView(
+        final addedIds = switch (target) {
+          .group => {
+            for (final entry in scheduleState.groupsSchedule) entry.$1,
+          },
+          .teacher => {
+            for (final entry in scheduleState.teachersSchedule) entry.$1,
+          },
+          .classroom => {
+            for (final entry in scheduleState.classroomsSchedule) entry.$1,
+          },
+        };
+        final positions = {
+          for (final (index, result) in results.indexed)
+            '${result.target.name}:${result.id}': index + 1,
+        };
+        return ListView.builder(
           padding: const EdgeInsets.only(bottom: 24),
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.screen,
-                0,
-                AppSpacing.screen,
-                10,
-              ),
-              child: Text(
-                l10n.addScheduleFound(results.length),
-                style: AppText.headline.copyWith(color: colors.ink),
-              ),
-            ),
-            for (final result in results)
-              _AddScheduleResultRow(
+          itemCount: results.length + 2,
+          findChildIndexCallback: (key) =>
+              key is ValueKey<String> ? positions[key.value] : null,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.screen,
+                  0,
+                  AppSpacing.screen,
+                  10,
+                ),
+                child: Text(
+                  l10n.addScheduleFound(results.length),
+                  style: AppText.headline.copyWith(color: colors.ink),
+                ),
+              );
+            }
+            final result = results.elementAtOrNull(index - 1);
+            if (result != null) {
+              return _AddScheduleResultRow(
                 key: ValueKey('${result.target.name}:${result.id}'),
                 result: result,
-                added: result.isAdded(scheduleState),
-              ),
-            const SizedBox(height: 18),
-            _CreateScheduleRow(onTap: () => _openCreate(context)),
-          ],
+                added: addedIds.contains(result.id),
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.only(top: 18),
+              child: _CreateScheduleRow(onTap: () => _openCreate(context)),
+            );
+          },
         );
       },
     );

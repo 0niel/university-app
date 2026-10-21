@@ -11,6 +11,12 @@ class AppGlassLens extends StatelessWidget {
     super.key,
   });
 
+  static const _transparentLiteGlow = LiquidGlassLight.glow(
+    thickness: 4,
+    intensity: .05,
+  );
+  static const _noGlow = LiquidGlassLight.glow(thickness: 0);
+
   final LiquidGlassStyle style;
   final Widget child;
   final double borderRadius;
@@ -28,7 +34,7 @@ class AppGlassLens extends StatelessWidget {
             style.shape ??
             LiquidGlassShape.roundedRectangle(cornerRadius: borderRadius),
         specular: style.specular,
-        glow: style.glow,
+        glow: style.glow == _transparentLiteGlow ? _noGlow : style.glow,
         blur: style.blur,
         magnification: style.magnification,
         color: style.color,
@@ -38,15 +44,14 @@ class AppGlassLens extends StatelessWidget {
           ? RepaintBoundary(child: glass)
           : glass;
     } else {
-      final media = MediaQuery.of(context);
       final view = View.of(context);
-      background = MediaQuery(
-        data: media.copyWith(
-          size: view.physicalSize / view.devicePixelRatio,
-          devicePixelRatio: view.devicePixelRatio,
-        ),
+      final lens = MediaQuery.fromView(
+        view: view,
         child: LiquidGlassLens(style: style, child: const SizedBox.expand()),
       );
+      background = LiquidGlassBatch.backdropIdOf(context) == null
+          ? LiquidGlassBatch(child: lens)
+          : lens;
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/glass/app_glass_batch.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_control_surface.dart';
@@ -67,6 +68,19 @@ class AppScreenHeader extends StatelessWidget {
 
     final textAction = this.textAction;
     Widget buildHeader({double labelWidth = 0, double labelHeight = 0}) {
+      final actionOverlays = Stack(
+        children: [
+          for (final (index, action) in actions.indexed)
+            Positioned.fill(
+              child: _HeaderActionOverlay(
+                action: action,
+                index: actions.length - index - 1,
+                padding: insets,
+                controlTone: controlTone,
+              ),
+            ),
+        ],
+      );
       return Stack(
         children: [
           ConstrainedBox(
@@ -170,14 +184,11 @@ class AppScreenHeader extends StatelessWidget {
                 ),
               ),
             ),
-          for (final (index, action) in actions.indexed)
+          if (actions.isNotEmpty)
             Positioned.fill(
-              child: _HeaderActionOverlay(
-                action: action,
-                index: actions.length - index - 1,
-                padding: insets,
-                controlTone: controlTone,
-              ),
+              child: controlTone == AppControlSurfaceTone.glass
+                  ? AppGlassBatch(child: actionOverlays)
+                  : actionOverlays,
             ),
         ],
       );
@@ -259,13 +270,13 @@ class AppHeaderCircleButton extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   Center(
-                    child:
-                        action.child ??
-                        AppLineIconWidget(
-                          action.icon ?? AppLineIcon.more,
-                          size: iconSize,
-                          color: fg,
-                        ),
+                    child: action.child == null
+                        ? AppLineIconWidget(
+                            action.icon ?? AppLineIcon.more,
+                            size: iconSize,
+                            color: fg,
+                          )
+                        : AppGlassBatch.exclude(child: action.child!),
                   ),
                   if (action.badge)
                     Positioned(

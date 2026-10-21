@@ -97,13 +97,14 @@ class MapFreeRoomsPanel extends StatelessWidget {
     final state = context.watch<FreeRoomsCubit>().state;
     final campus = mapState.selectedCampus;
     final filtered = state.copyWith(campus: campus?.displayName ?? '');
-    final mappedRooms = state.query.trim().isEmpty
+    final query = roomKey(state.query);
+    final mappedRooms = discovery != null || state.query.trim().isEmpty
         ? <RoomModel>[]
         : mapState.rooms
               .where(
                 (room) =>
-                    roomKey(room.name).contains(roomKey(state.query)) ||
-                    roomKey(room.roomId).contains(roomKey(state.query)),
+                    roomKey(room.name).contains(query) ||
+                    roomKey(room.roomId).contains(query),
               )
               .toList();
     Widget header(ScrollController scrollController) => GestureDetector(

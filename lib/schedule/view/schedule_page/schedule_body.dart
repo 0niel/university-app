@@ -13,6 +13,7 @@ import 'package:rtu_mirea_app/promo/promo.dart';
 import 'package:rtu_mirea_app/schedule/bloc/schedule_bloc.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/models/models.dart';
+import 'package:rtu_mirea_app/schedule/utils/schedule_date_index.dart';
 import 'package:rtu_mirea_app/schedule/utils/schedule_diff_engine.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
@@ -55,6 +56,8 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
   late ScheduleView _view = widget.initialView;
   ScheduleState? _previous;
   var _hintChecked = false;
+  SelectedSchedule? _indexedSchedule;
+  ScheduleDateIndex _dateIndex = ScheduleDateIndex(const []);
 
   @override
   bool get isClockTickNeeded => widget.now == null;
@@ -159,13 +162,19 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
   @override
   Widget build(BuildContext context) {
     final now = widget.now ?? _now;
-    final state = context.watch<ScheduleBloc>().state;
+    final (selected, status, isOffline) = context
+        .select<ScheduleBloc, (SelectedSchedule?, ScheduleStatus, bool)>(
+          (bloc) => (
+            bloc.state.selectedSchedule,
+            bloc.state.status,
+            bloc.state.isOffline,
+          ),
+        );
     final preferences = context.watch<SchedulePreferencesCubit>().state;
     final display = context.watch<ScheduleDisplayCubit>().state;
     final changesCubit = context.watch<ScheduleChangesCubit>();
     final comparison = context.watch<ScheduleComparisonCubit>();
     final activities = context.watch<UserActivitiesCubit>().state.activities;
-    final selected = state.selectedSchedule;
     final l10n = context.l10n;
     final request = changesRequestFor(selected);
     final changes =
@@ -182,6 +191,11 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
         .toList();
     final weekChanges = changesInWeek(unreadChanges, _day);
     final schedule = selected?.schedule ?? [];
+    if (!identical(selected, _indexedSchedule)) {
+      _indexedSchedule = selected;
+      _dateIndex = ScheduleDateIndex(schedule);
+    }
+    final dateIndex = _dateIndex;
     if (!_hintChecked && widget.now == null && schedule.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _maybeShowLongPressHint(),
@@ -195,7 +209,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
       ScheduleView.day => ScheduleDayView(
         day: day,
         now: now,
-        schedule: schedule,
+        schedule: dateIndex.partsForDay(day),
         changes: changes,
         preferences: preferences,
         display: display,
@@ -205,6 +219,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
         showDayStrip: false,
       ),
       ScheduleView.week => ScheduleWeekView(
+        dateIndex: dateIndex,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
         day: day,
         now: now,
@@ -217,6 +232,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
         onDay: _selectDay,
       ),
       ScheduleView.month => ScheduleMonthView(
+        dateIndex: dateIndex,
         now: now,
         day: day,
         schedule: schedule,
@@ -232,6 +248,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
       ),
     };
     final strip = ScheduleDayStrip(
+      dateIndex: dateIndex,
       day: _day,
       now: now,
       schedule: schedule,
@@ -302,7 +319,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                                   bottom: AppSpacing.sm,
                                 ),
                               ),
-                              if (state.isOffline) ...[
+                              if (isOffline) ...[
                                 AppBanner(
                                   message: l10n.offlineFromCache,
                                   tone: AppBannerTone.warn,
@@ -386,7 +403,7 @@ class _ScheduleBodyState extends State<ScheduleBody> with ScheduleClockTicker {
                                   ninjaBottomInset(context) + AppSpacing.lg,
                                 ),
                                 sliver: SliverToBoxAdapter(
-                                  child: switch (state.status) {
+                                  child: switch (status) {
                                     ScheduleStatus.loading =>
                                       const AppSkeletonGroup(
                                         child: Column(

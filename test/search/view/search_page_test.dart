@@ -93,6 +93,38 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
+    testWidgets(
+      'moving the cursor preserves scroll and does not search again',
+      (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _wrap(searchBloc: searchBloc, schedule: scheduleBloc),
+        );
+        final scroll = tester.state<NestedScrollViewState>(
+          find.byType(NestedScrollView),
+        );
+        scroll.outerController.jumpTo(24);
+        await tester.pump();
+        final previousOffset = scroll.outerController.offset;
+        expect(previousOffset, greaterThan(0));
+
+        tester
+            .widget<EditableText>(find.byType(EditableText))
+            .controller
+            .selection = const TextSelection.collapsed(
+          offset: 2,
+        );
+        await tester.pump();
+
+        expect(scroll.outerController.offset, previousOffset);
+        verifyNever(
+          () =>
+              searchBloc.add(const SearchQueryChanged(searchQuery: 'история')),
+        );
+      },
+    );
+
     testWidgets('keeps search controls and skeleton responsive at 200%', (
       tester,
     ) async {

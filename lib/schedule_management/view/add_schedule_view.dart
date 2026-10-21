@@ -10,7 +10,7 @@ class AddScheduleView extends StatefulWidget {
 class _AddScheduleViewState extends State<AddScheduleView> {
   final TextEditingController _controller = TextEditingController();
   ScheduleTarget _target = .group;
-  String _query = '';
+  bool _hasQuery = false;
 
   SearchMode get _modeFor => _target == .classroom ? .classrooms : .schedule;
 
@@ -31,7 +31,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
 
   void _onQueryChanged(String query) {
     context.read<SearchBloc>().add(SearchQueryChanged(searchQuery: query));
-    setState(() => _query = query);
+    final hasQuery = query.trim().isNotEmpty;
+    if (_hasQuery != hasQuery) setState(() => _hasQuery = hasQuery);
   }
 
   String get _hint {
@@ -104,7 +105,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
           ),
         ),
       ],
-      body: _query.trim().isNotEmpty
+      body: _hasQuery
           ? _AddScheduleResults(
               target: _target,
               onRetry: () => _onQueryChanged(_controller.text),

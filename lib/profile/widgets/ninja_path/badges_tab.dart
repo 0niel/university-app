@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
@@ -36,20 +37,34 @@ class BadgesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NinjaPathCubit, NinjaPathState>(
+      buildWhen: (previous, current) =>
+          previous.badgesStatus != current.badgesStatus ||
+          !listEquals(previous.badges, current.badges) ||
+          previous.recentlyUnlocked != current.recentlyUnlocked,
       builder: (context, state) {
-        return NinjaStateSwitcher(
+        return TweenAnimationBuilder<double>(
+          key: ValueKey(state.badgesStatus),
+          tween: Tween(begin: 0, end: 1),
+          duration: NinjaMotion.of(context),
+          curve: Curves.easeOutCubic,
+          builder: (context, opacity, child) =>
+              SliverOpacity(opacity: opacity, sliver: child),
           child: switch (state.badgesStatus) {
-            .initial || .loading => const NinjaPathSkeleton.badges(
-              key: ValueKey('badges-loading'),
+            .initial || .loading => const SliverToBoxAdapter(
+              child: NinjaPathSkeleton.badges(key: ValueKey('badges-loading')),
             ),
-            .error => NinjaPathTabError(
-              key: const ValueKey('badges-error'),
-              onRetry: () =>
-                  unawaited(context.read<NinjaPathCubit>().loadBadges()),
+            .error => SliverToBoxAdapter(
+              child: NinjaPathTabError(
+                key: const ValueKey('badges-error'),
+                onRetry: () =>
+                    unawaited(context.read<NinjaPathCubit>().loadBadges()),
+              ),
             ),
-            .loaded when state.badges.isEmpty => const NinjaPathTabEmpty(
-              key: ValueKey('badges-empty'),
-              icon: AppLineIcon.trophy,
+            .loaded when state.badges.isEmpty => const SliverToBoxAdapter(
+              child: NinjaPathTabEmpty(
+                key: ValueKey('badges-empty'),
+                icon: AppLineIcon.trophy,
+              ),
             ),
             .loaded => _BadgesContent(
               key: const ValueKey('badges-content'),

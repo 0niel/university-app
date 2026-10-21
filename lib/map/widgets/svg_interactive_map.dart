@@ -108,6 +108,16 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!TickerMode.valuesOf(context).enabled) {
+      _zoomController.stop();
+      _zoomAnimation = null;
+      _cancelViewportRefit();
+    }
+  }
+
+  @override
   void didUpdateWidget(covariant SvgInteractiveMap oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.is3D != widget.is3D) _labelHitIndex.clear();

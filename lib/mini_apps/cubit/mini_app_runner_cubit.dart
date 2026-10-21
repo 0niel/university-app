@@ -69,12 +69,15 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
   }
 
   Future<void> updateConsents(List<MiniAppPermission> scopes) async {
+    if (isClosed) return;
     final app = state.app;
     if (app == null) return;
     try {
       await _repository.setConsents(appId: app.id, scopes: scopes);
+      if (isClosed) return;
       emit(state.copyWith(app: app.copyWith(grantedPermissions: scopes)));
     } on Exception catch (error, stackTrace) {
+      if (isClosed) return;
       addError(error, stackTrace);
     }
   }
@@ -240,17 +243,21 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
   }
 
   Future<void> rate(int rating) async {
+    if (isClosed) return;
     final app = state.app;
     if (app == null) return;
     try {
       await _repository.rateApp(appId: app.id, rating: rating);
+      if (isClosed) return;
       emit(state.copyWith(app: app.copyWith(myRating: rating)));
     } on Exception catch (error, stackTrace) {
+      if (isClosed) return;
       addError(error, stackTrace);
     }
   }
 
   Future<bool> report(MiniAppReportReason reason, String details) async {
+    if (isClosed) return false;
     final app = state.app;
     if (app == null) return false;
     try {
@@ -259,9 +266,11 @@ class MiniAppRunnerCubit extends Cubit<MiniAppRunnerState> {
         reason: reason,
         details: details,
       );
+      if (isClosed) return false;
       emit(state.copyWith(app: app.copyWith(hasMyOpenReport: true)));
       return true;
     } on Exception catch (error, stackTrace) {
+      if (isClosed) return false;
       addError(error, stackTrace);
       return false;
     }

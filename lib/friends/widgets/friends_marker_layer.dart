@@ -52,6 +52,13 @@ class _FriendsMarkerLayerState extends State<FriendsMarkerLayer>
   final _displayed = <String, LatLng>{};
   final _from = <String, LatLng>{};
   final _to = <String, LatLng>{};
+  final _markerChildren = <String, ({Friend friend, Widget child})>{};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _markerChildren.clear();
+  }
 
   @override
   void initState() {
@@ -85,13 +92,18 @@ class _FriendsMarkerLayerState extends State<FriendsMarkerLayer>
     }
 
     _displayed.removeWhere((id, _) => !liveIds.contains(id));
+    _markerChildren.removeWhere((id, _) => !liveIds.contains(id));
     _from.removeWhere((id, _) => !_to.containsKey(id));
 
-    if (_to.isEmpty) return;
+    if (_to.isEmpty) {
+      _controller.stop();
+      return;
+    }
     final reduceMotion =
         MediaQuery.disableAnimationsOf(context) ||
         MediaQuery.accessibleNavigationOf(context);
     if (reduceMotion) {
+      _controller.stop();
       _to.forEach((id, target) => _displayed[id] = target);
       _from.clear();
       _to.clear();
@@ -122,6 +134,20 @@ class _FriendsMarkerLayerState extends State<FriendsMarkerLayer>
 
   LatLng? _pointOf(Friend friend) => friendPoint(friend);
 
+  Widget _markerChild(Friend friend) {
+    final cached = _markerChildren[friend.userId];
+    if (cached?.friend == friend) return cached!.child;
+    final child = AppPressable(
+      key: ValueKey(friend.userId),
+      behavior: HitTestBehavior.deferToChild,
+      onTap: () => widget.onFriendTap(friend),
+      semanticsLabel: friendMarkerSemanticsLabel(friend, context.l10n),
+      child: RepaintBoundary(child: FriendMarker(friend: friend)),
+    );
+    _markerChildren[friend.userId] = (friend: friend, child: child);
+    return child;
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -151,16 +177,7 @@ class _FriendsMarkerLayerState extends State<FriendsMarkerLayer>
               width: 110,
               height: 110,
               alignment: .center,
-              child: AppPressable(
-                key: ValueKey(friend.userId),
-                behavior: HitTestBehavior.deferToChild,
-                onTap: () => widget.onFriendTap(friend),
-                semanticsLabel: friendMarkerSemanticsLabel(
-                  friend,
-                  context.l10n,
-                ),
-                child: RepaintBoundary(child: FriendMarker(friend: friend)),
-              ),
+              child: _markerChild(friend),
             ),
       ],
     );

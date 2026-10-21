@@ -66,6 +66,10 @@ class _MapVolumeLayerState extends State<MapVolumeLayer> {
   late List<_VolumePlace> _features;
   late List<_VolumePlace> _overviewFeatures;
   late List<(Offset, double)> _routeMarkers;
+  List<RoomModel> _indexedRooms = const [];
+  List<MapPlaceData> _indexedPlaces = const [];
+  List<MapNavigationLandmark> _indexedLandmarks = const [];
+  Set<String> _indexedSyntheticIds = const {};
   late final ValueNotifier<MapVolumeProjection> _projection;
   late final ValueNotifier<Matrix4> _ground;
 
@@ -97,6 +101,10 @@ class _MapVolumeLayerState extends State<MapVolumeLayer> {
   }
 
   void _index() {
+    _indexedRooms = List.of(widget.rooms);
+    _indexedPlaces = List.of(widget.places);
+    _indexedLandmarks = List.of(widget.navigationLandmarks);
+    _indexedSyntheticIds = Set.of(widget.syntheticRoomIds);
     final places = {for (final place in widget.places) place.id: place};
     final represented = <String>{};
     _features = [
@@ -175,10 +183,10 @@ class _MapVolumeLayerState extends State<MapVolumeLayer> {
         floorSize: widget.floorSize,
       );
     }
-    if (!identical(widget.rooms, oldWidget.rooms) ||
-        !identical(widget.places, oldWidget.places) ||
-        !identical(widget.navigationLandmarks, oldWidget.navigationLandmarks) ||
-        !identical(widget.syntheticRoomIds, oldWidget.syntheticRoomIds) ||
+    if (!listEquals(widget.rooms, _indexedRooms) ||
+        !listEquals(widget.places, _indexedPlaces) ||
+        !listEquals(widget.navigationLandmarks, _indexedLandmarks) ||
+        !setEquals(widget.syntheticRoomIds, _indexedSyntheticIds) ||
         widget.floorSize != oldWidget.floorSize) {
       _index();
     }
@@ -193,7 +201,13 @@ class _MapVolumeLayerState extends State<MapVolumeLayer> {
       _indexRouteMarkers();
     }
     if (widget.hitIndex != oldWidget.hitIndex) oldWidget.hitIndex?.clear();
-    _cameraChanged();
+    if (widget.transform != oldWidget.transform ||
+        widget.viewportSize != oldWidget.viewportSize ||
+        widget.bearing != oldWidget.bearing ||
+        widget.pitch != oldWidget.pitch ||
+        widget.pivot != oldWidget.pivot) {
+      _cameraChanged();
+    }
   }
 
   @override

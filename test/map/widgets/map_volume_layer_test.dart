@@ -16,6 +16,77 @@ import '../../gallery/gallery_fonts.dart';
 
 void main() {
   setUpAll(loadGalleryFonts);
+  testWidgets(
+    'unchanged 3D updates preserve painters and camera invalidation',
+    (
+      tester,
+    ) async {
+      final transform = TransformationController();
+      addTearDown(transform.dispose);
+      final layers = _layers('');
+      final places = [_place('one', 'room', '101', const Offset(30, 40))];
+      var version = 0;
+      var bearing = 0.0;
+      late StateSetter update;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              update = setState;
+              return MapVolumeLayer(
+                key: const ValueKey('volume'),
+                floorSize: const Size(1000, 1000),
+                viewportSize: const Size(320, 200),
+                layers: layers,
+                rooms: const [],
+                places: places,
+                transform: transform,
+                bearing: bearing,
+              );
+            },
+          ),
+        ),
+      );
+      final painted = find.descendant(
+        of: find.byType(MapVolumeLayer),
+        matching: find.byType(CustomPaint),
+      );
+      final painters = tester
+          .widgetList<CustomPaint>(painted)
+          .map((paint) => paint.painter!)
+          .toList();
+      var invalidations = 0;
+      void invalidated() => invalidations++;
+      for (final painter in painters) {
+        painter.addListener(invalidated);
+        addTearDown(() => painter.removeListener(invalidated));
+      }
+      update(() => version++);
+      await tester.pump();
+      expect(version, 1);
+      final updated = tester
+          .widgetList<CustomPaint>(painted)
+          .map((paint) => paint.painter!)
+          .toList();
+      expect(invalidations, 0);
+      for (var index = 0; index < painters.length; index++) {
+        expect(updated[index].shouldRepaint(painters[index]), isFalse);
+      }
+      places[0] = _place('new', 'cafeteria', 'Cafe', const Offset(30, 40));
+      update(() => version++);
+      await tester.pump();
+      final changed = tester
+          .widgetList<CustomPaint>(painted)
+          .map((paint) => paint.painter!)
+          .toList();
+      expect(changed.first.shouldRepaint(updated.first), isTrue);
+      update(() => bearing = .4);
+      await tester.pump();
+      expect(invalidations, greaterThan(0));
+      expect(tester.takeException(), isNull);
+    },
+  );
   test(
     'ground projection round trips rotation, pitch, pan and off-centre pivot',
     () {

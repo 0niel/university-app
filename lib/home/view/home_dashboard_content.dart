@@ -2,44 +2,35 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:app_ui/app_ui.dart';
-import 'package:community_repository/community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:promo_repository/promo_repository.dart';
-import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
-import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/community/cubit/deadlines/deadlines.dart';
 import 'package:rtu_mirea_app/community/view/deadlines/add_deadline_sheet.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/home/cubit/home_cubit.dart';
-import 'package:rtu_mirea_app/home/cubit/home_gamification_cubit.dart';
 import 'package:rtu_mirea_app/home/cubit/home_identity_cubit.dart';
-import 'package:rtu_mirea_app/home/cubit/home_stories_cubit.dart';
 import 'package:rtu_mirea_app/home/view/home_dashboard_metrics.dart';
+import 'package:rtu_mirea_app/home/view/home_dashboard_quick_actions.dart';
+import 'package:rtu_mirea_app/home/view/home_dashboard_status_strip.dart';
+import 'package:rtu_mirea_app/home/view/home_dashboard_stories.dart';
+import 'package:rtu_mirea_app/home/view/home_dashboard_top_row.dart';
+import 'package:rtu_mirea_app/home/view/home_dashboard_trending.dart';
 import 'package:rtu_mirea_app/home/view/home_day_lessons.dart';
 import 'package:rtu_mirea_app/home/view/home_labels.dart';
 import 'package:rtu_mirea_app/home/view/sheets/sheets.dart';
 import 'package:rtu_mirea_app/home/view/widgets/widgets.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/navigation/routes/routes.dart';
-import 'package:rtu_mirea_app/notifications/notifications.dart';
 import 'package:rtu_mirea_app/profile/cubit/ui_preferences_cubit.dart';
 import 'package:rtu_mirea_app/promo/promo.dart';
 import 'package:rtu_mirea_app/schedule/schedule.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
 import 'package:rtu_mirea_app/search/search.dart';
-import 'package:rtu_mirea_app/services/services.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:rtu_mirea_app/teacher_account/widgets/teacher_account_shortcut.dart';
-import 'package:rtu_mirea_app/top_discussions/top_discussions.dart';
-import 'package:rtu_mirea_app/top_discussions/view/discourse_topic_utils.dart';
 import 'package:schedule_repository/schedule_repository.dart';
-
-void _openTopic(BuildContext context, DiscourseTopic topic) {
-  final forumUrl = context.read<UniversityConfig>().communityForumUrl;
-  unawaited(openDiscourseTopic(forumUrl, topic.id));
-}
 
 class HomeDashboardContent extends StatelessWidget {
   const HomeDashboardContent({
@@ -61,9 +52,7 @@ class HomeDashboardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
     final config = context.read<UniversityConfig>();
-    final user = context.watch<AppBloc>().state.user;
     final persona = context.watch<AccountPersonaCubit?>()?.state;
     final isTeacher = persona?.isTeacher == true;
     final identityCubit = context.watch<HomeIdentityCubit?>();
@@ -91,8 +80,14 @@ class HomeDashboardContent extends StatelessWidget {
         target != null && changesCubit.matchesTarget(target.$1, target.$2)
         ? changesCubit.state.changes
         : const <ScheduleChange>[];
+    final lessonsByDay = <DateTime, List<LessonSchedulePart>>{};
+    List<LessonSchedulePart> lessonsForDay(DateTime day) =>
+        lessonsByDay.putIfAbsent(
+          DateUtils.dateOnly(day),
+          () => homeLessonsForDay(schedule, day),
+        );
     final days = homeWeekDays(selectedDay);
-    final lessons = homeLessonsForDay(schedule, selectedDay);
+    final lessons = lessonsForDay(selectedDay);
     final entries = homeDayEntries(
       day: selectedDay,
       lessons: lessons,
@@ -111,40 +106,8 @@ class HomeDashboardContent extends StatelessWidget {
     final deadlines = context.watch<DeadlinesCubit>().state;
     final active = [...deadlines.activeDeadlines]
       ..sort((a, b) => a.dueAt.compareTo(b.dueAt));
-    final profile = context.watch<HomeGamificationCubit>().state;
-    final categoriesState = context.watch<CategoriesBloc>().state;
-    final sources = categoriesState.sources;
-    final sourcesLoading =
-        categoriesState.status == CategoriesStatus.initial ||
-        categoriesState.status == CategoriesStatus.loading;
     final preferences = context.watch<UiPreferencesCubit>().state;
-    final favorites = context.watch<FavoriteServicesCubit>().state;
-    final catalogState = context.watch<ServiceCatalogCubit>().state;
-    final catalog = catalogState.catalog;
-    final quickActionsLoading = !favorites.loaded || catalogState.isLoading;
-    final services = ServicesDirectory.orderedEntries(
-      ServicesDirectory.sections(
-        context,
-        config: config,
-        catalog: catalog,
-      ).expand((section) => section.entries),
-      favorites.ids,
-    );
-    final notificationState = context.watch<NotificationsCubit>().state;
-    final notifications = buildNotificationFeed(
-      l10n: l10n,
-      pushes: notificationState.pushes,
-      changes: changes,
-    );
     final exam = homeNextExam(schedule, now);
-    final examState = context.watch<ExamReadinessCubit>().state;
-    final readiness =
-        exam != null &&
-            examState.entries.any(
-              (entry) => entry.subjectName == exam.lesson.subject,
-            )
-        ? examState.readinessFor(exam.lesson.subject)
-        : null;
     final tomorrow = DateUtils.dateOnly(now).add(const Duration(days: 1));
     final dayLabel = DateUtils.isSameDay(selectedDay, now)
         ? l10n.today
@@ -153,7 +116,6 @@ class HomeDashboardContent extends StatelessWidget {
       AppSpacing.screenTop,
       MediaQuery.paddingOf(context).top + 12,
     );
-    final showCoach = !context.watch<HomeCubit>().state.searchCoachShown;
     void open(HomeLessonEntry entry) => unawaited(
       ScheduleDetailsRoute(
         $extra: (entry.lesson, DateUtils.dateOnly(entry.start)),
@@ -194,23 +156,12 @@ class HomeDashboardContent extends StatelessWidget {
                   ),
                 ),
               inset(
-                HomeTopRow(
+                HomeDashboardTopRow(
                   userName: userName,
-                  photoUrl: user.photo,
-                  level: profile?.isEmpty == false ? profile?.level : null,
                   now: now,
-                  dotColor: switch (kind) {
-                    HomeHeroKind.during => colors.accent,
-                    HomeHeroKind.pause => colors.lecture,
-                    HomeHeroKind.before ||
-                    HomeHeroKind.done ||
-                    HomeHeroKind.other ||
-                    HomeHeroKind.free => colors.muted2,
-                  },
+                  kind: kind,
                   searchKey: searchKey,
-                  unreadCount: notificationState.unreadCount(
-                    notifications.map((item) => item.id),
-                  ),
+                  changes: changes,
                 ),
               ),
               inset(
@@ -242,32 +193,25 @@ class HomeDashboardContent extends StatelessWidget {
                   0,
                 ),
               ),
-              HomeStoriesRail(
-                sources: sources,
-                seenSourceIds: context.watch<HomeStoriesCubit>().state,
-                onSourceOpened: context.read<HomeStoriesCubit>().markSeen,
-                loading: sourcesLoading,
-              ),
+              const HomeDashboardStories(),
               HomeWeekPills(
                 days: days,
                 selectedIndex: days.indexWhere(
                   (day) => DateUtils.isSameDay(day, selectedDay),
                 ),
                 today: now,
-                onLessonCountForDay: (day) =>
-                    homeLessonsForDay(schedule, day).length,
+                onLessonCountForDay: (day) => lessonsForDay(day).length,
                 onLessonColorsForDay: (day) => [
-                  for (final lesson in homeLessonsForDay(schedule, day))
+                  for (final lesson in lessonsForDay(day))
                     lessonAccentOf(context, lesson),
                 ],
                 lessonCounts: [
-                  for (final day in days)
-                    homeLessonsForDay(schedule, day).length,
+                  for (final day in days) lessonsForDay(day).length,
                 ],
                 lessonColors: [
                   for (final day in days)
                     [
-                      for (final lesson in homeLessonsForDay(schedule, day))
+                      for (final lesson in lessonsForDay(day))
                         lessonAccentOf(context, lesson),
                     ],
                 ],
@@ -324,7 +268,7 @@ class HomeDashboardContent extends StatelessWidget {
                           HomeHero(
                             entries: entries,
                             kind: kind,
-                            tomorrow: homeLessonsForDay(schedule, tomorrow),
+                            tomorrow: lessonsForDay(tomorrow),
                             now: now,
                             deadline: active.firstOrNull,
                             onOpen: open,
@@ -360,12 +304,10 @@ class HomeDashboardContent extends StatelessWidget {
                 ),
               Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.lg),
-                child: HomeStatusStrip(
+                child: HomeDashboardStatusStrip(
                   deadlines: deadlines.deadlines,
-                  profile: profile,
                   now: now,
                   exam: isTeacher ? null : exam,
-                  readiness: isTeacher ? null : readiness,
                   onProfile: () => const ProfileRoute().go(context),
                   onDeadlines: openDeadlines,
                   onExam: () => const ScheduleSessionRoute().go(context),
@@ -384,11 +326,7 @@ class HomeDashboardContent extends StatelessWidget {
               ),
               if (preferences.isSectionEnabled(HomeSection.smartChips))
                 inset(
-                  HomeQuickActions(
-                    services: services,
-                    onAll: () => const ServicesRoute().go(context),
-                    loading: quickActionsLoading,
-                  ),
+                  const HomeDashboardQuickActions(),
                 ),
               if (preferences.isSectionEnabled(HomeSection.deadlines))
                 inset(
@@ -410,14 +348,7 @@ class HomeDashboardContent extends StatelessWidget {
                 ),
               if (preferences.isSectionEnabled(HomeSection.trending))
                 inset(
-                  HomeTrendingGroup(
-                    state: context.watch<DiscourseBloc>().state,
-                    onAll: () => const CommunitiesRoute().go(context),
-                    onOpen: (topic) => _openTopic(context, topic),
-                    onRetry: () => context.read<DiscourseBloc>().add(
-                      const DiscourseTopTopicsRequested(),
-                    ),
-                  ),
+                  const HomeDashboardTrending(),
                 ),
               PromoBannerSlot(
                 placement: PromoPlacement.home,
@@ -432,13 +363,18 @@ class HomeDashboardContent extends StatelessWidget {
               ),
             ],
           ),
-          if (showCoach)
-            Positioned.fill(
-              child: SearchCoachOverlay(
-                anchorKey: searchKey,
-                onDismiss: () => context.read<HomeCubit>().dismissSearchCoach(),
-              ),
+          Positioned.fill(
+            child: BlocSelector<HomeCubit, HomeState, bool>(
+              selector: (homeState) => homeState.searchCoachShown,
+              builder: (context, shown) => shown
+                  ? const SizedBox.shrink()
+                  : SearchCoachOverlay(
+                      anchorKey: searchKey,
+                      onDismiss: () =>
+                          context.read<HomeCubit>().dismissSearchCoach(),
+                    ),
             ),
+          ),
         ],
       ),
     );

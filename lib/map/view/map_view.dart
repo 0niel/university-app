@@ -17,8 +17,10 @@ import 'package:rtu_mirea_app/map/models/models.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
 import 'package:rtu_mirea_app/map/services/map_navigation_preparation.dart';
+import 'package:rtu_mirea_app/map/services/map_render_snapshot.dart';
 import 'package:rtu_mirea_app/map/services/map_route_destinations.dart';
 import 'package:rtu_mirea_app/map/services/room_key.dart';
+import 'package:rtu_mirea_app/map/widgets/map_activity_listener.dart';
 import 'package:rtu_mirea_app/map/widgets/map_edit_menu.dart';
 import 'package:rtu_mirea_app/map/widgets/map_floor_alignment_page.dart';
 import 'package:rtu_mirea_app/map/widgets/map_geographic_view.dart';
@@ -57,6 +59,8 @@ class _MapViewState extends State<MapView> {
   );
   final _query = TextEditingController();
   Timer? _clock;
+  final _renderSnapshot = MapRenderSnapshot();
+  DateTime _lastRoomRefresh = DateTime.now();
   String? _pendingRoom;
   String? _pendingPlaceId;
   String? _routeStartRoomId;
@@ -106,10 +110,23 @@ class _MapViewState extends State<MapView> {
     _mapController = widget.mapController ?? SvgInteractiveMapController();
     _panelController.addListener(_panelChanged);
     _query.text = context.read<FreeRoomsCubit>().state.query;
-    _clock = Timer.periodic(const Duration(minutes: 1), (_) {
+  }
+
+  void _activityChanged(bool active) {
+    _clock?.cancel();
+    _clock = null;
+    if (!active) return;
+    void refresh() {
       if (!mounted) return;
+      _lastRoomRefresh = DateTime.now();
       unawaited(context.read<FreeRoomsCubit>().load());
-    });
+    }
+
+    if (DateTime.now().difference(_lastRoomRefresh) >=
+        const Duration(minutes: 1)) {
+      refresh();
+    }
+    _clock = Timer.periodic(const Duration(minutes: 1), (_) => refresh());
   }
 
   @override
@@ -171,9 +188,11 @@ class _MapViewState extends State<MapView> {
   }
 
   void _queryChanged(String value) {
-    context.read<FreeRoomsCubit>().queryChanged(value);
-    if (value.trim().isNotEmpty && _panelController.isAttached) {
-      _panelController.jumpTo(.78);
+    final cubit = context.read<FreeRoomsCubit>();
+    final hadQuery = cubit.state.query.trim().isNotEmpty;
+    cubit.queryChanged(value);
+    if (!hadQuery && value.trim().isNotEmpty && _panelController.isAttached) {
+      _animatePanel(.78);
     }
   }
 
@@ -586,12 +605,7 @@ class _MapViewState extends State<MapView> {
   }
 
   List<List<Offset>> _routeSegments(String floorId) {
-    final route = _route;
-    if (route == null) return const [];
-    return [
-      for (final segment in route.segmentsForFloor(floorId))
-        [for (final node in segment.nodes) Offset(node.x, node.y)],
-    ];
+    return _renderSnapshot.segmentsForFloor(_route, floorId);
   }
 
   void _more() {
@@ -1151,7 +1165,12 @@ class _MapViewState extends State<MapView> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => MapActivityListener(
+    onChanged: _activityChanged,
+    child: _buildMap(context),
+  );
+
+  Widget _buildMap(BuildContext context) => Scaffold(
     backgroundColor: context.colors.canvas,
     body: BlocConsumer<MapBloc, MapState>(
       listener: (_, state) => _mapStateChanged(state),
@@ -1219,11 +1238,10 @@ class _MapViewState extends State<MapView> {
                     showRouteDestination:
                         _route?.nodes.lastOrNull?.floorId == floor.id,
                     routeInstructionPoint: _routeInstructionPoint(floor.id),
-                    places: [
-                      for (final place
-                          in state.campusData?.rooms ?? <MapPlaceData>[])
-                        if (place.floorId == floor.id) place,
-                    ],
+                    places: _renderSnapshot.placesForFloor(
+                      state.campusData,
+                      floor.id,
+                    ),
                     onRoomTap: _openMappedRoom,
                     viewportPadding: _mapViewportPadding.value,
                     viewportPaddingListenable: _mapViewportPadding,
@@ -1256,7 +1274,12 @@ class _MapViewState extends State<MapView> {
                           ),
                           if (_route != null && _routePanelWidth == 0)
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                8,
+                                20,
+                                0,
+                              ),
                               child: _routeOverlay(state),
                             ),
                         ],
@@ -1283,7 +1306,10 @@ class _MapViewState extends State<MapView> {
                         left: AppSpacing.lg,
                         top: _viewportTop + AppSpacing.sm,
                         width: _routePanelWidth,
-                        child: _routeOverlay(state, maxHeight: availableHeight),
+                        child: _routeOverlay(
+                          state,
+                          maxHeight: availableHeight,
+                        ),
                       );
                     },
                   ),

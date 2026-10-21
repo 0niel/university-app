@@ -43,7 +43,13 @@ void main() {
       expect(overlay.color.a, greaterThan(.9));
       expect(overlay.color.a, greaterThan(navigation.color.a));
       expect(navigation.color.a, greaterThan(control.color.a));
-      for (final surface in [content, control, pinned, navigation, overlay]) {
+      for (final surface in [
+        content,
+        control,
+        pinned,
+        navigation,
+        overlay,
+      ]) {
         expect(surface.specular, AppGlassStyle.rim);
       }
     }
@@ -180,7 +186,7 @@ void main() {
     for (final lens in lenses) {
       expect(lens.color!.a, greaterThan(.97));
       expect(lens.specular, AppGlassStyle.rim);
-      expect(lens.glow, AppGlassStyle.glow);
+      expect(lens.glow, const LiquidGlassLight.glow(thickness: 0));
     }
     expect(lenses.first.blur, 0);
     final highlight = lenses.last.color!;

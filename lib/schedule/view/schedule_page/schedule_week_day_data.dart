@@ -14,6 +14,7 @@ class ScheduleWeekDayData {
     required SchedulePreferencesState preferences,
     required ScheduleDisplayState display,
     required List<UserActivity> activities,
+    List<CalendarSchedulePart>? calendarEvents,
   }) {
     final lessons = visibleLessonsForDay(
       schedule: schedule,
@@ -35,7 +36,8 @@ class ScheduleWeekDayData {
       if (slot != null) dayActivities.add((activity, slot));
     }
     final events = <(CalendarSchedulePart, LessonBellSlotConfig)>[];
-    for (final event in schedule.whereType<CalendarSchedulePart>()) {
+    for (final event
+        in calendarEvents ?? schedule.whereType<CalendarSchedulePart>()) {
       final start = event.startsAt;
       final end = event.endsAt;
       if (event.isAllDay ||

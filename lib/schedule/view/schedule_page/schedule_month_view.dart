@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
+import 'package:rtu_mirea_app/schedule/utils/schedule_date_index.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_status.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/lesson_text.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_calendar_notice.dart';
@@ -21,6 +22,7 @@ class ScheduleMonthView extends StatelessWidget {
     this.display = const ScheduleDisplayState(),
     this.changes = const [],
     this.activities = const [],
+    this.dateIndex,
     super.key,
   });
 
@@ -33,8 +35,14 @@ class ScheduleMonthView extends StatelessWidget {
   final ScheduleDisplayState display;
   final List<ScheduleChange> changes;
   final List<UserActivity> activities;
+  final ScheduleDateIndex? dateIndex;
 
-  List<(String, Color, bool)> _markers(BuildContext context, DateTime date) => [
+  List<(String, Color, bool)> _markers(
+    BuildContext context,
+    DateTime date,
+    DateTime currentTime,
+    ScheduleDateIndex index,
+  ) => [
     if (scheduleSpecialDay(date))
       (scheduleDayLabel(context, date), context.colors.warn, false),
     for (final activity in activities)
@@ -44,43 +52,48 @@ class ScheduleMonthView extends StatelessWidget {
           (display.showPast ||
               (activity.endsAt ??
                       activity.startsAt.add(const Duration(hours: 1)))
-                  .isAfter(now ?? DateTime.now())))
+                  .isAfter(currentTime)))
         (activity.title, context.colors.ink, true),
-    for (final part in schedule)
-      if (part.dates.any((selectedDate) => isSameDate(selectedDate, date)))
-        if (part is HolidaySchedulePart)
-          (part.title, context.colors.warn, false)
-        else if (part is CalendarSchedulePart &&
-            (display.showPast ||
-                (part.endsAt ??
-                        (part.isAllDay || part.startsAt == null
-                            ? date.add(const Duration(days: 1))
-                            : part.startsAt!.add(const Duration(hours: 1))))
-                    .isAfter(now ?? DateTime.now())))
-          (part.title, context.colors.accent, true),
+    for (final part in index.partsForDay(date))
+      if (part is HolidaySchedulePart)
+        (part.title, context.colors.warn, false)
+      else if (part is CalendarSchedulePart &&
+          (display.showPast ||
+              (part.endsAt ??
+                      (part.isAllDay || part.startsAt == null
+                          ? date.add(const Duration(days: 1))
+                          : part.startsAt!.add(const Duration(hours: 1))))
+                  .isAfter(currentTime)))
+        (part.title, context.colors.accent, true),
   ];
-
-  List<LessonSchedulePart> _lessons(DateTime date) => visibleLessonsForDay(
-    schedule: schedule,
-    day: date,
-    now: now ?? DateTime.now(),
-    preferences: preferences,
-    display: display,
-    changes: changes,
-  );
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
     final locale = Localizations.localeOf(context).toString();
+    final currentTime = now ?? DateTime.now();
+    final index = dateIndex ?? ScheduleDateIndex(schedule);
+    final dailyLessons = <DateTime, List<LessonSchedulePart>>{};
+    List<LessonSchedulePart> lessonsOn(DateTime date) =>
+        dailyLessons.putIfAbsent(
+          date,
+          () => visibleLessonsForDay(
+            schedule: index.partsForDay(date),
+            day: date,
+            now: currentTime,
+            preferences: preferences,
+            display: display,
+            changes: changes,
+          ),
+        );
     final start = DateTime(day.year, day.month);
     final end = DateTime(day.year, day.month + 1);
     final gridStart = weekStartFor(start);
     final cells = ((end.difference(gridStart).inDays + 6) ~/ 7) * 7;
     final all = <LessonSchedulePart>[];
     for (var d = start; d.isBefore(end); d = d.add(const Duration(days: 1))) {
-      final lessons = _lessons(d);
+      final lessons = lessonsOn(d);
       all.addAll(lessons);
     }
     return Column(
@@ -162,14 +175,16 @@ class ScheduleMonthView extends StatelessWidget {
                               Duration(days: row * 7 + column),
                             ),
                             selected: day,
-                            now: now ?? DateTime.now(),
+                            now: currentTime,
                             month: day.month,
-                            lessons: _lessons(
+                            lessons: lessonsOn(
                               gridStart.add(Duration(days: row * 7 + column)),
                             ),
                             markers: _markers(
                               context,
                               gridStart.add(Duration(days: row * 7 + column)),
+                              currentTime,
+                              index,
                             ),
                             onTap: onDay,
                           ),

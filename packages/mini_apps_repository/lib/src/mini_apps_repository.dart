@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:mini_apps_repository/src/mini_app_decoder.dart';
 import 'package:mini_apps_repository/src/mini_apps_failures.dart';
 import 'package:mini_apps_repository/src/models/models.dart';
 import 'package:storage/storage.dart';
@@ -132,7 +133,7 @@ class MiniAppsRepository {
         params: {'p_organization_id': _organizationId, 'p_slug': slug},
       );
       if (res is! Map) return null;
-      return MiniApp.fromJson(res.cast<String, dynamic>());
+      return MiniAppDecoder.decode(res);
     } on Exception catch (error, stackTrace) {
       Error.throwWithStackTrace(GetMiniAppFailure(error), stackTrace);
     }
@@ -805,7 +806,7 @@ class MiniAppsRepository {
     if (res is! List) return const [];
     return res
         .whereType<Map<Object?, Object?>>()
-        .map((e) => MiniApp.fromJson(e.cast<String, dynamic>()))
+        .map(MiniAppDecoder.decode)
         .toList();
   }
 }

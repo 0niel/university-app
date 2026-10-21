@@ -80,6 +80,46 @@ void main() {
   });
 
   group('FriendMarker', () {
+    testWidgets('gliding positions reuse avatar and interaction children', (
+      tester,
+    ) async {
+      var friend = _friendAt(latitude: 55.67, longitude: 37.48);
+      late StateSetter update;
+      await tester.pumpWidget(
+        _wrap(
+          StatefulBuilder(
+            builder: (context, setState) {
+              update = setState;
+              return FlutterMap(
+                options: const MapOptions(
+                  initialCenter: LatLng(55.67, 37.48),
+                  initialZoom: 15,
+                ),
+                children: [
+                  FriendsMarkerLayer(friends: [friend], onFriendTap: (_) {}),
+                ],
+              );
+            },
+          ),
+          disableAnimations: false,
+        ),
+      );
+      update(() => friend = friend.copyWith(latitude: 55.671));
+      await tester.pump();
+      final initial = tester
+          .widget<MarkerLayer>(find.byType(MarkerLayer))
+          .markers
+          .single;
+      await tester.pump(const Duration(milliseconds: 250));
+      final moving = tester
+          .widget<MarkerLayer>(find.byType(MarkerLayer))
+          .markers
+          .single;
+      expect(moving.point, isNot(initial.point));
+      expect(moving.child, same(initial.child));
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(tester.takeException(), isNull);
+    });
     testWidgets('draws a borderless surface bubble with a name pill', (
       tester,
     ) async {

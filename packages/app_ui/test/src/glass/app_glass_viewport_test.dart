@@ -1,10 +1,128 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_lens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 void main() {
+  testWidgets(
+    'IME metrics preserve the full lens widget and scaled foreground',
+    (
+      tester,
+    ) async {
+      tester.view
+        ..physicalSize = const Size(1233, 2670)
+        ..devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      final media = ValueNotifier(
+        const MediaQueryData(size: Size(411, 890), devicePixelRatio: 3),
+      );
+      final text = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(media.dispose);
+      addTearDown(text.dispose);
+      addTearDown(focus.dispose);
+      late MediaQueryData foreground;
+      await tester.pumpWidget(
+        _viewportHost(
+          media,
+          Builder(
+            builder: (context) {
+              foreground = MediaQuery.of(context);
+              return SizedBox(
+                width: 240,
+                height: 80,
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: TextField(controller: text, focusNode: focus),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Draft');
+      final lens = find.byType(LiquidGlassLens);
+      final originalWidget = tester.widget<LiquidGlassLens>(lens);
+      final originalElement = tester.element(lens);
+      final originalField = tester.element(find.byType(TextField));
+      const scale = 411 / 390;
+      for (final inset in [80.0, 160.0, 240.0, 320.0, 160.0, 0.0]) {
+        tester.view.viewInsets = FakeViewPadding(bottom: inset * 3);
+        media.value = media.value.copyWith(
+          viewInsets: EdgeInsets.only(bottom: inset),
+        );
+        await tester.pump();
+        expect(tester.widget<LiquidGlassLens>(lens), same(originalWidget));
+        expect(tester.element(lens), same(originalElement));
+        expect(tester.element(find.byType(TextField)), same(originalField));
+        final shader = _shaderMedia(tester, lens);
+        expect(shader.size, const Size(411, 890));
+        expect(shader.devicePixelRatio, 3);
+        expect(shader.viewInsets.bottom, inset);
+        expect(foreground.viewInsets.bottom, closeTo(inset / scale, .001));
+        expect(foreground.devicePixelRatio, closeTo(3 * scale, .001));
+        expect(text.text, 'Draft');
+        expect(focus.hasFocus, isTrue);
+        expect(tester.takeException(), isNull);
+      }
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'physical lens viewport follows resizing and inherited preferences',
+    (
+      tester,
+    ) async {
+      tester.view
+        ..physicalSize = const Size(1233, 2670)
+        ..devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      final media = ValueNotifier(
+        const MediaQueryData(size: Size(411, 890), devicePixelRatio: 3),
+      );
+      addTearDown(media.dispose);
+      await tester.pumpWidget(
+        _viewportHost(media, const SizedBox(width: 240, height: 80)),
+      );
+      await tester.pumpAndSettle();
+      final lens = find.byType(LiquidGlassLens);
+      final original = tester.widget<LiquidGlassLens>(lens);
+      for (final (pixels, ratio) in [
+        (const Size(2790, 1260), 3.0),
+        (const Size(2790, 1260), 2.0),
+      ]) {
+        tester.view
+          ..physicalSize = pixels
+          ..devicePixelRatio = ratio;
+        media.value = media.value.copyWith(
+          size: pixels / ratio,
+          devicePixelRatio: ratio,
+          platformBrightness: Brightness.dark,
+          textScaler: const TextScaler.linear(1.4),
+          disableAnimations: true,
+          accessibleNavigation: true,
+          highContrast: true,
+        );
+        await tester.pump();
+        expect(tester.widget<LiquidGlassLens>(lens), same(original));
+        final shader = _shaderMedia(tester, lens);
+        expect(shader.size, pixels / ratio);
+        expect(shader.devicePixelRatio, ratio);
+        expect(shader.platformBrightness, Brightness.dark);
+        expect(shader.textScaler.scale(10), 14);
+        expect(shader.disableAnimations, isTrue);
+        expect(shader.accessibleNavigation, isTrue);
+        expect(shader.highContrast, isTrue);
+        expect(tester.takeException(), isNull);
+      }
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
   testWidgets(
     'state changes hide the old glass and keep the new action usable',
     (tester) async {
@@ -128,3 +246,32 @@ void main() {
     );
   }
 }
+
+Widget _viewportHost(ValueNotifier<MediaQueryData> media, Widget child) =>
+    MaterialApp(
+      theme: AppTheme.darkTheme,
+      home: ValueListenableBuilder(
+        valueListenable: media,
+        builder: (context, value, child) =>
+            MediaQuery(data: value, child: child!),
+        child: AppScale(
+          child: Center(
+            child: AppGlassLens(
+              style: AppGlassStyle.surface(
+                colors: AppColors.dark,
+                radius: 24,
+                tone: AppGlassTone.regular,
+                highContrast: false,
+                role: AppGlassRole.control,
+              ),
+              borderRadius: 24,
+              fallbackColor: Colors.black,
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+
+MediaQueryData _shaderMedia(WidgetTester tester, Finder lens) =>
+    tester.element(lens).getInheritedWidgetOfExactType<MediaQuery>()!.data;

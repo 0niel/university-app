@@ -44,6 +44,7 @@ class OnboardingGroupStep extends StatefulWidget {
 class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
   late final TextEditingController _controller;
   late final SearchBloc _searchBloc;
+  late String _query;
   Group? _selected;
   var _edited = false;
 
@@ -51,6 +52,7 @@ class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialQuery);
+    _query = _controller.text;
     _selected = widget.initialSelected;
     _searchBloc = SearchBloc(scheduleRepository: context.read());
     _controller.addListener(_onQueryChanged);
@@ -63,6 +65,7 @@ class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
     if (_edited) return;
     _selected = widget.initialSelected;
     if (_controller.text != widget.initialQuery) {
+      _query = widget.initialQuery;
       _controller
         ..removeListener(_onQueryChanged)
         ..text = widget.initialQuery
@@ -84,13 +87,17 @@ class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
       _searchBloc.add(SearchQueryChanged(searchQuery: _controller.text));
 
   void _onQueryChanged() {
+    final query = _controller.text;
+    if (query == _query) return;
+    _query = query;
     _edited = true;
-    widget.onQueryChanged(_controller.text);
     final selected = _selected;
-    if (selected != null && selected.name != _controller.text.trim()) {
-      setState(() => _selected = null);
-      widget.onSelected(null);
-    }
+    final clearSelected = selected != null && selected.name != query.trim();
+    setState(() {
+      if (clearSelected) _selected = null;
+    });
+    widget.onQueryChanged(query);
+    if (clearSelected) widget.onSelected(null);
     _search();
   }
 
@@ -108,12 +115,7 @@ class _OnboardingGroupStepState extends State<OnboardingGroupStep> {
   }
 
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
-    listenable: _controller,
-    builder: (context, _) => _buildContent(context),
-  );
-
-  Widget _buildContent(BuildContext context) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
     return BlocProvider.value(

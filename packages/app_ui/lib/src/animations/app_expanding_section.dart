@@ -74,7 +74,10 @@ class _AppExpandingSectionState extends State<AppExpandingSection>
         ignoring: !widget.expanded,
         child: ExcludeFocus(
           excluding: !widget.expanded,
-          child: FocusScope(node: _focusScope, child: widget.child),
+          child: TickerMode(
+            enabled: widget.expanded,
+            child: FocusScope(node: _focusScope, child: widget.child),
+          ),
         ),
       ),
     ),

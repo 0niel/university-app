@@ -31,6 +31,7 @@ class _SearchViewState extends State<SearchView> {
     super.initState();
     _query = _controller.text;
     _onQueryChanged = () {
+      if (_query == _controller.text) return;
       context.read<SearchBloc>().add(
         SearchQueryChanged(searchQuery: _controller.text),
       );

@@ -108,18 +108,15 @@ class _NinjaMarkPainter extends CustomPainter {
       return;
     }
 
-    // saveLayer so BlendMode.clear punches through the shuriken only,
-    // not whatever is painted beneath this widget.
-    final bounds = Offset.zero & size;
-    canvas
-      ..saveLayer(bounds, Paint())
-      ..drawPath(path, Paint()..color = color)
-      ..drawCircle(
-        Offset(size.width / 2, size.height / 2),
-        size.width * (3.4 / 32),
-        Paint()..blendMode = BlendMode.clear,
-      )
-      ..restore();
+    path
+      ..fillType = PathFillType.evenOdd
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(size.width / 2, size.height / 2),
+          radius: size.width * (3.4 / 32),
+        ),
+      );
+    canvas.drawPath(path, Paint()..color = color);
   }
 
   @override
