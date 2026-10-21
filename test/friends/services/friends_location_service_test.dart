@@ -203,18 +203,19 @@ void main() {
 
   test('stationary sharing obtains a fresh fix in background', () async {
     await useFastHeartbeat();
-    final received = <Position>[];
-    final subscription = service.positions.listen(received.add);
+    geolocator.currentResult = Completer<Position>();
+    final update = service.positions.first;
     await service.start(backgroundEnabled: true);
     service.didChangeAppLifecycleState(AppLifecycleState.paused);
     await geolocator.currentStarted.future.timeout(const Duration(seconds: 2));
-    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
     expect(geolocator.currentRequests, 1);
-    expect(received, hasLength(1));
+    final position = _position();
+    geolocator.currentResult!.complete(position);
+    expect(await update, same(position));
     await service.stop();
     await Future<void>.delayed(const Duration(milliseconds: 30));
     expect(geolocator.currentRequests, 1);
-    await subscription.cancel();
   });
 
   test('heartbeat result arriving after stop is discarded', () async {
