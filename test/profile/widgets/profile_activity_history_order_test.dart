@@ -49,7 +49,9 @@ void main() {
       final heatmap = find.byType(AppActivityHeatmap);
       final cells = find.descendant(
         of: heatmap,
-        matching: find.byType(Tooltip),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Semantics && widget.properties.tooltip != null,
+        ),
       );
       expect(cells, findsNWidgets(28));
       expect(
@@ -70,9 +72,21 @@ void main() {
       );
       final component = tester.widget<AppActivityHeatmap>(heatmap);
       expect(
-        tester.widgetList<Tooltip>(cells).map((cell) => cell.message),
-        contains(component.tooltipBuilder!(newest, ascending.last.count)),
+        tester
+            .widgetList<Semantics>(cells)
+            .map((cell) => cell.properties.tooltip),
+        orderedEquals([
+          for (final day in ascending)
+            component.tooltipBuilder!(day.day, day.count),
+        ]),
       );
+      final newestMessage = component.tooltipBuilder!(
+        newest,
+        ascending.last.count,
+      );
+      await tester.longPress(cells.last);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text(newestMessage), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }
@@ -115,12 +129,17 @@ void main() {
     await tester.pumpAndSettle();
 
     final heatmap = find.byType(AppActivityHeatmap);
-    final cells = tester.widgetList<Tooltip>(
-      find.descendant(of: heatmap, matching: find.byType(Tooltip)),
+    final cells = tester.widgetList<Semantics>(
+      find.descendant(
+        of: heatmap,
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Semantics && widget.properties.tooltip != null,
+        ),
+      ),
     );
     expect(cells.length, inInclusiveRange(70, 140));
     expect(
-      cells.map((cell) => cell.message),
+      cells.map((cell) => cell.properties.tooltip),
       contains(
         tester.widget<AppActivityHeatmap>(heatmap).tooltipBuilder!(newest, 5),
       ),
