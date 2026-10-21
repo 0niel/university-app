@@ -131,14 +131,14 @@ class _AppSheetSurface extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          Positioned.fill(
+          const Positioned.fill(
             bottom: -AppRadius.sheet,
             child: IgnorePointer(
               child: AppGlassSurface(
-                role: color.a == 1 ? AppGlassRole.sheet : AppGlassRole.overlay,
+                role: AppGlassRole.overlay,
                 borderRadius: AppRadius.sheet,
                 tone: AppGlassTone.subtle,
-                child: const SizedBox.expand(),
+                child: SizedBox.expand(),
               ),
             ),
           ),

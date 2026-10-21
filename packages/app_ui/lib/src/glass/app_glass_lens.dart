@@ -11,6 +11,12 @@ class AppGlassLens extends StatelessWidget {
     super.key,
   });
 
+  static const _transparentLiteGlow = LiquidGlassLight.glow(
+    thickness: 4,
+    intensity: .05,
+  );
+  static const _noGlow = LiquidGlassLight.glow(thickness: 0);
+
   final LiquidGlassStyle style;
   final Widget child;
   final double borderRadius;
@@ -28,7 +34,7 @@ class AppGlassLens extends StatelessWidget {
             style.shape ??
             LiquidGlassShape.roundedRectangle(cornerRadius: borderRadius),
         specular: style.specular,
-        glow: style.glow,
+        glow: style.glow == _transparentLiteGlow ? _noGlow : style.glow,
         blur: style.blur,
         magnification: style.magnification,
         color: style.color,

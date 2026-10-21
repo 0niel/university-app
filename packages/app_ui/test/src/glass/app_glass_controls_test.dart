@@ -19,7 +19,6 @@ void main() {
       final navigation = material(AppGlassRole.navigation);
       final pinned = material(AppGlassRole.pinned);
       final overlay = material(AppGlassRole.overlay);
-      final sheet = material(AppGlassRole.sheet);
       expect(content.liteGlass, isTrue);
       expect(content.refractionIndex, 1);
       expect(content.blur, 0);
@@ -42,11 +41,6 @@ void main() {
       expect(navigation.refractionIndex, lessThan(control.refractionIndex));
       expect(navigation.color.a, greaterThan(.8));
       expect(overlay.color.a, greaterThan(.9));
-      expect(sheet.liteGlass, isTrue);
-      expect(sheet.blur, 0);
-      expect(sheet.refractionIndex, 1);
-      expect(sheet.refractionWidth, 0);
-      expect(sheet.color, overlay.color);
       expect(overlay.color.a, greaterThan(navigation.color.a));
       expect(navigation.color.a, greaterThan(control.color.a));
       for (final surface in [
@@ -55,7 +49,6 @@ void main() {
         pinned,
         navigation,
         overlay,
-        sheet,
       ]) {
         expect(surface.specular, AppGlassStyle.rim);
       }
@@ -193,7 +186,7 @@ void main() {
     for (final lens in lenses) {
       expect(lens.color!.a, greaterThan(.97));
       expect(lens.specular, AppGlassStyle.rim);
-      expect(lens.glow, AppGlassStyle.glow);
+      expect(lens.glow, const LiquidGlassLight.glow(thickness: 0));
     }
     expect(lenses.first.blur, 0);
     final highlight = lenses.last.color!;

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/glass/app_glass_batch.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_control_surface.dart';
@@ -85,7 +86,7 @@ class AppInnerHeader extends StatelessWidget {
             ),
           );
           painter?.dispose();
-          return Row(
+          final header = Row(
             children: [
               if (onBack != null) ...[
                 AppPressable(
@@ -111,53 +112,57 @@ class AppInnerHeader extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
               ],
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: (titleStyle ?? AppText.displaySmall).copyWith(
-                        color: colors.ink,
-                      ),
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: AppSpacing.xs),
+                child: AppGlassBatch.exclude(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       Text(
-                        subtitle,
-                        style: AppText.caption.copyWith(color: colors.muted),
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: (titleStyle ?? AppText.displaySmall).copyWith(
+                          color: colors.ink,
+                        ),
                       ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          subtitle,
+                          style: AppText.caption.copyWith(color: colors.muted),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
               if (trailingLabel != null) ...[
                 const SizedBox(width: AppSpacing.md),
                 SizedBox(
                   width: trailingWidth,
-                  child: AppPressable(
-                    onTap: onTrailingLabelTap,
-                    semanticsLabel: trailingLabel,
-                    semanticsButton: onTrailingLabelTap != null,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 44),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: onTrailingLabelTap == null
-                              ? AppSpacing.zero
-                              : AppSpacing.xs,
-                        ),
-                        child: Center(
-                          child: Text(
-                            trailingLabel,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppText.sans(
-                              13,
-                              FontWeight.w500,
-                            ).copyWith(color: colors.muted),
+                  child: AppGlassBatch.exclude(
+                    child: AppPressable(
+                      onTap: onTrailingLabelTap,
+                      semanticsLabel: trailingLabel,
+                      semanticsButton: onTrailingLabelTap != null,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 44),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: onTrailingLabelTap == null
+                                ? AppSpacing.zero
+                                : AppSpacing.xs,
+                          ),
+                          child: Center(
+                            child: Text(
+                              trailingLabel,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppText.sans(
+                                13,
+                                FontWeight.w500,
+                              ).copyWith(color: colors.muted),
+                            ),
                           ),
                         ),
                       ),
@@ -175,6 +180,9 @@ class AppInnerHeader extends StatelessWidget {
               ],
             ],
           );
+          return controlTone == AppControlSurfaceTone.glass
+              ? AppGlassBatch(child: header)
+              : header;
         },
       ),
     );

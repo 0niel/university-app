@@ -242,19 +242,20 @@ void main() {
       expect(find.byType(AppGlassSurface), findsOneWidget);
     });
 
-    testWidgets('opaque sheet retains its rim without filtering its own fill', (
+    testWidgets('opaque sheet retains the original full lens lighting', (
       tester,
     ) async {
       usePhoneViewport(tester);
       await open(tester, title: 'Search');
 
-      expect(find.byType(LiquidGlassLens), findsNothing);
-      expect(tester.layers.whereType<BackdropFilterLayer>(), isEmpty);
-      final glass = tester.widget<LiquidGlassLite>(
-        find.byType(LiquidGlassLite),
+      final glass = tester.widget<LiquidGlassLens>(
+        find.byType(LiquidGlassLens),
       );
-      expect(glass.specular, AppGlassStyle.rim);
-      expect(glass.glow, AppGlassStyle.glow);
+      expect(glass.style.specular, AppGlassStyle.rim);
+      expect(glass.style.glow, AppGlassStyle.glow);
+      expect(glass.style.blur, 14);
+      expect(glass.style.refractionIndex, 1.004);
+      expect(glass.style.refractionWidth, 8);
       expect(tester.takeException(), isNull);
     });
 

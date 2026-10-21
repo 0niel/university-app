@@ -62,6 +62,40 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('excluded foreground keeps its own backdrop inside a batch', (
+    tester,
+  ) async {
+    int? foregroundId;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: AppGlassBatch(
+          child: Column(
+            children: [
+              surface('peer'),
+              AppGlassBatch.exclude(
+                child: Builder(
+                  builder: (context) {
+                    foregroundId = LiquidGlassBatch.backdropIdOf(context);
+                    return surface('excluded');
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(foregroundId, isNull);
+    expect(lensBackdrop(tester, 'peer'), isNotNull);
+    expect(lensBackdrop(tester, 'excluded'), isNotNull);
+    expect(
+      lensBackdrop(tester, 'excluded'),
+      isNot(lensBackdrop(tester, 'peer')),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('overlapping nested surfaces keep independent backdrop reads', (
     tester,
   ) async {

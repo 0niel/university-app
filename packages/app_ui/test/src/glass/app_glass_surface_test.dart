@@ -28,7 +28,7 @@ void main() {
         find.byType(LiquidGlassLite),
       );
       expect(glass.specular, AppGlassStyle.rim);
-      expect(glass.glow, AppGlassStyle.glow);
+      expect(glass.glow, const LiquidGlassLight.glow(thickness: 0));
       expect(glass.blur, 0);
       expect(glass.magnification, 1);
     }

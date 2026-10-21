@@ -72,7 +72,7 @@ void main() {
             expect(material.blur, 6);
             expect(material.magnification, 1);
             expect(material.specular, AppGlassStyle.rim);
-            expect(material.glow, AppGlassStyle.glow);
+            expect(material.glow, const LiquidGlassLight.glow(thickness: 0));
             expect(
               tester.layers.whereType<BackdropFilterLayer>(),
               hasLength(1),
