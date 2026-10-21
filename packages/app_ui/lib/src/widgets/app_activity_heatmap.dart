@@ -2,7 +2,7 @@ import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_heatmap_day.dart';
-import 'package:flutter/material.dart' show Tooltip, TooltipTriggerMode;
+import 'package:app_ui/src/widgets/app_heatmap_tooltips.dart';
 import 'package:flutter/widgets.dart';
 
 export 'app_heatmap_day.dart';
@@ -73,37 +73,41 @@ class AppActivityHeatmap extends StatelessWidget {
               monthLabelBuilder: monthLabelBuilder,
             ),
             SizedBox(height: gap),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _WeekdayLabels(
-                  labels: weekdayLabels,
-                  cellSize: cellSize,
-                  gap: gap,
-                  width: _labelColumnWidth,
-                ),
-                for (final week in visible) ...[
-                  SizedBox(width: gap),
-                  Column(
-                    children: [
-                      for (final day in week) ...[
-                        if (day != null)
-                          _HeatmapCell(
-                            date: day,
-                            count: byDay[day] ?? 0,
-                            level: _levelOf(byDay[day] ?? 0, maxCount),
-                            size: cellSize,
-                            isToday: day == latest,
-                            tooltipBuilder: tooltipBuilder,
-                          )
-                        else
-                          SizedBox(width: cellSize, height: cellSize),
-                        if (day != week.last) SizedBox(height: gap),
-                      ],
-                    ],
+            AppHeatmapTooltips(
+              builder: (tooltipTarget) => Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _WeekdayLabels(
+                    labels: weekdayLabels,
+                    cellSize: cellSize,
+                    gap: gap,
+                    width: _labelColumnWidth,
                   ),
+                  for (final week in visible) ...[
+                    SizedBox(width: gap),
+                    Column(
+                      children: [
+                        for (final day in week) ...[
+                          if (day != null)
+                            _HeatmapCell(
+                              key: ValueKey(day),
+                              date: day,
+                              count: byDay[day] ?? 0,
+                              level: _levelOf(byDay[day] ?? 0, maxCount),
+                              size: cellSize,
+                              isToday: day == latest,
+                              tooltipBuilder: tooltipBuilder,
+                              tooltipTargetBuilder: tooltipTarget,
+                            )
+                          else
+                            SizedBox(width: cellSize, height: cellSize),
+                          if (day != week.last) SizedBox(height: gap),
+                        ],
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
             if (legendLessLabel != null || legendMoreLabel != null) ...[
               SizedBox(height: gap * 2),
@@ -164,6 +168,8 @@ class _HeatmapCell extends StatelessWidget {
     required this.size,
     required this.isToday,
     required this.tooltipBuilder,
+    required this.tooltipTargetBuilder,
+    super.key,
   });
 
   final DateTime date;
@@ -172,6 +178,7 @@ class _HeatmapCell extends StatelessWidget {
   final double size;
   final bool isToday;
   final String Function(DateTime day, int count)? tooltipBuilder;
+  final HeatmapTooltipTargetBuilder tooltipTargetBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -186,9 +193,9 @@ class _HeatmapCell extends StatelessWidget {
     );
     final builder = tooltipBuilder;
     if (builder == null) return cell;
-    return Tooltip(
+    return tooltipTargetBuilder(
+      day: date,
       message: builder(date, count),
-      triggerMode: TooltipTriggerMode.longPress,
       child: cell,
     );
   }

@@ -1,5 +1,7 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -9,6 +11,127 @@ void main() {
   );
 
   group('AppTooltip', () {
+    testWidgets('preserves the child state when tooltip visibility changes', (
+      tester,
+    ) async {
+      final visible = ValueNotifier(true);
+      addTearDown(visible.dispose);
+      await tester.pumpWidget(
+        wrap(
+          ValueListenableBuilder(
+            valueListenable: visible,
+            builder: (context, value, child) => TooltipVisibility(
+              visible: value,
+              child: child!,
+            ),
+            child: const AppTooltipAnchor(
+              message: 'Draft hint',
+              child: _DraftTarget(),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Count 0'));
+      await tester.enterText(find.byType(TextField), 'Unsaved draft');
+      await tester.pumpAndSettle();
+      final target = tester.state<_DraftTargetState>(find.byType(_DraftTarget));
+      final field = tester.element(find.byType(TextField));
+
+      for (final enabled in [false, true, false, true]) {
+        visible.value = enabled;
+        await tester.pumpAndSettle();
+
+        expect(
+          tester.state<_DraftTargetState>(find.byType(_DraftTarget)),
+          same(target),
+        );
+        expect(tester.element(find.byType(TextField)), same(field));
+        expect(find.text('Count 1'), findsOneWidget);
+        expect(find.text('Unsaved draft'), findsOneWidget);
+        expect(target.focus.hasFocus, isTrue);
+        expect(
+          find.byType(RawTooltip),
+          enabled ? findsOneWidget : findsNothing,
+        );
+        expect(tester.takeException(), isNull);
+      }
+    });
+
+    testWidgets('restores tooltip triggers without keeping hidden routes', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrap(const SizedBox()));
+      final router = tester.binding.pointerRouter;
+      final baseline = router.debugGlobalRouteCount;
+      final visible = ValueNotifier(true);
+      final focus = FocusNode();
+      addTearDown(visible.dispose);
+      addTearDown(focus.dispose);
+      await tester.pumpWidget(
+        wrap(
+          ValueListenableBuilder(
+            valueListenable: visible,
+            builder: (context, value, child) => TooltipVisibility(
+              visible: value,
+              child: child!,
+            ),
+            child: AppTooltipAnchor(
+              message: 'Target hint',
+              child: Focus(
+                focusNode: focus,
+                child: const SizedBox(
+                  width: 100,
+                  height: 44,
+                  child: Text('Target'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(router.debugGlobalRouteCount, baseline + 1);
+      visible.value = false;
+      await tester.pumpAndSettle();
+      expect(router.debugGlobalRouteCount, baseline);
+      await tester.longPress(find.text('Target'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AppTooltip), findsNothing);
+
+      visible.value = true;
+      await tester.pumpAndSettle();
+      expect(router.debugGlobalRouteCount, baseline + 1);
+      focus.requestFocus();
+      await tester.pumpAndSettle();
+      expect(find.text('Target hint'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byType(AppTooltip), findsNothing);
+      focus.unfocus();
+      await tester.pumpAndSettle();
+
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      await mouse.moveTo(tester.getCenter(find.text('Target')));
+      await tester.pumpAndSettle();
+      expect(find.text('Target hint'), findsOneWidget);
+      await mouse.moveTo(Offset.zero);
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpAndSettle();
+      expect(find.byType(AppTooltip), findsNothing);
+      await mouse.removePointer();
+
+      await tester.longPress(find.text('Target'));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('Target hint'), findsOneWidget);
+      visible.value = false;
+      await tester.pumpAndSettle();
+      expect(find.byType(AppTooltip), findsNothing);
+      expect(router.debugGlobalRouteCount, baseline);
+      await tester.pump(const Duration(seconds: 2));
+      expect(router.debugGlobalRouteCount, baseline);
+      expect(tester.takeException(), isNull);
+    });
+
     for (final width in [360.0, 430.0]) {
       testWidgets(
         'keeps tooltip direction in canvas units at $width',
@@ -86,4 +209,36 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+}
+
+class _DraftTarget extends StatefulWidget {
+  const _DraftTarget();
+
+  @override
+  State<_DraftTarget> createState() => _DraftTargetState();
+}
+
+class _DraftTargetState extends State<_DraftTarget> {
+  final controller = TextEditingController();
+  final focus = FocusNode();
+  int count = 0;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      TextField(controller: controller, focusNode: focus),
+      TextButton(
+        onPressed: () => setState(() => count++),
+        child: Text('Count $count'),
+      ),
+    ],
+  );
 }

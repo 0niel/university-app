@@ -3,6 +3,65 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/navigation/view/navigation_branch_container.dart';
 
 void main() {
+  testWidgets(
+    'hidden tooltips release global pointer routes and restore on return',
+    (
+      tester,
+    ) async {
+      final router = tester.binding.pointerRouter;
+      final baseline = router.debugGlobalRouteCount;
+      Widget build(int index) => MaterialApp(
+        home: NavigationBranchContainer(
+          currentIndex: index,
+          children: [
+            const Tooltip(
+              message: 'Feed action',
+              child: ColoredBox(
+                key: ValueKey('feed-action'),
+                color: Colors.transparent,
+                child: SizedBox(width: 48, height: 48),
+              ),
+            ),
+            Column(
+              children: [
+                for (var day = 0; day < 126; day++)
+                  Tooltip(
+                    message: 'Day $day',
+                    child: const SizedBox(width: 1, height: 1),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(build(0));
+      await tester.pumpAndSettle();
+      expect(router.debugGlobalRouteCount, baseline + 1);
+
+      await tester.longPress(find.byKey(const ValueKey('feed-action')));
+      await tester.pumpAndSettle();
+      expect(find.text('Feed action'), findsOneWidget);
+
+      await tester.pumpWidget(build(1));
+      await tester.pumpAndSettle();
+      expect(router.debugGlobalRouteCount, baseline + 126);
+      expect(find.text('Feed action'), findsNothing);
+
+      await tester.pumpWidget(build(0));
+      await tester.pumpAndSettle();
+      expect(router.debugGlobalRouteCount, baseline + 1);
+      await tester.longPress(find.byKey(const ValueKey('feed-action')));
+      await tester.pumpAndSettle();
+      expect(find.text('Feed action'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      expect(router.debugGlobalRouteCount, baseline);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('inactive branches never paint or expose semantics', (
     tester,
   ) async {
