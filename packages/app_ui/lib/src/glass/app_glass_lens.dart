@@ -44,13 +44,9 @@ class AppGlassLens extends StatelessWidget {
           ? RepaintBoundary(child: glass)
           : glass;
     } else {
-      final media = MediaQuery.of(context);
       final view = View.of(context);
-      final lens = MediaQuery(
-        data: media.copyWith(
-          size: view.physicalSize / view.devicePixelRatio,
-          devicePixelRatio: view.devicePixelRatio,
-        ),
+      final lens = MediaQuery.fromView(
+        view: view,
         child: LiquidGlassLens(style: style, child: const SizedBox.expand()),
       );
       background = LiquidGlassBatch.backdropIdOf(context) == null
