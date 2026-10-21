@@ -97,6 +97,7 @@ class AppTooltipAnchor extends StatefulWidget {
 }
 
 class _AppTooltipAnchorState extends State<AppTooltipAnchor> {
+  final _childKey = GlobalKey<State<StatefulWidget>>();
   final _tooltipKey = GlobalKey<RawTooltipState>();
   bool _below = false;
   double _offset = AppControlSize.touchTarget / 2 + _TooltipMetrics.gap;
@@ -139,8 +140,9 @@ class _AppTooltipAnchorState extends State<AppTooltipAnchor> {
 
   @override
   Widget build(BuildContext context) {
+    final child = KeyedSubtree(key: _childKey, child: widget.child);
     if (widget.message.isEmpty || !TooltipVisibility.of(context)) {
-      return widget.child;
+      return child;
     }
     final reduceMotion =
         MediaQuery.disableAnimationsOf(context) ||
@@ -205,7 +207,7 @@ class _AppTooltipAnchorState extends State<AppTooltipAnchor> {
                     ),
                   ),
                 ),
-                child: widget.child,
+                child: child,
               ),
             ),
           ),

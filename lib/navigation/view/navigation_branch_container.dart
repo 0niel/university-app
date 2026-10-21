@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show TooltipVisibility;
 import 'package:flutter/widgets.dart';
 
 class NavigationBranchContainer extends StatelessWidget {
@@ -36,13 +37,16 @@ class NavigationBranchContainer extends StatelessWidget {
                   excluding: index != currentIndex,
                   child: TickerMode(
                     enabled: index == currentIndex,
-                    child: AnimatedSlide(
-                      duration: duration,
-                      curve: Curves.easeOutCubic,
-                      offset: index == currentIndex
-                          ? Offset.zero
-                          : Offset(index < currentIndex ? -.018 : .018, 0),
-                      child: children[index],
+                    child: TooltipVisibility(
+                      visible: index == currentIndex,
+                      child: AnimatedSlide(
+                        duration: duration,
+                        curve: Curves.easeOutCubic,
+                        offset: index == currentIndex
+                            ? Offset.zero
+                            : Offset(index < currentIndex ? -.018 : .018, 0),
+                        child: children[index],
+                      ),
                     ),
                   ),
                 ),

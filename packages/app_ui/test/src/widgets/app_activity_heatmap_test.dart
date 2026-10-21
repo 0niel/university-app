@@ -106,9 +106,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final tooltip = tester.widget<Tooltip>(find.byType(Tooltip).last);
+      expect(find.byType(Tooltip), findsNothing);
+      final day = find.byKey(ValueKey(today));
+      await tester.longPress(day);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+      final tooltip = tester.widget<Tooltip>(find.byType(Tooltip));
       expect(tooltip.message, '3 сен · 3 действия');
-      expect(tooltip.triggerMode, TooltipTriggerMode.longPress);
+      expect(find.text('3 сен · 3 действия'), findsOneWidget);
+      expect(tester.getRect(find.byType(Tooltip)), tester.getRect(day));
+      await tester.pumpWidget(const SizedBox());
     });
 
     testWidgets('renders weekday and legend labels when provided', (
