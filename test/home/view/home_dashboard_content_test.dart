@@ -4,8 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rtu_mirea_app/home/cubit/home_stories_cubit.dart';
+import 'package:rtu_mirea_app/home/view/home_dashboard_content.dart';
 import 'package:rtu_mirea_app/home/view/widgets/home_greeting.dart';
 import 'package:rtu_mirea_app/home/view/widgets/home_hero.dart';
+import 'package:rtu_mirea_app/home/view/widgets/home_stories_rail.dart';
 import 'package:rtu_mirea_app/home/view/widgets/home_week_pills.dart';
 import 'package:rtu_mirea_app/teacher_account/cubit/account_persona_cubit.dart';
 import 'package:rtu_mirea_app/teacher_account/widgets/teacher_account_shortcut.dart';
@@ -17,6 +20,57 @@ class _Account extends MockCubit<AccountPersonaState>
     implements AccountPersonaCubit {}
 
 void main() {
+  testWidgets('marking a story seen preserves the schedule subtree', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    final stories = HomeStoriesCubit();
+    addTearDown(controller.dispose);
+    addTearDown(stories.close);
+    final now = DateTime(2026, 9, 1, 11, 22);
+    await tester.pumpApp(
+      Scaffold(
+        body: homeDashboardFixture(
+          controller: controller,
+          clock: now,
+          child: BlocProvider<HomeStoriesCubit>.value(
+            value: stories,
+            child: HomeDashboardContent(
+              now: now,
+              selectedDay: now,
+              scrollController: controller,
+              searchKey: GlobalKey(),
+              onSelectedDay: (_) {},
+              onRetry: () {},
+            ),
+          ),
+        ),
+      ),
+      size: const Size(390, 844),
+    );
+    await tester.pump();
+    final week = tester.widget<HomeWeekPills>(find.byType(HomeWeekPills));
+    expect(
+      tester
+          .widget<HomeStoriesRail>(find.byType(HomeStoriesRail))
+          .seenSourceIds,
+      isEmpty,
+    );
+    stories.markSeen('mirea');
+    await tester.pump();
+    expect(
+      tester.widget<HomeWeekPills>(find.byType(HomeWeekPills)),
+      same(week),
+    );
+    expect(
+      tester
+          .widget<HomeStoriesRail>(find.byType(HomeStoriesRail))
+          .seenSourceIds,
+      contains('mirea'),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('teacher home keeps common content and offers its cabinet', (
     tester,
   ) async {

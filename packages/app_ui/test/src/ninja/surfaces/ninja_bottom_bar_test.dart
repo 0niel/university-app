@@ -1,6 +1,7 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 import '../../kit_harness.dart';
 
@@ -34,6 +35,68 @@ void main() {
       .toList();
 
   group('NinjaBottomBar', () {
+    for (final direction in TextDirection.values) {
+      testWidgets(
+        'selection moves without repainting its backdrop in $direction',
+        (tester) async {
+          var index = 0;
+          var backdropPaints = 0;
+          late StateSetter update;
+          await tester.pumpWidget(
+            host(
+              Directionality(
+                textDirection: direction,
+                child: StatefulBuilder(
+                  builder: (context, setState) {
+                    update = setState;
+                    return CustomPaint(
+                      painter: _PaintCounter(() => backdropPaints++),
+                      child: NinjaBottomBar(
+                        items: items,
+                        currentIndex: index,
+                        onSelected: (_) {},
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final lens = find.byType(LiquidGlassLens);
+          expect(lens, findsOneWidget);
+          expect(
+            LiquidGlassBatch.backdropIdOf(tester.element(lens)),
+            isNotNull,
+          );
+          final selection = find.byKey(
+            const ValueKey('navigation-selection'),
+          );
+          final start = tester.getCenter(selection);
+          update(() => index = 4);
+          await tester.pump();
+          final initialPaints = backdropPaints;
+          await tester.pump(const Duration(milliseconds: 120));
+          final middle = tester.getCenter(selection);
+          await tester.pump(const Duration(milliseconds: 240));
+          final end = tester.getCenter(selection);
+          expect(
+            middle.dx,
+            inExclusiveRange(
+              start.dx < end.dx ? start.dx : end.dx,
+              start.dx > end.dx ? start.dx : end.dx,
+            ),
+          );
+          expect(
+            end.dx,
+            closeTo(tester.getCenter(find.bySemanticsLabel('Я')).dx, .01),
+          );
+          expect(backdropPaints, initialPaints);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+
     testWidgets('keeps the glass bar compact with one moving selection', (
       tester,
     ) async {
@@ -265,4 +328,19 @@ void main() {
       expect(picked, 2);
     });
   });
+}
+
+class _PaintCounter extends CustomPainter {
+  const _PaintCounter(this.onPaint);
+
+  final VoidCallback onPaint;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    onPaint();
+    canvas.drawRect(Offset.zero & size, Paint()..color = Colors.red);
+  }
+
+  @override
+  bool shouldRepaint(_PaintCounter oldDelegate) => false;
 }

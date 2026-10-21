@@ -42,11 +42,11 @@ class _NinjaPathViewState extends State<NinjaPathView> {
             ),
           ),
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
               AppSpacing.screen,
               24,
               AppSpacing.screen,
-              ninjaBottomInset(context) + AppSpacing.lg,
+              0,
             ),
             sliver: SliverList.list(
               children: [
@@ -77,15 +77,25 @@ class _NinjaPathViewState extends State<NinjaPathView> {
                   onChanged: (value) => setState(() => _tab = value),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                NinjaStateSwitcher(
-                  child: switch (_tab) {
-                    0 => const BadgesTab(key: ValueKey('badges')),
-                    1 => const QuestsTab(key: ValueKey('quests')),
-                    _ => const LeaderboardTab(key: ValueKey('leaderboard')),
-                  },
-                ),
               ],
             ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.screen,
+              0,
+              AppSpacing.screen,
+              ninjaBottomInset(context) + AppSpacing.lg,
+            ),
+            sliver: _tab == 0
+                ? const BadgesTab(key: ValueKey('badges'))
+                : SliverToBoxAdapter(
+                    child: NinjaStateSwitcher(
+                      child: _tab == 1
+                          ? const QuestsTab(key: ValueKey('quests'))
+                          : const LeaderboardTab(key: ValueKey('leaderboard')),
+                    ),
+                  ),
           ),
         ],
       ),

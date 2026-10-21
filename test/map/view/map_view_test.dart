@@ -455,6 +455,11 @@ void main() {
     await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'А-101');
+    expect(sheet.controller!.size, sheet.minChildSize);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(sheet.controller!.size, greaterThan(sheet.minChildSize));
+    expect(sheet.controller!.size, lessThan(sheet.maxChildSize));
     await tester.pumpAndSettle();
     verify(() => freeRooms.queryChanged('А-101')).called(1);
     expect(sheet.controller!.size, sheet.maxChildSize);

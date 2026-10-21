@@ -4,6 +4,94 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 void main() {
+  Widget surface(String name, {Widget child = const SizedBox(height: 48)}) =>
+      SizedBox(
+        width: 180,
+        child: AppGlassSurface(
+          key: ValueKey(name),
+          role: AppGlassRole.control,
+          child: child,
+        ),
+      );
+
+  int? lensBackdrop(WidgetTester tester, String name) {
+    final lens = find
+        .descendant(
+          of: find.byKey(ValueKey(name)),
+          matching: find.byType(LiquidGlassLens),
+        )
+        .first;
+    return LiquidGlassBatch.backdropIdOf(tester.element(lens));
+  }
+
+  testWidgets(
+    'standalone lenses each compose blur and refraction in isolation',
+    (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: Row(children: [surface('first'), surface('second')]),
+        ),
+      );
+      final first = lensBackdrop(tester, 'first');
+      final second = lensBackdrop(tester, 'second');
+      expect(first, isNotNull);
+      expect(second, isNotNull);
+      expect(first, isNot(second));
+      expect(find.byType(LiquidGlassBatch), findsNWidgets(2));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('full lenses reuse the enclosing shared backdrop', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: AppGlassBatch(
+          child: Row(children: [surface('first'), surface('second')]),
+        ),
+      ),
+    );
+    expect(lensBackdrop(tester, 'first'), isNotNull);
+    expect(lensBackdrop(tester, 'second'), lensBackdrop(tester, 'first'));
+    expect(find.byType(LiquidGlassBatch), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('overlapping nested surfaces keep independent backdrop reads', (
+    tester,
+  ) async {
+    int? contentBackdrop;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: Center(
+          child: surface(
+            'outer',
+            child: Builder(
+              builder: (context) {
+                contentBackdrop = LiquidGlassBatch.backdropIdOf(context);
+                return Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: surface('inner'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(contentBackdrop, isNull);
+    expect(lensBackdrop(tester, 'outer'), isNotNull);
+    expect(lensBackdrop(tester, 'inner'), isNotNull);
+    expect(lensBackdrop(tester, 'inner'), isNot(lensBackdrop(tester, 'outer')));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'siblings share one backdrop and separate batches stay isolated',
     (

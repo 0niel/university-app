@@ -14,7 +14,7 @@ class FriendsMapCamera {
   final TickerProvider vsync;
 
   AnimationController? _moveController;
-  Animation<double>? _moveAnimation;
+  CurvedAnimation? _moveAnimation;
   Tween<double>? _latitudeTween;
   Tween<double>? _longitudeTween;
   Tween<double>? _zoomTween;
@@ -37,11 +37,13 @@ class FriendsMapCamera {
       return;
     }
     if (!animate) {
+      dispose();
       _controller.move(destination, destinationZoom);
       return;
     }
     final camera = _controller.camera;
     if (!camera.center.latitude.isFinite || !camera.center.longitude.isFinite) {
+      dispose();
       _controller.move(destination, destinationZoom);
       return;
     }
@@ -90,6 +92,7 @@ class FriendsMapCamera {
   }
 
   void dispose() {
+    _moveAnimation?.dispose();
     _moveController?.removeListener(_onTick);
     _moveController
       ?..stop()

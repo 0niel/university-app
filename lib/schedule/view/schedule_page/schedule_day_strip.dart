@@ -3,13 +3,14 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
+import 'package:rtu_mirea_app/schedule/utils/schedule_date_index.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_calendar_notice.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_dates.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_marks.dart';
 import 'package:rtu_mirea_app/tour/tour.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
-class ScheduleDayStrip extends StatelessWidget {
+class ScheduleDayStrip extends StatefulWidget {
   const ScheduleDayStrip({
     required this.day,
     required this.now,
@@ -18,6 +19,7 @@ class ScheduleDayStrip extends StatelessWidget {
     required this.display,
     required this.changes,
     required this.onDay,
+    this.dateIndex,
     super.key,
   });
 
@@ -28,16 +30,36 @@ class ScheduleDayStrip extends StatelessWidget {
   final ScheduleDisplayState display;
   final List<ScheduleChange> changes;
   final ValueChanged<DateTime> onDay;
+  final ScheduleDateIndex? dateIndex;
+
+  @override
+  State<ScheduleDayStrip> createState() => _ScheduleDayStripState();
+}
+
+class _ScheduleDayStripState extends State<ScheduleDayStrip> {
+  late ScheduleDateIndex _dateIndex =
+      widget.dateIndex ?? ScheduleDateIndex(widget.schedule);
+
+  @override
+  void didUpdateWidget(covariant ScheduleDayStrip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final dateIndex = widget.dateIndex;
+    if (dateIndex != null) {
+      _dateIndex = dateIndex;
+    } else if (!_dateIndex.matches(widget.schedule)) {
+      _dateIndex = ScheduleDateIndex(widget.schedule);
+    }
+  }
 
   List<(String, Color)> _marks(BuildContext context, DateTime date) =>
       scheduleDayMarks(
         context,
-        schedule: schedule,
+        schedule: _dateIndex.partsForDay(date),
         day: date,
-        now: now,
-        preferences: preferences,
-        display: display,
-        changes: changes,
+        now: widget.now,
+        preferences: widget.preferences,
+        display: widget.display,
+        changes: widget.changes,
       );
 
   List<AppWeekDay> _days(BuildContext context, DateTime start) {
@@ -54,7 +76,7 @@ class ScheduleDayStrip extends StatelessWidget {
         '${date.day}',
         short: weekdayFormat.format(date).toUpperCase(),
         isWeekend: RussianWorkCalendar.dayInfo(date).isNonWorking,
-        isToday: isSameDate(date, now),
+        isToday: isSameDate(date, widget.now),
         semanticsLabel: [
           dateFormat.format(date),
           scheduleDayLabel(context, date),
@@ -67,6 +89,7 @@ class ScheduleDayStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final day = widget.day;
     final days = weekDaysFor(day);
     return AppTourAnchor(
       target: AppTourTarget.scheduleWeek,
@@ -78,10 +101,10 @@ class ScheduleDayStrip extends StatelessWidget {
         selectedIndex: day.weekday - 1,
         onSelected: (index) {
           final selected = index < 0 ? null : days.elementAtOrNull(index);
-          if (selected != null) onDay(selected);
+          if (selected != null) widget.onDay(selected);
         },
         daysBuilder: (start) => _days(context, start),
-        onWeekChanged: (start) => onDay(
+        onWeekChanged: (start) => widget.onDay(
           DateTime(start.year, start.month, start.day + day.weekday - 1),
         ),
       ),

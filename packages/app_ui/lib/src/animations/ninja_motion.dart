@@ -10,9 +10,8 @@ abstract final class NinjaMotion {
   static const Curve emphasized = Curves.easeInOutCubic;
 
   static Duration of(BuildContext context, [Duration duration = base]) {
-    final media = MediaQuery.maybeOf(context);
-    return (media?.disableAnimations ?? false) ||
-            (media?.accessibleNavigation ?? false)
+    return (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
+            (MediaQuery.maybeAccessibleNavigationOf(context) ?? false)
         ? Duration.zero
         : duration;
   }

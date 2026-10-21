@@ -1,4 +1,5 @@
 import 'package:app_ui/src/animations/app_expanding_section.dart';
+import 'package:app_ui/src/widgets/app_spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -142,5 +143,34 @@ void main() {
     await tester.pumpWidget(view(expanded: true, reduced: true));
     expect(height(tester), 100);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('collapsed content stops scheduling frames and resumes on open', (
+    tester,
+  ) async {
+    const content = SizedBox(
+      width: 200,
+      height: 100,
+      child: AppSpinner(),
+    );
+    await tester.pumpWidget(view(expanded: false, child: content));
+    await tester.pump();
+    final spinner = tester.element(find.byType(AppSpinner));
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    await tester.pumpWidget(view(expanded: true, child: content));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.binding.hasScheduledFrame, isTrue);
+
+    await tester.pumpWidget(view(expanded: false, child: content));
+    await tester.pumpAndSettle();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    expect(tester.element(find.byType(AppSpinner)), same(spinner));
+
+    await tester.pumpWidget(view(expanded: true, child: content));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    expect(tester.element(find.byType(AppSpinner)), same(spinner));
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 }

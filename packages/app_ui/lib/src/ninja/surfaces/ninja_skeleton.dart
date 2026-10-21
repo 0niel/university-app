@@ -143,10 +143,9 @@ class _NinjaSkeletonGroupState extends State<NinjaSkeletonGroup>
 
   void _syncAnimation() {
     _parent = _NinjaSkeletonSceneData.maybeOf(context);
-    final mediaQuery = MediaQuery.maybeOf(context);
     final reduceMotion =
-        mediaQuery?.disableAnimations == true ||
-        mediaQuery?.accessibleNavigation == true;
+        (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
+        (MediaQuery.maybeAccessibleNavigationOf(context) ?? false);
     final animate =
         _parent == null &&
         widget.pulse &&

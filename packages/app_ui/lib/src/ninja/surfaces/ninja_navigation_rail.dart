@@ -39,34 +39,42 @@ class NinjaNavigationRail extends StatelessWidget {
                 vertical: AppSpacing.md,
               ),
               child: Center(
-                child: AppGlassSurface(
-                  role: AppGlassRole.navigation,
-                  borderRadius: AppRadius.sheet,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.sheet),
-                    child: SingleChildScrollView(
-                      primary: false,
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppSpacing.sm),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            for (var index = 0; index < items.length; index++)
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: index == items.length - 1
-                                      ? 0
-                                      : AppSpacing.sm,
-                                ),
-                                child: _RailItem(
-                                  key: ValueKey(index),
-                                  item: items[index],
-                                  selected: index == currentIndex,
-                                  showLabel: showLabels,
-                                  onTap: () => onSelected(index),
-                                ),
-                              ),
-                          ],
+                child: AppGlassBatch(
+                  child: AppGlassSurface(
+                    role: AppGlassRole.navigation,
+                    borderRadius: AppRadius.sheet,
+                    child: RepaintBoundary(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(AppRadius.sheet),
+                        child: SingleChildScrollView(
+                          primary: false,
+                          child: Padding(
+                            padding: const EdgeInsets.all(AppSpacing.sm),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                for (
+                                  var index = 0;
+                                  index < items.length;
+                                  index++
+                                )
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: index == items.length - 1
+                                          ? 0
+                                          : AppSpacing.sm,
+                                    ),
+                                    child: _RailItem(
+                                      key: ValueKey(index),
+                                      item: items[index],
+                                      selected: index == currentIndex,
+                                      showLabel: showLabels,
+                                      onTap: () => onSelected(index),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),

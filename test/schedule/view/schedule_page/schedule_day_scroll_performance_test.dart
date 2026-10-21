@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_strip.dart';
 import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_day_view.dart';
+import 'package:rtu_mirea_app/schedule/view/schedule_page/schedule_month_view.dart';
 import 'package:schedule_repository/schedule_repository.dart';
 
 import '../../../helpers/pump_app.dart';
@@ -141,7 +142,39 @@ void main() {
     }
   }
 
-  testWidgets('day marks are scanned once for semantics and colored dots', (
+  testWidgets('month totals and cells scan semester data only once', (
+    tester,
+  ) async {
+    final source = _CountingSchedule([
+      ...lessons,
+      for (var index = 1; index <= 62; index++)
+        scheduleTestLesson(
+          day: day.add(Duration(days: index * 7)),
+          subject: 'Future $index',
+        ),
+    ]);
+    await tester.pumpApp(
+      Scaffold(
+        body: SingleChildScrollView(
+          child: ScheduleMonthView(
+            day: day,
+            now: day,
+            schedule: source,
+            preferences: const SchedulePreferencesState(),
+            onDay: (_) {},
+            onMonth: (_) {},
+          ),
+        ),
+      ),
+      size: const Size(390, 844),
+    );
+    await tester.pumpAndSettle();
+    expect(source.reads, source.length);
+    expect(find.byType(ScheduleMonthTypeChart), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('day marks reuse the date index across visibility filters', (
     tester,
   ) async {
     final source = _CountingSchedule([
@@ -168,7 +201,7 @@ void main() {
     );
     await pump();
     await tester.pumpAndSettle();
-    expect(source.reads, source.length * 21);
+    expect(source.reads, source.length);
     final initial = tester
         .widget<AppWeekStrip>(find.byType(AppWeekStrip))
         .days[day.weekday - 1];
@@ -178,7 +211,7 @@ void main() {
     source.reads = 0;
     await pump(showLectures: false);
     await tester.pumpAndSettle();
-    expect(source.reads, source.length * 21);
+    expect(source.reads, 0);
     final filtered = tester
         .widget<AppWeekStrip>(find.byType(AppWeekStrip))
         .days[day.weekday - 1];

@@ -44,6 +44,61 @@ void main() {
     cache: cache,
   );
 
+  group('catalog metadata', () {
+    const row = <String, Object?>{
+      'id': 'app-1',
+      'slug': 'poll',
+      'name': 'Poll',
+      'tags': [42],
+    };
+    for (final (rpc, load, failure)
+        in <
+          (
+            String,
+            Future<List<MiniApp>> Function(MiniAppsRepository),
+            Matcher,
+          )
+        >[
+          (
+            'get_mini_apps',
+            (repository) => repository.getApps(),
+            isA<GetMiniAppsFailure>(),
+          ),
+          (
+            'get_my_mini_apps',
+            (repository) => repository.getMyApps(),
+            isA<GetMyMiniAppsFailure>(),
+          ),
+          (
+            'get_recent_mini_apps',
+            (repository) => repository.getRecentApps(),
+            isA<GetRecentMiniAppsFailure>(),
+          ),
+        ]) {
+      test('$rpc converts malformed rows to a recoverable failure', () async {
+        when(
+          () => supabase.rpc<Object?>(rpc, params: any(named: 'params')),
+        ).thenAnswer((_) => FakeRpcBuilder(const [row]));
+
+        await expectLater(load(buildRepository()), throwsA(failure));
+      });
+    }
+
+    test('an invalid app name does not escape the runner as a TypeError', () {
+      when(
+        () => supabase.rpc<Object?>(
+          'get_mini_app',
+          params: any(named: 'params'),
+        ),
+      ).thenAnswer((_) => FakeRpcBuilder({...row, 'name': 42}));
+
+      expect(
+        () => buildRepository().getApp('poll'),
+        throwsA(isA<GetMiniAppFailure>()),
+      );
+    });
+  });
+
   group('screen cache', () {
     test('readCachedScreen returns what fetchScreen stored', () async {
       final cache = FakeStorage();

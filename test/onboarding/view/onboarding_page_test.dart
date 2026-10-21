@@ -155,6 +155,27 @@ void main() {
           .onPressed !=
       null;
 
+  testWidgets('moving the group search cursor does not restart the search', (
+    tester,
+  ) async {
+    await openGroupStep(tester);
+    await search(tester, 'ИКБО');
+    final field = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(const Key('onboarding_groupSearch')),
+        matching: find.byType(EditableText),
+      ),
+    );
+    clearInteractions(scheduleRepository);
+    field.controller.selection = const TextSelection.collapsed(offset: 1);
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pump();
+    verifyNever(
+      () => scheduleRepository.searchGroups(query: any(named: 'query')),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('welcome shows its first story, preview and setup actions', (
     tester,
   ) async {

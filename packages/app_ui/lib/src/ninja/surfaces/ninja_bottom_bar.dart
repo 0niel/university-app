@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:app_ui/src/colors/colors.dart';
+import 'package:app_ui/src/glass/app_glass_batch.dart';
 import 'package:app_ui/src/glass/app_glass_surface.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
 import 'package:app_ui/src/typography/typography.dart';
@@ -60,50 +61,73 @@ class NinjaBottomBar extends StatelessWidget {
             AppSpacing.md,
             bottomPadding + bottomInset,
           ),
-          child: AppGlassSurface(
-            role: AppGlassRole.navigation,
-            borderRadius: AppRadius.full,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            child: SizedBox(
-              height: pillHeight,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final cellWidth = constraints.maxWidth / items.length;
-                  return Stack(
-                    children: [
-                      AnimatedPositionedDirectional(
-                        duration: _reduceMotion(context)
-                            ? Duration.zero
-                            : const Duration(milliseconds: 360),
-                        curve: Curves.easeOutCubic,
-                        start: currentIndex * cellWidth + 2,
-                        top: 6,
-                        bottom: 6,
-                        width: cellWidth - 4,
-                        child: DecoratedBox(
-                          key: const ValueKey('navigation-selection'),
-                          decoration: BoxDecoration(
-                            color: context.colors.tint,
-                            borderRadius: BorderRadius.circular(AppRadius.full),
-                          ),
-                        ),
-                      ),
-                      Row(
+          child: AppGlassBatch(
+            child: AppGlassSurface(
+              role: AppGlassRole.navigation,
+              borderRadius: AppRadius.full,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: RepaintBoundary(
+                child: SizedBox(
+                  height: pillHeight,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final cellWidth = constraints.maxWidth / items.length;
+                      return Stack(
                         children: [
-                          for (var index = 0; index < items.length; index++)
-                            Expanded(
-                              child: _BottomBarItem(
-                                item: items[index],
-                                selected: index == currentIndex,
-                                circleSize: circleSize,
-                                onTap: () => onSelected(index),
+                          PositionedDirectional(
+                            start: 2,
+                            top: 6,
+                            bottom: 6,
+                            width: cellWidth - 4,
+                            child: TweenAnimationBuilder<double>(
+                              tween: Tween(
+                                begin: currentIndex * cellWidth,
+                                end: currentIndex * cellWidth,
+                              ),
+                              duration: _reduceMotion(context)
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 360),
+                              curve: Curves.easeOutCubic,
+                              builder: (context, offset, child) =>
+                                  Transform.translate(
+                                    offset: Offset(
+                                      Directionality.of(context) ==
+                                              TextDirection.rtl
+                                          ? -offset
+                                          : offset,
+                                      0,
+                                    ),
+                                    child: child,
+                                  ),
+                              child: DecoratedBox(
+                                key: const ValueKey('navigation-selection'),
+                                decoration: BoxDecoration(
+                                  color: context.colors.tint,
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.full,
+                                  ),
+                                ),
                               ),
                             ),
+                          ),
+                          Row(
+                            children: [
+                              for (var index = 0; index < items.length; index++)
+                                Expanded(
+                                  child: _BottomBarItem(
+                                    item: items[index],
+                                    selected: index == currentIndex,
+                                    circleSize: circleSize,
+                                    onTap: () => onSelected(index),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ],
-                      ),
-                    ],
-                  );
-                },
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),

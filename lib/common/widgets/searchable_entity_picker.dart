@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:app_ui/app_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
@@ -50,11 +51,13 @@ class _SearchableEntityPickerState<T> extends State<SearchableEntityPicker<T>> {
   }
 
   void _onQueryChanged(String value) {
+    final query = value.trim();
+    if (_query == query) return;
     _debounce?.cancel();
-    setState(() => _query = value.trim());
+    setState(() => _query = query);
     _debounce = Timer(
       const Duration(milliseconds: 350),
-      () => unawaited(_search(value.trim())),
+      () => unawaited(_search(query)),
     );
   }
 
@@ -108,6 +111,10 @@ class _SearchableEntityPickerState<T> extends State<SearchableEntityPicker<T>> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
+    final showManual = _showManual;
+    final showEmpty =
+        _query.length >= 2 && _results.isEmpty && !_loading && !showManual;
+    final resultOffset = showManual ? 1 : 0;
 
     return Column(
       mainAxisSize: .min,
@@ -124,31 +131,33 @@ class _SearchableEntityPickerState<T> extends State<SearchableEntityPicker<T>> {
           height: 300,
           child: _loading && _results.isEmpty
               ? const _SearchableEntityPickerSkeleton()
-              : ListView(
-                  children: [
-                    if (_showManual)
-                      NinjaListCell(
+              : ListView.builder(
+                  itemCount:
+                      resultOffset + _results.length + (showEmpty ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (showManual && index == 0) {
+                      return NinjaListCell(
                         title: l10n.pickerAddManually(_query),
                         onTap: _addManually,
-                      ),
-                    for (final item in _results)
-                      NinjaListCell(
+                      );
+                    }
+                    final resultIndex = index - resultOffset;
+                    if (resultIndex < _results.length) {
+                      final item = _results.elementAtOrNull(resultIndex) as T;
+                      return NinjaListCell(
                         title: widget.titleBuilder(item),
                         subtitle: widget.subtitleBuilder?.call(item),
                         onTap: () => _pick(item),
+                      );
+                    }
+                    return NinjaEmptyState.screen(
+                      title: l10n.pickerNothingFound,
+                      icon: AppLineIconWidget(
+                        AppLineIcon.search,
+                        color: colors.accent,
                       ),
-                    if (_query.length >= 2 &&
-                        _results.isEmpty &&
-                        !_loading &&
-                        !_showManual)
-                      NinjaEmptyState.screen(
-                        title: l10n.pickerNothingFound,
-                        icon: AppLineIconWidget(
-                          AppLineIcon.search,
-                          color: colors.accent,
-                        ),
-                      ).animateEmptyState(),
-                  ],
+                    ).animateEmptyState();
+                  },
                 ),
         ),
       ],

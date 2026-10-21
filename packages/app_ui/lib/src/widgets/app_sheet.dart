@@ -122,22 +122,23 @@ class _AppSheetSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = backgroundColor ?? context.colors.surface;
     return Material(
-      color: backgroundColor ?? context.colors.surface,
+      color: color,
       borderRadius: const BorderRadius.vertical(
         top: Radius.circular(AppRadius.sheet),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          const Positioned.fill(
+          Positioned.fill(
             bottom: -AppRadius.sheet,
             child: IgnorePointer(
               child: AppGlassSurface(
-                role: AppGlassRole.overlay,
+                role: color.a == 1 ? AppGlassRole.sheet : AppGlassRole.overlay,
                 borderRadius: AppRadius.sheet,
                 tone: AppGlassTone.subtle,
-                child: SizedBox.expand(),
+                child: const SizedBox.expand(),
               ),
             ),
           ),
@@ -177,10 +178,10 @@ class _AppSheetBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
-    final keyboardInset = mediaQuery.viewInsets.bottom;
-    final bottomSafe = keyboardInset > 0 ? 0.0 : mediaQuery.viewPadding.bottom;
+    final screenHeight = MediaQuery.heightOf(context);
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final viewPadding = MediaQuery.viewPaddingOf(context);
+    final bottomSafe = keyboardInset > 0 ? 0.0 : viewPadding.bottom;
 
     final padding =
         contentPadding ??
@@ -234,7 +235,7 @@ class _AppSheetBody extends StatelessWidget {
 
     final double availableHeight = math.max(
       0,
-      screenHeight - keyboardInset - mediaQuery.viewPadding.top,
+      screenHeight - keyboardInset - viewPadding.top,
     );
     final maxHeight = math.min(
       screenHeight * maxHeightFraction,
@@ -244,14 +245,7 @@ class _AppSheetBody extends StatelessWidget {
     final fixedHeight = fraction == null
         ? null
         : math.min(screenHeight * fraction, availableHeight);
-    final reduceMotion =
-        mediaQuery.disableAnimations || mediaQuery.accessibleNavigation;
-
-    return AnimatedPadding(
-      duration: reduceMotion
-          ? Duration.zero
-          : const Duration(milliseconds: 120),
-      curve: Curves.easeOut,
+    return Padding(
       padding: EdgeInsets.only(bottom: keyboardInset),
       child: ConstrainedBox(
         constraints: BoxConstraints(

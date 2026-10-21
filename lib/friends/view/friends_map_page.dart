@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
 import 'package:rtu_mirea_app/friends/view/friends_map_view.dart';
+import 'package:rtu_mirea_app/map/widgets/map_activity_listener.dart';
 
 class FriendsMapPage extends StatefulWidget {
   const FriendsMapPage({super.key});
@@ -19,7 +20,6 @@ class _FriendsMapPageState extends State<FriendsMapPage> {
   void initState() {
     super.initState();
     _cubit = context.read<FriendsMapCubit>();
-    unawaited(_cubit.setMapVisible(visible: true));
   }
 
   @override
@@ -29,5 +29,8 @@ class _FriendsMapPageState extends State<FriendsMapPage> {
   }
 
   @override
-  Widget build(BuildContext context) => const FriendsMapView();
+  Widget build(BuildContext context) => MapActivityListener(
+    onChanged: (visible) => unawaited(_cubit.setMapVisible(visible: visible)),
+    child: const FriendsMapView(),
+  );
 }

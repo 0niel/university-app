@@ -7,6 +7,7 @@ import 'package:gamification_repository/gamification_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/profile/cubit/ninja_path_cubit.dart';
+import 'package:rtu_mirea_app/profile/widgets/ninja_path/badge_tile.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/badges_tab.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/leaderboard_tab.dart';
 import 'package:rtu_mirea_app/profile/widgets/ninja_path/quests_tab.dart';
@@ -32,9 +33,18 @@ Widget _app(
       child: child!,
     ),
     home: Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(padding: const EdgeInsets.all(20), child: child),
-      ),
+      body: child is BadgesTab
+          ? CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(20),
+                  sliver: child,
+                ),
+              ],
+            )
+          : SingleChildScrollView(
+              child: Padding(padding: const EdgeInsets.all(20), child: child),
+            ),
     ),
   ),
 );
@@ -112,7 +122,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
-        final grid = tester.widget<GridView>(find.byType(GridView));
+        final grid = tester.widget<SliverGrid>(find.byType(SliverGrid));
         final delegate =
             grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
         expect(delegate.crossAxisCount, 2);
@@ -120,4 +130,41 @@ void main() {
       },
     );
   }
+
+  testWidgets('badge categories build only the visible grid tiles', (
+    tester,
+  ) async {
+    final cubit = _Path();
+    final badges = List.generate(
+      300,
+      (index) => GamificationBadge(
+        id: 'badge-$index',
+        category: index < 150 ? 'Активность' : 'Учёба',
+        name: 'Достижение ${index.toString().padLeft(3, '0')}',
+        description: 'Описание достижения',
+        emoji: '🏆',
+        isEarned: true,
+      ),
+    );
+    when(() => cubit.state).thenReturn(
+      NinjaPathState(
+        badgesStatus: NinjaPathLoadStatus.loaded,
+        badges: badges,
+      ),
+    );
+    await tester.pumpWidget(_app(cubit, const BadgesTab()));
+    await tester.pumpAndSettle();
+    expect(find.byType(BadgeTile).evaluate().length, lessThan(30));
+    expect(find.byKey(const ValueKey('badge-299')), findsNothing);
+    final position = tester
+        .state<ScrollableState>(
+          find.byType(Scrollable).first,
+        )
+        .position;
+    position.jumpTo(position.maxScrollExtent);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('badge-299')), findsOneWidget);
+    expect(find.byType(BadgeTile).evaluate().length, lessThan(30));
+    expect(tester.takeException(), isNull);
+  });
 }

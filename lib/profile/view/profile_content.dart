@@ -107,7 +107,6 @@ class _ProfileContentState extends State<_ProfileContent> {
     final academic = state.overview.academic;
     final profile = state.gamificationProfile;
     final badges = [...state.earnedBadges, ...state.closestBadges];
-    final friends = context.watch<FriendsListCubit>().state;
     final cardNumber = academic.studentCardNumber;
     final bottom = MediaQuery.paddingOf(context).bottom;
     return ListView(
@@ -200,17 +199,7 @@ class _ProfileContentState extends State<_ProfileContent> {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(
               children: [
-                ProfileLinkRow(
-                  icon: AppLineIcon.people,
-                  title: l10n.friendsTitle,
-                  meta: friends.status == FriendsListStatus.loaded
-                      ? l10n.profileFriendsMeta(
-                          friends.friends.length,
-                          friends.onCampusCount(DateTime.now()),
-                        )
-                      : null,
-                  onTap: () => const FriendsRoute().push<void>(context),
-                ),
+                const _ProfileFriendsLink(),
                 if (NfcPassAvailability.isSupported && !isTeacher)
                   ProfileLinkRow(
                     icon: AppLineIcon.contactless,
@@ -247,4 +236,25 @@ class _ProfileContentState extends State<_ProfileContent> {
     primaryLabel: context.l10n.retry,
     onPrimary: () => context.read<ProfileCubit>().reloadSection(section),
   );
+}
+
+class _ProfileFriendsLink extends StatelessWidget {
+  const _ProfileFriendsLink();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final friends = context.watch<FriendsListCubit>().state;
+    return ProfileLinkRow(
+      icon: AppLineIcon.people,
+      title: l10n.friendsTitle,
+      meta: friends.status == FriendsListStatus.loaded
+          ? l10n.profileFriendsMeta(
+              friends.friends.length,
+              friends.onCampusCount(DateTime.now()),
+            )
+          : null,
+      onTap: () => const FriendsRoute().push<void>(context),
+    );
+  }
 }

@@ -40,13 +40,16 @@ class AppGlassLens extends StatelessWidget {
     } else {
       final media = MediaQuery.of(context);
       final view = View.of(context);
-      background = MediaQuery(
+      final lens = MediaQuery(
         data: media.copyWith(
           size: view.physicalSize / view.devicePixelRatio,
           devicePixelRatio: view.devicePixelRatio,
         ),
         child: LiquidGlassLens(style: style, child: const SizedBox.expand()),
       );
+      background = LiquidGlassBatch.backdropIdOf(context) == null
+          ? LiquidGlassBatch(child: lens)
+          : lens;
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),

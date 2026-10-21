@@ -12,49 +12,60 @@ class _BadgesContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categories = badges.map((badge) => badge.category).toSet().toList()
-      ..sort();
+    final grouped = <String, List<GamificationBadge>>{};
+    for (final badge in badges) {
+      (grouped[badge.category] ??= []).add(badge);
+    }
+    final categories = grouped.keys.toList()..sort();
     final recentlyUnlocked = this.recentlyUnlocked;
     final spec = badgeGridSpec(context);
-    return Column(
-      crossAxisAlignment: .stretch,
-      children: [
-        if (recentlyUnlocked != null) ...[
-          _RecentlyUnlockedCard(badge: recentlyUnlocked),
-          const SizedBox(height: AppSpacing.screen),
-        ],
-        for (final category in categories) ..._category(category, spec),
+    return SliverMainAxisGroup(
+      slivers: [
+        if (recentlyUnlocked != null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.screen),
+              child: _RecentlyUnlockedCard(badge: recentlyUnlocked),
+            ),
+          ),
+        for (final category in categories)
+          ..._category(category, grouped[category]!, spec),
       ],
     );
   }
 
   List<Widget> _category(
     String category,
+    List<GamificationBadge> categoryEntries,
     ({int columns, double aspectRatio}) spec,
   ) {
-    final categoryBadges = _sorted(
-      badges.where((badge) => badge.category == category),
-    );
+    final categoryBadges = _sorted(categoryEntries);
     final earned = categoryBadges.where((badge) => badge.isEarned).length;
     return [
-      _CategoryHeader(
-        title: category,
-        done: earned,
-        total: categoryBadges.length,
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          child: _CategoryHeader(
+            title: category,
+            done: earned,
+            total: categoryBadges.length,
+          ),
+        ),
       ),
-      const SizedBox(height: AppSpacing.md),
-      GridView.count(
-        crossAxisCount: spec.columns,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        childAspectRatio: spec.aspectRatio,
-        children: [
-          for (final badge in categoryBadges) BadgeTile(badge: badge),
-        ],
+      SliverGrid.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: spec.columns,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: spec.aspectRatio,
+        ),
+        itemCount: categoryBadges.length,
+        itemBuilder: (context, index) => BadgeTile(
+          key: ValueKey(categoryBadges[index].id),
+          badge: categoryBadges[index],
+        ),
       ),
-      const SizedBox(height: AppSpacing.screen),
+      const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.screen)),
     ];
   }
 

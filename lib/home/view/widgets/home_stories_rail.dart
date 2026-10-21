@@ -114,6 +114,7 @@ class HomeStoryItem extends StatelessWidget {
         ? source.sourceId
         : source.sourceName;
     final avatar = source.avatarUrl;
+    final avatarPixels = (48 * MediaQuery.devicePixelRatioOf(context)).ceil();
     Widget thumbnail(Widget child) => heroTag == null
         ? child
         : HeroMode(
@@ -166,6 +167,8 @@ class HomeStoryItem extends StatelessWidget {
                           )
                         : Image.network(
                             avatar,
+                            cacheWidth: avatarPixels,
+                            cacheHeight: avatarPixels,
                             excludeFromSemantics: true,
                             fit: .cover,
                             errorBuilder: (_, _, _) =>
