@@ -267,6 +267,31 @@ void main() {
     ),
   );
 
+  testWidgets('account appearance loads before a profile route is visited', (
+    tester,
+  ) async {
+    initialize();
+    when(() => preferences.currentUserId).thenReturn(user.id);
+    when(
+      () => gamification.getAccountPersona(
+        organizationId: any(named: 'organizationId'),
+        expectedUserId: user.id,
+      ),
+    ).thenAnswer((_) async => AccountPersona.empty);
+    when(
+      gamification.getSettings,
+    ).thenAnswer((_) async => const UserSettings(accentColor: 'violet'));
+
+    await tester.pumpWidget(shell(const SizedBox()));
+    await tester.pump();
+
+    expect(theme.state.colorScheme, AppColorScheme.violet);
+    verify(gamification.getSettings).called(1);
+    verifyNever(() => gamification.ensureProfile(any()));
+    verifyNever(() => gamification.getProfileOverview(any()));
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets(
     'push wrappers have localization and navigate once across remounts',
     (

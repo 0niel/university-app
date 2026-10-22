@@ -181,56 +181,60 @@ class _MiniAppsCatalogState extends State<MiniAppsCatalog> {
                 color: colors.accent,
                 backgroundColor: colors.surface,
                 onRefresh: widget.onRefresh,
-                child: CustomScrollView(
-                  key: const PageStorageKey('mini-apps-catalog'),
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: _MiniAppsAppBar(
-                        count: state.apps.length,
-                        subtitle: state.hasFilters
-                            ? context.l10n.miniAppsSearchResultsCount(
-                                state.resultCount,
-                              )
-                            : null,
-                        isSearching: state.isSearching,
-                        onSearchToggled: _toggleSearch,
-                        onBack: widget.onBack,
+                child: AppGlassBatch(
+                  child: CustomScrollView(
+                    key: const PageStorageKey('mini-apps-catalog'),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: _MiniAppsAppBar(
+                          count: state.apps.length,
+                          subtitle: state.hasFilters
+                              ? context.l10n.miniAppsSearchResultsCount(
+                                  state.resultCount,
+                                )
+                              : null,
+                          isSearching: state.isSearching,
+                          onSearchToggled: _toggleSearch,
+                          onBack: widget.onBack,
+                        ),
                       ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: _CatalogToolbar(
+                      SliverToBoxAdapter(
+                        child: _CatalogToolbar(
+                          state: state,
+                          onSortChanged: widget.onSortChanged,
+                          onCreate: widget.onCreate,
+                          onModerate: widget.onModerate,
+                        ),
+                      ),
+                      AppGlassBatch.exclude(
+                        child: _CatalogFilters(
+                          state: state,
+                          controller: _searchController,
+                          focusNode: _searchFocus,
+                          onQueryChanged: _queryChanged,
+                          onQuerySubmitted: _submitQuery,
+                          onCategoryChanged: widget.onCategoryChanged,
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: _CatalogFeedback(
+                          state: state,
+                          onRetry: () => unawaited(widget.onRefresh()),
+                        ),
+                      ),
+                      _CatalogBody(
                         state: state,
-                        onSortChanged: widget.onSortChanged,
+                        onOpen: widget.onOpen,
+                        onActions: widget.onActions,
                         onCreate: widget.onCreate,
-                        onModerate: widget.onModerate,
-                      ),
-                    ),
-                    _CatalogFilters(
-                      state: state,
-                      controller: _searchController,
-                      focusNode: _searchFocus,
-                      onQueryChanged: _queryChanged,
-                      onQuerySubmitted: _submitQuery,
-                      onCategoryChanged: widget.onCategoryChanged,
-                    ),
-                    SliverToBoxAdapter(
-                      child: _CatalogFeedback(
-                        state: state,
+                        onResetFilters: _resetFilters,
                         onRetry: () => unawaited(widget.onRefresh()),
                       ),
-                    ),
-                    _CatalogBody(
-                      state: state,
-                      onOpen: widget.onOpen,
-                      onActions: widget.onActions,
-                      onCreate: widget.onCreate,
-                      onResetFilters: _resetFilters,
-                      onRetry: () => unawaited(widget.onRefresh()),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

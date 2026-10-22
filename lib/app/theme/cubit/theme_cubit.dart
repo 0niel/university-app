@@ -8,7 +8,12 @@ import 'package:rtu_mirea_app/app/theme/cubit/theme_state.dart';
 class ThemeCubit extends HydratedCubit<ThemeState> {
   ThemeCubit() : super(const ThemeState());
 
+  var _accentRevision = 0;
+
+  int get accentRevision => _accentRevision;
+
   void setColorScheme(AppColorScheme scheme) {
+    _accentRevision++;
     if (state.colorScheme == scheme) return;
     emit(state.copyWith(colorScheme: scheme));
   }

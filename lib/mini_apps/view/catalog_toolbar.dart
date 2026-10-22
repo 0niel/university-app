@@ -21,29 +21,27 @@ class _CatalogToolbar extends StatelessWidget {
       AppSpacing.screen,
       AppSpacing.sm,
     ),
-    child: AppGlassBatch(
-      child: Wrap(
-        spacing: AppSpacing.sm,
-        runSpacing: AppSpacing.sm,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          _MiniAppsSortButton(selected: state.sort, onChanged: onSortChanged),
-          AppButton.glass(
-            key: const ValueKey('mini-apps-create-button'),
-            label: context.l10n.miniAppsCreate,
-            icon: const AppLineIconWidget(AppLineIcon.plus),
-            onPressed: onCreate,
+    child: Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        _MiniAppsSortButton(selected: state.sort, onChanged: onSortChanged),
+        AppButton.glass(
+          key: const ValueKey('mini-apps-create-button'),
+          label: context.l10n.miniAppsCreate,
+          icon: const AppLineIconWidget(AppLineIcon.plus),
+          onPressed: onCreate,
+        ),
+        if (state.isModerator && onModerate != null)
+          AppIconButton(
+            tone: AppIconButtonTone.glass,
+            shape: AppIconButtonShape.circle,
+            tooltip: context.l10n.miniAppsModeration,
+            icon: const AppLineIconWidget(AppLineIcon.shield),
+            onPressed: onModerate,
           ),
-          if (state.isModerator && onModerate != null)
-            AppIconButton(
-              tone: AppIconButtonTone.glass,
-              shape: AppIconButtonShape.circle,
-              tooltip: context.l10n.miniAppsModeration,
-              icon: const AppLineIconWidget(AppLineIcon.shield),
-              onPressed: onModerate,
-            ),
-        ],
-      ),
+      ],
     ),
   );
 }

@@ -68,7 +68,9 @@ void main() {
               find.descendant(
                 of: find.descendant(
                   of: find.byKey(ValueKey(id)),
-                  matching: find.byType(LiquidGlassLite),
+                  matching: find.byType(
+                    id == 'reference' ? LiquidGlassLite : AppGlassLens,
+                  ),
                 ),
                 matching: find.byWidgetPredicate(
                   (widget) =>

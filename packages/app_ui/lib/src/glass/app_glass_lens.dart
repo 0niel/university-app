@@ -1,3 +1,4 @@
+import 'package:app_ui/src/glass/app_glass_lite.dart';
 import 'package:app_ui/src/glass/app_glass_theme.dart';
 import 'package:flutter/widgets.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
@@ -29,7 +30,7 @@ class AppGlassLens extends StatelessWidget {
     if (!enabled) {
       background = ColoredBox(color: fallbackColor);
     } else if (style.liteGlass) {
-      final glass = LiquidGlassLite(
+      final glass = AppGlassLite(
         shape:
             style.shape ??
             LiquidGlassShape.roundedRectangle(cornerRadius: borderRadius),
