@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:preferences_repository/preferences_repository.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
+import 'package:rtu_mirea_app/app/widgets/theme_preferences_sync.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_map_cubit.dart';
 import 'package:rtu_mirea_app/notifications/cubit/notifications_cubit.dart';
@@ -83,7 +84,9 @@ class UserPreferencesScope extends StatelessWidget {
             },
           ),
         ],
-        child: AccountPersonaLifecycle(child: child),
+        child: AccountPersonaLifecycle(
+          child: ThemePreferencesSync(userId: userId, child: child),
+        ),
       ),
     );
   }

@@ -68,34 +68,36 @@ class _AppPopoverState extends State<AppPopover> {
       child: AppGlassSurface(
         role: AppGlassRole.overlay,
         borderRadius: AppRadius.card,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          child: Material(
-            type: MaterialType.transparency,
-            child: Shortcuts(
-              shortcuts: const {
-                SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
-                SingleActivator(LogicalKeyboardKey.arrowDown):
-                    NextFocusIntent(),
-                SingleActivator(LogicalKeyboardKey.arrowUp):
-                    PreviousFocusIntent(),
-              },
-              child: Actions(
-                actions: {
-                  DismissIntent: CallbackAction<DismissIntent>(
-                    onInvoke: (_) => Navigator.of(context).maybePop(),
-                  ),
+        child: RepaintBoundary(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            child: Material(
+              type: MaterialType.transparency,
+              child: Shortcuts(
+                shortcuts: const {
+                  SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+                  SingleActivator(LogicalKeyboardKey.arrowDown):
+                      NextFocusIntent(),
+                  SingleActivator(LogicalKeyboardKey.arrowUp):
+                      PreviousFocusIntent(),
                 },
-                child: Focus(
-                  autofocus: true,
-                  child: FocusTraversalGroup(
-                    child: Scrollbar(
-                      controller: _scrollController,
-                      thumbVisibility: true,
-                      child: SingleChildScrollView(
+                child: Actions(
+                  actions: {
+                    DismissIntent: CallbackAction<DismissIntent>(
+                      onInvoke: (_) => Navigator.of(context).maybePop(),
+                    ),
+                  },
+                  child: Focus(
+                    autofocus: true,
+                    child: FocusTraversalGroup(
+                      child: Scrollbar(
                         controller: _scrollController,
-                        padding: const EdgeInsets.all(AppSpacing.sm),
-                        child: widget.child,
+                        thumbVisibility: true,
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          child: widget.child,
+                        ),
                       ),
                     ),
                   ),

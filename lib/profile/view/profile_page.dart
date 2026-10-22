@@ -8,8 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamification_repository/gamification_repository.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rtu_mirea_app/app/bloc/app_bloc.dart';
-import 'package:rtu_mirea_app/app/theme/app_color_schemes.dart';
-import 'package:rtu_mirea_app/app/theme/cubit/theme_cubit.dart';
 import 'package:rtu_mirea_app/config/config.dart';
 import 'package:rtu_mirea_app/friends/cubit/friends_list_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';

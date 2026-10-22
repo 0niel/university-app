@@ -16,17 +16,11 @@ class ProfileView extends StatelessWidget {
       body: AppAmbientBackground(
         child: BlocListener<ProfileCubit, ProfileState>(
           listenWhen: (previous, current) {
-            final badgesChanged =
-                current.newlyEarnedBadges.isNotEmpty &&
+            return current.newlyEarnedBadges.isNotEmpty &&
                 !listEquals(
                   previous.newlyEarnedBadges,
                   current.newlyEarnedBadges,
                 );
-            final settingsArrived =
-                current.status == .loaded && previous.status != .loaded;
-            final accentChanged =
-                previous.settings.accentColor != current.settings.accentColor;
-            return badgesChanged || settingsArrived || accentChanged;
           },
           listener: _onProfileChanged,
           child: BlocBuilder<ProfileCubit, ProfileState>(
@@ -130,14 +124,6 @@ class ProfileView extends StatelessWidget {
   }
 
   void _onProfileChanged(BuildContext context, ProfileState state) {
-    if (!state.failedSections.contains(ProfileSection.settings)) {
-      final scheme = AppColorScheme.values.firstWhereOrNull(
-        (candidate) => candidate.name == state.settings.accentColor,
-      );
-      if (scheme != null) {
-        context.read<ThemeCubit?>()?.setColorScheme(scheme);
-      }
-    }
     if (state.newlyEarnedBadges.isNotEmpty) {
       final l10n = context.l10n;
       for (final badge in state.newlyEarnedBadges) {
