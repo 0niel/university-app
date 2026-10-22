@@ -293,9 +293,6 @@ jobs:
     name: Supabase migration replay
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    permissions:
-      contents: read
-      packages: read
 
     steps:
       - name: Check out repository
@@ -308,10 +305,8 @@ jobs:
         with:
           version: latest
 
-      - name: Authenticate container pulls
-        env:
-          GHCR_TOKEN: ${{ github.token }}
-        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+      - name: Restore container registry fallback
+        run: echo 'SUPABASE_INTERNAL_IMAGE_REGISTRY=' >> "$GITHUB_ENV"
 
       - name: Start local Supabase
         run: supabase start
