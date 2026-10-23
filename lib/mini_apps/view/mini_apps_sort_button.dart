@@ -42,7 +42,7 @@ class _MiniAppsSortButtonState extends State<_MiniAppsSortButton> {
       final label = _miniAppSortLabel(anchorContext.l10n, widget.selected);
       return Semantics(
         expanded: _selection != null,
-        child: AppButton.glass(
+        child: AppButton.tonal(
           key: const ValueKey('mini-apps-sort-button'),
           label: label,
           size: AppButtonSize.small,

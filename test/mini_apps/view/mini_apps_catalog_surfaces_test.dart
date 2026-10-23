@@ -1,7 +1,8 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-// The renderer belongs to app_ui; this verifies its shared capture contract.
+// The renderer belongs to app_ui; this verifies selective backdrop usage.
 // ignore: depend_on_referenced_packages
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:mini_apps_repository/mini_apps_repository.dart';
@@ -12,7 +13,7 @@ import 'package:rtu_mirea_app/mini_apps/view/mini_apps_catalog.dart';
 void main() {
   for (final textScale in [1.0, 2.0]) {
     testWidgets(
-      'catalog peers share capture and pinned search stays isolated '
+      'only the pinned strip uses glass above catalog content '
       'at scale $textScale',
       (tester) async {
         tester.view
@@ -33,85 +34,99 @@ void main() {
           recents: apps.take(6).toList(),
           isModerator: true,
         );
+        var enabled = true;
+        late StateSetter rebuild;
         await tester.pumpWidget(
           StatefulBuilder(
-            builder: (context, update) => MaterialApp(
-              theme: AppTheme.darkTheme,
-              locale: const Locale('ru'),
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              builder: (context, child) => MediaQuery(
-                data: MediaQuery.of(context).copyWith(
-                  textScaler: TextScaler.linear(textScale),
-                  disableAnimations: true,
-                  padding: const EdgeInsets.only(top: 24),
+            builder: (context, update) {
+              rebuild = update;
+              return MaterialApp(
+                theme: AppTheme.generateTheme(
+                  AppColors.dark,
+                  Brightness.dark,
+                  glassEnabled: enabled,
                 ),
-                child: child!,
-              ),
-              home: MiniAppsCatalog(
-                state: state,
-                onRefresh: () async {},
-                onQueryChanged: (_) {},
-                onCategoryChanged: (_) {},
-                onSortChanged: (_) {},
-                onSearchToggled: () => update(
-                  () => state = state.copyWith(isSearching: !state.isSearching),
+                locale: const Locale('ru'),
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(textScale),
+                    disableAnimations: true,
+                    padding: const EdgeInsets.only(top: 24),
+                  ),
+                  child: child!,
                 ),
-                onOpen: (_) {},
-                onActions: (_) {},
-                onCreate: () {},
-                onModerate: () {},
-                onResetFilters: () {},
-                onBack: () {},
-              ),
-            ),
+                home: MiniAppsCatalog(
+                  state: state,
+                  onRefresh: () async {},
+                  onQueryChanged: (_) {},
+                  onCategoryChanged: (_) {},
+                  onSortChanged: (_) {},
+                  onSearchToggled: () => update(
+                    () =>
+                        state = state.copyWith(isSearching: !state.isSearching),
+                  ),
+                  onOpen: (_) {},
+                  onActions: (_) {},
+                  onCreate: () {},
+                  onModerate: () {},
+                  onResetFilters: () {},
+                  onBack: () {},
+                ),
+              );
+            },
           ),
         );
         await tester.pumpAndSettle();
-
-        Finder lensIn(Finder parent) => find
-            .descendant(of: parent, matching: find.byType(LiquidGlassLens))
-            .first;
-        int? backdropOf(Finder lens) =>
-            LiquidGlassBatch.backdropIdOf(tester.element(lens));
+        expect(find.byType(LiquidGlassLens), findsNothing);
+        expect(find.byType(LiquidGlassLite), findsNothing);
+        expect(find.byType(BackdropFilter), findsNothing);
+        expect(tester.layers.whereType<BackdropFilterLayer>(), isEmpty);
 
         final sort = find.byKey(const ValueKey('mini-apps-sort-button'));
         final create = find.byKey(const ValueKey('mini-apps-create-button'));
         final recent = find.byKey(const ValueKey('recent-capture-0'));
-        final sortLens = lensIn(sort);
-        final sharedId = backdropOf(sortLens);
-        expect(sharedId, isNotNull);
-        expect(backdropOf(lensIn(create)), sharedId);
-        expect(backdropOf(lensIn(recent)), sharedId);
+        for (final control in [sort, create, recent]) {
+          expect(
+            find.descendant(
+              of: control,
+              matching: find.byType(LiquidGlassLens),
+            ),
+            findsNothing,
+          );
+          expect(
+            find.descendant(
+              of: control,
+              matching: find.byType(LiquidGlassLite),
+            ),
+            findsNothing,
+          );
+          expect(
+            find.ancestor(of: control, matching: find.byType(AppGlassBatch)),
+            findsNothing,
+          );
+        }
         expect(tester.getRect(sort).overlaps(tester.getRect(recent)), isFalse);
-        final header = find.byType(AppInnerHeader);
-        final headerId = backdropOf(lensIn(header));
-        expect(headerId, isNotNull);
-        expect(headerId, isNot(sharedId));
-        for (final lens
-            in find
-                .descendant(
-                  of: header,
-                  matching: find.byType(LiquidGlassLens),
-                )
-                .evaluate()) {
-          expect(LiquidGlassBatch.backdropIdOf(lens), headerId);
-        }
-        for (final lens in [sortLens, lensIn(create), lensIn(recent)]) {
-          final style = tester.widget<LiquidGlassLens>(lens).style;
-          expect(style.liteGlass, isFalse);
-          expect(style.blur, 6);
-          expect(style.refractionIndex, 1.012);
-          expect(style.refractionWidth, 14);
-        }
+        final icon = find.descendant(
+          of: recent,
+          matching: find.byType(AppIconTile),
+        );
+        expect(tester.getSize(icon), const Size.square(52));
+        expect(MediaQuery.textScalerOf(tester.element(icon)).scale(26), 26);
 
         await tester.tap(find.byType(AppHeaderCircleButton));
         await tester.pumpAndSettle();
         final search = find.byType(AppSearchField);
-        final searchId = backdropOf(lensIn(search));
-        expect(searchId, isNotNull);
-        expect(searchId, isNot(sharedId));
-        expect(searchId, isNot(headerId));
+        expect(find.byType(LiquidGlassLens), findsNothing);
+        expect(find.byType(BackdropFilter), findsNothing);
+        expect(tester.layers.whereType<BackdropFilterLayer>(), isEmpty);
+        final field = find.descendant(
+          of: search,
+          matching: find.byType(TextField),
+        );
+        await tester.enterText(field, 'draft');
+        await tester.pump(const Duration(milliseconds: 300));
         await tester.drag(
           find.byKey(const PageStorageKey('mini-apps-catalog')),
           const Offset(0, -360),
@@ -122,15 +137,40 @@ void main() {
           matching: find.byType(AppPinnedSurface),
         );
         expect(tester.widget<AppPinnedSurface>(pinnedSurface).elevated, isTrue);
-        expect(backdropOf(lensIn(search)), searchId);
-        expect(backdropOf(lensIn(recent)), sharedId);
+        expect(find.byType(LiquidGlassLens), findsNothing);
+        expect(find.byType(LiquidGlassLite), findsOneWidget);
+        expect(
+          find.descendant(
+            of: pinnedSurface,
+            matching: find.byType(LiquidGlassLite),
+          ),
+          findsOneWidget,
+        );
+        expect(tester.layers.whereType<BackdropFilterLayer>(), hasLength(1));
+        expect(
+          find.descendant(of: search, matching: find.byType(BackdropFilter)),
+          findsNothing,
+        );
+        final searchBounds = tester.getRect(search);
+        final controller = tester.widget<TextField>(field).controller!;
+        for (final next in [false, true]) {
+          rebuild(() => enabled = next);
+          await tester.pumpAndSettle();
+          expect(tester.getRect(search), searchBounds);
+          expect(tester.widget<TextField>(field).controller, same(controller));
+          expect(controller.text, 'draft');
+          expect(
+            tester.layers.whereType<BackdropFilterLayer>(),
+            next ? hasLength(1) : isEmpty,
+          );
+        }
         expect(tester.takeException(), isNull);
       },
     );
   }
 
   testWidgets(
-    'toolbar batches wrapped controls without changing their actions',
+    'tonal toolbar keeps wrapped targets and actions through glass toggles',
     (
       tester,
     ) async {
@@ -140,6 +180,7 @@ void main() {
       addTearDown(tester.view.reset);
       var creates = 0;
       var moderations = 0;
+      final sorts = <MiniAppSort>[];
       var enabled = true;
       late StateSetter update;
       await tester.pumpWidget(
@@ -170,7 +211,7 @@ void main() {
                 onRefresh: () async {},
                 onQueryChanged: (_) {},
                 onCategoryChanged: (_) {},
-                onSortChanged: (_) {},
+                onSortChanged: sorts.add,
                 onSearchToggled: () {},
                 onOpen: (_) {},
                 onActions: (_) {},
@@ -189,14 +230,6 @@ void main() {
         find.byKey(const ValueKey('mini-apps-create-button')),
         find.byTooltip(l10n.miniAppsModeration),
       ];
-      final batches = [
-        for (final control in controls)
-          tester.element(
-            find.ancestor(of: control, matching: find.byType(AppGlassBatch)),
-          ),
-      ];
-      expect(batches[1], same(batches[0]));
-      expect(batches[2], same(batches[0]));
       final bounds = controls.map(tester.getRect).toList();
       for (var i = 0; i < bounds.length; i++) {
         for (var j = i + 1; j < bounds.length; j++) {
@@ -211,6 +244,20 @@ void main() {
         await tester.pumpAndSettle();
         for (var index = 0; index < controls.length; index++) {
           expect(tester.getRect(controls[index]), bounds[index]);
+          expect(
+            find.descendant(
+              of: controls[index],
+              matching: find.byType(LiquidGlassLens),
+            ),
+            findsNothing,
+          );
+          expect(
+            find.ancestor(
+              of: controls[index],
+              matching: find.byType(AppGlassBatch),
+            ),
+            findsNothing,
+          );
         }
         await tester.tap(create);
         await tester.tap(moderate);
@@ -220,12 +267,22 @@ void main() {
       await tester.tap(controls[0]);
       await tester.pumpAndSettle();
       expect(find.byType(AppPopover), findsOneWidget);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AppPopover),
+          matching: find.text(l10n.miniAppsSortNew),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(sorts, [MiniAppSort.newest]);
+      expect(find.byType(AppPopover), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
 
   testWidgets(
-    'recent glass stays scrollable and tappable through reveal and toggle',
+    'ordinary recent tiles keep scroll state and taps '
+    'through reveal and toggle',
     (
       tester,
     ) async {
@@ -282,7 +339,7 @@ void main() {
       final list = find.byKey(const ValueKey('mini-apps-recents'));
       expect(
         find.ancestor(of: list, matching: find.byType(AppGlassBatch)),
-        findsOneWidget,
+        findsNothing,
       );
       await tester.drag(list, const Offset(-170, 0));
       await tester.pumpAndSettle();
@@ -304,6 +361,14 @@ void main() {
           same(scrollableState),
         );
         expect(scrollableState.position.pixels, offset);
+        expect(
+          find.descendant(of: list, matching: find.byType(LiquidGlassLens)),
+          findsNothing,
+        );
+        expect(
+          find.descendant(of: list, matching: find.byType(BackdropFilter)),
+          findsNothing,
+        );
         final recent = find.byKey(const ValueKey('recent-recent-2'));
         expect(recent.hitTestable(), findsOneWidget);
         await tester.tap(recent);

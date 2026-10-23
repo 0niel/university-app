@@ -99,9 +99,9 @@ void main() {
             final style = tester.widget<LiquidGlassLens>(lens).style;
             expect(style.liteGlass, isFalse);
             expect(style.blur, 6);
-            expect(style.refractionIndex, 1.012);
-            expect(style.refractionWidth, 14);
-            expect(style.specular, AppGlassStyle.rim);
+            expect(style.refractionIndex, 1.019);
+            expect(style.refractionWidth, 12);
+            expect(style.specular, AppGlassStyle.floatingRim);
             expect(style.glow, AppGlassStyle.glow);
           }
           final firstTarget = tester.getRect(

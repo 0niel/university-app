@@ -75,10 +75,9 @@ void main() {
           scroll.jumpTo(120);
           await tester.pump();
           expect(focus.hasFocus, isTrue);
-          final glass = find.byType(
-            highlight ? LiquidGlassLens : LiquidGlassLite,
-          );
-          expect(glass, findsOneWidget);
+          final glass = find.byType(LiquidGlassLens);
+          expect(glass, highlight ? findsOneWidget : findsNothing);
+          if (!highlight) expect(find.byType(LiquidGlassLite), findsNothing);
 
           for (final next in [false, true, false]) {
             update(() => enabled = next);
@@ -90,14 +89,17 @@ void main() {
             expect(scroll.offset, 120);
             expect(
               glass,
-              next ? findsOneWidget : findsNothing,
+              next && highlight ? findsOneWidget : findsNothing,
             );
-            if (!next) {
+            if (!next || !highlight) {
               expect(find.byType(BackdropFilter), findsNothing);
               final fallback = find.byWidgetPredicate(
-                (widget) =>
-                    widget is ColoredBox &&
-                    widget.color == (highlight ? colors.tint : colors.surface),
+                (widget) => highlight
+                    ? widget is ColoredBox && widget.color == colors.tint
+                    : widget is DecoratedBox &&
+                          widget.decoration is BoxDecoration &&
+                          (widget.decoration as BoxDecoration).color ==
+                              colors.surface,
               );
               expect(fallback, findsOneWidget);
             }
@@ -110,18 +112,23 @@ void main() {
     }
   }
 
-  testWidgets('glass is enabled for default and custom themes', (tester) async {
+  testWidgets('floating glass is enabled for default and custom themes', (
+    tester,
+  ) async {
     for (final theme in [AppTheme.darkTheme, ThemeData()]) {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
           home: const Scaffold(
-            body: AppGlassSurface(child: SizedBox(width: 100, height: 80)),
+            body: AppGlassSurface(
+              role: AppGlassRole.control,
+              child: SizedBox(width: 100, height: 80),
+            ),
           ),
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(LiquidGlassLite), findsOneWidget);
+      expect(find.byType(LiquidGlassLens), findsOneWidget);
       expect(tester.takeException(), isNull);
     }
   });

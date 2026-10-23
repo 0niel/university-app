@@ -124,21 +124,22 @@ class _AppSheetSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = backgroundColor ?? context.colors.surface;
     return Material(
-      color: color,
+      type: MaterialType.transparency,
       borderRadius: const BorderRadius.vertical(
         top: Radius.circular(AppRadius.sheet),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          const Positioned.fill(
+          Positioned.fill(
             bottom: -AppRadius.sheet,
             child: IgnorePointer(
               child: AppGlassSurface(
                 role: AppGlassRole.overlay,
                 borderRadius: AppRadius.sheet,
                 tone: AppGlassTone.subtle,
-                child: SizedBox.expand(),
+                color: color,
+                child: const SizedBox.expand(),
               ),
             ),
           ),

@@ -238,11 +238,18 @@ void main() {
       const background = Color(0xFF263142);
       await open(tester, title: 'Цвет', backgroundColor: background);
 
-      expect(tester.widget<Material>(surfaceMaterial()).color, background);
+      expect(
+        tester.widget<Material>(surfaceMaterial()).type,
+        MaterialType.transparency,
+      );
+      expect(
+        tester.widget<AppGlassSurface>(find.byType(AppGlassSurface)).color,
+        background,
+      );
       expect(find.byType(AppGlassSurface), findsOneWidget);
     });
 
-    testWidgets('opaque sheet retains the original full lens lighting', (
+    testWidgets('sheet retains the shared floating lens lighting', (
       tester,
     ) async {
       usePhoneViewport(tester);
@@ -251,11 +258,11 @@ void main() {
       final glass = tester.widget<LiquidGlassLens>(
         find.byType(LiquidGlassLens),
       );
-      expect(glass.style.specular, AppGlassStyle.rim);
+      expect(glass.style.specular, AppGlassStyle.floatingRim);
       expect(glass.style.glow, AppGlassStyle.glow);
-      expect(glass.style.blur, 14);
-      expect(glass.style.refractionIndex, 1.004);
-      expect(glass.style.refractionWidth, 8);
+      expect(glass.style.blur, 8);
+      expect(glass.style.refractionIndex, 1.012);
+      expect(glass.style.refractionWidth, 12);
       expect(tester.takeException(), isNull);
     });
 

@@ -17,13 +17,14 @@ void main() {
         (const Size(180, 56), 28.0),
         (const Size(360, 120), 24.0),
       ]) {
-        for (final role in [AppGlassRole.content, AppGlassRole.pinned]) {
-          final style = AppGlassStyle.surface(
-            colors: colors,
-            radius: radius,
-            tone: AppGlassTone.regular,
-            highContrast: false,
-            role: role,
+        for (final blur in [0.0, 6.0]) {
+          final style = LiquidGlassStyle(
+            liteGlass: true,
+            shape: LiquidGlassShape.roundedRectangle(cornerRadius: radius),
+            specular: AppGlassStyle.rim,
+            glow: AppGlassStyle.glow,
+            blur: blur,
+            color: colors.surface.withValues(alpha: .9),
           );
           await tester.pumpWidget(
             MaterialApp(
@@ -89,7 +90,7 @@ void main() {
             expect(
               _firstDifference(reference, optimized),
               -1,
-              reason: '$role at $size, DPR $ratio, dark=${colors.isDark}',
+              reason: 'blur=$blur at $size, DPR $ratio, dark=${colors.isDark}',
             );
           }
         }

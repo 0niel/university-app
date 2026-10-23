@@ -36,6 +36,26 @@ class AppGlassSurface extends StatelessWidget {
         (tone == AppGlassTone.accent
             ? Color.alphaBlend(accent.withValues(alpha: .13), colors.surface)
             : colors.surface);
+    final background = Color.alphaBlend(base, colors.surface);
+    if (role == AppGlassRole.content) {
+      final radius = BorderRadius.circular(borderRadius);
+      return ClipRRect(
+        borderRadius: radius,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: radius,
+            border: Border.all(
+              color: highContrast
+                  ? colors.ink.withValues(alpha: .24)
+                  : colors.line,
+              width: highContrast ? 1 : .75,
+            ),
+          ),
+          child: Padding(padding: padding, child: child),
+        ),
+      );
+    }
     final style = AppGlassStyle.surface(
       colors: colors,
       radius: borderRadius,
@@ -43,12 +63,12 @@ class AppGlassSurface extends StatelessWidget {
       highContrast: highContrast,
       role: role,
       tint: accent,
-      baseColor: Color.alphaBlend(base, colors.surface),
+      baseColor: background,
     );
     return AppGlassLens(
       style: style,
       borderRadius: borderRadius,
-      fallbackColor: Color.alphaBlend(base, colors.surface),
+      fallbackColor: background,
       child: Padding(padding: padding, child: child),
     );
   }
