@@ -305,6 +305,9 @@ jobs:
         with:
           version: latest
 
+      - name: Restore container registry fallback
+        run: echo 'SUPABASE_INTERNAL_IMAGE_REGISTRY=' >> "$GITHUB_ENV"
+
       - name: Start local Supabase
         run: supabase start
 
