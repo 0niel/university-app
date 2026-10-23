@@ -2,8 +2,12 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+// Verify app_ui capture identities without adding a runtime dependency.
+// ignore: depend_on_referenced_packages
+import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
+import 'package:rtu_mirea_app/map/widgets/map_search_transition.dart';
 import 'package:rtu_mirea_app/map/widgets/map_top_bar.dart';
 
 const _campus = CampusModel(
@@ -66,6 +70,123 @@ Future<void> _pumpBar(
 }
 
 void main() {
+  for (final textScale in [1.0, 2.0]) {
+    testWidgets(
+      'collapsed controls share capture while animated search stays isolated '
+      'at scale $textScale',
+      (tester) async {
+        addTearDown(tester.view.reset);
+        final controller = TextEditingController();
+        addTearDown(controller.dispose);
+        final queries = <String>[];
+        var friends = 0;
+        CampusModel? selected;
+        await _pumpBar(
+          tester,
+          controller: controller,
+          onQueryChanged: queries.add,
+          onFriends: () => friends++,
+          onCampusSelected: (campus) => selected = campus,
+          hasSelection: false,
+          reducedMotion: false,
+          textScale: textScale,
+        );
+        final bar = find.byType(MapTopBar);
+        final l10n = tester.element(bar).l10n;
+        final lenses = find.descendant(
+          of: bar,
+          matching: find.byType(LiquidGlassLens),
+        );
+        expect(lenses, findsNWidgets(3));
+        final collapsedId = LiquidGlassBatch.backdropIdOf(
+          lenses.evaluate().first,
+        );
+        expect(collapsedId, isNotNull);
+        final bounds = [
+          for (final element in lenses.evaluate())
+            tester.getRect(find.byWidget(element.widget)),
+        ];
+        for (final element in lenses.evaluate()) {
+          expect(LiquidGlassBatch.backdropIdOf(element), collapsedId);
+        }
+        for (var first = 0; first < bounds.length; first++) {
+          for (var second = first + 1; second < bounds.length; second++) {
+            expect(bounds[first].overlaps(bounds[second]), isFalse);
+          }
+        }
+        await tester.tap(find.byTooltip(l10n.mapFriendsToggle));
+        expect(friends, 1);
+        await tester.tap(find.text(l10n.mapCampusFilter));
+        await tester.pumpAndSettle();
+        expect(find.byType(AppSheet), findsOneWidget);
+        expect(
+          find.ancestor(
+            of: find.byType(AppSheet),
+            matching: find.byType(AppGlassBatch),
+          ),
+          findsNothing,
+        );
+        await tester.tap(find.text(_campus.displayName));
+        await tester.pumpAndSettle();
+        expect(selected, _campus);
+        expect(find.byType(AppSheet), findsNothing);
+
+        await tester.tap(find.byTooltip(l10n.mapSearchPlaceholder));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 8));
+        final transition = tester.widget<MapSearchTransition>(
+          find.byType(MapSearchTransition),
+        );
+        expect(transition.animation.value, greaterThan(0));
+        expect(transition.animation.isCompleted, isFalse);
+        final search = find.byType(AppSearchField);
+        final searchLens = find.descendant(
+          of: search,
+          matching: find.byType(LiquidGlassLens),
+        );
+        final searchId = LiquidGlassBatch.backdropIdOf(
+          tester.element(searchLens),
+        );
+        expect(searchId, isNotNull);
+        expect(searchId, isNot(collapsedId));
+        final campus = find.byType(AppButton);
+        expect(tester.getRect(search).overlaps(tester.getRect(campus)), isTrue);
+        final remainingControls = lenses.evaluate().where(
+          (element) => LiquidGlassBatch.backdropIdOf(element) == collapsedId,
+        );
+        expect(remainingControls, hasLength(2));
+        expect(
+          find.byTooltip(l10n.mapFriendsToggle).hitTestable(),
+          findsNothing,
+        );
+        final field = find.byType(TextField);
+        final fieldElement = tester.element(field);
+        expect(tester.widget<TextField>(field).focusNode!.hasFocus, isFalse);
+        await tester.pumpAndSettle();
+        expect(tester.element(field), same(fieldElement));
+        expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
+        expect(tester.testTextInput.isVisible, isTrue);
+        expect(
+          LiquidGlassBatch.backdropIdOf(tester.element(searchLens)),
+          searchId,
+        );
+        await tester.enterText(field, 'А-101');
+        expect(queries, ['А-101']);
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await tester.pumpAndSettle();
+        expect(controller.text, isEmpty);
+        expect(queries, ['А-101', '']);
+        expect(field, findsNothing);
+        expect(tester.testTextInput.isVisible, isFalse);
+        expect(lenses, findsNWidgets(3));
+        for (final element in lenses.evaluate()) {
+          expect(LiquidGlassBatch.backdropIdOf(element), collapsedId);
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   for (final glassEnabled in [true, false]) {
     testWidgets(
       'floating search keeps optics and editing with glass $glassEnabled',

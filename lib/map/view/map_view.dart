@@ -31,6 +31,7 @@ import 'package:rtu_mirea_app/map/widgets/map_places_explorer.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_overlay.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/map_saved_places_sheet.dart';
+import 'package:rtu_mirea_app/map/widgets/map_selection_feedback.dart';
 import 'package:rtu_mirea_app/map/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -1167,7 +1168,7 @@ class _MapViewState extends State<MapView> {
   @override
   Widget build(BuildContext context) => MapActivityListener(
     onChanged: _activityChanged,
-    child: _buildMap(context),
+    child: MapSelectionFeedback(child: _buildMap(context)),
   );
 
   Widget _buildMap(BuildContext context) => Scaffold(
