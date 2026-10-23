@@ -675,6 +675,8 @@ void main() {
     await pumpMap(tester, mapController: controller, reduceMotion: true);
     await tester.tap(find.byTooltip('Объёмный план'));
     await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 120));
+    await tester.pumpAndSettle();
     final initial = tester.widget<MapVolumeLayer>(find.byType(MapVolumeLayer));
     final scale = controller.currentScale;
     await tester.tap(find.byTooltip('Повернуть план'));
@@ -826,6 +828,8 @@ void main() {
       reduceMotion: true,
       mapController: controller,
     );
+    await tester.pump(const Duration(milliseconds: 120));
+    await tester.pumpAndSettle();
     final map = tester.widget<SvgInteractiveMap>(
       find.byType(SvgInteractiveMap),
     );

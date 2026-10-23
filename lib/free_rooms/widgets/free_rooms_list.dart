@@ -25,6 +25,7 @@ class FreeRoomsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Visibility.of(context);
     final l10n = context.l10n;
     final current = now ?? DateTime.now();
     if (state.rooms.isEmpty &&
@@ -101,6 +102,8 @@ class FreeRoomsList extends StatelessWidget {
       floor: roomFloors[roomKey(room.room)],
       locale: context.l10n.localeName,
     );
-    return FreeRoomRow(room: model, onTap: () => onRoomTap(model));
+    return RepaintBoundary(
+      child: FreeRoomRow(room: model, onTap: () => onRoomTap(model)),
+    );
   }
 }

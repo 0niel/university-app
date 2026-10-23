@@ -1,0 +1,40 @@
+import 'package:flutter/material.dart';
+
+String mapPlaceKindLabel(String kind) => switch (kind) {
+  'room' || 'classroom' => 'Аудитория',
+  'cafeteria' || 'cafe' || 'canteen' || 'food' => 'Еда',
+  'atm' || 'bank' => 'Банкомат',
+  'toilet' || 'restroom' || 'wc' => 'Туалет',
+  'entrance' || 'exit' => 'Вход',
+  'elevator' || 'lift' => 'Лифт',
+  'stairs' || 'staircase' => 'Лестница',
+  'escalator' => 'Эскалатор',
+  'ramp' => 'Пандус',
+  'library' => 'Библиотека',
+  'water' || 'drinking_water' => 'Питьевая вода',
+  'printer' || 'copy' => 'Печать',
+  'wardrobe' || 'cloakroom' => 'Гардероб',
+  'medical' || 'first_aid' => 'Медпункт',
+  'vending' => 'Автомат',
+  'study' || 'coworking' => 'Для учёбы',
+  _ => 'Сервис',
+};
+
+IconData mapPlaceKindIcon(String kind) => switch (mapPlaceKindLabel(kind)) {
+  'Аудитория' => Icons.meeting_room_outlined,
+  'Еда' => Icons.restaurant_rounded,
+  'Банкомат' => Icons.atm_rounded,
+  'Туалет' => Icons.wc_rounded,
+  'Вход' => Icons.door_front_door_outlined,
+  'Лифт' => Icons.elevator_outlined,
+  'Лестница' => Icons.stairs_outlined,
+  'Эскалатор' => Icons.escalator_outlined,
+  'Пандус' => Icons.accessible_forward_rounded,
+  'Библиотека' => Icons.local_library_outlined,
+  'Питьевая вода' => Icons.water_drop_outlined,
+  'Печать' => Icons.print_outlined,
+  'Гардероб' => Icons.checkroom_rounded,
+  'Медпункт' => Icons.medical_services_outlined,
+  'Автомат' => Icons.local_cafe_outlined,
+  _ => Icons.place_outlined,
+};

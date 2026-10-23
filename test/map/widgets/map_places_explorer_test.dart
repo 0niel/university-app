@@ -1,9 +1,11 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
 import 'package:rtu_mirea_app/map/widgets/map_places_explorer.dart';
+import 'package:rtu_mirea_app/map/widgets/map_places_index.dart';
 
 import '../../helpers/pump_app.dart';
 
@@ -287,7 +289,7 @@ void main() {
     expect(_visibleIds(tester), ['food']);
   });
 
-  testWidgets('source is above results and large text remains bounded', (
+  testWidgets('no duplicate source link and large text remains bounded', (
     tester,
   ) async {
     await tester.pumpApp(
@@ -299,15 +301,113 @@ void main() {
       textScaler: const TextScaler.linear(2),
     );
     await tester.pumpAndSettle();
-    final source = find.widgetWithText(AppButton, 'Пульс РТУ МИРЭА · источник');
-    expect(source, findsOneWidget);
-    expect(tester.getTopLeft(source).dy, lessThan(700));
-    expect(
-      tester.getTopLeft(source).dy,
-      lessThan(tester.getTopLeft(find.byType(AppListGroup)).dy),
-    );
+    expect(find.textContaining('источник'), findsNothing);
+    expect(find.textContaining('Пульс РТУ МИРЭА'), findsNothing);
     expect(find.byType(AppListRow), findsNWidgets(20));
     expect(find.byType(AppIconTile), findsNWidgets(20));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'pagination keeps bounded row repaint layers and existing actions',
+    (
+      tester,
+    ) async {
+      final campus = _campus([
+        for (var n = 1; n <= 60; n++) _place('room-$n', '$n'),
+      ]);
+      MapPlaceData? opened;
+      await tester.pumpApp(
+        _page(campus, onPlace: (place) => opened = place),
+        size: const Size(400, 900),
+      );
+      final first = find.byKey(const ValueKey('map-place-paint-room-1'));
+      final boundary = tester.renderObject<RenderRepaintBoundary>(first);
+      final layer = boundary.debugLayer! as OffsetLayer;
+      final picture = (layer.firstChild! as PictureLayer).picture;
+      expect(boundary.size.height, lessThan(200));
+      expect(find.byType(AppListRow), findsNWidgets(20));
+      await tester.drag(
+        find.byType(SingleChildScrollView).first,
+        const Offset(0, -30),
+      );
+      await tester.pumpAndSettle();
+      expect((layer.firstChild! as PictureLayer).picture, same(picture));
+      final more = tester.widget<AppButton>(
+        find.widgetWithText(AppButton, 'Ещё 40 мест'),
+      );
+      more.onPressed!();
+      await tester.pump();
+      expect(find.byType(AppListRow), findsNWidgets(50));
+      expect(tester.renderObject<RenderRepaintBoundary>(first), same(boundary));
+      await tester.ensureVisible(find.byKey(const ValueKey('room-25')));
+      await tester.tap(find.byKey(const ValueKey('room-25')));
+      expect(opened?.id, 'room-25');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  test(
+    'index reuses identical selections and invalidates floor/query/category',
+    () {
+      final index = MapPlacesIndex(
+        _campus([
+          _place('other', '2', floor: 'floor-1'),
+          _place('current', '20'),
+          _place('food', 'Cafe', kind: 'cafe'),
+        ]),
+      );
+      List<MapPlaceEntry> select({
+        String query = '',
+        String? category,
+        String? floor = 'floor-2',
+        bool onlyFloor = false,
+      }) => index.select(
+        query: query,
+        category: category,
+        currentFloorId: floor,
+        onlyCurrentFloor: onlyFloor,
+      );
+      final all = select();
+      expect(select(), same(all));
+      expect(select(query: '2').map((entry) => entry.place.id), [
+        'other',
+        'current',
+        'food',
+      ]);
+      expect(select(category: 'Еда').single.place.id, 'food');
+      expect(select(onlyFloor: true).map((entry) => entry.place.id), [
+        'current',
+        'food',
+      ]);
+      expect(
+        select(floor: 'floor-1', onlyFloor: true).single.place.id,
+        'other',
+      );
+      expect(index.countOnFloor('floor-2'), 2);
+      expect(all.clear, throwsUnsupportedError);
+    },
+  );
+
+  testWidgets('mutated source lists and floor metadata refresh the index', (
+    tester,
+  ) async {
+    final rooms = [_place('first', '101')];
+    final campus = _campus(rooms);
+    await tester.pumpApp(_page(campus, query: '101'));
+    expect(_visibleIds(tester), ['first']);
+    rooms[0] = _place('replacement', '102');
+    await tester.pumpApp(_page(campus, query: '101'));
+    expect(_visibleIds(tester), isEmpty);
+    rooms.add(_place('new', '101'));
+    await tester.pumpApp(_page(campus, query: '101'));
+    expect(_visibleIds(tester), ['new']);
+    campus.floors[2] = MapFloorData.fromJson({
+      'id': 'floor-2',
+      'level': 3,
+    }, svgPath: 'floor.svg');
+    await tester.pumpApp(_page(campus, query: '101 3 этаж'));
+    expect(_visibleIds(tester), ['new']);
+    expect(find.text('Аудитория · 3 этаж'), findsOneWidget);
   });
 }

@@ -158,10 +158,6 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       if (mounted && revision == _viewportRevision) _refitViewport();
     }
 
-    if (_reduceMotion) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => apply());
-      return;
-    }
     _viewportSettled = Timer(
       const Duration(milliseconds: 120),
       apply,

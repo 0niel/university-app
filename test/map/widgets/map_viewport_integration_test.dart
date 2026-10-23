@@ -17,6 +17,81 @@ import '../../helpers/pump_app.dart';
 class _Map extends MockBloc<MapEvent, MapState> implements MapBloc {}
 
 void main() {
+  for (final (disableAnimations, accessibleNavigation) in [
+    (false, false),
+    (true, false),
+    (false, true),
+  ]) {
+    testWidgets(
+      'viewport drag settles before refitting, '
+      'reduce=$disableAnimations, accessible=$accessibleNavigation',
+      (tester) async {
+        const bounds = Rect.fromLTWH(0, 0, 2000, 1000);
+        final bloc = _Map();
+        when(() => bloc.state).thenReturn(
+          const MapState(status: .loaded, boundingRect: bounds),
+        );
+        addTearDown(bloc.close);
+        final padding = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
+        addTearDown(padding.dispose);
+        await tester.pumpApp(
+          BlocProvider<MapBloc>.value(
+            value: bloc,
+            child: MediaQuery(
+              data: MediaQueryData(
+                disableAnimations: disableAnimations,
+                accessibleNavigation: accessibleNavigation,
+              ),
+              child: SvgInteractiveMap(
+                svgAssetPath: 'floor',
+                svgContent: '<svg viewBox="0 0 2000 1000" />',
+                showRoomLabels: true,
+                viewportPaddingListenable: padding,
+              ),
+            ),
+          ),
+          size: const Size(320, 420),
+        );
+        await tester.pumpAndSettle();
+        final viewport = tester.getSize(find.byType(SvgInteractiveMap));
+        final camera = tester
+            .widget<InteractiveViewer>(find.byType(InteractiveViewer))
+            .transformationController!;
+        final initial = List<double>.of(camera.value.storage);
+        var changes = 0;
+        void changed() => changes++;
+        camera.addListener(changed);
+        addTearDown(() => camera.removeListener(changed));
+        for (final bottom in [150.0, 200.0, 250.0, 300.0, 340.0]) {
+          await tester.pump(const Duration(milliseconds: 16));
+          padding.value = EdgeInsets.only(bottom: bottom);
+          tester.binding.scheduleFrame();
+          await tester.pump();
+          expect(changes, 0);
+          expect(camera.value.storage, orderedEquals(initial));
+        }
+        await tester.pump(const Duration(milliseconds: 119));
+        expect(changes, 0);
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.pumpAndSettle();
+        final availableHeight = viewport.height - padding.value.bottom;
+        final scale = availableHeight / bounds.height;
+        expect(mapPlanarScale(camera.value), closeTo(scale, .000001));
+        expect(
+          camera.value[12],
+          closeTo((viewport.width - bounds.width * scale) / 2, .000001),
+        );
+        expect(camera.value[13], closeTo(0, .000001));
+        if (disableAnimations || accessibleNavigation) {
+          expect(changes, 1);
+        } else {
+          expect(changes, greaterThan(1));
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('actual V78 paint surfaces remain bounded at maximum zoom', (
     tester,
   ) async {
