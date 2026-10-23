@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+// Inspect backdrop capture ownership supplied by app_ui's glass dependency.
 // ignore: depend_on_referenced_packages
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:mocktail/mocktail.dart';
