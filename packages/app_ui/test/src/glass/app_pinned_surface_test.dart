@@ -71,8 +71,20 @@ void main() {
             );
             expect(material.blur, 6);
             expect(material.magnification, 1);
-            expect(material.specular, AppGlassStyle.rim);
+            expect(material.specular!.thickness, 0);
+            expect(material.specular!.intensity, 0);
             expect(material.glow, const LiquidGlassLight.glow(thickness: 0));
+            expect(
+              find.descendant(
+                of: find.byType(LiquidGlassLite),
+                matching: find.byType(CustomPaint),
+              ),
+              findsNothing,
+            );
+            expect(
+              tester.renderObject<RenderBox>(find.byType(LiquidGlassLite)),
+              paintsExactlyCountTimes(#drawVertices, 0),
+            );
             expect(
               tester.layers.whereType<BackdropFilterLayer>(),
               hasLength(1),

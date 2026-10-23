@@ -56,8 +56,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     return _syntheticRooms['$floorPath:$revision'] ?? const {};
   }
 
-  Future<String> loadSvg(String path) =>
-      repository?.loadSvg(path) ?? _roomsParser.onLoadSvg(path);
+  Future<String> loadSvg(String path, {CampusMapData? campus}) =>
+      repository?.loadSvg(path, campus: campus) ?? _roomsParser.onLoadSvg(path);
 
   Future<void> _onMapInitialized(
     MapInitialized event,
@@ -136,7 +136,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       final (rooms, rect) = await _parseFloor(floor, campusData: campusData);
       final svgContent = repository == null
           ? null
-          : await loadSvg(floor.svgPath);
+          : await loadSvg(floor.svgPath, campus: campusData);
       if (revision != _selectionRevision || emit.isDone) return;
       emit(
         state.copyWith(
@@ -234,7 +234,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       _floorCache.clear();
       _syntheticRooms.clear();
       final (rooms, rect) = await _parseFloor(floor, campusData: updated);
-      final svgContent = await loadSvg(floor.svgPath);
+      final svgContent = await loadSvg(floor.svgPath, campus: updated);
       if (emit.isDone ||
           revision != _selectionRevision ||
           !identical(state.campusData, displayed)) {
@@ -284,7 +284,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       final (rooms, rect) = await _parseFloor(floor, campusData: campusData);
       final svgContent = repository == null
           ? null
-          : await loadSvg(floor.svgPath);
+          : await loadSvg(floor.svgPath, campus: campusData);
       if (revision != _selectionRevision || emit.isDone) return;
       emit(
         state.copyWith(
@@ -402,7 +402,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       _floorCache.clear();
       _syntheticRooms.clear();
       final (rooms, rect) = await _parseFloor(floor, campusData: campusData);
-      final svgContent = await loadSvg(floor.svgPath);
+      final svgContent = await loadSvg(floor.svgPath, campus: campusData);
       if (revision != _selectionRevision || emit.isDone) return;
       emit(
         state.copyWith(
@@ -447,6 +447,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         state.selectedFloor?.id == event.floor.id) {
       return;
     }
+    final previous = state;
     final revision = ++_selectionRevision;
     final changedCampus = state.selectedCampus?.id != event.campus.id;
     final resolveCampus = changedCampus || state.status == .loading;
@@ -467,7 +468,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       final (rooms, rect) = await _parseFloor(floor, campusData: campusData);
       final svgContent = repository == null
           ? null
-          : await loadSvg(floor.svgPath);
+          : await loadSvg(floor.svgPath, campus: campusData);
       if (revision != _selectionRevision || emit.isDone) return;
       emit(
         state.copyWith(
@@ -502,9 +503,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       }
     } on Exception catch (error, stackTrace) {
       if (revision != _selectionRevision || emit.isDone) return;
+      final canRestore =
+          (previous.status == .loaded || previous.status == .loading) &&
+          previous.selectedCampus != null &&
+          previous.selectedFloor != null &&
+          (repository == null || previous.svgContent != null);
       emit(
-        state.copyWith(
-          status: .failure,
+        (canRestore ? previous : state).copyWith(
+          status: canRestore ? .loaded : .failure,
           errorMessage: 'Ошибка загрузки этажа: $error',
         ),
       );
@@ -588,7 +594,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     if (cached != null) return cached;
     final parser = repository == null
         ? _roomsParser
-        : SvgRoomParser(onLoadSvg: loadSvg);
+        : SvgRoomParser(
+            onLoadSvg: (path) => loadSvg(path, campus: campusData),
+          );
     final (parsedRooms, boundingRect) = await parser.parseSvg(
       floor.svgPath,
     );

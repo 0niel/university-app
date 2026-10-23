@@ -10,6 +10,7 @@ import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
 import 'package:rtu_mirea_app/map/services/room_key.dart';
+import 'package:rtu_mirea_app/map/widgets/map_panel_expand_button.dart';
 
 class MapFreeRoomsPanel extends StatelessWidget {
   const MapFreeRoomsPanel({
@@ -169,31 +170,14 @@ class MapFreeRoomsPanel extends StatelessWidget {
                     onTap: () => _chooseFloor(context),
                   ),
                 const SizedBox(width: AppSpacing.sm),
-                AnimatedBuilder(
-                  animation: controller,
-                  builder: (context, _) {
-                    final expanded =
-                        controller.isAttached &&
-                        controller.size > collapsedSize + .08;
-                    return AppIconButton(
-                      icon: AnimatedRotation(
-                        turns: expanded ? .5 : 0,
-                        duration: NinjaMotion.of(context),
-                        child: const AppLineIconWidget(AppLineIcon.chevronU),
-                      ),
-                      tooltip: expanded
-                          ? l10n.mapCollapseSheet
-                          : l10n.mapExpandSheet,
-                      shape: AppIconButtonShape.circle,
-                      size: AppIconButtonSize.compact,
-                      tone: AppIconButtonTone.surface,
-                      onPressed: () {
-                        if (scrollController.hasClients) {
-                          scrollController.jumpTo(0);
-                        }
-                        onToggle();
-                      },
-                    );
+                MapPanelExpandButton(
+                  controller: controller,
+                  collapsedSize: collapsedSize,
+                  onPressed: () {
+                    if (scrollController.hasClients) {
+                      scrollController.jumpTo(0);
+                    }
+                    onToggle();
                   },
                 ),
               ],
@@ -249,63 +233,73 @@ class MapFreeRoomsPanel extends StatelessWidget {
       maxChildSize: .78,
       snap: true,
       snapSizes: [collapsedSize, .78],
-      builder: (context, scrollController) => DecoratedBox(
-        key: const ValueKey('map-panel-surface'),
-        decoration: BoxDecoration(
-          color: colors.canvas,
-          border: Border.all(color: colors.line),
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppRadius.sheet),
+      builder: (context, scrollController) {
+        final panelHeader = RepaintBoundary(child: header(scrollController));
+        return DecoratedBox(
+          key: const ValueKey('map-panel-surface'),
+          decoration: BoxDecoration(
+            color: colors.canvas,
+            border: Border.all(color: colors.line),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppRadius.sheet),
+            ),
           ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(bottom: bottomInset),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final collapsed =
-                  constraints.maxHeight <=
-                  viewportHeight * collapsedSize - bottomInset + 1;
-              final scrollingHeader =
-                  viewportHeight * collapsedSize - bottomInset <
-                      compactContentExtent - 1 ||
-                  MediaQuery.textScalerOf(context).scale(14) > 19;
-              if (scrollingHeader) {
-                return SingleChildScrollView(
-                  key: const ValueKey('map-panel-scroll'),
-                  controller: scrollController,
-                  padding: const EdgeInsets.only(bottom: AppSpacing.screen),
-                  child: Column(
-                    children: [
-                      header(scrollController),
-                      if (!collapsed)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 14),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: bottomInset),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final collapsed =
+                    constraints.maxHeight <=
+                    viewportHeight * collapsedSize - bottomInset + 1;
+                final scrollingHeader =
+                    viewportHeight * collapsedSize - bottomInset <
+                        compactContentExtent - 1 ||
+                    MediaQuery.textScalerOf(context).scale(14) > 19;
+                if (scrollingHeader) {
+                  return SingleChildScrollView(
+                    key: const ValueKey('map-panel-scroll'),
+                    controller: scrollController,
+                    padding: const EdgeInsets.only(bottom: AppSpacing.screen),
+                    child: Column(
+                      children: [
+                        panelHeader,
+                        Visibility(
+                          visible: !collapsed,
+                          maintainState: true,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 14),
+                            child: rooms,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return Column(
+                  children: [
+                    panelHeader,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        key: const ValueKey('map-panel-scroll'),
+                        controller: scrollController,
+                        padding: EdgeInsets.only(
+                          top: collapsed ? 0 : AppSpacing.sectionGap,
+                          bottom: AppSpacing.screen,
+                        ),
+                        child: Visibility(
+                          visible: !collapsed,
+                          maintainState: true,
                           child: rooms,
                         ),
-                    ],
-                  ),
-                );
-              }
-              return Column(
-                children: [
-                  header(scrollController),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      key: const ValueKey('map-panel-scroll'),
-                      controller: scrollController,
-                      padding: EdgeInsets.only(
-                        top: collapsed ? 0 : AppSpacing.sectionGap,
-                        bottom: AppSpacing.screen,
                       ),
-                      child: collapsed ? const SizedBox.shrink() : rooms,
                     ),
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

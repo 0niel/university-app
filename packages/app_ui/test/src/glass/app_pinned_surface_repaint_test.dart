@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
-    'pinned frost reads the live backdrop without repainting its rim',
+    'pinned frost reads the live backdrop without repainting its tint layer',
     (
       tester,
     ) async {
@@ -43,7 +43,7 @@ void main() {
       );
       expect(background, findsOneWidget);
       expect(tester.layers.whereType<BackdropFilterLayer>(), hasLength(1));
-      final rim = tester.renderObject<RenderRepaintBoundary>(background)
+      final tint = tester.renderObject<RenderRepaintBoundary>(background)
         ..debugResetMetrics();
       final capture = tester.renderObject<RenderRepaintBoundary>(
         find.byKey(captureKey),
@@ -71,8 +71,8 @@ void main() {
       final after = await centerPixel();
       expect(after.r, lessThan(before.r));
       expect(after.b, greaterThan(before.b));
-      expect(rim.debugSymmetricPaintCount, 0);
-      expect(rim.debugAsymmetricPaintCount, 8);
+      expect(tint.debugSymmetricPaintCount, 0);
+      expect(tint.debugAsymmetricPaintCount, 8);
       expect(tester.takeException(), isNull);
     },
   );

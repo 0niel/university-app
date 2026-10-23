@@ -24,14 +24,8 @@ void main() {
         (const Size(96, 240), 16.0),
         (const Size(10, 10), .0),
       ]) {
-        for (final role in [AppGlassRole.content, AppGlassRole.pinned]) {
-          final style = AppGlassStyle.surface(
-            colors: colors,
-            radius: radius,
-            tone: AppGlassTone.regular,
-            highContrast: false,
-            role: role,
-          );
+        for (final blur in [0.0, 6.0]) {
+          final style = _legacyStyle(colors, radius, blur: blur);
           final reference = <double, Uint8List>{};
           await tester.pumpWidget(
             _Fixture(
@@ -61,7 +55,7 @@ void main() {
               _firstDifference(reference[ratio]!, optimized),
               -1,
               reason:
-                  '$role, $size, radius=$radius, '
+                  'blur=$blur, $size, radius=$radius, '
                   'DPR=$ratio, dark=${colors.isDark}',
             );
           }
@@ -144,13 +138,7 @@ void main() {
   });
 
   testWidgets('keeps frost active and retains two rim passes', (tester) async {
-    final style = AppGlassStyle.surface(
-      colors: AppColors.dark,
-      radius: 24,
-      tone: AppGlassTone.regular,
-      highContrast: false,
-      role: AppGlassRole.pinned,
-    );
+    final style = _legacyStyle(AppColors.dark, 24, blur: 6);
     await tester.pumpWidget(
       _Fixture(
         size: const Size(360, 120),
@@ -213,6 +201,27 @@ void main() {
     );
   });
 }
+
+LiquidGlassStyle _legacyStyle(
+  AppColors colors,
+  double radius, {
+  required double blur,
+}) => LiquidGlassStyle(
+  liteGlass: true,
+  shape: LiquidGlassShape.roundedRectangle(cornerRadius: radius),
+  specular: AppGlassStyle.rim,
+  glow: AppGlassStyle.glow,
+  blur: blur,
+  color: colors.surface.withValues(
+    alpha: blur == 0
+        ? colors.isDark
+              ? .94
+              : .97
+        : colors.isDark
+        ? .9
+        : .94,
+  ),
+);
 
 Widget _glass(
   LiquidGlassStyle style, {

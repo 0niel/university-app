@@ -27,7 +27,7 @@ class _CatalogToolbar extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         _MiniAppsSortButton(selected: state.sort, onChanged: onSortChanged),
-        AppButton.glass(
+        AppButton.tonal(
           key: const ValueKey('mini-apps-create-button'),
           label: context.l10n.miniAppsCreate,
           icon: const AppLineIconWidget(AppLineIcon.plus),
@@ -35,7 +35,7 @@ class _CatalogToolbar extends StatelessWidget {
         ),
         if (state.isModerator && onModerate != null)
           AppIconButton(
-            tone: AppIconButtonTone.glass,
+            tone: AppIconButtonTone.tonal,
             shape: AppIconButtonShape.circle,
             tooltip: context.l10n.miniAppsModeration,
             icon: const AppLineIconWidget(AppLineIcon.shield),

@@ -238,24 +238,36 @@ void main() {
       const background = Color(0xFF263142);
       await open(tester, title: 'Цвет', backgroundColor: background);
 
-      expect(tester.widget<Material>(surfaceMaterial()).color, background);
+      expect(
+        tester.widget<Material>(surfaceMaterial()).type,
+        MaterialType.transparency,
+      );
+      expect(
+        tester.widget<AppGlassSurface>(find.byType(AppGlassSurface)).color,
+        background,
+      );
       expect(find.byType(AppGlassSurface), findsOneWidget);
     });
 
-    testWidgets('opaque sheet retains the original full lens lighting', (
+    testWidgets('large sheet uses real frost without full lens lighting', (
       tester,
     ) async {
       usePhoneViewport(tester);
       await open(tester, title: 'Search');
 
-      final glass = tester.widget<LiquidGlassLens>(
-        find.byType(LiquidGlassLens),
+      final glass = tester.widget<LiquidGlassLite>(
+        find.byType(LiquidGlassLite),
       );
-      expect(glass.style.specular, AppGlassStyle.rim);
-      expect(glass.style.glow, AppGlassStyle.glow);
-      expect(glass.style.blur, 14);
-      expect(glass.style.refractionIndex, 1.004);
-      expect(glass.style.refractionWidth, 8);
+      expect(find.byType(LiquidGlassLens), findsNothing);
+      expect(glass.blur, 6);
+      expect(glass.magnification, 1);
+      expect(glass.specular?.thickness, 0);
+      expect(glass.glow?.thickness, 0);
+      expect(tester.layers.whereType<BackdropFilterLayer>(), hasLength(1));
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppGlassSurface)),
+        paintsExactlyCountTimes(#drawVertices, 0),
+      );
       expect(tester.takeException(), isNull);
     });
 
@@ -267,7 +279,8 @@ void main() {
         backgroundColor: const Color(0x40263142),
       );
 
-      expect(find.byType(LiquidGlassLens), findsOneWidget);
+      expect(find.byType(LiquidGlassLens), findsNothing);
+      expect(find.byType(LiquidGlassLite), findsOneWidget);
       expect(tester.layers.whereType<BackdropFilterLayer>(), isNotEmpty);
       expect(tester.takeException(), isNull);
     });

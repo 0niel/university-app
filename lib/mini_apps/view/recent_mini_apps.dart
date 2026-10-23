@@ -43,24 +43,11 @@ class _RecentMiniApps extends StatelessWidget {
               child: ExcludeSemantics(
                 child: Column(
                   children: [
-                    AppGlassSurface(
-                      role: AppGlassRole.control,
-                      tone: AppGlassTone.accent,
-                      tint: accent,
-                      borderRadius: AppRadius.field,
-                      child: SizedBox.square(
-                        dimension: 52,
-                        child: Center(
-                          child: Text(
-                            app.iconEmoji,
-                            textScaler: TextScaler.noScaling,
-                            style: AppText.sans(
-                              26,
-                              FontWeight.w400,
-                              height: 1,
-                            ),
-                          ),
-                        ),
+                    MediaQuery.withNoTextScaling(
+                      child: MiniAppIconTile(
+                        emoji: app.iconEmoji,
+                        accent: accent,
+                        size: 52,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),

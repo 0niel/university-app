@@ -54,7 +54,7 @@ void main() {
       expect(lens.style.color.withValues(alpha: 1), kitColors.surface);
       expect(lens.style.color.a, greaterThan(.9));
       expect(card.role, AppGlassRole.overlay);
-      expect(lens.style.specular, AppGlassStyle.rim);
+      expect(lens.style.specular, AppGlassStyle.floatingRim);
 
       final title = kitStyleOf(tester, 'Удалить своё расписание?');
       expect(title?.fontSize, 17);

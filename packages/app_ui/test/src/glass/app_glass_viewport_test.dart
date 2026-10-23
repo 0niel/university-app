@@ -141,6 +141,7 @@ void main() {
                 return NinjaStateSwitcher(
                   child: AppGlassSurface(
                     key: ValueKey(loaded),
+                    role: AppGlassRole.control,
                     child: loaded
                         ? AppButton.primary(
                             label: 'Ready',
@@ -162,7 +163,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 80));
       expect(find.byType(TextField), findsNothing);
       expect(focus.hasFocus, isFalse);
-      final lens = find.byType(LiquidGlassLite);
+      final lens = find.byType(LiquidGlassLens);
       expect(lens, findsOneWidget);
       expect(
         find.ancestor(of: lens, matching: find.byType(FadeTransition)),

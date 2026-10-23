@@ -27,7 +27,6 @@ class _MiniAppsSearchField extends StatelessWidget {
         controller: controller,
         focusNode: focusNode,
         hintText: l10n.miniAppsSearchHint,
-        tone: AppSearchFieldTone.glass,
         isOnCanvas: true,
         onChanged: onChanged,
         onSubmitted: onSubmitted,

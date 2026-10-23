@@ -34,7 +34,6 @@ class _MiniAppsAppBar extends StatelessWidget {
       subtitle: subtitle ?? l10n.miniAppsSubtitle(count),
       onBack: onBack,
       backSemanticsLabel: l10n.back,
-      controlTone: AppControlSurfaceTone.glass,
       actions: [
         AppHeaderAction(
           child: AnimatedSwitcher(

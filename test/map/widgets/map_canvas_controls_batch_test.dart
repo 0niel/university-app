@@ -1,11 +1,83 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/widgets/map_canvas_controls.dart';
 
 void main() {
   for (final axis in Axis.values) {
+    testWidgets('$axis capture mode preserves focus and an in-flight press', (
+      tester,
+    ) async {
+      var shared = false;
+      var calls = 0;
+      late StateSetter update;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          locale: const Locale('ru'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              update = setState;
+              return Scaffold(
+                body: Center(
+                  child: AppGlassBatch(
+                    child: MapCanvasControls(
+                      axis: axis,
+                      joinParentBatch: shared,
+                      onZoomIn: () {},
+                      onZoomOut: () {},
+                      onFit: () => calls++,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final controls = find.byType(MapCanvasControls);
+      final l10n = tester.element(controls).l10n;
+      final button = find.byTooltip(l10n.mapFitFloorPlan);
+      final press = find.descendant(
+        of: button,
+        matching: find.byType(AppPressState),
+      );
+      final pressState = tester.state<State>(press);
+      final focus =
+          tester
+                .widget<FocusableActionDetector>(
+                  find.descendant(
+                    of: button,
+                    matching: find.byType(FocusableActionDetector),
+                  ),
+                )
+                .focusNode!
+            ..requestFocus();
+      await tester.pump();
+      final bounds = tester.getRect(button);
+      for (final next in [true, false]) {
+        final pointer = await tester.startGesture(bounds.center);
+        await tester.pump(const Duration(milliseconds: 120));
+        update(() => shared = next);
+        await tester.pump();
+        expect(tester.state<State>(press), same(pressState));
+        expect(focus.hasFocus, isTrue);
+        expect(tester.getRect(button), bounds);
+        await pointer.up();
+        await tester.pumpAndSettle();
+      }
+      expect(calls, 2);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(calls, 3);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets(
       '$axis map controls keep geometry and actions across glass toggle',
       (

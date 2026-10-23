@@ -31,6 +31,7 @@ import 'package:rtu_mirea_app/map/widgets/map_places_explorer.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_overlay.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
 import 'package:rtu_mirea_app/map/widgets/map_saved_places_sheet.dart';
+import 'package:rtu_mirea_app/map/widgets/map_selection_feedback.dart';
 import 'package:rtu_mirea_app/map/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -1167,7 +1168,7 @@ class _MapViewState extends State<MapView> {
   @override
   Widget build(BuildContext context) => MapActivityListener(
     onChanged: _activityChanged,
-    child: _buildMap(context),
+    child: MapSelectionFeedback(child: _buildMap(context)),
   );
 
   Widget _buildMap(BuildContext context) => Scaffold(
@@ -1213,38 +1214,82 @@ class _MapViewState extends State<MapView> {
                 ? _collapsedPanelSize
                 : .78;
             _updateMapViewport(panelSize);
-            return Stack(
+            final controlStyle = AppGlassStyle.surface(
+              colors: context.colors,
+              radius: AppControlSize.iconButton / 2,
+              tone: AppGlassTone.regular,
+              highContrast: MediaQuery.highContrastOf(context),
+              role: AppGlassRole.control,
+            );
+            final captureReach =
+                3 * controlStyle.blur +
+                controlStyle.refractionWidth +
+                (controlStyle.specular?.thickness ?? 0) +
+                3;
+            final topGlassBottom = MapTopBar.extentOf(context);
+            final controlCount = interactive ? (_is3D ? 5 : 4) : 3;
+            final controlsHeight =
+                AppControlSize.iconButton * controlCount +
+                AppSpacing.sm * (controlCount - 2);
+            MapCanvasControls controls({
+              required bool shared,
+              bool compact = false,
+            }) => MapCanvasControls(
+              joinParentBatch: shared,
+              axis: compact ? Axis.horizontal : Axis.vertical,
+              showZoom: !compact,
+              is3D: _is3D,
+              onRotate: !compact && _is3D && interactive
+                  ? () => setState(() => _mapBearing += math.pi / 4)
+                  : null,
+              onToggle3D: !compact && interactive
+                  ? () => setState(() => _is3D = !_is3D)
+                  : null,
+              onZoomIn: interactive ? _mapController.zoomIn : null,
+              onZoomOut: interactive ? _mapController.zoomOut : null,
+              onFit: interactive ? _mapController.fit : null,
+            );
+            final sharedControls = controls(shared: true);
+            final isolatedControls = controls(shared: false);
+            final sharedCompactControls = controls(shared: true, compact: true);
+            final isolatedCompactControls = controls(
+              shared: false,
+              compact: true,
+            );
+            final mapStack = Stack(
               fit: StackFit.expand,
               children: [
-                RepaintBoundary(
-                  child: SvgInteractiveMap(
-                    controller: _mapController,
-                    svgAssetPath: floor.svgPath,
-                    svgContent: state.svgContent,
-                    showRoomLabels: state.campusData != null,
-                    syntheticRoomIds: state.campusData == null
-                        ? const {}
-                        : context.read<MapBloc>().syntheticRoomIds,
-                    routeSegments: _routeSegments(floor.id),
-                    is3D: _is3D,
-                    bearing: _mapBearing,
-                    navigationLandmarks: _navigationLandmarks(
-                      state.campusData,
-                      floor.id,
+                AppGlassBatch.exclude(
+                  child: RepaintBoundary(
+                    child: SvgInteractiveMap(
+                      controller: _mapController,
+                      svgAssetPath: floor.svgPath,
+                      svgContent: state.svgContent,
+                      showRoomLabels: state.campusData != null,
+                      syntheticRoomIds: state.campusData == null
+                          ? const {}
+                          : context.read<MapBloc>().syntheticRoomIds,
+                      routeSegments: _routeSegments(floor.id),
+                      is3D: _is3D,
+                      bearing: _mapBearing,
+                      navigationLandmarks: _navigationLandmarks(
+                        state.campusData,
+                        floor.id,
+                      ),
+                      onNavigationLandmarkTap: _openNavigationLandmark,
+                      showRouteStart:
+                          _route?.nodes.firstOrNull?.floorId == floor.id,
+                      showRouteDestination:
+                          _route?.nodes.lastOrNull?.floorId == floor.id,
+                      routeInstructionPoint: _routeInstructionPoint(floor.id),
+                      places: _renderSnapshot.placesForFloor(
+                        state.campusData,
+                        floor.id,
+                      ),
+                      onRoomTap: _openMappedRoom,
+                      viewportPadding: _mapViewportPadding.value,
+                      viewportPaddingListenable: _mapViewportPadding,
                     ),
-                    onNavigationLandmarkTap: _openNavigationLandmark,
-                    showRouteStart:
-                        _route?.nodes.firstOrNull?.floorId == floor.id,
-                    showRouteDestination:
-                        _route?.nodes.lastOrNull?.floorId == floor.id,
-                    routeInstructionPoint: _routeInstructionPoint(floor.id),
-                    places: _renderSnapshot.placesForFloor(
-                      state.campusData,
-                      floor.id,
-                    ),
-                    onRoomTap: _openMappedRoom,
-                    viewportPadding: _mapViewportPadding.value,
-                    viewportPaddingListenable: _mapViewportPadding,
                   ),
                 ),
                 Positioned(
@@ -1262,6 +1307,7 @@ class _MapViewState extends State<MapView> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           MapTopBar(
+                            joinParentBatch: true,
                             showCampusSelector:
                                 _route == null || constraints.maxHeight >= 600,
                             controller: _query,
@@ -1280,7 +1326,9 @@ class _MapViewState extends State<MapView> {
                                 20,
                                 0,
                               ),
-                              child: _routeOverlay(state),
+                              child: AppGlassBatch.exclude(
+                                child: _routeOverlay(state),
+                              ),
                             ),
                         ],
                       ),
@@ -1306,9 +1354,11 @@ class _MapViewState extends State<MapView> {
                         left: AppSpacing.lg,
                         top: _viewportTop + AppSpacing.sm,
                         width: _routePanelWidth,
-                        child: _routeOverlay(
-                          state,
-                          maxHeight: availableHeight,
+                        child: AppGlassBatch.exclude(
+                          child: _routeOverlay(
+                            state,
+                            maxHeight: availableHeight,
+                          ),
                         ),
                       );
                     },
@@ -1336,36 +1386,25 @@ class _MapViewState extends State<MapView> {
                             _viewportTop + AppControlSize.touchTarget + 20) {
                       return const SizedBox.shrink();
                     }
+                    final height = controlsFit
+                        ? controlsHeight
+                        : AppControlSize.iconButton;
+                    final shareCapture =
+                        _route == null &&
+                        constraints.maxHeight - panelHeight - 12 - height >=
+                            topGlassBottom + 2 * captureReach;
                     return Positioned(
                       right: AppSpacing.lg,
                       bottom: panelHeight + 12,
                       child: controlsFit
-                          ? child!
-                          : MapCanvasControls(
-                              axis: Axis.horizontal,
-                              showZoom: false,
-                              onZoomIn: interactive
-                                  ? _mapController.zoomIn
-                                  : null,
-                              onZoomOut: interactive
-                                  ? _mapController.zoomOut
-                                  : null,
-                              onFit: interactive ? _mapController.fit : null,
-                            ),
+                          ? shareCapture
+                                ? sharedControls
+                                : isolatedControls
+                          : shareCapture
+                          ? sharedCompactControls
+                          : isolatedCompactControls,
                     );
                   },
-                  child: MapCanvasControls(
-                    is3D: _is3D,
-                    onRotate: _is3D && interactive
-                        ? () => setState(() => _mapBearing += math.pi / 4)
-                        : null,
-                    onToggle3D: interactive
-                        ? () => setState(() => _is3D = !_is3D)
-                        : null,
-                    onZoomIn: interactive ? _mapController.zoomIn : null,
-                    onZoomOut: interactive ? _mapController.zoomOut : null,
-                    onFit: interactive ? _mapController.fit : null,
-                  ),
                 ),
                 AnimatedBuilder(
                   animation: _panelExtent,
@@ -1383,61 +1422,65 @@ class _MapViewState extends State<MapView> {
                       child: child!,
                     );
                   },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (state.campusData != null) ...[
-                        AppButton.primary(
-                          label: context.l10n.lessonDetailsRoute,
-                          icon: const Icon(
-                            Icons.directions_walk_rounded,
-                            size: 20,
+                  child: AppGlassBatch.exclude(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (state.campusData != null) ...[
+                          AppButton.primary(
+                            label: context.l10n.lessonDetailsRoute,
+                            icon: const Icon(
+                              Icons.directions_walk_rounded,
+                              size: 20,
+                            ),
+                            onPressed: interactive ? _planRoute : null,
                           ),
-                          onPressed: interactive ? _planRoute : null,
+                          const SizedBox(width: AppSpacing.sm),
+                        ],
+                        AppIconButton(
+                          icon: const AppLineIconWidget(AppLineIcon.more),
+                          tooltip: context.l10n.mapActions,
+                          shape: AppIconButtonShape.circle,
+                          tone: AppIconButtonTone.glass,
+                          onPressed: _more,
                         ),
-                        const SizedBox(width: AppSpacing.sm),
                       ],
-                      AppIconButton(
-                        icon: const AppLineIconWidget(AppLineIcon.more),
-                        tooltip: context.l10n.mapActions,
-                        shape: AppIconButtonShape.circle,
-                        tone: AppIconButtonTone.glass,
-                        onPressed: _more,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-                MapFreeRoomsPanel(
-                  controller: _panelController,
-                  collapsedSize: _collapsedPanelSize,
-                  viewportHeight: constraints.maxHeight,
-                  bottomInset: bottomInset,
-                  compactContentExtent: compactContentExtent,
-                  mapState: state,
-                  discovery: state.campusData == null
-                      ? null
-                      : BlocBuilder<FreeRoomsCubit, FreeRoomsState>(
-                          buildWhen: (before, after) =>
-                              before.query != after.query,
-                          builder: (context, free) => MapPlacesExplorer(
-                            campus: state.campusData!,
-                            currentFloorId: state.selectedFloor?.id,
-                            query: free.query,
-                            onPlace: _openPlace,
-                            onCommunity: _community,
-                            onRefresh: () => context.read<MapBloc>().add(
-                              const MapEvent.refreshRequested(),
+                AppGlassBatch.exclude(
+                  child: MapFreeRoomsPanel(
+                    controller: _panelController,
+                    collapsedSize: _collapsedPanelSize,
+                    viewportHeight: constraints.maxHeight,
+                    bottomInset: bottomInset,
+                    compactContentExtent: compactContentExtent,
+                    mapState: state,
+                    discovery: state.campusData == null
+                        ? null
+                        : BlocBuilder<FreeRoomsCubit, FreeRoomsState>(
+                            buildWhen: (before, after) =>
+                                before.query != after.query,
+                            builder: (context, free) => MapPlacesExplorer(
+                              campus: state.campusData!,
+                              currentFloorId: state.selectedFloor?.id,
+                              query: free.query,
+                              onPlace: _openPlace,
+                              onCommunity: _community,
+                              onRefresh: () => context.read<MapBloc>().add(
+                                const MapEvent.refreshRequested(),
+                              ),
                             ),
                           ),
-                        ),
-                  onRoomTap: _openRoom,
-                  onFloor: _floor,
-                  onToggle: _togglePanel,
-                  onMappedRoomTap: (room) {
-                    FocusScope.of(context).unfocus();
-                    _mapController.focusRoom(room);
-                    _openMappedRoom(room);
-                  },
+                    onRoomTap: _openRoom,
+                    onFloor: _floor,
+                    onToggle: _togglePanel,
+                    onMappedRoomTap: (room) {
+                      FocusScope.of(context).unfocus();
+                      _mapController.focusRoom(room);
+                      _openMappedRoom(room);
+                    },
+                  ),
                 ),
                 if (!interactive)
                   Positioned(
@@ -1447,6 +1490,7 @@ class _MapViewState extends State<MapView> {
                   ),
               ],
             );
+            return AppGlassBatch(child: mapStack);
           },
         );
       },
