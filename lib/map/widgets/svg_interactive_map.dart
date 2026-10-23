@@ -90,6 +90,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
   String? _selectedRoomId;
   bool _userAdjustedCamera = false;
   Rect? _lastVisibleViewport;
+  Offset? _volumePivot;
   late double _volumeBearing;
   double _gestureScale = 1;
   double _gestureBearing = 0;
@@ -120,7 +121,10 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
   @override
   void didUpdateWidget(covariant SvgInteractiveMap oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.is3D != widget.is3D) _labelHitIndex.clear();
+    if (oldWidget.is3D != widget.is3D) {
+      _labelHitIndex.clear();
+      _volumePivot = null;
+    }
     _volumeBearing += widget.bearing - oldWidget.bearing;
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller?.detach(this);
@@ -143,6 +147,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       _hasFittedView = false;
       _userAdjustedCamera = false;
       _lastVisibleViewport = null;
+      _volumePivot = null;
     } else if (widget.viewportPaddingListenable == null &&
         oldWidget.viewportPadding != widget.viewportPadding) {
       _viewportChanged();
@@ -176,9 +181,14 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     if (_userAdjustedCamera && constraints != null) {
       final viewport = _visibleViewport(constraints);
       final previous = _lastVisibleViewport;
+      _commitVolumeViewport(viewport);
       _lastVisibleViewport = viewport;
       if (previous != null) {
-        final delta = viewport.center - previous.center;
+        final delta = widget.is3D
+            ? _volumeProjection(
+                transform: Matrix4.identity(),
+              ).screenDeltaToScene(viewport.center - previous.center)
+            : viewport.center - previous.center;
         final matrix = _transformationController.value.clone();
         matrix.setTranslationRaw(
           matrix[12] + delta.dx,
@@ -245,6 +255,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
           constraints.maxWidth,
           constraints.maxHeight,
         );
+        _volumePivot ??= _visibleViewport(constraints).center;
         final viewportChanged =
             _lastViewportSize != null && _lastViewportSize != viewportSize;
         _lastViewportSize = viewportSize;
@@ -298,7 +309,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
                           selectedRoomId: _selectedRoomId,
                           hitIndex: _labelHitIndex,
                           bearing: _volumeBearing,
-                          pivot: _visibleViewport(constraints).center,
+                          pivot: _volumePivot,
                           routeSegments: widget.routeSegments,
                           instructionPoint: widget.routeInstructionPoint,
                           showRouteStart: widget.showRouteStart,
@@ -510,8 +521,21 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       viewportSize: Size(constraints.maxWidth, constraints.maxHeight),
       transform: transform ?? _transformationController.value,
       bearing: bearing ?? _volumeBearing,
-      pivot: _visibleViewport(constraints).center,
+      pivot: _volumePivot,
     );
+  }
+
+  void _commitVolumeViewport(Rect viewport) {
+    if (!widget.is3D || _volumePivot == viewport.center) return;
+    final sceneOrigin = _volumeProjection().screenToScene(Offset.zero);
+    setState(() => _volumePivot = viewport.center);
+    final translation =
+        _volumeProjection(
+          transform: Matrix4.identity(),
+        ).screenToScene(Offset.zero) -
+        sceneOrigin * currentScale;
+    _transformationController.value = _transformationController.value.clone()
+      ..setTranslationRaw(translation.dx, translation.dy, 0);
   }
 
   Offset _sceneAt(Offset point) => widget.is3D && _lastConstraints != null
@@ -580,6 +604,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
       return;
     }
     final viewport = _visibleViewport(constraints);
+    _commitVolumeViewport(viewport);
     _lastVisibleViewport = viewport;
     _userAdjustedCamera = false;
     final volumeTarget = widget.is3D
@@ -632,6 +657,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
     final center = location.detachedService ? location.point! : rect.center;
     setState(() => _selectedRoomId = room.roomId);
     final viewport = _visibleViewport(constraints);
+    _commitVolumeViewport(viewport);
     _lastVisibleViewport = viewport;
     _userAdjustedCamera = false;
     if (widget.is3D) {
@@ -693,6 +719,7 @@ class _SvgInteractiveMapState extends State<SvgInteractiveMap>
         )
         .clamp(_minScale, _maxScale);
     _cancelViewportRefit();
+    _commitVolumeViewport(viewport);
     _lastVisibleViewport = viewport;
     _userAdjustedCamera = true;
     setState(() => _selectedRoomId = null);
