@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:app_ui/src/colors/colors.dart';
 import 'package:app_ui/src/glass/app_glass_surface.dart';
 import 'package:app_ui/src/spacing/app_spacing.dart';
+import 'package:app_ui/src/theme/app_surface_style.dart';
 import 'package:app_ui/src/typography/typography.dart';
 import 'package:app_ui/src/widgets/app_control_surface.dart';
 import 'package:app_ui/src/widgets/app_line_icon.dart';
@@ -123,28 +124,36 @@ class _AppSheetSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = backgroundColor ?? context.colors.surface;
+    const radius = BorderRadius.vertical(
+      top: Radius.circular(AppRadius.sheet),
+    );
     return Material(
       type: MaterialType.transparency,
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(AppRadius.sheet),
-      ),
+      borderRadius: radius,
       clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            bottom: -AppRadius.sheet,
-            child: IgnorePointer(
-              child: AppGlassSurface(
-                role: AppGlassRole.overlay,
-                borderRadius: AppRadius.sheet,
-                tone: AppGlassTone.subtle,
-                color: color,
-                child: const SizedBox.expand(),
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          border: AppSurfaceStyle.outline(context),
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              bottom: -AppRadius.sheet,
+              child: IgnorePointer(
+                child: AppGlassSurface(
+                  role: AppGlassRole.sheet,
+                  borderRadius: AppRadius.sheet,
+                  tone: AppGlassTone.subtle,
+                  color: color,
+                  child: const SizedBox.expand(),
+                ),
               ),
             ),
-          ),
-          child,
-        ],
+            child,
+          ],
+        ),
       ),
     );
   }

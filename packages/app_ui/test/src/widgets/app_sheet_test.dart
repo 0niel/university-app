@@ -249,20 +249,25 @@ void main() {
       expect(find.byType(AppGlassSurface), findsOneWidget);
     });
 
-    testWidgets('sheet retains the shared floating lens lighting', (
+    testWidgets('large sheet uses real frost without full lens lighting', (
       tester,
     ) async {
       usePhoneViewport(tester);
       await open(tester, title: 'Search');
 
-      final glass = tester.widget<LiquidGlassLens>(
-        find.byType(LiquidGlassLens),
+      final glass = tester.widget<LiquidGlassLite>(
+        find.byType(LiquidGlassLite),
       );
-      expect(glass.style.specular, AppGlassStyle.floatingRim);
-      expect(glass.style.glow, AppGlassStyle.glow);
-      expect(glass.style.blur, 8);
-      expect(glass.style.refractionIndex, 1.012);
-      expect(glass.style.refractionWidth, 12);
+      expect(find.byType(LiquidGlassLens), findsNothing);
+      expect(glass.blur, 6);
+      expect(glass.magnification, 1);
+      expect(glass.specular?.thickness, 0);
+      expect(glass.glow?.thickness, 0);
+      expect(tester.layers.whereType<BackdropFilterLayer>(), hasLength(1));
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppGlassSurface)),
+        paintsExactlyCountTimes(#drawVertices, 0),
+      );
       expect(tester.takeException(), isNull);
     });
 
@@ -274,7 +279,8 @@ void main() {
         backgroundColor: const Color(0x40263142),
       );
 
-      expect(find.byType(LiquidGlassLens), findsOneWidget);
+      expect(find.byType(LiquidGlassLens), findsNothing);
+      expect(find.byType(LiquidGlassLite), findsOneWidget);
       expect(tester.layers.whereType<BackdropFilterLayer>(), isNotEmpty);
       expect(tester.takeException(), isNull);
     });

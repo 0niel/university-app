@@ -46,11 +46,12 @@ abstract final class AppGlassStyle {
       AppGlassRole.pinned => (colors.isDark ? .9 : .94, 6.0, 1.0, 0.0),
       AppGlassRole.navigation => (colors.isDark ? .78 : .88, 8.0, 1.016, 12.0),
       AppGlassRole.overlay => (colors.isDark ? .9 : .95, 8.0, 1.012, 12.0),
+      AppGlassRole.sheet => (colors.isDark ? .9 : .95, 6.0, 1.0, 0.0),
     };
     return LiquidGlassStyle(
       shape: LiquidGlassShape.roundedRectangle(cornerRadius: radius),
       specular: switch (role) {
-        AppGlassRole.pinned => _noRim,
+        AppGlassRole.pinned || AppGlassRole.sheet => _noRim,
         AppGlassRole.content => rim,
         AppGlassRole.control ||
         AppGlassRole.navigation ||
@@ -66,7 +67,7 @@ abstract final class AppGlassStyle {
       ),
       blur: switch (role) {
         AppGlassRole.content => 0,
-        AppGlassRole.pinned => highContrast ? 0 : blur,
+        AppGlassRole.pinned || AppGlassRole.sheet => highContrast ? 0 : blur,
         AppGlassRole.control ||
         AppGlassRole.navigation ||
         AppGlassRole.overlay => highContrast ? 8 : blur,
@@ -76,7 +77,8 @@ abstract final class AppGlassStyle {
       liteGlass:
           highContrast ||
           role == AppGlassRole.content ||
-          role == AppGlassRole.pinned,
+          role == AppGlassRole.pinned ||
+          role == AppGlassRole.sheet,
     );
   }
 }
