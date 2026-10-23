@@ -25,6 +25,7 @@
 // API response: the upstream JSON body (status code is forwarded).
 import { createClient } from "@supabase/supabase-js";
 import { readBoundedJson, RequestBodyError } from "../_shared/request_body.ts";
+import { sessionIdFromVerifiedToken } from "../_shared/session_context.ts";
 
 const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_REQUEST_BYTES = 1024 * 1024;
@@ -66,6 +67,10 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Unauthorized" }, 401);
   }
   const user = userData.user;
+  const sessionId = sessionIdFromVerifiedToken(authHeader, user.id);
+  if (sessionId == null) {
+    return json({ error: "Требуется повторный вход." }, 401);
+  }
 
   let body: ProxyRequest;
   try {
@@ -100,6 +105,36 @@ Deno.serve(async (req: Request) => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+  const method = kind === "api" ? sanitizeMethod(body.method) : "GET";
+  if (method == null) {
+    return json({ error: "Unsupported method" }, 400);
+  }
+  const { data: requestAccess, error: requestAccessError } = await serviceClient
+    .rpc("record_mini_app_request", {
+      p_user_id: user.id,
+      p_organization_id: organizationId,
+      p_slug: slug,
+      p_kind: kind,
+      p_path: path ?? "/",
+      p_method: method,
+      p_ip_address: req.headers.get("cf-connecting-ip") ??
+        req.headers.get("x-real-ip"),
+      p_user_agent: req.headers.get("user-agent"),
+    });
+  if (requestAccessError) {
+    return json(
+      { error: "Не удалось проверить доступ. Попробуйте позже." },
+      503,
+    );
+  }
+  if (!requestAccess?.allowed) {
+    const limited = requestAccess?.reason === "rate_limited";
+    return json({
+      error: limited
+        ? "Слишком много запросов. Попробуйте позже."
+        : "Аккаунт недоступен.",
+    }, limited ? 429 : 403);
+  }
   const { data: context, error: contextError } = await serviceClient.rpc(
     "mini_app_proxy_context",
     {
@@ -144,7 +179,15 @@ Deno.serve(async (req: Request) => {
   // edge function. Trusted target, so the SSRF host checks below don't apply;
   // we authenticate ourselves to it with the service-role key.
   if (app.sourceKind === "service") {
-    return callServiceApp(organizationId, slug, kind, path, body, user.id);
+    return callServiceApp(
+      organizationId,
+      slug,
+      kind,
+      path,
+      body,
+      user.id,
+      sessionId,
+    );
   }
 
   // Remote apps: server-side fetch with SSRF protections.
@@ -154,11 +197,6 @@ Deno.serve(async (req: Request) => {
     body.query,
   );
   if (target instanceof Response) return target;
-
-  const method = kind === "api" ? sanitizeMethod(body.method) : "GET";
-  if (method == null) {
-    return json({ error: "Unsupported method" }, 400);
-  }
 
   const appMeta = context.app as { id: string };
   const headers: Record<string, string> = {
@@ -209,6 +247,7 @@ async function callServiceApp(
   path: string | null,
   body: ProxyRequest,
   userId: string,
+  sessionId: string,
 ): Promise<Response> {
   const target = `${
     Deno.env.get("SUPABASE_URL")
@@ -230,6 +269,7 @@ async function callServiceApp(
         query: body.query,
         body: body.body,
         userId,
+        sessionId,
       }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
