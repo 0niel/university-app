@@ -17,6 +17,7 @@ class MapTopBar extends StatefulWidget {
     required this.onFriends,
     this.onSearchClosed,
     this.showCampusSelector = true,
+    this.joinParentBatch = false,
     super.key,
   });
 
@@ -28,6 +29,15 @@ class MapTopBar extends StatefulWidget {
   final VoidCallback onFriends;
   final VoidCallback? onSearchClosed;
   final bool showCampusSelector;
+  final bool joinParentBatch;
+
+  static double _searchHeightOf(BuildContext context) =>
+      50 + (MediaQuery.textScalerOf(context).scale(18) - 18).clamp(0.0, 30.0);
+
+  static double extentOf(BuildContext context) =>
+      MediaQuery.paddingOf(context).top +
+      AppSpacing.sm +
+      _searchHeightOf(context);
 
   @override
   State<MapTopBar> createState() => _MapTopBarState();
@@ -139,12 +149,13 @@ class _MapTopBarState extends State<MapTopBar>
     ),
   );
 
+  Widget _batch(Widget child) =>
+      widget.joinParentBatch ? child : AppGlassBatch(child: child);
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final searchHeight =
-        50.0 +
-        (MediaQuery.textScalerOf(context).scale(18) - 18).clamp(0.0, 30.0);
+    final searchHeight = MapTopBar._searchHeightOf(context);
     return PopScope(
       canPop: !_searching,
       onPopInvokedWithResult: (didPop, result) {
@@ -161,8 +172,8 @@ class _MapTopBarState extends State<MapTopBar>
             AppSpacing.lg,
             0,
           ),
-          child: AppGlassBatch(
-            child: MapSearchTransition(
+          child: _batch(
+            MapSearchTransition(
               animation: _expansion,
               searching: _searching,
               height: searchHeight,

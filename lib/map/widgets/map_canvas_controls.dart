@@ -2,7 +2,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 
-class MapCanvasControls extends StatelessWidget {
+class MapCanvasControls extends StatefulWidget {
   const MapCanvasControls({
     this.onZoomIn,
     this.onZoomOut,
@@ -12,6 +12,7 @@ class MapCanvasControls extends StatelessWidget {
     this.is3D = false,
     this.showZoom = true,
     this.axis = Axis.vertical,
+    this.joinParentBatch = false,
     super.key,
   });
 
@@ -23,20 +24,29 @@ class MapCanvasControls extends StatelessWidget {
   final bool is3D;
   final bool showZoom;
   final Axis axis;
+  final bool joinParentBatch;
 
   @override
-  Widget build(BuildContext context) => AppGlassBatch(
-    child: Flex(
-      direction: axis,
+  State<MapCanvasControls> createState() => _MapCanvasControlsState();
+}
+
+class _MapCanvasControlsState extends State<MapCanvasControls> {
+  final GlobalKey _controlsKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    final controls = Flex(
+      key: _controlsKey,
+      direction: widget.axis,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (showZoom) ...[
+        if (widget.showZoom) ...[
           AppGlassSurface(
             role: AppGlassRole.control,
             key: const ValueKey('map-zoom-controls'),
             borderRadius: AppRadius.full,
             child: Flex(
-              direction: axis,
+              direction: widget.axis,
               mainAxisSize: MainAxisSize.min,
               children: [
                 AppIconButton(
@@ -44,21 +54,21 @@ class MapCanvasControls extends StatelessWidget {
                   tooltip: context.l10n.mapZoomIn,
                   shape: AppIconButtonShape.circle,
                   tone: AppIconButtonTone.plain,
-                  onPressed: onZoomIn,
+                  onPressed: widget.onZoomIn,
                 ),
                 AppIconButton(
                   icon: const AppLineIconWidget(AppLineIcon.minus),
                   tooltip: context.l10n.mapZoomOut,
                   shape: AppIconButtonShape.circle,
                   tone: AppIconButtonTone.plain,
-                  onPressed: onZoomOut,
+                  onPressed: widget.onZoomOut,
                 ),
               ],
             ),
           ),
           SizedBox(
-            height: axis == Axis.vertical ? AppSpacing.sm : 0,
-            width: axis == Axis.horizontal ? AppSpacing.sm : 0,
+            height: widget.axis == Axis.vertical ? AppSpacing.sm : 0,
+            width: widget.axis == Axis.horizontal ? AppSpacing.sm : 0,
           ),
         ],
         AppIconButton(
@@ -66,46 +76,49 @@ class MapCanvasControls extends StatelessWidget {
           tooltip: context.l10n.mapFitFloorPlan,
           shape: AppIconButtonShape.circle,
           tone: AppIconButtonTone.glass,
-          onPressed: onFit,
+          onPressed: widget.onFit,
         ),
-        if (onRotate != null) ...[
+        if (widget.onRotate != null) ...[
           SizedBox(
-            height: axis == Axis.vertical ? AppSpacing.sm : 0,
-            width: axis == Axis.horizontal ? AppSpacing.sm : 0,
+            height: widget.axis == Axis.vertical ? AppSpacing.sm : 0,
+            width: widget.axis == Axis.horizontal ? AppSpacing.sm : 0,
           ),
           AppIconButton(
             icon: const AppLineIconWidget(AppLineIcon.refresh),
             tooltip: context.l10n.mapRotatePlan,
             shape: AppIconButtonShape.circle,
             tone: AppIconButtonTone.glass,
-            onPressed: onRotate,
+            onPressed: widget.onRotate,
           ),
         ],
-        if (onToggle3D != null) ...[
+        if (widget.onToggle3D != null) ...[
           SizedBox(
-            height: axis == Axis.vertical ? AppSpacing.sm : 0,
-            width: axis == Axis.horizontal ? AppSpacing.sm : 0,
+            height: widget.axis == Axis.vertical ? AppSpacing.sm : 0,
+            width: widget.axis == Axis.horizontal ? AppSpacing.sm : 0,
           ),
           Semantics(
-            toggled: is3D,
+            toggled: widget.is3D,
             child: AppIconButton(
               icon: Text(
-                is3D ? context.l10n.map2DLabel : context.l10n.map3DLabel,
+                widget.is3D ? context.l10n.map2DLabel : context.l10n.map3DLabel,
                 style: AppText.caption.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: is3D ? context.colors.accent : context.colors.ink,
+                  color: widget.is3D
+                      ? context.colors.accent
+                      : context.colors.ink,
                 ),
               ),
-              tooltip: is3D
+              tooltip: widget.is3D
                   ? context.l10n.mapTopDownView
                   : context.l10n.mapVolumeView,
               shape: AppIconButtonShape.circle,
               tone: AppIconButtonTone.glass,
-              onPressed: onToggle3D,
+              onPressed: widget.onToggle3D,
             ),
           ),
         ],
       ],
-    ),
-  );
+    );
+    return widget.joinParentBatch ? controls : AppGlassBatch(child: controls);
+  }
 }

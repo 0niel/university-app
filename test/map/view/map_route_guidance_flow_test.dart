@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+// ignore: depend_on_referenced_packages
+import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
@@ -16,9 +18,11 @@ import 'package:rtu_mirea_app/map/data/map_data_repository.dart';
 import 'package:rtu_mirea_app/map/navigation/navigation.dart';
 import 'package:rtu_mirea_app/map/services/objects_service.dart';
 import 'package:rtu_mirea_app/map/view/map_view.dart';
+import 'package:rtu_mirea_app/map/widgets/map_canvas_controls.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_guidance.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_overlay.dart';
 import 'package:rtu_mirea_app/map/widgets/map_route_sheet.dart';
+import 'package:rtu_mirea_app/map/widgets/map_top_bar.dart';
 import 'package:rtu_mirea_app/map/widgets/svg_interactive_map.dart';
 import 'package:rtu_mirea_app/map/widgets/svg_interactive_map_controller.dart';
 
@@ -219,6 +223,29 @@ class MapRouteGuidanceHarness {
 }
 
 void main() {
+  testWidgets('ending a route preserves the expanded search field and focus', (
+    tester,
+  ) async {
+    final harness = MapRouteGuidanceHarness();
+    await harness.mount(tester);
+    await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
+    await tester.pumpAndSettle();
+    final field = find.byType(TextField);
+    final element = tester.element(field);
+    await tester.enterText(field, '101');
+    harness.guidance(tester).onClose();
+    await tester.pumpAndSettle();
+    expect(find.byType(MapRouteGuidance), findsNothing);
+    expect(tester.element(field), same(element));
+    final input = tester.widget<TextField>(field);
+    expect(input.focusNode!.hasFocus, isTrue);
+    expect(input.controller!.text, '101');
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(field, findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'timeline previews while dragging and commits the final floor once',
     (tester) async {
@@ -552,6 +579,29 @@ void main() {
           isFalse,
         );
       }
+      final topLenses = find
+          .descendant(
+            of: find.byType(MapTopBar),
+            matching: find.byType(LiquidGlassLens),
+          )
+          .evaluate();
+      final canvasLenses = find
+          .descendant(
+            of: find.byType(MapCanvasControls),
+            matching: find.byType(LiquidGlassLens),
+          )
+          .evaluate();
+      final topId = LiquidGlassBatch.backdropIdOf(topLenses.first);
+      expect(topId, isNotNull);
+      for (final lens in canvasLenses) {
+        expect(LiquidGlassBatch.backdropIdOf(lens), isNot(topId));
+      }
+      expect(
+        LiquidGlassBatch.backdropIdOf(
+          tester.element(find.byType(MapRouteOverlay)),
+        ),
+        isNull,
+      );
       final guide = tester.getRect(find.byType(MapRouteGuidance));
       final map = tester.widget<SvgInteractiveMap>(
         find.byType(SvgInteractiveMap),
