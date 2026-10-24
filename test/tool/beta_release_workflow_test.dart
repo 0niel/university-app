@@ -31,7 +31,7 @@ void main() {
     expect(workflow, contains('if-no-files-found: error'));
     expect(
       workflow,
-      contains('5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb'),
+      contains('07c191c9448f0b67c5f96253d8832356ba213b06'),
     );
     expect(workflow, contains(r'git -C "$shorebird_dir" rev-parse HEAD'));
     expect(workflow, isNot(contains('shorebirdtech/setup-shorebird@')));
@@ -223,7 +223,7 @@ void main() {
 
     expect(
       workflow,
-      contains('5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb'),
+      contains('07c191c9448f0b67c5f96253d8832356ba213b06'),
     );
     expect(workflow, contains(r'git -C "$shorebird_dir" fetch --depth 1'));
     expect(workflow, contains(r'git -C "$shorebird_dir" rev-parse HEAD'));
