@@ -20,6 +20,9 @@ class CommunityPageHeader extends StatelessWidget {
     subtitle: subtitle,
     onBack: () => Navigator.of(context).maybePop(),
     backSemanticsLabel: context.l10n.back,
-    actions: [for (final action in actions) AppHeaderAction(child: action)],
+    actions: [
+      for (final action in actions)
+        AppHeaderAction(child: action, hasOwnSurface: true),
+    ],
   );
 }

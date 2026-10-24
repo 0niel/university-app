@@ -437,14 +437,17 @@ void main() {
       ..setDark()
       ..setTheme(light: theme.getLightTheme(), dark: staleDark);
     await tester.pumpAndSettle();
-    expectPalette(AppColors.dark);
+    expectPalette(AppColors.dark, glassEnabled: false);
     expect(manager.darkTheme.colors, AppColors.dark);
 
     manager.setLight();
     await tester.pumpAndSettle();
     manager.setTheme(light: theme.getLightTheme(), dark: staleDark);
     await tester.pumpAndSettle();
-    expectPalette(AppColorSchemes.getLightColors(AppColorScheme.blue));
+    expectPalette(
+      AppColorSchemes.getLightColors(AppColorScheme.blue),
+      glassEnabled: false,
+    );
     expect(manager.darkTheme.colors, AppColors.dark);
 
     final lightNavigator = tester.state<NavigatorState>(

@@ -1,12 +1,11 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-// Inspect backdrop capture ownership supplied by app_ui's glass dependency.
-// ignore: depend_on_referenced_packages
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart' as renderer;
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
 import 'package:rtu_mirea_app/l10n/l10n.dart';
@@ -78,11 +77,8 @@ Future<_FreeRooms> _pump(
 }
 
 Finder _lenses(Finder widget) =>
-    find.descendant(of: widget, matching: find.byType(LiquidGlassLens));
-int? _id(Element lens) => LiquidGlassBatch.backdropIdOf(lens);
-Rect _bounds(WidgetTester tester, Iterable<Element> lenses) => lenses
-    .map((element) => tester.getRect(find.byWidget(element.widget)))
-    .reduce((a, b) => a.expandToInclude(b));
+    find.descendant(of: widget, matching: find.byType(AppGlassRenderer));
+BackdropKey? _id(Element lens) => AppGlassRendererScope.of(lens);
 
 void main() {
   for (final scale in [1.0, 2.0]) {
@@ -95,8 +91,6 @@ void main() {
             await tester.tap(find.byTooltip('Объёмный план'));
             await tester.pumpAndSettle();
           }
-          var sawShared = false;
-          var sawIsolated = false;
           for (final size in [
             const Size(320, 700),
             const Size(844, 390),
@@ -117,14 +111,22 @@ void main() {
             expect(topId, isNotNull);
             expect(top.map(_id).toSet(), {topId});
             expect(canvas.map(_id).toSet(), hasLength(1));
-            final shares = _id(canvas.first) == topId;
-            if (shares) {
-              sawShared = true;
-              final gap =
-                  _bounds(tester, canvas).top - _bounds(tester, top).bottom;
-              expect(gap, greaterThanOrEqualTo(60));
-              final peers = [...top, ...canvas];
+            expect(_id(canvas.first), isNot(topId));
+            for (final group in [
+              find.byType(MapTopBar),
+              find.byType(MapCanvasControls),
+            ]) {
+              expect(
+                find.descendant(
+                  of: group,
+                  matching: find.byType(renderer.LiquidGlassLayer),
+                ),
+                findsOneWidget,
+              );
+            }
+            for (final peers in [top, canvas]) {
               for (var i = 0; i < peers.length; i++) {
+                expect(AppGlassRendererScope.sharesLayerOf(peers[i]), isTrue);
                 for (var j = i + 1; j < peers.length; j++) {
                   expect(
                     tester
@@ -136,8 +138,6 @@ void main() {
                   );
                 }
               }
-            } else {
-              sawIsolated = true;
             }
             final more = find.byTooltip('Действия с картой');
             final moreLens = _lenses(more).evaluate();
@@ -145,31 +145,30 @@ void main() {
             expect(_id(moreLens.single), isNot(topId));
             expect(tester.takeException(), isNull);
           }
-          expect(sawShared, isTrue);
-          if (is3D || scale == 2) expect(sawIsolated, isTrue);
         },
       );
     }
   }
 
   testWidgets(
-    'shared canvas keeps search and sheets isolated with real actions',
+    'compact canvas keeps search and sheets isolated with real actions',
     (tester) async {
       final free = await _pump(tester);
       final top = find.byType(MapTopBar);
       final l10n = tester.element(top).l10n;
       final shared = _id(_lenses(top).evaluate().first);
-      expect(
-        _lenses(find.byType(MapCanvasControls)).evaluate().map(_id).toSet(),
-        {shared},
-      );
+      final canvasIds = _lenses(
+        find.byType(MapCanvasControls),
+      ).evaluate().map(_id).toSet();
+      expect(canvasIds, hasLength(1));
+      expect(canvasIds.single, isNot(shared));
       await tester.tap(find.byTooltip(l10n.mapSearchPlaceholder));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 16));
       final search = _lenses(find.byType(AppSearchField));
       expect(search, findsOneWidget);
       final searchId = _id(tester.element(search));
-      expect(searchId, isNotNull);
+      expect(searchId, isNull);
       expect(searchId, isNot(shared));
       await tester.pumpAndSettle();
       expect(
@@ -199,7 +198,7 @@ void main() {
     tester,
   ) async {
     await _pump(tester, glass: false);
-    expect(find.byType(LiquidGlassLens), findsNothing);
+    expect(find.byType(AppGlassRenderer), findsNothing);
     for (final label in [
       'Приблизить карту',
       'Отдалить карту',

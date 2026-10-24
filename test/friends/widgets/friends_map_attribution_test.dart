@@ -25,7 +25,7 @@ void main() {
       ),
     );
 
-    expect(find.text('© OpenStreetMap contributors'), findsOneWidget);
+    expect(find.text('© OpenMapTiles · © OpenStreetMap'), findsOneWidget);
     final attribution = find.descendant(
       of: find.byType(FriendsMapAttribution),
       matching: find.byType(Positioned),
@@ -44,7 +44,7 @@ void main() {
     await tester.pump();
 
     final attributionRect = tester.getRect(
-      find.text('© OpenStreetMap contributors'),
+      find.text('© OpenMapTiles · © OpenStreetMap'),
     );
     final panelTop = tester.view.physicalSize.height * (1 - extent.value);
     expect(attributionRect.bottom, lessThanOrEqualTo(panelTop - 10));
@@ -55,7 +55,7 @@ void main() {
     expect(
       tester.getSemantics(find.byType(AppPressable)),
       matchesSemantics(
-        label: '© OpenStreetMap contributors',
+        label: '© OpenMapTiles · © OpenStreetMap',
         isButton: true,
         hasEnabledState: true,
         isEnabled: true,

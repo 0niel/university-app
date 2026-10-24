@@ -18,7 +18,7 @@ class GlobalSearchButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppIconButton(
       icon: const AppLineIconWidget(AppLineIcon.search),
-      tone: AppIconButtonTone.surface,
+      tone: AppIconButtonTone.glass,
       shape: AppIconButtonShape.circle,
       size: AppIconButtonSize.compact,
       tooltip: context.l10n.search,

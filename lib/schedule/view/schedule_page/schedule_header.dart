@@ -53,24 +53,26 @@ class ScheduleHeader extends StatelessWidget {
         ),
       ],
     );
-    final actions = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(
-          child: SchedulePickerButton(
-            name: name,
-            semanticsLabel: nameSemanticsLabel,
+    final actions = AppGlassBatch.controls(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: SchedulePickerButton(
+              name: name,
+              semanticsLabel: nameSemanticsLabel,
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        AppIconButton(
-          icon: const AppLineIconWidget(AppLineIcon.tune),
-          shape: AppIconButtonShape.circle,
-          tone: AppIconButtonTone.surface,
-          tooltip: l10n.scheduleFilterSemantics,
-          onPressed: () => showScheduleFilterSheet(context, day: day),
-        ),
-      ],
+          const SizedBox(width: AppSpacing.sm),
+          AppIconButton(
+            icon: const AppLineIconWidget(AppLineIcon.tune),
+            shape: AppIconButtonShape.circle,
+            tone: AppIconButtonTone.glass,
+            tooltip: l10n.scheduleFilterSemantics,
+            onPressed: () => showScheduleFilterSheet(context, day: day),
+          ),
+        ],
+      ),
     );
     return Padding(
       padding: EdgeInsets.fromLTRB(

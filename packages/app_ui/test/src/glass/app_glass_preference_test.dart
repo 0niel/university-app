@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
@@ -75,7 +76,7 @@ void main() {
           scroll.jumpTo(120);
           await tester.pump();
           expect(focus.hasFocus, isTrue);
-          final glass = find.byType(LiquidGlassLens);
+          final glass = find.byType(AppGlassRenderer);
           expect(glass, highlight ? findsOneWidget : findsNothing);
           if (!highlight) expect(find.byType(LiquidGlassLite), findsNothing);
 
@@ -128,7 +129,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(LiquidGlassLens), findsOneWidget);
+      expect(find.byType(AppGlassRenderer), findsOneWidget);
       expect(tester.takeException(), isNull);
     }
   });

@@ -19,7 +19,13 @@ abstract final class AppGlassStyle {
     sharpness: .3,
     intensity: .65,
   );
+  static const _darkFloatingRim = LiquidGlassLight.specular(
+    thickness: .6,
+    sharpness: .08,
+    intensity: .12,
+  );
   static const _noRim = LiquidGlassLight.specular(thickness: 0, intensity: 0);
+  static const _noGlow = LiquidGlassLight.glow(thickness: 0, intensity: 0);
 
   static LiquidGlassStyle surface({
     required AppColors colors,
@@ -42,10 +48,25 @@ abstract final class AppGlassStyle {
             : colors.surface);
     final (opacity, blur, refraction, band) = switch (role) {
       AppGlassRole.content => (colors.isDark ? .94 : .97, 0.0, 1.0, 0.0),
-      AppGlassRole.control => (colors.isDark ? .64 : .76, 6.0, 1.019, 12.0),
+      AppGlassRole.control => (
+        colors.isDark ? .74 : .76,
+        6.0,
+        colors.isDark ? 1.006 : 1.019,
+        colors.isDark ? 4.0 : 12.0,
+      ),
       AppGlassRole.pinned => (colors.isDark ? .9 : .94, 6.0, 1.0, 0.0),
-      AppGlassRole.navigation => (colors.isDark ? .78 : .88, 8.0, 1.016, 12.0),
-      AppGlassRole.overlay => (colors.isDark ? .9 : .95, 8.0, 1.012, 12.0),
+      AppGlassRole.navigation => (
+        colors.isDark ? .84 : .88,
+        8.0,
+        colors.isDark ? 1.004 : 1.016,
+        colors.isDark ? 4.0 : 12.0,
+      ),
+      AppGlassRole.overlay => (
+        colors.isDark ? .94 : .95,
+        8.0,
+        colors.isDark ? 1.003 : 1.012,
+        colors.isDark ? 3.0 : 12.0,
+      ),
       AppGlassRole.sheet => (colors.isDark ? .9 : .95, 6.0, 1.0, 0.0),
     };
     return LiquidGlassStyle(
@@ -55,9 +76,14 @@ abstract final class AppGlassStyle {
         AppGlassRole.content => rim,
         AppGlassRole.control ||
         AppGlassRole.navigation ||
-        AppGlassRole.overlay => highContrast ? rim : floatingRim,
+        AppGlassRole.overlay =>
+          highContrast
+              ? rim
+              : colors.isDark
+              ? _darkFloatingRim
+              : floatingRim,
       },
-      glow: glow,
+      glow: colors.isDark ? _noGlow : glow,
       color: base.withValues(
         alpha: highContrast
             ? .98

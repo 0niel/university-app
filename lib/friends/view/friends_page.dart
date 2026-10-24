@@ -87,6 +87,7 @@ class _FriendsListViewState extends State<FriendsListView> {
                   onBack: () => Navigator.of(context).maybePop(),
                   actions: [
                     AppHeaderAction(
+                      hasOwnSurface: true,
                       child: Container(
                         width: 44,
                         height: 44,

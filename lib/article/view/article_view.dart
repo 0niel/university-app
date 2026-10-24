@@ -51,38 +51,42 @@ class ArticleView extends StatelessWidget {
                 horizontal: AppSpacing.screen,
               ),
               sliver: SliverToBoxAdapter(
-                child: PageActionBar(
-                  onBack: () => Navigator.of(context).maybePop(),
-                  actions: [
-                    AppIconButton(
-                      key: const Key('articlePage_saveButton'),
-                      icon: const AppLineIconWidget(
-                        AppLineIcon.bookmark,
-                        size: 20,
+                child: AppGlassBatch.controls(
+                  child: PageActionBar(
+                    onBack: () => Navigator.of(context).maybePop(),
+                    actions: [
+                      AppIconButton(
+                        key: const Key('articlePage_saveButton'),
+                        icon: const AppLineIconWidget(
+                          AppLineIcon.bookmark,
+                          size: 20,
+                        ),
+                        tooltip: saved
+                            ? l10n.articleRemoveFromSaved
+                            : l10n.save,
+                        tone: saved
+                            ? AppIconButtonTone.primary
+                            : AppIconButtonTone.glass,
+                        shape: AppIconButtonShape.circle,
+                        onPressed: () => _toggleSaved(context),
                       ),
-                      tooltip: saved ? l10n.articleRemoveFromSaved : l10n.save,
-                      tone: saved
-                          ? AppIconButtonTone.primary
-                          : AppIconButtonTone.surface,
-                      shape: AppIconButtonShape.circle,
-                      onPressed: () => _toggleSaved(context),
-                    ),
-                    AppIconButton(
-                      key: const Key('articlePage_shareButton'),
-                      icon: const AppLineIconWidget(
-                        AppLineIcon.share,
-                        size: 20,
+                      AppIconButton(
+                        key: const Key('articlePage_shareButton'),
+                        icon: const AppLineIconWidget(
+                          AppLineIcon.share,
+                          size: 20,
+                        ),
+                        tooltip: l10n.share,
+                        tone: AppIconButtonTone.glass,
+                        shape: AppIconButtonShape.circle,
+                        onPressed: canShare
+                            ? () => context.read<ArticleBloc>().add(
+                                ShareRequested(uri: uri),
+                              )
+                            : null,
                       ),
-                      tooltip: l10n.share,
-                      tone: AppIconButtonTone.surface,
-                      shape: AppIconButtonShape.circle,
-                      onPressed: canShare
-                          ? () => context.read<ArticleBloc>().add(
-                              ShareRequested(uri: uri),
-                            )
-                          : null,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

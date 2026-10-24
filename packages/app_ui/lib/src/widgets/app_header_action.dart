@@ -5,6 +5,7 @@ class AppHeaderAction {
   const AppHeaderAction({
     this.icon,
     this.child,
+    this.hasOwnSurface = false,
     this.onTap,
     this.badge = false,
     this.badgeColor,
@@ -13,6 +14,7 @@ class AppHeaderAction {
 
   final AppLineIcon? icon;
   final Widget? child;
+  final bool hasOwnSurface;
   final VoidCallback? onTap;
   final bool badge;
   final Color? badgeColor;

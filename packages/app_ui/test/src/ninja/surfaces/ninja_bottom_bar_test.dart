@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
@@ -63,7 +64,7 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
-          final lens = find.byType(LiquidGlassLens);
+          final lens = find.byType(AppGlassRenderer);
           expect(lens, findsOneWidget);
           expect(
             LiquidGlassBatch.backdropIdOf(tester.element(lens)),

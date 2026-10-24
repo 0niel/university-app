@@ -384,7 +384,7 @@ class _MapFloorAlignmentPageState extends State<MapFloorAlignmentPage> {
             size: AppButtonSize.small,
             textStyle: AppText.captionSmall,
             onPressed: () => unawaited(
-              launchUrl(Uri.parse('https://www.openstreetmap.org/copyright')),
+              AppMapTiles.showAttribution(context),
             ),
           ),
         ),

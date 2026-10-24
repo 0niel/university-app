@@ -23,7 +23,7 @@ class NinjaPeopleHeader extends StatelessWidget {
         : null,
     backSemanticsLabel: MaterialLocalizations.of(context).backButtonTooltip,
     actions: [
-      AppHeaderAction(child: search),
+      AppHeaderAction(child: search, hasOwnSurface: true),
       AppHeaderAction(
         icon: AppLineIcon.plus,
         semanticsLabel: addLabel,

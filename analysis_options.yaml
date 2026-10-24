@@ -11,6 +11,12 @@ analyzer:
     - "**/*.pbjson.dart"
     - "lib/l10n/generated/**"
     - "wear/lib/l10n/generated/**"
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
   errors:
     invalid_annotation_target: ignore
 

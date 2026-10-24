@@ -25,7 +25,7 @@ class AppInnerHeader extends StatelessWidget {
     this.padding,
     this.applyTopInset = true,
     this.titleStyle,
-    this.controlTone = AppControlSurfaceTone.neutral,
+    this.controlTone = AppControlSurfaceTone.glass,
   });
 
   final String title;
@@ -181,7 +181,7 @@ class AppInnerHeader extends StatelessWidget {
             ],
           );
           return controlTone == AppControlSurfaceTone.glass
-              ? AppGlassBatch(child: header)
+              ? AppGlassBatch.controls(child: header)
               : header;
         },
       ),

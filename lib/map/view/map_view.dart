@@ -1214,48 +1214,23 @@ class _MapViewState extends State<MapView> {
                 ? _collapsedPanelSize
                 : .78;
             _updateMapViewport(panelSize);
-            final controlStyle = AppGlassStyle.surface(
-              colors: context.colors,
-              radius: AppControlSize.iconButton / 2,
-              tone: AppGlassTone.regular,
-              highContrast: MediaQuery.highContrastOf(context),
-              role: AppGlassRole.control,
-            );
-            final captureReach =
-                3 * controlStyle.blur +
-                controlStyle.refractionWidth +
-                (controlStyle.specular?.thickness ?? 0) +
-                3;
-            final topGlassBottom = MapTopBar.extentOf(context);
-            final controlCount = interactive ? (_is3D ? 5 : 4) : 3;
-            final controlsHeight =
-                AppControlSize.iconButton * controlCount +
-                AppSpacing.sm * (controlCount - 2);
-            MapCanvasControls controls({
-              required bool shared,
-              bool compact = false,
-            }) => MapCanvasControls(
-              joinParentBatch: shared,
-              axis: compact ? Axis.horizontal : Axis.vertical,
-              showZoom: !compact,
-              is3D: _is3D,
-              onRotate: !compact && _is3D && interactive
-                  ? () => setState(() => _mapBearing += math.pi / 4)
-                  : null,
-              onToggle3D: !compact && interactive
-                  ? () => setState(() => _is3D = !_is3D)
-                  : null,
-              onZoomIn: interactive ? _mapController.zoomIn : null,
-              onZoomOut: interactive ? _mapController.zoomOut : null,
-              onFit: interactive ? _mapController.fit : null,
-            );
-            final sharedControls = controls(shared: true);
-            final isolatedControls = controls(shared: false);
-            final sharedCompactControls = controls(shared: true, compact: true);
-            final isolatedCompactControls = controls(
-              shared: false,
-              compact: true,
-            );
+            MapCanvasControls controls({bool compact = false}) =>
+                MapCanvasControls(
+                  axis: compact ? Axis.horizontal : Axis.vertical,
+                  showZoom: !compact,
+                  is3D: _is3D,
+                  onRotate: !compact && _is3D && interactive
+                      ? () => setState(() => _mapBearing += math.pi / 4)
+                      : null,
+                  onToggle3D: !compact && interactive
+                      ? () => setState(() => _is3D = !_is3D)
+                      : null,
+                  onZoomIn: interactive ? _mapController.zoomIn : null,
+                  onZoomOut: interactive ? _mapController.zoomOut : null,
+                  onFit: interactive ? _mapController.fit : null,
+                );
+            final canvasControls = controls();
+            final compactControls = controls(compact: true);
             final mapStack = Stack(
               fit: StackFit.expand,
               children: [
@@ -1307,7 +1282,6 @@ class _MapViewState extends State<MapView> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           MapTopBar(
-                            joinParentBatch: true,
                             showCampusSelector:
                                 _route == null || constraints.maxHeight >= 600,
                             controller: _query,
@@ -1386,23 +1360,10 @@ class _MapViewState extends State<MapView> {
                             _viewportTop + AppControlSize.touchTarget + 20) {
                       return const SizedBox.shrink();
                     }
-                    final height = controlsFit
-                        ? controlsHeight
-                        : AppControlSize.iconButton;
-                    final shareCapture =
-                        _route == null &&
-                        constraints.maxHeight - panelHeight - 12 - height >=
-                            topGlassBottom + 2 * captureReach;
                     return Positioned(
                       right: AppSpacing.lg,
                       bottom: panelHeight + 12,
-                      child: controlsFit
-                          ? shareCapture
-                                ? sharedControls
-                                : isolatedControls
-                          : shareCapture
-                          ? sharedCompactControls
-                          : isolatedCompactControls,
+                      child: controlsFit ? canvasControls : compactControls,
                     );
                   },
                 ),

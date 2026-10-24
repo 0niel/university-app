@@ -1,6 +1,8 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart' as renderer;
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/widgets/map_canvas_controls.dart';
 
@@ -49,10 +51,12 @@ void main() {
             find.descendant(of: zoom, matching: find.byType(AppGlassSurface)),
             findsNothing,
           );
-          final lenses = find.byWidgetPredicate(
-            (widget) => widget.runtimeType.toString() == 'LiquidGlassLens',
-          );
+          final lenses = find.byType(AppGlassRenderer);
           expect(lenses, glassEnabled ? findsWidgets : findsNothing);
+          expect(find.byType(renderer.LiquidGlassLayer), findsOneWidget);
+          for (final lens in lenses.evaluate()) {
+            expect(AppGlassRendererScope.sharesLayerOf(lens), isTrue);
+          }
           final l10n = tester.element(find.byType(MapCanvasControls)).l10n;
           for (final label in [
             l10n.mapZoomIn,

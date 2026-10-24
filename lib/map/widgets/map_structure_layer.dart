@@ -267,7 +267,12 @@ class MapStructureLayers {
     if (openingsOnly && _graphics.contains(tag)) return null;
     if (!openingsOnly && element.childElements.isEmpty) return element.copy();
 
-    final copy = element.copy()..children.clear();
+    final copy = XmlElement(
+      element.name.copy(),
+      element.attributes.map((attribute) => attribute.copy()),
+      const [],
+      element.isSelfClosing,
+    );
     for (final child in element.children) {
       if (child is XmlElement) {
         final retained = _split(child, viewBox, openingsOnly: openingsOnly);

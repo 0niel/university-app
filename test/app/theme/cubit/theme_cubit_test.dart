@@ -25,7 +25,7 @@ void main() {
     test('initial state is ThemeState()', () {
       final state = ThemeCubit().state;
       expect(state, equals(const ThemeState()));
-      expect(state.glassEnabled, isTrue);
+      expect(state.glassEnabled, isFalse);
     });
 
     blocTest<ThemeCubit, ThemeState>(
@@ -42,10 +42,10 @@ void main() {
       build: ThemeCubit.new,
       seed: () => const ThemeState(colorScheme: AppColorScheme.violet),
       act: (cubit) => cubit
-        ..setGlassEnabled(enabled: false)
-        ..setGlassEnabled(enabled: true),
+        ..setGlassEnabled(enabled: true)
+        ..setGlassEnabled(enabled: false),
       expect: () => const [
-        ThemeState(colorScheme: AppColorScheme.violet, glassEnabled: false),
+        ThemeState(colorScheme: AppColorScheme.violet, glassEnabled: true),
         ThemeState(colorScheme: AppColorScheme.violet),
       ],
     );
@@ -129,7 +129,7 @@ void main() {
         expect(theme.colorScheme.surface, colors.surface);
         expect(theme.colorScheme.surfaceContainerHighest, colors.surface2);
         expect(theme.colorScheme.surfaceTint, Colors.transparent);
-        expect(theme.extension<AppGlassTheme>()!.enabled, isTrue);
+        expect(theme.extension<AppGlassTheme>()!.enabled, isFalse);
       },
     );
 
@@ -179,11 +179,30 @@ void main() {
       }
     });
 
-    test('glass defaults on when old storage has no appearance preference', () {
-      final cubit = ThemeCubit();
-      expect(cubit.fromJson({}), const ThemeState());
-      expect(cubit.fromJson({'isAmoled': 'obsolete'}), const ThemeState());
-    });
+    test(
+      'glass defaults off when old storage has no appearance preference',
+      () {
+        final cubit = ThemeCubit();
+        expect(cubit.fromJson({}), const ThemeState());
+        expect(cubit.fromJson({'isAmoled': 'obsolete'}), const ThemeState());
+        expect(cubit.fromJson({'colorScheme': 'red'}).glassEnabled, isFalse);
+        expect(cubit.fromJson({'glassEnabled': null}).glassEnabled, isFalse);
+      },
+    );
+
+    for (final enabled in [false, true]) {
+      test('restores the saved glass preference $enabled on startup', () async {
+        when(() => storage.read(any())).thenReturn({
+          'colorScheme': 'violet',
+          'glassEnabled': enabled,
+          'accentSelectionVersion': 2,
+        });
+        final cubit = ThemeCubit();
+        expect(cubit.state.glassEnabled, enabled);
+        expect(cubit.state.colorScheme, AppColorScheme.violet);
+        await cubit.close();
+      });
+    }
 
     test('a malformed glass value falls back to the default state', () {
       final cubit = ThemeCubit();

@@ -1,9 +1,9 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:app_ui/src/widgets/app_control_surface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 import '../kit_harness.dart';
 
@@ -26,7 +26,6 @@ void main() {
               child: inner
                   ? AppInnerHeader(
                       title: 'Сервисы',
-                      controlTone: AppControlSurfaceTone.glass,
                       onBack: () => backs++,
                       backSemanticsLabel: 'Назад',
                       actions: [
@@ -39,7 +38,6 @@ void main() {
                     )
                   : AppScreenHeader(
                       title: 'Сервисы',
-                      controlTone: AppControlSurfaceTone.glass,
                       actions: [
                         AppHeaderAction(
                           icon: AppLineIcon.tune,
@@ -56,7 +54,7 @@ void main() {
         await tester.pumpAndSettle();
         final count = inner ? 2 : 1;
         expect(find.byType(AppGlassSurface), findsNWidgets(count));
-        expect(find.byType(LiquidGlassLens), findsNWidgets(count));
+        expect(find.byType(AppGlassRenderer), findsNWidgets(count));
         for (final surface in tester.widgetList<AppGlassSurface>(
           find.byType(AppGlassSurface),
         )) {
@@ -90,7 +88,7 @@ void main() {
 
         await tester.pumpWidget(view(glassEnabled: false));
         await tester.pumpAndSettle();
-        expect(find.byType(LiquidGlassLens), findsNothing);
+        expect(find.byType(AppGlassRenderer), findsNothing);
         expect(tester.getRect(action), bounds);
         expect(find.bySemanticsLabel('Настройки'), findsOneWidget);
         await tester.tap(action);

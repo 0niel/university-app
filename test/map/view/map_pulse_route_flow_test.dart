@@ -49,7 +49,8 @@ void main() {
         cache: const _NoCache(),
         bundledCatalogAsset: MapDataRepository.pulseCatalogAsset,
         rpc: (name, _) async {
-          if (refreshedCampus != null) {
+          final campus = refreshedCampus;
+          if (campus != null) {
             if (name == 'get_map_catalog') {
               refreshEntered.complete();
               await releaseRefresh.future;
@@ -58,12 +59,12 @@ void main() {
                   {
                     'id': campusId,
                     'short_title': campusTitle,
-                    'revision': refreshedCampus['revision'],
+                    'revision': campus['revision'],
                   },
                 ],
               };
             }
-            if (name == 'get_map_campus') return refreshedCampus;
+            if (name == 'get_map_campus') return campus;
           }
           throw const MapDataException('offline');
         },

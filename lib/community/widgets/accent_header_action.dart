@@ -9,6 +9,7 @@ AppHeaderAction accentHeaderAction({
   required String semanticsLabel,
   AppLineIcon icon = AppLineIcon.plus,
 }) => AppHeaderAction(
+  hasOwnSurface: true,
   onTap: onTap,
   semanticsLabel: semanticsLabel,
   child: AccentHeaderGlyph(icon: icon, enabled: onTap != null),

@@ -63,7 +63,7 @@ android {
     ndkVersion "28.2.13676358"
 
     defaultConfig {
-        applicationId "ninja.mirea.mireaapp"
+        applicationId project.findProperty('diagnosticApplicationId') ?: "ninja.mirea.mireaapp"
         minSdk 26
         targetSdk 36
         versionCode flutterVersionCode.toInteger()

@@ -64,6 +64,7 @@ class _SchedulePickerButtonState extends State<SchedulePickerButton> {
               widget.name ??
               anchorContext.l10n.schedules,
           child: AppGlassSurface(
+            role: AppGlassRole.control,
             borderRadius: AppRadius.full,
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.sectionGap,

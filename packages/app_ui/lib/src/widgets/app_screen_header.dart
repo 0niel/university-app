@@ -27,7 +27,7 @@ class AppScreenHeader extends StatelessWidget {
     this.padding,
     this.applyTopInset = true,
     this.titleStyle,
-    this.controlTone = AppControlSurfaceTone.neutral,
+    this.controlTone = AppControlSurfaceTone.glass,
   }) : assert(
          trailing == null || textAction == null,
          'Use either trailing or textAction.',
@@ -187,7 +187,7 @@ class AppScreenHeader extends StatelessWidget {
           if (actions.isNotEmpty)
             Positioned.fill(
               child: controlTone == AppControlSurfaceTone.glass
-                  ? AppGlassBatch(child: actionOverlays)
+                  ? AppGlassBatch.controls(child: actionOverlays)
                   : actionOverlays,
             ),
         ],
@@ -233,7 +233,7 @@ class AppHeaderCircleButton extends StatelessWidget {
     this.foreground,
     this.iconSize = AppIconSize.md,
     this.visualAlignment = Alignment.center,
-    this.controlTone = AppControlSurfaceTone.neutral,
+    this.controlTone = AppControlSurfaceTone.glass,
   });
 
   final AppHeaderAction action;
@@ -259,9 +259,13 @@ class AppHeaderCircleButton extends StatelessWidget {
         child: Align(
           alignment: visualAlignment,
           child: AppControlSurface(
-            color: background ?? colors.surface,
+            color: action.hasOwnSurface
+                ? const Color(0x00000000)
+                : background ?? colors.surface,
             borderRadius: AppRadius.full,
-            tone: controlTone,
+            tone: action.hasOwnSurface
+                ? AppControlSurfaceTone.quiet
+                : controlTone,
             enabled: action.onTap != null,
             child: SizedBox.square(
               dimension: size,

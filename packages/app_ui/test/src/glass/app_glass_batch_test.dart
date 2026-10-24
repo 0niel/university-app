@@ -1,9 +1,15 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart' as renderer;
 
 void main() {
+  Finder activeLegacyBatches() => find.byWidgetPredicate(
+    (widget) => widget is LiquidGlassBatch && widget.enabled,
+  );
+
   Widget surface(String name, {Widget child = const SizedBox(height: 48)}) =>
       SizedBox(
         width: 180,
@@ -14,18 +20,25 @@ void main() {
         ),
       );
 
-  int? lensBackdrop(WidgetTester tester, String name) {
+  BackdropKey? lensBackdrop(WidgetTester tester, String name) {
     final lens = find
         .descendant(
           of: find.byKey(ValueKey(name)),
-          matching: find.byType(LiquidGlassLens),
+          matching: find.byType(AppGlassRenderer),
         )
         .first;
-    return LiquidGlassBatch.backdropIdOf(tester.element(lens));
+    return tester
+        .widget<renderer.LiquidGlassLayer>(
+          find.descendant(
+            of: lens,
+            matching: find.byType(renderer.LiquidGlassLayer),
+          ),
+        )
+        .backdropKey;
   }
 
   testWidgets(
-    'standalone lenses each compose blur and refraction in isolation',
+    'standalone lenses retain independent backdrop reads',
     (
       tester,
     ) async {
@@ -37,10 +50,10 @@ void main() {
       );
       final first = lensBackdrop(tester, 'first');
       final second = lensBackdrop(tester, 'second');
-      expect(first, isNotNull);
-      expect(second, isNotNull);
-      expect(first, isNot(second));
-      expect(find.byType(LiquidGlassBatch), findsNWidgets(2));
+      expect(first, isNull);
+      expect(second, isNull);
+      expect(find.byType(renderer.LiquidGlassLayer), findsNWidgets(2));
+      expect(activeLegacyBatches(), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -58,9 +71,59 @@ void main() {
     );
     expect(lensBackdrop(tester, 'first'), isNotNull);
     expect(lensBackdrop(tester, 'second'), lensBackdrop(tester, 'first'));
-    expect(find.byType(LiquidGlassBatch), findsOneWidget);
+    expect(activeLegacyBatches(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'compact controls share one real layer and isolate nested glass',
+    (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: AppGlassBatch.controls(
+            child: Row(
+              children: [
+                surface('first', child: surface('nested')),
+                surface('second'),
+              ],
+            ),
+          ),
+        ),
+      );
+      final layers = tester.widgetList<renderer.LiquidGlassLayer>(
+        find.byType(renderer.LiquidGlassLayer),
+      );
+      expect(layers, hasLength(2));
+      expect(layers.first.backdropKey, isNotNull);
+      expect(layers.last.backdropKey, isNull);
+      expect(layers.every((layer) => !layer.fake), isTrue);
+      expect(find.byType(AppGlassRenderer), findsNWidgets(3));
+      for (final name in ['first', 'second']) {
+        final lens = find
+            .descendant(
+              of: find.byKey(ValueKey(name)),
+              matching: find.byType(AppGlassRenderer),
+            )
+            .first;
+        expect(
+          AppGlassRendererScope.sharesLayerOf(tester.element(lens)),
+          isTrue,
+        );
+      }
+      final nested = find.descendant(
+        of: find.byKey(const ValueKey('nested')),
+        matching: find.byType(AppGlassRenderer),
+      );
+      expect(
+        AppGlassRendererScope.sharesLayerOf(tester.element(nested)),
+        isFalse,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('excluded foreground keeps its own backdrop inside a batch', (
     tester,
@@ -88,7 +151,7 @@ void main() {
     );
     expect(foregroundId, isNull);
     expect(lensBackdrop(tester, 'peer'), isNotNull);
-    expect(lensBackdrop(tester, 'excluded'), isNotNull);
+    expect(lensBackdrop(tester, 'excluded'), isNull);
     expect(
       lensBackdrop(tester, 'excluded'),
       isNot(lensBackdrop(tester, 'peer')),
@@ -96,33 +159,43 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('overlapping nested surfaces keep independent backdrop reads', (
+  testWidgets('nested overlapping lenses do not reuse their parent batch', (
     tester,
   ) async {
-    int? contentBackdrop;
+    BackdropKey? contentBackdrop;
+    int? legacyContentBackdrop;
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.darkTheme,
-        home: Center(
-          child: surface(
-            'outer',
-            child: Builder(
-              builder: (context) {
-                contentBackdrop = LiquidGlassBatch.backdropIdOf(context);
-                return Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: surface('inner'),
-                );
-              },
+        home: AppGlassBatch(
+          child: Center(
+            child: surface(
+              'outer',
+              child: Builder(
+                builder: (context) {
+                  contentBackdrop = AppGlassRendererScope.of(context);
+                  legacyContentBackdrop = LiquidGlassBatch.backdropIdOf(
+                    context,
+                  );
+                  return Stack(
+                    children: [
+                      surface('inner'),
+                      Positioned(left: 8, top: 8, child: surface('overlap')),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),
       ),
     );
     expect(contentBackdrop, isNull);
+    expect(legacyContentBackdrop, isNull);
     expect(lensBackdrop(tester, 'outer'), isNotNull);
-    expect(lensBackdrop(tester, 'inner'), isNotNull);
-    expect(lensBackdrop(tester, 'inner'), isNot(lensBackdrop(tester, 'outer')));
+    expect(lensBackdrop(tester, 'inner'), isNull);
+    expect(lensBackdrop(tester, 'overlap'), isNull);
+    expect(find.byType(renderer.LiquidGlassLayer), findsNWidgets(3));
     expect(tester.takeException(), isNull);
   });
 
@@ -188,7 +261,7 @@ void main() {
                 body: Center(
                   child: SizedBox(
                     width: 280,
-                    child: AppGlassBatch(
+                    child: AppGlassBatch.controls(
                       child: Builder(
                         builder: (context) {
                           backdropId = LiquidGlassBatch.backdropIdOf(context);

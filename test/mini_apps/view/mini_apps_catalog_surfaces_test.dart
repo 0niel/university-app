@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,7 +14,7 @@ import 'package:rtu_mirea_app/mini_apps/view/mini_apps_catalog.dart';
 void main() {
   for (final textScale in [1.0, 2.0]) {
     testWidgets(
-      'only the pinned strip uses glass above catalog content '
+      'header and pinned strip keep catalog content free of glass '
       'at scale $textScale',
       (tester) async {
         tester.view
@@ -79,10 +80,33 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(find.byType(LiquidGlassLens), findsNothing);
+        void expectCaptures({bool pinned = false, bool enabled = true}) {
+          final blur = tester.layers.whereType<BackdropFilterLayer>().where(
+            (layer) => layer.filter is! ColorFilter,
+          );
+          expect(blur, enabled ? hasLength(pinned ? 1 : 2) : isEmpty);
+          final shared = blur.where((layer) => layer.backdropKey != null);
+          expect(
+            shared.map((layer) => layer.backdropKey).toSet(),
+            enabled && !pinned ? hasLength(1) : isEmpty,
+          );
+          expect(
+            blur.where((layer) => layer.backdropKey == null),
+            enabled && pinned ? hasLength(1) : isEmpty,
+          );
+        }
+
+        expect(find.byType(AppGlassRenderer), findsNWidgets(2));
+        expect(
+          find.descendant(
+            of: find.byType(AppInnerHeader),
+            matching: find.byType(AppGlassRenderer),
+          ),
+          findsNWidgets(2),
+        );
         expect(find.byType(LiquidGlassLite), findsNothing);
         expect(find.byType(BackdropFilter), findsNothing);
-        expect(tester.layers.whereType<BackdropFilterLayer>(), isEmpty);
+        expectCaptures();
 
         final sort = find.byKey(const ValueKey('mini-apps-sort-button'));
         final create = find.byKey(const ValueKey('mini-apps-create-button'));
@@ -91,7 +115,7 @@ void main() {
           expect(
             find.descendant(
               of: control,
-              matching: find.byType(LiquidGlassLens),
+              matching: find.byType(AppGlassRenderer),
             ),
             findsNothing,
           );
@@ -118,9 +142,9 @@ void main() {
         await tester.tap(find.byType(AppHeaderCircleButton));
         await tester.pumpAndSettle();
         final search = find.byType(AppSearchField);
-        expect(find.byType(LiquidGlassLens), findsNothing);
+        expect(find.byType(AppGlassRenderer), findsNWidgets(2));
         expect(find.byType(BackdropFilter), findsNothing);
-        expect(tester.layers.whereType<BackdropFilterLayer>(), isEmpty);
+        expectCaptures();
         final field = find.descendant(
           of: search,
           matching: find.byType(TextField),
@@ -137,7 +161,7 @@ void main() {
           matching: find.byType(AppPinnedSurface),
         );
         expect(tester.widget<AppPinnedSurface>(pinnedSurface).elevated, isTrue);
-        expect(find.byType(LiquidGlassLens), findsNothing);
+        expect(find.byType(AppGlassRenderer), findsNothing);
         expect(find.byType(LiquidGlassLite), findsOneWidget);
         expect(
           find.descendant(
@@ -146,7 +170,7 @@ void main() {
           ),
           findsOneWidget,
         );
-        expect(tester.layers.whereType<BackdropFilterLayer>(), hasLength(1));
+        expectCaptures(pinned: true);
         expect(
           find.descendant(of: search, matching: find.byType(BackdropFilter)),
           findsNothing,
@@ -159,10 +183,7 @@ void main() {
           expect(tester.getRect(search), searchBounds);
           expect(tester.widget<TextField>(field).controller, same(controller));
           expect(controller.text, 'draft');
-          expect(
-            tester.layers.whereType<BackdropFilterLayer>(),
-            next ? hasLength(1) : isEmpty,
-          );
+          expectCaptures(pinned: true, enabled: next);
         }
         expect(tester.takeException(), isNull);
       },
@@ -247,7 +268,7 @@ void main() {
           expect(
             find.descendant(
               of: controls[index],
-              matching: find.byType(LiquidGlassLens),
+              matching: find.byType(AppGlassRenderer),
             ),
             findsNothing,
           );
@@ -362,7 +383,7 @@ void main() {
         );
         expect(scrollableState.position.pixels, offset);
         expect(
-          find.descendant(of: list, matching: find.byType(LiquidGlassLens)),
+          find.descendant(of: list, matching: find.byType(AppGlassRenderer)),
           findsNothing,
         );
         expect(

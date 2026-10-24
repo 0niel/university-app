@@ -73,7 +73,7 @@ void main() {
   });
 
   testWidgets(
-    'glass toggle defaults on and changes the real theme state both ways',
+    'glass toggle defaults off and changes the real theme state both ways',
     (tester) async {
       final theme = ThemeCubit();
       final preferences = UiPreferencesCubit();
@@ -100,18 +100,18 @@ void main() {
         of: row,
         matching: find.byType(AppSwitch),
       );
-      expect(theme.state.glassEnabled, isTrue);
-      expect(tester.widget<AppSwitch>(control).value, isTrue);
+      expect(theme.state.glassEnabled, isFalse);
+      expect(tester.widget<AppSwitch>(control).value, isFalse);
       await tester.ensureVisible(control);
       await tester.pumpAndSettle();
       await tester.tap(control);
       await tester.pumpAndSettle();
-      expect(theme.state.glassEnabled, isFalse);
-      expect(tester.widget<AppSwitch>(control).value, isFalse);
-      await tester.tap(find.text(l10n.settingsGlassEffectTitle));
-      await tester.pumpAndSettle();
       expect(theme.state.glassEnabled, isTrue);
       expect(tester.widget<AppSwitch>(control).value, isTrue);
+      await tester.tap(find.text(l10n.settingsGlassEffectTitle));
+      await tester.pumpAndSettle();
+      expect(theme.state.glassEnabled, isFalse);
+      expect(tester.widget<AppSwitch>(control).value, isFalse);
       expect(tester.takeException(), isNull);
     },
   );
