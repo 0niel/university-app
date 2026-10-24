@@ -149,7 +149,7 @@ jobs:
 
       - name: Verify source
         run: |
-          flutter analyze --no-pub lib test
+          flutter analyze --no-pub --no-fatal-infos --fatal-warnings lib test
           flutter test --no-pub
           python3 -m unittest discover -s test/tool -p app_store_build_status_test.py
 

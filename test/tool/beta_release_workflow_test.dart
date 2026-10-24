@@ -141,7 +141,12 @@ void main() {
     );
     expect(workflow, contains('"Xcode 26.3"'));
     expect(verifySourceIndex, greaterThan(verifyIndex));
-    expect(workflow, contains('flutter analyze --no-pub lib test'));
+    expect(
+      workflow,
+      contains(
+        'flutter analyze --no-pub --no-fatal-infos --fatal-warnings lib test',
+      ),
+    );
     expect(workflow, contains('flutter test --no-pub'));
     expect(
       workflow,

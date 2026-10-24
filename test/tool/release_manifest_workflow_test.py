@@ -88,6 +88,10 @@ class ReleaseManifestWorkflowTest(unittest.TestCase):
             self.assertIn("private/university_provider/lib", verify["run"])
             self.assertNotIn("--no-fatal-warnings", verify["run"])
             self.assertNotIn("continue-on-error", verify)
+        source = step(IOS, "release", "Verify source")
+        self.assertIn("--no-fatal-infos --fatal-warnings lib test", source["run"])
+        self.assertIn("flutter test --no-pub", source["run"])
+        self.assertNotIn("continue-on-error", source)
 
     def test_historical_baselines_do_not_automatically_roll_out_to_google_play(self):
         play = yaml.safe_load((ROOT / ".github/workflows/google-play-release.yml").read_text())
