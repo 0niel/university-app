@@ -233,102 +233,105 @@ class ScheduleWeekView extends StatelessWidget {
               padding: gutters,
               child: SizedBox(
                 width: width,
-                child: AppCard(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.md,
-                    AppSpacing.sectionGap,
-                    AppSpacing.md,
-                    AppSpacing.lg,
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(width: ScheduleMetrics.timeColumn),
-                          for (final date in days)
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  left: AppSpacing.xs,
-                                ),
-                                child: AppDayPill(
-                                  dense: true,
-                                  selected: isSameDate(date, day),
-                                  day: AppWeekDay(
-                                    '${date.day}',
-                                    short: DateFormat.E(
-                                      locale,
-                                    ).format(date).toUpperCase(),
-                                    isToday: isSameDate(
-                                      date,
-                                      currentTime,
-                                    ),
-                                    isWeekend: RussianWorkCalendar.dayInfo(
-                                      date,
-                                    ).isNonWorking,
-                                    semanticsLabel: dayLabel(date),
-                                    dots: [
-                                      for (final lesson
-                                          in dayData[date]!.lessons)
-                                        lessonAccentOf(context, lesson),
-                                    ],
-                                  ),
-                                  onTap: () => onDay(date),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      for (var index = 0; index < bells.length; index++)
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top: index == AppSpacing.zero
-                                ? AppSpacing.sm
-                                : AppSpacing.xs,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: ScheduleMetrics.timeColumn,
+                child: RepaintBoundary(
+                  key: const ValueKey('schedule-week-table'),
+                  child: AppCard(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.md,
+                      AppSpacing.sectionGap,
+                      AppSpacing.md,
+                      AppSpacing.lg,
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(width: ScheduleMetrics.timeColumn),
+                            for (final date in days)
+                              Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.only(
-                                    top: AppSpacing.xsm,
+                                    left: AppSpacing.xs,
                                   ),
-                                  child: Text(
-                                    _time(bells[index].startMinutes),
-                                    style: AppText.micro.copyWith(
-                                      color: context.colors.muted,
+                                  child: AppDayPill(
+                                    dense: true,
+                                    selected: isSameDate(date, day),
+                                    day: AppWeekDay(
+                                      '${date.day}',
+                                      short: DateFormat.E(
+                                        locale,
+                                      ).format(date).toUpperCase(),
+                                      isToday: isSameDate(
+                                        date,
+                                        currentTime,
+                                      ),
+                                      isWeekend: RussianWorkCalendar.dayInfo(
+                                        date,
+                                      ).isNonWorking,
+                                      semanticsLabel: dayLabel(date),
+                                      dots: [
+                                        for (final lesson
+                                            in dayData[date]!.lessons)
+                                          lessonAccentOf(context, lesson),
+                                      ],
                                     ),
+                                    onTap: () => onDay(date),
                                   ),
                                 ),
                               ),
-                              for (final date in days)
-                                Expanded(
+                          ],
+                        ),
+                        for (var index = 0; index < bells.length; index++)
+                          Padding(
+                            padding: EdgeInsets.only(
+                              top: index == AppSpacing.zero
+                                  ? AppSpacing.sm
+                                  : AppSpacing.xs,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: ScheduleMetrics.timeColumn,
                                   child: Padding(
                                     padding: const EdgeInsets.only(
-                                      left: AppSpacing.xs,
+                                      top: AppSpacing.xsm,
                                     ),
-                                    child: KeyedSubtree(
-                                      key: ValueKey(
-                                        'week-cell-${date.toIso8601String()}-'
-                                        '${bells[index].startMinutes}',
-                                      ),
-                                      child: _cell(
-                                        context,
-                                        date,
-                                        bells[index],
-                                        dayData[date]!,
-                                        friendOccupancy[date]!,
+                                    child: Text(
+                                      _time(bells[index].startMinutes),
+                                      style: AppText.micro.copyWith(
+                                        color: context.colors.muted,
                                       ),
                                     ),
                                   ),
                                 ),
-                            ],
+                                for (final date in days)
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        left: AppSpacing.xs,
+                                      ),
+                                      child: KeyedSubtree(
+                                        key: ValueKey(
+                                          'week-cell-${date.toIso8601String()}-'
+                                          '${bells[index].startMinutes}',
+                                        ),
+                                        child: _cell(
+                                          context,
+                                          date,
+                                          bells[index],
+                                          dayData[date]!,
+                                          friendOccupancy[date]!,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
