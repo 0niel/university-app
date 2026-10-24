@@ -1,5 +1,7 @@
+import json
 import os
 import plistlib
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -22,6 +24,78 @@ def step(workflow, job, name):
 
 
 class ReleaseManifestWorkflowTest(unittest.TestCase):
+    def run_prepare_step(self, name, values, runs=None, ancestor_status=0):
+        bash = os.environ.get("TEST_BASH") or shutil.which("bash")
+        self.assertIsNotNone(bash)
+        with tempfile.TemporaryDirectory() as directory:
+            response = Path(directory) / "runs.json"
+            response.write_text(json.dumps({"workflow_runs": runs or []}))
+            environment = {
+                **os.environ, "GITHUB_EVENT_NAME": "workflow_dispatch",
+                "GITHUB_REF": "refs/heads/master", "DEFAULT_BRANCH": "master",
+                "SOURCE_SHA": "a" * 40, "WORKFLOW_SHA": "b" * 40,
+                "GITHUB_REPOSITORY": "sample/mobile", "RUNNER_TEMP": Path(directory).as_posix(),
+                "TEST_RUNS": response.as_posix(), "TEST_PYTHON": Path(sys.executable).as_posix(),
+                "TEST_ANCESTOR_STATUS": str(ancestor_status), **values,
+            }
+            script = ('git() { if [[ "$1" == rev-parse ]]; then '
+                      'printf "%s\\n" "${TEST_CHECKOUT_SHA:-$SOURCE_SHA}"; '
+                      'else return "$TEST_ANCESTOR_STATUS"; fi; }\n'
+                      'gh() { cat "$TEST_RUNS"; }\n'
+                      'python3() { "$TEST_PYTHON" "$@"; }\n'
+                      + step(ANDROID, "prepare", name)["run"])
+            return subprocess.run(
+                [bash, "--noprofile", "--norc", "-e", "-o", "pipefail", "-c", script],
+                env=environment, capture_output=True, text=True, timeout=15,
+            )
+
+    def test_manual_baseline_requires_a_full_sha_on_the_default_branch(self):
+        for values, accepted in (({}, True), ({"SOURCE_SHA": "master"}, False),
+                                 ({"SOURCE_SHA": "a" * 40 + "\necho injected"}, False),
+                                 ({"GITHUB_REF": "refs/heads/feature"}, False),
+                                 ({"GITHUB_EVENT_NAME": "workflow_run"}, False)):
+            with self.subTest(values=values):
+                result = self.run_prepare_step("Validate manual source", values)
+                self.assertEqual(result.returncode == 0, accepted, result.stderr)
+        checkout = step(ANDROID, "prepare", "Check out repository")["with"]
+        self.assertEqual(checkout["fetch-depth"], 0)
+        self.assertIn("inputs.source_sha", checkout["ref"])
+        self.assertEqual(ANDROID["jobs"]["prepare"]["permissions"]["actions"], "read")
+
+    def test_manual_baseline_requires_exact_successful_push_ci_and_ancestry(self):
+        run = {"head_sha": "a" * 40, "head_branch": "master", "event": "push",
+               "path": ".github/workflows/main.yml", "status": "completed",
+               "conclusion": "success", "head_repository": {"full_name": "sample/mobile"}}
+        cases = [({}, 0, True), ({"event": "pull_request"}, 0, False),
+                 ({"head_sha": "c" * 40}, 0, False), ({"head_branch": "feature"}, 0, False),
+                 ({"conclusion": "failure"}, 0, False), ({"status": "in_progress"}, 0, False),
+                 ({"path": ".github/workflows/other.yml"}, 0, False),
+                 ({"head_repository": {"full_name": "other/mobile"}}, 0, False),
+                 ({}, 1, False)]
+        for changes, ancestry, accepted in cases:
+            with self.subTest(changes=changes, ancestry=ancestry):
+                result = self.run_prepare_step("Verify approved source", {}, [{**run, **changes}], ancestry)
+                self.assertEqual(result.returncode == 0, accepted, result.stderr)
+        result = self.run_prepare_step("Verify approved source", {})
+        self.assertNotEqual(result.returncode, 0)
+        result = self.run_prepare_step("Verify approved source", {"TEST_CHECKOUT_SHA": "c" * 40}, [run])
+        self.assertNotEqual(result.returncode, 0)
+
+    def test_provider_compatibility_keeps_warnings_and_errors_fatal(self):
+        for workflow, job in ((ANDROID, "android"), (IOS, "release")):
+            verify = step(workflow, job, "Verify university provider compatibility")
+            self.assertIn("--no-fatal-infos", verify["run"])
+            self.assertIn("private/university_provider/lib", verify["run"])
+            self.assertNotIn("--no-fatal-warnings", verify["run"])
+            self.assertNotIn("continue-on-error", verify)
+
+    def test_historical_baselines_do_not_automatically_roll_out_to_google_play(self):
+        play = yaml.safe_load((ROOT / ".github/workflows/google-play-release.yml").read_text())
+        self.assertEqual(ANDROID["run-name"], "${{ inputs.source_sha != '' && 'Android baseline' || 'Beta Release' }}")
+        condition = play["jobs"]["publish"]["if"]
+        self.assertIn("github.event_name == 'workflow_dispatch' ||", condition)
+        self.assertIn("github.event.workflow_run.display_title != 'Android baseline'", condition)
+
     def assert_order(self, workflow, job, names):
         steps = workflow["jobs"][job]["steps"]
         positions = [steps.index(step(workflow, job, name)) for name in names]
