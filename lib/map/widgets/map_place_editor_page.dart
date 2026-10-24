@@ -151,7 +151,7 @@ class _MapPlaceEditorPageState extends State<MapPlaceEditorPage> {
             children: [
               Expanded(
                 child: Semantics(
-                  header: true,
+                  headingLevel: 1,
                   child: Text('Категория', style: AppText.sectionSmall),
                 ),
               ),

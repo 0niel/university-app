@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:app_ui/app_ui.dart';
 import 'package:app_ui/src/glass/app_glass_lens.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -98,7 +99,7 @@ void main() {
     }
   });
 
-  testWidgets('custom Lite lighting and full lens lighting remain unchanged', (
+  testWidgets('custom Lite lighting and full renderer style are retained', (
     tester,
   ) async {
     const custom = LiquidGlassLight.glow(thickness: 4, intensity: .8);
@@ -130,7 +131,7 @@ void main() {
       } else {
         expect(
           tester
-              .widget<LiquidGlassLens>(find.byType(LiquidGlassLens))
+              .widget<AppGlassRenderer>(find.byType(AppGlassRenderer))
               .style
               .glow,
           glow,

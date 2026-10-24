@@ -3,6 +3,7 @@ analyzer:
   exclude:
     - "**/*.freezed.dart"
     - "**/*.g.dart"
+    - build/**
   errors:
     lines_longer_than_80_chars: ignore
 

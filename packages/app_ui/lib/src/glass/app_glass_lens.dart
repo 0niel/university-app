@@ -1,4 +1,5 @@
 import 'package:app_ui/src/glass/app_glass_lite.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:app_ui/src/glass/app_glass_theme.dart';
 import 'package:flutter/widgets.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
@@ -45,14 +46,7 @@ class AppGlassLens extends StatelessWidget {
           ? RepaintBoundary(child: glass)
           : glass;
     } else {
-      final view = View.of(context);
-      final lens = MediaQuery.fromView(
-        view: view,
-        child: LiquidGlassLens(style: style, child: const SizedBox.expand()),
-      );
-      background = LiquidGlassBatch.backdropIdOf(context) == null
-          ? LiquidGlassBatch(child: lens)
-          : lens;
+      background = AppGlassRenderer(style: style, borderRadius: borderRadius);
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
@@ -66,7 +60,9 @@ class AppGlassLens extends StatelessWidget {
               ),
             ),
           ),
-          child,
+          LiquidGlassBatch.exclude(
+            child: AppGlassRendererScope(backdropKey: null, child: child),
+          ),
         ],
       ),
     );

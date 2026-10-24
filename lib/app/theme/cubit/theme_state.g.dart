@@ -10,7 +10,7 @@ _ThemeState _$ThemeStateFromJson(Map<String, dynamic> json) => _ThemeState(
   colorScheme:
       $enumDecodeNullable(_$AppColorSchemeEnumMap, json['colorScheme']) ??
       AppColorScheme.blue,
-  glassEnabled: json['glassEnabled'] as bool? ?? true,
+  glassEnabled: json['glassEnabled'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$ThemeStateToJson(_ThemeState instance) =>

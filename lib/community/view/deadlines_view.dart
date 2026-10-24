@@ -195,6 +195,7 @@ class _DeadlinesViewState extends State<DeadlinesView> {
                   onBack: () => Navigator.of(context).maybePop(),
                   actions: [
                     AppHeaderAction(
+                      hasOwnSurface: true,
                       semanticsLabel: l10n.deadlinesAddSemantics,
                       onTap: state.isCreating ? null : add,
                       child: AppIconTile(

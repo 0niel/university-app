@@ -6,7 +6,7 @@ version: 5.4.0+156
 
 environment:
   sdk: ^3.12.0
-  flutter: ^3.44.0
+  flutter: ^3.47.0
 
 workspace:
   - packages/discourse_api_client
@@ -141,6 +141,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_map: ^8.2.2
+  flutter_map_vector_tiles: ^2.10.1
   flutter_material_design_icons: ^3.1.0+7447
   flutter_native_splash: ^2.4.3
   flutter_nfc_kit: ^3.3.1
@@ -302,6 +303,7 @@ dev_dependencies:
   freezed: 3.2.5
   go_router_builder: ^4.1.1
   json_serializable: 6.14.0
+  liquid_glass_renderer: 1.0.0-dev.1
   mocktail: ^1.0.5
   shared_preferences_platform_interface: ^2.4.2
   very_good_analysis: 10.3.0

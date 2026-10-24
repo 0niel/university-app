@@ -1,4 +1,5 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -113,9 +114,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final savedOffset = profileScroll.position.pixels;
-      final lenses = find.byWidgetPredicate(
-        (widget) => widget.runtimeType.toString() == 'LiquidGlassLens',
-      );
+      final lenses = find.byType(AppGlassRenderer);
       for (final enabled in [false, true]) {
         await tester.tap(find.byTooltip(l10n.settingsGlassEffectTitle));
         await tester.pumpAndSettle();

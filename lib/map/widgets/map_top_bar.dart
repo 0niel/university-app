@@ -150,7 +150,7 @@ class _MapTopBarState extends State<MapTopBar>
   );
 
   Widget _batch(Widget child) =>
-      widget.joinParentBatch ? child : AppGlassBatch(child: child);
+      widget.joinParentBatch ? child : AppGlassBatch.controls(child: child);
 
   @override
   Widget build(BuildContext context) {

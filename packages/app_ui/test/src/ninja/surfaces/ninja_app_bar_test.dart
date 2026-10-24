@@ -55,7 +55,7 @@ void main() {
       );
       expect(circle.color, kitColors.surface);
       expect(circle.borderRadius, AppRadius.full);
-      expect(circle.tone, AppControlSurfaceTone.neutral);
+      expect(circle.tone, AppControlSurfaceTone.glass);
       expect(
         tester.getSize(find.byType(AppHeaderCircleButton)).width,
         AppControlSize.touchTarget,
@@ -197,7 +197,7 @@ void main() {
       );
       expect(
         tester.widget<AppControlSurface>(back).tone,
-        AppControlSurfaceTone.neutral,
+        AppControlSurfaceTone.glass,
       );
       final trailing = kitStyleOf(tester, 'Изменить');
       expect(trailing?.fontSize, 13);

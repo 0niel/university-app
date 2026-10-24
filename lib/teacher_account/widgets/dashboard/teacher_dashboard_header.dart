@@ -37,7 +37,7 @@ class TeacherDashboardHeader extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Semantics(
-            header: true,
+            headingLevel: 1,
             child: Text(
               l10n.teacherCabinetTitle,
               style: AppText.section.copyWith(color: context.colors.ink),

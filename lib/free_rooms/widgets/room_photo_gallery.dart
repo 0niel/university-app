@@ -97,7 +97,7 @@ class _RoomPhotoGalleryState extends State<RoomPhotoGallery> {
             children: [
               Expanded(
                 child: Semantics(
-                  header: true,
+                  headingLevel: 1,
                   child: Text(l10n.roomPhotoAdd, style: AppText.sectionSmall),
                 ),
               ),

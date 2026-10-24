@@ -1,5 +1,6 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:app_ui/src/glass/app_glass_lens.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -216,7 +217,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(AppGlassLens), findsOneWidget);
       expect(
-        find.byType(LiquidGlassLens).evaluate().length +
+        find.byType(AppGlassRenderer).evaluate().length +
             find.byType(LiquidGlassLite).evaluate().length,
         greaterThan(0),
       );

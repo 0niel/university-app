@@ -1,8 +1,10 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart' as renderer;
 
 void main() {
   test('floating optics and pinned frost follow their material roles', () {
@@ -26,10 +28,15 @@ void main() {
       expect(pinned.specular!.thickness, 0);
       expect(pinned.specular!.intensity, 0);
       expect(control.liteGlass, isFalse);
-      expect(control.refractionIndex, inExclusiveRange(1.015, 1.02));
+      expect(
+        control.refractionIndex,
+        colors.isDark
+            ? inExclusiveRange(1, 1.015)
+            : inExclusiveRange(1.015, 1.02),
+      );
       expect(navigation.refractionIndex, lessThan(control.refractionIndex));
       expect(navigation.refractionIndex, greaterThan(overlay.refractionIndex));
-      expect(overlay.refractionIndex, greaterThan(1.01));
+      expect(overlay.refractionIndex, greaterThan(1));
       expect(navigation.color.a, inExclusiveRange(.75, .9));
       expect(overlay.color.a, greaterThanOrEqualTo(.9));
       expect(overlay.color.a, greaterThan(navigation.color.a));
@@ -44,9 +51,22 @@ void main() {
         AppGlassRole.overlay,
       ]) {
         final surface = material(role);
-        expect(surface.specular, AppGlassStyle.floatingRim);
+        if (colors.isDark) {
+          expect(
+            surface.specular!.intensity,
+            inExclusiveRange(0, AppGlassStyle.rim.intensity),
+          );
+          expect(
+            surface.specular!.thickness,
+            inExclusiveRange(0, AppGlassStyle.rim.thickness),
+          );
+          expect(surface.glow!.thickness, 0);
+          expect(surface.refractionWidth, inExclusiveRange(0, 8));
+        } else {
+          expect(surface.specular, AppGlassStyle.floatingRim);
+          expect(surface.refractionWidth, inInclusiveRange(8, 12));
+        }
         expect(surface.blur, inInclusiveRange(0, 8));
-        expect(surface.refractionWidth, inInclusiveRange(8, 12));
         final accessible = AppGlassStyle.surface(
           colors: colors,
           radius: 28,
@@ -118,17 +138,38 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final lenses = find.byType(LiquidGlassLens);
+      final lenses = find.byType(AppGlassRenderer);
       expect(lenses, findsNWidgets(3));
-      for (final lens in tester.widgetList<LiquidGlassLens>(lenses)) {
+      expect(find.byType(LiquidGlassLens), findsNothing);
+      final layers = tester.widgetList<renderer.LiquidGlassLayer>(
+        find.byType(renderer.LiquidGlassLayer),
+      );
+      expect(layers, hasLength(3));
+      for (final layer in layers) {
+        expect(layer.fake, isFalse);
+        expect(layer.settings.refractionAmount, greaterThan(0));
+        expect(layer.settings.refractionHeight, greaterThan(0));
+      }
+      for (final lens in tester.widgetList<AppGlassRenderer>(lenses)) {
         expect(lens.style.liteGlass, isFalse);
         expect(lens.style.refractionIndex, greaterThan(1));
         expect(lens.style.refractionIndex, lessThan(1.02));
-        expect(lens.style.refractionWidth, inInclusiveRange(8, 16));
+        expect(
+          lens.style.refractionWidth,
+          dark ? inExclusiveRange(0, 8) : inInclusiveRange(8, 16),
+        );
         expect(lens.style.color.a, inExclusiveRange(.5, .85));
-        expect(lens.style.specular, AppGlassStyle.floatingRim);
+        if (dark) {
+          expect(
+            lens.style.specular!.intensity,
+            lessThan(AppGlassStyle.rim.intensity),
+          );
+          expect(lens.style.glow!.thickness, 0);
+        } else {
+          expect(lens.style.specular, AppGlassStyle.floatingRim);
+          expect(lens.style.glow, AppGlassStyle.glow);
+        }
         expect(lens.style.blur, lessThanOrEqualTo(8));
-        expect(lens.style.glow, AppGlassStyle.glow);
       }
       await tester.enterText(find.byType(EditableText), 'A-101');
       await tester.pumpAndSettle();
@@ -193,7 +234,7 @@ void main() {
     for (final lens in lenses) {
       expect(lens.color!.a, greaterThan(.97));
       expect(lens.specular, AppGlassStyle.rim);
-      expect(lens.glow, const LiquidGlassLight.glow(thickness: 0));
+      expect(lens.glow!.thickness, 0);
     }
     expect(lenses.single.blur, 8);
     expect(

@@ -17,7 +17,7 @@ class _CatalogSectionLabel extends StatelessWidget {
       child: Align(
         alignment: AlignmentDirectional.centerStart,
         child: Semantics(
-          header: true,
+          headingLevel: 2,
           child: Text(
             title,
             style: AppText.sans(16, FontWeight.w600, height: 1.2).copyWith(

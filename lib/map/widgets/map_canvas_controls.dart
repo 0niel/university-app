@@ -119,6 +119,8 @@ class _MapCanvasControlsState extends State<MapCanvasControls> {
         ],
       ],
     );
-    return widget.joinParentBatch ? controls : AppGlassBatch(child: controls);
+    return widget.joinParentBatch
+        ? controls
+        : AppGlassBatch.controls(child: controls);
   }
 }

@@ -210,7 +210,7 @@ return $default(_that.colorScheme,_that.glassEnabled);case _:
 @JsonSerializable()
 
 class _ThemeState implements ThemeState {
-  const _ThemeState({this.colorScheme = AppColorScheme.blue, this.glassEnabled = true});
+  const _ThemeState({this.colorScheme = AppColorScheme.blue, this.glassEnabled = false});
   factory _ThemeState.fromJson(Map<String, dynamic> json) => _$ThemeStateFromJson(json);
 
 @override@JsonKey() final  AppColorScheme colorScheme;

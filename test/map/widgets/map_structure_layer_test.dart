@@ -15,6 +15,59 @@ List<XmlElement> _elements(String svg, String tag) => XmlDocument.parse(svg)
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test('nested splits retain namespaced attributes, text and transforms', () {
+    const svg = '''
+    <svg:svg xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+      <svg:g id="outer" transform="translate(10 20)" xml:space="preserve"
+        style="stroke:#123456;fill:none" xlink:href="#wall">
+        <!--retain foundation annotation--><?map layer?>
+        <svg:g id="inner" transform="scale(2)">
+          <svg:path id="wall" d="M0 0H10V10H0Z"/>
+          <svg:text x="2" y="4">A &amp; B<svg:tspan> C</svg:tspan></svg:text>
+          <svg:line id="door" x1="0" y1="0" x2="10" y2="10"/>
+        </svg:g>
+        <svg:g id="empty"></svg:g>
+      </svg:g>
+    </svg:svg>''';
+    final layers = MapStructureLayers.fromSvg(svg);
+    for (final source in [layers.foundation, layers.openings]) {
+      final root = XmlDocument.parse(source).rootElement;
+      expect(root.name.qualified, 'svg:svg');
+      expect(root.getAttribute('xmlns:svg'), 'http://www.w3.org/2000/svg');
+      expect(root.getAttribute('xmlns:xlink'), 'http://www.w3.org/1999/xlink');
+      final outer = _elements(source, 'g').first;
+      expect(outer.name.qualified, 'svg:g');
+      expect(outer.getAttribute('transform'), 'translate(10 20)');
+      expect(outer.getAttribute('xml:space'), 'preserve');
+      expect(outer.getAttribute('xlink:href'), '#wall');
+      expect(outer.getAttribute('style'), 'stroke:#123456;fill:none');
+      expect(
+        _elements(source, 'g')[1].getAttribute('transform'),
+        'scale(2)',
+      );
+    }
+    expect(_elements(layers.foundation, 'text').single.innerText, 'A & B C');
+    expect(layers.foundation, contains('<!--retain foundation annotation-->'));
+    expect(layers.foundation, contains('<?map layer?>'));
+    expect(layers.foundation, contains('<svg:g id="empty"></svg:g>'));
+    expect(_elements(layers.foundation, 'line'), isEmpty);
+    expect(_elements(layers.openings, 'path'), isEmpty);
+    expect(_elements(layers.openings, 'text'), isEmpty);
+    expect(
+      _elements(layers.openings, 'line').single.getAttribute('id'),
+      'door',
+    );
+    expect(
+      layers.foundationShapes.single.path.getBounds(),
+      const Rect.fromLTRB(10, 20, 30, 40),
+    );
+    expect(
+      layers.openingShapes.single.path.getBounds(),
+      const Rect.fromLTRB(10, 20, 30, 40),
+    );
+  });
+
   test('preserves structure and transforms while separating door openings', () {
     const svg = '''
     <svg viewBox="0 0 100 100">

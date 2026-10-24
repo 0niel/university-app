@@ -3,15 +3,13 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:campus_repository/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-// Inspect backdrop capture ownership supplied by app_ui's glass dependency.
-// ignore: depend_on_referenced_packages
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/free_rooms/cubit/free_rooms_cubit.dart';
 import 'package:rtu_mirea_app/map/bloc/map_bloc.dart';
@@ -583,22 +581,22 @@ void main() {
       final topLenses = find
           .descendant(
             of: find.byType(MapTopBar),
-            matching: find.byType(LiquidGlassLens),
+            matching: find.byType(AppGlassRenderer),
           )
           .evaluate();
       final canvasLenses = find
           .descendant(
             of: find.byType(MapCanvasControls),
-            matching: find.byType(LiquidGlassLens),
+            matching: find.byType(AppGlassRenderer),
           )
           .evaluate();
-      final topId = LiquidGlassBatch.backdropIdOf(topLenses.first);
+      final topId = AppGlassRendererScope.of(topLenses.first);
       expect(topId, isNotNull);
       for (final lens in canvasLenses) {
-        expect(LiquidGlassBatch.backdropIdOf(lens), isNot(topId));
+        expect(AppGlassRendererScope.of(lens), isNot(topId));
       }
       expect(
-        LiquidGlassBatch.backdropIdOf(
+        AppGlassRendererScope.of(
           tester.element(find.byType(MapRouteOverlay)),
         ),
         isNull,

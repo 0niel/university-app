@@ -47,44 +47,52 @@ class _FreeRoomsViewState extends State<FreeRoomsView> {
       body: RefreshIndicator(
         color: context.colors.accent,
         onRefresh: cubit.load,
-        child: ListView(
+        child: CustomScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.only(
-            bottom: ninjaBottomInset(context) + AppSpacing.lg,
-          ),
-          children: [
-            AppInnerHeader(
-              title: l10n.freeRoomsNowTitle,
-              subtitle: l10n.freeRoomsSubtitle,
-              onBack: () => Navigator.of(context).maybePop(),
-              backSemanticsLabel: l10n.back,
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 14),
-              child: AppSearchField(
-                controller: _query,
-                hintText: l10n.mapRoomSearchHint,
-                isOnCanvas: true,
-                onChanged: cubit.queryChanged,
-                onClear: () => cubit.queryChanged(''),
+          slivers: [
+            SliverToBoxAdapter(
+              child: AppInnerHeader(
+                title: l10n.freeRoomsNowTitle,
+                subtitle: l10n.freeRoomsSubtitle,
+                onBack: () => Navigator.of(context).maybePop(),
+                backSemanticsLabel: l10n.back,
               ),
             ),
-            AppChipRow<String>(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screen,
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 14),
+                child: AppSearchField(
+                  controller: _query,
+                  hintText: l10n.mapRoomSearchHint,
+                  isOnCanvas: true,
+                  onChanged: cubit.queryChanged,
+                  onClear: () => cubit.queryChanged(''),
+                ),
               ),
-              value: state.campus,
-              onChanged: cubit.campusChanged,
-              items: [
-                AppChipRowItem(value: '', label: l10n.freeRoomsAllBuildings),
-                for (final campus in state.campuses)
-                  AppChipRowItem(value: campus, label: campus),
-              ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-              child: FreeRoomsList(
+            SliverToBoxAdapter(
+              child: AppChipRow<String>(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screen,
+                ),
+                value: state.campus,
+                onChanged: cubit.campusChanged,
+                items: [
+                  AppChipRowItem(value: '', label: l10n.freeRoomsAllBuildings),
+                  for (final campus in state.campuses)
+                    AppChipRowItem(value: campus, label: campus),
+                ],
+              ),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                14,
+                20,
+                ninjaBottomInset(context) + AppSpacing.lg,
+              ),
+              sliver: FreeRoomsList.sliver(
                 state: state,
                 now: _now,
                 onRetry: () => unawaited(cubit.load()),

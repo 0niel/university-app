@@ -1,7 +1,7 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 import '../kit_harness.dart';
 
@@ -99,7 +99,9 @@ void main() {
       );
       expect(card.borderRadius, AppRadius.dialog);
       expect(card.tone, AppGlassTone.regular);
-      final lens = tester.widget<LiquidGlassLens>(find.byType(LiquidGlassLens));
+      final lens = tester.widget<AppGlassRenderer>(
+        find.byType(AppGlassRenderer),
+      );
       expect(lens.style.color.withValues(alpha: 1), kitColors.surface);
       expect(lens.style.color.a, greaterThan(.9));
       expect(card.role, AppGlassRole.overlay);

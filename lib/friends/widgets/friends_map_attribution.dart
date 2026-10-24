@@ -4,14 +4,9 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rtu_mirea_app/common/widgets/app_map_tiles.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class FriendsMapAttribution extends StatelessWidget {
   const FriendsMapAttribution({required this.panelExtent, super.key});
-
-  static final Uri _copyrightUri = Uri.parse(
-    'https://www.openstreetmap.org/copyright',
-  );
 
   final ValueListenable<double> panelExtent;
 
@@ -31,7 +26,7 @@ class FriendsMapAttribution extends StatelessWidget {
       },
       child: AppPressable(
         onTap: () => unawaited(
-          launchUrl(_copyrightUri, mode: .externalApplication),
+          AppMapTiles.showAttribution(context),
         ),
         semanticsLabel: AppMapTiles.attribution,
         pressedScale: 0.98,

@@ -1,10 +1,9 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-// Verify app_ui capture identities without adding a runtime dependency.
-// ignore: depend_on_referenced_packages
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart' as renderer;
 import 'package:rtu_mirea_app/l10n/l10n.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
 import 'package:rtu_mirea_app/map/widgets/map_search_transition.dart';
@@ -95,10 +94,17 @@ void main() {
         final l10n = tester.element(bar).l10n;
         final lenses = find.descendant(
           of: bar,
-          matching: find.byType(LiquidGlassLens),
+          matching: find.byType(AppGlassRenderer),
         );
         expect(lenses, findsNWidgets(3));
-        final collapsedId = LiquidGlassBatch.backdropIdOf(
+        expect(
+          find.descendant(
+            of: bar,
+            matching: find.byType(renderer.LiquidGlassLayer),
+          ),
+          findsOneWidget,
+        );
+        final collapsedId = AppGlassRendererScope.of(
           lenses.evaluate().first,
         );
         expect(collapsedId, isNotNull);
@@ -107,7 +113,8 @@ void main() {
             tester.getRect(find.byWidget(element.widget)),
         ];
         for (final element in lenses.evaluate()) {
-          expect(LiquidGlassBatch.backdropIdOf(element), collapsedId);
+          expect(AppGlassRendererScope.of(element), collapsedId);
+          expect(AppGlassRendererScope.sharesLayerOf(element), isTrue);
         }
         for (var first = 0; first < bounds.length; first++) {
           for (var second = first + 1; second < bounds.length; second++) {
@@ -142,17 +149,21 @@ void main() {
         final search = find.byType(AppSearchField);
         final searchLens = find.descendant(
           of: search,
-          matching: find.byType(LiquidGlassLens),
+          matching: find.byType(AppGlassRenderer),
         );
-        final searchId = LiquidGlassBatch.backdropIdOf(
+        final searchId = AppGlassRendererScope.of(
           tester.element(searchLens),
         );
-        expect(searchId, isNotNull);
+        expect(searchId, isNull);
+        expect(
+          AppGlassRendererScope.sharesLayerOf(tester.element(searchLens)),
+          isFalse,
+        );
         expect(searchId, isNot(collapsedId));
         final campus = find.byType(AppButton);
         expect(tester.getRect(search).overlaps(tester.getRect(campus)), isTrue);
         final remainingControls = lenses.evaluate().where(
-          (element) => LiquidGlassBatch.backdropIdOf(element) == collapsedId,
+          (element) => AppGlassRendererScope.of(element) == collapsedId,
         );
         expect(remainingControls, hasLength(2));
         expect(
@@ -167,7 +178,7 @@ void main() {
         expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
         expect(tester.testTextInput.isVisible, isTrue);
         expect(
-          LiquidGlassBatch.backdropIdOf(tester.element(searchLens)),
+          AppGlassRendererScope.of(tester.element(searchLens)),
           searchId,
         );
         await tester.enterText(field, 'А-101');
@@ -180,7 +191,7 @@ void main() {
         expect(tester.testTextInput.isVisible, isFalse);
         expect(lenses, findsNWidgets(3));
         for (final element in lenses.evaluate()) {
-          expect(LiquidGlassBatch.backdropIdOf(element), collapsedId);
+          expect(AppGlassRendererScope.of(element), collapsedId);
         }
         expect(tester.takeException(), isNull);
       },
@@ -200,9 +211,7 @@ void main() {
           glassEnabled: glassEnabled,
           reducedMotion: false,
         );
-        final lenses = find.byWidgetPredicate(
-          (widget) => widget.runtimeType.toString() == 'LiquidGlassLens',
-        );
+        final lenses = find.byType(AppGlassRenderer);
         expect(lenses, glassEnabled ? findsWidgets : findsNothing);
         await tester.tap(find.byTooltip('Аудитория, кафедра, столовая'));
         await tester.pump();

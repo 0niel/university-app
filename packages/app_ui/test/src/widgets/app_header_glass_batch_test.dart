@@ -1,16 +1,32 @@
 import 'package:app_ui/app_ui.dart';
+import 'package:app_ui/src/glass/app_glass_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart' as renderer;
 
 import '../kit_harness.dart';
 
 void main() {
-  Finder lensIn(Finder parent) =>
-      find.descendant(of: parent, matching: find.byType(LiquidGlassLens)).first;
+  Finder lensIn(Finder parent) => find
+      .descendant(of: parent, matching: find.byType(AppGlassRenderer))
+      .first;
 
-  int? backdrop(WidgetTester tester, Finder lens) =>
-      LiquidGlassBatch.backdropIdOf(tester.element(lens));
+  BackdropKey? backdrop(WidgetTester tester, Finder lens) {
+    final own = find.descendant(
+      of: lens,
+      matching: find.byType(renderer.LiquidGlassLayer),
+    );
+    final layer = own.evaluate().isNotEmpty
+        ? own.first
+        : find
+              .ancestor(
+                of: lens,
+                matching: find.byType(renderer.LiquidGlassLayer),
+              )
+              .first;
+    return tester.widget<renderer.LiquidGlassLayer>(layer).backdropKey;
+  }
 
   Widget nestedGlass(String key) => SizedBox.square(
     dimension: 14,
@@ -24,13 +40,14 @@ void main() {
   for (final inner in [false, true]) {
     for (final rtl in [false, true]) {
       testWidgets(
-        'header batches only peer controls at 200 percent '
+        'header isolates custom glass controls at 200 percent '
         'inner=$inner rtl=$rtl',
         (tester) async {
           final taps = [0, 0];
           final actions = [
             AppHeaderAction(
               child: nestedGlass('nested'),
+              hasOwnSurface: true,
               semanticsLabel: 'First',
               onTap: () => taps[0]++,
             ),
@@ -53,13 +70,11 @@ void main() {
                           trailingLabel: 'Label',
                           onBack: () => taps[1]++,
                           backSemanticsLabel: 'Second',
-                          controlTone: AppControlSurfaceTone.glass,
                           actions: actions,
                         )
                       : AppScreenHeader(
                           title: 'Title',
                           trailing: nestedGlass('trailing'),
-                          controlTone: AppControlSurfaceTone.glass,
                           actions: actions,
                         ),
                 ),
@@ -71,11 +86,18 @@ void main() {
 
           final first = lensIn(find.byType(AppHeaderCircleButton).first);
           final second = inner
-              ? find.byType(LiquidGlassLens).first
+              ? find.byType(AppGlassRenderer).first
               : lensIn(find.byType(AppHeaderCircleButton).last);
-          final sharedId = backdrop(tester, first);
+          final sharedId = backdrop(tester, second);
           expect(sharedId, isNotNull);
-          expect(backdrop(tester, second), sharedId);
+          expect(backdrop(tester, first), isNull);
+          expect(
+            find.descendant(
+              of: find.byType(AppHeaderCircleButton).first,
+              matching: find.byType(AppGlassRenderer),
+            ),
+            findsOneWidget,
+          );
           expect(
             backdrop(tester, lensIn(find.byKey(const ValueKey('nested')))),
             isNot(sharedId),
@@ -96,7 +118,7 @@ void main() {
             );
           }
           for (final lens in [first, second]) {
-            final style = tester.widget<LiquidGlassLens>(lens).style;
+            final style = tester.widget<AppGlassRenderer>(lens).style;
             expect(style.liteGlass, isFalse);
             expect(style.blur, 6);
             expect(style.refractionIndex, 1.019);

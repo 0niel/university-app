@@ -81,9 +81,53 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      expect(find.byType(AppListGroup), findsOneWidget);
+      expect(find.byKey(const ValueKey('free-rooms-list')), findsOneWidget);
       expect(find.text('Свободно сейчас'), findsOneWidget);
       expect(find.byType(AppChip), findsWidgets);
+    });
+
+    testWidgets('lazy room list applies campus and text filters', (
+      tester,
+    ) async {
+      when(() => cubit.state).thenReturn(
+        const FreeRoomsState(
+          status: FreeRoomsStatus.populated,
+          campus: 'mp1',
+          query: '101',
+          rooms: [
+            FreeRoom(room: 'А-101', campus: 'mp1'),
+            FreeRoom(room: 'А-102', campus: 'mp1'),
+            FreeRoom(room: 'Б-101', campus: 'v78'),
+          ],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('А-101'), findsOneWidget);
+      expect(find.text('А-102'), findsNothing);
+      expect(find.text('Б-101'), findsNothing);
+      await tester.enterText(find.byType(EditableText), '102');
+      verify(() => cubit.queryChanged('102')).called(1);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('lazy populated list retains pull to refresh', (tester) async {
+      when(() => cubit.state).thenReturn(
+        const FreeRoomsState(
+          status: FreeRoomsStatus.populated,
+          rooms: [FreeRoom(room: 'А-101', campus: 'mp1')],
+        ),
+      );
+      when(() => cubit.load()).thenAnswer((_) async {});
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 400));
+      await tester.pumpAndSettle();
+      verify(() => cubit.load()).called(1);
+      expect(find.text('А-101'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets(

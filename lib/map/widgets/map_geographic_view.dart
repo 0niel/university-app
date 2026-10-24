@@ -123,7 +123,10 @@ class _MapGeographicViewState extends State<MapGeographicView> {
                                     tooltip: place.label,
                                     onPressed: place.onTap,
                                     icon: const Icon(Icons.place_outlined),
-                                    tone: AppIconButtonTone.glass,
+                                    tone: AppIconButtonTone.surface,
+                                    shape: AppIconButtonShape.circle,
+                                    size: AppIconButtonSize.small,
+                                    foregroundColor: context.colors.accent,
                                   ),
                                 ),
                             ],
@@ -249,11 +252,7 @@ class _MapGeographicViewState extends State<MapGeographicView> {
                                   label: AppMapTiles.attribution,
                                   size: AppButtonSize.small,
                                   onPressed: () => unawaited(
-                                    launchUrl(
-                                      Uri.parse(
-                                        'https://www.openstreetmap.org/copyright',
-                                      ),
-                                    ),
+                                    AppMapTiles.showAttribution(context),
                                   ),
                                 ),
                                 AppButton.text(
