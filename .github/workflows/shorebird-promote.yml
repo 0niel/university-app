@@ -196,7 +196,7 @@ jobs:
     - name: Install pinned Shorebird
       run: |
         shorebird_dir="$RUNNER_TEMP/shorebird-sdk"
-        shorebird_revision=5ac7f9a9a5c4a5e66a958e608da0f73e34a3d6bb
+        shorebird_revision=07c191c9448f0b67c5f96253d8832356ba213b06
         mkdir "$shorebird_dir"
         git -C "$shorebird_dir" init
         git -C "$shorebird_dir" remote add origin https://github.com/shorebirdtech/shorebird.git
