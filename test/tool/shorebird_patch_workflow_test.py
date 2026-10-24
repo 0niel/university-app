@@ -530,6 +530,24 @@ class ShorebirdPatchWorkflowTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             self.execute(item, {'CURRENT_TRACK': 'stable'})
 
+    def test_promotion_accepts_cli_metadata_but_rejects_wrong_identity(self):
+        receipt = self.receipt()
+        live = {'id': 44, 'number': 2, 'channel': 'stable', 'is_rolled_back': False, 'artifacts': receipt['artifacts']}
+        self.write('live-stable.json', {'status': 'success', 'data': {'patches': [live]}})
+        data = {'app_id': receipt['app_id'], 'release_version': receipt['release_version'],
+                'patch_number': 2, 'track': 'stable', 'changed': True, 'patch': live}
+        item = step(PROMOTE, 'promote', 'Promote verified patch')
+        self.write('promotion-result.json', {'status': 'success', 'data': data})
+        self.execute(item, {'CURRENT_TRACK': 'staging'})
+        for changes in ({'app_id': 'other-app'}, {'release_version': '1.0.0+1'},
+                        {'patch_number': 3}, {'track': 'beta'}):
+            self.write('promotion-result.json', {'status': 'success', 'data': {**data, **changes}})
+            with self.subTest(changes=changes), self.assertRaises(SystemExit):
+                self.execute(item, {'CURRENT_TRACK': 'staging'})
+        self.write('promotion-result.json', {'status': 'error', 'data': data})
+        with self.assertRaises(SystemExit):
+            self.execute(item, {'CURRENT_TRACK': 'staging'})
+
     def test_cleanup_does_not_depend_on_successful_projection_creation(self):
         cleanup = step(PATCH, 'patch', 'Remove signing material')
         self.assertNotIn('working-directory', cleanup)

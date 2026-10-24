@@ -279,7 +279,8 @@ jobs:
         }
         if os.environ["CURRENT_TRACK"] == "staging":
             result = json.loads((root / "promotion-result.json").read_text())
-            if result["status"] != "success" or result["data"] != expected:
+            identity = {**expected, "app_id": receipt["app_id"]}
+            if result["status"] != "success" or any(result["data"].get(key) != value for key, value in identity.items()):
                 raise SystemExit("Patch promotion was not confirmed")
         live = json.loads((root / "live-stable.json").read_text())
         if live["status"] != "success":
