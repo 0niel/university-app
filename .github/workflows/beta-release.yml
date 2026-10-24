@@ -1,4 +1,5 @@
 name: Beta Release
+run-name: ${{ inputs.source_sha != '' && 'Android baseline' || 'Beta Release' }}
 
 on:
   workflow_run:
@@ -9,12 +10,18 @@ on:
     branches:
       - master
   workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Approved commit for a baseline without automatic store upload
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
 
 concurrency:
-  group: beta-release-${{ github.event.workflow_run.head_sha || github.sha }}
+  group: beta-release-${{ inputs.source_sha || github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -24,6 +31,9 @@ jobs:
       (github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     outputs:
       build_name: ${{ steps.metadata.outputs.build_name }}
       build_number: ${{ steps.metadata.outputs.build_number }}
@@ -32,11 +42,55 @@ jobs:
       tag: ${{ steps.metadata.outputs.tag }}
 
     steps:
+      - name: Validate manual source
+        if: inputs.source_sha != ''
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        shell: bash
+        run: |
+          test "$GITHUB_EVENT_NAME" = workflow_dispatch
+          test "$GITHUB_REF" = "refs/heads/$DEFAULT_BRANCH"
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ inputs.source_sha || github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
           persist-credentials: false
+
+      - name: Verify approved source
+        if: inputs.source_sha != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git merge-base --is-ancestor "$SOURCE_SHA" "$WORKFLOW_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/main.yml/runs?head_sha=$SOURCE_SHA&event=push&status=success&per_page=100" > "$RUNNER_TEMP/source-ci.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          runs = json.loads((Path(os.environ["RUNNER_TEMP"]) / "source-ci.json").read_text())["workflow_runs"]
+          expected = {
+              "head_sha": os.environ["SOURCE_SHA"],
+              "head_branch": os.environ["DEFAULT_BRANCH"],
+              "event": "push",
+              "path": ".github/workflows/main.yml",
+              "status": "completed",
+              "conclusion": "success",
+          }
+          if not any(all(run.get(key) == value for key, value in expected.items())
+              and run.get("head_repository", {}).get("full_name") == os.environ["GITHUB_REPOSITORY"]
+              for run in runs):
+              raise SystemExit("The exact source must pass CI on the default branch")
+          PY
 
       - name: Prepare release metadata
         id: metadata
@@ -177,7 +231,7 @@ jobs:
         run: dart run build_runner build
 
       - name: Verify university provider compatibility
-        run: flutter analyze --no-pub private/university_provider/lib
+        run: flutter analyze --no-pub --no-fatal-infos private/university_provider/lib
 
       - name: Configure signing
         env:

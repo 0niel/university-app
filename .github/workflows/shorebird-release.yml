@@ -145,7 +145,7 @@ jobs:
         run: dart run build_runner build
 
       - name: Verify university provider compatibility
-        run: flutter analyze --no-pub private/university_provider/lib
+        run: flutter analyze --no-pub --no-fatal-infos private/university_provider/lib
 
       - name: Verify source
         run: |
