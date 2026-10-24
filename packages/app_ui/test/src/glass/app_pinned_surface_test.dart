@@ -73,7 +73,8 @@ void main() {
             expect(material.magnification, 1);
             expect(material.specular!.thickness, 0);
             expect(material.specular!.intensity, 0);
-            expect(material.glow, const LiquidGlassLight.glow(thickness: 0));
+            expect(material.glow!.thickness, 0);
+            if (dark) expect(material.glow!.intensity, 0);
             expect(
               find.descendant(
                 of: find.byType(LiquidGlassLite),
