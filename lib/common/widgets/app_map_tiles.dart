@@ -67,8 +67,9 @@ class AppMapTiles {
                 '© OpenStreetMap contributors':
                     'https://www.openstreetmap.org/copyright',
               }.entries)
-                ListTile(
-                  title: Text(source.key),
+                AppListRow(
+                  title: source.key,
+                  titleMaxLines: null,
                   trailing: const Icon(Icons.open_in_new_rounded),
                   onTap: () => unawaited(
                     launchUrl(
