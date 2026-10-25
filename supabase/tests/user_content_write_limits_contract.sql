@@ -57,6 +57,7 @@ declare
   v_result jsonb;
   v_i integer;
   v_count bigint;
+  v_hint text;
   v_revision bigint := 0;
 begin
   if has_function_privilege('authenticated', 'internal.limit_user_content_write()', 'EXECUTE')
@@ -70,8 +71,10 @@ begin
   insert into core.organizations (id, name)
   values ('content-write-contract', 'Content Write Contract'),
     ('content-write-contract-next', 'Next Organization');
-  insert into auth.users (id, is_anonymous)
-  values (v_owner, false), (v_other, false), (v_guest, true), (v_transfer, false);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[v_owner, v_other, v_transfer]) id;
+  insert into auth.users (id, is_anonymous) values (v_guest, true);
   insert into core.user_academic_profiles (user_id, organization_id)
   values
     (v_owner, 'content-write-contract'),
@@ -94,7 +97,8 @@ begin
   for v_i in 1..121 loop
     v_inviter := extensions.gen_random_uuid();
     v_inviting_group := extensions.gen_random_uuid();
-    insert into auth.users (id, is_anonymous) values (v_inviter, false);
+    insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+    values (v_inviter, false, now() - interval '2 days', now() - interval '2 days');
     insert into core.user_academic_profiles (user_id, organization_id)
     values (v_inviter, 'content-write-contract');
     insert into core.study_groups (id, organization_id, owner_id, name, join_code)
@@ -159,14 +163,27 @@ begin
   perform set_config('request.jwt.claims', jsonb_build_object(
     'sub', v_guest, 'role', 'authenticated', 'is_anonymous', false
   )::text, true);
-  for v_i in 1..6 loop
+  begin
     insert into core.group_post_comments (post_id, author_id, body)
-    values (v_post, v_guest, 'Guest comment ' || v_i);
+    values (v_post, v_guest, 'Guest forged claim');
+    raise exception 'Guest account published a comment';
+  exception when insufficient_privilege then
+    get stacked diagnostics v_hint = pg_exception_hint;
+    if v_hint is distinct from 'content_account_unverified' then raise; end if;
+  end;
+  if exists (select 1 from core.group_post_comments where author_id = v_guest)
+    or exists (select 1 from core.content_write_events
+      where user_id = v_guest and action = 'create:core.group_post_comments') then
+    raise exception 'Rejected guest comment changed content or quota';
+  end if;
+  for v_i in 1..40 loop
+    insert into user_private.user_preferences (user_id, key, value)
+    values (v_guest, 'guest-private-' || v_i, jsonb_build_object('value', v_i));
   end loop;
   perform pg_temp.expect_content_write_limit(format(
-    'insert into core.group_post_comments (post_id,author_id,body) values (%L,%L,%L)',
-    v_post, v_guest, 'Guest forged claim'
-  ), 'create:core.group_post_comments');
+    'insert into user_private.user_preferences (user_id,key,value) values (%L,%L,%L::jsonb)',
+    v_guest, 'guest-private-over', '{"value":41}'
+  ), 'create:user_private.user_preferences');
 
   perform set_config('request.jwt.claim.sub', v_owner::text, true);
   perform set_config('request.jwt.claims', jsonb_build_object(

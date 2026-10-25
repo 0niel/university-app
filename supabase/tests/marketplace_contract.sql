@@ -78,8 +78,9 @@ begin
     ('market-test-a', 'Market Test A'),
     ('market-test-b', 'Market Test B');
 
-  insert into auth.users (id)
-  values (v_seller), (v_buyer), (v_outsider);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[v_seller, v_buyer, v_outsider]) id;
 
   insert into core.user_academic_profiles (
     user_id,

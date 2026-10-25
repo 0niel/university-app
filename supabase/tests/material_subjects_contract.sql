@@ -25,7 +25,8 @@ begin
 
   insert into core.organizations (id, name)
   values ('material-subjects-contract', 'Material Subjects Contract');
-  insert into auth.users (id) values (v_user_id);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  values (v_user_id, false, now() - interval '2 days', now() - interval '2 days');
   insert into core.user_academic_profiles (
     user_id, organization_id, academic_group
   ) values (v_user_id, 'material-subjects-contract', 'Test Group');
