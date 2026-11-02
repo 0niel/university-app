@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:app_ui/app_ui.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:community_repository/community_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamification_repository/gamification_repository.dart';
@@ -74,6 +78,27 @@ void main() {
   testWidgets(
     'settings keeps its inset and advanced actions without search at 200%',
     (tester) async {
+      final cacheDirectory = Directory.systemTemp.createTempSync(
+        'settings-cache-test-',
+      );
+      addTearDown(cacheDirectory.deleteSync);
+      final cachePath = Completer<String>();
+      var cacheRequests = 0;
+      const pathProvider = MethodChannel('plugins.flutter.io/path_provider');
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        pathProvider,
+        (call) {
+          if (call.method != 'getTemporaryDirectory') return null;
+          cacheRequests++;
+          return cachePath.future;
+        },
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          pathProvider,
+          null,
+        );
+      });
       tester.view.physicalSize = const Size(320, 844);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -163,6 +188,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
+      expect(cacheRequests, 0);
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('settings-bottom-inset')),
         300,
@@ -180,6 +206,19 @@ void main() {
       await tester.ensureVisible(advanced);
       await tester.tap(advanced);
       await tester.pumpAndSettle();
+      expect(cacheRequests, 1);
+      await tester.tap(advanced);
+      await tester.pumpAndSettle();
+      await tester.tap(advanced);
+      await tester.pumpAndSettle();
+      expect(cacheRequests, 1);
+      cachePath.complete('${cacheDirectory.path}/missing');
+      await tester.pumpAndSettle();
+      await tester.tap(advanced);
+      await tester.pumpAndSettle();
+      await tester.tap(advanced);
+      await tester.pumpAndSettle();
+      expect(cacheRequests, 1);
       expect(find.byType(AppSearchField), findsNothing);
       expect(find.text(l10n.search), findsNothing);
       await tester.scrollUntilVisible(
@@ -198,6 +237,12 @@ void main() {
       await tester.ensureVisible(find.text(l10n.settingsLanguage));
       await tester.pumpAndSettle();
       expect(find.text(l10n.settingsLanguage).hitTestable(), findsOneWidget);
+      expect(
+        tester
+            .widget<SettingsDataSection>(find.byType(SettingsDataSection))
+            .cacheLabel,
+        isNotNull,
+      );
       await tester.tap(find.text(l10n.settingsLanguage));
       await tester.pumpAndSettle();
       expect(find.byType(AppSheet), findsOneWidget);
@@ -211,6 +256,11 @@ void main() {
       await tester.tap(advanced);
       await tester.pumpAndSettle();
       expect(find.byType(SettingsHomeSection), findsNothing);
+      await tester.tap(advanced);
+      await tester.pumpAndSettle();
+      expect(cacheRequests, 1);
+      await tester.tap(advanced);
+      await tester.pumpAndSettle();
       expect(find.byType(AppSearchField), findsNothing);
       expect(tester.takeException(), isNull);
     },

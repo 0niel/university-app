@@ -1,5 +1,4 @@
 import 'package:app_ui/app_ui.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,7 +34,7 @@ void main() {
     await tester.pump();
     expect(
       tester
-          .widget<CachedNetworkImage>(find.byType(CachedNetworkImage).first)
+          .widget<FeedImage>(find.byType(FeedImage).first)
           .imageUrl,
       'https://forum.example.edu/uploads/optimized.jpg',
     );

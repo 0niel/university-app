@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:app_ui/app_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:rtu_mirea_app/main/bootstrap/touch_input.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -21,7 +23,13 @@ bool _isRetryableNetworkNoise(Object error) {
 Future<void> bootstrap(AppBuilder builder) async {
   await runZonedGuarded<Future<void>>(
     () async {
-      WidgetsFlutterBinding.ensureInitialized();
+      final binding = WidgetsFlutterBinding.ensureInitialized();
+      configureTouchInput(
+        binding: binding,
+        platform: defaultTargetPlatform,
+        refreshRate:
+            binding.platformDispatcher.implicitView?.display.refreshRate ?? 0,
+      );
 
       try {
         await AppGlass.warmUp().timeout(const Duration(seconds: 3));

@@ -71,51 +71,84 @@ class NewsFeedContent extends StatelessWidget {
       );
     }
 
-    final hero = posts.firstOrNull;
-    final rows = posts.skip(1).toList();
-
-    return SliverList.list(
-      children: [
-        if (hero != null)
-          FeedHeroPost(
+    return SliverList.builder(
+      itemCount: posts.length + (isFailure || hasMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == posts.length) {
+          return isFailure
+              ? Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.gap),
+                  child: NinjaErrorCard(
+                    title: l10n.loadingError,
+                    message: l10n.feedLoadMoreError,
+                    actionLabel: l10n.retry,
+                    onAction: () => _retry(context),
+                  ),
+                )
+              : FeedLoaderItem(
+                  key: ValueKey('newsFeed_more_${posts.length}'),
+                  onPresented: () => _request(context),
+                );
+        }
+        final post = posts[index];
+        if (index == 0) {
+          return FeedHeroPost(
             key: const Key('newsFeed_hero'),
-            title: hero.title,
-            source: _source(context, hero),
-            meta: feedRelativeTime(l10n, hero.publishedAt),
-            lead: hero.description,
-            imageUrl: hero.imageUrl,
-            onTap: () => _open(context, hero),
-          ),
-        if (rows.isNotEmpty)
-          AppListGroup(
-            children: [
-              for (final post in rows)
-                FeedPostRow(
-                  key: ValueKey('newsFeed_row_${post.id}'),
-                  title: post.title,
-                  source: _source(context, post),
-                  meta: feedRelativeTime(l10n, post.publishedAt),
-                  imageUrl: post.imageUrl,
-                  onTap: () => _open(context, post),
-                ),
-            ],
-          ),
-        if (isFailure)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.gap),
-            child: NinjaErrorCard(
-              title: l10n.loadingError,
-              message: l10n.feedLoadMoreError,
-              actionLabel: l10n.retry,
-              onAction: () => _retry(context),
+            title: post.title,
+            source: _source(context, post),
+            meta: feedRelativeTime(l10n, post.publishedAt),
+            lead: post.description,
+            imageUrl: post.imageUrl,
+            onTap: () => _open(context, post),
+          );
+        }
+        final colors = context.colors;
+        final first = index == 1;
+        final last = index == posts.length - 1;
+        final radius = BorderRadius.vertical(
+          top: first ? const Radius.circular(AppRadius.card) : Radius.zero,
+          bottom: last ? const Radius.circular(AppRadius.card) : Radius.zero,
+        );
+        final side = AppSurfaceStyle.outline(context).left;
+        return DecoratedBox(
+          key: ValueKey('newsFeed_group_${post.id}'),
+          position: DecorationPosition.foreground,
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            border: Border(
+              left: side,
+              right: side,
+              top: first ? side : BorderSide.none,
+              bottom: last ? side : BorderSide.none,
             ),
-          )
-        else if (hasMore)
-          FeedLoaderItem(
-            key: ValueKey('newsFeed_more_${posts.length}'),
-            onPresented: () => _request(context),
           ),
-      ],
+          child: ClipRRect(
+            borderRadius: radius,
+            child: ColoredBox(
+              color: colors.surface,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FeedPostRow(
+                    key: ValueKey('newsFeed_row_${post.id}'),
+                    title: post.title,
+                    source: _source(context, post),
+                    meta: feedRelativeTime(l10n, post.publishedAt),
+                    imageUrl: post.imageUrl,
+                    onTap: () => _open(context, post),
+                  ),
+                  if (!last)
+                    AppDivider(
+                      color: colors.line.withValues(
+                        alpha: colors.line.a * (colors.isDark ? .62 : .75),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

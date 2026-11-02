@@ -10,6 +10,7 @@ extension AppMotionPresets on Widget {
       delay: delay,
       duration: const Duration(milliseconds: 220),
       slideYFraction: 0.035,
+      fade: false,
       child: this,
     );
   }
@@ -73,6 +74,7 @@ class _MotionEntrance extends StatefulWidget {
     this.delay = Duration.zero,
     this.slideYFraction = 0,
     this.scaleBegin = 1,
+    this.fade = true,
   });
 
   final Widget child;
@@ -80,6 +82,7 @@ class _MotionEntrance extends StatefulWidget {
   final Duration duration;
   final double slideYFraction;
   final double scaleBegin;
+  final bool fade;
 
   @override
   State<_MotionEntrance> createState() => _MotionEntranceState();
@@ -136,7 +139,7 @@ class _MotionEntranceState extends State<_MotionEntrance>
       builder: (context, child) {
         final t = animation.value;
         Widget result = Opacity(
-          opacity: t,
+          opacity: widget.fade ? t : 1,
           alwaysIncludeSemantics: true,
           child: child,
         );

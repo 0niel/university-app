@@ -99,64 +99,73 @@ class HomeTopRow extends StatelessWidget {
                 ),
               ),
             const SizedBox(width: AppSpacing.sm),
-            AppTourAnchor(
-              target: .homeSearch,
-              child: KeyedSubtree(
-                key: searchKey,
-                child: AppHeaderCircleButton(
-                  visualAlignment: Alignment.topRight,
-                  action: AppHeaderAction(
-                    icon: .search,
-                    onTap: () => openGlobalSearch(context),
-                    semanticsLabel: l10n.homeSearchLabel,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                AppHeaderCircleButton(
-                  visualAlignment: Alignment.topRight,
-                  action: AppHeaderAction(
-                    icon: AppLineIcon.bell,
-                    onTap: () => showNotificationsSheet(context),
-                    semanticsLabel: l10n.notifications,
-                  ),
-                ),
-                if (unreadCount > 0)
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: IgnorePointer(
-                      child: Container(
-                        height: 18,
-                        constraints: const BoxConstraints(minWidth: 18),
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: context.colors.danger,
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.skeleton,
-                          ),
-                          border: Border.all(
-                            color: context.colors.canvas,
-                            width: 2,
-                          ),
-                        ),
-                        child: Text(
-                          unreadCount > 99 ? '99+' : '$unreadCount',
-                          style: AppText.sans(
-                            10,
-                            FontWeight.w800,
-                            height: 1.2,
-                          ).copyWith(color: context.colors.white),
+            AppGlassBatch.controls(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppTourAnchor(
+                    target: .homeSearch,
+                    child: KeyedSubtree(
+                      key: searchKey,
+                      child: AppHeaderCircleButton(
+                        visualAlignment: Alignment.topRight,
+                        action: AppHeaderAction(
+                          icon: .search,
+                          onTap: () => openGlobalSearch(context),
+                          semanticsLabel: l10n.homeSearchLabel,
                         ),
                       ),
                     ),
                   ),
-              ],
+                  const SizedBox(width: AppSpacing.sm),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      AppHeaderCircleButton(
+                        visualAlignment: Alignment.topRight,
+                        action: AppHeaderAction(
+                          icon: AppLineIcon.bell,
+                          onTap: () => showNotificationsSheet(context),
+                          semanticsLabel: l10n.notifications,
+                        ),
+                      ),
+                      if (unreadCount > 0)
+                        Positioned(
+                          top: 6,
+                          right: 6,
+                          child: IgnorePointer(
+                            child: Container(
+                              height: 18,
+                              constraints: const BoxConstraints(minWidth: 18),
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: context.colors.danger,
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.skeleton,
+                                ),
+                                border: Border.all(
+                                  color: context.colors.canvas,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Text(
+                                unreadCount > 99 ? '99+' : '$unreadCount',
+                                style: AppText.sans(
+                                  10,
+                                  FontWeight.w800,
+                                  height: 1.2,
+                                ).copyWith(color: context.colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         );

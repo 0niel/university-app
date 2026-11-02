@@ -196,7 +196,7 @@ void main() {
   }
   for (final scale in [1.0, 2.0]) {
     testWidgets(
-      'extent changes reuse header and discovery at ${scale * 100}%',
+      'panel defers content and preserves it after opening at ${scale * 100}%',
       (
         tester,
       ) async {
@@ -231,8 +231,15 @@ void main() {
           textScaler: TextScaler.linear(scale),
         );
         expect(find.text('persistent discovery'), findsNothing);
+        expect(mounts, 0);
+        expect(
+          find.byType(_DiscoveryProbe, skipOffstage: false),
+          findsNothing,
+        );
+        expect(find.byType(FreeRoomsList, skipOffstage: false), findsNothing);
         controller.jumpTo(.5);
         await tester.pumpAndSettle();
+        expect(mounts, 1);
         final discovery = tester.element(find.byType(_DiscoveryProbe));
         final title = tester.widget<Text>(find.text('Места'));
         final expand = tester.widget<AppIconButton>(

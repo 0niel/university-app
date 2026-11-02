@@ -1,7 +1,10 @@
+import 'dart:ui' show PictureRecorder;
+
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:rtu_mirea_app/map/data/map_data_models.dart';
 import 'package:rtu_mirea_app/map/models/models.dart';
 import 'package:rtu_mirea_app/map/navigation/indoor_navigation_graph.dart';
@@ -9,7 +12,83 @@ import 'package:rtu_mirea_app/map/services/map_label_hit_index.dart';
 import 'package:rtu_mirea_app/map/services/map_navigation_landmarks.dart';
 import 'package:rtu_mirea_app/map/widgets/map_cartographic_layer.dart';
 
+class _Path extends Mock implements Path {}
+
 void main() {
+  testWidgets('label anchors are computed only when needed and then reused', (
+    tester,
+  ) async {
+    registerFallbackValue(Offset.zero);
+    final geometry = Path()..addRect(const Rect.fromLTWH(0, 0, 1000, 1000));
+    final path = _Path();
+    var metricReads = 0;
+    when(path.getBounds).thenAnswer((_) => geometry.getBounds());
+    when(() => path.contains(any())).thenAnswer(
+      (call) => geometry.contains(call.positionalArguments.single as Offset),
+    );
+    when(() => path.computeMetrics(forceClosed: true)).thenAnswer((_) {
+      metricReads++;
+      return geometry.computeMetrics(forceClosed: true);
+    });
+    final transform = TransformationController(
+      Matrix4.identity()..scaleByDouble(.01, .01, 1, 1),
+    );
+    addTearDown(transform.dispose);
+    final hitIndex = MapLabelHitIndex();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: Offstage(
+          child: MapCartographicLayer(
+            rooms: [RoomModel(roomId: 'room', name: '101', path: path)],
+            places: const [],
+            size: const Size(1000, 1000),
+            transform: transform,
+            hitIndex: hitIndex,
+          ),
+        ),
+      ),
+    );
+    expect(metricReads, 0);
+    void paintLabels() {
+      final labels = tester.widget<CustomPaint>(
+        find
+            .descendant(
+              of: find.byType(MapCartographicLayer, skipOffstage: false),
+              matching: find.byType(CustomPaint, skipOffstage: false),
+              skipOffstage: false,
+            )
+            .last,
+      );
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, 1000, 1000));
+      labels.painter!.paint(canvas, const Size(1000, 1000));
+      recorder.endRecording().dispose();
+    }
+
+    paintLabels();
+    expect(metricReads, 0);
+    expect(hitIndex.bounds, isEmpty);
+    transform.value = Matrix4.identity();
+    await tester.pump();
+    paintLabels();
+    expect(metricReads, 1);
+    expect(hitIndex.bounds.keys, ['room']);
+    paintLabels();
+    expect(metricReads, 1);
+    transform.value = Matrix4.identity()..scaleByDouble(.01, .01, 1, 1);
+    await tester.pump();
+    paintLabels();
+    expect(hitIndex.bounds, isEmpty);
+    expect(metricReads, 1);
+    transform.value = Matrix4.identity();
+    await tester.pump();
+    paintLabels();
+    expect(hitIndex.bounds.keys, ['room']);
+    expect(metricReads, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('viewport panning replaces visible label hit targets', (
     tester,
   ) async {
