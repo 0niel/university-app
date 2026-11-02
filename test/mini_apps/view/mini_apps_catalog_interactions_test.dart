@@ -128,6 +128,42 @@ void main() {
     matching: find.byType(TextField),
   );
 
+  testWidgets('newly visible catalog rows do not start entrance tickers', (
+    tester,
+  ) async {
+    final apps = List.generate(
+      80,
+      (index) => MiniApp(
+        id: 'app-$index',
+        slug: 'app-$index',
+        name: 'Приложение $index',
+      ),
+    );
+    final driver = _CatalogDriver(populated.copyWith(apps: apps));
+    await _pumpCatalog(
+      tester,
+      driver,
+      width: 390,
+      textScale: 1,
+      reduceMotion: false,
+    );
+    final scrollable = tester.state<ScrollableState>(
+      find
+          .descendant(
+            of: find.byType(CustomScrollView),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    expect(find.byKey(const ValueKey('catalog-app-0')), findsOneWidget);
+    scrollable.position.jumpTo(scrollable.position.maxScrollExtent / 2);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('catalog-app-0')), findsNothing);
+    expect(find.byType(MiniAppCard), findsWidgets);
+    expect(tester.binding.transientCallbackCount, 0);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('sort popover changes once and ignores the active option', (
     tester,
   ) async {
@@ -188,7 +224,6 @@ void main() {
       );
       await tester.tap(toggleSearch());
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 220));
       await tester.pump();
       final input = tester.widget<TextField>(field());
       final inputElement = tester.element(field());

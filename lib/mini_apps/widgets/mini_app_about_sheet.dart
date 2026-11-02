@@ -137,6 +137,7 @@ class _MiniAppAboutSheetState extends State<MiniAppAboutSheet> {
             for (var star = 1; star <= 5; star++)
               AppPressable(
                 onTap: () => unawaited(_rate(star)),
+                pressedScale: 1,
                 semanticsLabel: '$star',
                 semanticsSelected: star == _myRating,
                 child: SizedBox.square(

@@ -13,11 +13,15 @@ import 'package:rtu_mirea_app/notifications/model/app_notification.dart';
 import 'package:rtu_mirea_app/notifications/view/notifications_sheet.dart';
 import 'package:rtu_mirea_app/notifications/view/widgets/notification_row.dart';
 import 'package:rtu_mirea_app/notifications/view/widgets/notifications_sheet_header.dart';
+import 'package:rtu_mirea_app/schedule/cubit/cubit.dart';
+import 'package:schedule_repository/schedule_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/pump_app.dart';
 
 class _InboxRepository extends Mock implements NotificationInboxRepository {}
+
+class _ScheduleRepository extends Mock implements ScheduleRepository {}
 
 void main() {
   late NotificationsCubit cubit;
@@ -167,4 +171,169 @@ void main() {
     );
     expect(time.top, greaterThan(subtitle.bottom));
   });
+
+  testWidgets('long inbox mounts only its viewport and reaches the last row', (
+    tester,
+  ) async {
+    final changes = [
+      for (var i = 0; i < 200; i++)
+        ScheduleChange(
+          id: '${i + 1}',
+          kind: ScheduleChangeKind.room,
+          subject: 'Subject $i',
+          lessonDate: now,
+          createdAt: now.subtract(Duration(minutes: i)),
+        ),
+    ];
+    await tester.pumpApp(
+      BlocProvider.value(
+        value: cubit,
+        child: Scaffold(
+          body: NotificationsSheet(changes: changes, now: now),
+        ),
+      ),
+      size: const Size(390, 844),
+    );
+    await tester.pump();
+    expect(find.byType(NotificationRow).evaluate().length, lessThan(20));
+    expect(find.byKey(const ValueKey('change:200')), findsNothing);
+    final scroll = Scrollable.of(
+      tester.element(find.byType(NotificationRow).first),
+    );
+    scroll.position.jumpTo(scroll.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('change:200')), findsOneWidget);
+    expect(find.byType(NotificationRow).evaluate().length, lessThan(20));
+    final action = find.descendant(
+      of: find.byType(NotificationsSheetHeader),
+      matching: find.byType(AppPressable),
+    );
+    await tester.tap(action);
+    await tester.pump();
+    expect(
+      changes.every((change) => cubit.state.isRead('change:${change.id}')),
+      isTrue,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('short inbox keeps a compact height', (tester) async {
+    cubit.recordPush(id: 'short', title: 'One notification', at: now);
+    await pump(tester);
+    expect(
+      tester.getSize(find.byType(NotificationsSheet)).height,
+      lessThan(300),
+    );
+    expect(find.byType(AppListGroup), findsOneWidget);
+    expect(find.text('One notification'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'notification sheet coordinates list scrolling and drag dismissal',
+    (
+      tester,
+    ) async {
+      final repository = _ScheduleRepository();
+      when(
+        () => repository.getScheduleChanges(
+          targetType: ScheduleTargetType.group,
+          target: 'A',
+        ),
+      ).thenAnswer(
+        (_) async => [
+          for (var i = 0; i < 100; i++)
+            ScheduleChange(
+              id: '${i + 1}',
+              kind: ScheduleChangeKind.room,
+              subject: 'Subject $i',
+              lessonDate: now,
+              createdAt: now.subtract(Duration(minutes: i)),
+            ),
+        ],
+      );
+      final changes = ScheduleChangesCubit(scheduleRepository: repository);
+      addTearDown(changes.close);
+      await changes.load(targetType: ScheduleTargetType.group, target: 'A');
+      await tester.pumpApp(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: cubit),
+            BlocProvider.value(value: changes),
+          ],
+          child: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => unawaited(showNotificationsSheet(context)),
+                child: const Text('Open inbox'),
+              ),
+            ),
+          ),
+        ),
+        size: const Size(390, 844),
+      );
+      await tester.tap(find.text('Open inbox'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AppSheet), findsOneWidget);
+      expect(find.byType(NotificationRow).evaluate().length, lessThan(20));
+      final scroll = Scrollable.of(
+        tester.element(find.byType(NotificationRow).first),
+      );
+      scroll.position.jumpTo(scroll.position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('change:100')), findsOneWidget);
+      scroll.position.jumpTo(scroll.position.minScrollExtent);
+      await tester.pumpAndSettle();
+      await tester.drag(find.byType(ListView), const Offset(0, 700));
+      await tester.pumpAndSettle();
+      expect(find.byType(AppSheet), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'compact landscape error sheet keeps retry reachable at 200 percent',
+    (
+      tester,
+    ) async {
+      final inbox = _InboxRepository();
+      when(() => inbox.load('student')).thenThrow(StateError('offline'));
+      await cubit.close();
+      cubit = NotificationsCubit(userId: 'student', repository: inbox);
+      final changes = ScheduleChangesCubit(
+        scheduleRepository: _ScheduleRepository(),
+      );
+      addTearDown(changes.close);
+      await tester.pumpApp(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: cubit),
+            BlocProvider.value(value: changes),
+          ],
+          child: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => unawaited(showNotificationsSheet(context)),
+                child: const Text('Open compact inbox'),
+              ),
+            ),
+          ),
+        ),
+        size: const Size(390, 320),
+        textScaler: const TextScaler.linear(2),
+      );
+      await tester.tap(find.text('Open compact inbox'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AppSheet), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      final retry = find.byType(AppPillButton);
+      await tester.ensureVisible(retry);
+      await tester.pumpAndSettle();
+      expect(retry.hitTestable(), findsOneWidget);
+      await tester.tap(retry);
+      await tester.pumpAndSettle();
+      verify(() => inbox.load('student')).called(2);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

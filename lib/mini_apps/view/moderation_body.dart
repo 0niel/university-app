@@ -7,7 +7,7 @@ class _ModerationBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaStateSwitcher(child: _body(context));
+    return Align(alignment: Alignment.topCenter, child: _body(context));
   }
 
   Widget _body(BuildContext context) {
@@ -26,7 +26,7 @@ class _ModerationBody extends StatelessWidget {
           retryLabel: l10n.retry,
           onRetry: () =>
               unawaited(context.read<MiniAppsModerationCubit>().load()),
-        ).animateEmptyState(),
+        ),
       );
     }
     if (state.queue.isEmpty) {
@@ -41,7 +41,7 @@ class _ModerationBody extends StatelessWidget {
           onAction: () =>
               unawaited(context.read<MiniAppsModerationCubit>().load()),
           outlinedAction: true,
-        ).animateEmptyState(),
+        ),
       );
     }
     final queue = state.queue;
@@ -60,22 +60,22 @@ class _ModerationBody extends StatelessWidget {
               title: l10n.miniAppsModerationPending,
               subtitle: l10n.miniAppsModerationPendingSubtitle,
             ),
-            for (final (index, app) in queue.pending.indexed)
+            for (final app in queue.pending)
               _PendingCard(
                 app: app,
                 processing: state.processingAppId == app.id,
-              ).animateListItem(index: index),
+              ),
           ],
           if (queue.reported.isNotEmpty) ...[
             _ModerationSectionLabel(
               title: l10n.miniAppsModerationReported,
               subtitle: l10n.miniAppsModerationReportedSubtitle,
             ),
-            for (final (index, reported) in queue.reported.indexed)
+            for (final reported in queue.reported)
               _ReportedCard(
                 reported: reported,
                 processing: state.processingAppId == reported.app.id,
-              ).animateListItem(index: index),
+              ),
           ],
         ],
       ),

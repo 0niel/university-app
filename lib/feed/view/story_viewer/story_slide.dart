@@ -1,9 +1,9 @@
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rtu_mirea_app/feed/view/story_viewer/story_images.dart';
 import 'package:rtu_mirea_app/feed/view/story_viewer/story_layout.dart';
 
 class StorySlide extends StatelessWidget {
@@ -29,7 +29,11 @@ class StorySlide extends StatelessWidget {
   final Object? imageHeroTag;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => _build(context, constraints.biggest),
+  );
+
+  Widget _build(BuildContext context, Size size) {
     const dark = AppColors.dark;
     final white = context.colors.white;
     final lead = this.lead;
@@ -48,36 +52,24 @@ class StorySlide extends StatelessWidget {
         const IgnorePointer(child: StoryBackdrop()),
         if (imageUrl != null && imageUrl.isNotEmpty)
           IgnorePointer(
-            child: ColorFiltered(
-              colorFilter: ColorFilter.mode(
-                dark.canvas.withValues(alpha: .35),
-                BlendMode.darken,
-              ),
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+            child: _StoryPhotoBackdrop(url: imageUrl, size: size),
           ),
         if (imageUrl != null && imageUrl.isNotEmpty)
           IgnorePointer(
             child: image(
-              CachedNetworkImage(
-                imageUrl: imageUrl,
+              Image(
+                image: StoryImages.media(
+                  CachedNetworkImageProvider(imageUrl),
+                  size,
+                  MediaQuery.devicePixelRatioOf(context),
+                ),
                 fit: BoxFit.contain,
-                imageBuilder: (context, provider) {
-                  onMediaReady?.call();
-                  return Image(
-                    image: provider,
-                    fit: BoxFit.contain,
-                    excludeFromSemantics: true,
-                  );
+                excludeFromSemantics: true,
+                frameBuilder: (_, child, frame, _) {
+                  if (frame != null) onMediaReady?.call();
+                  return child;
                 },
-                placeholder: (_, _) => const SizedBox.shrink(),
-                errorWidget: (_, _, _) {
+                errorBuilder: (_, _, _) {
                   onMediaReady?.call();
                   return const SizedBox.shrink();
                 },
@@ -195,6 +187,30 @@ class StorySlide extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _StoryPhotoBackdrop extends StatelessWidget {
+  const _StoryPhotoBackdrop({required this.url, required this.size});
+
+  final String url;
+  final Size size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image(
+      image: StoryImages.backdrop(
+        url,
+        size,
+        MediaQuery.devicePixelRatioOf(context),
+      ),
+      color: AppColors.dark.canvas.withValues(alpha: .35),
+      colorBlendMode: BlendMode.darken,
+      fit: BoxFit.fill,
+      filterQuality: FilterQuality.low,
+      excludeFromSemantics: true,
+      errorBuilder: (_, _, _) => const SizedBox.shrink(),
     );
   }
 }

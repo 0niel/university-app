@@ -11,6 +11,7 @@ import 'package:news_repository/news_repository.dart';
 import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/feed/bloc/feed_bloc.dart';
+import 'package:rtu_mirea_app/feed/view/story_viewer/story_images.dart';
 import 'package:rtu_mirea_app/feed/view/story_viewer/story_layout.dart';
 import 'package:rtu_mirea_app/feed/view/story_viewer/story_progress_bars.dart';
 import 'package:rtu_mirea_app/feed/view/story_viewer/story_slide.dart';
@@ -55,7 +56,7 @@ class _StoryViewerPageState extends State<StoryViewerPage>
   double _swipeDistance = 0;
   final _mediaHeroScope = Object();
   String? _mediaPostId;
-  String? _precachedNextId;
+  ImageProvider<Object>? _precachedNext;
 
   @override
   void initState() {
@@ -299,19 +300,27 @@ class _StoryViewerPageState extends State<StoryViewerPage>
     WidgetsBinding.instance.ensureVisualUpdate();
   }
 
-  void _precacheNext(BuildContext context, List<PostBlock> posts, int index) {
+  void _precacheNext(
+    BuildContext context,
+    List<PostBlock> posts,
+    int index,
+    Size size,
+  ) {
     final next = posts.elementAtOrNull(index + 1);
     final url = next?.imageUrl;
-    if (next == null ||
-        url == null ||
-        url.isEmpty ||
-        _precachedNextId == next.id) {
+    if (next == null || url == null || url.isEmpty) {
       return;
     }
-    _precachedNextId = next.id;
+    final provider = StoryImages.media(
+      CachedNetworkImageProvider(url),
+      size,
+      MediaQuery.devicePixelRatioOf(context),
+    );
+    if (_precachedNext == provider) return;
+    _precachedNext = provider;
     unawaited(
       precacheImage(
-        CachedNetworkImageProvider(url),
+        provider,
         context,
       ).catchError(
         (Object error) =>
@@ -407,7 +416,12 @@ class _StoryViewerPageState extends State<StoryViewerPage>
                       if (post == null) return const SizedBox.shrink();
                       _prepareMedia(post);
                       _ensureStarted(posts.length);
-                      _precacheNext(context, posts, index);
+                      _precacheNext(
+                        context,
+                        posts,
+                        index,
+                        StoryImages.stageSize(constraints.biggest),
+                      );
                       return _StoryScreen(
                         posts: posts,
                         index: index,
@@ -506,12 +520,15 @@ class _StoryHeader extends StatelessWidget {
               ),
               clipBehavior: Clip.antiAlias,
               child: avatarUrl != null && avatarUrl!.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: avatarUrl!,
+                  ? Image(
+                      image: StoryImages.avatar(
+                        avatarUrl!,
+                        MediaQuery.devicePixelRatioOf(context),
+                      ),
                       fit: BoxFit.cover,
                       width: StoryLayout.avatarSize,
                       height: StoryLayout.avatarSize,
-                      errorWidget: (_, _, _) =>
+                      errorBuilder: (_, _, _) =>
                           _StoryInitials(name: sourceName),
                     )
                   : _StoryInitials(name: sourceName),

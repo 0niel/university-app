@@ -8,7 +8,7 @@ class _StatsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaStateSwitcher(child: _body(context));
+    return Align(alignment: Alignment.topCenter, child: _body(context));
   }
 
   Widget _body(BuildContext context) {
@@ -28,7 +28,7 @@ class _StatsContent extends StatelessWidget {
           message: l10n.tryAgain,
           retryLabel: l10n.retry,
           onRetry: () => unawaited(context.read<MiniAppStatsCubit>().load()),
-        ).animateEmptyState(),
+        ),
       );
     }
     if (state.status == .loading && stats.isEmpty) {
@@ -50,7 +50,7 @@ class _StatsContent extends StatelessWidget {
           actionLabel: l10n.refreshData,
           onAction: () => unawaited(context.read<MiniAppStatsCubit>().load()),
           outlinedAction: true,
-        ).animateEmptyState(),
+        ),
       );
     }
     return _StatsBody(

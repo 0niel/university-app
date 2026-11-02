@@ -23,8 +23,9 @@ class _CatalogFilters extends StatelessWidget {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppExpandingSection(
-          expanded: state.isSearching,
+        Visibility(
+          visible: state.isSearching,
+          maintainState: true,
           child: _MiniAppsSearchField(
             controller: controller,
             focusNode: focusNode,

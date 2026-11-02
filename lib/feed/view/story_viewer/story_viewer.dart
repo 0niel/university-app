@@ -48,17 +48,7 @@ Future<void> showStoryViewer(
           },
         ),
       ),
-      transitionsBuilder: (_, animation, _, child) {
-        final curved = animation.drive(CurveTween(curve: NinjaMotion.enter));
-        final scale = Tween(begin: .96, end: 1.toDouble());
-        return FadeTransition(
-          opacity: curved,
-          child: ScaleTransition(
-            scale: scale.animate(curved),
-            child: child,
-          ),
-        );
-      },
+      transitionsBuilder: (_, _, _, child) => child,
     ),
   );
 }

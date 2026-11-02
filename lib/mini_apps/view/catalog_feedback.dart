@@ -17,9 +17,8 @@ class _CatalogFeedback extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppExpandingSection(
-          expanded: loading,
-          child: Padding(
+        if (loading)
+          Padding(
             padding: const EdgeInsets.fromLTRB(20, 2, 20, 6),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.full),
@@ -34,10 +33,8 @@ class _CatalogFeedback extends StatelessWidget {
               ),
             ),
           ),
-        ),
-        AppExpandingSection(
-          expanded: hasContent && state.status == MiniAppsCatalogStatus.failure,
-          child: Padding(
+        if (hasContent && state.status == MiniAppsCatalogStatus.failure)
+          Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
             child: AppGlassSurface(
               tone: AppGlassTone.accent,
@@ -90,7 +87,6 @@ class _CatalogFeedback extends StatelessWidget {
               ),
             ),
           ),
-        ),
       ],
     );
   }

@@ -22,7 +22,7 @@ class MiniAppRunnerBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NinjaStateSwitcher(child: _body(context));
+    return Align(alignment: Alignment.topCenter, child: _body(context));
   }
 
   Widget _body(BuildContext context) {
@@ -42,7 +42,7 @@ class MiniAppRunnerBody extends StatelessWidget {
             subtitle: l10n.miniAppsRunnerNotFoundSubtitle,
             actionLabel: l10n.miniAppsCatalogSection,
             onAction: () => context.go('/services/apps'),
-          ).animateEmptyState(),
+          ),
         );
       case .failure:
         return _framed(
@@ -54,7 +54,7 @@ class MiniAppRunnerBody extends StatelessWidget {
             primaryLabel: l10n.retry,
             footnote: null,
             onPrimary: () => unawaited(_reload(context)),
-          ).animateEmptyState(),
+          ),
         );
       case .ready:
         final screen = state.screen;
@@ -89,7 +89,7 @@ class MiniAppRunnerBody extends StatelessWidget {
       footnote: null,
       primaryLabel: context.l10n.retry,
       onPrimary: () => unawaited(_reload(context)),
-    ).animateEmptyState(),
+    ),
   );
 
   Widget _framed(BuildContext context, Key key, Widget child) => Center(

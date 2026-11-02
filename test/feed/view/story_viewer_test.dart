@@ -5,6 +5,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:news_blocks/news_blocks.dart';
@@ -13,6 +14,7 @@ import 'package:rtu_mirea_app/categories/categories.dart';
 import 'package:rtu_mirea_app/common/media_viewer/media_viewer.dart';
 import 'package:rtu_mirea_app/common/media_viewer/widgets/media_top_bar.dart';
 import 'package:rtu_mirea_app/feed/bloc/feed_bloc.dart';
+import 'package:rtu_mirea_app/feed/view/story_viewer/story_images.dart';
 import 'package:rtu_mirea_app/feed/view/story_viewer/story_slide.dart';
 import 'package:rtu_mirea_app/feed/view/story_viewer/story_viewer_page.dart';
 import 'package:rtu_mirea_app/home/view/widgets/home_stories_rail.dart';
@@ -23,6 +25,8 @@ class _Feed extends MockBloc<FeedEvent, FeedState> implements FeedBloc {}
 
 class _Categories extends MockBloc<CategoriesEvent, CategoriesState>
     implements CategoriesBloc {}
+
+class _Cache extends Mock implements BaseCacheManager {}
 
 void main() {
   late FeedBloc feed;
@@ -122,6 +126,17 @@ void main() {
     final sourceTag = tester.widget<Hero>(find.byType(Hero)).tag;
     await tester.tap(find.byType(HomeStoryItem));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    final viewer = find.byType(StoryViewerPage);
+    expect(ModalRoute.of(tester.element(viewer))!.opaque, isFalse);
+    final fades = tester.widgetList<FadeTransition>(
+      find.ancestor(of: viewer, matching: find.byType(FadeTransition)),
+    );
+    expect(fades.every((fade) => fade.opacity.value == 1), isTrue);
+    final scales = tester.widgetList<ScaleTransition>(
+      find.ancestor(of: viewer, matching: find.byType(ScaleTransition)),
+    );
+    expect(scales.every((scale) => scale.scale.value == 1), isTrue);
     await tester.pump(const Duration(milliseconds: 400));
     final hero = tester.widget<Hero>(
       find.descendant(
@@ -136,6 +151,137 @@ void main() {
     expect(tester.widget<Hero>(find.byType(Hero)).tag, sourceTag);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('launch and header avatars reuse the bounded decoded image', (
+    tester,
+  ) async {
+    loadedStories();
+    const avatarSource = NewsSourceItem(
+      sourceType: 'telegram',
+      sourceId: 'science',
+      sourceName: 'Наука',
+      avatarUrl: 'https://example.test/avatar.jpg',
+    );
+    when(() => categories.state).thenReturn(
+      const CategoriesState(sources: [avatarSource]),
+    );
+    final posts = feed.state.feed['science']!;
+    when(() => feed.state).thenReturn(
+      FeedState(
+        status: .populated,
+        feed: {newsCategoryKey('telegram', 'science'): posts},
+      ),
+    );
+    final previousCache = CachedNetworkImageProvider.defaultCacheManager;
+    final cache = _Cache();
+    when(
+      () => cache.getFileStream(
+        any(),
+        key: any(named: 'key'),
+        headers: any(named: 'headers'),
+        withProgress: any(named: 'withProgress'),
+      ),
+    ).thenAnswer((_) => const Stream.empty());
+    CachedNetworkImageProvider.defaultCacheManager = cache;
+    addTearDown(() {
+      CachedNetworkImageProvider.defaultCacheManager = previousCache;
+      PaintingBinding.instance.imageCache
+        ..clear()
+        ..clearLiveImages();
+    });
+    await tester.pumpApp(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<FeedBloc>.value(value: feed),
+          BlocProvider<CategoriesBloc>.value(value: categories),
+        ],
+        child: const Scaffold(
+          body: HomeStoriesRail(
+            sources: [avatarSource],
+          ),
+        ),
+      ),
+    );
+    final source = tester.widget<Image>(find.byType(Image)).image;
+    await tester.tap(find.byType(HomeStoryItem));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    final destination = tester
+        .widget<Image>(
+          find.descendant(
+            of: find.byType(StoryViewerPage),
+            matching: find.byType(Image),
+          ),
+        )
+        .image;
+    expect(source, destination);
+    expect(
+      await source.obtainKey(ImageConfiguration.empty),
+      await destination.obtainKey(ImageConfiguration.empty),
+    );
+    verify(
+      () => cache.getFileStream(
+        'https://example.test/avatar.jpg',
+        key: any(named: 'key'),
+        headers: any(named: 'headers'),
+        withProgress: any(named: 'withProgress'),
+      ),
+    ).called(1);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets(
+    'next story uses the exact image cache entry that was prefetched',
+    (
+      tester,
+    ) async {
+      loadedStories(images: true);
+      final previousCache = CachedNetworkImageProvider.defaultCacheManager;
+      final cache = _Cache();
+      when(
+        () => cache.getFileStream(
+          any(),
+          key: any(named: 'key'),
+          headers: any(named: 'headers'),
+          withProgress: any(named: 'withProgress'),
+        ),
+      ).thenAnswer((_) => const Stream.empty());
+      CachedNetworkImageProvider.defaultCacheManager = cache;
+      addTearDown(() {
+        CachedNetworkImageProvider.defaultCacheManager = previousCache;
+        PaintingBinding.instance.imageCache
+          ..clear()
+          ..clearLiveImages();
+      });
+      await tester.pumpApp(subject(), size: const Size(390, 844));
+      await tester.tap(find.text('Open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      final prefetched = StoryImages.media(
+        const CachedNetworkImageProvider('https://example.com/second.png'),
+        const Size(390, 844),
+        1,
+      );
+      final key = await prefetched.obtainKey(ImageConfiguration.empty);
+      expect(
+        PaintingBinding.instance.imageCache.statusForKey(key).pending,
+        isTrue,
+      );
+      expect(find.byType(ImageFiltered), findsNothing);
+      await tester.tap(find.byKey(const Key('storyViewer_nextZone')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 200));
+      final image = tester
+          .widgetList<Image>(find.byType(Image))
+          .singleWhere(
+            (image) => image.fit == BoxFit.contain,
+          );
+      expect(image.image, prefetched);
+      expect(await image.image.obtainKey(ImageConfiguration.empty), key);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   testWidgets('horizontal swipes navigate without dismissing the story', (
     tester,

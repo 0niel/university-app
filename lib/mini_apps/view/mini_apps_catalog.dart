@@ -66,7 +66,6 @@ class _MiniAppsCatalogState extends State<MiniAppsCatalog> {
   final _searchFocus = FocusNode();
   late String _requestedQuery = widget.state.query;
   Timer? _queryDelay;
-  Timer? _focusDelay;
 
   @override
   void initState() {
@@ -92,7 +91,6 @@ class _MiniAppsCatalogState extends State<MiniAppsCatalog> {
         _scheduleFocus();
       } else {
         _queryDelay?.cancel();
-        _focusDelay?.cancel();
         _searchFocus.unfocus();
         _searchController.clear();
       }
@@ -102,10 +100,7 @@ class _MiniAppsCatalogState extends State<MiniAppsCatalog> {
   void _scheduleFocus() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !widget.state.isSearching) return;
-      _focusDelay?.cancel();
-      _focusDelay = Timer(NinjaMotion.of(context, NinjaMotion.fast), () {
-        if (mounted && widget.state.isSearching) _searchFocus.requestFocus();
-      });
+      _searchFocus.requestFocus();
     });
   }
 
@@ -132,7 +127,6 @@ class _MiniAppsCatalogState extends State<MiniAppsCatalog> {
 
   void _toggleSearch() {
     _queryDelay?.cancel();
-    _focusDelay?.cancel();
     if (widget.state.isSearching) {
       _searchFocus.unfocus();
       _searchController.clear();
@@ -150,7 +144,6 @@ class _MiniAppsCatalogState extends State<MiniAppsCatalog> {
   @override
   void dispose() {
     _queryDelay?.cancel();
-    _focusDelay?.cancel();
     _searchFocus.dispose();
     _searchController.dispose();
     super.dispose();

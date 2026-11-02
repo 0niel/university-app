@@ -23,6 +23,7 @@ class MiniAppScanGlassButton extends StatelessWidget {
       label: tooltip,
       child: AppPressable(
         onTap: onTap,
+        pressedScale: 1,
         child: Container(
           width: 48,
           height: 48,

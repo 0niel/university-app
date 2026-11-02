@@ -32,7 +32,7 @@ class MiniAppCard extends StatelessWidget {
     return AppPressable(
       onTap: onTap,
       onLongPress: onLongPress,
-      pressedScale: .985,
+      pressedScale: 1,
       haptics: true,
       child: AppGlassSurface(
         tone: app.isFeatured ? AppGlassTone.accent : AppGlassTone.subtle,
