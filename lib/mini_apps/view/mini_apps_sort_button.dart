@@ -47,10 +47,8 @@ class _MiniAppsSortButtonState extends State<_MiniAppsSortButton> {
           label: label,
           size: AppButtonSize.small,
           icon: const AppLineIconWidget(AppLineIcon.filter),
-          trailingIcon: AnimatedRotation(
-            turns: _selection == null ? 0 : .5,
-            duration: NinjaMotion.of(anchorContext, NinjaMotion.fast),
-            curve: NinjaMotion.enter,
+          trailingIcon: RotatedBox(
+            quarterTurns: _selection == null ? 0 : 2,
             child: const AppLineIconWidget(AppLineIcon.chevronD),
           ),
           tooltip: '${anchorContext.l10n.miniAppsSortTitle}: $label',

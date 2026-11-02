@@ -36,22 +36,10 @@ class _MiniAppsAppBar extends StatelessWidget {
       backSemanticsLabel: l10n.back,
       actions: [
         AppHeaderAction(
-          child: AnimatedSwitcher(
-            duration: NinjaMotion.of(context, NinjaMotion.fast),
-            switchInCurve: NinjaMotion.enter,
-            switchOutCurve: NinjaMotion.exit,
-            transitionBuilder: (child, animation) => FadeTransition(
-              opacity: animation,
-              child: ScaleTransition(
-                scale: animation.drive(Tween(begin: .8, end: 1)),
-                child: child,
-              ),
-            ),
-            child: AppLineIconWidget(
-              isSearching ? AppLineIcon.close : AppLineIcon.search,
-              key: ValueKey(isSearching),
-              size: AppIconSize.md,
-            ),
+          child: AppLineIconWidget(
+            isSearching ? AppLineIcon.close : AppLineIcon.search,
+            key: ValueKey(isSearching),
+            size: AppIconSize.md,
           ),
           semanticsLabel: isSearching
               ? MaterialLocalizations.of(context).closeButtonTooltip

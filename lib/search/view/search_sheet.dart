@@ -38,6 +38,7 @@ Future<void> showSearchSheet(BuildContext context, {String? query}) async {
     await showAppSheet<void>(
       context,
       heightFraction: 0.86,
+      scrollable: false,
       child: SearchSheet(
         bloc: bloc,
         scheduleBloc: scheduleBloc,
@@ -76,6 +77,9 @@ class _SearchSheetState extends State<SearchSheet> {
     text: widget.initialQuery,
   );
   late String _query = _controller.text.trim();
+  final _focusNode = FocusNode();
+  Animation<double>? _routeAnimation;
+  bool _focusScheduled = false;
 
   @override
   void initState() {
@@ -87,7 +91,54 @@ class _SearchSheetState extends State<SearchSheet> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final animation = ModalRoute.of(context)?.animation;
+    if (!identical(animation, _routeAnimation)) {
+      _routeAnimation?.removeStatusListener(_onRouteStatus);
+      _routeAnimation = animation;
+    }
+    if (animation == null || animation.status == AnimationStatus.completed) {
+      _scheduleFocus();
+    } else {
+      animation
+        ..removeStatusListener(_onRouteStatus)
+        ..addStatusListener(_onRouteStatus);
+    }
+  }
+
+  void _onRouteStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _routeAnimation?.removeStatusListener(_onRouteStatus);
+      _scheduleFocus();
+    }
+  }
+
+  void _scheduleFocus() {
+    if (_focusScheduled) return;
+    _focusScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final route = ModalRoute.of(context);
+      if (!(route?.isCurrent ?? true)) return;
+      final animation = route?.animation;
+      if ((route?.offstage ?? false) ||
+          (animation != null &&
+              animation.status != AnimationStatus.completed)) {
+        _focusScheduled = false;
+        _routeAnimation?.removeStatusListener(_onRouteStatus);
+        _routeAnimation = animation;
+        animation?.addStatusListener(_onRouteStatus);
+        return;
+      }
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
   void dispose() {
+    _routeAnimation?.removeStatusListener(_onRouteStatus);
+    _focusNode.dispose();
     _controller
       ..removeListener(_onChanged)
       ..dispose();
@@ -96,8 +147,8 @@ class _SearchSheetState extends State<SearchSheet> {
 
   void _onChanged() {
     final next = _controller.text.trim();
-    widget.bloc.add(SearchQueryChanged(searchQuery: _controller.text));
     if (next == _query) return;
+    widget.bloc.add(SearchQueryChanged(searchQuery: _controller.text));
     setState(() => _query = next);
   }
 
@@ -235,76 +286,151 @@ class _SearchSheetState extends State<SearchSheet> {
       builder: (context, state) {
         final hits = _hits(context);
         final loading = state.status == SearchStatus.loading;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppSearchField(
-              key: const ValueKey('search-sheet-field'),
-              controller: _controller,
-              autofocus: true,
-              height: 52,
-              isOnCanvas: true,
-              hintText: l10n.searchSheetPlaceholder,
-              onSubmitted: (value) {
-                if (value.trim().isNotEmpty) _commit(value.trim());
-              },
+        return CustomScrollView(
+          key: const ValueKey('search-sheet-scroll'),
+          primary: true,
+          slivers: [
+            SliverToBoxAdapter(
+              child: AppSearchField(
+                key: const ValueKey('search-sheet-field'),
+                controller: _controller,
+                focusNode: _focusNode,
+                height: 52,
+                isOnCanvas: true,
+                hintText: l10n.searchSheetPlaceholder,
+                onSubmitted: (value) {
+                  if (value.trim().isNotEmpty) _commit(value.trim());
+                },
+              ),
             ),
             if (_query.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sectionGap),
-              AppListGroup(
-                key: const ValueKey('search-sheet-results'),
-                children: [
-                  for (final hit in hits) SearchSheetRow(hit: hit),
-                  if (hits.isEmpty && loading)
-                    const AppSkeletonGroup(
-                      child: Column(
-                        children: [
-                          AppSkeletonRow(showTrailing: false),
-                          AppSkeletonRow(showTrailing: false),
-                        ],
-                      ),
-                    ),
-                  if (hits.isEmpty && !loading)
-                    state.status == SearchStatus.failure
-                        ? AppErrorState(
-                            title: l10n.searchFailed,
-                            message: l10n.tryAgain,
-                            primaryLabel: l10n.retry,
-                            footnote: null,
-                            onPrimary: () => widget.bloc.add(
-                              SearchQueryChanged(searchQuery: _query),
-                            ),
-                          )
-                        : Padding(
-                            key: const ValueKey('search-sheet-empty'),
-                            padding: const EdgeInsets.all(AppSpacing.xlg),
-                            child: Text(
-                              l10n.searchSheetNoResults,
-                              textAlign: TextAlign.center,
-                              style: AppText.body.copyWith(color: colors.muted),
-                            ),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: AppSpacing.sectionGap),
+              ),
+              if (hits.isNotEmpty)
+                SliverList.builder(
+                  key: const ValueKey('search-sheet-results'),
+                  itemCount: hits.length,
+                  itemBuilder: (context, index) => _SearchSheetGroupRow(
+                    first: index == 0,
+                    last: index == hits.length - 1,
+                    child: SearchSheetRow(hit: hits[index]),
+                  ),
+                )
+              else
+                SliverToBoxAdapter(
+                  child: AppListGroup(
+                    key: const ValueKey('search-sheet-results'),
+                    children: [
+                      if (loading)
+                        const AppSkeletonGroup(
+                          child: Column(
+                            children: [
+                              AppSkeletonRow(showTrailing: false),
+                              AppSkeletonRow(showTrailing: false),
+                            ],
                           ),
-                ],
-              ),
+                        )
+                      else if (state.status == SearchStatus.failure)
+                        AppErrorState(
+                          title: l10n.searchFailed,
+                          message: l10n.tryAgain,
+                          primaryLabel: l10n.retry,
+                          footnote: null,
+                          onPrimary: () => widget.bloc.add(
+                            SearchQueryChanged(searchQuery: _query),
+                          ),
+                        )
+                      else
+                        Padding(
+                          key: const ValueKey('search-sheet-empty'),
+                          padding: const EdgeInsets.all(AppSpacing.xlg),
+                          child: Text(
+                            l10n.searchSheetNoResults,
+                            textAlign: TextAlign.center,
+                            style: AppText.body.copyWith(color: colors.muted),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
             ],
-            if (state.searchHisoty.isNotEmpty) ...[
-              AppOverline(l10n.searchRecent, topPadding: 20),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final recent in state.searchHisoty)
-                    SearchRecentPill(
-                      label: recent,
-                      onTap: () => _setQuery(recent),
+            if (state.searchHisoty.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppOverline(l10n.searchRecent, topPadding: 20),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final recent in state.searchHisoty)
+                          SearchRecentPill(
+                            label: recent,
+                            onTap: () => _setQuery(recent),
+                          ),
+                      ],
                     ),
-                ],
+                  ],
+                ),
               ),
-            ],
-            const SizedBox(height: 200),
+            const SliverToBoxAdapter(child: SizedBox(height: 200)),
           ],
         );
       },
+    );
+  }
+}
+
+class _SearchSheetGroupRow extends StatelessWidget {
+  const _SearchSheetGroupRow({
+    required this.first,
+    required this.last,
+    required this.child,
+  });
+
+  final bool first;
+  final bool last;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final radius = BorderRadius.vertical(
+      top: first ? const Radius.circular(AppRadius.card) : Radius.zero,
+      bottom: last ? const Radius.circular(AppRadius.card) : Radius.zero,
+    );
+    final side = AppSurfaceStyle.outline(context).left;
+    return DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        border: Border(
+          left: side,
+          right: side,
+          top: first ? side : BorderSide.none,
+          bottom: last ? side : BorderSide.none,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: ColoredBox(
+          color: colors.surface,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              child,
+              if (!last)
+                AppDivider(
+                  color: colors.line.withValues(
+                    alpha: colors.line.a * (colors.isDark ? .62 : .75),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

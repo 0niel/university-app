@@ -4,6 +4,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:news_repository/news_repository.dart';
 import 'package:rtu_mirea_app/feed/feed.dart';
+import 'package:rtu_mirea_app/feed/view/story_viewer/story_images.dart';
 
 class HomeStoriesRail extends StatelessWidget {
   const HomeStoriesRail({
@@ -114,7 +115,6 @@ class HomeStoryItem extends StatelessWidget {
         ? source.sourceId
         : source.sourceName;
     final avatar = source.avatarUrl;
-    final avatarPixels = (48 * MediaQuery.devicePixelRatioOf(context)).ceil();
     Widget thumbnail(Widget child) => heroTag == null
         ? child
         : HeroMode(
@@ -165,10 +165,11 @@ class HomeStoryItem extends StatelessWidget {
                               ),
                             ),
                           )
-                        : Image.network(
-                            avatar,
-                            cacheWidth: avatarPixels,
-                            cacheHeight: avatarPixels,
+                        : Image(
+                            image: StoryImages.avatar(
+                              avatar,
+                              MediaQuery.devicePixelRatioOf(context),
+                            ),
                             excludeFromSemantics: true,
                             fit: .cover,
                             errorBuilder: (_, _, _) =>

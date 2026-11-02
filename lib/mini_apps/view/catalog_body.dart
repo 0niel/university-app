@@ -29,11 +29,9 @@ class _CatalogBody extends StatelessWidget {
       sliver: SliverMainAxisGroup(
         slivers: [
           SliverToBoxAdapter(
-            child: AppStateSwitcher(
-              child: hasContent
-                  ? const SizedBox.shrink(key: ValueKey('catalog-content'))
-                  : _statePanel(context),
-            ),
+            child: hasContent
+                ? const SizedBox.shrink(key: ValueKey('catalog-content'))
+                : _statePanel(context),
           ),
           if (hasContent) ...[
             if (showRecents)
@@ -128,14 +126,11 @@ class _CatalogBody extends StatelessWidget {
             AppSpacing.screen,
             AppSpacing.sm,
           ),
-          child: AppReveal(
-            index: index,
-            child: MiniAppCard(
-              app: app,
-              showStatus: showStatus,
-              onTap: () => onOpen(app),
-              onLongPress: () => onActions(app),
-            ),
+          child: MiniAppCard(
+            app: app,
+            showStatus: showStatus,
+            onTap: () => onOpen(app),
+            onLongPress: () => onActions(app),
           ),
         );
       },
