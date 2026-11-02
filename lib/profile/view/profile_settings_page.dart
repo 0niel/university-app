@@ -29,6 +29,7 @@ class ProfileSettingsPage extends StatefulWidget {
 class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   final AppCache _cache = const AppCache();
   String? _cacheLabel;
+  Future<void>? _cacheSizeLoad;
   String? _version;
   String? _buildNumber;
   var _clearingCache = false;
@@ -41,11 +42,26 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       unawaited(context.read<PassSecurityCubit>().refreshCapability());
       unawaited(context.read<NfcHceCubit>().refresh());
     }
-    unawaited(_loadCacheSize());
     unawaited(_loadVersion());
   }
 
-  Future<void> _loadCacheSize() async {
+  Future<void> _loadCacheSize({bool refresh = false}) async {
+    final pending = _cacheSizeLoad;
+    if (pending != null) {
+      await pending;
+      if (!refresh || !mounted) return;
+    }
+    if (!refresh && _cacheLabel != null) return;
+    final request = _estimateCacheSize();
+    _cacheSizeLoad = request;
+    try {
+      await request;
+    } finally {
+      _cacheSizeLoad = null;
+    }
+  }
+
+  Future<void> _estimateCacheSize() async {
     try {
       final bytes = await _cache.estimateBytes();
       if (!mounted) return;
@@ -58,6 +74,11 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         name: 'ProfileSettingsPage',
       );
     }
+  }
+
+  void _toggleAdvanced() {
+    setState(() => _showAdvanced = !_showAdvanced);
+    if (_showAdvanced) unawaited(_loadCacheSize());
   }
 
   Future<void> _loadVersion() async {
@@ -153,8 +174,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                             : AppLineIcon.chevronD,
                       ),
                       showChevron: false,
-                      onTap: () =>
-                          setState(() => _showAdvanced = !_showAdvanced),
+                      onTap: _toggleAdvanced,
                     ),
                   ],
                 ),
@@ -223,7 +243,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     final l10n = context.l10n;
     try {
       await _cache.clear();
-      await _loadCacheSize();
+      await _loadCacheSize(refresh: true);
       if (!mounted) return;
       showNinjaToast(context, message: l10n.settingsCacheCleared);
     } on Exception catch (error, stackTrace) {

@@ -263,9 +263,8 @@ class MapFreeRoomsPanel extends StatelessWidget {
                     child: Column(
                       children: [
                         panelHeader,
-                        Visibility(
+                        _DeferredPanelContent(
                           visible: !collapsed,
-                          maintainState: true,
                           child: Padding(
                             padding: const EdgeInsets.only(top: 14),
                             child: rooms,
@@ -286,9 +285,8 @@ class MapFreeRoomsPanel extends StatelessWidget {
                           top: collapsed ? 0 : AppSpacing.sectionGap,
                           bottom: AppSpacing.screen,
                         ),
-                        child: Visibility(
+                        child: _DeferredPanelContent(
                           visible: !collapsed,
-                          maintainState: true,
                           child: rooms,
                         ),
                       ),
@@ -300,6 +298,31 @@ class MapFreeRoomsPanel extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _DeferredPanelContent extends StatefulWidget {
+  const _DeferredPanelContent({required this.visible, required this.child});
+
+  final bool visible;
+  final Widget child;
+
+  @override
+  State<_DeferredPanelContent> createState() => _DeferredPanelContentState();
+}
+
+class _DeferredPanelContentState extends State<_DeferredPanelContent> {
+  bool _hasBeenVisible = false;
+
+  @override
+  Widget build(BuildContext context) {
+    _hasBeenVisible |= widget.visible;
+    if (!_hasBeenVisible) return const SizedBox.shrink();
+    return Visibility(
+      visible: widget.visible,
+      maintainState: true,
+      child: widget.child,
     );
   }
 }

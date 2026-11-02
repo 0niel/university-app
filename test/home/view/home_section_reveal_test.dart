@@ -4,6 +4,64 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rtu_mirea_app/home/view/widgets/home_section_reveal.dart';
 
 void main() {
+  testWidgets(
+    'home reveal reuses static paint and invalidates content updates',
+    (
+      tester,
+    ) async {
+      var paints = 0;
+      var revision = 0;
+      late StateSetter rebuild;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                rebuild = setState;
+                return ListView(
+                  children: [
+                    HomeSectionReveal(
+                      child: CustomPaint(
+                        painter: _PaintProbe(
+                          revision: revision,
+                          onPaint: () => paints++,
+                        ),
+                        child: const SizedBox(height: 200),
+                      ),
+                    ),
+                    const SizedBox(height: 1000),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      expect(paints, 1);
+      for (var frame = 0; frame < 8; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      final transform = tester.widget<Transform>(
+        find.descendant(
+          of: find.byType(HomeSectionReveal),
+          matching: find.byType(Transform),
+        ),
+      );
+      expect(transform.transform.storage[13], greaterThan(0));
+      expect(transform.transform.storage[13], lessThan(18));
+      expect(paints, 1);
+      rebuild(() => revision++);
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(paints, 2);
+      for (var frame = 0; frame < 8; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(paints, 2);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('home transform preserves glass backdrop and focused child', (
     tester,
   ) async {
@@ -76,4 +134,24 @@ void main() {
     expect(focus.hasFocus, isTrue);
     expect(tester.takeException(), isNull);
   });
+}
+
+class _PaintProbe extends CustomPainter {
+  _PaintProbe({required this.revision, required this.onPaint});
+
+  final int revision;
+  final VoidCallback onPaint;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    onPaint();
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = revision.isEven ? Colors.red : Colors.blue,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_PaintProbe oldDelegate) =>
+      revision != oldDelegate.revision;
 }

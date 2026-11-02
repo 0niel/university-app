@@ -46,7 +46,14 @@ void main() {
   ) async {
     await tester.pumpWidget(_host());
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, lessThan(1));
+    expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 1);
+    expect(
+      tester
+          .widget<FractionalTranslation>(find.byType(FractionalTranslation))
+          .translation
+          .dy,
+      greaterThan(0),
+    );
     await tester.pumpWidget(_host(accessible: true));
     expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 1);
     await tester.pump();

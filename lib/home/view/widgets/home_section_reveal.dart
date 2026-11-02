@@ -18,7 +18,7 @@ class HomeSectionReveal extends StatelessWidget {
         1,
         curve: Curves.easeOutCubic,
       ),
-      child: child,
+      child: RepaintBoundary(child: child),
       builder: (context, value, content) => Transform.translate(
         offset: duration == Duration.zero
             ? Offset.zero

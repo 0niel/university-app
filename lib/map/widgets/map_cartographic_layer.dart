@@ -232,12 +232,7 @@ class _Feature {
     required this.synthetic,
     required this.floorSize,
     this.closed = false,
-  }) : bounds = room.path.getBounds(),
-       location = resolveMapPlaceAnchor(
-         room.path,
-         floorSize: floorSize,
-         place: place,
-       );
+  }) : bounds = room.path.getBounds();
 
   final RoomModel room;
   final MapPlaceData? place;
@@ -245,7 +240,11 @@ class _Feature {
   final bool closed;
   final Size floorSize;
   final Rect bounds;
-  final MapPlaceAnchor location;
+  late final MapPlaceAnchor location = resolveMapPlaceAnchor(
+    room.path,
+    floorSize: floorSize,
+    place: place,
+  );
   Offset? get anchor => location.point;
   bool get detachedService => location.detachedService;
   static final RegExp _passagePattern = RegExp(
@@ -401,8 +400,6 @@ class _LabelsPainter extends CustomPainter {
       }
     }
     for (final feature in features) {
-      final anchor = feature.anchor;
-      if (anchor == null || !labelArea.contains(anchor)) continue;
       final width = feature.bounds.width * scale;
       final height = feature.bounds.height * scale;
       final selected = selectedId == feature.room.roomId;
@@ -423,6 +420,8 @@ class _LabelsPainter extends CustomPainter {
       if (!selected && feature.passage && (width < 120 || height < 28)) {
         continue;
       }
+      final anchor = feature.anchor;
+      if (anchor == null || !labelArea.contains(anchor)) continue;
       final withText =
           feature.label.isNotEmpty &&
           (selected ||
