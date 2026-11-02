@@ -303,7 +303,7 @@ jobs:
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3.0.0
         with:
-          version: latest
+          version: 3.0.0
 
       - name: Restore container registry fallback
         run: echo 'SUPABASE_INTERNAL_IMAGE_REGISTRY=' >> "$GITHUB_ENV"
