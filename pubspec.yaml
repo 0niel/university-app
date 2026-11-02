@@ -2,7 +2,7 @@ name: rtu_mirea_app
 description: Mobile application for students of RTU MIREA
 publish_to: 'none'
 
-version: 5.4.1+156
+version: 5.4.2+156
 
 environment:
   sdk: ^3.12.0
@@ -303,7 +303,7 @@ dev_dependencies:
   freezed: 3.2.5
   go_router_builder: ^4.1.1
   json_serializable: 6.14.0
-  liquid_glass_renderer: 1.0.0-dev.1
+  liquid_glass_renderer: 1.0.0-dev.2
   mocktail: ^1.0.5
   shared_preferences_platform_interface: ^2.4.2
   very_good_analysis: 10.3.0

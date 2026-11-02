@@ -1745,10 +1745,10 @@ packages:
     dependency: "direct dev"
     description:
       name: liquid_glass_renderer
-      sha256: b8702093e30ec5d4aded2307994342b30bc5d003ff9b5964764fc0db2f1f888c
+      sha256: "5a57a498fffd29eb8373695346ae423e4d3879edf72335db57d0e31ff74ae54f"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0-dev.1"
+    version: "1.0.0-dev.2"
   list_counter:
     dependency: transitive
     description:

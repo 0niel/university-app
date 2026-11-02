@@ -26,7 +26,7 @@ dependencies:
   hugeicons: ^1.1.5
   intl: ^0.20.2
   liquid_glass_easy: ^5.0.0
-  liquid_glass_renderer: 1.0.0-dev.1
+  liquid_glass_renderer: 1.0.0-dev.2
   open_filex: ^4.4.0
   photo_view: ^0.15.0
   smooth_sheets: ^1.0.2
