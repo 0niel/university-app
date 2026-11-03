@@ -30,6 +30,9 @@ begin
       'stale_request_decline'
     ] loop
       begin
+        perform set_config('request.jwt.claim.sub', '', true);
+        perform set_config('request.jwt.claim.role', '', true);
+        perform set_config('request.jwt.claims', '{}', true);
         v_owner := extensions.gen_random_uuid();
         v_user := extensions.gen_random_uuid();
         v_group := extensions.gen_random_uuid();
@@ -60,9 +63,24 @@ begin
         )::text, true);
         execute 'set local role authenticated';
         if v_mode like 'invite_%' then
-          perform public.invite_to_study_group(v_user);
+          if v_guest then
+            begin
+              perform public.invite_to_study_group(v_user);
+              raise exception 'Guest created a study-group invitation';
+            exception when insufficient_privilege then null;
+            end;
+          else
+            perform public.invite_to_study_group(v_user);
+          end if;
         end if;
         execute 'reset role';
+        perform set_config('request.jwt.claim.sub', '', true);
+        perform set_config('request.jwt.claim.role', '', true);
+        perform set_config('request.jwt.claims', '{}', true);
+        if v_guest and v_mode like 'invite_%' then
+          insert into core.study_group_invites(group_id,target_user_id,created_by,kind)
+          values (v_group,v_user,v_owner,'invite');
+        end if;
 
         if v_mode = 'invite_decline' then
           v_other_owner := extensions.gen_random_uuid();
@@ -97,7 +115,21 @@ begin
           raise exception 'Lifecycle authentication claims are invalid';
         end if;
         if v_mode like 'request_%' or v_mode like 'stale_request%' then
-          perform public.request_to_join_group(v_group);
+          if v_guest then
+            begin
+              perform public.request_to_join_group(v_group);
+              raise exception 'Guest created a study-group join request';
+            exception when insufficient_privilege then null;
+            end;
+            execute 'reset role';
+            if exists(select 1 from core.study_group_invites where group_id=v_group and target_user_id=v_user) then
+              raise exception 'Rejected guest join request persisted';
+            end if;
+            v_passed := v_passed+1;
+            continue;
+          else
+            perform public.request_to_join_group(v_group);
+          end if;
         end if;
         execute 'reset role';
         select id into v_invite
@@ -117,6 +149,24 @@ begin
           )::text, true);
         end if;
         execute 'set local role authenticated';
+        if v_guest and v_accept then
+          begin
+            if v_mode like 'invite_%' then
+              perform public.respond_group_invite(v_invite, true);
+            elsif v_mode = 'code' then
+              perform public.join_group_by_code('study-lifecycle-a',
+                upper(left(replace(v_group::text, '-', ''), 8)));
+            end if;
+            raise exception 'Guest joined a study group';
+          exception when insufficient_privilege then null;
+          end;
+          execute 'reset role';
+          if exists(select 1 from core.study_group_members where group_id=v_group and user_id=v_user) then
+            raise exception 'Rejected guest membership persisted';
+          end if;
+          v_passed := v_passed+1;
+          continue;
+        end if;
         if v_mode like 'invite_%' then
           v_result := public.respond_group_invite(v_invite, v_accept);
         elsif v_mode = 'code' then

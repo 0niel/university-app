@@ -97,7 +97,9 @@ declare
 begin
   insert into core.organizations (id, name)
   values (v_org, 'Wallet Contract A'), (v_other_org, 'Wallet Contract B');
-  insert into auth.users (id) values (v_uid), (v_other), (v_new);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[v_uid, v_other, v_new]) id;
   insert into core.user_academic_profiles (user_id, organization_id)
   values (v_uid, v_org), (v_other, v_other_org), (v_new, v_org);
   insert into core.user_gamification_profiles (

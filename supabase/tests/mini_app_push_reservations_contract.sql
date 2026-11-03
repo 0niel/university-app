@@ -31,9 +31,10 @@ begin
   select * into f from mini_push_fixture;
   insert into core.organizations (id, name)
   values (f.organization_id, 'Push Contract');
-  insert into auth.users (id, is_anonymous) values
-    (f.owner_id, false), (f.first_id, false),
-    (f.second_id, true), (f.unconsented_id, false);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[f.owner_id, f.first_id, f.unconsented_id]) id;
+  insert into auth.users (id, is_anonymous) values (f.second_id, true);
   insert into core.mini_apps (
     id, organization_id, owner_id, slug, name, status, requested_permissions
   ) values

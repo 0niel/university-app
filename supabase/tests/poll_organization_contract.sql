@@ -38,9 +38,11 @@ begin
   insert into core.organizations (id, name) values
     (f.organization_id, 'Poll Contract'),
     (f.foreign_organization_id, 'Foreign Poll Contract');
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[f.owner_id, f.foreign_id]) id;
   insert into auth.users (id, is_anonymous) values
-    (f.owner_id, false), (f.anonymous_id, true),
-    (f.foreign_id, false), (f.unprofiled_id, true);
+    (f.anonymous_id, true), (f.unprofiled_id, true);
   insert into core.user_academic_profiles (user_id, organization_id) values
     (f.owner_id, f.organization_id),
     (f.foreign_id, f.foreign_organization_id);
@@ -161,7 +163,7 @@ select set_config('request.jwt.claim.sub', anonymous_id::text, true),
 from poll_org_fixture;
 
 do $$
-declare f poll_org_fixture; v_legacy jsonb; v_modern jsonb; v_poll jsonb; v_poll_id uuid;
+declare f poll_org_fixture; v_legacy jsonb; v_modern jsonb;
 begin
   select * into f from poll_org_fixture;
   perform public.ensure_academic_profile(f.organization_id, null);
@@ -181,25 +183,28 @@ begin
     or core.poll_to_json(f.foreign_poll_id, f.anonymous_id) is not null then
     raise exception 'Anonymous user read foreign organization';
   end if;
-  perform public.vote_poll(f.legacy_poll_id, array[f.legacy_option_id]);
-  v_poll := public.submit_poll_answers(f.modern_poll_id,
+  perform pg_temp.expect_poll_org_error(format(
+    'select public.vote_poll(%L,array[%L]::uuid[])',
+    f.legacy_poll_id, f.legacy_option_id), '42501');
+  perform pg_temp.expect_poll_org_error(format(
+    'select public.submit_poll_answers(%L,%L::jsonb)', f.modern_poll_id,
     jsonb_build_array(jsonb_build_object('questionId', f.modern_question_id,
-      'optionIds', jsonb_build_array(f.modern_option_id))));
-  if v_poll is null or (v_poll ->> 'iParticipated')::boolean is not true then
-    raise exception 'Anonymous modern participation failed';
-  end if;
-  if not exists (select 1 from core.poll_votes
+      'optionIds', jsonb_build_array(f.modern_option_id)))::text), '42501');
+  if exists (select 1 from core.poll_votes
       where poll_id = f.legacy_poll_id and user_id = f.anonymous_id)
-    or not exists (select 1 from core.poll_answers
+    or exists (select 1 from core.poll_answers
       where poll_id = f.modern_poll_id and user_id = f.anonymous_id) then
-    raise exception 'Anonymous votes did not persist in both models';
+    raise exception 'Rejected guest votes persisted';
   end if;
-  v_poll_id := public.create_poll(f.organization_id, 'Anonymous legacy create', array['A', 'B']);
-  if v_poll_id is null then raise exception 'Anonymous legacy creation failed'; end if;
-  v_poll := public.create_poll_v2(f.organization_id, 'Anonymous modern create',
-    p_questions := '[{"text":"Explain","kind":"text"}]');
-  if v_poll is null or v_poll ->> 'id' is null then
-    raise exception 'Anonymous modern creation failed';
+  perform pg_temp.expect_poll_org_error(format(
+    'select public.create_poll(%L,%L,array[%L,%L])',
+    f.organization_id, 'Anonymous legacy create', 'A', 'B'), '42501');
+  perform pg_temp.expect_poll_org_error(format(
+    'select public.create_poll_v2(%L,%L,p_questions := %L::jsonb)',
+    f.organization_id, 'Anonymous modern create',
+    '[{"text":"Explain","kind":"text"}]'), '42501');
+  if exists (select 1 from core.polls where author_id = f.anonymous_id) then
+    raise exception 'Rejected guest creation persisted';
   end if;
 end;
 $$;

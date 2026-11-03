@@ -56,8 +56,9 @@ begin
   insert into core.organizations (id, name) values
     ('september-release-contract', 'Release Contract'),
     ('september-release-foreign', 'Foreign Contract');
-  insert into auth.users (id) values
-    (f.owner_id), (f.member_id), (f.outsider_id), (f.foreign_id);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[f.owner_id, f.member_id, f.outsider_id, f.foreign_id]) id;
   insert into core.user_academic_profiles (user_id, organization_id, academic_group)
   select id, case when id = f.foreign_id then 'september-release-foreign'
     else 'september-release-contract' end, 'TEST-01'

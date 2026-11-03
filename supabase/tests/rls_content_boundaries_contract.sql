@@ -162,8 +162,9 @@ begin
   select * into f from rls_boundary_fixture;
   insert into core.organizations (id, name) values
     (f.organization_id, 'Boundary'), (f.foreign_organization_id, 'Foreign boundary');
-  insert into auth.users (id, is_anonymous) values
-    (f.owner_id, false), (f.member_id, false), (f.foreign_id, false), (f.admin_id, false);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[f.owner_id, f.member_id, f.foreign_id, f.admin_id]) id;
   insert into core.user_academic_profiles (user_id, organization_id, full_name) values
     (f.owner_id, f.organization_id, 'Boundary owner'),
     (f.member_id, f.organization_id, 'Boundary member'),

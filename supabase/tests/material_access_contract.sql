@@ -38,7 +38,9 @@ begin
   insert into core.organizations (id, name) values
     ('material-access-contract', 'Material Access Contract'),
     ('material-foreign-contract', 'Material Foreign Contract');
-  insert into auth.users (id) values (f.owner_id), (f.buyer_id), (f.poor_id), (f.foreign_id);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[f.owner_id, f.buyer_id, f.poor_id, f.foreign_id]) id;
   update auth.users set is_anonymous = true where id = f.poor_id;
   insert into core.user_academic_profiles (user_id, organization_id, academic_group)
   select uid, case when uid = f.foreign_id then 'material-foreign-contract'

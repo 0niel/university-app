@@ -10,7 +10,9 @@ declare
   v_legacy uuid := extensions.gen_random_uuid();
 begin
   insert into core.organizations (id, name) values ('free-mentorship', 'Free mentorship');
-  insert into auth.users (id) values (v_mentor), (v_requester);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[v_mentor, v_requester]) id;
   insert into core.user_academic_profiles (user_id, organization_id, full_name, academic_group)
   values (v_mentor, 'free-mentorship', 'Mentor', 'FREE-01'),
     (v_requester, 'free-mentorship', 'Requester', 'FREE-01');

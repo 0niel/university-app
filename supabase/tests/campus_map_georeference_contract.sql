@@ -66,7 +66,9 @@ begin
   end if;
 
   insert into core.organizations(id,name) values ('map-georeference-contract','Map georeference contract');
-  insert into auth.users(id) values (v_author),(v_moderator);
+  insert into auth.users(id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[v_author, v_moderator]) id;
   insert into core.user_academic_profiles(user_id,organization_id) values
     (v_author,'map-georeference-contract'),(v_moderator,'map-georeference-contract');
   insert into core.map_moderators(organization_id,user_id) values ('map-georeference-contract',v_moderator);

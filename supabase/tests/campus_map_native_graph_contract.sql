@@ -25,7 +25,9 @@ begin
   end if;
   perform core.map_patch_document(v_campus.document, 'graph', v_campus.id, v_patch);
 
-  insert into auth.users(id) values (v_author), (v_moderator);
+  insert into auth.users(id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[v_author, v_moderator]) id;
   insert into core.user_academic_profiles(user_id,organization_id) values
     (v_author,v_campus.organization_id), (v_moderator,v_campus.organization_id);
   insert into core.map_moderators(user_id,organization_id) values (v_moderator,v_campus.organization_id);

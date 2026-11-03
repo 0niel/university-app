@@ -10,6 +10,7 @@ declare
   v_peer uuid := extensions.gen_random_uuid();
   v_outsider uuid := extensions.gen_random_uuid();
   v_missing uuid := extensions.gen_random_uuid();
+  v_creator uuid := extensions.gen_random_uuid();
   v_group_id uuid := extensions.gen_random_uuid();
   v_other_group_id uuid := extensions.gen_random_uuid();
   v_user_id uuid;
@@ -30,13 +31,14 @@ begin
     ('people-group-auth-a', 'People Group Auth A'),
     ('people-group-auth-b', 'People Group Auth B');
 
-  insert into auth.users (id, is_anonymous, raw_app_meta_data)
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at, raw_app_meta_data)
   values
-    (v_normal, false, '{"contract":"people_group_auth"}'),
-    (v_guest, true, '{"contract":"people_group_auth"}'),
-    (v_peer, false, '{"contract":"people_group_auth"}'),
-    (v_outsider, false, '{"contract":"people_group_auth"}'),
-    (v_missing, true, '{"contract":"people_group_auth"}');
+    (v_normal, false, now()-interval '2 days', now()-interval '2 days', '{"contract":"people_group_auth"}'),
+    (v_guest, true, now(), null, '{"contract":"people_group_auth"}'),
+    (v_peer, false, now()-interval '2 days', now()-interval '2 days', '{"contract":"people_group_auth"}'),
+    (v_outsider, false, now()-interval '2 days', now()-interval '2 days', '{"contract":"people_group_auth"}'),
+    (v_missing, true, now(), null, '{"contract":"people_group_auth"}'),
+    (v_creator, false, now()-interval '2 days', now()-interval '2 days', '{"contract":"people_group_auth"}');
 
   insert into core.user_academic_profiles (
     user_id, organization_id, academic_group, full_name
@@ -179,28 +181,42 @@ begin
 
   execute 'set local role authenticated';
   begin
-    v_group := public.create_study_group(
+    perform public.create_study_group(
       'people-group-auth-a', 'People Contract Guest'
     );
-    if not coalesce((v_group->>'hasGroup')::boolean, false)
-      or not coalesce((v_group->>'isOwner')::boolean, false)
-      or (select auth.uid()) is distinct from v_guest
-      or not coalesce((select (auth.jwt()->>'is_anonymous')::boolean), false)
-    then
-      raise exception 'Guest could not create a study group without identity change';
-    end if;
-    if jsonb_typeof(v_group->'members') is distinct from 'array' then
-      raise exception 'Created guest group members is not an array';
-    end if;
-    if jsonb_array_length(v_group->'members') <> 1
-      or (v_group->'members'->0->>'userId')::uuid is distinct from v_guest then
-      raise exception 'Created guest group does not include its owner';
-    end if;
-  exception when others then
+    v_failures := array_append(v_failures, 'Guest created a study group');
+  exception when insufficient_privilege then null;
+  when others then
     v_failures := array_append(
       v_failures, format('guest creation: %s %s', sqlstate, sqlerrm)
     );
   end;
+  execute 'reset role';
+  if exists(select 1 from core.study_groups where owner_id=v_guest)
+    or (select auth.uid()) is distinct from v_guest
+    or not coalesce((select (auth.jwt()->>'is_anonymous')::boolean), false) then
+    raise exception 'Rejected guest group creation changed content or identity';
+  end if;
+
+  perform set_config('request.jwt.claim.sub', '', true);
+  perform set_config('request.jwt.claim.role', '', true);
+  perform set_config('request.jwt.claims', '{}', true);
+  insert into core.user_academic_profiles(user_id, organization_id, academic_group, full_name)
+  values (v_creator, 'people-group-auth-a', 'SAME-01', 'Permanent Creator');
+  perform set_config('request.jwt.claim.sub', v_creator::text, true);
+  perform set_config('request.jwt.claim.role', 'authenticated', true);
+  perform set_config('request.jwt.claims', jsonb_build_object(
+    'sub', v_creator, 'role', 'authenticated', 'is_anonymous', false
+  )::text, true);
+  execute 'set local role authenticated';
+  v_group := public.create_study_group('people-group-auth-a', 'Permanent Creator Group');
+  if not coalesce((v_group->>'hasGroup')::boolean, false)
+    or not coalesce((v_group->>'isOwner')::boolean, false)
+    or jsonb_typeof(v_group->'members') is distinct from 'array'
+    or jsonb_array_length(v_group->'members') <> 1
+    or (v_group->'members'->0->>'userId')::uuid is distinct from v_creator then
+    raise exception 'Permanent user could not create a study group';
+  end if;
   execute 'reset role';
 
   perform set_config('request.jwt.claim.sub', v_missing::text, true);
@@ -234,6 +250,9 @@ begin
     end;
   end loop;
   execute 'reset role';
+  if v_missing_denied <> 6 then
+    raise exception 'Missing-profile guest was not denied by every protected RPC';
+  end if;
   if cardinality(v_failures) > 0 then
     raise exception 'People/group auth contract: %', jsonb_build_object(
       'failures', v_failures,

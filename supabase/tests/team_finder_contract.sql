@@ -94,13 +94,11 @@ begin
     ('team-test-a', 'Team Test A'),
     ('team-test-b', 'Team Test B');
 
-  insert into auth.users (id)
-  values
-    (v_owner),
-    (v_applicant),
-    (v_second_applicant),
-    (v_outsider),
-    (v_poor_owner);
+  insert into auth.users (id, is_anonymous, created_at, email_confirmed_at)
+  select id, false, now() - interval '2 days', now() - interval '2 days'
+  from unnest(array[
+    v_owner, v_applicant, v_second_applicant, v_outsider, v_poor_owner
+  ]) id;
 
   insert into core.user_academic_profiles (
     user_id,
